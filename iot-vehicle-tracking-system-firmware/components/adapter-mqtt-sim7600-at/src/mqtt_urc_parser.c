@@ -17,9 +17,6 @@
  * This translation unit belongs to the SIM7600 AT MQTT adapter layer and keeps adapter-local state, topic wiring, and broker command sequencing isolated behind the exported entry points.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /**
  * @brief Check if MQTT error code indicates disconnection.
@@ -28,7 +25,6 @@
  * @return true if error means disconnected, false otherwise.
  */
 bool tracker_mqtt_err_indicates_disconnect(int err_code) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return err_code == MQTT_ERR_NETWORK_NOT_OPENED || err_code == MQTT_ERR_NO_CONNECTION ||
            err_code == MQTT_ERR_NOT_SUPPORTED_OPERATION || err_code == MQTT_ERR_SOCKET_CLOSED_BY_SERVER;
 }
@@ -40,7 +36,6 @@ bool tracker_mqtt_err_indicates_disconnect(int err_code) {
  * @param err_code Error code from modem.
  */
 void tracker_mqtt_mark_disconnected(const char *reason, int err_code) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (s_connected) {
         ESP_LOGW(TRACKER_MQTT_TAG,
                  "MQTT marked disconnected reason=%s err=%d",
@@ -57,7 +52,6 @@ void tracker_mqtt_mark_disconnected(const char *reason, int err_code) {
  * Clears all pending RX context for fresh parsing.
  */
 void tracker_mqtt_rx_reset(void) {
-    // Reset RX reset here so stale data does not leak into the next cycle.
     memset(&s_rx_ctx, 0, sizeof(s_rx_ctx));
     s_rx_ctx.client_index = -1;
     s_rx_pending_header = MQTT_RX_PENDING_NONE;
@@ -73,7 +67,6 @@ void tracker_mqtt_rx_reset(void) {
  * @return true on success, false on parse failure.
  */
 bool tracker_mqtt_parse_next_int(const char **cursor, int *out_value) {
-    // Decode raw parse next int into the normalized form the rest of the module expects.
     ESP_RETURN_ON_FALSE(cursor != NULL, false, TRACKER_MQTT_TAG, "parse cursor null");
     ESP_RETURN_ON_FALSE(*cursor != NULL, false, TRACKER_MQTT_TAG, "parse cursor pointee null");
     ESP_RETURN_ON_FALSE(out_value != NULL, false, TRACKER_MQTT_TAG, "parse out_value null");
@@ -95,7 +88,6 @@ bool tracker_mqtt_parse_next_int(const char **cursor, int *out_value) {
 }
 
 static const char *tracker_mqtt_find_last(const char *text, const char *needle) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (text == NULL || needle == NULL || needle[0] == '\0') {
         return NULL;
     }
@@ -124,7 +116,6 @@ bool tracker_mqtt_parse_int_list_from_text(const char *text,
                                            const char *prefix,
                                            int *out_values,
                                            size_t value_count) {
-    // Decode raw parse int list from text into the normalized form the rest of the module expects.
     ESP_RETURN_ON_FALSE(text != NULL, false, TRACKER_MQTT_TAG, "parse text null");
     ESP_RETURN_ON_FALSE(prefix != NULL, false, TRACKER_MQTT_TAG, "parse prefix null");
     ESP_RETURN_ON_FALSE(out_values != NULL, false, TRACKER_MQTT_TAG, "parse out_values null");
@@ -154,7 +145,6 @@ bool tracker_mqtt_parse_int_list_from_text(const char *text,
  * @return true if parse success, false if not found.
  */
 bool tracker_mqtt_parse_disconnect_state(const char *response, int *out_disc_state) {
-    // Decode raw parse disconnect into the normalized form the rest of the module expects.
     ESP_RETURN_ON_FALSE(response != NULL, false, TRACKER_MQTT_TAG, "response null");
     ESP_RETURN_ON_FALSE(out_disc_state != NULL, false, TRACKER_MQTT_TAG, "out_disc_state null");
 
@@ -175,7 +165,6 @@ bool tracker_mqtt_parse_disconnect_state(const char *response, int *out_disc_sta
 }
 
 static bool tracker_mqtt_err_allowed(int err_code, const int *allowed_codes, size_t allowed_count) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (allowed_codes == NULL) {
         return err_code == 0;
     }
@@ -196,7 +185,6 @@ esp_err_t tracker_mqtt_expect_result(const char *response,
                                      bool require_prefix,
                                      int *out_err_code,
                                      bool *out_parsed) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ESP_RETURN_ON_NULL(response, ESP_ERR_INVALID_ARG, TRACKER_MQTT_TAG, "response null");
     ESP_RETURN_ON_NULL(prefix, ESP_ERR_INVALID_ARG, TRACKER_MQTT_TAG, "prefix null");
 
@@ -236,7 +224,6 @@ esp_err_t tracker_mqtt_expect_result(const char *response,
 }
 
 bool tracker_mqtt_extract_error_code_from_response(const char *response, int *out_err_code) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (response == NULL || out_err_code == NULL) {
         return false;
     }
@@ -335,7 +322,6 @@ esp_err_t tracker_mqtt_send_cmd_with_policy(const char *cmd,
  * @return ESP_OK on success.
  */
 esp_err_t tracker_mqtt_send_cmd(const char *cmd, uint32_t timeout_ms, char *response, size_t response_size) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return tracker_mqtt_send_cmd_with_policy(cmd, timeout_ms, response, response_size, false, false);
 }
 
@@ -353,7 +339,6 @@ void tracker_mqtt_reset_connect_wait(void) {
  * @brief Begin waiting for connect result.
  */
 void tracker_mqtt_begin_connect_wait(void) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     tracker_mqtt_reset_connect_wait();
     s_connect_result_pending = true;
 }
@@ -384,7 +369,6 @@ void tracker_mqtt_begin_publish_wait(void) {
  * @param err_code Error code from modem.
  */
 void tracker_mqtt_on_connect_result_line(int client_index, int err_code) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (!s_connect_result_pending || client_index != MQTT_CLIENT_INDEX) {
         return;
     }
@@ -406,7 +390,6 @@ void tracker_mqtt_on_publish_result_line(int client_index, int err_code) {
 }
 
 esp_err_t tracker_mqtt_wait_connect_result(int *out_err_code) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     ESP_RETURN_ON_NULL(out_err_code, ESP_ERR_INVALID_ARG, TRACKER_MQTT_TAG, "out_err_code null");
     uint64_t start_ms = util_uptime_ms();
 
@@ -445,19 +428,10 @@ esp_err_t tracker_mqtt_wait_publish_result(int *out_err_code) {
     return ESP_ERR_TIMEOUT;
 }
 
-bool tracker_mqtt_response_has_prompt(const char *response) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    return response != NULL &&
-           (strstr(response, "\r\n>\r\n") != NULL || strstr(response, "\n>\n") != NULL ||
-            strstr(response, "\r\n>") != NULL || strstr(response, "\n>") != NULL ||
-            strstr(response, "> ") != NULL || strstr(response, ">") != NULL);
-}
-
 esp_err_t tracker_mqtt_input_data(const char *prepare_cmd,
                                   const char *data,
                                   const char *result_prefix,
                                   bool has_client_index) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ESP_RETURN_ON_NULL(prepare_cmd, ESP_ERR_INVALID_ARG, TRACKER_MQTT_TAG, "prepare_cmd null");
     ESP_RETURN_ON_NULL(data, ESP_ERR_INVALID_ARG, TRACKER_MQTT_TAG, "data null");
     ESP_RETURN_ON_NULL(result_prefix, ESP_ERR_INVALID_ARG, TRACKER_MQTT_TAG, "result_prefix null");
@@ -515,7 +489,6 @@ static size_t tracker_mqtt_append_topic_chunk(const char *chunk, size_t chunk_le
 }
 
 static size_t tracker_mqtt_append_payload_chunk(const char *chunk, size_t chunk_len) {
-    // Rehydrate append payload chunk here so later logic reads one coherent snapshot after reset or sleep.
     if (chunk == NULL || chunk_len == 0U || s_rx_ctx.payload_chunk_remaining <= 0) {
         return 0U;
     }
@@ -542,7 +515,6 @@ static size_t tracker_mqtt_append_payload_chunk(const char *chunk, size_t chunk_
 }
 
 static bool tracker_mqtt_parse_plain_int_list(const char *text, int *out_values, size_t value_count) {
-    // Decode raw parse plain int list into the normalized form the rest of the module expects.
     ESP_RETURN_ON_FALSE(text != NULL, false, TRACKER_MQTT_TAG, "plain parse text null");
     ESP_RETURN_ON_FALSE(out_values != NULL, false, TRACKER_MQTT_TAG, "plain parse out_values null");
     ESP_RETURN_ON_FALSE(value_count > 0, false, TRACKER_MQTT_TAG, "plain parse value_count invalid");
@@ -646,7 +618,6 @@ static void tracker_mqtt_dispatch_rx_if_complete(void) {
 }
 
 static const char *tracker_mqtt_seek_urc_prefix(const char *cursor) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (cursor == NULL) {
         return NULL;
     }
@@ -660,7 +631,6 @@ static const char *tracker_mqtt_seek_urc_prefix(const char *cursor) {
 }
 
 static const char *tracker_mqtt_skip_inline_whitespace(const char *cursor) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     while (cursor != NULL && (*cursor == ' ' || *cursor == '\t')) {
         ++cursor;
     }
@@ -698,7 +668,6 @@ static bool tracker_mqtt_consume_pending_rx_data(const char *cursor, const char 
 }
 
 static bool tracker_mqtt_handle_rx_urc(const char *cursor, const char **out_next_cursor) {
-    // Keep the branchy handle RX URC flow centralized here so side effects remain easy to audit.
     if (strncmp(cursor, "+CMQTTRXSTART:", strlen("+CMQTTRXSTART:")) == 0) {
         int values[3] = {0};
         if (tracker_mqtt_parse_int_list_from_text(cursor, "+CMQTTRXSTART:", values, 3)) {
@@ -758,7 +727,6 @@ static bool tracker_mqtt_handle_rx_urc(const char *cursor, const char **out_next
 }
 
 static bool tracker_mqtt_handle_non_rx_urc(const char *cursor, const char **out_next_cursor) {
-    // Keep the branchy handle non RX URC flow centralized here so side effects remain easy to audit.
     if (strncmp(cursor, "+CMQTTCONNECT:", strlen("+CMQTTCONNECT:")) == 0) {
         int values[2] = {0};
         if (tracker_mqtt_parse_int_list_from_text(cursor, "+CMQTTCONNECT:", values, 2)) {
@@ -805,7 +773,6 @@ static bool tracker_mqtt_handle_non_rx_urc(const char *cursor, const char **out_
 }
 
 void tracker_mqtt_on_urc_line(const char *line) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (line == NULL || line[0] == '\0') {
         return;
     }
@@ -836,7 +803,6 @@ void tracker_mqtt_on_urc_line(const char *line) {
 }
 
 void tracker_mqtt_register_urc_handler(void) {
-    // Keep the branchy register URC handler flow centralized here so side effects remain easy to audit.
     if (s_urc_registered) {
         return;
     }

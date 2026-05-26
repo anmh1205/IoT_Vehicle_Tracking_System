@@ -18,11 +18,8 @@
  * This translation unit belongs to the app-core orchestration layer and keeps FSM transitions, retained runtime state, and orchestration policy centralized inside app-core.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
 
-
-static const char *TAG = STATE_MACHINE_TAG;
+static const char *TAG = "OTA_RUNTIME";
 
 /**
  * @brief Persist the current OTA confirm context to NVS.
@@ -32,7 +29,6 @@ static const char *TAG = STATE_MACHINE_TAG;
  * flow even after crashes or watchdog resets.
  */
 static void state_machine_persist_ota_context(void) {
-    // Persist persist OTA context here so later boots, retries, or recovery paths can resume cleanly.
     ota_persist_context_t persisted = {0};
     persisted.pending_confirm = g_rtc_context.ota_pending_confirm;
     persisted.confirm_timeout_sec = g_rtc_context.ota_confirm_timeout_sec;
@@ -63,7 +59,6 @@ static void state_machine_persist_ota_context(void) {
  * 2. Log warning if clear operation fails (non-fatal)
  */
 static void state_machine_clear_persisted_ota_context(void) {
-    // Persist clear persisted OTA context here so later boots, retries, or recovery paths can resume cleanly.
     esp_err_t err = nvs_config_clear_ota_context();
     if (err != ESP_OK) {
         ESP_LOGW(TAG, "event=ota_context_clear_failed err=%s", esp_err_to_name(err));
@@ -87,7 +82,6 @@ static void state_machine_clear_persisted_ota_context(void) {
  * @note If NVS load fails or context invalid, operation is skipped silently.
  */
 void state_machine_restore_ota_context_from_nvs(void) {
-    // Rehydrate restore OTA context from NVS here so later logic reads one coherent snapshot after reset or sleep.
     if (g_rtc_context.ota_pending_confirm) {
         return;
     }
@@ -136,7 +130,6 @@ void state_machine_restore_ota_context_from_nvs(void) {
  * @param[in] user_ctx Unused caller context.
  */
 static void state_machine_ota_status_callback(const firmware_status_t *firmware, void *user_ctx) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     (void)user_ctx;
     state_machine_publish_firmware_payload(firmware);
 }
@@ -148,7 +141,6 @@ static void state_machine_ota_status_callback(const firmware_status_t *firmware,
  * traffic cannot starve telemetry, retry, or sleep logic in the main FSM loop.
  */
 void state_machine_handle_pending_action(void) {
-    // Keep the branchy handle pending action flow centralized here so side effects remain easy to audit.
     for (uint32_t i = 0; i < TRACKER_PENDING_ACTION_DRAIN_LIMIT; ++i) {
         command_action_t action = command_handler_consume_action();
         if (action == COMMAND_ACTION_NONE) {
@@ -187,7 +179,6 @@ void state_machine_handle_pending_action(void) {
  * and asks ESP-IDF to mark the new partition valid.
  */
 void state_machine_try_confirm_running_firmware(void) {
-    // Advance one cooperative step here using the current state, time gates, and retry policy.
     if (s_ota_confirm_checked) {
         return;
     }

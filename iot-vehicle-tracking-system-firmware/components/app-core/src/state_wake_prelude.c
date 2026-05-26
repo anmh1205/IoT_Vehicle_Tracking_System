@@ -29,11 +29,8 @@
  * This translation unit belongs to the app-core orchestration layer and keeps FSM transitions, retained runtime state, and orchestration policy centralized inside app-core.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
 
-
-static const char *TAG = STATE_MACHINE_TAG;
+static const char *TAG = "WAKE_PRELUDE";
 
 /**
  * @brief Power-cycle GNSS after repeated poll failures.
@@ -46,7 +43,6 @@ static const char *TAG = STATE_MACHINE_TAG;
  * @return true when the GNSS power cycle completed successfully.
  */
 static bool state_machine_try_rearm_gnss(const char *reason) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     uint64_t now_ms = util_uptime_ms();
     if (s_last_gnss_rearm_ms != 0 && (now_ms - s_last_gnss_rearm_ms) < TRACKER_GNSS_REARM_COOLDOWN_MS) {
         return false;
@@ -80,7 +76,6 @@ static bool state_machine_try_rearm_gnss(const char *reason) {
  * @return true if power-on succeeded, false otherwise.
  */
 static bool state_machine_try_reassert_gnss_power(const char *reason) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     uint64_t now_ms = util_uptime_ms();
     if (s_last_gnss_rearm_ms != 0 && (now_ms - s_last_gnss_rearm_ms) < TRACKER_GNSS_REARM_COOLDOWN_MS) {
         return false;
@@ -108,7 +103,6 @@ static bool state_machine_try_reassert_gnss_power(const char *reason) {
  * @return True if ready.
  */
 bool state_machine_can_poll_gnss(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_gnss_started && modem_lte_is_at_ready() && modem_gnss_is_query_ready();
 }
 
@@ -116,7 +110,6 @@ bool state_machine_can_poll_gnss(void) {
  * @brief Try to start GNSS non-blocking.
  */
 void state_machine_try_start_gnss_nonblocking(void) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (s_gnss_started || !modem_lte_is_at_ready()) {
         return;
     }
@@ -146,7 +139,6 @@ void state_machine_try_start_gnss_nonblocking(void) {
  * @brief Bootstrap RTC hardware.
  */
 void state_machine_bootstrap_rtc(void) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (s_hw_bootstrap_done || !rtc_ds3231m_is_available()) {
         return;
     }
@@ -203,7 +195,6 @@ void state_machine_bootstrap_rtc(void) {
  * same runtime policy without redoing basic setup.
  */
 void state_machine_bootstrap_imu(void) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (!state_machine_imu_runtime_enabled() || s_imu_available) {
         return;
     }
@@ -251,7 +242,6 @@ void state_machine_bootstrap_imu(void) {
  * @param[in] read_obd True to poll OBD when a BLE session is connected.
  */
 void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
-    // Refresh the always-on analog and IMU snapshot first so every later branch works from one coherent baseline.
     float vehicle_battery_raw_v = adc_read_vehicle_battery_voltage();
     float device_battery_raw_v = adc_read_device_battery_voltage();
     s_telemetry.vehicle_battery = vehicle_battery_raw_v * TRACKER_ADC_SUPPLY_CALIB_GAIN;
@@ -304,27 +294,26 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
 
     if (read_gnss && state_machine_can_poll_gnss()) {
         uint64_t now_ms = util_uptime_ms();
-        if (s_last_gnss_poll_ms != 0 && (now_ms - s_last_gnss_poll_ms) < TRACKER_GNSS_POLL_INTERVAL_MS) {
-            goto telemetry_finalize;
-        }
-
-        // GNSS polls are rate-limited separately so the modem is not hammered every FSM iteration.
-        s_last_gnss_poll_ms = now_ms;
-        gnss_data_t gnss = {0};
-        if (modem_gnss_get_location(&gnss) == ESP_OK) {
-            s_telemetry.gnss = gnss;
-            s_gnss_poll_fail_streak = 0;
-        } else {
-            s_gnss_poll_fail_streak += 1;
-            // Escalate from transient poll failures to a GNSS re-arm only after the streak crosses the configured threshold.
-            if (s_gnss_poll_fail_streak >= TRACKER_GNSS_FAIL_REARM_THRESHOLD &&
-                state_machine_try_rearm_gnss("poll_fail_threshold")) {
+        bool poll_due = (s_last_gnss_poll_ms == 0) ||
+                        ((now_ms - s_last_gnss_poll_ms) >= TRACKER_GNSS_POLL_INTERVAL_MS);
+        if (poll_due) {
+            // GNSS polls are rate-limited separately so the modem is not hammered every FSM iteration.
+            s_last_gnss_poll_ms = now_ms;
+            gnss_data_t gnss = {0};
+            if (modem_gnss_get_location(&gnss) == ESP_OK) {
+                s_telemetry.gnss = gnss;
                 s_gnss_poll_fail_streak = 0;
+            } else {
+                s_gnss_poll_fail_streak += 1;
+                // Escalate from transient poll failures to a GNSS re-arm only after the streak crosses the configured threshold.
+                if (s_gnss_poll_fail_streak >= TRACKER_GNSS_FAIL_REARM_THRESHOLD &&
+                    state_machine_try_rearm_gnss("poll_fail_threshold")) {
+                    s_gnss_poll_fail_streak = 0;
+                }
             }
         }
     }
 
-telemetry_finalize:
     // Guarantee a non-zero timestamp so downstream formatters always have something monotonic to serialize.
     if (s_telemetry.gnss.timestamp_ms == 0) {
         s_telemetry.gnss.timestamp_ms = util_uptime_ms();
@@ -480,7 +469,6 @@ telemetry_finalize:
  * @return true when GNSS has a valid fix and its timestamp passes RTC validity checks.
  */
 static bool state_machine_network_time_valid(uint64_t *out_time_ms) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!s_telemetry.gnss.fix_valid) {
         return false;
     }
@@ -504,7 +492,6 @@ static bool state_machine_network_time_valid(uint64_t *out_time_ms) {
  * @return true when a valid RTC timestamp was obtained.
  */
 static bool state_machine_try_get_rtc_time(uint64_t now_ms, uint64_t *out_rtc_ms) {
-    // Read try get RTC time without widening the mutation surface of this module.
     if (!rtc_ds3231m_is_available() || !retry_state_can_run(&s_rtc_read_retry, now_ms)) {
         return false;
     }
@@ -545,7 +532,6 @@ static bool state_machine_try_get_rtc_time(uint64_t now_ms, uint64_t *out_rtc_ms
  * can recover a trusted clock earlier in the next cycle.
  */
 void state_machine_update_time_source(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     uint64_t now_ms = util_uptime_ms();
     uint64_t selected_time_ms = now_ms;
     bool trusted = false;
@@ -579,7 +565,6 @@ void state_machine_update_time_source(void) {
  * @param[in] err Failure code that triggered the retry.
  */
 static void state_machine_schedule_network_retry(uint64_t now_ms, const char *step, esp_err_t err) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     uint32_t delay_ms = retry_state_current_delay_ms(&s_network_retry, &g_state_network_retry_policy, now_ms);
     if (retry_state_schedule(&s_network_retry, &g_state_network_retry_policy, now_ms, err) != ESP_OK) {
         return;
@@ -631,7 +616,6 @@ static bool state_machine_wakeup_low_power_modem_if_needed(void) {
  * polling resumes without waiting for a full reboot.
  */
 static void state_machine_try_connect_network(void) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     uint64_t now_ms = util_uptime_ms();
     if (!retry_state_can_run(&s_network_retry, now_ms)) {
         return;
@@ -709,7 +693,6 @@ static void state_machine_try_connect_network(void) {
  * @param[in] allow_replay True to let the offline queue drain during this pass.
  */
 void state_machine_run_wake_prelude(bool allow_replay) {
-    // Advance one cooperative step here using the current state, time gates, and retry policy.
     state_machine_handle_pending_action();
     bool ble_result_handled = state_machine_handle_ble_connect_result();
     bool modem_ready = state_machine_wakeup_low_power_modem_if_needed();

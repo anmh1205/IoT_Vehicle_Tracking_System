@@ -122,8 +122,6 @@ bool util_is_sleep_enabled(void);
  *
  * @return Clamped value.
  */
-float util_clamp_float(float value, float min_value, float max_value);
-
 /**
  * @brief Clamp integer value into `[min_value, max_value]`.
  *

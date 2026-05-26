@@ -120,7 +120,6 @@ void modem_lte_set_fixed_uart_cfg(void);
 const char *modem_lte_state_name(modem_lte_state_t state);
 void modem_lte_transition(modem_lte_state_t next_state, uint64_t now_ms, uint64_t delay_ms);
 esp_err_t modem_lte_send_simple(const char *cmd, const char *expect, uint32_t timeout_ms);
-void modem_lte_response_preview(const char *response, char *preview, size_t preview_size);
 bool modem_lte_diag_log_due(uint64_t now_ms, uint64_t *last_log_ms, uint64_t interval_ms);
 void modem_lte_log_at_probe_response(const char *response);
 void modem_lte_log_fixed_uart_cfg(void);

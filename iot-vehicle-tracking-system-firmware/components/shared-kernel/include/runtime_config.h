@@ -16,7 +16,7 @@
 /** @brief Maximum length for unique tracker device ID (including null terminator). */
 #define TRACKER_DEVICE_ID_MAX_LEN 32
 /** @brief Maximum length for auth token sent in telemetry payloads. */
-#define TRACKER_AUTH_TOKEN_MAX_LEN 64
+#define TRACKER_AUTH_TOKEN_MAX_LEN 128
 /** @brief Maximum length for MQTT host or APN-like host strings. */
 #define TRACKER_HOST_MAX_LEN 64
 /** @brief Maximum length for MQTT username. */

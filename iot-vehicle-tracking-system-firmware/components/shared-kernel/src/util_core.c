@@ -13,9 +13,6 @@
  * This translation unit belongs to the shared kernel layer and centralizes shared primitives, validation bounds, retry helpers, and generic utilities used across components.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /* Logging tag for utility functions. */
 static const char *UTIL_TAG = "UTIL";
@@ -58,7 +55,6 @@ size_t util_copy_string(char *dst, size_t dst_size, const char *src) {
  * @return Uptime in milliseconds.
  */
 uint64_t util_uptime_ms(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return (uint64_t)(esp_timer_get_time() / 1000ULL);
 }
 
@@ -72,7 +68,6 @@ uint64_t util_uptime_ms(void) {
  * @param out_size Size of output buffer.
  */
 void util_generate_uuid_v4(char *out, size_t out_size) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (out == NULL || out_size < 37) {
         return;
     }
@@ -121,7 +116,6 @@ void util_generate_uuid_v4(char *out, size_t out_size) {
  * @param boot_count Sequential boot number.
  */
 void util_generate_boot_id(char *out, size_t out_size, uint32_t boot_count) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (out == NULL || out_size == 0) {
         return;
     }
@@ -140,7 +134,6 @@ void util_generate_boot_id(char *out, size_t out_size, uint32_t boot_count) {
  * @param enabled true to allow sleep, false to disable.
  */
 void util_set_sleep_enabled(bool enabled) {
-    // Program the low-power path here so the next wake cycle resumes from predictable state.
     s_sleep_enabled = enabled;
 }
 
@@ -150,27 +143,7 @@ void util_set_sleep_enabled(bool enabled) {
  * @return true if sleep is permitted, false otherwise.
  */
 bool util_is_sleep_enabled(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_sleep_enabled;
-}
-
-/**
- * @brief Clamp float value to inclusive range.
- *
- * @param value Input value.
- * @param min_value Lower bound.
- * @param max_value Upper bound.
- * @return Clamped value within bounds.
- */
-float util_clamp_float(float value, float min_value, float max_value) {
-    // Validate clamp float here before it can influence shared or persisted runtime state.
-    if (value < min_value) {
-        return min_value;
-    }
-    if (value > max_value) {
-        return max_value;
-    }
-    return value;
 }
 
 /**
@@ -199,7 +172,6 @@ int util_clamp_int(int value, int min_value, int max_value) {
  * @return true if NULL or empty, false otherwise.
  */
 bool util_string_empty(const char *value) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return value == NULL || value[0] == '\0';
 }
 
@@ -212,7 +184,6 @@ bool util_string_empty(const char *value) {
  * @return true on success, false on invalid hex.
  */
 bool util_hex_to_bytes(const char *hex, uint8_t *out, size_t out_len) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (hex == NULL || out == NULL) {
         return false;
     }
@@ -247,7 +218,6 @@ bool util_hex_to_bytes_span(const char *hex,
                             uint8_t *out,
                             size_t out_cap,
                             size_t *out_written) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (hex == NULL || out == NULL || out_written == NULL || (hex_len % 2U) != 0U) {
         return false;
     }

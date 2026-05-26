@@ -12,9 +12,6 @@
  * This translation unit belongs to the SIM7600 AT MQTT adapter layer and keeps adapter-local state, topic wiring, and broker command sequencing isolated behind the exported entry points.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /**
  * @brief Check if host forces default TLS port.
@@ -23,7 +20,6 @@
  * @return True if forces TLS.
  */
 bool tracker_mqtt_host_forces_tls_default_port(const char *host) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return !util_string_empty(host) && strcmp(host, TRACKER_MQTT_TLS_HOST) == 0;
 }
 
@@ -34,7 +30,6 @@ bool tracker_mqtt_host_forces_tls_default_port(const char *host) {
  * @return True if TLS required.
  */
 bool tracker_mqtt_use_tls(const config_t *cfg) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return cfg != NULL &&
            (tracker_mqtt_host_forces_tls_default_port(cfg->mqtt_host) || cfg->mqtt_port == MQTT_IMPLICIT_TLS_PORT);
 }

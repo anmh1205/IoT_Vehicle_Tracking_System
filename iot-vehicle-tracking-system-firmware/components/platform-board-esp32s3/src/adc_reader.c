@@ -14,9 +14,6 @@
  * This translation unit belongs to the ESP32-S3 board support layer and keeps board-specific pin mappings, peripherals, and power behavior isolated from portable runtime logic.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /* Board ADC profile: U_SUPPLY on GPIO3 (ADC1_CH2), U_BATT on GPIO4 (ADC1_CH3). */
 #define ADC_UNIT_USED ADC_UNIT_1
@@ -41,7 +38,6 @@ static bool s_batt_calibration_enabled = false;
 static void adc_reader_try_enable_calibration(adc_channel_t channel,
                                               adc_cali_handle_t *out_handle,
                                               bool *out_enabled) {
-    // Read reader try enable calibration without widening the mutation surface of this module.
     if (out_handle == NULL || out_enabled == NULL) {
         return;
     }
@@ -71,7 +67,6 @@ static float adc_reader_read_voltage(adc_channel_t channel,
                                      adc_cali_handle_t cali_handle,
                                      bool calibration_enabled,
                                      float divider_ratio) {
-    // Read reader read voltage without widening the mutation surface of this module.
     if (s_adc_handle == NULL) {
         return 0.0f;
     }
@@ -123,7 +118,6 @@ static float adc_reader_read_voltage(adc_channel_t channel,
  * @return ESP_OK on success, ESP_FAIL on initialization failure.
  */
 esp_err_t adc_reader_init(void) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     adc_oneshot_unit_init_cfg_t unit_cfg = {
         .unit_id = ADC_UNIT_USED,
         .ulp_mode = ADC_ULP_MODE_DISABLE,
@@ -169,7 +163,6 @@ esp_err_t adc_reader_init(void) {
  * @return Voltage in volts (V), 0.0 if ADC not initialized.
  */
 float adc_read_device_battery_voltage(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return adc_reader_read_voltage(ADC_CHANNEL_BATT,
                                    s_batt_cali_handle,
                                    s_batt_calibration_enabled,
@@ -187,7 +180,6 @@ float adc_read_device_battery_voltage(void) {
  * @return Voltage in volts (V), 0.0 if ADC not initialized.
  */
 float adc_read_vehicle_battery_voltage(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return adc_reader_read_voltage(ADC_CHANNEL_SUPPLY,
                                    s_supply_cali_handle,
                                    s_supply_calibration_enabled,
@@ -201,7 +193,6 @@ float adc_read_vehicle_battery_voltage(void) {
  * Called during shutdown or when ADC is no longer needed.
  */
 void adc_reader_deinit(void) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (s_batt_cali_handle != NULL) {
 #if ADC_CALI_SCHEME_CURVE_FITTING_SUPPORTED
         adc_cali_delete_scheme_curve_fitting(s_batt_cali_handle);

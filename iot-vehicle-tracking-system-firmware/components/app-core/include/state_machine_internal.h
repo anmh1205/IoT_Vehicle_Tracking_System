@@ -36,7 +36,6 @@ bool state_machine_has_recent_obd_sample(uint64_t now_ms, uint32_t max_age_ms);
 /** @brief Report whether recent OBD engine-on evidence is still fresh enough for decisions. */
 bool state_machine_has_recent_obd_engine_on_evidence(uint64_t now_ms);
 /** @brief Report whether OBD activity is still recent enough to keep the tracker awake. */
-bool state_machine_obd_recently_active(uint64_t now_ms);
 /** @brief Recompute telemetry state axes after state or sensor updates. */
 void state_machine_sync_runtime_axes(app_state_t app_state);
 /** @brief Check whether heartbeat/status publishes may proceed on current network state. */

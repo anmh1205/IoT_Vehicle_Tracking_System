@@ -29,9 +29,6 @@
  * This translation unit belongs to the app-core orchestration layer and keeps FSM transitions, retained runtime state, and orchestration policy centralized inside app-core.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /* Logging tag for main application module. */
 static const char *TAG = "TRACKER_MAIN";
@@ -56,7 +53,6 @@ static esp_err_t tracker_storage_queue_enqueue_port(int record_type,
                                                     bool net_up,
                                                     bool time_trusted,
                                                     uint64_t timestamp_ms) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return offline_queue_enqueue((offline_record_type_t)record_type,
                                  payload,
                                  gps_fix,
@@ -71,7 +67,6 @@ static esp_err_t tracker_storage_queue_enqueue_port(int record_type,
  * @param[in] cb Callback invoked for incoming command payloads.
  */
 static void tracker_mqtt_set_command_callback_port(tracker_command_message_callback_t cb) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     tracker_mqtt_set_command_callback(cb);
 }
 
@@ -86,7 +81,6 @@ static void tracker_mqtt_set_command_callback_port(tracker_command_message_callb
 static void *tracker_obd_connect_port(tracker_obd_response_callback_t response_cb,
                                       void *user_ctx,
                                       uint32_t connect_timeout_ms) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_connect((ble_obd_response_cb_t)response_cb, user_ctx, connect_timeout_ms);
 }
 
@@ -97,7 +91,6 @@ static void *tracker_obd_connect_port(tracker_obd_response_callback_t response_c
  * @return ESP-IDF style status code from the BLE OBD adapter.
  */
 static esp_err_t tracker_obd_disconnect_port(void *ctx) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_disconnect((ble_obd_ctx_t *)ctx);
 }
 
@@ -108,7 +101,6 @@ static esp_err_t tracker_obd_disconnect_port(void *ctx) {
  * @return true when the BLE OBD session is connected.
  */
 static bool tracker_obd_is_connected_port(void *ctx) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_is_connected((ble_obd_ctx_t *)ctx);
 }
 
@@ -122,7 +114,6 @@ static bool tracker_obd_is_connected_port(void *ctx) {
  * @return BLE OBD adapter return code.
  */
 static int tracker_obd_request_pid_port(void *ctx, uint8_t mode, uint8_t pid, uint32_t timeout_ms) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_rxtx((ble_obd_ctx_t *)ctx, mode, pid, timeout_ms);
 }
 
@@ -135,7 +126,6 @@ static int tracker_obd_request_pid_port(void *ctx, uint8_t mode, uint8_t pid, ui
  * @return BLE OBD adapter return code.
  */
 static int tracker_obd_request_mode_port(void *ctx, uint8_t mode, uint32_t timeout_ms) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_request_mode((ble_obd_ctx_t *)ctx, mode, timeout_ms);
 }
 
@@ -146,7 +136,6 @@ static int tracker_obd_request_mode_port(void *ctx, uint8_t mode, uint32_t timeo
  * @return ESP-IDF style status code from the BLE OBD adapter.
  */
 static esp_err_t tracker_obd_elm327_init_port(void *ctx) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_elm327_init((ble_obd_ctx_t *)ctx);
 }
 
@@ -157,7 +146,6 @@ static esp_err_t tracker_obd_elm327_init_port(void *ctx) {
  * @return ECU-state label string.
  */
 static const char *tracker_obd_get_ecu_state_label_port(void *ctx) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_get_last_ecu_state_label((ble_obd_ctx_t *)ctx);
 }
 
@@ -242,7 +230,6 @@ static const tracker_runtime_ports_t s_runtime_ports = {
  * budget. This override is limited to validation builds.
  */
 static void tracker_main_relax_task_wdt_for_field_validation(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     const esp_task_wdt_config_t wdt_cfg = {
         .timeout_ms = 30000,
         .idle_core_mask = (1U << portNUM_PROCESSORS) - 1U,

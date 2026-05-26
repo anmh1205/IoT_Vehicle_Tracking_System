@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "esp_log.h"
 
 #include "modem_at.h"
+#include "telemetry_counters.h"
 #include "util.h"
 
 /**
@@ -15,9 +15,6 @@
  * @brief GNSS control/parsing implementation over modem AT interface.
  * This translation unit belongs to the SIM7600 AT modem adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
-
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
 
 
 static const char *TAG = "MODEM_GNSS";
@@ -87,41 +84,56 @@ static uint64_t s_query_ready_ms = 0;
  * @brief Convert modem UTC timestamp string to milliseconds.
  *
  * Input format example: `20260221153045.123`.
+ * Uses manual UTC conversion to avoid mktime() timezone dependency.
  *
  * @param utc_string UTC timestamp string from modem.
  *
- * @return Parsed epoch-like milliseconds, or uptime fallback on parse failure.
+ * @return Parsed epoch milliseconds (UTC), or uptime fallback on parse failure.
  */
 static uint64_t modem_gnss_parse_timestamp(const char *utc_string) {
-    // Decode raw GNSS parse timestamp into the normalized form the rest of the module expects.
     if (utc_string == NULL || strlen(utc_string) < 14) {
         return util_uptime_ms();
     }
 
-    struct tm tm_value = {0};
+    int year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0;
     char fractional[4] = {0};
 
-    /* Parse `YYYYMMDDhhmmss.xxx`. */
     sscanf(utc_string,
            "%4d%2d%2d%2d%2d%2d.%3s",
-           &tm_value.tm_year,
-           &tm_value.tm_mon,
-           &tm_value.tm_mday,
-           &tm_value.tm_hour,
-           &tm_value.tm_min,
-           &tm_value.tm_sec,
-           fractional);
+           &year, &month, &day, &hour, &minute, &second, fractional);
 
-    /* `struct tm` expects year offset from 1900 and month 0..11. */
-    tm_value.tm_year -= 1900;
-    tm_value.tm_mon -= 1;
-
-    time_t epoch = mktime(&tm_value);
-    if (epoch <= 0) {
+    if (year < 1970 || month < 1 || month > 12 || day < 1 || day > 31 ||
+        hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
         return util_uptime_ms();
     }
 
-    return ((uint64_t)epoch * 1000ULL) + (uint64_t)atoi(fractional);
+    /* Manual UTC epoch calculation — avoids mktime() timezone dependency. */
+    uint64_t days = 0;
+    for (int y = 1970; y < year; ++y) {
+        days += ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)) ? 366ULL : 365ULL;
+    }
+    static const uint8_t mdays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    for (int m = 1; m < month; ++m) {
+        days += mdays[m - 1];
+        if (m == 2 && ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))) {
+            days += 1;
+        }
+    }
+    days += (uint64_t)(day - 1);
+
+    uint64_t epoch_s = days * 86400ULL + (uint64_t)hour * 3600ULL +
+                       (uint64_t)minute * 60ULL + (uint64_t)second;
+
+    long frac_ms = 0;
+    if (fractional[0] != '\0') {
+        char *end = NULL;
+        frac_ms = strtol(fractional, &end, 10);
+        if (frac_ms < 0 || frac_ms > 999) {
+            frac_ms = 0;
+        }
+    }
+
+    return epoch_s * 1000ULL + (uint64_t)frac_ms;
 }
 
 /**
@@ -132,7 +144,6 @@ static uint64_t modem_gnss_parse_timestamp(const char *utc_string) {
  * @return True if logging is allowed.
  */
 static bool modem_gnss_log_due(uint64_t *last_log_ms, uint64_t now_ms) {
-    // Emit a focused GNSS log due diagnostic here so field logs explain the current stage.
     if (last_log_ms == NULL) {
         return false;
     }
@@ -151,7 +162,6 @@ static bool modem_gnss_log_due(uint64_t *last_log_ms, uint64_t now_ms) {
  * @param response Response buffer.
  */
 static void modem_gnss_prepare_response_preview(char *dst, size_t dst_size, const char *src) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (dst == NULL || dst_size == 0) {
         return;
     }
@@ -171,7 +181,6 @@ static void modem_gnss_prepare_response_preview(char *dst, size_t dst_size, cons
 }
 
 static void modem_gnss_log_command_response(const char *command, esp_err_t err, const char *response) {
-    // Emit a focused GNSS log command response diagnostic here so field logs explain the current stage.
     char preview[MODEM_GNSS_RESP_PREVIEW_LEN] = {0};
     modem_gnss_prepare_response_preview(preview, sizeof(preview), response);
     ESP_LOGD(TAG, "event=gnss_cmd_response cmd=%s err=%s resp=%s", command, esp_err_to_name(err), preview);
@@ -186,7 +195,6 @@ static void modem_gnss_log_command_response(const char *command, esp_err_t err, 
  * @return Delay in ms.
  */
 static uint32_t modem_gnss_query_ready_delay_ms(bool known_power_off, uint64_t off_duration_ms, bool resumed_session) {
-    // Read GNSS query ready delay ms without widening the mutation surface of this module.
     if (resumed_session) {
         return MODEM_GNSS_QUERY_READY_RESUME_MS;
     }
@@ -210,7 +218,6 @@ static void modem_gnss_arm_query_ready_window(const char *start_path,
                                               bool known_power_off,
                                               uint64_t off_duration_ms,
                                               bool resumed_session) {
-    // Read GNSS arm query ready window without widening the mutation surface of this module.
     uint64_t now_ms = util_uptime_ms();
     uint32_t delay_ms = modem_gnss_query_ready_delay_ms(known_power_off, off_duration_ms, resumed_session);
     s_query_ready_ms = now_ms + delay_ms;
@@ -231,7 +238,6 @@ static void modem_gnss_arm_query_ready_window(const char *start_path,
 }
 
 static uint64_t modem_gnss_parse_cgpsinfo_timestamp(const char *date_ddmmyy, const char *time_hhmmss) {
-    // Decode raw GNSS parse cgpsinfo timestamp into the normalized form the rest of the module expects.
     if (date_ddmmyy == NULL || time_hhmmss == NULL || strlen(date_ddmmyy) < 6 || strlen(time_hhmmss) < 6) {
         return util_uptime_ms();
     }
@@ -250,23 +256,32 @@ static uint64_t modem_gnss_parse_cgpsinfo_timestamp(const char *date_ddmmyy, con
         return util_uptime_ms();
     }
 
-    struct tm tm_value = {0};
-    tm_value.tm_mday = day;
-    tm_value.tm_mon = month - 1;
-    tm_value.tm_year = (2000 + year) - 1900;
-    tm_value.tm_hour = hour;
-    tm_value.tm_min = minute;
-    tm_value.tm_sec = second;
-
-    time_t epoch = mktime(&tm_value);
-    if (epoch <= 0) {
+    int full_year = 2000 + year;
+    if (full_year < 1970 || month < 1 || month > 12 || day < 1 || day > 31 ||
+        hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
         return util_uptime_ms();
     }
-    return (uint64_t)epoch * 1000ULL;
+
+    /* Manual UTC epoch calculation — avoids mktime() timezone dependency. */
+    uint64_t days = 0;
+    for (int y = 1970; y < full_year; ++y) {
+        days += ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)) ? 366ULL : 365ULL;
+    }
+    static const uint8_t mdays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    for (int m = 1; m < month; ++m) {
+        days += mdays[m - 1];
+        if (m == 2 && ((full_year % 4 == 0 && full_year % 100 != 0) || (full_year % 400 == 0))) {
+            days += 1;
+        }
+    }
+    days += (uint64_t)(day - 1);
+
+    uint64_t epoch_s = days * 86400ULL + (uint64_t)hour * 3600ULL +
+                       (uint64_t)minute * 60ULL + (uint64_t)second;
+    return epoch_s * 1000ULL;
 }
 
 static bool modem_gnss_parse_nmea_degrees(const char *value, char hemisphere, double *out_decimal) {
-    // Decode raw GNSS parse nmea degrees into the normalized form the rest of the module expects.
     if (value == NULL || out_decimal == NULL || value[0] == '\0') {
         return false;
     }
@@ -289,7 +304,6 @@ static bool modem_gnss_parse_nmea_degrees(const char *value, char hemisphere, do
 }
 
 static modem_gnss_read_result_t modem_gnss_send_cgpsinfo_and_parse(gnss_data_t *data) {
-    // Decode raw GNSS send cgpsinfo and parse into the normalized form the rest of the module expects.
     char response[512] = {0};
     esp_err_t err = ESP_FAIL;
 
@@ -357,6 +371,7 @@ static modem_gnss_read_result_t modem_gnss_send_cgpsinfo_and_parse(gnss_data_t *
     if (!has_lat || !has_lon || !has_lat_hemi || !has_lon_hemi) {
         // CGPSINFO reports empty coordinate slots when GNSS is alive but still has no fix; that is not a parse error.
         data->fix_valid = false;
+        data->query_mode = GNSS_QUERY_MODE_CGPSINFO;
         data->timestamp_ms = (field_count > 5) ? modem_gnss_parse_cgpsinfo_timestamp(fields[4], fields[5]) : util_uptime_ms();
         ESP_LOGD(TAG, "event=gnss_fallback_no_fix source=AT+CGPSINFO");
         return MODEM_GNSS_READ_OK;
@@ -371,11 +386,19 @@ static modem_gnss_read_result_t modem_gnss_send_cgpsinfo_and_parse(gnss_data_t *
         return MODEM_GNSS_READ_PARSE_FAIL;
     }
 
-    // Fallback mode does not expose detailed constellation count, so keep the fix minimal but internally consistent.
+    // CGPSINFO fallback does not report constellation count. The previous behavior
+    // hardcoded satellites=1 to indicate "fix valid". This kept compatibility with
+    // cloud consumers that gate on satellites>0, but it misled diagnostics by
+    // making fallback fixes indistinguishable from real CGNSINF fixes.
+    //
+    // Compromise: keep satellites=1 as a contract minimum so cloud filtering still
+    // works, but emit a fallback marker via diagnostics so operators can detect
+    // when the device is stuck on the simpler query path.
     data->fix_valid = true;
     data->latitude = latitude;
     data->longitude = longitude;
     data->satellites = 1;
+    data->query_mode = GNSS_QUERY_MODE_CGPSINFO;
     data->timestamp_ms = (field_count > 5) ? modem_gnss_parse_cgpsinfo_timestamp(fields[4], fields[5]) : util_uptime_ms();
     data->speed_kmh = (field_count > 7 && fields[7] != NULL && fields[7][0] != '\0') ? (float)(atof(fields[7]) * 1.852f) : 0.0f;
     data->course_deg = (field_count > 8 && fields[8] != NULL && fields[8][0] != '\0') ? (float)atof(fields[8]) : 0.0f;
@@ -388,7 +411,6 @@ static modem_gnss_read_result_t modem_gnss_send_cgpsinfo_and_parse(gnss_data_t *
 }
 
 static modem_gnss_read_result_t modem_gnss_send_and_parse(gnss_data_t *data) {
-    // Decode raw GNSS send and parse into the normalized form the rest of the module expects.
     char response[512] = {0};
     bool transport_ok = false;
     esp_err_t last_err = ESP_FAIL;
@@ -453,6 +475,18 @@ static modem_gnss_read_result_t modem_gnss_send_and_parse(gnss_data_t *data) {
     data->latitude = field_count > 3 && fields[3] != NULL ? atof(fields[3]) : 0.0;
     data->longitude = field_count > 4 && fields[4] != NULL ? atof(fields[4]) : 0.0;
     data->speed_kmh = field_count > 6 && fields[6] != NULL ? (float)atof(fields[6]) : 0.0f;
+
+    /* Validate coordinate ranges to reject modem garbage data. */
+    if (data->fix_valid) {
+        if (data->latitude < -90.0 || data->latitude > 90.0 ||
+            data->longitude < -180.0 || data->longitude > 180.0) {
+            ESP_LOGW(TAG, "event=gnss_coordinate_out_of_range lat=%.6f lon=%.6f",
+                     data->latitude, data->longitude);
+            data->fix_valid = false;
+            data->latitude = 0.0;
+            data->longitude = 0.0;
+        }
+    }
     data->course_deg = field_count > 7 && fields[7] != NULL ? (float)atof(fields[7]) : 0.0f;
 
     // SIM7600 reports GPS and GLONASS counts separately, so merge them into one firmware-facing satellite total.
@@ -468,11 +502,11 @@ static modem_gnss_read_result_t modem_gnss_send_and_parse(gnss_data_t *data) {
         data->satellites = 0;
     }
 
+    data->query_mode = GNSS_QUERY_MODE_CGNSINF;
     return MODEM_GNSS_READ_OK;
 }
 
 static bool modem_gnss_try_self_heal(uint64_t now_ms) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (s_last_self_heal_ms != 0 && (now_ms - s_last_self_heal_ms) < MODEM_GNSS_QUERY_SELF_HEAL_COOLDOWN_MS) {
         return false;
     }
@@ -490,11 +524,11 @@ static bool modem_gnss_try_self_heal(uint64_t now_ms) {
     }
 
     ESP_LOGW(TAG, "event=gnss_self_heal_executed action=repower");
+    telemetry_counters_inc_gnss_self_heal();
     return true;
 }
 
 static bool modem_gnss_try_no_fix_recover(uint64_t now_ms) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (s_no_fix_recover_pending) {
         if (now_ms < s_no_fix_recover_ready_ms) {
             return false;
@@ -509,6 +543,7 @@ static bool modem_gnss_try_no_fix_recover(uint64_t now_ms) {
         s_no_fix_recover_pending = false;
         s_last_no_fix_recover_ms = now_ms;
         ESP_LOGW(TAG, "event=gnss_no_fix_recover_executed stage=power_on");
+        telemetry_counters_inc_gnss_no_fix_recover();
         return true;
     }
 
@@ -537,7 +572,6 @@ static bool modem_gnss_try_no_fix_recover(uint64_t now_ms) {
  * @return ESP_OK on success, otherwise modem command error.
  */
 esp_err_t modem_gnss_power_on(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     char response[MODEM_GNSS_POWER_DEBUG_BUF_LEN] = {0};
     uint64_t now_ms = util_uptime_ms();
     bool known_power_off = s_last_power_off_ms != 0 && now_ms >= s_last_power_off_ms;
@@ -630,7 +664,6 @@ esp_err_t modem_gnss_power_on(void) {
  * @return ESP_OK on success, otherwise modem command error.
  */
 esp_err_t modem_gnss_power_off(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     esp_err_t err = modem_at_send_expect("AT+CGNSPWR=0\r", "OK", MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
     if (err == ESP_OK) {
         s_gnss_powered = false;
@@ -652,22 +685,11 @@ esp_err_t modem_gnss_power_off(void) {
 }
 
 /**
- * @brief Check whether last cached sample had valid fix.
- *
- * @return true when last fix is valid.
- */
-bool modem_gnss_has_fix(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    return s_last_gnss.fix_valid;
-}
-
-/**
  * @brief Check if GNSS query is ready.
  *
  * @return True if ready.
  */
 bool modem_gnss_is_query_ready(void) {
-    // Read GNSS is query ready without widening the mutation surface of this module.
     if (!s_gnss_powered) {
         return false;
     }
@@ -706,8 +728,10 @@ esp_err_t modem_gnss_get_location(gnss_data_t *data) {
         result = modem_gnss_send_and_parse(data);
         if (result == MODEM_GNSS_READ_OK) {
             s_cgnsinf_fail_streak = 0;
+            telemetry_counters_inc_gnss_cgnsinf_fix_ok();
         } else {
             s_cgnsinf_fail_streak += 1;
+            telemetry_counters_inc_gnss_cgnsinf_fail();
             // Repeated primary-query failures trigger a cooldown so we stop hammering AT+CGNSINF on unstable modems.
             if (s_cgnsinf_fail_streak >= MODEM_GNSS_QUERY_PRIMARY_BACKOFF_FAIL_THRESHOLD) {
                 s_cgnsinf_backoff_until_ms = now_ms + MODEM_GNSS_QUERY_PRIMARY_BACKOFF_COOLDOWN_MS;
@@ -725,6 +749,10 @@ esp_err_t modem_gnss_get_location(gnss_data_t *data) {
                 s_cgnsinf_fail_streak = 0;
                 s_cgnsinf_backoff_until_ms = 0;
                 ESP_LOGW(TAG, "event=gnss_query_mode_switched mode=CGPSINFO reason=primary_cgnsinf_failure");
+                telemetry_counters_inc_gnss_query_mode_switched();
+                telemetry_counters_inc_gnss_cgpsinfo_fix_ok();
+            } else {
+                telemetry_counters_inc_gnss_cgpsinfo_fail();
             }
         }
     } else {
@@ -732,6 +760,11 @@ esp_err_t modem_gnss_get_location(gnss_data_t *data) {
                  "event=gnss_primary_query_skipped reason=backoff remaining_ms=%llu",
                  (unsigned long long)(s_cgnsinf_backoff_until_ms - now_ms));
         result = modem_gnss_send_cgpsinfo_and_parse(data);
+        if (result == MODEM_GNSS_READ_OK) {
+            telemetry_counters_inc_gnss_cgpsinfo_fix_ok();
+        } else {
+            telemetry_counters_inc_gnss_cgpsinfo_fail();
+        }
     }
 
     if (result != MODEM_GNSS_READ_OK) {
@@ -771,6 +804,7 @@ esp_err_t modem_gnss_get_location(gnss_data_t *data) {
                             s_cgnsinf_fail_streak = 0;
                             s_cgnsinf_backoff_until_ms = 0;
                             ESP_LOGW(TAG, "event=gnss_query_mode_switched mode=CGPSINFO reason=self_heal_fallback_success");
+                            telemetry_counters_inc_gnss_query_mode_switched();
                         }
                     }
                 }

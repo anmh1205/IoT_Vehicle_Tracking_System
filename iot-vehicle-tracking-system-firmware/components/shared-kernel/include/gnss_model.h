@@ -13,6 +13,14 @@
 // module contract without reaching into private implementation details.
 
 
+typedef enum {
+    GNSS_QUERY_MODE_UNKNOWN = 0,
+    /** Primary path: AT+CGNSINF with full constellation count. */
+    GNSS_QUERY_MODE_CGNSINF,
+    /** Fallback path: AT+CGPSINFO; no constellation count, satellites is approximate. */
+    GNSS_QUERY_MODE_CGPSINFO,
+} gnss_query_mode_t;
+
 typedef struct {
     /** Latitude in decimal degrees. */
     double latitude;
@@ -28,4 +36,6 @@ typedef struct {
     uint64_t timestamp_ms;
     /** True when modem reports valid fix. */
     bool fix_valid;
+    /** Which AT command path produced this fix. */
+    gnss_query_mode_t query_mode;
 } gnss_data_t;

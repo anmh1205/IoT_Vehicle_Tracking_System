@@ -25,9 +25,6 @@
  * This translation unit belongs to the SDMMC FATFS storage adapter layer and keeps adapter-local state, crash-recovery sequencing, and storage policy isolated behind the exported entry points.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 #define SD_LOG_MOUNT_POINT "/sdcard"
 #define SD_LOG_ROOT_DIR SD_LOG_MOUNT_POINT "/tracker"
@@ -411,7 +408,6 @@ static esp_err_t sd_log_store_copy_payload_from_line(const char *payload_start, 
 }
 
 static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *out_record) {
-    // Decode raw log store parse record into the normalized form the rest of the module expects.
     ESP_RETURN_ON_NULL(line, ESP_ERR_INVALID_ARG, TAG, "line null");
     ESP_RETURN_ON_NULL(out_record, ESP_ERR_INVALID_ARG, TAG, "record null");
 
@@ -709,26 +705,6 @@ esp_err_t sd_log_store_get_meta(sd_log_meta_t *out_meta) {
     // Return the current metadata snapshot here so diagnostics and replay code can inspect queue position.
     ESP_RETURN_ON_NULL(out_meta, ESP_ERR_INVALID_ARG, TAG, "out_meta null");
     *out_meta = s_ctx.meta;
-    return ESP_OK;
-}
-
-esp_err_t sd_log_store_set_ack_seq_critical(uint32_t ack_seq_critical) {
-    // Advance the critical-ack watermark here once the cloud has durably accepted important records.
-    sd_log_meta_t meta = s_ctx.meta;
-    if (ack_seq_critical > meta.ack_seq_critical) {
-        /* ACK watermark is monotonic; never move it backward. */
-        meta.ack_seq_critical = ack_seq_critical;
-    }
-
-    esp_err_t err = sd_log_store_write_meta_snapshot(&meta);
-    if (err != ESP_OK) {
-        return err;
-    }
-
-    s_ctx.meta = meta;
-    if (s_ctx.state == SD_LOG_STATE_DEGRADED) {
-        s_ctx.state = SD_LOG_STATE_MOUNTED;
-    }
     return ESP_OK;
 }
 

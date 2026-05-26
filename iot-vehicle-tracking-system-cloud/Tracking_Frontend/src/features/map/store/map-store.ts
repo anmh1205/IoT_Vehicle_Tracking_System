@@ -129,12 +129,27 @@ export const useMapStore = create<MapState>((set) => ({
     }),
   clearPositions: () => set({ positions: new Map() }),
   focusDevice: (id) =>
-    set((state) => ({
-      selectedDeviceId: id,
-      hardMode: 'inspect-device',
-      showAllowedZone:
-        state.hardMode === 'inspect-device' ? state.showAllowedZone : false,
-    })),
+    set((state) => {
+      const device = state.positions.get(id);
+      const hasValidCoords =
+        device &&
+        Number.isFinite(device.lat) &&
+        Number.isFinite(device.lon) &&
+        Math.abs(device.lat) <= 90 &&
+        Math.abs(device.lon) <= 180 &&
+        !(device.lat === 0 && device.lon === 0);
+
+      return {
+        selectedDeviceId: id,
+        hardMode: 'inspect-device',
+        followMode: true,
+        showAllowedZone:
+          state.hardMode === 'inspect-device' ? state.showAllowedZone : false,
+        ...(hasValidCoords
+          ? { mapViewport: { center: [device.lat, device.lon] as [number, number], zoom: Math.max(state.mapViewport.zoom, 15) } }
+          : {}),
+      };
+    }),
   clearSelection: () =>
     set((state) => ({
       selectedDeviceId: null,

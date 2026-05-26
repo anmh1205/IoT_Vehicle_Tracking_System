@@ -14,9 +14,6 @@
  * This translation unit belongs to the SIM7600 AT modem adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /**
  * @brief Send AT command and check expected response.
@@ -29,7 +26,6 @@
  * @return ESP_OK on success, error on failure.
  */
 esp_err_t modem_lte_send_simple(const char *cmd, const char *expect, uint32_t timeout_ms) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return modem_at_send_expect(cmd, expect, timeout_ms);
 }
 
@@ -44,7 +40,6 @@ esp_err_t modem_lte_send_simple(const char *cmd, const char *expect, uint32_t ti
  * @return True if logging is due.
  */
 bool modem_lte_diag_log_due(uint64_t now_ms, uint64_t *last_log_ms, uint64_t interval_ms) {
-    // Emit a focused LTE diag log due diagnostic here so field logs explain the current stage.
     if (last_log_ms == NULL) {
         return true;
     }
@@ -66,7 +61,6 @@ bool modem_lte_diag_log_due(uint64_t now_ms, uint64_t *last_log_ms, uint64_t int
  * @return True if modem is alive.
  */
 bool modem_lte_try_resume_alive_modem(uint64_t now_ms) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     esp_err_t at_init_err = modem_at_init();
     if (at_init_err != ESP_OK) {
         return false;
@@ -110,7 +104,6 @@ bool modem_lte_try_resume_alive_modem(uint64_t now_ms) {
  * Logs STATUS and NET-LIGHT GPIO states for diagnostics.
  */
 void modem_lte_log_hw_lines_if_available(void) {
-    // Emit a focused LTE log hw lines if available diagnostic here so field logs explain the current stage.
     bool level = false;
 
     esp_err_t status_err = modem_read_status(&level);
@@ -143,7 +136,6 @@ void modem_lte_log_hw_lines_if_available(void) {
  * @return True if parsed successfully.
  */
 bool modem_lte_parse_cereg(const char *response, int *out_n, int *out_stat) {
-    // Decode raw LTE parse CEREG into the normalized form the rest of the module expects.
     if (response == NULL) {
         return false;
     }
@@ -175,7 +167,6 @@ bool modem_lte_parse_cereg(const char *response, int *out_n, int *out_stat) {
  * @return String name for stat value.
  */
 const char *modem_lte_cereg_stat_name(int stat) {
-    // Translate LTE CEREG stat name into a readable label so logs and diagnostics stay easy to follow.
     switch (stat) {
         case 0:
             return "not_registered_not_searching";
@@ -200,7 +191,6 @@ const char *modem_lte_cereg_stat_name(int stat) {
  * Logs CPIN, CEREG, CSQ, COPS for debugging.
  */
 void modem_lte_log_registration_snapshot(void) {
-    // Emit a focused LTE log registration snapshot diagnostic here so field logs explain the current stage.
     static const struct {
         const char *cmd;
         const char *label;

@@ -26,6 +26,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
+import { notificationUtils } from '@/lib/notification';
 import {
   buildFirmwareConfigCommandParams,
   getDeviceConfigSummary,
@@ -304,12 +305,28 @@ export const SettingsTab = () => {
       },
     };
 
-    await onUpdateNameId({ deviceName: values.deviceName });
-    await onUpdateSettings({
-      requestInterval: values.drivingIntervalSec,
-      imuAccelDeltaThresholdMps2: values.imuAccelDeltaThresholdMps2,
-      config: nextConfig,
-    });
+    let nameUpdateSucceeded = false;
+    try {
+      await onUpdateNameId({ deviceName: values.deviceName });
+      nameUpdateSucceeded = true;
+    } catch {
+      return;
+    }
+
+    try {
+      await onUpdateSettings({
+        requestInterval: values.drivingIntervalSec,
+        imuAccelDeltaThresholdMps2: values.imuAccelDeltaThresholdMps2,
+        config: nextConfig,
+      });
+    } catch {
+      if (nameUpdateSucceeded) {
+        notificationUtils.warning(
+          'Lưu cấu hình không hoàn tất',
+          'Tên thiết bị đã cập nhật nhưng cấu hình kỹ thuật thất bại. Vui lòng thử lại.',
+        );
+      }
+    }
   };
 
   return (

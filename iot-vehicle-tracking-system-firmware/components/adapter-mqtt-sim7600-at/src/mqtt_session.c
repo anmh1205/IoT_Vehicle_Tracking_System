@@ -48,9 +48,6 @@
  * - TLS errors: fallback to non-TLS if configured
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 #ifndef CONFIG_TRACKER_TLS_VERIFY_SERVER
 #define CONFIG_TRACKER_TLS_VERIFY_SERVER 0
@@ -78,7 +75,6 @@ static bool tracker_mqtt_parse_ipv4_literal(const char *value, char *out_ip, siz
  * @return Class name ("primary" or "fallback").
  */
 static const char *tracker_mqtt_endpoint_class(const char *server_addr) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!util_string_empty(server_addr) && strcmp(server_addr, s_server_addr_fallback) == 0) {
         return "fallback";
     }
@@ -143,7 +139,6 @@ static void tracker_mqtt_log_response_excerpt(const char *label, const char *res
 }
 
 static const char *tracker_mqtt_find_last_text(const char *text, const char *needle) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (text == NULL || needle == NULL || needle[0] == '\0') {
         return NULL;
     }
@@ -158,7 +153,6 @@ static const char *tracker_mqtt_find_last_text(const char *text, const char *nee
 }
 
 static bool tracker_mqtt_parse_ipv4_literal(const char *value, char *out_ip, size_t out_ip_size) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (util_string_empty(value) || out_ip == NULL || out_ip_size < MQTT_RESOLVED_IPV4_MAX_LEN) {
         return false;
     }
@@ -190,7 +184,6 @@ static bool tracker_mqtt_parse_dns_success(const char *response,
                                            const char *host,
                                            char *out_ip,
                                            size_t out_ip_size) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (response == NULL || util_string_empty(host) || out_ip == NULL || out_ip_size < MQTT_RESOLVED_IPV4_MAX_LEN) {
         return false;
     }
@@ -226,7 +219,6 @@ static bool tracker_mqtt_parse_dns_success(const char *response,
 }
 
 static bool tracker_mqtt_parse_dns_error(const char *response, int *out_dns_err_code) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (response == NULL || out_dns_err_code == NULL) {
         return false;
     }
@@ -315,7 +307,6 @@ static bool tracker_mqtt_resolve_host_ipv4(const char *host, char *out_ip, size_
 static esp_err_t tracker_mqtt_build_resolved_server_addr(const char *resolved_ip,
                                                          char *server_addr,
                                                          size_t server_addr_size) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ESP_RETURN_ON_FALSE(!util_string_empty(resolved_ip),
                         ESP_ERR_INVALID_ARG,
                         TRACKER_MQTT_TAG,
@@ -441,7 +432,6 @@ static esp_err_t tracker_mqtt_send_lifecycle_cmd(const char *cmd,
 }
 
 static esp_err_t tracker_mqtt_configure_tls_certificate(char *cmd, size_t cmd_size) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
 #if CONFIG_TRACKER_TLS_VERIFY_SERVER
     /*
      * SIM7600 validates against certificate files stored inside the modem, not
@@ -480,7 +470,6 @@ static esp_err_t tracker_mqtt_configure_tls_certificate(char *cmd, size_t cmd_si
  * @return ESP_OK on success.
  */
 esp_err_t tracker_mqtt_start_service(void) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (s_service_started) {
         return ESP_OK;
     }
@@ -503,7 +492,6 @@ esp_err_t tracker_mqtt_start_service(void) {
 }
 
 esp_err_t tracker_mqtt_configure_tls(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!s_tls_enabled) {
         return ESP_OK;
     }
@@ -561,7 +549,6 @@ esp_err_t tracker_mqtt_configure_tls(void) {
 }
 
 esp_err_t tracker_mqtt_acquire_client(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (s_client_acquired) {
         return ESP_OK;
     }
@@ -616,7 +603,6 @@ esp_err_t tracker_mqtt_apply_client_options(void) {
 }
 
 bool tracker_mqtt_query_disconnect_state_with_policy(int *out_disc_state, bool quiet) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     ESP_RETURN_ON_FALSE(out_disc_state != NULL, false, TRACKER_MQTT_TAG, "out_disc_state null");
 
     char response[MQTT_AT_RESPONSE_MAX_LEN] = {0};
@@ -632,12 +618,10 @@ bool tracker_mqtt_query_disconnect_state_with_policy(int *out_disc_state, bool q
 }
 
 bool tracker_mqtt_query_disconnect_state(int *out_disc_state) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return tracker_mqtt_query_disconnect_state_with_policy(out_disc_state, false);
 }
 
 bool tracker_mqtt_resume_connected_session(const char *reason, bool quiet_query) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     int disc_state = -1;
     if (!tracker_mqtt_query_disconnect_state_with_policy(&disc_state, quiet_query) || disc_state != 0) {
         return false;
@@ -684,7 +668,6 @@ static esp_err_t tracker_mqtt_build_connect_cmd(const char *server_addr, char *c
 }
 
 static bool tracker_mqtt_probe_connected_session_window(int *out_connect_err_code) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     uint64_t probe_start_ms = util_uptime_ms();
     while ((util_uptime_ms() - probe_start_ms) < MQTT_CONNECT_SESSION_PROBE_WINDOW_MS) {
         int disc_state = -1;
@@ -712,7 +695,6 @@ static bool tracker_mqtt_probe_connected_session_window(int *out_connect_err_cod
 static esp_err_t tracker_mqtt_handle_connect_timeout(const char *server_addr,
                                                      int *out_connect_err_code,
                                                      bool *out_timed_out) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     int disc_state = -1;
     if (tracker_mqtt_query_disconnect_state(&disc_state) && disc_state == 0) {
         s_connected = true;
@@ -743,7 +725,6 @@ static esp_err_t tracker_mqtt_handle_connect_timeout(const char *server_addr,
 static esp_err_t tracker_mqtt_handle_connect_rejection(const char *server_addr,
                                                        int connect_err,
                                                        int *out_connect_err_code) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (tracker_mqtt_err_indicates_disconnect(connect_err)) {
         tracker_mqtt_mark_disconnected("+CMQTTCONNECT", connect_err);
     }
@@ -760,7 +741,6 @@ static esp_err_t tracker_mqtt_handle_connect_rejection(const char *server_addr,
 }
 
 esp_err_t tracker_mqtt_connect_once(const char *server_addr, int *out_connect_err_code, bool *out_timed_out) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     ESP_RETURN_ON_FALSE(!util_string_empty(server_addr),
                         ESP_ERR_INVALID_ARG,
                         TRACKER_MQTT_TAG,
@@ -885,7 +865,6 @@ void tracker_mqtt_log_connect_diagnostics(void) {
 }
 
 esp_err_t tracker_mqtt_send_disconnect(void) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (!s_connected && !s_client_acquired) {
         return ESP_OK;
     }
@@ -911,7 +890,6 @@ esp_err_t tracker_mqtt_send_disconnect(void) {
 }
 
 esp_err_t tracker_mqtt_release_client(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!s_client_acquired) {
         return ESP_OK;
     }
@@ -937,7 +915,6 @@ esp_err_t tracker_mqtt_release_client(void) {
 }
 
 esp_err_t tracker_mqtt_stop_service(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!s_service_started) {
         return ESP_OK;
     }
@@ -963,7 +940,6 @@ esp_err_t tracker_mqtt_stop_service(void) {
 }
 
 esp_err_t tracker_mqtt_cleanup_after_connect_failure(void) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     esp_err_t first_err = ESP_OK;
     esp_err_t disc_err = tracker_mqtt_send_disconnect();
     if (first_err == ESP_OK && disc_err != ESP_OK) {
@@ -1023,7 +999,6 @@ esp_err_t tracker_mqtt_cleanup_after_connect_failure(void) {
 }
 
 esp_err_t tracker_mqtt_session_connect(void) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (s_connected) {
         return ESP_OK;
     }
@@ -1095,7 +1070,6 @@ esp_err_t tracker_mqtt_session_connect(void) {
 }
 
 esp_err_t tracker_mqtt_session_disconnect(void) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     esp_err_t first_err = ESP_OK;
 
     esp_err_t err = tracker_mqtt_send_disconnect();

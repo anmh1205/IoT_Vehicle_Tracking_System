@@ -11,6 +11,7 @@ import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigg
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { StatCard } from '@/components/common/stat-card';
+import { formatDateTime } from '@/lib/utils/date/format';
 import {
   Select,
   SelectContent,
@@ -102,7 +103,7 @@ const ViolationsPage = () => {
         </Badge>
       ),
     },
-    { accessorKey: 'createdAt', header: 'Thời gian', meta: { label: 'Thời gian' } },
+    { accessorKey: 'createdAt', header: 'Thời gian', meta: { label: 'Thời gian' }, cell: ({ row }) => formatDateTime(row.original.createdAt) },
     {
       accessorKey: 'acknowledged',
       header: 'Trạng thái',
@@ -127,10 +128,10 @@ const ViolationsPage = () => {
             <Button
               size="sm"
               variant="outline"
-              disabled={ackMutation.isPending}
+              disabled={ackMutation.isPending && ackMutation.variables === row.original.id}
               onClick={() => ackMutation.mutate(row.original.id)}
             >
-              {ackMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {ackMutation.isPending && ackMutation.variables === row.original.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               Xác nhận
             </Button>
           ) : null}

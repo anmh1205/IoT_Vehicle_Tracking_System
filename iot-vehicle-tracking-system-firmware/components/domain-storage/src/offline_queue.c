@@ -49,9 +49,6 @@
  *    - Corrupt record: skip and advance replay_seq
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 static const char *TAG = "OFFLINE_QUEUE";
 /* Retry delayed SD mounts instead of probing every enqueue/replay tick. */
@@ -86,7 +83,6 @@ static offline_queue_ctx_t s_ctx;
  * @return Number of unread records represented by `meta`.
  */
 static uint32_t offline_queue_depth_from_meta(const sd_log_meta_t *meta) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (meta == NULL) {
         return 0;
     }
@@ -218,13 +214,11 @@ static const retry_policy_t s_sd_mount_retry_policy = {
  * @return true when the record should be treated as critical.
  */
 static bool offline_queue_is_critical(offline_record_type_t type) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return type == OFFLINE_RECORD_STATUS || type == OFFLINE_RECORD_EVENT ||
            type == OFFLINE_RECORD_FIRMWARE;
 }
 
 static const char *offline_queue_type_name(offline_record_type_t type) {
-    // Translate type name into a readable label so logs and diagnostics stay easy to follow.
     switch (type) {
         case OFFLINE_RECORD_STATUS:
             return "status";
@@ -239,7 +233,6 @@ static const char *offline_queue_type_name(offline_record_type_t type) {
 }
 
 static const char *offline_queue_topic_from_type(offline_record_type_t type) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     switch (type) {
         case OFFLINE_RECORD_STATUS:
             return tracker_mqtt_status_topic();
@@ -259,7 +252,6 @@ static const char *offline_queue_topic_from_type(offline_record_type_t type) {
  * @param[in] now_ms Current uptime used for retry bookkeeping.
  */
 static void offline_queue_try_mount(uint64_t now_ms) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!CONFIG_TRACKER_SD_LOG_ENABLE || sd_log_store_is_mounted()) {
         return;
     }
@@ -306,7 +298,6 @@ static bool offline_queue_replace_fragment(char *payload,
                                            size_t payload_len,
                                            const char *needle,
                                            const char *replacement) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (payload == NULL || payload_len == 0 || needle == NULL || replacement == NULL) {
         return false;
     }
@@ -348,7 +339,6 @@ static bool offline_queue_replace_fragment(char *payload,
 static const char *offline_queue_payload_for_publish(const sd_log_record_t *rec,
                                                      char *scratch_payload,
                                                      size_t scratch_len) {
-    // Rehydrate payload for publish here so later logic reads one coherent snapshot after reset or sleep.
     ESP_RETURN_ON_FALSE(rec != NULL, "", TAG, "record null");
     ESP_RETURN_ON_FALSE(scratch_payload != NULL && scratch_len > 0, rec->payload, TAG, "scratch invalid");
 

@@ -8,9 +8,6 @@
  * This translation unit belongs to the app-core orchestration layer and keeps FSM transitions, retained runtime state, and orchestration policy centralized inside app-core.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /**
  * @brief Initialize the state machine with runtime configuration.
@@ -40,6 +37,5 @@ app_state_t state_machine_run(app_state_t current_state) {
  * @return The latest telemetry data collected by the state machine.
  */
 telemetry_t state_machine_get_telemetry(void) {
-    // Keep this public facade thin and delegate the real work to the focused helper below.
     return state_machine_core_get_telemetry();
 }

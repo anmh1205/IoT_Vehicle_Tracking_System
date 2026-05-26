@@ -8,9 +8,6 @@
  * This translation unit belongs to the shared kernel layer and centralizes shared primitives, validation bounds, retry helpers, and generic utilities used across components.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /* Prevent undefined `1U << shift` behavior and runaway multiplication. */
 #define RETRY_EXP_SHIFT_CAP 20U
@@ -22,7 +19,6 @@
  * @return Base delay in ms (minimum 1).
  */
 static uint32_t retry_policy_base_delay_ms(const retry_policy_t *policy) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (policy == NULL || policy->base_delay_ms == 0U) {
         /* Never return zero; callers expect retries to eventually move forward. */
         return 1U;
@@ -38,7 +34,6 @@ static uint32_t retry_policy_base_delay_ms(const retry_policy_t *policy) {
  * @return Capped delay.
  */
 static uint32_t retry_policy_cap_delay_ms(const retry_policy_t *policy, uint32_t delay_ms) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (policy == NULL || policy->max_delay_ms == 0U) {
         return delay_ms;
     }
@@ -69,7 +64,6 @@ void retry_state_reset(retry_state_t *state) {
  * @return true if delay has elapsed, false if must wait.
  */
 bool retry_state_can_run(const retry_state_t *state, uint64_t now_ms) {
-    // Advance one cooperative step here using the current state, time gates, and retry policy.
     if (state == NULL) {
         return false;
     }
@@ -87,7 +81,6 @@ bool retry_state_can_run(const retry_state_t *state, uint64_t now_ms) {
 uint32_t retry_state_current_delay_ms(const retry_state_t *state,
                                       const retry_policy_t *policy,
                                       uint64_t seed_ms) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     uint32_t delay_ms = retry_policy_base_delay_ms(policy);
 
     if (policy != NULL && policy->mode == RETRY_MODE_EXPONENTIAL && state != NULL && state->attempts > 0U) {
@@ -145,7 +138,6 @@ esp_err_t retry_state_schedule(retry_state_t *state,
                                const retry_policy_t *policy,
                                uint64_t now_ms,
                                esp_err_t err) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (state == NULL || policy == NULL) {
         return ESP_ERR_INVALID_ARG;
     }

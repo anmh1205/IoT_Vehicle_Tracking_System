@@ -46,6 +46,7 @@ export const VehicleForm = ({
   formError,
   fieldErrors,
   onSubmit,
+  isPending = false,
 }: {
   open: boolean;
   onOpenChange: (value: boolean) => void;
@@ -54,12 +55,21 @@ export const VehicleForm = ({
   formError?: string | null;
   fieldErrors?: Record<string, string>;
   onSubmit: (values: VehicleFormValues) => void;
+  isPending?: boolean;
 }) => {
   const [form, setForm] = useState<VehicleFormValues>(EMPTY_FORM);
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    if (!open) {
+      setForm(EMPTY_FORM);
+      setLocalErrors({});
+      return;
+    }
+
     if (!defaultValues) {
       setForm(EMPTY_FORM);
+      setLocalErrors({});
       return;
     }
 
@@ -71,7 +81,26 @@ export const VehicleForm = ({
       year: defaultValues.year ? String(defaultValues.year) : '',
       customerId: defaultValues.customerId ? String(defaultValues.customerId) : 'none',
     });
-  }, [defaultValues]);
+    setLocalErrors({});
+  }, [defaultValues, open]);
+
+  const validate = (): boolean => {
+    const errors: Record<string, string> = {};
+    if (!form.vehicleId.trim()) errors.vehicleId = 'Mã xe là bắt buộc';
+    if (!form.plateNumber.trim()) errors.plateNumber = 'Biển số là bắt buộc';
+    if (form.year && (Number(form.year) < 1900 || Number(form.year) > new Date().getFullYear() + 2)) {
+      errors.year = 'Năm sản xuất không hợp lệ';
+    }
+    setLocalErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (!validate()) return;
+    onSubmit(form);
+  };
+
+  const mergedErrors = { ...localErrors, ...fieldErrors };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -102,13 +131,13 @@ export const VehicleForm = ({
               value={form.vehicleId}
               autoCapitalize="characters"
               spellCheck={false}
-              className={fieldErrors?.vehicleId ? 'border-destructive focus-visible:ring-destructive' : undefined}
+              className={mergedErrors?.vehicleId ? 'border-destructive focus-visible:ring-destructive' : undefined}
               onChange={(event) => setForm((state) => ({ ...state, vehicleId: event.target.value }))}
               disabled={Boolean(defaultValues?.id)}
             />
-            {fieldErrors?.vehicleId ? (
+            {mergedErrors?.vehicleId ? (
               <p role="alert" aria-live="polite" className="text-sm text-destructive">
-                {fieldErrors.vehicleId}
+                {mergedErrors.vehicleId}
               </p>
             ) : null}
           </div>
@@ -212,10 +241,12 @@ export const VehicleForm = ({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
             Hủy
           </Button>
-          <Button onClick={() => onSubmit(form)}>Lưu</Button>
+          <Button onClick={handleSubmit} disabled={isPending}>
+            {isPending ? 'Đang lưu...' : 'Lưu'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

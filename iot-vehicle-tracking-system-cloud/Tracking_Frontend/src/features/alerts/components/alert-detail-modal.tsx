@@ -1,10 +1,13 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useMap } from 'react-leaflet';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { CheckCircle2, CircleCheckBig, XCircle } from 'lucide-react';
 import { EmptyState } from '@/components/common/empty-state';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
@@ -16,10 +19,14 @@ import {
 import { createDeviceMarkerIcon } from '@/features/map/components/marker-icon';
 import { hasValidMapCoordinates, MAP_LAYER_CONFIG } from '@/features/map/constants/map-config';
 import {
+  alertServices,
   getAlertSeverityLabel,
   getAlertStatusLabel,
   getAlertTypeLabel,
 } from '@/lib/api/alerts';
+import { notificationUtils } from '@/lib/notification';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
+import { queryInvalidation } from '@/lib/utils/query-invalidation';
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/utils/date/format';
 
 const MapContainer = dynamic(() => import('react-leaflet').then((m) => m.MapContainer), {
@@ -245,11 +252,58 @@ export const AlertDetailModal = ({
   open,
   onOpenChange,
   alert,
+  onActionComplete,
 }: {
   open: boolean;
   onOpenChange: (value: boolean) => void;
   alert: any | null;
+  onActionComplete?: () => void;
 }) => {
+  const queryClient = useQueryClient();
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
+
+  const ackMutation = useMutation({
+    mutationFn: (id: number) => alertServices.acknowledge(id),
+    onSuccess: () => {
+      queryInvalidation.alerts.all(queryClient);
+      notificationUtils.success('Đã xác nhận cảnh báo');
+      onActionComplete?.();
+    },
+    onError: (error: unknown) => {
+      notificationUtils.error('Xác nhận cảnh báo thất bại', getApiErrorMessage(error, 'Không thể cập nhật trạng thái.'));
+    },
+    onSettled: () => setPendingAction(null),
+  });
+
+  const resolveMutation = useMutation({
+    mutationFn: (id: number) => alertServices.resolve(id),
+    onSuccess: () => {
+      queryInvalidation.alerts.all(queryClient);
+      notificationUtils.success('Đã giải quyết cảnh báo');
+      onActionComplete?.();
+    },
+    onError: (error: unknown) => {
+      notificationUtils.error('Giải quyết cảnh báo thất bại', getApiErrorMessage(error, 'Không thể đóng cảnh báo.'));
+    },
+    onSettled: () => setPendingAction(null),
+  });
+
+  const dismissMutation = useMutation({
+    mutationFn: (id: number) => alertServices.dismiss(id),
+    onSuccess: () => {
+      queryInvalidation.alerts.all(queryClient);
+      notificationUtils.success('Đã bỏ qua cảnh báo');
+      onActionComplete?.();
+    },
+    onError: (error: unknown) => {
+      notificationUtils.error('Bỏ qua cảnh báo thất bại', getApiErrorMessage(error, 'Không thể bỏ qua cảnh báo.'));
+    },
+    onSettled: () => setPendingAction(null),
+  });
+
+  const isPending = Boolean(pendingAction);
+  const isResolved = alert?.status === 'resolved' || alert?.status === 'dismissed';
+
   const coordinates = {
     lat: Number(alert?.latitude),
     lon: Number(alert?.longitude),
@@ -294,6 +348,46 @@ export const AlertDetailModal = ({
             <DialogTitle>{displayTitle}</DialogTitle>
             <DialogDescription>{displayMessage}</DialogDescription>
           </div>
+
+          {!isResolved && alert?.id ? (
+            <div className="flex flex-wrap gap-2 border-t pt-3">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={isPending || alert?.status !== 'active'}
+                onClick={() => {
+                  setPendingAction('acknowledge');
+                  ackMutation.mutate(alert.id);
+                }}
+              >
+                <CircleCheckBig className="mr-2 h-4 w-4" />
+                {pendingAction === 'acknowledge' ? 'Đang xử lý...' : 'Xác nhận'}
+              </Button>
+              <Button
+                size="sm"
+                disabled={isPending}
+                onClick={() => {
+                  setPendingAction('resolve');
+                  resolveMutation.mutate(alert.id);
+                }}
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                {pendingAction === 'resolve' ? 'Đang xử lý...' : 'Giải quyết'}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={isPending}
+                onClick={() => {
+                  setPendingAction('dismiss');
+                  dismissMutation.mutate(alert.id);
+                }}
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                {pendingAction === 'dismiss' ? 'Đang xử lý...' : 'Bỏ qua'}
+              </Button>
+            </div>
+          ) : null}
         </DialogHeader>
 
         <div className="min-h-0 flex-1 overflow-hidden px-5 py-4 sm:px-6">

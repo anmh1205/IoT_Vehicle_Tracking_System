@@ -10,9 +10,6 @@
  * This translation unit belongs to the ESP-IDF runtime port layer and bridges portable runtime expectations onto concrete ESP-IDF services and platform helpers.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /* Logging tag for runtime ports module. */
 static const char *TAG = "RUNTIME_PORTS";

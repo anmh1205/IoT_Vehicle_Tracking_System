@@ -88,3 +88,33 @@ esp_err_t retry_state_schedule(retry_state_t *state,
 uint32_t retry_state_current_delay_ms(const retry_state_t *state,
                                       const retry_policy_t *policy,
                                       uint64_t seed_ms);
+
+/**
+ * @brief Convenience macro: guard + attempt + schedule-on-fail + reset-on-success.
+ *
+ * Usage:
+ *   RETRY_ATTEMPT(s_network_retry, g_network_policy, now_ms, "lte_tick", modem_lte_tick(now_ms));
+ *
+ * Expands to the standard retry pattern without copy-pasting 8-10 lines each time.
+ * The `operation` expression is evaluated once. On ESP_OK the state resets.
+ * On failure the retry is scheduled and the enclosing scope should `return` or `break`.
+ *
+ * @param _state   retry_state_t variable (lvalue)
+ * @param _policy  retry_policy_t variable (lvalue)
+ * @param _now_ms  Current uptime in ms
+ * @param _step    String literal for log identification
+ * @param _op      Expression returning esp_err_t
+ */
+#define RETRY_ATTEMPT(_state, _policy, _now_ms, _step, _op) do { \
+    if (!retry_state_can_run(&(_state), (_now_ms))) break; \
+    esp_err_t _retry_err = (_op); \
+    if (_retry_err != ESP_OK) { \
+        uint32_t _retry_delay = retry_state_current_delay_ms(&(_state), &(_policy), (_now_ms)); \
+        (void)retry_state_schedule(&(_state), &(_policy), (_now_ms), _retry_err); \
+        ESP_LOGW(TAG, "event=retry_scheduled step=%s err=%s attempt=%lu delay_ms=%lu", \
+                 (_step), esp_err_to_name(_retry_err), \
+                 (unsigned long)(_state).attempts, (unsigned long)_retry_delay); \
+        break; \
+    } \
+    retry_state_reset(&(_state)); \
+} while (0)

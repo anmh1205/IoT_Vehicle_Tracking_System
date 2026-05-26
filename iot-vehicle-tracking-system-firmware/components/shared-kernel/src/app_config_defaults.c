@@ -12,9 +12,6 @@
  * This translation unit belongs to the shared kernel layer and centralizes shared primitives, validation bounds, retry helpers, and generic utilities used across components.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 #ifndef CONFIG_TRACKER_DEFAULT_DEVICE_ID
 #define CONFIG_TRACKER_DEFAULT_DEVICE_ID "TRACKER_001"
@@ -81,7 +78,6 @@
  * @param config Output config structure (cannot be NULL).
  */
 void app_config_set_defaults(config_t *config) {
-    // Copy the caller-provided config set defaults into module-local state after lightweight guards.
     if (config == NULL) {
         return;
     }
@@ -118,7 +114,6 @@ void app_config_set_defaults(config_t *config) {
  * @return true if valid, false if any field is invalid.
  */
 bool app_config_is_valid(const config_t *config) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (config == NULL) {
         return false;
     }

@@ -26,9 +26,6 @@
  *    - A deadzone filters low noise so a parked device does not accumulate false motion.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 #define IMU_I2C_PORT I2C_NUM_0
 #define IMU_I2C_FREQ_HZ 400000
@@ -102,7 +99,6 @@ static float s_accel_delta_window_peak_mps2 = 0.0f;
  * @return true when the active device uses the LIS3DSH register map.
  */
 static bool imu_is_lis3dsh(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_imu_chip == IMU_CHIP_LIS3DSH;
 }
 
@@ -112,7 +108,6 @@ static bool imu_is_lis3dsh(void) {
  * @return String name.
  */
 static const char *imu_detected_chip_name(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return imu_is_lis3dsh() ? "lis3dsh" : "lis3dh-legacy";
 }
 
@@ -125,7 +120,6 @@ static const char *imu_detected_chip_name(void) {
  * @return ESP_OK on success, otherwise I2C error.
  */
 static esp_err_t imu_write_reg(uint8_t reg, uint8_t value) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     uint8_t payload[2] = {reg, value};
     return i2c_master_transmit(s_dev_handle,
                                payload,
@@ -142,7 +136,6 @@ static esp_err_t imu_write_reg(uint8_t reg, uint8_t value) {
  * @return ESP_OK on success, otherwise I2C error.
  */
 static esp_err_t imu_read_reg(uint8_t reg, uint8_t *value) {
-    // Read read reg without widening the mutation surface of this module.
     ESP_RETURN_ON_NULL(value, ESP_ERR_INVALID_ARG, TAG, "value is NULL");
     esp_err_t err = i2c_master_transmit_receive(s_dev_handle,
                                                 &reg,
@@ -176,7 +169,6 @@ static esp_err_t imu_read_reg(uint8_t reg, uint8_t *value) {
  * @return ESP_OK on success, otherwise I2C error.
  */
 static esp_err_t imu_read_regs(uint8_t reg, uint8_t *data, size_t len) {
-    // Read read regs without widening the mutation surface of this module.
     ESP_RETURN_ON_NULL(data, ESP_ERR_INVALID_ARG, TAG, "data is NULL");
     /*
      * LIS3DH uses SUB[7] to enable address auto-increment on multi-byte reads.
@@ -224,7 +216,6 @@ static esp_err_t imu_try_bind_device(uint8_t device_addr,
                                      uint32_t scl_speed_hz,
                                      uint8_t expected_who_am_i,
                                      uint8_t *out_who_am_i) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ESP_RETURN_ON_NULL(out_who_am_i, ESP_ERR_INVALID_ARG, TAG, "out_who_am_i is NULL");
 
     i2c_device_config_t dev_cfg = {
@@ -256,7 +247,6 @@ static esp_err_t imu_try_bind_device(uint8_t device_addr,
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t imu_init(void) {
-    // Bring the shared I2C bus and the detected IMU variant into a known-good runtime configuration.
     esp_err_t err = ESP_OK;
 
     if (s_dev_handle != NULL) {
@@ -417,7 +407,6 @@ fail:
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_ms) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ESP_RETURN_ON_NULL(s_dev_handle, ESP_ERR_INVALID_STATE, TAG, "IMU not initialized");
 
     /* LIS3DH threshold unit ~16mg/LSB in +/-2g mode. */
@@ -426,9 +415,16 @@ esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_
     uint8_t duration = (uint8_t)util_clamp_int((int)((duration_ms + 99U) / 100U), 0, 127);
 
     if (imu_is_lis3dsh()) {
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG2, 0x01) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG2 write failed");
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG3, 0x40) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG3 write failed");
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG5, 0x00) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG5 write failed");
+        /*
+         * LIS3DSH uses a different register map than LIS3DH for interrupt config.
+         * CTRL_REG3 (0x23): INT1_EN=1, IEA=1 (active-high), IEL=0 (latched)
+         * INT1_CFG/THS/DURATION registers (0x30-0x33) are shared with LIS3DH.
+         * Threshold unit for LIS3DSH at FS=+/-2g: 1 LSB = 16mg (same as LIS3DH).
+         */
+        /* CTRL_REG3: enable INT1, active-high output */
+        ESP_RETURN_ON_FALSE(imu_write_reg(0x23, 0x48) == ESP_OK, ESP_FAIL, TAG, "LIS3DSH CTRL_REG3 write failed");
+        /* Ensure CTRL_REG5 full-scale stays at +/-2g for consistent threshold scaling */
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_CTRL_REG5, 0x00) == ESP_OK, ESP_FAIL, TAG, "LIS3DSH CTRL_REG5 write failed");
     } else {
         /* Keep runtime ODR aligned with the interrupt generator configuration. */
         ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG1, 0x27) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG1 write failed");
@@ -455,7 +451,6 @@ esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_
  * @return ESP_OK on success.
  */
 esp_err_t imu_clear_motion_interrupt(void) {
-    // Reset clear motion interrupt here so stale data does not leak into the next cycle.
     ESP_RETURN_ON_NULL(s_dev_handle, ESP_ERR_INVALID_STATE, TAG, "IMU not initialized");
 
     uint8_t src = 0;
@@ -472,7 +467,6 @@ esp_err_t imu_clear_motion_interrupt(void) {
  * @return true if motion interrupt line is asserted.
  */
 bool imu_motion_detected(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return gpio_get_level(PIN_LIS3DSH_INT) == 1;
 }
 
@@ -486,7 +480,6 @@ bool imu_motion_detected(void) {
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t imu_read_accel(int16_t *x, int16_t *y, int16_t *z) {
-    // Read read accel without widening the mutation surface of this module.
     ESP_RETURN_ON_NULL(s_dev_handle, ESP_ERR_INVALID_STATE, TAG, "IMU not initialized");
     ESP_RETURN_ON_NULL(x, ESP_ERR_INVALID_ARG, TAG, "x is NULL");
     ESP_RETURN_ON_NULL(y, ESP_ERR_INVALID_ARG, TAG, "y is NULL");
@@ -511,7 +504,6 @@ esp_err_t imu_read_accel(int16_t *x, int16_t *y, int16_t *z) {
  * @return Peak acceleration delta in m/s^2.
  */
 float imu_get_peak_accel_delta_mps2(void) {
-    // Read get peak accel delta mps2 without widening the mutation surface of this module.
     uint64_t now_ms = util_uptime_ms();
     if (s_read_backoff_until_ms != 0 && now_ms < s_read_backoff_until_ms) {
         s_prev_sample_valid = false;
@@ -539,10 +531,15 @@ float imu_get_peak_accel_delta_mps2(void) {
     s_read_fail_streak = 0;
     s_read_backoff_until_ms = 0;
 
-    /* Convert raw high-resolution counts to mg approximation. */
-    float x_mg = x / 16.0f;
-    float y_mg = y / 16.0f;
-    float z_mg = z / 16.0f;
+    /*
+     * Convert raw counts to mg.
+     * LIS3DH (12-bit left-justified in 16-bit, FS=+/-2g): 1 mg/LSB after >>4, so raw/16.
+     * LIS3DSH (16-bit, FS=+/-2g): 0.06 mg/LSB per datasheet.
+     */
+    float scale = imu_is_lis3dsh() ? 0.06f : (1.0f / 16.0f);
+    float x_mg = (float)x * scale;
+    float y_mg = (float)y * scale;
+    float z_mg = (float)z * scale;
 
     if (!s_prev_sample_valid) {
         s_prev_x_mg = x_mg;
@@ -590,7 +587,6 @@ void imu_reset_accel_delta_window(void) {
  * @brief Deinitialize IMU I2C resources.
  */
 void imu_deinit(void) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (s_dev_handle != NULL) {
         i2c_master_bus_rm_device(s_dev_handle);
         s_dev_handle = NULL;

@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { DataTable } from '@/components/common/data-table';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
 import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
+import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { useSocket } from '@/components/providers/socket-provider';
 import { Badge } from '@/components/ui/badge';
@@ -96,6 +97,7 @@ const FirmwarePage = () => {
   const [deployTarget, setDeployTarget] = useState<FirmwareRecord | null>(null);
   const [assigningDeviceId, setAssigningDeviceId] = useState<string | null>(null);
   const [policySearch, setPolicySearch] = useState('');
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
   const [policyStatus, setPolicyStatus] = useState<
     'all' | 'running' | 'online' | 'disconnected' | 'stopped'
   >('all');
@@ -409,7 +411,7 @@ const FirmwarePage = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive"
-                  onSelect={() => deleteMutation.mutate(row.original.id)}
+                  onSelect={() => setDeleteTargetId(row.original.id)}
                 >
                   Xóa
                 </DropdownMenuItem>
@@ -640,6 +642,23 @@ const FirmwarePage = () => {
         onOpenChange={(next) => {
           if (!next) {
             setDeployTarget(null);
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        open={deleteTargetId !== null}
+        title="Xóa firmware"
+        description="Bạn có chắc muốn xóa firmware này? Thao tác không thể hoàn tác."
+        confirmLabel="Xóa"
+        variant="destructive"
+        isPending={deleteMutation.isPending}
+        onCancel={() => setDeleteTargetId(null)}
+        onConfirm={() => {
+          if (deleteTargetId !== null) {
+            deleteMutation.mutate(deleteTargetId, {
+              onSettled: () => setDeleteTargetId(null),
+            });
           }
         }}
       />

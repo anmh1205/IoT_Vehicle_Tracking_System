@@ -142,7 +142,6 @@ void tracker_mqtt_on_connect_result_line(int client_index, int err_code);
 void tracker_mqtt_on_publish_result_line(int client_index, int err_code);
 esp_err_t tracker_mqtt_wait_connect_result(int *out_err_code);
 esp_err_t tracker_mqtt_wait_publish_result(int *out_err_code);
-bool tracker_mqtt_response_has_prompt(const char *response);
 esp_err_t tracker_mqtt_input_data(const char *prepare_cmd,
                                   const char *data,
                                   const char *result_prefix,

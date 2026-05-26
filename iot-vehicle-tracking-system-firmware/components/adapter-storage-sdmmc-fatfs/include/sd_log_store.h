@@ -128,8 +128,6 @@ esp_err_t sd_log_store_get_meta(sd_log_meta_t *out_meta);
  *
  * @return ESP_OK on success, otherwise an SD metadata write error.
  */
-esp_err_t sd_log_store_set_ack_seq_critical(uint32_t ack_seq_critical);
-
 /**
  * @brief Advance the replay pointer without changing the critical ACK watermark.
  *

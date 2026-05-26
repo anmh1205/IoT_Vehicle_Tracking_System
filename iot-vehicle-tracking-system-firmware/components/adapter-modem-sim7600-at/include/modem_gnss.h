@@ -35,8 +35,6 @@ esp_err_t modem_gnss_power_off(void);
  *
  * @return true when the last parsed GNSS sample had valid fix.
  */
-bool modem_gnss_has_fix(void);
-
 /**
  * @brief Check whether GNSS startup warm-up window has elapsed.
  *

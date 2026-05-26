@@ -129,8 +129,6 @@ esp_err_t modem_at_set_baud(uint32_t baud);
  *
  * @return Active UART baudrate.
  */
-uint32_t modem_at_get_baud(void);
-
 /**
  * @brief Update modem UART TX/RX pin mapping at runtime.
  *
@@ -147,8 +145,6 @@ esp_err_t modem_at_set_pins(gpio_num_t tx_pin, gpio_num_t rx_pin);
  * @param out_tx_pin Optional output TX GPIO pointer.
  * @param out_rx_pin Optional output RX GPIO pointer.
  */
-void modem_at_get_pins(gpio_num_t *out_tx_pin, gpio_num_t *out_rx_pin);
-
 /**
  * @brief Configure UART signal inversion mask for modem AT transport.
  *
@@ -163,8 +159,6 @@ esp_err_t modem_at_set_line_inverse(uint32_t inverse_mask);
  *
  * @return Current inversion mask.
  */
-uint32_t modem_at_get_line_inverse(void);
-
 /**
  * @brief Configure UART frame format at runtime.
  *
@@ -177,17 +171,6 @@ uint32_t modem_at_get_line_inverse(void);
 esp_err_t modem_at_set_frame_format(uart_word_length_t data_bits,
                                     uart_parity_t parity,
                                     uart_stop_bits_t stop_bits);
-
-/**
- * @brief Read current UART frame format.
- *
- * @param out_data_bits Optional output data bits pointer.
- * @param out_parity Optional output parity pointer.
- * @param out_stop_bits Optional output stop bits pointer.
- */
-void modem_at_get_frame_format(uart_word_length_t *out_data_bits,
-                               uart_parity_t *out_parity,
-                               uart_stop_bits_t *out_stop_bits);
 
 /**
  * @brief Configure UART source clock.

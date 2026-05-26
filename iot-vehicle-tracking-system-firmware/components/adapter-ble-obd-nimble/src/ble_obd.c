@@ -24,9 +24,6 @@
  * This translation unit belongs to the BLE OBD NimBLE adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 #define OBD_MODE_CURRENT_DATA 0x01
 #define OBD_TX_CHAR_UUID "0x2af1"
@@ -156,7 +153,6 @@ static const ble_mgr_disc_cfg_t s_obd_disc_cfg = {
  * @return GATT handle.
  */
 static uint16_t ble_obd_tx_handle(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_obd_chars[0].handle;
 }
 
@@ -166,7 +162,6 @@ static uint16_t ble_obd_tx_handle(void) {
  * @return GATT handle.
  */
 static uint16_t ble_obd_rx_handle(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_obd_chars[1].handle;
 }
 
@@ -189,7 +184,6 @@ static uint16_t ble_obd_rx_handle(void) {
  * @return size_t Number of characters copied (excluding null), 0 on failure.
  */
 static size_t ble_obd_copy_adv_name(const struct ble_hs_adv_fields *adv_fields, char *buf, size_t buf_len) {
-    // Translate OBD copy adv name into a readable label so logs and diagnostics stay easy to follow.
     if (buf == NULL || buf_len == 0) {
         return 0;
     }
@@ -223,7 +217,6 @@ static size_t ble_obd_copy_adv_name(const struct ble_hs_adv_fields *adv_fields, 
  * @return true if keyword found (case-insensitive), false otherwise.
  */
 static bool ble_obd_name_contains_keyword(const char *value, const char *keyword) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (util_string_empty(value) || util_string_empty(keyword)) {
         return false;
     }
@@ -256,7 +249,6 @@ static bool ble_obd_name_contains_keyword(const char *value, const char *keyword
  * @brief Heuristic match for common BLE OBD adapter names.
  */
 static bool ble_obd_name_looks_like_adapter(const char *name) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     static const char *keywords[] = {"vgate", "icar", "icar pro", "obd", "elm", "vlink", "viecar", "kw9"};
 
     for (size_t i = 0; i < ARRAY_SIZE(keywords); ++i) {
@@ -269,7 +261,6 @@ static bool ble_obd_name_looks_like_adapter(const char *name) {
 }
 
 static ble_obd_response_state_t ble_obd_classify_response_state(ble_obd_ctx_t *ctx, bool has_valid_obd) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (ctx == NULL) {
         return BLE_OBD_RESPONSE_STATE_UNKNOWN;
     }
@@ -297,7 +288,6 @@ static ble_obd_response_state_t ble_obd_classify_response_state(ble_obd_ctx_t *c
 }
 
 static const char *ble_obd_response_state_to_string(ble_obd_response_state_t state) {
-    // Translate OBD response to string into a readable label so logs and diagnostics stay easy to follow.
     switch (state) {
         case BLE_OBD_RESPONSE_STATE_LIVE:
             return "live";
@@ -331,7 +321,6 @@ static bool ble_obd_device_filter_cb(ble_mgr_ctx_t *mgr_ctx,
                                      const struct ble_hs_adv_fields *adv_fields,
                                      bool service_match,
                                      void *usr_ctx) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     (void)mgr_ctx;
     (void)usr_ctx;
 
@@ -376,7 +365,6 @@ static bool ble_obd_device_filter_cb(ble_mgr_ctx_t *mgr_ctx,
  * Returning false disables auto-reconnect in manager layer.
  */
 static bool ble_obd_disconnected_cb(ble_mgr_ctx_t *mgr_ctx, void *usr_ctx) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     (void)mgr_ctx;
     (void)usr_ctx;
     return false;
@@ -393,7 +381,6 @@ static bool ble_obd_disconnected_cb(ble_mgr_ctx_t *mgr_ctx, void *usr_ctx) {
  * @return true if at least one valid byte token was parsed.
  */
 static bool ble_obd_parse_hex_response(const char *response, uint8_t *values, size_t max_values, size_t *out_count) {
-    // Decode raw OBD parse hex response into the normalized form the rest of the module expects.
     if (response == NULL || values == NULL || max_values == 0 || out_count == NULL) {
         return false;
     }
@@ -438,7 +425,6 @@ static bool ble_obd_parse_hex_response(const char *response, uint8_t *values, si
  * @brief Check whether response chunk contains ELM prompt marker.
  */
 static bool ble_obd_response_has_prompt(const char *response) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (response == NULL) {
         return false;
     }
@@ -449,7 +435,6 @@ static bool ble_obd_response_has_prompt(const char *response) {
  * @brief Clear aggregated response buffer for next transaction.
  */
 static void ble_obd_response_reset(ble_obd_ctx_t *ctx) {
-    // Reset OBD response reset here so stale data does not leak into the next cycle.
     if (ctx == NULL) {
         return;
     }
@@ -462,7 +447,6 @@ static void ble_obd_response_reset(ble_obd_ctx_t *ctx) {
  * @brief Log rolling diagnostic counters for OBD transaction health.
  */
 static void ble_obd_diag_log_periodic(ble_obd_ctx_t *ctx, bool force_now) {
-    // Emit a focused OBD diag log periodic diagnostic here so field logs explain the current stage.
     if (ctx == NULL) {
         return;
     }
@@ -613,7 +597,6 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
  * @return ESP_OK on success.
  */
 esp_err_t ble_obd_set_preferred_address(const char *address) {
-    // Copy the caller-provided OBD set preferred address into module-local state after lightweight guards.
     if (util_string_empty(address)) {
         s_has_preferred_addr = false;
         memset(&s_preferred_addr, 0, sizeof(s_preferred_addr));
@@ -637,7 +620,6 @@ esp_err_t ble_obd_set_preferred_address(const char *address) {
  * @return BLE OBD context on success, otherwise NULL.
  */
 ble_obd_ctx_t *ble_obd_connect(ble_obd_response_cb_t response_cb, void *usr_ctx, uint32_t connect_timeout_ms) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     ble_mgr_ctx_t *mgr_ctx = ble_mgr_init(1000);
     ESP_RETURN_ON_NULL(mgr_ctx, NULL, TAG, "Failed to init BLE manager");
 
@@ -683,7 +665,6 @@ ble_obd_ctx_t *ble_obd_connect(ble_obd_response_cb_t response_cb, void *usr_ctx,
  * @return ESP_OK always.
  */
 esp_err_t ble_obd_disconnect(ble_obd_ctx_t *ctx) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (ctx == NULL) {
         return ESP_OK;
     }
@@ -702,6 +683,7 @@ esp_err_t ble_obd_disconnect(ble_obd_ctx_t *ctx) {
     }
 
     free(ctx);
+    ctx = NULL;
     return ESP_OK;
 }
 
@@ -713,7 +695,6 @@ esp_err_t ble_obd_disconnect(ble_obd_ctx_t *ctx) {
  * @return true when connected.
  */
 bool ble_obd_is_connected(ble_obd_ctx_t *ctx) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (ctx == NULL || ctx->mgr_ctx == NULL) {
         return false;
     }
@@ -735,7 +716,6 @@ bool ble_obd_get_peer_address_string(ble_obd_ctx_t *ctx, char out[BLE_ADDR_STR_L
 }
 
 const char *ble_obd_get_last_ecu_state_label(ble_obd_ctx_t *ctx) {
-    // Read OBD get last ecu label without widening the mutation surface of this module.
     if (ctx == NULL) {
         return "disconnected";
     }
@@ -802,7 +782,6 @@ static int ble_obd_execute_request(ble_obd_ctx_t *ctx,
                                    uint8_t pid,
                                    bool expect_pid_header,
                                    uint32_t timeout_ms) {
-    // Update the OBD execute request path here so later asynchronous work sees the latest intent.
     ESP_RETURN_ON_NULL(ctx, -1, TAG, "ctx is NULL");
 
     if (xSemaphoreTake(ctx->api_mutex, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
@@ -859,12 +838,10 @@ static int ble_obd_execute_request(ble_obd_ctx_t *ctx,
 }
 
 int ble_obd_rxtx(ble_obd_ctx_t *ctx, uint8_t mode, uint8_t pid, uint32_t timeout_ms) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_execute_request(ctx, mode, pid, true, timeout_ms);
 }
 
 int ble_obd_request_mode(ble_obd_ctx_t *ctx, uint8_t mode, uint32_t timeout_ms) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_execute_request(ctx, mode, 0, false, timeout_ms);
 }
 
@@ -876,7 +853,6 @@ int ble_obd_request_mode(ble_obd_ctx_t *ctx, uint8_t mode, uint32_t timeout_ms) 
  * @return ESP_OK on success, otherwise first failing command error.
  */
 esp_err_t ble_obd_elm327_init(ble_obd_ctx_t *ctx) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     ESP_RETURN_ON_NULL(ctx, ESP_ERR_INVALID_ARG, TAG, "ctx is NULL");
 
     const char *commands[] = {

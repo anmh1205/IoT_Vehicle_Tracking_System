@@ -12,6 +12,8 @@ import { NotificationBadge } from './notification-badge';
 import { NotificationRow } from './notification-item';
 import { useNotifications } from '../hooks/use-notifications';
 import { notificationServices } from '@/lib/api/notifications';
+import { notificationUtils } from '@/lib/notification';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 
 const NOTIFICATION_BADGE_HIDDEN_KEY = 'tracking.notificationBadgeHidden';
 
@@ -44,12 +46,18 @@ export const NotificationDropdown = () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['notification-stats'] });
     },
+    onError: (error: unknown) => {
+      notificationUtils.error('Không thể đánh dấu đã đọc', getApiErrorMessage(error, 'Lỗi không xác định'));
+    },
   });
   const markAllMutation = useMutation({
     mutationFn: () => notificationServices.markAllRead(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['notification-stats'] });
+    },
+    onError: (error: unknown) => {
+      notificationUtils.error('Không thể đánh dấu tất cả đã đọc', getApiErrorMessage(error, 'Lỗi không xác định'));
     },
   });
   const items = notifications.data?.items ?? [];
@@ -97,7 +105,7 @@ export const NotificationDropdown = () => {
               disabled={markAllMutation.isPending || unreadCount === 0}
             >
               {markAllMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Đánh dấu tất cả
+            Đánh dấu tất cả đã đọc
             </Button>
           </div>
         </div>

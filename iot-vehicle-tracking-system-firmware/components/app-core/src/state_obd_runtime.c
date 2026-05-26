@@ -19,11 +19,8 @@
  * This translation unit belongs to the app-core orchestration layer and keeps FSM transitions, retained runtime state, and orchestration policy centralized inside app-core.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
 
-
-static const char *TAG = STATE_MACHINE_TAG;
+static const char *TAG = "OBD_RUNTIME";
 /* Flag to prevent repeated BLE skip warnings in field validation mode. */
 static bool s_field_validation_ble_skip_logged = false;
 
@@ -36,7 +33,6 @@ static const tracker_obd_diag_query_t s_state_obd_diag_queries[] = {
 };
 
 static bool state_machine_has_rtc_ble_mac(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     for (size_t i = 0; i < sizeof(g_rtc_context.ble_mac); ++i) {
         if (g_rtc_context.ble_mac[i] != 0U) {
             return true;
@@ -110,7 +106,6 @@ static bool state_machine_resolve_preferred_ble_mac(char out[TRACKER_MAC_ADDR_ST
  * @return Pointer to the internal immutable query table.
  */
 const tracker_obd_diag_query_t *state_machine_obd_diagnostic_queries(size_t *out_count) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (out_count != NULL) {
         *out_count = ARRAY_SIZE(s_state_obd_diag_queries);
     }
@@ -171,7 +166,6 @@ static bool state_machine_format_dtc_code(uint8_t high, uint8_t low, char out[TR
  * @param[in] len Number of bytes available in `data`.
  */
 static void state_machine_decode_dtc_payload(obd_dtc_list_t *list, const uint8_t *data, size_t len) {
-    // Decode raw decode DTC payload into the normalized form the rest of the module expects.
     if (list == NULL) {
         return;
     }
@@ -206,7 +200,6 @@ static void state_machine_decode_dtc_payload(obd_dtc_list_t *list, const uint8_t
 static obd_monitor_status_t state_machine_decode_monitor_status(uint8_t supported_bits,
                                                                 uint8_t incomplete_bits,
                                                                 uint8_t bit_index) {
-    // Decode raw decode monitor status into the normalized form the rest of the module expects.
     uint8_t mask = (uint8_t)(1U << bit_index);
     if ((supported_bits & mask) == 0U) {
         return OBD_MONITOR_STATUS_UNSUPPORTED;
@@ -226,7 +219,6 @@ static obd_monitor_status_t state_machine_decode_monitor_status(uint8_t supporte
 static void state_machine_decode_readiness_payload(obd_readiness_t *readiness,
                                                    const uint8_t *data,
                                                    size_t len) {
-    // Decode raw decode readiness payload into the normalized form the rest of the module expects.
     if (readiness == NULL) {
         return;
     }
@@ -284,7 +276,6 @@ static void state_machine_decode_readiness_payload(obd_readiness_t *readiness,
  * @param[in] pid PID used with the mode, or `-1` for mode-only requests.
  */
 static void state_machine_clear_obd_diagnostic_query(uint8_t mode, int pid) {
-    // Reset clear OBD diagnostic query here so stale data does not leak into the next cycle.
     if (mode == OBD_MODE_CURRENT_DATA && pid == OBD_PID_MONITOR_STATUS) {
         memset(&s_telemetry.obd_readiness, 0, sizeof(s_telemetry.obd_readiness));
         return;
@@ -309,7 +300,6 @@ static void state_machine_clear_obd_diagnostic_query(uint8_t mode, int pid) {
  * @brief Clear OBD signal snapshot.
  */
 void state_machine_clear_obd_signal_snapshot(void) {
-    // Reset clear OBD signal snapshot here so stale data does not leak into the next cycle.
     /*
      * OBD signal fields are scalar values, so a disconnected adapter would
      * otherwise keep publishing the last successful PID sample. Clear both live
@@ -333,7 +323,6 @@ void state_machine_clear_obd_signal_snapshot(void) {
  * @brief Mark OBD as disconnected.
  */
 void state_machine_mark_obd_disconnected(void) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     /* Single exit path for BLE disconnect/failure so every caller clears stale OBD state identically. */
     s_obd_elm_ready = false;
     state_machine_clear_obd_signal_snapshot();
@@ -360,7 +349,6 @@ void state_machine_mark_obd_disconnected(void) {
  * @param[in] usr_ctx Unused caller context.
  */
 void state_machine_obd_response_cb(uint8_t mode, int pid, const uint8_t *data, size_t len, void *usr_ctx) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     (void)usr_ctx;
 
     int32_t converted = 0;
@@ -455,7 +443,6 @@ bool state_machine_has_recent_obd_engine_on_evidence(uint64_t now_ms) {
  * @param now_ms Current timestamp.
  */
 void state_machine_obd_refresh_fail_window(uint64_t now_ms) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (s_obd_fail_window_started_ms == 0 ||
         now_ms < s_obd_fail_window_started_ms ||
         (now_ms - s_obd_fail_window_started_ms) >= TRACKER_OBD_FAIL_WINDOW_MS) {
@@ -465,7 +452,6 @@ void state_machine_obd_refresh_fail_window(uint64_t now_ms) {
 }
 
 static const retry_policy_t *state_machine_current_ble_retry_policy(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_telemetry.ignition ? &g_state_ble_retry_policy : &g_state_ble_retry_parked_policy;
 }
 
@@ -477,7 +463,6 @@ static const retry_policy_t *state_machine_current_ble_retry_policy(void) {
  * @param[in] policy Optional policy override; defaults to driving policy.
  */
 static void state_machine_schedule_ble_retry(uint64_t now_ms, const char *reason, const retry_policy_t *policy) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     const retry_policy_t *active_policy = policy != NULL ? policy : &g_state_ble_retry_policy;
     uint32_t delay_ms = retry_state_current_delay_ms(&s_ble_retry, active_policy, now_ms);
     esp_err_t sched_err = retry_state_schedule(&s_ble_retry, active_policy, now_ms, ESP_FAIL);
@@ -501,7 +486,6 @@ static void state_machine_schedule_ble_retry(uint64_t now_ms, const char *reason
  * @param[in] now_ms Current uptime.
  */
 static void state_machine_obd_record_connect_failure(uint64_t now_ms) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     state_machine_obd_refresh_fail_window(now_ms);
     s_obd_fail_window_count += 1U;
 }
@@ -540,7 +524,6 @@ static void state_machine_publish_obd_failure_event_if_needed(uint64_t now_ms,
  * @return true when at least one fresh PID sample was observed.
  */
 static bool state_machine_prime_obd_after_connect(ble_obd_ctx_t *ctx) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (ctx == NULL) {
         return false;
     }
@@ -573,7 +556,6 @@ static bool state_machine_prime_obd_after_connect(ble_obd_ctx_t *ctx) {
  * @param[in] query Query descriptor containing mode and optional PID.
  */
 void state_machine_run_obd_diagnostic_query(ble_obd_ctx_t *ctx, const tracker_obd_diag_query_t *query) {
-    // Advance one cooperative step here using the current state, time gates, and retry policy.
     if (ctx == NULL || query == NULL) {
         return;
     }
@@ -605,7 +587,6 @@ void state_machine_run_obd_diagnostic_query(ble_obd_ctx_t *ctx, const tracker_ob
  * @param[in] ctx Connected BLE OBD context.
  */
 static void state_machine_prime_obd_diagnostics_after_connect(ble_obd_ctx_t *ctx) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (ctx == NULL) {
         return;
     }
@@ -629,7 +610,6 @@ static void state_machine_prime_obd_diagnostics_after_connect(ble_obd_ctx_t *ctx
  * @param[in] arg Pointer to `tracker_ble_connect_task_args_t`.
  */
 static void state_machine_ble_connect_task(void *arg) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     tracker_ble_connect_task_args_t *task_args = (tracker_ble_connect_task_args_t *)arg;
     tracker_ble_connect_result_t result = {
         .ctx = NULL,
@@ -660,6 +640,7 @@ static void state_machine_ble_connect_task(void *arg) {
         }
 
         free(task_args);
+        task_args = NULL;
     }
 
     if (s_ble_connect_result_queue != NULL) {
@@ -675,7 +656,6 @@ static void state_machine_ble_connect_task(void *arg) {
  * @return true when at least one result item was consumed.
  */
 bool state_machine_handle_ble_connect_result(void) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (s_ble_connect_result_queue == NULL) {
         return false;
     }
@@ -751,7 +731,6 @@ bool state_machine_handle_ble_connect_result(void) {
  * and asynchronous task launch. It intentionally does not block the main FSM.
  */
 void state_machine_try_connect_ble(void) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     // Always consume the previous async connect result first so retry policy reflects the latest BLE outcome.
     (void)state_machine_handle_ble_connect_result();
     if (s_ota_in_progress || g_rtc_context.ota_pending_confirm) {
@@ -842,6 +821,7 @@ void state_machine_try_connect_ble(void) {
                     5,
                     NULL) != pdPASS) {
         free(task_args);
+        task_args = NULL;
         state_machine_mark_obd_disconnected();
         state_machine_publish_obd_failure_event_if_needed(now_ms,
                                                           TRACKER_EVENT_CODE_OBD_CONNECT_FAILED,

@@ -15,15 +15,11 @@
  * This translation unit belongs to the KV/NVS persistence adapter layer and keeps adapter-local state, migration rules, and persistence policy isolated behind the exported entry points.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /* Logging tag for OTA context store NVS module. */
 static const char *TAG = "OTA_CONTEXT_STORE";
 
 esp_err_t ota_context_store_nvs_save(const ota_persist_context_t *context) {
-    // Persist context store NVS save here so later boots, retries, or recovery paths can resume cleanly.
     ESP_RETURN_ON_NULL(context, ESP_ERR_INVALID_ARG, TAG, "ota context is NULL");
 
     nvs_handle_t handle = 0;
@@ -39,7 +35,6 @@ esp_err_t ota_context_store_nvs_save(const ota_persist_context_t *context) {
 }
 
 esp_err_t ota_context_store_nvs_load(ota_persist_context_t *out_context, bool *out_found) {
-    // Rehydrate context store NVS load here so later logic reads one coherent snapshot after reset or sleep.
     ESP_RETURN_ON_NULL(out_context, ESP_ERR_INVALID_ARG, TAG, "out_context is NULL");
     ESP_RETURN_ON_NULL(out_found, ESP_ERR_INVALID_ARG, TAG, "out_found is NULL");
 
@@ -87,7 +82,6 @@ esp_err_t ota_context_store_nvs_load(ota_persist_context_t *out_context, bool *o
 }
 
 esp_err_t ota_context_store_nvs_clear(void) {
-    // Reset context store NVS clear here so stale data does not leak into the next cycle.
     nvs_handle_t handle = 0;
     esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READWRITE, &handle);
     if (err == ESP_ERR_NVS_NOT_FOUND) {

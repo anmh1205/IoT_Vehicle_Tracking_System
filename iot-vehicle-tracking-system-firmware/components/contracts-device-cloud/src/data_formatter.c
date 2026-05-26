@@ -5,6 +5,8 @@
 
 #include "cJSON.h"
 
+#include "esp_log.h"
+
 #include "util.h"
 
 #define DATA_FORMATTER_DEFAULT_SCHEMA_VERSION "v1.0.0"
@@ -17,9 +19,6 @@
  * This translation unit belongs to the device-cloud contract layer and keeps payload-shaping rules and cloud-facing contract details aligned in one place.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /**
  * @brief Serialize cJSON object to compact string and free cJSON tree.
@@ -29,7 +28,6 @@
  * @return Heap string from cJSON, caller frees with `cJSON_free`.
  */
 static char *data_formatter_print(cJSON *root) {
-    // Build the formatter print representation here so every caller emits the same contract.
     if (root == NULL) {
         return NULL;
     }
@@ -55,7 +53,6 @@ static void data_formatter_add_metadata(cJSON *root,
                                         uint32_t seq_no,
                                         const char *boot_id,
                                         const char *schema_version) {
-    // Build the formatter add metadata representation here so every caller emits the same contract.
     if (root == NULL) {
         return;
     }
@@ -96,7 +93,6 @@ static void data_formatter_add_session_identity(cJSON *root,
                                                 uint64_t canonical_session_id,
                                                 const char *session_boot_id,
                                                 const char *boundary_event) {
-    // Build the formatter add session identity representation here so every caller emits the same contract.
     if (root == NULL) {
         return;
     }
@@ -127,7 +123,6 @@ static void data_formatter_add_session_identity(cJSON *root,
  * @param[in] value String value to append.
  */
 static void data_formatter_append_string_item(cJSON *array, const char *value) {
-    // Build the formatter append string item representation here so every caller emits the same contract.
     if (array == NULL || util_string_empty(value)) {
         return;
     }
@@ -139,7 +134,6 @@ static void data_formatter_append_string_item(cJSON *array, const char *value) {
 }
 
 static const char *data_formatter_ignition_state_label(tracker_ignition_state_t state) {
-    // Build the formatter ignition label representation here so every caller emits the same contract.
     switch (state) {
         case TRACKER_IGNITION_STATE_ON:
             return "ON";
@@ -152,7 +146,6 @@ static const char *data_formatter_ignition_state_label(tracker_ignition_state_t 
 }
 
 static const char *data_formatter_motion_state_label(tracker_motion_state_t state) {
-    // Build the formatter motion label representation here so every caller emits the same contract.
     switch (state) {
         case TRACKER_MOTION_STATE_MOVING:
             return "MOVING";
@@ -165,7 +158,6 @@ static const char *data_formatter_motion_state_label(tracker_motion_state_t stat
 }
 
 static const char *data_formatter_vehicle_state_label(tracker_vehicle_state_t state) {
-    // Build the formatter vehicle label representation here so every caller emits the same contract.
     switch (state) {
         case TRACKER_VEHICLE_STATE_PARKED_OFF:
             return "PARKED_OFF";
@@ -186,7 +178,6 @@ static const char *data_formatter_vehicle_state_label(tracker_vehicle_state_t st
 }
 
 static const char *data_formatter_device_state_label(tracker_device_state_t state) {
-    // Build the formatter device label representation here so every caller emits the same contract.
     switch (state) {
         case TRACKER_DEVICE_STATE_BOOTING:
             return "BOOTING";
@@ -210,7 +201,6 @@ static const char *data_formatter_device_state_label(tracker_device_state_t stat
 }
 
 static const char *data_formatter_sleep_mode_label(tracker_sleep_mode_t mode) {
-    // Build the formatter sleep mode label representation here so every caller emits the same contract.
     switch (mode) {
         case TRACKER_SLEEP_MODE_FAKE:
             return "FAKE";
@@ -231,7 +221,6 @@ static const char *data_formatter_sleep_mode_label(tracker_sleep_mode_t mode) {
  * @param[in] telemetry Telemetry snapshot providing state enums.
  */
 static void data_formatter_add_state(cJSON *root, const telemetry_t *telemetry) {
-    // Build the formatter add representation here so every caller emits the same contract.
     if (root == NULL || telemetry == NULL) {
         return;
     }
@@ -263,7 +252,6 @@ static void data_formatter_append_alert(cJSON *array,
                                         const char *code,
                                         const char *severity,
                                         const char *message) {
-    // Build the formatter append alert representation here so every caller emits the same contract.
     if (array == NULL || util_string_empty(code) || util_string_empty(severity)) {
         return;
     }
@@ -288,7 +276,6 @@ static void data_formatter_append_alert(cJSON *array,
  * @param[in] telemetry Telemetry snapshot used for alert derivation.
  */
 static void data_formatter_add_runtime_alerts(cJSON *root, const telemetry_t *telemetry) {
-    // Build the formatter add runtime alerts representation here so every caller emits the same contract.
     if (root == NULL || telemetry == NULL) {
         return;
     }
@@ -313,6 +300,15 @@ static void data_formatter_add_runtime_alerts(cJSON *root, const telemetry_t *te
                                     "OBD connection failed in recent 5-minute window");
     }
 
+    if (telemetry->gnss.query_mode == GNSS_QUERY_MODE_CGPSINFO) {
+        // Fallback CGPSINFO path: lacks accurate satellite count and may indicate
+        // the primary CGNSINF query is failing for this modem firmware.
+        data_formatter_append_alert(device_alerts,
+                                    "gnss_fallback_mode",
+                                    "low",
+                                    "GNSS using CGPSINFO fallback; satellite count is approximate");
+    }
+
     if (telemetry->obd_readiness.valid && telemetry->obd_readiness.mil_on) {
         data_formatter_append_alert(ecu_alerts,
                                     "mil_on",
@@ -334,7 +330,6 @@ static void data_formatter_add_runtime_alerts(cJSON *root, const telemetry_t *te
 }
 
 static const char *data_formatter_monitor_status_label(obd_monitor_status_t status) {
-    // Build the formatter monitor status label representation here so every caller emits the same contract.
     switch (status) {
         case OBD_MONITOR_STATUS_COMPLETE:
             return "complete";
@@ -351,7 +346,6 @@ static const char *data_formatter_monitor_status_label(obd_monitor_status_t stat
 static void data_formatter_add_monitor_status(cJSON *readiness,
                                               const char *key,
                                               obd_monitor_status_t status) {
-    // Build the formatter add monitor status representation here so every caller emits the same contract.
     if (readiness == NULL || util_string_empty(key)) {
         return;
     }
@@ -365,7 +359,6 @@ static void data_formatter_add_monitor_status(cJSON *readiness,
 static void data_formatter_add_dtc_codes(cJSON *dtc,
                                          const char *key,
                                          const obd_dtc_list_t *list) {
-    // Build the formatter add DTC codes representation here so every caller emits the same contract.
     if (dtc == NULL || util_string_empty(key) || list == NULL) {
         return;
     }
@@ -405,11 +398,36 @@ static void data_formatter_add_diagnostics(cJSON *root, const telemetry_t *telem
     cJSON *signals = cJSON_AddObjectToObject(diagnostics, "signals");
     cJSON *quality = cJSON_AddObjectToObject(diagnostics, "quality");
     cJSON *events = cJSON_AddArrayToObject(diagnostics, "events");
+    cJSON *gnss_diag = cJSON_AddObjectToObject(diagnostics, "gnss");
 
-    if (channel == NULL || signals == NULL || quality == NULL || events == NULL) {
+    if (channel == NULL || signals == NULL || quality == NULL || events == NULL || gnss_diag == NULL) {
         cJSON_Delete(diagnostics);
         return;
     }
+
+    /* GNSS path diagnostics — exposes which AT command path supplied the latest fix
+     * so cloud operators can detect when the device is stuck on the simpler
+     * CGPSINFO fallback (which lacks accurate satellite count). */
+    const char *gnss_mode_label = "unknown";
+    switch (telemetry->gnss.query_mode) {
+        case GNSS_QUERY_MODE_CGNSINF:
+            gnss_mode_label = "cgnsinf";
+            break;
+        case GNSS_QUERY_MODE_CGPSINFO:
+            gnss_mode_label = "cgpsinfo_fallback";
+            break;
+        case GNSS_QUERY_MODE_UNKNOWN:
+        default:
+            gnss_mode_label = "unknown";
+            break;
+    }
+    cJSON_AddStringToObject(gnss_diag, "query_mode", gnss_mode_label);
+    cJSON_AddBoolToObject(gnss_diag, "fix_valid", telemetry->gnss.fix_valid);
+    cJSON_AddNumberToObject(gnss_diag, "satellites_reported", telemetry->gnss.satellites);
+
+    ESP_LOGI("DATA_FMT", "event=gnss_diag_added mode=%s fix=%d sat=%u",
+             gnss_mode_label, telemetry->gnss.fix_valid ? 1 : 0,
+             (unsigned)telemetry->gnss.satellites);
 
     // Channel metadata is always emitted, even when signal values are intentionally suppressed as stale.
     cJSON_AddBoolToObject(channel, "ble_obd_connected", telemetry->obd_ble_connected);

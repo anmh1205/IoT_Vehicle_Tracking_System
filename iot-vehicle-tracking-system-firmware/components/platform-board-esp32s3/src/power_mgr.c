@@ -16,9 +16,6 @@
  * This translation unit belongs to the ESP32-S3 board support layer and keeps board-specific pin mappings, peripherals, and power behavior isolated from portable runtime logic.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 static const char *TAG = "POWER_MGR";
 
@@ -42,7 +39,6 @@ static bool s_pwrkey_inverted_stage = MODEM_PWRKEY_INVERTED_STAGE_DEFAULT != 0;
  * @param asserted true to assert modem-side PWRKEY, false to release.
  */
 static void modem_pwrkey_drive(bool asserted) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     int raw_level = asserted ? 1 : 0;
     if (s_pwrkey_inverted_stage) {
         raw_level = asserted ? 1 : 0;
@@ -53,7 +49,6 @@ static void modem_pwrkey_drive(bool asserted) {
 }
 
 static const char *modem_pwrkey_profile_name(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_pwrkey_inverted_stage ? "INVERTED_STAGE" : "DIRECT";
 }
 
@@ -74,7 +69,6 @@ static void modem_reset_drive(bool asserted) {
  * @brief Drive modem DTR logical level through optional inverting transistor stage.
  */
 static void modem_dtr_drive(bool high) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (PIN_MODEM_DTR == GPIO_NUM_NC) {
         return;
     }
@@ -90,7 +84,6 @@ static void modem_dtr_drive(bool high) {
  * @brief Build a GPIO bit mask safely for valid pins only.
  */
 static uint64_t power_gpio_mask(gpio_num_t pin) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if ((int)pin < 0 || (int)pin >= 64) {
         return 0;
     }
@@ -109,7 +102,6 @@ static uint64_t power_gpio_mask(gpio_num_t pin) {
  * @return ESP_OK on success.
  */
 esp_err_t power_mgr_init(void) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     uint64_t output_mask = power_gpio_mask(PIN_MODEM_PWRKEY);
     if (PIN_MODEM_RESET != GPIO_NUM_NC) {
         output_mask |= power_gpio_mask(PIN_MODEM_RESET);
@@ -126,7 +118,11 @@ esp_err_t power_mgr_init(void) {
             .pull_down_en = GPIO_PULLDOWN_DISABLE,
             .intr_type = GPIO_INTR_DISABLE,
         };
-        ESP_ERROR_CHECK(gpio_config(&output_cfg));
+        esp_err_t err = gpio_config(&output_cfg);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "GPIO output config failed: %s", esp_err_to_name(err));
+            return err;
+        }
     }
 
     uint64_t input_mask = 0ULL;
@@ -145,7 +141,11 @@ esp_err_t power_mgr_init(void) {
             .pull_down_en = GPIO_PULLDOWN_ENABLE,
             .intr_type = GPIO_INTR_DISABLE,
         };
-        ESP_ERROR_CHECK(gpio_config(&input_cfg));
+        esp_err_t err = gpio_config(&input_cfg);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "GPIO input config failed: %s", esp_err_to_name(err));
+            return err;
+        }
     }
 
     modem_pwrkey_drive(false);
@@ -166,7 +166,6 @@ esp_err_t power_mgr_init(void) {
  * @brief Send modem power-key pulse sequence.
  */
 static esp_err_t modem_power_key_pulse(uint32_t pulse_ms) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ESP_LOGI(TAG,
              "SIM7600 PWRKEY pulse begin gpio=%d pulse_ms=%lu profile=%s",
              (int)PIN_MODEM_PWRKEY,
@@ -188,7 +187,6 @@ static esp_err_t modem_power_key_pulse(uint32_t pulse_ms) {
  * @return ESP_OK on pulse sent, ESP_FAIL on error.
  */
 esp_err_t modem_power_on(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return modem_power_key_pulse(MODEM_PWRKEY_ON_PULSE_MS);
 }
 
@@ -201,38 +199,7 @@ esp_err_t modem_power_on(void) {
  * @return ESP_OK on pulse sent, ESP_FAIL on error.
  */
 esp_err_t modem_power_off(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return modem_power_key_pulse(MODEM_PWRKEY_OFF_PULSE_MS);
-}
-
-/**
- * @brief Configure PWRKEY inversion stage.
- *
- * Some board designs use an inverting transistor between the ESP32
- * and modem PWRKEY. This allows polarity configuration
- * to match the hardware design.
- *
- * @param inverted true if hardware uses inverting stage, false for direct drive.
- * @return ESP_OK.
- */
-esp_err_t modem_set_pwrkey_inverted_stage(bool inverted) {
-    // Copy the caller-provided set pwrkey inverted stage into module-local state after lightweight guards.
-    s_pwrkey_inverted_stage = inverted;
-    modem_pwrkey_drive(false);
-    ESP_LOGW(TAG,
-             "PWRKEY profile switched -> %s",
-             modem_pwrkey_profile_name());
-    return ESP_OK;
-}
-
-/**
- * @brief Get current PWRKEY inversion stage setting.
- *
- * @return true if inverted stage is configured.
- */
-bool modem_get_pwrkey_inverted_stage(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    return s_pwrkey_inverted_stage;
 }
 
 /**
@@ -270,7 +237,6 @@ esp_err_t modem_reset_pulse(void) {
  * @return ESP_OK on success, ESP_ERR_NOT_SUPPORTED if DTR pin not connected.
  */
 esp_err_t modem_set_dtr(bool high) {
-    // Copy the caller-provided set dtr into module-local state after lightweight guards.
     if (PIN_MODEM_DTR == GPIO_NUM_NC) {
         return ESP_ERR_NOT_SUPPORTED;
     }
@@ -300,7 +266,6 @@ esp_err_t modem_set_dtr(bool high) {
  * @return ESP_OK on success, ESP_ERR_NOT_SUPPORTED if STATUS pin not connected.
  */
 esp_err_t modem_read_status(bool *level) {
-    // Read read status without widening the mutation surface of this module.
     if (PIN_MODEM_STATUS == GPIO_NUM_NC) {
         return ESP_ERR_NOT_SUPPORTED;
     }
@@ -322,7 +287,6 @@ esp_err_t modem_read_status(bool *level) {
  * @return ESP_OK on success, ESP_ERR_NOT_SUPPORTED if pin not connected.
  */
 esp_err_t modem_read_netlight(bool *level) {
-    // Read read netlight without widening the mutation surface of this module.
     if (PIN_MODEM_NETLIGHT == GPIO_NUM_NC) {
         return ESP_ERR_NOT_SUPPORTED;
     }

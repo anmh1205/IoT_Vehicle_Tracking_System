@@ -57,9 +57,6 @@
  *    - Buffer sizes: 2KB RX, 2KB TX
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 #define MODEM_RX_BUFFER_SIZE 1024
 #define MODEM_MAX_URC_CALLBACKS 8
@@ -121,7 +118,6 @@ static bool s_dispatch_line_overflow = false;
  * Counter values are exposed via s_uart_diag for runtime health monitoring.
  */
 static void modem_at_drain_uart_events(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (s_uart_event_queue == NULL) {
         return;
     }
@@ -158,7 +154,6 @@ static void modem_at_drain_uart_events(void) {
  * @param line Null-terminated modem line.
  */
 static void modem_at_dispatch_line(const char *line) {
-    // Route AT dispatch line to the right callback or helper while keeping ownership explicit.
     if (line == NULL || line[0] == '\0') {
         return;
     }
@@ -174,7 +169,6 @@ static void modem_at_dispatch_line(const char *line) {
 }
 
 static void modem_at_dispatch_chunk_lines(const char *chunk, size_t chunk_len) {
-    // Route AT dispatch chunk lines to the right callback or helper while keeping ownership explicit.
     if (chunk == NULL || chunk_len == 0U) {
         return;
     }
@@ -215,7 +209,6 @@ static void modem_at_dispatch_chunk_lines(const char *chunk, size_t chunk_len) {
  * with `modem_at_poll_urc`.
  */
 static void modem_at_drain_pending_input(uint32_t max_read_bytes) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!s_uart_ready || max_read_bytes == 0U) {
         return;
     }
@@ -244,7 +237,6 @@ static void modem_at_drain_pending_input(uint32_t max_read_bytes) {
  * @return true when response has terminal marker.
  */
 static bool modem_at_response_done(const char *buffer) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     size_t len = strlen(buffer);
     while (len > 0) {
         char c = buffer[len - 1];
@@ -258,7 +250,8 @@ static bool modem_at_response_done(const char *buffer) {
     bool ends_with_error = len >= 5 && strncmp(buffer + (len - 5), "ERROR", 5) == 0;
 
     return strstr(buffer, "\r\nOK\r\n") != NULL || strstr(buffer, "\r\nERROR\r\n") != NULL ||
-           strstr(buffer, "+CME ERROR") != NULL || ends_with_ok || ends_with_error;
+           strstr(buffer, "+CME ERROR") != NULL || strstr(buffer, "+CMS ERROR") != NULL ||
+           ends_with_ok || ends_with_error;
 }
 
 /**
@@ -272,7 +265,6 @@ static bool modem_at_response_done(const char *buffer) {
  * @return true if prompt detected, false otherwise.
  */
 static bool modem_at_response_has_prompt(const char *buffer) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (buffer == NULL) {
         return false;
     }
@@ -317,7 +309,6 @@ static esp_err_t modem_at_collect_response_until(char *response,
                                                   size_t resp_len,
                                                   uint32_t timeout_ms,
                                                   bool stop_on_prompt) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     size_t used = 0U;
     uint64_t deadline = esp_timer_get_time() + ((uint64_t)timeout_ms * 1000ULL);
     char chunk[128];
@@ -355,7 +346,9 @@ static esp_err_t modem_at_collect_response_until(char *response,
         }
 
         if (response_done) {
-            bool has_error = strstr(response_probe, "ERROR") != NULL || strstr(response_probe, "+CME ERROR") != NULL;
+            bool has_error = strstr(response_probe, "ERROR") != NULL ||
+                            strstr(response_probe, "+CME ERROR") != NULL ||
+                            strstr(response_probe, "+CMS ERROR") != NULL;
             if (!has_error && response != NULL) {
                 has_error = strstr(response, "ERROR") != NULL;
             }
@@ -378,7 +371,6 @@ static esp_err_t modem_at_collect_response_until(char *response,
  * @return ESP_OK on success, ESP_FAIL on write failure.
  */
 static esp_err_t modem_at_write_all_bytes(const uint8_t *data, size_t data_len) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ESP_RETURN_ON_FALSE(data != NULL, ESP_ERR_INVALID_ARG, TAG, "data null");
     ESP_RETURN_ON_FALSE(data_len > 0U, ESP_ERR_INVALID_ARG, TAG, "data_len invalid");
 
@@ -404,7 +396,6 @@ static esp_err_t modem_at_write_all_bytes(const uint8_t *data, size_t data_len) 
  * for the next command attempt.
  */
 static void modem_at_clear_pending_after_failure(void) {
-    // Reset AT clear pending after failure here so stale data does not leak into the next cycle.
     modem_at_drain_uart_events();
     modem_at_drain_pending_input(MODEM_RX_BUFFER_SIZE);
 }
@@ -426,7 +417,6 @@ static void modem_at_append_response_probe(char *probe,
                                            size_t *probe_len,
                                            const char *chunk,
                                            size_t chunk_len) {
-    // Stage AT append response probe durably here so transient link loss cannot drop the caller's payload.
     if (probe == NULL || probe_len == NULL || chunk == NULL || chunk_len == 0U) {
         return;
     }
@@ -456,7 +446,6 @@ static void modem_at_append_response_probe(char *probe,
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t modem_at_init(void) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (s_uart_ready) {
         return ESP_OK;
     }
@@ -530,7 +519,6 @@ esp_err_t modem_at_init(void) {
  * @brief Release AT transport resources.
  */
 void modem_at_deinit(void) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (s_at_lock != NULL) {
         vSemaphoreDelete(s_at_lock);
         s_at_lock = NULL;
@@ -560,7 +548,6 @@ void modem_at_deinit(void) {
  * @return ESP_OK, ESP_FAIL, ESP_ERR_TIMEOUT, or state errors.
  */
 esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32_t timeout_ms) {
-    // Push AT send through the shared publish path so metadata and error handling stay aligned.
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
     ESP_RETURN_ON_NULL(cmd, ESP_ERR_INVALID_ARG, TAG, "cmd is NULL");
 
@@ -607,7 +594,6 @@ esp_err_t modem_at_send_prompt_data(const char *prepare_cmd,
                                     char *response,
                                     size_t resp_len,
                                     uint32_t timeout_ms) {
-    // Push AT send prompt data through the shared publish path so metadata and error handling stay aligned.
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
     ESP_RETURN_ON_NULL(prepare_cmd, ESP_ERR_INVALID_ARG, TAG, "prepare_cmd null");
     ESP_RETURN_ON_FALSE(data != NULL && data_len > 0U, ESP_ERR_INVALID_ARG, TAG, "prompt data invalid");
@@ -670,7 +656,6 @@ esp_err_t modem_at_send_collect(const char *cmd,
                                 size_t *out_len,
                                 uint32_t timeout_ms,
                                 uint32_t idle_timeout_ms) {
-    // Push AT send collect through the shared publish path so metadata and error handling stay aligned.
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
     ESP_RETURN_ON_NULL(cmd, ESP_ERR_INVALID_ARG, TAG, "cmd is NULL");
     ESP_RETURN_ON_FALSE(response != NULL && resp_len > 0U, ESP_ERR_INVALID_ARG, TAG, "response buffer invalid");
@@ -750,7 +735,6 @@ esp_err_t modem_at_send_collect(const char *cmd,
  * @return ESP_OK if response contains expect token, ESP_FAIL otherwise.
  */
 esp_err_t modem_at_send_expect(const char *cmd, const char *expect, uint32_t timeout_ms) {
-    // Push AT send expect through the shared publish path so metadata and error handling stay aligned.
     char response[MODEM_RX_BUFFER_SIZE] = {0};
     esp_err_t err = modem_at_send(cmd, response, sizeof(response), timeout_ms);
     if (err != ESP_OK) {
@@ -776,7 +760,6 @@ esp_err_t modem_at_send_expect(const char *cmd, const char *expect, uint32_t tim
  *         ESP_ERR_TIMEOUT on mutex timeout.
  */
 esp_err_t modem_at_set_baud(uint32_t baud) {
-    // Copy the caller-provided AT set baud into module-local state after lightweight guards.
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
     ESP_RETURN_ON_FALSE(baud > 0, ESP_ERR_INVALID_ARG, TAG, "Invalid baud");
 
@@ -800,16 +783,6 @@ esp_err_t modem_at_set_baud(uint32_t baud) {
 }
 
 /**
- * @brief Get current UART baudrate.
- *
- * @return Current baudrate value.
- */
-uint32_t modem_at_get_baud(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    return s_uart_baud;
-}
-
-/**
  * @brief Change UART TX/RX pins at runtime.
  *
  * Reconfigures the GPIO pins used for UART communication.
@@ -820,7 +793,6 @@ uint32_t modem_at_get_baud(void) {
  * @return ESP_OK on success, ESP_ERR_TIMEOUT on mutex timeout.
  */
 esp_err_t modem_at_set_pins(gpio_num_t tx_pin, gpio_num_t rx_pin) {
-    // Copy the caller-provided AT set pins into module-local state after lightweight guards.
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
     if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
@@ -839,25 +811,6 @@ esp_err_t modem_at_set_pins(gpio_num_t tx_pin, gpio_num_t rx_pin) {
 }
 
 /**
- * @brief Get current UART pin configuration.
- *
- * Retrieves the current TX and RX GPIO pin numbers
- * used for UART communication.
- *
- * @param out_tx_pin Output pointer for TX pin (can be NULL).
- * @param out_rx_pin Output pointer for RX pin (can be NULL).
- */
-void modem_at_get_pins(gpio_num_t *out_tx_pin, gpio_num_t *out_rx_pin) {
-    // Read AT get pins without widening the mutation surface of this module.
-    if (out_tx_pin != NULL) {
-        *out_tx_pin = s_uart_tx_pin;
-    }
-    if (out_rx_pin != NULL) {
-        *out_rx_pin = s_uart_rx_pin;
-    }
-}
-
-/**
  * @brief Set UART line inverse mask for signal level reversal.
  *
  * Some modem designs use inverted signal levels.
@@ -867,7 +820,6 @@ void modem_at_get_pins(gpio_num_t *out_tx_pin, gpio_num_t *out_rx_pin) {
  * @return ESP_OK on success, ESP_ERR_TIMEOUT on mutex timeout.
  */
 esp_err_t modem_at_set_line_inverse(uint32_t inverse_mask) {
-    // Copy the caller-provided AT set line inverse into module-local state after lightweight guards.
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
     if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
@@ -887,16 +839,6 @@ esp_err_t modem_at_set_line_inverse(uint32_t inverse_mask) {
 
     xSemaphoreGive(s_at_lock);
     return err;
-}
-
-/**
- * @brief Get current UART line inverse mask.
- *
- * @return Current inverse mask value.
- */
-uint32_t modem_at_get_line_inverse(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    return s_uart_inverse_mask;
 }
 
 /**
@@ -946,28 +888,6 @@ esp_err_t modem_at_set_frame_format(uart_word_length_t data_bits,
 }
 
 /**
- * @brief Get current UART frame format configuration.
- *
- * @param out_data_bits Output pointer for data bits (can be NULL).
- * @param out_parity Output pointer for parity mode (can be NULL).
- * @param out_stop_bits Output pointer for stop bits (can be NULL).
- */
-void modem_at_get_frame_format(uart_word_length_t *out_data_bits,
-                               uart_parity_t *out_parity,
-                               uart_stop_bits_t *out_stop_bits) {
-    // Build the AT get frame format representation here so every caller emits the same contract.
-    if (out_data_bits != NULL) {
-        *out_data_bits = s_uart_data_bits;
-    }
-    if (out_parity != NULL) {
-        *out_parity = s_uart_parity;
-    }
-    if (out_stop_bits != NULL) {
-        *out_stop_bits = s_uart_stop_bits;
-    }
-}
-
-/**
  * @brief Set UART source clock.
  *
  * Configures the clock source for UART operation.
@@ -978,7 +898,6 @@ void modem_at_get_frame_format(uart_word_length_t *out_data_bits,
  * @return ESP_OK on success, ESP_ERR_TIMEOUT on mutex timeout.
  */
 esp_err_t modem_at_set_source_clk(uart_sclk_t source_clk) {
-    // Copy the caller-provided AT set source clk into module-local state after lightweight guards.
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
     if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
@@ -1014,7 +933,6 @@ esp_err_t modem_at_set_source_clk(uart_sclk_t source_clk) {
  * @return Current source clock setting.
  */
 uart_sclk_t modem_at_get_source_clk(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_uart_source_clk;
 }
 
@@ -1027,7 +945,6 @@ uart_sclk_t modem_at_get_source_clk(void) {
  * @param out_diag Output structure for diagnostics (cannot be NULL).
  */
 void modem_at_get_uart_diag(modem_at_uart_diag_t *out_diag) {
-    // Read AT get uart diag without widening the mutation surface of this module.
     if (out_diag == NULL) {
         return;
     }
@@ -1044,7 +961,6 @@ void modem_at_get_uart_diag(modem_at_uart_diag_t *out_diag) {
  * to start fresh diagnostics accumulation.
  */
 void modem_at_reset_uart_diag(void) {
-    // Reset AT reset uart diag here so stale data does not leak into the next cycle.
     modem_at_drain_uart_events();
     memset(&s_uart_diag, 0, sizeof(s_uart_diag));
 }
@@ -1056,7 +972,6 @@ void modem_at_reset_uart_diag(void) {
  * @param cb Callback function.
  */
 void modem_at_register_urc(const char *prefix, modem_urc_cb_t cb) {
-    // Update the AT register URC path here so later asynchronous work sees the latest intent.
     if (prefix == NULL || cb == NULL) {
         return;
     }
@@ -1114,7 +1029,6 @@ void modem_at_register_urc(const char *prefix, modem_urc_cb_t cb) {
  *         ESP_ERR_TIMEOUT if lock could not be acquired immediately.
  */
 esp_err_t modem_at_poll_urc(uint32_t max_read_bytes) {
-    // Advance one cooperative step here using the current state, time gates, and retry policy.
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
     if (max_read_bytes == 0U) {

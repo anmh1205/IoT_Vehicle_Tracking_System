@@ -35,9 +35,6 @@
  * outbound payload types without duplicating publish logic in the FSM itself.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 typedef char *(*state_publish_formatter_t)(const config_t *cfg,
                                           const telemetry_t *telemetry,
@@ -63,7 +60,7 @@ typedef struct {
     const char *message;
 } state_publish_event_args_t;
 
-static const char *TAG = STATE_MACHINE_TAG;
+static const char *TAG = "PUBLISH_PIPE";
 
 /**
  * @brief Return whether the current session identity is safe to emit.
@@ -294,7 +291,6 @@ static bool state_publish_via_pipeline(const char *log_label,
  * @brief Keep firmware status for the next connected publish opportunity.
  */
 static void state_machine_defer_firmware_report(const firmware_status_t *firmware) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (firmware == NULL) {
         return;
     }
@@ -315,7 +311,6 @@ static void state_machine_fill_firmware_status(firmware_status_t *firmware,
                                                const char *job_id,
                                                const char *partition,
                                                const char *error) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (firmware == NULL) {
         return;
     }
@@ -483,7 +478,6 @@ void state_machine_publish_or_stage_firmware_status(const char *status,
  * @brief Flush one deferred firmware report once MQTT is connected again.
  */
 void state_machine_try_flush_deferred_firmware_report(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!s_deferred_firmware_report_pending || !tracker_mqtt_is_connected() || s_ota_in_progress) {
         return;
     }

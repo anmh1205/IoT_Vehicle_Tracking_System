@@ -19,6 +19,7 @@ import { AlertFilters } from '@/features/alerts/components/alert-filters';
 import { alertServices, localizeAlertForDisplay } from '@/lib/api/alerts';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
+import { queryInvalidation } from '@/lib/utils/query-invalidation';
 import { formatNumber } from '@/lib/utils/date/format';
 import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
 
@@ -182,7 +183,7 @@ const AlertsPage = () => {
 
   const ackMutation = useMutation({
     mutationFn: (id: number) => alertServices.acknowledge(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
+    onSuccess: () => queryInvalidation.alerts.all(queryClient),
     onError: (error: unknown) => {
       notificationUtils.error(
         'Xác nhận cảnh báo thất bại',
@@ -193,7 +194,7 @@ const AlertsPage = () => {
 
   const resolveMutation = useMutation({
     mutationFn: (id: number) => alertServices.resolve(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
+    onSuccess: () => queryInvalidation.alerts.all(queryClient),
     onError: (error: unknown) => {
       notificationUtils.error(
         'Đóng cảnh báo thất bại',
@@ -201,6 +202,29 @@ const AlertsPage = () => {
       );
     },
   });
+
+  const [batchPending, setBatchPending] = useState(false);
+
+  const executeBatch = async (action: (id: number) => Promise<unknown>) => {
+    if (selected.length === 0) return;
+    setBatchPending(true);
+    try {
+      const results = await Promise.allSettled(selected.map((id) => action(id)));
+      const succeeded = results.filter((r) => r.status === 'fulfilled').length;
+      const failed = results.length - succeeded;
+      if (failed === 0) {
+        notificationUtils.success(`Đã xử lý ${succeeded} cảnh báo`);
+      } else {
+        notificationUtils.warning(
+          `${succeeded}/${results.length} thành công, ${failed} thất bại`,
+        );
+      }
+      queryInvalidation.alerts.all(queryClient);
+      setSelected([]);
+    } finally {
+      setBatchPending(false);
+    }
+  };
 
   const allRows = useMemo(
     () =>
@@ -279,16 +303,16 @@ const AlertsPage = () => {
         <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
-            disabled={selected.length === 0 || ackMutation.isPending}
-            onClick={() => selected.forEach((id) => ackMutation.mutate(id))}
+            disabled={selected.length === 0 || batchPending}
+            onClick={() => executeBatch((id) => alertServices.acknowledge(id))}
           >
-            Xác nhận đã chọn
+            {batchPending ? 'Đang xử lý...' : 'Xác nhận đã chọn'}
           </Button>
           <Button
-            disabled={selected.length === 0 || resolveMutation.isPending}
-            onClick={() => selected.forEach((id) => resolveMutation.mutate(id))}
+            disabled={selected.length === 0 || batchPending}
+            onClick={() => executeBatch((id) => alertServices.resolve(id))}
           >
-            Giải quyết đã chọn
+            {batchPending ? 'Đang xử lý...' : 'Giải quyết đã chọn'}
           </Button>
         </div>
       }
@@ -429,6 +453,10 @@ const AlertsPage = () => {
         open={!!detail}
         onOpenChange={(value) => !value && setDetail(null)}
         alert={detail}
+        onActionComplete={() => {
+          setDetail(null);
+          queryInvalidation.alerts.all(queryClient);
+        }}
       />
     </PageContainer>
   );

@@ -20,15 +20,11 @@
  *
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
-esp_err_t modem_lte_init(void);
-
 /**
  * @brief Register to LTE network and activate PDP context.
  *
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
-esp_err_t modem_lte_connect(void);
-
 /**
  * @brief Trigger non-blocking LTE connect workflow.
  */

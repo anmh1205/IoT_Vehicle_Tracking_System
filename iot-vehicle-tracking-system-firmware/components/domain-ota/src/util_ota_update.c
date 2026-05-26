@@ -60,9 +60,6 @@
  *    - SHA mismatch: reject, log error
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /** OTA update context. */
 typedef struct {
@@ -92,7 +89,6 @@ typedef struct {
  * @param out_size Buffer size.
  */
 void util_fill_partition_label(const esp_partition_t *partition, char *out, size_t out_size) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (partition == NULL) {
         util_copy_string(out, out_size, "unknown");
         return;
@@ -109,7 +105,6 @@ void util_fill_partition_label(const esp_partition_t *partition, char *out, size
 static void util_ota_emit_status(const firmware_status_t *status,
                                  ota_status_callback_t status_callback,
                                  void *status_callback_ctx) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (status == NULL || status_callback == NULL) {
         return;
     }
@@ -122,7 +117,6 @@ static void util_ota_set_status(firmware_status_t *status,
                                 uint8_t progress,
                                 ota_status_callback_t status_callback,
                                 void *status_callback_ctx) {
-    // Copy the caller-provided OTA set status into module-local state after lightweight guards.
     if (status == NULL || util_string_empty(next_status)) {
         return;
     }
@@ -138,7 +132,6 @@ static esp_err_t util_ota_prepare_status_report(util_ota_update_ctx_t *ctx,
                                                 firmware_status_t *out_status,
                                                 ota_status_callback_t status_callback,
                                                 void *status_callback_ctx) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     memset(out_status, 0, sizeof(*out_status));
     util_copy_string(out_status->job_id, sizeof(out_status->job_id), cmd->job_id);
     util_copy_string(out_status->target_version, sizeof(out_status->target_version), cmd->version);
@@ -160,7 +153,6 @@ static esp_err_t util_ota_prepare_status_report(util_ota_update_ctx_t *ctx,
 }
 
 static esp_err_t util_ota_http_init_session(util_ota_update_ctx_t *ctx) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     util_ota_http_register_urc_once();
     util_ota_http_action_reset();
 
@@ -235,7 +227,6 @@ static esp_err_t util_ota_http_apply_request_config(util_ota_update_ctx_t *ctx, 
 }
 
 static esp_err_t util_ota_http_start_download(util_ota_update_ctx_t *ctx, const ota_command_t *cmd) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     telemetry_counters_inc_ota_http_start();
     ESP_LOGI(UTIL_TAG, "ota http start job=%s", cmd->job_id);
     s_ota_http_action.waiting = true;
@@ -290,7 +281,6 @@ static esp_err_t util_ota_http_start_download(util_ota_update_ctx_t *ctx, const 
 }
 
 static esp_err_t util_ota_begin_partition_write(util_ota_update_ctx_t *ctx) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ctx->failure_code = TRACKER_OTA_ERROR_OTA_BEGIN_FAILED;
     esp_err_t err = esp_ota_begin(ctx->update_partition, OTA_SIZE_UNKNOWN, &ctx->ota_handle);
     if (err != ESP_OK) {
@@ -329,7 +319,6 @@ static esp_err_t util_ota_begin_partition_write(util_ota_update_ctx_t *ctx) {
 }
 
 static size_t util_ota_next_request_len(const util_ota_update_ctx_t *ctx) {
-    // Update the OTA next request len path here so later asynchronous work sees the latest intent.
     size_t request_len = ctx->transfer_wire_len - ctx->read_offset;
     size_t request_max_len = (ctx->transfer_mode_known && ctx->transfer_mode_hex)
                                  ? OTA_HTTP_HEX_CHUNK_SIZE
@@ -347,7 +336,6 @@ static esp_err_t util_ota_request_chunk(util_ota_update_ctx_t *ctx,
                                         size_t request_len,
                                         const uint8_t **wire_payload,
                                         size_t *wire_payload_len) {
-    // Update the OTA request chunk path here so later asynchronous work sees the latest intent.
     char http_read_cmd[72] = {0};
     int read_cmd_len = snprintf(http_read_cmd,
                                 sizeof(http_read_cmd),
@@ -399,7 +387,6 @@ static void util_ota_resolve_transfer_mode(util_ota_update_ctx_t *ctx,
                                            const ota_command_t *cmd,
                                            const uint8_t *wire_payload,
                                            size_t wire_payload_len) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (ctx->transfer_mode_known) {
         return;
     }
@@ -417,7 +404,6 @@ static esp_err_t util_ota_write_wire_payload(util_ota_update_ctx_t *ctx,
                                              const ota_command_t *cmd,
                                              const uint8_t *wire_payload,
                                              size_t wire_payload_len) {
-    // Rehydrate OTA write wire payload here so later logic reads one coherent snapshot after reset or sleep.
     size_t written_len = 0U;
     if (ctx->read_offset == 0U) {
         // Validate the magic byte before writing anything so we fail fast on HTML/error pages masquerading as firmware.
@@ -500,7 +486,6 @@ static void util_ota_emit_download_progress(util_ota_update_ctx_t *ctx,
                                             firmware_status_t *out_status,
                                             ota_status_callback_t status_callback,
                                             void *status_callback_ctx) {
-    // Rehydrate OTA emit download progress here so later logic reads one coherent snapshot after reset or sleep.
     if (cmd->size == 0) {
         return;
     }
@@ -526,7 +511,6 @@ static esp_err_t util_ota_stream_payload(util_ota_update_ctx_t *ctx,
                                          firmware_status_t *out_status,
                                          ota_status_callback_t status_callback,
                                          void *status_callback_ctx) {
-    // Rehydrate OTA stream payload here so later logic reads one coherent snapshot after reset or sleep.
     ctx->transfer_wire_len = (size_t)cmd->size;
     while (ctx->read_offset < ctx->transfer_wire_len) {
         size_t request_len = util_ota_next_request_len(ctx);
@@ -560,7 +544,6 @@ static esp_err_t util_ota_finalize_image(util_ota_update_ctx_t *ctx,
                                          firmware_status_t *out_status,
                                          ota_status_callback_t status_callback,
                                          void *status_callback_ctx) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (ctx->transfer_mode_known && ctx->transfer_mode_hex &&
         ctx->read_offset != ((size_t)cmd->size * 2U)) {
         // In hex mode the modem reports wire bytes, so the final offset must be exactly twice the binary image length.
@@ -643,15 +626,16 @@ static void util_ota_cleanup_update(util_ota_update_ctx_t *ctx,
                                     firmware_status_t *out_status,
                                     ota_status_callback_t status_callback,
                                     void *status_callback_ctx) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (ctx->sha_ctx_started) {
         mbedtls_sha256_free(&ctx->sha_ctx);
     }
     if (ctx->decode_buffer != NULL) {
         free(ctx->decode_buffer);
+        ctx->decode_buffer = NULL;
     }
     if (ctx->http_read_response != NULL) {
         free(ctx->http_read_response);
+        ctx->http_read_response = NULL;
     }
     if (ctx->http_initialized) {
         (void)modem_at_send_expect("AT+HTTPTERM\r", "OK", OTA_HTTP_CMD_TIMEOUT_MS);

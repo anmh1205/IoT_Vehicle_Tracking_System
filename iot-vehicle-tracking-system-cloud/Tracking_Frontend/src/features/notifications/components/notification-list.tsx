@@ -1,13 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CheckCheck, Loader2, RefreshCcw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/common/empty-state';
+import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { notificationServices } from '@/lib/api/notifications';
+import { notificationUtils } from '@/lib/notification';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { NotificationRow } from './notification-item';
 import type { NotificationItem } from '@/features/notifications/types';
 
@@ -35,6 +39,7 @@ export const NotificationList = ({
   onLoadMore?: () => void;
 }) => {
   const queryClient = useQueryClient();
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const markReadMutation = useMutation({
     mutationFn: (id: number) => notificationServices.markRead(id),
@@ -42,12 +47,19 @@ export const NotificationList = ({
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['notification-stats'] });
     },
+    onError: (error: unknown) => {
+      notificationUtils.error('Không thể đánh dấu đã đọc', getApiErrorMessage(error, 'Lỗi không xác định'));
+    },
   });
   const deleteMutation = useMutation({
     mutationFn: (id: number) => notificationServices.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['notification-stats'] });
+      notificationUtils.success('Đã ẩn thông báo');
+    },
+    onError: (error: unknown) => {
+      notificationUtils.error('Không thể ẩn thông báo', getApiErrorMessage(error, 'Lỗi không xác định'));
     },
   });
 
@@ -108,7 +120,7 @@ export const NotificationList = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => deleteMutation.mutate(item.id)}
+                  onClick={() => setDeleteTarget(item.id)}
                   disabled={deleteMutation.isPending}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
@@ -146,6 +158,22 @@ export const NotificationList = ({
           </div>
         ) : null}
       </CardContent>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Ẩn thông báo"
+        description="Bạn có chắc muốn ẩn thông báo này? Thao tác không thể hoàn tác."
+        confirmLabel="Ẩn"
+        variant="destructive"
+        isPending={deleteMutation.isPending}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget !== null) {
+            deleteMutation.mutate(deleteTarget);
+            setDeleteTarget(null);
+          }
+        }}
+      />
     </Card>
   );
 };

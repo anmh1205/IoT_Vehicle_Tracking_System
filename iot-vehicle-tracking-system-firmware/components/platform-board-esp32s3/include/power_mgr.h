@@ -42,15 +42,11 @@ esp_err_t modem_power_off(void);
  *
  * @return ESP_OK on success.
  */
-esp_err_t modem_set_pwrkey_inverted_stage(bool inverted);
-
 /**
  * @brief Read current MCU->PWRKEY inversion profile.
  *
  * @return true when GPIO HIGH asserts modem PWRKEY.
  */
-bool modem_get_pwrkey_inverted_stage(void);
-
 /**
  * @brief Pulse modem reset line when mapped.
  *

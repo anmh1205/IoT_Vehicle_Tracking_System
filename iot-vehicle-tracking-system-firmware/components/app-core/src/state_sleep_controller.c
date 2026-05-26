@@ -26,6 +26,7 @@
 #include "power_mgr.h"
 #include "session_mgr.h"
 #include "state_machine_internal.h"
+#include "state_led_control.h"
 #include "state_obd_runtime.h"
 #include "state_runtime_context.h"
 #include "util.h"
@@ -81,11 +82,8 @@
  *    - FAKE_SLEEP: ~20-30mA (idle, no sleep)
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
 
-
-static const char *TAG = STATE_MACHINE_TAG;
+static const char *TAG = "SLEEP_CTRL";
 
 static void state_machine_prepare_deep_sleep_wakeup_for_interval_us(uint64_t wake_interval_us);
 static app_state_t state_machine_enter_light_sleep_for_interval_us(uint64_t wake_interval_us,
@@ -105,8 +103,24 @@ static bool state_machine_should_keep_parked_modem_gnss_warm(void) {
  *
  * @return true when a USB Serial/JTAG host is currently attached.
  */
+/**
+ * @brief Report whether a USB Serial/JTAG host is still attached.
+ *
+ * Uses SOF packet detection. After boot, there's a grace period where USB
+ * is assumed connected to avoid entering real sleep before the host has
+ * time to re-enumerate and open the COM port.
+ *
+ * @return true when a USB Serial/JTAG host is currently attached.
+ */
 static bool state_machine_usb_console_host_connected(void) {
 #if CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED
+    /* Grace period: assume USB connected for first 60s after boot.
+     * This prevents the device from entering deep/light sleep before
+     * the host PC has time to re-enumerate USB after flash/reboot.
+     * Typical boot-to-first-sleep is ~36s, so 60s covers it safely. */
+    if (util_uptime_ms() < 60000ULL) {
+        return true;
+    }
     return usb_serial_jtag_is_connected();
 #else
     return false;
@@ -123,7 +137,6 @@ static bool state_machine_usb_console_host_connected(void) {
  * @return true when the parked path should use light sleep motion wake.
  */
 static bool state_machine_should_use_light_sleep_motion_wake(void) {
-    // Program the low-power path here so the next wake cycle resumes from predictable state.
     if (!state_machine_imu_runtime_enabled() || !s_imu_available) {
         return false;
     }
@@ -147,7 +160,6 @@ static bool state_machine_should_use_light_sleep_motion_wake(void) {
  * @return true when the IMU pin is usable with ext0 deep-sleep wakeup.
  */
 static bool state_machine_can_arm_imu_deep_sleep_wakeup(void) {
-    // Program the low-power path here so the next wake cycle resumes from predictable state.
     if (!state_machine_imu_runtime_enabled() || !s_imu_available) {
         return false;
     }
@@ -161,6 +173,8 @@ static app_state_t state_machine_enter_usb_guarded_sleep(bool prefer_light_sleep
     uint64_t sleep_ms = (uint64_t)wake_interval_s * 1000ULL;
     const char *backend = prefer_light_sleep_motion_wake ? "light_proxy" : "deep_proxy";
 
+    /* LED stays solid ON during USB-guarded fake sleep to indicate
+     * the device is alive but in pseudo-sleep mode. */
     state_machine_force_user_led_on();
 
     if (prefer_light_sleep_motion_wake) {
@@ -242,7 +256,6 @@ static app_state_t state_machine_enter_usb_guarded_sleep(bool prefer_light_sleep
  * current enough to influence wake-time decisions.
  */
 static void state_machine_clear_gnss_cache(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     memset(&s_telemetry.gnss, 0, sizeof(s_telemetry.gnss));
 }
 
@@ -253,7 +266,6 @@ static void state_machine_clear_gnss_cache(void) {
  * @return Resolved runtime sleep mode.
  */
 tracker_sleep_mode_t state_machine_resolve_sleep_mode(app_state_t app_state) {
-    // Program the low-power path here so the next wake cycle resumes from predictable state.
     if (app_state != APP_STATE_SLEEP) {
         return TRACKER_SLEEP_MODE_NONE;
     }
@@ -433,7 +445,6 @@ void state_machine_shutdown_for_sleep(void) {
  * @brief Arm deep-sleep wake sources for parked heartbeat and optional IMU wake.
  */
 static void state_machine_prepare_deep_sleep_wakeup_for_interval_us(uint64_t wake_interval_us) {
-    // Program the low-power path here so the next wake cycle resumes from predictable state.
     (void)esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
     if (state_machine_can_arm_imu_deep_sleep_wakeup()) {
         esp_err_t wake_err = esp_sleep_enable_ext0_wakeup(PIN_LIS3DSH_INT, 1);
@@ -552,7 +563,6 @@ app_state_t state_machine_enter_light_sleep(void) {
  * @return Next FSM state after the fake-sleep interval elapses.
  */
 app_state_t state_machine_enter_fake_sleep(void) {
-    // Program the low-power path here so the next wake cycle resumes from predictable state.
     uint16_t wake_interval_s = state_machine_parked_wake_interval_s();
     uint64_t sleep_ms = (uint64_t)wake_interval_s * 1000ULL;
     uint64_t started_ms = util_uptime_ms();

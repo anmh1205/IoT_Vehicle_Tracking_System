@@ -40,8 +40,8 @@ export const CommandsTab = () => {
   if (commands.length === 0) {
     return (
       <DeviceDetailEmptyState
-        title="Chưa có lệnh điều khiển"
-        description="Lịch sử lệnh sẽ xuất hiện khi hệ thống gửi command đến thiết bị."
+        title="Chưa có lịch sử lệnh điều khiển"
+        description="Lịch sử lệnh sẽ xuất hiện khi hệ thống gửi command đến thiết bị. Gửi lệnh mới từ tab Cài đặt."
       />
     );
   }

@@ -44,9 +44,6 @@
  *    - `request_location`, `enable_tracking`, `reboot`: reduced to small runtime flags/actions
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 static const char *TAG = "COMMAND_HANDLER";
 /* Mutex lock timeout for command handler operations. */
@@ -138,7 +135,6 @@ static bool s_consumed_session_assignment_valid = false;
  * guarantees that only one action payload is live at a time.
  */
 static void command_handler_reset_consumed_payloads(void) {
-    // Rehydrate handler reset consumed payloads here so later logic reads one coherent snapshot after reset or sleep.
     s_consumed_ota_command_valid = false;
     s_consumed_config_update_valid = false;
     s_consumed_session_assignment_valid = false;
@@ -209,7 +205,6 @@ static const command_bool_update_rule_t s_update_bool_rules[] = {
  * @return true when the command mutex was acquired.
  */
 static bool command_handler_take_lock(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_lock != NULL && xSemaphoreTake(s_lock, COMMAND_HANDLER_LOCK_TIMEOUT_TICKS) == pdTRUE;
 }
 
@@ -221,7 +216,6 @@ static bool command_handler_take_lock(void) {
  * indefinitely when another path is applying a command.
  */
 static bool command_handler_take_lock_for(const char *operation) {
-    // Keep the branchy handler take lock for flow centralized here so side effects remain easy to audit.
     if (command_handler_take_lock()) {
         return true;
     }
@@ -242,7 +236,6 @@ static bool command_handler_take_lock_for(const char *operation) {
  * was never acquired or was already given (null check protects against both).
  */
 static void command_handler_give_lock(void) {
-    // Keep the branchy handler give lock flow centralized here so side effects remain easy to audit.
     if (s_lock != NULL) {
         xSemaphoreGive(s_lock);
     }
@@ -258,7 +251,6 @@ static void command_handler_give_lock(void) {
  * @return true if valid hex string of SHA256 length, false otherwise.
  */
 static bool command_is_hex_sha256(const char *value) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (util_string_empty(value) || strlen(value) != 64) {
         return false;
     }
@@ -286,7 +278,6 @@ static bool command_is_hex_sha256(const char *value) {
  * @return true if valid positive uint32 parsed, false on invalid input/range.
  */
 static bool command_parse_u32_positive(const cJSON *value, uint32_t *out_value) {
-    // Decode raw parse u32 positive into the normalized form the rest of the module expects.
     if (value == NULL || out_value == NULL) {
         return false;
     }
@@ -336,7 +327,6 @@ static bool command_parse_u32_positive(const cJSON *value, uint32_t *out_value) 
  * @return true when a valid positive uint64 value was parsed.
  */
 static bool command_parse_u64_positive(const cJSON *value, uint64_t *out_value) {
-    // Decode raw parse u64 positive into the normalized form the rest of the module expects.
     if (value == NULL || out_value == NULL) {
         return false;
     }
@@ -386,7 +376,6 @@ static bool command_parse_u64_positive(const cJSON *value, uint64_t *out_value) 
  * @return Confirm timeout in seconds.
  */
 static uint32_t command_parse_confirm_timeout_sec(const cJSON *params) {
-    // Decode raw parse confirm timeout sec into the normalized form the rest of the module expects.
     if (params == NULL || !cJSON_IsObject(params)) {
         return TRACKER_OTA_CONFIRM_TIMEOUT_DEFAULT_SEC;
     }
@@ -414,7 +403,6 @@ static uint32_t command_parse_confirm_timeout_sec(const cJSON *params) {
  * @return true if field is in whitelist, false otherwise.
  */
 static bool command_is_allowed_update_field(const char *name) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (util_string_empty(name)) {
         return false;
     }
@@ -444,7 +432,6 @@ static bool command_is_allowed_update_field(const char *name) {
 static bool command_parse_u16_update_field(const cJSON *params,
                                            size_t rule_index,
                                            command_config_update_t *update) {
-    // Decode raw parse u16 update field into the normalized form the rest of the module expects.
     if (params == NULL || update == NULL || rule_index >= ARRAY_SIZE(s_update_u16_rules)) {
         return false;
     }
@@ -473,7 +460,6 @@ static bool command_parse_u16_update_field(const cJSON *params,
 static bool command_parse_bool_update_field(const cJSON *params,
                                             size_t rule_index,
                                             command_config_update_t *update) {
-    // Decode raw parse bool update field into the normalized form the rest of the module expects.
     if (params == NULL || update == NULL || rule_index >= ARRAY_SIZE(s_update_bool_rules)) {
         return false;
     }
@@ -501,7 +487,6 @@ static bool command_parse_bool_update_field(const cJSON *params,
  * @return true when at least one field was staged.
  */
 static bool command_config_update_has_changes(const command_config_update_t *update) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return update != NULL && (update->u16_present_mask != 0U || update->bool_present_mask != 0U);
 }
 
@@ -577,7 +562,6 @@ static bool command_apply_bool_updates(config_t *next_config, const command_conf
  * are also ignored, leaving the current runtime value unchanged.
  */
 static bool command_parse_config_update(const cJSON *params, command_config_update_t *out_update) {
-    // Decode raw parse config update into the normalized form the rest of the module expects.
     if (params == NULL || out_update == NULL || !cJSON_IsObject(params)) {
         return false;
     }
@@ -603,7 +587,6 @@ static bool command_parse_config_update(const cJSON *params, command_config_upda
 }
 
 static const char *command_action_label(command_action_t action) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     switch (action) {
         case COMMAND_ACTION_APPLY_CONFIG:
             return "apply_config";
@@ -628,7 +611,6 @@ static const char *command_action_label(command_action_t action) {
  * that action.
  */
 static void command_handler_stage_consumed_action_payloads(const command_action_item_t *item) {
-    // Rehydrate handler stage consumed action payloads here so later logic reads one coherent snapshot after reset or sleep.
     command_handler_reset_consumed_payloads();
     if (item == NULL) {
         return;
@@ -666,7 +648,6 @@ static bool command_handler_take_consumed_payload_locked(void *out_payload,
                                                          size_t payload_size,
                                                          void *stored_payload,
                                                          bool *valid_flag) {
-    // Rehydrate handler take consumed payload locked here so later logic reads one coherent snapshot after reset or sleep.
     if (out_payload == NULL || stored_payload == NULL || valid_flag == NULL || !(*valid_flag)) {
         return false;
     }
@@ -717,7 +698,6 @@ static esp_err_t command_handler_enqueue_action(const command_action_item_t *ite
  * @return ESP_OK on success.
  */
 esp_err_t command_handler_init(config_t *config) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     ESP_RETURN_ON_NULL(config, ESP_ERR_INVALID_ARG, TAG, "config is NULL");
 
     if (s_lock == NULL) {
@@ -750,7 +730,6 @@ esp_err_t command_handler_init(config_t *config) {
  * @return true when params are valid and parsed.
  */
 static bool command_parse_ota_update(const cJSON *params, ota_command_t *out_cmd) {
-    // Decode raw parse OTA update into the normalized form the rest of the module expects.
     if (params == NULL || out_cmd == NULL || !cJSON_IsObject(params)) {
         ESP_LOGW(TAG, "event=ota_update_rejected reason=params_missing_or_not_object");
         return false;
@@ -846,7 +825,6 @@ static bool command_parse_ota_update(const cJSON *params, ota_command_t *out_cmd
  */
 static bool command_parse_session_assignment(const cJSON *params,
                                              command_session_assignment_t *out_assignment) {
-    // Decode raw parse session assignment into the normalized form the rest of the module expects.
     if (params == NULL || out_assignment == NULL || !cJSON_IsObject(params)) {
         return false;
     }
@@ -983,7 +961,6 @@ void command_handler_process(const char *command_json) {
  * @return true when a request existed.
  */
 bool command_handler_consume_location_request(void) {
-    // Keep the branchy handler consume location request flow centralized here so side effects remain easy to audit.
     if (!command_handler_take_lock()) {
         return false;
     }
@@ -1002,7 +979,6 @@ bool command_handler_consume_location_request(void) {
  * @return true when tracking is enabled.
  */
 bool command_handler_is_tracking_enabled(void) {
-    // Keep the branchy handler is tracking enabled flow centralized here so side effects remain easy to audit.
     if (!command_handler_take_lock()) {
         return true;
     }
@@ -1018,7 +994,6 @@ bool command_handler_is_tracking_enabled(void) {
  * @return Action value (or NONE).
  */
 command_action_t command_handler_consume_action(void) {
-    // Keep the branchy handler consume action flow centralized here so side effects remain easy to audit.
     if (!command_handler_take_lock()) {
         return COMMAND_ACTION_NONE;
     }
@@ -1043,7 +1018,6 @@ command_action_t command_handler_consume_action(void) {
  * the FSM is the only writer for runtime config.
  */
 esp_err_t command_handler_apply_pending_config(void) {
-    // Keep the branchy handler apply pending config flow centralized here so side effects remain easy to audit.
     if (!command_handler_take_lock()) {
         ESP_LOGW(TAG, "event=apply_config_skipped reason=lock_busy");
         return ESP_ERR_TIMEOUT;
@@ -1097,7 +1071,6 @@ esp_err_t command_handler_apply_pending_config(void) {
  * @return true if OTA payload was copied.
  */
 bool command_handler_take_ota_command(ota_command_t *out_cmd) {
-    // Keep the branchy handler take OTA command flow centralized here so side effects remain easy to audit.
     if (out_cmd == NULL) {
         return false;
     }
@@ -1122,7 +1095,6 @@ bool command_handler_take_ota_command(ota_command_t *out_cmd) {
  * @return true if a pending assignment was copied.
  */
 bool command_handler_take_session_assignment(command_session_assignment_t *out_assignment) {
-    // Keep the branchy handler take session assignment flow centralized here so side effects remain easy to audit.
     if (out_assignment == NULL) {
         return false;
     }

@@ -64,9 +64,30 @@ export const queryInvalidation = {
       void queryClient.invalidateQueries({ queryKey: ['dashboard-activity'] });
     },
   },
+  alerts: {
+    all: (queryClient: QueryClient) => {
+      void queryClient.invalidateQueries({ queryKey: ['alerts'] });
+      void queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0] ?? '').startsWith('alerts-summary') });
+      void queryClient.invalidateQueries({ queryKey: ['device-obd-alerts'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard-recent-alerts'] });
+    },
+    list: (queryClient: QueryClient) => {
+      void queryClient.invalidateQueries({ queryKey: ['alerts'] });
+    },
+    deviceScoped: (queryClient: QueryClient, deviceId: number | string) => {
+      void queryClient.invalidateQueries({ queryKey: ['alerts'] });
+      void queryClient.invalidateQueries({ queryKey: ['device-obd-alerts', String(deviceId)] });
+      void queryClient.invalidateQueries({ queryKey: ['device-obd-alerts'] });
+    },
+    summary: (queryClient: QueryClient) => {
+      void queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0] ?? '').startsWith('alerts-summary') });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard-recent-alerts'] });
+    },
+  },
   notifications: {
     all: (queryClient: QueryClient) => {
       void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      void queryClient.invalidateQueries({ queryKey: ['notification-stats'] });
     },
   },
   exports: {

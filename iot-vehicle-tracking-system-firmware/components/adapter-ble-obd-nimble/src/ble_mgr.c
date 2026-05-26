@@ -29,9 +29,6 @@
  * This translation unit belongs to the BLE OBD NimBLE adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 #define BLE_DISCOVERY_TIMEOUT_MS 5000U
 #define BLE_CONNECT_ATTEMPT_TIMEOUT_MS 7000U
@@ -126,7 +123,6 @@ static const struct ble_gap_conn_params s_conn_params = {
  * @brief Copy advertised local name into a null-terminated buffer.
  */
 static size_t ble_mgr_copy_adv_name(const struct ble_hs_adv_fields *adv_fields, char *buf, size_t buf_len) {
-    // Translate mgr copy adv name into a readable label so logs and diagnostics stay easy to follow.
     if (buf == NULL || buf_len == 0) {
         return 0;
     }
@@ -148,7 +144,6 @@ static size_t ble_mgr_copy_adv_name(const struct ble_hs_adv_fields *adv_fields, 
  * @param mgr_ctx BLE manager context.
  */
 static void ble_mgr_queue_clear(ble_mgr_ctx_t *mgr_ctx) {
-    // Reset mgr clear here so stale data does not leak into the next cycle.
     if (mgr_ctx != NULL && mgr_ctx->result_queue != NULL) {
         xQueueReset(mgr_ctx->result_queue);
     }
@@ -180,7 +175,6 @@ static void ble_mgr_queue_send(ble_mgr_ctx_t *mgr_ctx, ble_mgr_status_t status) 
  * @return true when queue message received.
  */
 static bool ble_mgr_queue_wait(ble_mgr_ctx_t *mgr_ctx, ble_mgr_status_t *status, uint32_t timeout_ms) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (mgr_ctx == NULL || mgr_ctx->result_queue == NULL) {
         return false;
     }
@@ -197,7 +191,6 @@ static bool ble_mgr_queue_wait(ble_mgr_ctx_t *mgr_ctx, ble_mgr_status_t *status,
 }
 
 static void ble_mgr_reset_context(ble_mgr_ctx_t *mgr_ctx) {
-    // Reset mgr reset context here so stale data does not leak into the next cycle.
     if (mgr_ctx == NULL) {
         return;
     }
@@ -235,7 +228,6 @@ static void ble_mgr_reset_context(ble_mgr_ctx_t *mgr_ctx) {
  * @return Same status input.
  */
 static ble_mgr_status_t ble_mgr_connect_complete(ble_mgr_ctx_t *mgr_ctx, ble_mgr_status_t status) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (mgr_ctx == NULL) {
         return BLE_MGR_E_NULL;
     }
@@ -251,7 +243,6 @@ static ble_mgr_status_t ble_mgr_connect_complete(ble_mgr_ctx_t *mgr_ctx, ble_mgr
 }
 
 static ble_mgr_status_t ble_mgr_start_pending_connect(ble_mgr_ctx_t *mgr_ctx) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (mgr_ctx == NULL || !mgr_ctx->pending_connect.armed) {
         return BLE_MGR_E_NULL;
     }
@@ -288,7 +279,6 @@ static ble_mgr_status_t ble_mgr_start_pending_connect(ble_mgr_ctx_t *mgr_ctx) {
  * @param reason Reset reason code.
  */
 static void ble_mgr_gap_stack_reset_cb(int reason) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     ESP_LOGW(TAG, "event=nimble_stack_reset reason=%d", reason);
 }
 
@@ -296,7 +286,6 @@ static void ble_mgr_gap_stack_reset_cb(int reason) {
  * @brief NimBLE sync callback used to release init wait.
  */
 static void ble_mgr_gap_stack_sync_cb(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ESP_LOGI(TAG, "event=nimble_stack_synced");
     ble_mgr_queue_send(&s_mgr, BLE_MGR_E_OK);
 }
@@ -310,7 +299,6 @@ static void ble_mgr_gap_stack_sync_cb(void) {
  * @return true when service UUID appears in adv payload.
  */
 static bool ble_mgr_adv_contains_service(const struct ble_hs_adv_fields *adv_fields, const char *target_uuid) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (adv_fields == NULL || target_uuid == NULL) {
         return false;
     }
@@ -353,7 +341,6 @@ static void ble_mgr_gap_notification_cb(ble_mgr_ctx_t *mgr_ctx,
                                         uint16_t attr_handle,
                                         uint16_t conn_handle,
                                         bool indication) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     (void)conn_handle;
     (void)indication;
 
@@ -378,7 +365,6 @@ static void ble_mgr_gap_notification_cb(ble_mgr_ctx_t *mgr_ctx,
  */
 static void ble_mgr_gatt_svc_chr_disc_completed_check(ble_mgr_ctx_t *mgr_ctx,
                                                       const struct ble_gatt_error *error) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (mgr_ctx == NULL || error == NULL) {
         return;
     }
@@ -432,7 +418,6 @@ static int ble_mgr_gatt_chr_discovered_cb(uint16_t conn_handle,
                                           const struct ble_gatt_error *error,
                                           const struct ble_gatt_chr *chr,
                                           void *arg) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ble_mgr_ctx_t *mgr_ctx = (ble_mgr_ctx_t *)arg;
     if (mgr_ctx == NULL || error == NULL || mgr_ctx->disc_cfg == NULL || mgr_ctx->disc_cfg->svc_def == NULL) {
         return 0;
@@ -492,7 +477,6 @@ static int ble_mgr_gatt_svc_discovered_cb(uint16_t conn_handle,
                                           const struct ble_gatt_error *error,
                                           const struct ble_gatt_svc *service,
                                           void *arg) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ble_mgr_ctx_t *mgr_ctx = (ble_mgr_ctx_t *)arg;
     if (mgr_ctx == NULL || error == NULL || mgr_ctx->disc_cfg == NULL || mgr_ctx->disc_cfg->svc_def == NULL) {
         return 0;
@@ -532,7 +516,6 @@ static int ble_mgr_gatt_svc_discovered_cb(uint16_t conn_handle,
  * @param status BLE status code (0 on success).
  */
 static void ble_mgr_gap_connected_cb(ble_mgr_ctx_t *mgr_ctx, uint16_t conn_handle, int status) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (mgr_ctx == NULL) {
         return;
     }
@@ -720,7 +703,6 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
  * @return Constant string.
  */
 const char *ble_mgr_status_to_string(ble_mgr_status_t status) {
-    // Translate mgr status to string into a readable label so logs and diagnostics stay easy to follow.
     switch (status) {
         case BLE_MGR_E_OK:
             return "OK";
@@ -751,7 +733,6 @@ const char *ble_mgr_status_to_string(ble_mgr_status_t status) {
  * @return Manager context pointer on success, NULL on timeout/failure.
  */
 ble_mgr_ctx_t *ble_mgr_init(uint32_t timeout_ms) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     ble_mgr_ctx_t *mgr_ctx = &s_mgr;
 
     if ((mgr_ctx->lock_mtx != NULL || mgr_ctx->result_queue != NULL) && !ble_stack_is_started()) {
@@ -842,7 +823,6 @@ ble_mgr_status_t ble_mgr_connect_service(ble_mgr_ctx_t *mgr_ctx,
                                          const ble_mgr_disc_cfg_t *disc_cfg,
                                          uint32_t timeout_ms,
                                          void *usr_ctx) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (mgr_ctx == NULL || disc_cfg == NULL || disc_cfg->svc_def == NULL) {
         return BLE_MGR_E_NULL;
     }
@@ -934,12 +914,10 @@ ble_mgr_status_t ble_mgr_send(ble_mgr_ctx_t *mgr_ctx, uint16_t chr_handle, const
  * @return True if connected.
  */
 bool ble_mgr_is_connected(ble_mgr_ctx_t *mgr_ctx) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return mgr_ctx != NULL && mgr_ctx->is_connected;
 }
 
 bool ble_mgr_get_peer_address(ble_mgr_ctx_t *mgr_ctx, ble_addr_t *out_addr) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (mgr_ctx == NULL || out_addr == NULL || !mgr_ctx->peer_addr_valid) {
         return false;
     }
@@ -956,7 +934,6 @@ bool ble_mgr_get_peer_address(ble_mgr_ctx_t *mgr_ctx, ble_addr_t *out_addr) {
  * @return ESP_OK on success, otherwise error.
  */
 esp_err_t ble_mgr_disconnect(ble_mgr_ctx_t *mgr_ctx) {
-    // Drive the transport or session toward a connected state while keeping retries explicit.
     ESP_RETURN_ON_NULL(mgr_ctx, ESP_ERR_INVALID_ARG, TAG, "context is NULL");
 
     if (!mgr_ctx->is_connected && mgr_ctx->conn_handle == BLE_HS_CONN_HANDLE_NONE) {

@@ -7,207 +7,63 @@
 
 /**
  * @file telemetry_counters.c
- * @brief In-memory counters for storage/replay/MQTT diagnostics.
+ * @brief In-memory counters for storage/replay/MQTT/OBD/LTE diagnostics.
  *
- * ## Telemetry Counters Flow
- *
- * ### Purpose
- *    - Runtime metrics for remote diagnostics
- *    - Track publish/replay success/failure
- *    - Monitor queue depth and replay rates
- *    - Expose via health snapshot
- *
- * ### Counter Categories
- *    - MQTT: publish_attempts, publish_success, publish_fail
- *    - Offline Queue: enqueue_total, replay_success, replay_fail
- *    - OBD: query_success, query_fail, connect_fail
- *    - LTE: connect_attempts, connect_success, connect_fail
- *
- * ### Thread Safety
- *    - Uses FreeRTOS portENTER_CRITICAL
- *    - Atomic increment operations
- *    - Safe from ISR and task context
- *
- * ### Access Pattern
- *    - Increment on events (success/failure paths)
- *    - Reset on config change or command
- *    - Read via telemetry_counters_get()
- *    - Exposed in health snapshot JSON
- *
- * ## Key Counters
- *    - publish_fail due to MQTT disconnect -> indicates network issues
- *    - replay_fail after successful connect -> indicates payload issues
- *    - connect_fail count -> BLE OBD reliability
+ * Thread safety: portENTER_CRITICAL spinlock protects all increments.
+ * Access pattern: increment on events, reset on command, read via _get().
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
-
-/* Telemetry counters instance for runtime diagnostics. */
 static telemetry_counters_t s_counters;
-/* Spinlock for thread-safe counter updates. */
 static portMUX_TYPE s_counters_mux = portMUX_INITIALIZER_UNLOCKED;
 
 static void telemetry_counters_inc_field(uint32_t *field) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     portENTER_CRITICAL(&s_counters_mux);
     *field += 1U;
     portEXIT_CRITICAL(&s_counters_mux);
 }
 
-/**
- * @file telemetry_counters.c
- * @brief Runtime telemetry metrics for diagnostics.
- */
-
-/**
- * @brief Reset all counters to zero.
- */
 void telemetry_counters_reset(void) {
-    // Reset counters reset here so stale data does not leak into the next cycle.
     portENTER_CRITICAL(&s_counters_mux);
     memset(&s_counters, 0, sizeof(s_counters));
     portEXIT_CRITICAL(&s_counters_mux);
 }
 
-/**
- * @brief Increment SD write OK counter.
- */
-void telemetry_counters_inc_sd_write_ok(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.sd_write_ok);
+/* Generate increment functions via X-macro expansion. */
+#define COUNTER_FUNC(name) \
+void telemetry_counters_inc_##name(void) { \
+    telemetry_counters_inc_field(&s_counters.name); \
 }
 
-/**
- * @brief Increment SD write fail counter.
- */
-void telemetry_counters_inc_sd_write_fail(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.sd_write_fail);
-}
+COUNTER_FUNC(sd_write_ok)
+COUNTER_FUNC(sd_write_fail)
+COUNTER_FUNC(sd_fsync_fail)
+COUNTER_FUNC(replay_success)
+COUNTER_FUNC(replay_retry)
+COUNTER_FUNC(replay_drop)
+COUNTER_FUNC(quota_hit)
+COUNTER_FUNC(mqtt_publish_ok)
+COUNTER_FUNC(mqtt_publish_fail)
+COUNTER_FUNC(mqtt_publish_fallback)
+COUNTER_FUNC(lte_recovery_start)
+COUNTER_FUNC(lte_recovery_success)
+COUNTER_FUNC(lte_recovery_fail)
+COUNTER_FUNC(obd_read_ok)
+COUNTER_FUNC(obd_timeout)
+COUNTER_FUNC(obd_invalid_response)
+COUNTER_FUNC(ota_http_start)
+COUNTER_FUNC(ota_http_success)
+COUNTER_FUNC(ota_http_fail)
+COUNTER_FUNC(gnss_cgnsinf_fix_ok)
+COUNTER_FUNC(gnss_cgnsinf_fail)
+COUNTER_FUNC(gnss_cgpsinfo_fix_ok)
+COUNTER_FUNC(gnss_cgpsinfo_fail)
+COUNTER_FUNC(gnss_no_fix_recover)
+COUNTER_FUNC(gnss_self_heal)
+COUNTER_FUNC(gnss_query_mode_switched)
 
-/**
- * @brief Increment SD fsync fail counter.
- */
-void telemetry_counters_inc_sd_fsync_fail(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.sd_fsync_fail);
-}
-
-/**
- * @brief Increment replay success counter.
- */
-void telemetry_counters_inc_replay_success(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.replay_success);
-}
-
-/**
- * @brief Increment replay retry counter.
- */
-void telemetry_counters_inc_replay_retry(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.replay_retry);
-}
-
-/**
- * @brief Increment replay drop counter.
- */
-void telemetry_counters_inc_replay_drop(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.replay_drop);
-}
-
-/**
- * @brief Increment quota hit counter.
- */
-void telemetry_counters_inc_quota_hit(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.quota_hit);
-}
-
-/**
- * @brief Increment MQTT connected counter.
- */
-void telemetry_counters_inc_mqtt_connected(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.mqtt_connected);
-}
-
-/**
- * @brief Increment MQTT disconnected counter.
- */
-void telemetry_counters_inc_mqtt_disconnected(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.mqtt_disconnected);
-}
-
-/**
- * @brief Increment MQTT publish OK counter.
- */
-void telemetry_counters_inc_mqtt_publish_ok(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.mqtt_publish_ok);
-}
-
-void telemetry_counters_inc_mqtt_publish_fail(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.mqtt_publish_fail);
-}
-
-void telemetry_counters_inc_mqtt_publish_fallback(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.mqtt_publish_fallback);
-}
-
-void telemetry_counters_inc_lte_recovery_start(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.lte_recovery_start);
-}
-
-void telemetry_counters_inc_lte_recovery_success(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.lte_recovery_success);
-}
-
-void telemetry_counters_inc_lte_recovery_fail(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.lte_recovery_fail);
-}
-
-void telemetry_counters_inc_obd_read_ok(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.obd_read_ok);
-}
-
-void telemetry_counters_inc_obd_timeout(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.obd_timeout);
-}
-
-void telemetry_counters_inc_obd_invalid_response(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.obd_invalid_response);
-}
-
-void telemetry_counters_inc_ota_http_start(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.ota_http_start);
-}
-
-void telemetry_counters_inc_ota_http_success(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.ota_http_success);
-}
-
-void telemetry_counters_inc_ota_http_fail(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
-    telemetry_counters_inc_field(&s_counters.ota_http_fail);
-}
+#undef COUNTER_FUNC
 
 telemetry_counters_t telemetry_counters_get(void) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     telemetry_counters_t snapshot;
     portENTER_CRITICAL(&s_counters_mux);
     snapshot = s_counters;

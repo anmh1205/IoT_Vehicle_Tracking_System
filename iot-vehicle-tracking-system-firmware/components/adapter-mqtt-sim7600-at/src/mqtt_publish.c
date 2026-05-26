@@ -44,9 +44,6 @@
  *    - Only one in-flight publish at a time
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /**
  * @brief Get topic class name.
@@ -55,7 +52,6 @@
  * @return Class name.
  */
 static const char *tracker_mqtt_topic_class(const char *topic) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (topic == s_topic_rawdata || (topic != NULL && strcmp(topic, s_topic_rawdata) == 0)) {
         return "rawdata";
     }
@@ -190,7 +186,6 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
 }
 
 esp_err_t tracker_mqtt_subscribe_commands_internal(void) {
-    // Update the subscribe commands internal path here so later asynchronous work sees the latest intent.
     ESP_RETURN_ON_FALSE(s_connected, ESP_ERR_INVALID_STATE, TRACKER_MQTT_TAG, "MQTT not connected");
     if (s_commands_subscribed) {
         return ESP_OK;

@@ -22,9 +22,6 @@
  * This translation unit belongs to the BLE OBD NimBLE adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 static const char *TAG = "BLE_INIT";
 static const UBaseType_t BLE_HOST_TASK_PRIORITY = (UBaseType_t)(configMAX_PRIORITIES - 4);
@@ -33,7 +30,6 @@ static const UBaseType_t BLE_HOST_TASK_PRIORITY = (UBaseType_t)(configMAX_PRIORI
  * @brief Convert controller status enum to readable text.
  */
 static const char *ble_controller_status_to_str(esp_bt_controller_status_t status) {
-    // Translate controller status to str into a readable label so logs and diagnostics stay easy to follow.
     switch (status) {
         case ESP_BT_CONTROLLER_STATUS_IDLE:
             return "IDLE";
@@ -73,7 +69,6 @@ void ble_store_config_init(void);
  * @param param Unused.
  */
 static void ble_task(void *param) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     (void)param;
     ESP_LOGI(TAG, "event=nimble_host_task_started");
 
@@ -93,7 +88,6 @@ static void ble_task(void *param) {
 }
 
 static BaseType_t ble_host_task_core(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return CONFIG_BT_NIMBLE_PINNED_TO_CORE < portNUM_PROCESSORS ? CONFIG_BT_NIMBLE_PINNED_TO_CORE : tskNO_AFFINITY;
 }
 
@@ -103,7 +97,6 @@ static BaseType_t ble_host_task_core(void) {
  * @param reason NimBLE reset reason code.
  */
 static void default_reset_cb(int reason) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     ESP_LOGW(TAG, "event=nimble_reset reason=%d", reason);
 }
 
@@ -111,7 +104,6 @@ static void default_reset_cb(int reason) {
  * @brief Default stack sync callback used when caller does not supply one.
  */
 static void default_sync_cb(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     ESP_LOGI(TAG, "event=nimble_host_synced");
 }
 
@@ -123,7 +115,6 @@ static void default_sync_cb(void) {
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t ble_init_stack(const ble_init_config_t *config) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     ESP_RETURN_ON_NULL(config, ESP_ERR_INVALID_ARG, TAG, "config is NULL");
 
     ble_log_controller_stage("enter");
@@ -193,7 +184,6 @@ esp_err_t ble_init_stack(const ble_init_config_t *config) {
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t ble_stack_init(void) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     static ble_init_config_t config = {
         .reset_cb = default_reset_cb,
         .sync_cb = default_sync_cb,
@@ -202,7 +192,6 @@ esp_err_t ble_stack_init(void) {
 }
 
 bool ble_stack_is_started(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_stack_started;
 }
 
@@ -212,7 +201,6 @@ bool ble_stack_is_started(void) {
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t ble_stack_deinit(void) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     ble_log_controller_stage("deinit-enter");
 
     /* Idempotent deinit for safe repeated calls. */

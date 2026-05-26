@@ -10,15 +10,11 @@
  * This translation unit belongs to the SIM7600 AT modem adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
 
-// File-local constants, retained state, and helper wiring stay private here so
-// higher layers interact with this module through its exported contract.
-
 
 /**
  * @brief Reset recovery markers to initial state.
  */
 static void modem_lte_reset_recovery_markers(void) {
-    // Reset LTE reset recovery markers here so stale data does not leak into the next cycle.
     s_lte_initialized = false;
     s_lte_connected = false;
     s_cpin_diag_log_ms = 0;
@@ -40,7 +36,6 @@ static void modem_lte_reset_recovery_markers(void) {
  * @return True if recovery allowed.
  */
 bool modem_lte_can_hw_recover(uint64_t now_ms) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     bool rdy_seen = modem_lte_rdy_seen_in_cycle();
     bool force_no_rdy_recover = !rdy_seen &&
                                 s_lte_backoff_retry.attempts >= MODEM_LTE_FORCE_RECOVER_NO_RDY_ATTEMPTS;
@@ -71,7 +66,6 @@ bool modem_lte_can_hw_recover(uint64_t now_ms) {
  * @brief Reset AT sync sweep counter.
  */
 void modem_lte_reset_at_sync_sweep(void) {
-    // Reset LTE reset AT sync sweep here so stale data does not leak into the next cycle.
     s_at_sync_fail_count = 0;
 }
 
@@ -83,7 +77,6 @@ void modem_lte_reset_at_sync_sweep(void) {
  * @param reason Failure reason.
  */
 void modem_lte_enter_backoff(uint64_t now_ms, esp_err_t err, const char *reason) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     uint32_t delay_ms = retry_state_current_delay_ms(&s_lte_backoff_retry,
                                                      &s_lte_backoff_policy,
                                                      now_ms);
@@ -104,7 +97,6 @@ void modem_lte_enter_backoff(uint64_t now_ms, esp_err_t err, const char *reason)
 }
 
 void modem_lte_restart_wait_rdy(uint64_t now_ms, const char *reason) {
-    // Initialize module-local state and dependencies before later runtime paths rely on them.
     modem_lte_reset_recovery_markers();
     s_state_deadline_ms = now_ms + MODEM_LTE_RDY_WAIT_TIMEOUT_MS;
     ESP_LOGW(MODEM_LTE_TAG, "restart wait-rdy reason=%s", reason);
@@ -112,7 +104,6 @@ void modem_lte_restart_wait_rdy(uint64_t now_ms, const char *reason) {
 }
 
 void modem_lte_enter_recover_or_backoff(uint64_t now_ms, esp_err_t err, const char *reason) {
-    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!modem_lte_can_hw_recover(now_ms)) {
         uint64_t cooldown_left_ms = 0;
         if (s_last_hw_recover_ms != 0 && now_ms > s_last_hw_recover_ms &&

@@ -196,7 +196,13 @@ export const TripForm = ({
           <Button variant="outline" disabled={isPending} onClick={() => onOpenChange(false)}>
             Hủy
           </Button>
-          <Button disabled={isPending} onClick={() => onSubmit(form)}>
+          <Button
+            disabled={isPending || !form.tripCode.trim()}
+            onClick={() => {
+              if (!form.tripCode.trim()) return;
+              onSubmit(form);
+            }}
+          >
             {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Lưu chuyến đi
           </Button>
