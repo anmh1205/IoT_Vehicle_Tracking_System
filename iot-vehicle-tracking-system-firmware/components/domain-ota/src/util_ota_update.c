@@ -77,7 +77,7 @@ typedef struct {
     bool transfer_mode_hex;
     size_t transfer_wire_len;
     size_t read_offset;
-    int total_written;
+    uint32_t total_written;
     uint8_t last_emitted_download_progress;
 } util_ota_update_ctx_t;
 
@@ -314,7 +314,7 @@ static esp_err_t util_ota_begin_partition_write(util_ota_update_ctx_t *ctx) {
     ctx->transfer_mode_hex = false;
     ctx->transfer_wire_len = 0U;
     ctx->read_offset = 0U;
-    ctx->total_written = 0;
+    ctx->total_written = 0U;
     return ESP_OK;
 }
 
@@ -470,11 +470,11 @@ static esp_err_t util_ota_write_wire_payload(util_ota_update_ctx_t *ctx,
     }
 
     ctx->read_offset += wire_payload_len;
-    ctx->total_written += (int)written_len;
-    if (ctx->total_written > (int)cmd->size) {
+    ctx->total_written += (uint32_t)written_len;
+    if (ctx->total_written > cmd->size) {
         // Reject oversized downloads even if the modem kept streaming, because the signed manifest is authoritative.
         ctx->failure_code = TRACKER_OTA_ERROR_HTTP_SIZE_MISMATCH;
-        ESP_LOGE(UTIL_TAG, "decoded size overflow expected=%u actual=%d", (unsigned)cmd->size, ctx->total_written);
+        ESP_LOGE(UTIL_TAG, "decoded size overflow expected=%u actual=%u", (unsigned)cmd->size, (unsigned)ctx->total_written);
         return ESP_FAIL;
     }
 
@@ -490,7 +490,7 @@ static void util_ota_emit_download_progress(util_ota_update_ctx_t *ctx,
         return;
     }
 
-    int progress = (int)(((uint64_t)ctx->total_written * 100ULL) / cmd->size);
+    int progress = (int)(((uint64_t)ctx->total_written * 100ULL) / (uint64_t)cmd->size);
     uint8_t bounded_progress = (uint8_t)util_clamp_int(progress,
                                                        TRACKER_OTA_PROGRESS_DOWNLOADING_START,
                                                        TRACKER_OTA_PROGRESS_DOWNLOADING_MAX);
@@ -555,13 +555,13 @@ static esp_err_t util_ota_finalize_image(util_ota_update_ctx_t *ctx,
         return ESP_FAIL;
     }
 
-    if (ctx->total_written != (int)cmd->size) {
+    if (ctx->total_written != cmd->size) {
         // Final decoded byte count must still match the manifest even when the transport framing looked correct.
         ctx->failure_code = TRACKER_OTA_ERROR_HTTP_SIZE_MISMATCH;
         ESP_LOGE(UTIL_TAG,
-                 "decoded size mismatch expected=%u actual=%d",
+                 "decoded size mismatch expected=%u actual=%u",
                  (unsigned)cmd->size,
-                 ctx->total_written);
+                 (unsigned)ctx->total_written);
         return ESP_FAIL;
     }
 

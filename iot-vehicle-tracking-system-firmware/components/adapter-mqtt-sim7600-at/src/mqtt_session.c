@@ -62,7 +62,7 @@
 #define CONFIG_TRACKER_MQTT_DNS_FALLBACK_IPV4 ""
 #endif
 
-#define MQTT_DNS_LOOKUP_TIMEOUT_MS 60000U
+#define MQTT_DNS_LOOKUP_TIMEOUT_MS 15000U
 #define MQTT_DNS_LOOKUP_IDLE_TIMEOUT_MS 1500U
 #define MQTT_RESOLVED_IPV4_MAX_LEN 16U
 
@@ -941,6 +941,10 @@ esp_err_t tracker_mqtt_stop_service(void) {
 
 esp_err_t tracker_mqtt_cleanup_after_connect_failure(void) {
     esp_err_t first_err = ESP_OK;
+    /* Total cleanup deadline: 60s max regardless of individual command timeouts.
+     * Prevents pathological modem states from blocking the FSM for minutes. */
+    uint64_t cleanup_deadline_ms = util_uptime_ms() + 60000ULL;
+
     esp_err_t disc_err = tracker_mqtt_send_disconnect();
     if (first_err == ESP_OK && disc_err != ESP_OK) {
         first_err = disc_err;
@@ -949,6 +953,10 @@ esp_err_t tracker_mqtt_cleanup_after_connect_failure(void) {
     esp_err_t rel_err = ESP_OK;
     uint32_t rel_attempts_performed = 0;
     for (uint32_t i = 0; i < MQTT_CONNECT_CLEANUP_RETRY_MAX; ++i) {
+        if (util_uptime_ms() >= cleanup_deadline_ms) {
+            ESP_LOGW(TRACKER_MQTT_TAG, "MQTT cleanup deadline hit stage=release");
+            break;
+        }
         rel_attempts_performed = i + 1U;
         disc_err = tracker_mqtt_send_disconnect();
         if (first_err == ESP_OK && disc_err != ESP_OK) {
@@ -968,6 +976,10 @@ esp_err_t tracker_mqtt_cleanup_after_connect_failure(void) {
     esp_err_t stop_err = ESP_OK;
     uint32_t stop_attempts_performed = 0;
     for (uint32_t i = 0; i < MQTT_CONNECT_CLEANUP_RETRY_MAX; ++i) {
+        if (util_uptime_ms() >= cleanup_deadline_ms) {
+            ESP_LOGW(TRACKER_MQTT_TAG, "MQTT cleanup deadline hit stage=stop");
+            break;
+        }
         stop_attempts_performed = i + 1U;
         stop_err = tracker_mqtt_stop_service();
         if (stop_err == ESP_OK) {

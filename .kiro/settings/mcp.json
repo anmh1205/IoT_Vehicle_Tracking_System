@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@anthropic-ai/mcp-playwright@latest"],
+      "disabled": false,
+      "autoApprove": ["browser_navigate", "browser_click", "browser_snapshot", "browser_type", "browser_wait_for_navigation"]
+    }
+  }
+}

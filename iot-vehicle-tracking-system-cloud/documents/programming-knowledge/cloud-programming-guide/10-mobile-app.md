@@ -1,6 +1,6 @@
-# 10 - Mobile App (Flutter)
+# 10 - Mobile App (Flutter) — Tổng quan
 
-> Flutter WebView Hybrid App — tái sử dụng web dashboard + native features (push notification, offline).
+> Tổng quan Flutter Mobile App. Xem [22-flutter-mobile-app.md](./22-flutter-mobile-app.md) cho tài liệu chi tiết đầy đủ.
 
 ---
 

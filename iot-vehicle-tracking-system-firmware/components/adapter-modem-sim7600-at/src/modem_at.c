@@ -763,7 +763,7 @@ esp_err_t modem_at_set_baud(uint32_t baud) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
     ESP_RETURN_ON_FALSE(baud > 0, ESP_ERR_INVALID_ARG, TAG, "Invalid baud");
 
-    if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(30000)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
     }
 
@@ -795,7 +795,7 @@ esp_err_t modem_at_set_baud(uint32_t baud) {
 esp_err_t modem_at_set_pins(gpio_num_t tx_pin, gpio_num_t rx_pin) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
-    if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(30000)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
     }
 
@@ -822,7 +822,7 @@ esp_err_t modem_at_set_pins(gpio_num_t tx_pin, gpio_num_t rx_pin) {
 esp_err_t modem_at_set_line_inverse(uint32_t inverse_mask) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
-    if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(30000)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
     }
 
@@ -859,7 +859,7 @@ esp_err_t modem_at_set_frame_format(uart_word_length_t data_bits,
     // Build the AT set frame format representation here so every caller emits the same contract.
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
-    if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(30000)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
     }
 
@@ -900,7 +900,7 @@ esp_err_t modem_at_set_frame_format(uart_word_length_t data_bits,
 esp_err_t modem_at_set_source_clk(uart_sclk_t source_clk) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
-    if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(30000)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
     }
 

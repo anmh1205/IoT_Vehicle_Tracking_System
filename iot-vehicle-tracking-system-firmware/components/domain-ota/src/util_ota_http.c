@@ -283,7 +283,12 @@ bool util_ota_parse_httpread_payload(const uint8_t *response,
 
     size_t declared_len = 0U;
     while (cursor < response_len && isdigit((unsigned char)response[cursor])) {
-        declared_len = (declared_len * 10U) + (size_t)(response[cursor] - '0');
+        size_t next = (declared_len * 10U) + (size_t)(response[cursor] - '0');
+        if (next < declared_len || next > response_len) {
+            /* Overflow or impossibly large length — reject. */
+            return false;
+        }
+        declared_len = next;
         ++cursor;
     }
     if (declared_len == 0U) {
