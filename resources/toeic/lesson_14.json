@@ -1,0 +1,131 @@
+{
+  "page_id": "357df50b-1fcd-814b-bf2f-cf414c432548",
+  "title": "14. Danh động từ và nguyên mẫu có to",
+  "intro": [
+    {"text": "Bài 14 — Phân biệt Danh động từ (V-ing) và Nguyên mẫu có to (to V). Đây là bài tổng hợp của Bài 12 và Bài 13. Làm câu hỏi ngay sau mỗi phần, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 hỏi chọn to V hay V-ing sau một động từ; và cấu trúc 'động từ + tân ngữ + to V' vs 'make/let/have sb + V trần'.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Nhóm động từ + to V",
+      "theory": ["Nhóm 'ý định, kế hoạch, mong muốn, quyết định' theo sau bằng to V."],
+      "keys": ["want, decide, plan, hope, agree, refuse, expect, offer, promise, manage, afford, learn, choose, intend, arrange + to V."],
+      "traps": ["Sau các động từ này KHÔNG dùng V-ing: 'promised to deliver' (không phải 'promised delivering')."],
+      "examples": [
+        "The board decided to pursue the merger.",
+        "We can't afford to have another delay."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The board decided ___ the proposed merger.\nA. pursue    B. to pursue    C. pursuing    D. pursued", "a": "Đáp án: B (to pursue). ||decide + to V."},
+        {"q": "With this tight schedule, we cannot afford ___ another setback.\nA. have    B. to have    C. having    D. had", "a": "Đáp án: B (to have). ||afford + to V."},
+        {"q": "The supplier agreed ___ its prices for bulk orders.\nA. lower    B. to lower    C. lowering    D. lowered", "a": "Đáp án: B (to lower). ||agree + to V."},
+        {"q": "The senior engineer offered ___ the new interns.\nA. train    B. to train    C. training    D. trained", "a": "Đáp án: B (to train). ||offer + to V."},
+        {"q": "Tìm và sửa lỗi:\n\"They promised delivering the goods on time.\"", "a": "Lỗi: \"promised delivering\" → \"promised to deliver\". ||promise + to V."},
+        {"q": "The assistant arranged ___ a meeting with the client.\nA. hold    B. to hold    C. holding    D. held", "a": "Đáp án: B (to hold). ||arrange + to V."},
+        {"q": "We expect ___ the audit results by Friday.\nA. receive    B. to receive    C. receiving    D. received", "a": "Đáp án: B (to receive). ||expect + to V."},
+        {"q": "Điền vào kế hoạch (Part 6):\n\"The company plans ___ a new branch in the south next year.\"\nA. open    B. to open    C. opening    D. opened", "a": "Đáp án: B (to open). ||plan + to V."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Nhóm động từ + V-ing",
+      "theory": ["Nhóm 'thưởng thức, hoàn tất, tránh, đề xuất, tiếp tục' theo sau bằng V-ing. Sau mọi giới từ cũng dùng V-ing."],
+      "keys": ["enjoy, finish, avoid, consider, suggest, recommend, mind, postpone, deny, keep, practice, admit, quit, risk + V-ing."],
+      "traps": ["suggest/recommend/consider + V-ing (không 'to do'). look forward to / be used to + V-ing."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "Most employees enjoy ___ as part of a small team.\nA. work    B. to work    C. working    D. worked", "a": "Đáp án: C (working). ||enjoy + V-ing."},
+        {"q": "Please avoid ___ during the certification exam.\nA. talk    B. to talk    C. talking    D. talked", "a": "Đáp án: C (talking). ||avoid + V-ing."},
+        {"q": "The committee suggested ___ the submission deadline by a week.\nA. to extend    B. extending    C. extend    D. extended", "a": "Đáp án: B (extending). ||suggest + V-ing."},
+        {"q": "The contractor admitted ___ a calculation error in the bid.\nA. to make    B. making    C. make    D. made", "a": "Đáp án: B (making). ||admit + V-ing."},
+        {"q": "Tìm và sửa lỗi:\n\"We considered to relocate the office downtown.\"", "a": "Lỗi: \"considered to relocate\" → \"considered relocating\". ||consider + V-ing."},
+        {"q": "The team kept ___ different settings until the system worked.\nA. try    B. to try    C. trying    D. tried", "a": "Đáp án: C (trying). ||keep + V-ing."},
+        {"q": "Consultants recommend ___ at the venue at least 30 minutes early.\nA. arrive    B. to arrive    C. arriving    D. arrived", "a": "Đáp án: C (arriving). ||recommend + V-ing."},
+        {"q": "Điền vào ghi chú (Part 6):\n\"To save costs, we postponed ___ new equipment until next quarter.\"\nA. buy    B. to buy    C. buying    D. bought", "a": "Đáp án: C (buying). ||postpone + V-ing."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Động từ đổi nghĩa theo to V / V-ing",
+      "theory": ["Một số động từ đổi nghĩa hoàn toàn tùy theo sau là to V hay V-ing."],
+      "keys": ["remember to V (nhớ sẽ làm) / remember V-ing (nhớ đã làm). stop to V (dừng để làm) / stop V-ing (ngừng hẳn). regret to V (tiếc phải báo) / regret V-ing (hối tiếc đã làm). forget to V / forget V-ing."],
+      "traps": ["try to V = nỗ lực; try V-ing = thử nghiệm một cách. Đọc ngữ cảnh để chọn."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "Please remember ___ the monthly report before you leave.\nA. submit    B. to submit    C. submitting    D. submitted", "a": "Đáp án: B (to submit). ||remember to V = nhớ sẽ phải làm (việc chưa làm)."},
+        {"q": "I clearly remember ___ him at last year's conference.\nA. to meet    B. meeting    C. meet    D. met", "a": "Đáp án: B (meeting). ||remember V-ing = nhớ đã làm (việc đã xảy ra)."},
+        {"q": "On the way to work, she stopped ___ a cup of coffee.\nA. get    B. to get    C. getting    D. got", "a": "Đáp án: B (to get). ||stop to V = dừng lại để làm việc khác."},
+        {"q": "For his health, he finally stopped ___ fast food.\nA. to eat    B. eating    C. eat    D. ate", "a": "Đáp án: B (eating). ||stop V-ing = ngừng hẳn một thói quen."},
+        {"q": "We regret ___ you that the seminar has been canceled.\nA. inform    B. to inform    C. informing    D. informed", "a": "Đáp án: B (to inform). ||regret to inform = tiếc phải báo tin (ngay bây giờ)."},
+        {"q": "Tìm và sửa lỗi:\n\"Don't forget submitting the expense form by Friday.\"", "a": "Lỗi: \"forget submitting\" → \"forget to submit\". ||forget to V = nhớ làm việc chưa làm (nhắc nhở)."},
+        {"q": "They tried ___ a new supplier, but the quality did not improve.\nA. to use    B. using    C. use    D. used", "a": "Đáp án: B (using). ||try V-ing = thử nghiệm một cách để xem kết quả."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"The team tried hard ___ the deadline despite limited resources.\"\nA. meet    B. to meet    C. meeting    D. met", "a": "Đáp án: B (to meet). ||try (hard) to V = nỗ lực làm điều khó."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Động từ + tân ngữ + to V; make/let/have + V trần",
+      "theory": ["Nhiều động từ theo mẫu: V + tân ngữ + to V. Riêng make/let/have (sai khiến) + tân ngữ + V NGUYÊN THỂ (không 'to'). help + tân ngữ + (to) V đều được."],
+      "keys": ["ask/tell/advise/expect/allow/encourage/want + sb + to V. make/let/have + sb + V trần. help + sb + (to) V."],
+      "traps": ["KHÔNG dùng 'to' sau make/let/have: 'had the technician repair' (không phải 'to repair')."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "The manager asked the team ___ overtime to meet the deadline.\nA. work    B. to work    C. working    D. worked", "a": "Đáp án: B (to work). ||ask + sb + to V."},
+        {"q": "The new policy allows employees ___ from home twice a week.\nA. work    B. to work    C. working    D. worked", "a": "Đáp án: B (to work). ||allow + sb + to V."},
+        {"q": "The supervisor made all staff ___ the safety training video.\nA. watch    B. to watch    C. watching    D. watched", "a": "Đáp án: A (watch). ||make + sb + V trần (không 'to')."},
+        {"q": "The new rule lets visitors ___ the executive lounge.\nA. use    B. to use    C. using    D. used", "a": "Đáp án: A (use). ||let + sb + V trần."},
+        {"q": "Tìm và sửa lỗi:\n\"The manager had the technician to repair the printer.\"", "a": "Lỗi: \"had ... to repair\" → \"had the technician repair\". ||have + sb + V trần (sai khiến)."},
+        {"q": "We encourage all employees ___ honest feedback through the portal.\nA. share    B. to share    C. sharing    D. shared", "a": "Đáp án: B (to share). ||encourage + sb + to V."},
+        {"q": "The trainer helped the interns ___ the new software quickly.\nA. understand    B. understanding    C. to understanding    D. understood", "a": "Đáp án: A (understand). ||help + sb + (to) V; 'understand' (V trần) đúng."},
+        {"q": "Điền vào hướng dẫn (Part 6):\n\"The company expects its managers ___ clear goals each quarter.\"\nA. set    B. to set    C. setting    D. sets", "a": "Đáp án: B (to set). ||expect + sb + to V."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn to V vs V-ing và mẫu động từ + tân ngữ + to V."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "The client finally agreed ___ the revised contract.\nA. sign    B. to sign    C. signing    D. signed", "a": "Đáp án: B (to sign). ||agree + to V."},
+        {"q": "Our staff enjoy ___ with this long-term partner.\nA. collaborate    B. to collaborate    C. collaborating    D. collaborated", "a": "Đáp án: C (collaborating). ||enjoy + V-ing."},
+        {"q": "The project manager suggested ___ the launch date.\nA. to change    B. changing    C. change    D. changed", "a": "Đáp án: B (changing). ||suggest + V-ing."},
+        {"q": "Due to budget cuts, they decided ___ the project.\nA. delay    B. to delay    C. delaying    D. delayed", "a": "Đáp án: B (to delay). ||decide + to V."},
+        {"q": "Tìm và sửa lỗi:\n\"She wants visiting the new manufacturing facility.\"", "a": "Lỗi: \"wants visiting\" → \"wants to visit\". ||want + to V."},
+        {"q": "The new hires are not used to ___ such long shifts.\nA. work    B. to work    C. working    D. worked", "a": "Đáp án: C (working). ||be used to + V-ing ('to' là giới từ)."},
+        {"q": "The director asked us ___ the figures before submission.\nA. recheck    B. to recheck    C. rechecking    D. rechecked", "a": "Đáp án: B (to recheck). ||ask + sb + to V."},
+        {"q": "We look forward to ___ from you regarding the offer.\nA. hear    B. to hear    C. hearing    D. heard", "a": "Đáp án: C (hearing). ||look forward to + V-ing."},
+        {"q": "Chọn câu ĐÚNG:\nA. The manager let the team to leave early.\nB. The manager let the team leave early.\nC. The manager let the team leaving early.\nD. The manager let the team left early.", "a": "Đáp án: B. ||let + sb + V trần (leave)."},
+        {"q": "Điền vào thông báo (Part 6):\n\"Management decided to keep ___ the old system until the upgrade is ready.\"\nA. use    B. to use    C. using    D. used", "a": "Đáp án: C (using). ||keep + V-ing (decide + to keep, rồi keep + V-ing)."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "The board agreed ___ the new marketing proposal.\nA. approve    B. to approve    C. approving    D. approved", "a": "B (to approve). ||agree + to V."},
+      {"q": "The team finished ___ the report ahead of schedule.\nA. to prepare    B. preparing    C. prepare    D. prepared", "a": "B (preparing). ||finish + V-ing."},
+      {"q": "Please remember ___ the storage room when you leave.\nA. lock    B. to lock    C. locking    D. locked", "a": "B (to lock). ||remember to V = nhớ sẽ làm."},
+      {"q": "The auditor admitted ___ a confidential file by mistake.\nA. to share    B. sharing    C. share    D. shared", "a": "B (sharing). ||admit + V-ing."},
+      {"q": "Tìm và sửa lỗi:\n\"They suggested to hire two more engineers.\"", "a": "Lỗi: \"suggested to hire\" → \"suggested hiring\". ||suggest + V-ing."},
+      {"q": "The new policy allows customers ___ items within 30 days.\nA. return    B. to return    C. returning    D. returned", "a": "B (to return). ||allow + sb + to V."},
+      {"q": "The supervisor made everyone ___ the updated procedure.\nA. follow    B. to follow    C. following    D. followed", "a": "A (follow). ||make + sb + V trần."},
+      {"q": "With so little time, we cannot afford ___ the deadline.\nA. miss    B. to miss    C. missing    D. missed", "a": "B (to miss). ||afford + to V."},
+      {"q": "Most employees enjoy ___ flexible working schedules.\nA. have    B. to have    C. having    D. had", "a": "C (having). ||enjoy + V-ing."},
+      {"q": "Tìm và sửa lỗi:\n\"The manager had the assistant to book the flight.\"", "a": "Lỗi: \"had ... to book\" → \"had the assistant book\". ||have + sb + V trần."},
+      {"q": "On the way to the airport, she stopped ___ some documents from the office.\nA. collect    B. to collect    C. collecting    D. collected", "a": "B (to collect). ||stop to V = dừng lại để làm việc khác."},
+      {"q": "The company keeps ___ in new technology every year.\nA. invest    B. to invest    C. investing    D. invested", "a": "C (investing). ||keep + V-ing."},
+      {"q": "We expect the supplier ___ the goods on time.\nA. deliver    B. to deliver    C. delivering    D. delivered", "a": "B (to deliver). ||expect + sb/sth + to V."},
+      {"q": "Chọn câu ĐÚNG:\nA. The trainer helped us to mastering the tool.\nB. The trainer helped us master the tool.\nC. The trainer helped us mastering the tool.\nD. The trainer helped us mastered the tool.", "a": "B. ||help + sb + (to) V; 'master' (V trần) đúng."},
+      {"q": "Tìm và sửa lỗi:\n\"We look forward to meet you at the trade fair.\"", "a": "Lỗi: \"to meet\" → \"to meeting\". ||look forward to + V-ing."},
+      {"q": "Điền vào biên bản (Part 6):\n\"The committee recommended ___ the project until more funding is secured.\"\nA. to postpone    B. postponing    C. postpone    D. postponed", "a": "B (postponing). ||recommend + V-ing."}
+    ]
+  },
+  "summary": [
+    "to V sau: want, decide, plan, hope, agree, refuse, expect, offer, promise, manage, afford, learn, choose, intend, arrange.",
+    "V-ing sau: enjoy, finish, avoid, consider, suggest, recommend, mind, postpone, deny, keep, practice, admit, quit, risk; và sau mọi giới từ.",
+    "Đổi nghĩa: remember/forget/stop/regret + to V (việc chưa làm/dừng để làm/tiếc phải báo) ↔ + V-ing (việc đã làm/ngừng hẳn/hối tiếc).",
+    "V + tân ngữ + to V: ask/tell/advise/expect/allow/encourage. make/let/have + sb + V trần; help + sb + (to) V."
+  ],
+  "summary_callouts": [
+    {"text": "Mẹo: nhóm 'ý định/kế hoạch' → to V; nhóm 'enjoy/finish/avoid/suggest' → V-ing. make/let/have + sb + V trần (không 'to'). look forward to / be used to + V-ing.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 3 (động từ đổi nghĩa) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

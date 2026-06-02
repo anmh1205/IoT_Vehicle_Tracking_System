@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="945" viewBox="0 0 1680 945" role="img" aria-label="Infographic bối cảnh GPS chỉ là một phần của bài toán quản lý xe thuê">
+  <defs>
+    <filter id="arrowShadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#0f2d49" flood-opacity="0.28"/>
+    </filter>
+    <linearGradient id="arrowFill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0f3457"/>
+      <stop offset="100%" stop-color="#1a5276"/>
+    </linearGradient>
+  </defs>
+  <image href="generated-slide-03-context-gap-infographic-ai-polished.png" x="0" y="0" width="1680" height="945"/>
+  <!-- Make the process arrows visually explicit for slide readability. -->
+  <g filter="url(#arrowShadow)">
+    <path d="M486 411 H533 V383 L583 425 L533 467 V439 H486 Z" fill="url(#arrowFill)"/>
+    <path d="M1072 411 H1119 V383 L1169 425 L1119 467 V439 H1072 Z" fill="url(#arrowFill)"/>
+  </g>
+  <!-- Correct the AI-rendered typo in the warning row caption while preserving the polished generated design. -->
+  <rect x="721" y="426" width="326" height="34" rx="6" fill="#ffffff"/>
+  <text x="724" y="449" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400" fill="#28364c">
+    rung, dịch chuyển khi đỗ, vượt vùng
+  </text>
+</svg>

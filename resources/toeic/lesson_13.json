@@ -1,0 +1,139 @@
+{
+  "page_id": "357df50b-1fcd-8177-8e4f-c3ad2a79289e",
+  "title": "13. Danh động từ",
+  "intro": [
+    {"text": "Bài 13 — Danh động từ (Gerund = V-ing dùng như một danh từ). Cách học: đọc lý thuyết từng phần → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 & 6 hay hỏi chọn V-ing hay to V. Quy tắc vàng: sau giới từ và sau nhóm động từ enjoy/finish/avoid... luôn dùng V-ing. So sánh trực tiếp với Bài 12 (nhóm want/decide + to V).", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Danh động từ làm chủ ngữ, tân ngữ, bổ ngữ",
+      "theory": ["V-ing có thể đóng vai trò như một danh từ: làm chủ ngữ (chia động từ số ít), làm tân ngữ, hoặc làm bổ ngữ sau động từ be."],
+      "keys": ["Chủ ngữ: Reading reports is part of my job. (is — số ít). Bổ ngữ: Her job is managing accounts."],
+      "traps": ["Khi V-ing làm chủ ngữ, động từ chính luôn chia số ít: Managing a team requires patience (không phải require)."],
+      "examples": [
+        "Exercising regularly improves focus. — gerund làm chủ ngữ.",
+        "My responsibility is handling customer complaints. — gerund làm bổ ngữ."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "___ to international clients requires strong communication skills.\nA. Communicate    B. Communicating    C. To communicating    D. Communicated", "a": "Đáp án: B (Communicating). ||Danh động từ làm chủ ngữ. 'To communicating' sai cấu trúc; động từ chính 'requires' chia số ít hợp với chủ ngữ gerund."},
+        {"q": "The committee finished ___ the annual budget yesterday.\nA. review    B. to review    C. reviewing    D. reviewed", "a": "Đáp án: C (reviewing). ||finish + V-ing."},
+        {"q": "___ regularly improves both health and concentration.\nA. Exercise    B. Exercising    C. To exercising    D. Exercised", "a": "Đáp án: B (Exercising). ||Gerund làm chủ ngữ, theo sau là động từ số ít 'improves'."},
+        {"q": "Her main responsibility is ___ customer complaints.\nA. handle    B. handling    C. to handling    D. handled", "a": "Đáp án: B (handling). ||Gerund làm bổ ngữ sau động từ be."},
+        {"q": "Chọn câu ĐÚNG:\nA. I enjoy to read market reports.\nB. I enjoy reading market reports.\nC. I enjoy read market reports.\nD. I enjoy for reading market reports.", "a": "Đáp án: B. ||enjoy + V-ing. enjoy không bao giờ đi với to V."},
+        {"q": "The manager suggested ___ the meeting to Monday morning.\nA. to move    B. moving    C. move    D. moved", "a": "Đáp án: B (moving). ||suggest + V-ing (không dùng suggest to do)."},
+        {"q": "Tìm và sửa lỗi:\n\"We considered to expand into new markets.\"", "a": "Lỗi: \"considered to expand\" → \"considered expanding\". ||consider + V-ing."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"___ accurate records is essential for passing the annual audit.\"\nA. Keep    B. Keeping    C. To keeping    D. Kept", "a": "Đáp án: B (Keeping). ||Gerund làm chủ ngữ, động từ chính 'is' chia số ít."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Động từ luôn theo sau bằng V-ing",
+      "theory": ["Một nhóm động từ bắt buộc theo sau là danh động từ, tuyệt đối không dùng to V."],
+      "keys": ["enjoy, finish, avoid, consider, suggest, recommend, mind, postpone, deny, keep, practice, quit, admit, miss, risk + V-ing."],
+      "traps": ["Đây là nhóm đối lập với Bài 12 (want/decide/plan/agree/hope + to V). Nếu thấy các động từ này, chọn ngay V-ing."],
+      "examples": [
+        "The staff kept working despite the issues. — keep + V-ing.",
+        "He admitted missing the deadline. — admit + V-ing."
+      ],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "The technical staff kept ___ despite the power issues.\nA. work    B. to work    C. working    D. worked", "a": "Đáp án: C (working). ||keep + V-ing = tiếp tục làm gì."},
+        {"q": "Please avoid ___ loudly during the presentation.\nA. talk    B. to talk    C. talking    D. talked", "a": "Đáp án: C (talking). ||avoid + V-ing."},
+        {"q": "Because of the storm, the company postponed ___ the new branch.\nA. to open    B. opening    C. open    D. opened", "a": "Đáp án: B (opening). ||postpone + V-ing."},
+        {"q": "The supplier admitted ___ the original deadline.\nA. to miss    B. missing    C. miss    D. missed", "a": "Đáp án: B (missing). ||admit + V-ing."},
+        {"q": "We recommend ___ early to avoid the holiday crowds.\nA. arrive    B. to arrive    C. arriving    D. arrived", "a": "Đáp án: C (arriving). ||recommend + V-ing."},
+        {"q": "Chọn câu ĐÚNG:\nA. They denied to receive the payment.\nB. They denied receiving the payment.\nC. They denied receive the payment.\nD. They denied for receiving the payment.", "a": "Đáp án: B. ||deny + V-ing."},
+        {"q": "Tìm và sửa lỗi:\n\"She practices to speak English with colleagues every day.\"", "a": "Lỗi: \"practices to speak\" → \"practices speaking\". ||practice + V-ing."},
+        {"q": "Điền vào bài viết (Part 6):\n\"To cut costs, the team decided to quit ___ the outdated software.\"\nA. use    B. to use    C. using    D. used", "a": "Đáp án: C (using). ||quit + V-ing. (Lưu ý decide + to V, nhưng ô trống đứng sau 'quit'.)"}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Sau giới từ luôn dùng V-ing",
+      "theory": ["Bất kỳ động từ nào đứng ngay sau một giới từ đều phải ở dạng V-ing."],
+      "keys": ["Giới từ thường gặp: in, on, at, for, after, before, about, by, of. Cụm: interested in, good at, responsible for, capable of, instead of, look forward to, be used to, be committed to + V-ing."],
+      "traps": ["look forward to / be used to / be committed to — 'to' ở đây là GIỚI TỪ nên theo sau là V-ing, KHÔNG phải V nguyên thể. Đúng: look forward to hearing."],
+      "examples": [
+        "She is interested in launching a startup. — interested in + V-ing.",
+        "Thank you for informing us promptly. — for + V-ing."
+      ],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "The new manager is interested in ___ a mentorship program.\nA. launch    B. to launch    C. launching    D. launched", "a": "Đáp án: C (launching). ||interested in + V-ing."},
+        {"q": "The sales team succeeded in ___ the major contract.\nA. win    B. to win    C. winning    D. won", "a": "Đáp án: C (winning). ||succeed in + V-ing."},
+        {"q": "Thank you for ___ us of the schedule change so promptly.\nA. inform    B. to inform    C. informing    D. informed", "a": "Đáp án: C (informing). ||for + V-ing."},
+        {"q": "We look forward to ___ from you regarding the proposal.\nA. hear    B. to hear    C. hearing    D. heard", "a": "Đáp án: C (hearing). ||look forward to + V-ing ('to' là giới từ). Bẫy kinh điển."},
+        {"q": "Tìm và sửa lỗi:\n\"He is responsible for manage the central warehouse.\"", "a": "Lỗi: \"for manage\" → \"for managing\". ||responsible for + V-ing."},
+        {"q": "Instead of ___ a taxi, the delegates took the subway.\nA. take    B. to take    C. taking    D. took", "a": "Đáp án: C (taking). ||instead of + V-ing."},
+        {"q": "The new device is capable of ___ data automatically every hour.\nA. store    B. to store    C. storing    D. stored", "a": "Đáp án: C (storing). ||capable of + V-ing."},
+        {"q": "Điền vào hướng dẫn (Part 6):\n\"Before ___ the form, applicants should read the eligibility guidelines.\"\nA. submit    B. to submit    C. submitting    D. submitted", "a": "Đáp án: C (submitting). ||before (giới từ) + V-ing."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Cụm cố định với V-ing (và bẫy)",
+      "theory": ["Nhiều cụm thành ngữ luôn theo sau bằng V-ing. Nhớ theo cụm sẽ nhanh hơn dịch nghĩa."],
+      "keys": ["it's no use + V-ing; be worth + V-ing; have difficulty + V-ing; spend time + V-ing; there's no point in + V-ing; can't help + V-ing; go + V-ing (go shopping)."],
+      "traps": ["be used to + V-ing = đã quen với việc gì (khác 'used to + V' = đã từng). 'to' trong be used to là giới từ → V-ing."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "It's no use ___ about the delay now; let's find a solution.\nA. complain    B. to complain    C. complaining    D. complained", "a": "Đáp án: C (complaining). ||it's no use + V-ing."},
+        {"q": "The detailed report is worth ___ before the board meeting.\nA. read    B. to read    C. reading    D. been read", "a": "Đáp án: C (reading). ||be worth + V-ing."},
+        {"q": "The HR team had difficulty ___ a suitable candidate for the role.\nA. find    B. to find    C. finding    D. found", "a": "Đáp án: C (finding). ||have difficulty + V-ing."},
+        {"q": "The engineers spent two hours ___ the software issue.\nA. discuss    B. to discuss    C. discussing    D. discussed", "a": "Đáp án: C (discussing). ||spend + time + V-ing."},
+        {"q": "There's no point in ___ the project without a clear budget.\nA. start    B. to start    C. starting    D. started", "a": "Đáp án: C (starting). ||there's no point in + V-ing."},
+        {"q": "After closing the deal, the whole team went ___ to celebrate.\nA. dine    B. to dine    C. dining    D. dined", "a": "Đáp án: C (dining). ||go + V-ing (go dining/shopping/...)."},
+        {"q": "The new staff are not used to ___ such long shifts yet.\nA. work    B. to work    C. working    D. worked", "a": "Đáp án: C (working). ||be used to + V-ing = quen với việc gì ('to' là giới từ)."},
+        {"q": "I can't help ___ that the new layout looks much cleaner.\nA. notice    B. to notice    C. noticing    D. noticed", "a": "Đáp án: C (noticing). ||can't help + V-ing = không thể không."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh: V-ing vs to V (10 câu)",
+      "theory": ["Trộn nhóm V-ing (bài này) với nhóm to V (Bài 12) để rèn phản xạ phân biệt."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "The board finally agreed ___ the merger proposal.\nA. approve    B. to approve    C. approving    D. approved", "a": "Đáp án: B (to approve). ||agree + to V (nhóm Bài 12). Bẫy đối lập với V-ing."},
+        {"q": "Most employees enjoy ___ with international partners.\nA. work    B. to work    C. working    D. worked", "a": "Đáp án: C (working). ||enjoy + V-ing."},
+        {"q": "She is particularly good at ___ complex technical problems.\nA. solve    B. to solve    C. solving    D. solved", "a": "Đáp án: C (solving). ||good at + V-ing."},
+        {"q": "The marketing manager decided ___ the product launch.\nA. delay    B. to delay    C. delaying    D. delayed", "a": "Đáp án: B (to delay). ||decide + to V."},
+        {"q": "Tìm và sửa lỗi:\n\"They suggested to hire two more engineers next quarter.\"", "a": "Lỗi: \"suggested to hire\" → \"suggested hiring\". ||suggest + V-ing."},
+        {"q": "___ regular feedback helps teams improve their performance.\nA. Collect    B. Collecting    C. To collecting    D. Collected", "a": "Đáp án: B (Collecting). ||Gerund làm chủ ngữ; 'helps' số ít."},
+        {"q": "Many customers are interested in ___ the new electric model.\nA. try    B. to try    C. trying    D. tried", "a": "Đáp án: C (trying). ||interested in + V-ing."},
+        {"q": "The CEO wants ___ the marketing strategy this quarter.\nA. revise    B. to revise    C. revising    D. revised", "a": "Đáp án: B (to revise). ||want + to V."},
+        {"q": "Chọn câu ĐÚNG:\nA. We finished to prepare the report.\nB. We finished preparing the report.\nC. We finished prepare the report.\nD. We finished for preparing the report.", "a": "Đáp án: B. ||finish + V-ing."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"By ___ energy use, the factory cut its operating costs significantly.\"\nA. reduce    B. to reduce    C. reducing    D. reduced", "a": "Đáp án: C (reducing). ||by + V-ing."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "___ a second language takes time, patience, and daily practice.\nA. Learn    B. Learning    C. To learning    D. Learned", "a": "B (Learning). ||Gerund làm chủ ngữ; 'takes' số ít."},
+      {"q": "The technician finished ___ the new equipment ahead of schedule.\nA. to install    B. installing    C. install    D. installed", "a": "B (installing). ||finish + V-ing."},
+      {"q": "Employees should avoid ___ confidential files over public networks.\nA. share    B. to share    C. sharing    D. shared", "a": "C (sharing). ||avoid + V-ing."},
+      {"q": "Our company is committed to ___ excellent after-sales service.\nA. provide    B. to provide    C. providing    D. provided", "a": "C (providing). ||be committed to + V-ing ('to' là giới từ)."},
+      {"q": "Tìm và sửa lỗi:\n\"She is looking forward to meet the new clients next week.\"", "a": "Lỗi: \"to meet\" → \"to meeting\". ||look forward to + V-ing."},
+      {"q": "The firm seriously considered ___ its headquarters downtown.\nA. to relocate    B. relocating    C. relocate    D. relocated", "a": "B (relocating). ||consider + V-ing."},
+      {"q": "Thank you for ___ the billing issue so quickly.\nA. resolve    B. to resolve    C. resolving    D. resolved", "a": "C (resolving). ||for + V-ing."},
+      {"q": "The development team kept ___ until the critical bug was fixed.\nA. work    B. to work    C. working    D. worked", "a": "C (working). ||keep + V-ing."},
+      {"q": "Chọn câu ĐÚNG:\nA. He admitted to break the safety rule.\nB. He admitted breaking the safety rule.\nC. He admitted break the safety rule.\nD. He admitted for breaking the safety rule.", "a": "B. ||admit + V-ing."},
+      {"q": "___ regularly with clients builds long-term trust.\nA. Communicate    B. Communicating    C. Communicated    D. Communicates", "a": "B (Communicating). ||Gerund làm chủ ngữ; 'builds' số ít."},
+      {"q": "The proposal is definitely worth ___ before the deadline.\nA. review    B. to review    C. reviewing    D. reviewed", "a": "C (reviewing). ||be worth + V-ing."},
+      {"q": "The startup has difficulty ___ qualified software engineers.\nA. recruit    B. to recruit    C. recruiting    D. recruited", "a": "C (recruiting). ||have difficulty + V-ing."},
+      {"q": "Due to budget cuts, management decided ___ the project until next year.\nA. postpone    B. to postpone    C. postponing    D. postponed", "a": "B (to postpone). ||decide + to V (bẫy đối lập với nhóm V-ing)."},
+      {"q": "The consultant recommended ___ to a more reliable supplier.\nA. to change    B. changing    C. change    D. changed", "a": "B (changing). ||recommend + V-ing."},
+      {"q": "Tìm và sửa lỗi:\n\"We are interested in expand our business overseas.\"", "a": "Lỗi: \"in expand\" → \"in expanding\". ||sau giới từ 'in' dùng V-ing."},
+      {"q": "Điền vào email (Part 6):\n\"Instead of ___ new equipment, the company chose to repair the old machines.\"\nA. buy    B. to buy    C. buying    D. bought", "a": "C (buying). ||instead of + V-ing."}
+    ]
+  },
+  "summary": [
+    "Danh động từ (V-ing) dùng như danh từ: làm chủ ngữ (động từ chính chia số ít), tân ngữ, bổ ngữ.",
+    "Nhóm động từ luôn + V-ing: enjoy, finish, avoid, consider, suggest, recommend, mind, postpone, deny, keep, practice, quit, admit, miss, risk.",
+    "Sau MỌI giới từ → V-ing: interested in, good at, responsible for, capable of, instead of, by, before, after, look forward to, be used to, be committed to.",
+    "Cụm cố định: it's no use / be worth / have difficulty / spend time / there's no point in / can't help / go + V-ing."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy kinh điển: look forward to / be used to / be committed to — 'to' là giới từ → theo sau V-ing, KHÔNG phải V nguyên thể.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "So với Bài 12: nhóm want / decide / plan / agree / hope / refuse / manage + to V. Bài 14 sẽ luyện kỹ cách phân biệt hai nhóm này.", "emoji": "💡", "color": "green_background"}
+  ]
+}

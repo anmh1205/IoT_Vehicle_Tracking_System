@@ -1,0 +1,131 @@
+{
+  "page_id": "357df50b-1fcd-8182-9773-e82271b2e527",
+  "title": "09. Hòa hợp chủ-vị cơ bản",
+  "intro": [
+    {"text": "Bài 09 — Hòa hợp chủ ngữ - động từ. Đọc lý thuyết → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 đặt cụm xen giữa (of.../along with...) để đánh lừa; phải chia động từ theo CHỦ NGỮ CHÍNH. Cũng hay hỏi a number of / the number of và there is/are.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Quy tắc cơ bản",
+      "theory": ["Chủ ngữ số ít → động từ số ít; chủ ngữ số nhiều → động từ số nhiều. Danh từ không đếm được luôn chia số ít."],
+      "keys": ["Danh từ không đếm: information, equipment, data, news, software, furniture, advice → số ít."],
+      "traps": ["software/equipment không thêm -s và đi với động từ số ít: The equipment requires...; The software has..."],
+      "examples": [
+        "The reports are ready for review. — số nhiều → are.",
+        "The equipment requires regular maintenance. — không đếm → số ít."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The operations manager ___ the weekly schedule.\nA. prepare    B. prepares    C. preparing    D. were", "a": "Đáp án: B (prepares). ||Chủ ngữ số ít → động từ số ít."},
+        {"q": "The factory workers ___ in the main hall every morning.\nA. gathers    B. gather    C. gathering    D. gathers", "a": "Đáp án: B (gather). ||'workers' số nhiều → gather."},
+        {"q": "The laboratory equipment ___ regular calibration.\nA. require    B. requires    C. requiring    D. required", "a": "Đáp án: B (requires). ||'equipment' không đếm → số ít."},
+        {"q": "The quarterly reports ___ ready for the board review.\nA. is    B. are    C. was    D. has", "a": "Đáp án: B (are). ||'reports' số nhiều → are."},
+        {"q": "Chọn câu ĐÚNG:\nA. The committee announce its decision.\nB. The committee announces its decision.\nC. The committee announcing its decision.\nD. The committee are announce its decision.", "a": "Đáp án: B. ||'committee' xem là số ít trong TOEIC → announces."},
+        {"q": "Tìm và sửa lỗi:\n\"The new accounting software have many useful features.\"", "a": "Lỗi: \"have\" → \"has\". ||'software' không đếm → số ít."},
+        {"q": "All customer data ___ stored on secure servers.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'data' trong văn phong TOEIC hiện đại xem là số ít → is."},
+        {"q": "Điền vào hồ sơ công ty (Part 6):\n\"Our company ___ fully committed to product quality.\"\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'company' số ít → is."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Chủ ngữ bị tách bởi cụm xen giữa",
+      "theory": ["Khi giữa chủ ngữ và động từ có cụm bổ nghĩa (of..., with..., along with..., as well as..., together with...), chia động từ theo CHỦ NGỮ CHÍNH, bỏ qua cụm xen giữa."],
+      "keys": ["The box OF tools IS...; The manager, ALONG WITH the team, IS... (chủ ngữ chính số ít → động từ số ít)."],
+      "traps": ["Danh từ ngay trước động từ thường là 'mồi nhử'; chủ ngữ thật nằm trước cụm 'of/with...'."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "The operations manager, along with two assistants, ___ attending the summit.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||Chủ ngữ chính 'manager' số ít; 'along with...' không đổi số."},
+        {"q": "The box of spare tools ___ on the bottom shelf.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||Chủ ngữ chính 'The box' số ít."},
+        {"q": "The list of shortlisted candidates ___ been finalized.\nA. have    B. has    C. are    D. were", "a": "Đáp án: B (has). ||'The list' số ít → has."},
+        {"q": "The CEO, as well as the directors, ___ the new strategy.\nA. support    B. supports    C. supporting    D. were", "a": "Đáp án: B (supports). ||Chủ ngữ chính 'The CEO' số ít; 'as well as...' không đổi số."},
+        {"q": "The price of the raw materials ___ increased sharply.\nA. have    B. has    C. are    D. were", "a": "Đáp án: B (has). ||'The price' số ít → has."},
+        {"q": "Tìm và sửa lỗi:\n\"The quality of the products are excellent this year.\"", "a": "Lỗi: \"are\" → \"is\". ||Chủ ngữ chính là 'The quality' (số ít)."},
+        {"q": "The team of senior engineers ___ working overtime this week.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'The team' số ít → is."},
+        {"q": "Điền vào hướng dẫn (Part 6):\n\"The complete set of guidelines ___ available on the company portal.\"\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'The set' số ít → is."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · each / every / either / neither / one of",
+      "theory": ["each, every, either, neither, one of, everyone, everything → luôn chia động từ SỐ ÍT, kể cả khi theo sau là danh từ số nhiều."],
+      "keys": ["Each of the + danh từ số nhiều + V số ít. One of the + danh từ số nhiều + V số ít. either...or / neither...nor → động từ theo chủ ngữ GẦN NHẤT."],
+      "traps": ["'Each of the reports IS...' (số ít), không phải 'are'."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "Each of the three proposals ___ significant merit.\nA. have    B. has    C. are    D. were", "a": "Đáp án: B (has). ||'Each of ...' luôn số ít."},
+        {"q": "Every employee ___ a valid identification badge.\nA. need    B. needs    C. needing    D. were", "a": "Đáp án: B (needs). ||'Every + danh từ số ít' → số ít."},
+        {"q": "Neither of the two options ___ acceptable to the client.\nA. are    B. is    C. were    D. have", "a": "Đáp án: B (is). ||'Neither of ...' → số ít."},
+        {"q": "One of the production machines ___ currently broken.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'One of the + số nhiều' → động từ số ít."},
+        {"q": "Everyone in the office ___ responsible for keeping it tidy.\nA. are    B. is    C. were    D. have", "a": "Đáp án: B (is). ||'Everyone' luôn số ít."},
+        {"q": "Tìm và sửa lỗi:\n\"Each of the monthly reports are reviewed by a manager.\"", "a": "Lỗi: \"are\" → \"is\". ||'Each of ...' → động từ số ít."},
+        {"q": "Either the manager or the assistant ___ available to help you.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||either...or → động từ chia theo chủ ngữ gần nhất ('the assistant', số ít)."},
+        {"q": "Điền vào hướng dẫn (Part 6):\n\"Every department ___ its own annual budget to manage.\"\nA. have    B. has    C. are    D. were", "a": "Đáp án: B (has). ||'Every + danh từ số ít' → has."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · there is/are, a number of, số lượng",
+      "theory": ["there is + danh từ số ít/không đếm; there are + danh từ số nhiều. 'a number of' = số nhiều; 'the number of' = số ít. Số tiền, khoảng cách, thời gian xem như một khối → số ít."],
+      "keys": ["A number of employees HAVE...; The number of employees HAS... Ten thousand dollars IS...; Five years IS..."],
+      "traps": ["Phân biệt 'a number of' (nhiều - số nhiều) với 'the number of' (con số - số ít)."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "There ___ several important issues to discuss today.\nA. is    B. are    C. was    D. has", "a": "Đáp án: B (are). ||'several issues' số nhiều → there are."},
+        {"q": "There ___ a problem with the latest invoice.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'a problem' số ít → there is."},
+        {"q": "A number of employees ___ requested flexible hours.\nA. has    B. have    C. is    D. was", "a": "Đáp án: B (have). ||'A number of + số nhiều' → động từ số nhiều."},
+        {"q": "The number of customer complaints ___ decreased this quarter.\nA. have    B. has    C. are    D. were", "a": "Đáp án: B (has). ||'The number of ...' → động từ số ít."},
+        {"q": "Ten thousand dollars ___ a significant investment for a startup.\nA. are    B. is    C. were    D. have", "a": "Đáp án: B (is). ||Số tiền xem như một khối → số ít."},
+        {"q": "Tìm và sửa lỗi:\n\"There is many opportunities in the emerging market.\"", "a": "Lỗi: \"is\" → \"are\". ||'many opportunities' số nhiều → there are."},
+        {"q": "Five years ___ a long time to commit to one project.\nA. are    B. is    C. were    D. have", "a": "Đáp án: B (is). ||Khoảng thời gian xem như một khối → số ít."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"A number of customers ___ asked for an extended warranty.\"\nA. has    B. have    C. is    D. was", "a": "Đáp án: B (have). ||'A number of + số nhiều' → have."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn cụm xen giữa, each/every, a number of/the number of và there is/are."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "The steering committee ___ to meet again next Friday.\nA. plan    B. plans    C. planning    D. were", "a": "Đáp án: B (plans). ||'committee' số ít → plans."},
+        {"q": "All the contracts ___ been signed and filed.\nA. has    B. have    C. is    D. was", "a": "Đáp án: B (have). ||'contracts' số nhiều → have."},
+        {"q": "Each of the meeting rooms ___ a built-in projector.\nA. have    B. has    C. are    D. were", "a": "Đáp án: B (has). ||'Each of ...' → số ít."},
+        {"q": "The manager, together with her team, ___ the quality award.\nA. receive    B. receives    C. receiving    D. were", "a": "Đáp án: B (receives). ||Chủ ngữ chính 'The manager' số ít."},
+        {"q": "Tìm và sửa lỗi:\n\"The number of applicants have grown steadily.\"", "a": "Lỗi: \"have\" → \"has\". ||'The number of ...' → số ít."},
+        {"q": "There ___ a few minor errors in the draft.\nA. is    B. are    C. was    D. has", "a": "Đáp án: B (are). ||'a few errors' số nhiều → there are."},
+        {"q": "Neither proposal ___ within the approved budget.\nA. are    B. is    C. were    D. have", "a": "Đáp án: B (is). ||'Neither + danh từ số ít' → is."},
+        {"q": "All the project information ___ accurate and up to date.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'information' không đếm → is."},
+        {"q": "A number of safety concerns ___ been raised by staff.\nA. has    B. have    C. is    D. was", "a": "Đáp án: B (have). ||'A number of + số nhiều' → have."},
+        {"q": "Điền vào hướng dẫn (Part 6):\n\"The list of approved vendors ___ updated at the start of each month.\"\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'The list' số ít → is."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "The new return policy ___ all retail departments.\nA. affect    B. affects    C. affecting    D. were", "a": "B (affects). ||'policy' số ít → affects."},
+      {"q": "The employees ___ very satisfied with the recent changes.\nA. is    B. are    C. was    D. has", "a": "B (are). ||'employees' số nhiều → are."},
+      {"q": "The box of product samples ___ just arrived.\nA. have    B. has    C. are    D. were", "a": "B (has). ||Chủ ngữ chính 'The box' số ít → has."},
+      {"q": "Each of the finalists ___ a 10-minute interview.\nA. have    B. has    C. are    D. were", "a": "B (has). ||'Each of ...' → số ít."},
+      {"q": "Tìm và sửa lỗi:\n\"The quality of the imported materials are excellent.\"", "a": "Lỗi: \"are\" → \"is\". ||Chủ ngữ chính là 'The quality' (số ít)."},
+      {"q": "There ___ several valid reasons for the project delay.\nA. is    B. are    C. was    D. has", "a": "B (are). ||'several reasons' số nhiều → there are."},
+      {"q": "A number of staff members ___ volunteered for the event.\nA. has    B. have    C. is    D. was", "a": "B (have). ||'A number of + số nhiều' → have."},
+      {"q": "The number of reported defects ___ been significantly reduced.\nA. have    B. has    C. are    D. were", "a": "B (has). ||'The number of ...' → số ít."},
+      {"q": "Every applicant ___ to submit an updated resume.\nA. need    B. needs    C. needing    D. were", "a": "B (needs). ||'Every + danh từ số ít' → needs."},
+      {"q": "The design team, along with the manager, ___ working late tonight.\nA. is    B. are    C. were    D. have", "a": "A (is). ||Chủ ngữ chính 'The design team' số ít."},
+      {"q": "Tìm và sửa lỗi:\n\"Each of the proposals have several strong points.\"", "a": "Lỗi: \"have\" → \"has\". ||'Each of ...' → số ít."},
+      {"q": "Neither of the two backup plans ___ truly feasible.\nA. are    B. is    C. were    D. have", "a": "B (is). ||'Neither of ...' → số ít."},
+      {"q": "All the survey data ___ already been analyzed.\nA. have    B. has    C. are    D. were", "a": "B (has). ||'data' xem là số ít → has."},
+      {"q": "Twenty kilometers ___ a long distance to commute daily.\nA. are    B. is    C. were    D. have", "a": "B (is). ||Khoảng cách xem như một khối → số ít."},
+      {"q": "There ___ a noticeable discrepancy in the final figures.\nA. is    B. are    C. were    D. have", "a": "A (is). ||'a discrepancy' số ít → there is."},
+      {"q": "Điền vào thông báo (Part 6):\n\"One of the office printers ___ out of order again.\"\nA. is    B. are    C. were    D. have", "a": "A (is). ||'One of the + số nhiều' → động từ số ít."}
+    ]
+  },
+  "summary": [
+    "Chủ ngữ số ít → động từ số ít; số nhiều → số nhiều. Danh từ không đếm (information, equipment, data, news, software) → số ít.",
+    "Bỏ qua cụm xen giữa (of..., with..., along with..., as well as..., together with...) — chia theo CHỦ NGỮ CHÍNH.",
+    "each/every/either/neither/one of/everyone → động từ số ít; either...or / neither...nor → theo chủ ngữ gần nhất.",
+    "there is + số ít/không đếm; there are + số nhiều. a number of + V số nhiều; the number of + V số ít. Số tiền/khoảng cách/thời gian → số ít."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy: 'The quality of the products IS...' (chủ ngữ là quality). 'A number of employees HAVE...' (số nhiều) ≠ 'The number of employees HAS...' (số ít).", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 2 (cụm xen giữa) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

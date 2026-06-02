@@ -1,0 +1,131 @@
+{
+  "page_id": "357df50b-1fcd-8150-bef7-e365f7cdfda8",
+  "title": "20. Câu bị động hoàn thành",
+  "intro": [
+    {"text": "Bài 20 — Câu bị động hoàn thành (has/have been + V3, had been + V3, will have been + V3). Làm câu hỏi ngay sau mỗi phần, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 & 6 hỏi bị động hoàn thành theo dấu hiệu (already/yet/since/for/by). Bẫy: sau 'been' phải là V3.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Hiện tại hoàn thành bị động (has/have been + V3)",
+      "theory": ["has/have been + V3 = đã được làm, còn liên quan đến hiện tại. Dấu hiệu: already, yet, just, recently, since, for."],
+      "keys": ["has been submitted, have been implemented, has just been signed, have not been delivered yet."],
+      "traps": ["Sau 'been' luôn là V3: 'has been sent' (không 'has been send')."],
+      "examples": [
+        "The report has already been submitted.",
+        "The new policies have recently been implemented."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The quarterly report ___ already ___.\nA. has been submitted    B. has submitted    C. have been submitted    D. is submitted", "a": "Đáp án: A (has been submitted). ||HTHT bị động: has + been + V3."},
+        {"q": "The new HR policies ___ recently ___.\nA. have been implemented    B. has been implemented    C. have implemented    D. are implemented", "a": "Đáp án: A (have been implemented). ||'policies' số nhiều → have been + V3."},
+        {"q": "The partnership contract ___ just ___.\nA. has been signed    B. has signed    C. have been signed    D. is signed", "a": "Đáp án: A (has been signed). ||'just' + HTHT bị động: has been + V3."},
+        {"q": "The ordered goods ___ not ___ yet.\nA. have not been delivered    B. has not been delivered    C. have not delivered    D. are not delivered", "a": "Đáp án: A (have not been delivered). ||'goods' số nhiều + yet → have not been + V3."},
+        {"q": "Tìm và sửa lỗi:\n\"The invoice has been send to the client already.\"", "a": "Lỗi: \"been send\" → \"been sent\". ||Sau been dùng V3."},
+        {"q": "All job applications ___ ___ since Monday morning.\nA. have been processed    B. has been processed    C. have processed    D. are processed", "a": "Đáp án: A (have been processed). ||'applications' số nhiều + since → have been + V3."},
+        {"q": "The accounting system ___ ___ several times this week.\nA. has been updated    B. have been updated    C. has updated    D. is updated", "a": "Đáp án: A (has been updated). ||'system' số ít → has been + V3."},
+        {"q": "Điền vào thông báo (Part 6):\n\"The order ___ already ___, so it should arrive within days.\"\nA. has been shipped    B. has shipped    C. have been shipped    D. is shipped", "a": "Đáp án: A (has been shipped). ||HTHT bị động: has been + V3."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Quá khứ hoàn thành bị động (had been + V3)",
+      "theory": ["had been + V3 = đã được làm xong TRƯỚC một mốc/hành động khác trong quá khứ."],
+      "keys": ["By the time we arrived, the meeting had been cancelled. (huỷ xong trước khi đến)."],
+      "traps": ["Sau 'had been' luôn là V3: 'had been finished' (không 'had been finish')."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "By the time we arrived, the meeting ___ already ___.\nA. had been cancelled    B. has been cancelled    C. had cancelled    D. was cancelling", "a": "Đáp án: A (had been cancelled). ||QKHT bị động: had been + V3 (xảy ra trước khi đến)."},
+        {"q": "The documents ___ already ___ before the audit began.\nA. had been shredded    B. has been shredded    C. had shredded    D. were shredding", "a": "Đáp án: A (had been shredded). ||had been + V3 (trước khi audit bắt đầu)."},
+        {"q": "Most of the stock ___ ___ before the product was recalled.\nA. had been sold    B. has been sold    C. had sold    D. was selling", "a": "Đáp án: A (had been sold). ||had been + V3 (trước khi thu hồi)."},
+        {"q": "When she joined the team, the project ___ already ___.\nA. had been completed    B. has been completed    C. had completed    D. was completing", "a": "Đáp án: A (had been completed). ||had been + V3 (trước khi cô ấy gia nhập)."},
+        {"q": "Tìm và sửa lỗi:\n\"The report had been finish before the deadline.\"", "a": "Lỗi: \"been finish\" → \"been finished\". ||Sau had been dùng V3."},
+        {"q": "The decision ___ already ___ before we were informed.\nA. had been made    B. has been made    C. had made    D. was making", "a": "Đáp án: A (had been made). ||had been + V3 (trước khi được thông báo)."},
+        {"q": "Chọn câu ĐÚNG:\nA. By 2020, the building has been renovated twice.\nB. By 2020, the building had been renovated twice.\nC. By 2020, the building had renovated twice.\nD. By 2020, the building was renovate twice.", "a": "Đáp án: B. ||'By 2020' (mốc quá khứ) → QKHT bị động had been + V3."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"By the time the client called, the issue ___ already ___.\"\nA. had been resolved    B. has been resolved    C. had resolved    D. was resolving", "a": "Đáp án: A (had been resolved). ||had been + V3 (trước khi khách gọi)."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Tương lai hoàn thành bị động (will have been + V3)",
+      "theory": ["will have been + V3 = sẽ được hoàn tất TRƯỚC một mốc trong tương lai. Dấu hiệu: by + thời điểm tương lai."],
+      "keys": ["By next month, the wing will have been completed. By Friday, all orders will have been shipped."],
+      "traps": ["Sau 'will have been' luôn là V3: 'will have been built' (không 'will have been build')."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "By next month, the new wing of the office ___ ___.\nA. will have been completed    B. will be completed    C. has been completed    D. will have completed", "a": "Đáp án: A (will have been completed). ||'By next month' → tương lai hoàn thành bị động."},
+        {"q": "By Friday, all pending orders ___ ___.\nA. will have been shipped    B. will be shipped    C. have been shipped    D. will have shipped", "a": "Đáp án: A (will have been shipped). ||'By Friday' → will have been + V3."},
+        {"q": "The prototype samples ___ ___ for two weeks now.\nA. have been tested    B. has been tested    C. had been tested    D. are tested", "a": "Đáp án: A (have been tested). ||'for two weeks now' → HTHT bị động."},
+        {"q": "The supply contract ___ ___ since last Tuesday.\nA. has been finalized    B. have been finalized    C. had been finalized    D. is finalized", "a": "Đáp án: A (has been finalized). ||'since last Tuesday' → HTHT bị động."},
+        {"q": "Tìm và sửa lỗi:\n\"By next year, the new bridge will have been build.\"", "a": "Lỗi: \"been build\" → \"been built\". ||Sau will have been dùng V3."},
+        {"q": "The equipment ___ not ___ since the last inspection.\nA. has not been serviced    B. have not been serviced    C. has not serviced    D. is not serviced", "a": "Đáp án: A (has not been serviced). ||'equipment' số ít + since → has not been + V3."},
+        {"q": "Chọn câu ĐÚNG:\nA. By the end of the day, the documents will have been reviewed.\nB. By the end of the day, the documents would have been reviewed.\nC. By the end of the day, the documents have been reviewed.\nD. By the end of the day, the documents had been reviewed.", "a": "Đáp án: A. ||'By the end of the day' (tương lai) → will have been + V3."},
+        {"q": "Điền vào email (Part 6):\n\"By the time you read this, your refund ___ already ___.\"\nA. will have been processed    B. will be processed    C. has been processed    D. will have processed", "a": "Đáp án: A (will have been processed). ||'By the time ...' tương lai → will have been + V3."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Phân biệt chủ động và bị động hoàn thành",
+      "theory": ["Chủ động hoàn thành: have/had + V3 (chủ ngữ thực hiện). Bị động hoàn thành: have/had BEEN + V3 (chủ ngữ nhận). Động từ nội động (arrive, happen) không có bị động."],
+      "keys": ["The committee has reviewed it (chủ động) ↔ It has been reviewed (bị động)."],
+      "traps": ["'have been arrived' SAI (arrive nội động) → 'have arrived'."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "The committee has ___ the proposal in detail.\nA. reviewed    B. been reviewed    C. review    D. reviewing", "a": "Đáp án: A (reviewed). ||Chủ động: has + V3 (committee thực hiện)."},
+        {"q": "The proposal ___ by the committee.\nA. has reviewed    B. has been reviewed    C. reviewed    D. reviewing", "a": "Đáp án: B (has been reviewed). ||Bị động: has been + V3 (proposal nhận hành động)."},
+        {"q": "The team had ___ the project ahead of schedule.\nA. completed    B. been completed    C. complete    D. completing", "a": "Đáp án: A (completed). ||Chủ động: had + V3 (team thực hiện)."},
+        {"q": "The project ___ ahead of schedule.\nA. had completed    B. had been completed    C. completed    D. completing", "a": "Đáp án: B (had been completed). ||Bị động: had been + V3."},
+        {"q": "Tìm và sửa lỗi:\n\"The goods have been arrived at the warehouse.\"", "a": "Lỗi: \"have been arrived\". ||'arrive' nội động → không bị động. Sửa: \"The goods have arrived...\""},
+        {"q": "The figures ___ ___ before the report was published.\nA. had been verified    B. had verified    C. has been verified    D. were verifying", "a": "Đáp án: A (had been verified). ||Bị động QKHT: had been + V3."},
+        {"q": "Chọn câu ĐÚNG:\nA. The new manager have been trained already.\nB. The new manager has been trained already.\nC. The new manager has trained already (by HR).\nD. The new manager been trained already.", "a": "Đáp án: B. ||'manager' số ít, bị động → has been + V3."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"All the data ___ been backed up before the migration started.\"\nA. had    B. have    C. has    D. was", "a": "Đáp án: A (had). ||'before ... started' (quá khứ) → had been backed up."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn HTHT/QKHT/TLHT bị động và phân biệt chủ động/bị động."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "The report ___ already ___ to the regional manager.\nA. has been sent    B. has sent    C. have been sent    D. is sent", "a": "Đáp án: A (has been sent). ||HTHT bị động: has been + V3."},
+        {"q": "By the time help arrived, the fire ___ already ___.\nA. had been extinguished    B. has been extinguished    C. had extinguished    D. was extinguishing", "a": "Đáp án: A (had been extinguished). ||QKHT bị động: had been + V3."},
+        {"q": "By December, the entire project ___ ___.\nA. will have been finished    B. will be finished    C. has been finished    D. will have finished", "a": "Đáp án: A (will have been finished). ||'By December' → TLHT bị động."},
+        {"q": "Tìm và sửa lỗi:\n\"The contract has been signing this morning.\"", "a": "Lỗi: \"been signing\" → \"been signed\". ||Bị động dùng V3, không V-ing."},
+        {"q": "The lab samples ___ ___ since last week.\nA. have been analyzed    B. has been analyzed    C. had been analyzed    D. are analyzed", "a": "Đáp án: A (have been analyzed). ||'since last week' → HTHT bị động số nhiều."},
+        {"q": "The decision ___ already ___ before the staff were informed.\nA. had been made    B. has been made    C. had made    D. was making", "a": "Đáp án: A (had been made). ||QKHT bị động: had been + V3."},
+        {"q": "The outstanding invoices ___ not ___ yet.\nA. have not been paid    B. has not been paid    C. have not paid    D. are not paid", "a": "Đáp án: A (have not been paid). ||'invoices' số nhiều + yet → have not been + V3."},
+        {"q": "Chọn câu chủ động ĐÚNG:\nA. The auditors have reviewed all the records.\nB. The auditors have been reviewed all the records.\nC. The auditors has been reviewed all the records.\nD. The auditors having reviewed all the records.", "a": "Đáp án: A. ||Chủ động: have + V3 (auditors thực hiện)."},
+        {"q": "The headquarters building ___ ___ twice since 2010.\nA. has been renovated    B. have been renovated    C. had been renovated    D. is renovated", "a": "Đáp án: A (has been renovated). ||'building' số ít + since → has been + V3."},
+        {"q": "Điền vào kế hoạch (Part 6):\n\"By next week, all employees ___ ___ on the new system.\"\nA. will have been trained    B. will be trained    C. have been trained    D. will have trained", "a": "Đáp án: A (will have been trained). ||'By next week' → TLHT bị động."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "The quarterly report ___ already ___.\nA. has been submitted    B. has submitted    C. have been submitted    D. is submitted", "a": "A (has been submitted). ||HTHT bị động: has been + V3."},
+      {"q": "By the time we got there, the event ___ already ___.\nA. had been cancelled    B. has been cancelled    C. had cancelled    D. was cancelling", "a": "A (had been cancelled). ||QKHT bị động: had been + V3."},
+      {"q": "By June, the new branch ___ ___ to the public.\nA. will have been opened    B. will be opened    C. has been opened    D. will have opened", "a": "A (will have been opened). ||'By June' → TLHT bị động."},
+      {"q": "Tìm và sửa lỗi:\n\"The package has been arrive this morning.\"", "a": "Lỗi: \"has been arrive\". ||'arrive' nội động → \"has arrived\"."},
+      {"q": "The updated policies ___ recently ___.\nA. have been introduced    B. has been introduced    C. have introduced    D. are introduced", "a": "A (have been introduced). ||'policies' số nhiều → have been + V3."},
+      {"q": "The files ___ already ___ before the system crashed.\nA. had been backed up    B. has been backed up    C. had backed up    D. were backing up", "a": "A (had been backed up). ||QKHT bị động: had been + V3."},
+      {"q": "The prototypes ___ ___ for three days now.\nA. have been tested    B. has been tested    C. had been tested    D. are tested", "a": "A (have been tested). ||'for three days now' → HTHT bị động số nhiều."},
+      {"q": "Chọn câu ĐÚNG (bị động, chủ ngữ số ít):\nA. The proposal have been approved by the board.\nB. The proposal has been approved by the board.\nC. The proposal having been approved.\nD. The proposal been approved by the board.", "a": "B. ||'proposal' số ít, bị động → has been + V3."},
+      {"q": "By the time you arrive, the meeting room ___ ___.\nA. will have been prepared    B. will prepare    C. has prepared    D. will have prepared", "a": "A (will have been prepared). ||'By the time you arrive' (tương lai) → will have been + V3."},
+      {"q": "Tìm và sửa lỗi:\n\"The report had been finish before noon.\"", "a": "Lỗi: \"been finish\" → \"been finished\". ||Sau had been dùng V3."},
+      {"q": "The supply contract ___ just ___.\nA. has been finalized    B. has finalized    C. have been finalized    D. is finalized", "a": "A (has been finalized). ||'just' + HTHT bị động: has been + V3."},
+      {"q": "The equipment ___ not ___ since January.\nA. has not been serviced    B. have not been serviced    C. has not serviced    D. is not serviced", "a": "A (has not been serviced). ||'equipment' số ít + since → has not been + V3."},
+      {"q": "By 2025, the new highway ___ ___.\nA. will have been completed    B. will be completed    C. has been completed    D. will have completed", "a": "A (will have been completed). ||'By 2025' → TLHT bị động."},
+      {"q": "The documents ___ ___ before the meeting started.\nA. had been distributed    B. has been distributed    C. had distributed    D. were distributing", "a": "A (had been distributed). ||QKHT bị động: had been + V3."},
+      {"q": "Chọn câu ĐÚNG (bị động, chủ ngữ số nhiều):\nA. All complaints have been handled by the support team.\nB. All complaints has been handled by the support team.\nC. All complaints having been handled.\nD. All complaints been handled.", "a": "A. ||'complaints' số nhiều, bị động → have been + V3."},
+      {"q": "Điền vào email (Part 6):\n\"By the end of today, your application ___ already ___.\"\nA. will have been reviewed    B. will be reviewed    C. has been reviewed    D. will have reviewed", "a": "A (will have been reviewed). ||'By the end of today' → TLHT bị động."}
+    ]
+  },
+  "summary": [
+    "Hiện tại hoàn thành bị động: has/have been + V3. Dấu hiệu: already, yet, just, recently, since, for.",
+    "Quá khứ hoàn thành bị động: had been + V3 (hoàn tất trước một mốc quá khứ khác).",
+    "Tương lai hoàn thành bị động: will have been + V3 (hoàn tất trước một mốc tương lai). Dấu hiệu: by + thời điểm.",
+    "Phân biệt chủ động (have/had + V3) với bị động (have/had been + V3). Động từ nội động (arrive, happen) không bị động."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy: sau 'been' phải là V3 (been submitted, been signed), không phải V nguyên thể/V-ing. 'have been arrived' SAI (arrive nội động) → 'have arrived'.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 4 (chủ động vs bị động) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

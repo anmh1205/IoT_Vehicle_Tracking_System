@@ -1,0 +1,135 @@
+{
+  "page_id": "357df50b-1fcd-811b-a130-e48c812c2442",
+  "title": "03. Tương lai với will",
+  "intro": [
+    {"text": "Bài 03 — Tương lai với will. Đọc lý thuyết từng phần → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 & 6 phân biệt will với be going to, và đặc biệt bẫy 'không dùng will trong mệnh đề if/when/as soon as'.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Cách dùng will",
+      "theory": ["will + V nguyên thể diễn tả: quyết định ngay lúc nói, dự đoán/ý kiến (I think, I believe), lời hứa, và lời đề nghị giúp đỡ."],
+      "keys": ["Dấu hiệu: tomorrow, next (week/month), soon, in the future, I think/believe/expect that..."],
+      "traps": ["Sau will luôn là động từ NGUYÊN THỂ, không có 'to': will attend (không phải will to attend)."],
+      "examples": [
+        "The board will announce the results tomorrow.",
+        "Don't worry, I will help you finish the report. — lời hứa/đề nghị."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The board ___ announce the annual results tomorrow.\nA. announce    B. will announce    C. announced    D. announcing", "a": "Đáp án: B (will announce). ||'tomorrow' → tương lai; will + V nguyên thể."},
+        {"q": "I think the new product ___ very popular with young customers.\nA. is    B. will be    C. was    D. being", "a": "Đáp án: B (will be). ||'I think' + dự đoán → will."},
+        {"q": "We ___ send you the final invoice next week.\nA. send    B. will send    C. sent    D. sending", "a": "Đáp án: B (will send). ||'next week' → tương lai."},
+        {"q": "Don't worry — I ___ help you prepare the presentation.\nA. help    B. will help    C. helped    D. helping", "a": "Đáp án: B (will help). ||Lời hứa/đề nghị giúp đỡ → will."},
+        {"q": "The annual conference ___ take place at the city convention center.\nA. take    B. will take    C. took    D. taking", "a": "Đáp án: B (will take). ||Thông báo sự kiện tương lai → will take place."},
+        {"q": "Chọn câu ĐÚNG:\nA. The CEO will to attend the gala dinner.\nB. The CEO will attend the gala dinner.\nC. The CEO will attends the gala dinner.\nD. The CEO will attending the gala dinner.", "a": "Đáp án: B. ||will + V nguyên thể (attend), không có 'to', không thêm -s/-ing."},
+        {"q": "Tìm và sửa lỗi:\n\"They will to launch the new app next month.\"", "a": "Lỗi: \"will to launch\" → \"will launch\". ||Sau will không dùng 'to'."},
+        {"q": "Điền vào dự báo (Part 6):\n\"According to the forecast, sales ___ rise sharply next quarter.\"\nA. rise    B. will rise    C. rose    D. rising", "a": "Đáp án: B (will rise). ||'next quarter' + dự đoán → will."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · will và be going to",
+      "theory": ["will: quyết định ngay lúc nói, dự đoán/ý kiến. be going to: kế hoạch đã định trước, hoặc dự đoán có bằng chứng rõ ràng."],
+      "keys": ["Quyết định tức thì → will. Kế hoạch đã sắp xếp ('everything is arranged/booked') → be going to. Có bằng chứng trước mắt → be going to."],
+      "traps": ["Không viết 'will going to'. Chỉ chọn một trong hai: will + V hoặc be going to + V."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "Look at those dark clouds — it ___ rain very soon.\nA. will    B. is going to    C. would    D. will be", "a": "Đáp án: B (is going to). ||Có bằng chứng trước mắt (mây đen) → be going to."},
+        {"q": "I've already decided: I ___ apply for the manager position.\nA. will    B. am going to    C. would    D. will be", "a": "Đáp án: B (am going to). ||Quyết định/kế hoạch đã định trước → be going to."},
+        {"q": "The phone is ringing. — OK, I ___ answer it.\nA. will    B. am going to    C. was going to    D. would", "a": "Đáp án: A (will). ||Quyết định ngay lúc nói → will."},
+        {"q": "Everything is arranged; we ___ hold the workshop on Friday.\nA. will    B. are going to    C. would    D. will have", "a": "Đáp án: B (are going to). ||Kế hoạch đã sắp xếp → be going to."},
+        {"q": "Chọn câu hợp ngữ cảnh (quyết định tức thì):\nA: The printer is out of paper.\nB: OK, I ___ refill it now.\nA. am going to    B. will    C. was going to    D. would", "a": "Đáp án: B (will). ||Phản ứng/quyết định ngay tại chỗ → will."},
+        {"q": "Tìm và sửa lỗi:\n\"We will going to expand into Europe next year.\"", "a": "Lỗi: \"will going to\". ||Sửa: \"We are going to expand...\" (hoặc \"We will expand...\"). Không trộn hai cấu trúc."},
+        {"q": "I truly believe the merger ___ benefit both companies.\nA. will    B. going to    C. would    D. was", "a": "Đáp án: A (will). ||Ý kiến/dự đoán cá nhân (believe) → will."},
+        {"q": "Điền vào lịch trình (Part 6):\n\"The schedule is finalized. The team ___ travel to the site on Monday.\"\nA. will    B. is going to    C. would    D. will have", "a": "Đáp án: B (is going to). ||Lịch đã chốt → kế hoạch định sẵn → be going to."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · will trong mệnh đề thời gian và điều kiện",
+      "theory": ["Trong mệnh đề bắt đầu bằng if, when, as soon as, once, until, before, after → dùng HIỆN TẠI ĐƠN để chỉ tương lai. Chỉ mệnh đề chính mới dùng will."],
+      "keys": ["if/when/as soon as/once + S + hiện tại đơn, ... S + will + V."],
+      "traps": ["KHÔNG dùng will trong mệnh đề if/when: 'If it rains' (không phải 'If it will rain')."],
+      "examples": [
+        "When the report is ready, I will email it to you.",
+        "If the client accepts the offer, we will sign tomorrow."
+      ],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "We will start the project as soon as the budget ___ approved.\nA. will be    B. is    C. was    D. being", "a": "Đáp án: B (is). ||Mệnh đề 'as soon as' dùng hiện tại để chỉ tương lai."},
+        {"q": "If the client ___ the offer, we will sign the deal tomorrow.\nA. will accept    B. accepts    C. accepted    D. accepting", "a": "Đáp án: B (accepts). ||Mệnh đề if dùng hiện tại đơn; mệnh đề chính dùng will."},
+        {"q": "When the report ___ ready, I will send it to all members.\nA. will be    B. is    C. was    D. being", "a": "Đáp án: B (is). ||Mệnh đề 'when' chỉ tương lai dùng hiện tại."},
+        {"q": "The manager will call you when she ___ back from the trip.\nA. will get    B. gets    C. got    D. getting", "a": "Đáp án: B (gets). ||Mệnh đề 'when' dùng hiện tại đơn."},
+        {"q": "Tìm và sửa lỗi:\n\"We will begin the meeting when everyone will arrive.\"", "a": "Lỗi: \"when everyone will arrive\" → \"when everyone arrives\". ||Mệnh đề 'when' không dùng will."},
+        {"q": "As soon as the system ___ updated, performance will improve.\nA. will be    B. is    C. was    D. being", "a": "Đáp án: B (is). ||Mệnh đề 'as soon as' dùng hiện tại."},
+        {"q": "Chọn câu ĐÚNG:\nA. If it will rain, we will cancel the event.\nB. If it rains, we will cancel the event.\nC. If it rains, we cancel the event.\nD. If it will rain, we cancel the event.", "a": "Đáp án: B. ||if + hiện tại đơn, mệnh đề chính + will."},
+        {"q": "Điền vào hợp đồng (Part 6):\n\"Once the contract ___ signed, production will begin immediately.\"\nA. will be    B. is    C. was    D. being", "a": "Đáp án: B (is). ||Mệnh đề 'once' dùng hiện tại để chỉ tương lai."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Phủ định, nghi vấn và will be V-ing",
+      "theory": ["Phủ định: will not = won't + V. Nghi vấn: Will + S + V? Tương lai tiếp diễn: will be + V-ing (đang xảy ra ở một thời điểm tương lai). Đề nghị lịch sự: Shall I...?"],
+      "keys": ["won't + V nguyên thể; Will + S + V nguyên thể; will be + V-ing; Shall I / Shall we + V?"],
+      "traps": ["Sau won't/will/shall luôn là V nguyên thể: won't join (không phải won't to join)."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "The store ___ open on the upcoming public holiday.\nA. will    B. won't    C. doesn't    D. isn't", "a": "Đáp án: B (won't). ||Phủ định tương lai: won't + V nguyên thể (open)."},
+        {"q": "___ you ___ the strategy meeting tomorrow morning?\nA. Will / attend    B. Will / attends    C. Do / attend    D. Are / attend", "a": "Đáp án: A (Will / attend). ||Will + S + V nguyên thể."},
+        {"q": "The team ___ be working late tonight to meet the deadline.\nA. will    B. will be    C. is    D. are", "a": "Đáp án: B (will be). ||Tương lai tiếp diễn: will be + V-ing (working)."},
+        {"q": "Chọn câu ĐÚNG:\nA. Will the delivery arrives on time?\nB. Will the delivery arrive on time?\nC. Will the delivery arriving on time?\nD. Does the delivery will arrive?", "a": "Đáp án: B. ||Sau Will dùng V nguyên thể (arrive)."},
+        {"q": "Tìm và sửa lỗi:\n\"She won't to join the conference call this afternoon.\"", "a": "Lỗi: \"won't to join\" → \"won't join\". ||Sau won't dùng V nguyên thể, không có 'to'."},
+        {"q": "By this time next week, we ___ be operating the new system.\nA. will    B. will be    C. are    D. were", "a": "Đáp án: B (will be). ||'By this time next week' + đang diễn ra → will be + V-ing."},
+        {"q": "___ I carry that heavy box to your office for you?\nA. Will    B. Shall    C. Do    D. Am", "a": "Đáp án: B (Shall). ||'Shall I + V?' = lời đề nghị giúp đỡ lịch sự."},
+        {"q": "Điền vào thông báo (Part 6):\n\"The IT department ___ not be available during the maintenance window tonight.\"\nA. will    B. won't    C. doesn't    D. isn't", "a": "Đáp án: B (won't). ||won't be available (tương lai phủ định)."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn will/ be going to, mệnh đề thời gian-điều kiện, và phủ định/nghi vấn."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "The supplier ___ deliver the goods next Monday.\nA. deliver    B. will deliver    C. delivered    D. delivering", "a": "Đáp án: B (will deliver). ||'next Monday' → tương lai."},
+        {"q": "I think the proposal ___ be approved by the board.\nA. will    B. going to    C. would    D. was", "a": "Đáp án: A (will). ||Ý kiến/dự đoán (think) → will."},
+        {"q": "We will notify you as soon as your order ___ shipped.\nA. will be    B. is    C. was    D. being", "a": "Đáp án: B (is). ||Mệnh đề 'as soon as' dùng hiện tại."},
+        {"q": "___ the manager sign the contract tomorrow?\nA. Will    B. Does    C. Is    D. Has", "a": "Đáp án: A (Will). ||'tomorrow' → câu hỏi tương lai: Will + S + V."},
+        {"q": "Tìm và sửa lỗi:\n\"They will to review the budget next week.\"", "a": "Lỗi: \"will to review\" → \"will review\". ||Sau will không dùng 'to'."},
+        {"q": "Everything is arranged; the ceremony ___ start at noon.\nA. will    B. is going to    C. would    D. will have", "a": "Đáp án: B (is going to). ||Kế hoạch đã sắp xếp → be going to."},
+        {"q": "If demand ___ high during the holidays, we will increase production.\nA. will be    B. is    C. was    D. being", "a": "Đáp án: B (is). ||Mệnh đề if dùng hiện tại đơn."},
+        {"q": "The store ___ accept returns without a valid receipt.\nA. will    B. won't    C. isn't    D. hasn't", "a": "Đáp án: B (won't). ||Chính sách tương lai phủ định → won't accept."},
+        {"q": "Chọn câu ĐÚNG:\nA. When the guests will arrive, we will start.\nB. When the guests arrive, we will start.\nC. When the guests arrive, we start.\nD. When the guests will arrive, we start.", "a": "Đáp án: B. ||Mệnh đề 'when' + hiện tại, mệnh đề chính + will."},
+        {"q": "Điền vào thông báo (Part 6):\n\"Our design team ___ be presenting the new concept at the conference next week.\"\nA. will    B. will be    C. is    D. are", "a": "Đáp án: B (will be). ||Tương lai tiếp diễn: will be presenting."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "The company ___ launch its new mobile app next month.\nA. launch    B. will launch    C. launched    D. launching", "a": "B (will launch). ||'next month' → tương lai."},
+      {"q": "I think customers ___ love the redesigned interface.\nA. will    B. are going    C. would    D. were", "a": "A (will). ||Ý kiến/dự đoán (think) → will."},
+      {"q": "We will begin the rollout once testing ___ complete.\nA. will be    B. is    C. was    D. being", "a": "B (is). ||Mệnh đề 'once' dùng hiện tại."},
+      {"q": "All flights are booked; we ___ fly to Osaka on Tuesday.\nA. will    B. are going to    C. would    D. will have", "a": "B (are going to). ||Kế hoạch đã đặt sẵn → be going to."},
+      {"q": "Tìm và sửa lỗi:\n\"If the weather will be bad, we will postpone the outdoor event.\"", "a": "Lỗi: \"If ... will be\" → \"If the weather is bad\". ||Mệnh đề if dùng hiện tại."},
+      {"q": "___ you ___ available for a quick call tomorrow afternoon?\nA. Will / be    B. Will / are    C. Do / be    D. Are / will", "a": "A (Will / be). ||Will + S + be (V nguyên thể)."},
+      {"q": "The factory ___ operate during the equipment upgrade.\nA. will    B. won't    C. doesn't    D. isn't", "a": "B (won't). ||Tương lai phủ định → won't operate."},
+      {"q": "By next year, the firm ___ have opened five new stores.\nA. will    B. will have    C. is    D. has", "a": "B (will have). ||'By next year' + hoàn tất → will have + V3 (tương lai hoàn thành)."},
+      {"q": "Chọn câu ĐÚNG:\nA. Will the report be ready by Friday?\nB. Will the report is ready by Friday?\nC. Will the report ready by Friday?\nD. Does the report will be ready?", "a": "A. ||Will + S + be (nguyên thể)."},
+      {"q": "As soon as we ___ confirmation from the client, we will proceed.\nA. will receive    B. receive    C. received    D. receiving", "a": "B (receive). ||Mệnh đề 'as soon as' dùng hiện tại."},
+      {"q": "___ I open the window for you? It's a bit warm in here.\nA. Will    B. Shall    C. Do    D. Am", "a": "B (Shall). ||Shall I + V = đề nghị lịch sự."},
+      {"q": "Tìm và sửa lỗi:\n\"The support team will working late tonight.\"", "a": "Lỗi: \"will working\" → \"will be working\" (hoặc \"will work\"). ||will + V nguyên thể, hoặc tương lai tiếp diễn will be + V-ing."},
+      {"q": "The manager ___ call you back when she returns from lunch.\nA. will    B. is going    C. would    D. was", "a": "A (will). ||Mệnh đề chính tương lai → will; mệnh đề 'when she returns' đã dùng hiện tại."},
+      {"q": "If the budget ___ approved, the project will start in June.\nA. will be    B. is    C. was    D. being", "a": "B (is). ||Mệnh đề if dùng hiện tại."},
+      {"q": "We ___ be able to deliver the order before the holiday rush.\nA. will    B. won't    C. don't    D. aren't", "a": "B (won't). ||Tương lai phủ định: won't be able to."},
+      {"q": "Điền vào thông báo (Part 6):\n\"The new pricing policy ___ take effect on the first of next month.\"\nA. take    B. will take    C. took    D. taking", "a": "B (will take). ||'next month' → tương lai."}
+    ]
+  },
+  "summary": [
+    "will + V nguyên thể: quyết định tức thì, dự đoán/ý kiến (I think/believe), lời hứa, đề nghị. Dấu hiệu: tomorrow, next, soon, in the future.",
+    "will vs be going to: will = quyết định ngay lúc nói + dự đoán/ý kiến; be going to = kế hoạch đã định + dự đoán có bằng chứng.",
+    "Mệnh đề thời gian (when/as soon as/once) và điều kiện (if) dùng HIỆN TẠI để chỉ tương lai; chỉ mệnh đề chính dùng will.",
+    "Phủ định: won't + V; nghi vấn: Will + S + V; tương lai tiếp diễn: will be + V-ing; đề nghị: Shall I...?"
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy nặng nhất: KHÔNG dùng will trong mệnh đề if/when/as soon as (If it rains..., không phải If it will rain...). Sau will/won't/shall luôn là V nguyên thể.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 3 (will trong mệnh đề thời gian/điều kiện) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

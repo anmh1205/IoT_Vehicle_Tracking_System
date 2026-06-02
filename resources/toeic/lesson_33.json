@@ -1,0 +1,131 @@
+{
+  "page_id": "357df50b-1fcd-81d9-a483-fcb133abd6b1",
+  "title": "33. So sánh ngang bằng",
+  "intro": [
+    {"text": "Bài 33 — So sánh ngang bằng (as ... as). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 — as + adj/adv + as; phủ định not as/so ... as; the same as; similar to; as much/many ... as.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · as + adj/adv + as",
+      "theory": ["So sánh ngang bằng: as + tính từ/trạng từ (dạng GỐC) + as. Dùng dạng gốc, KHÔNG dùng so sánh hơn."],
+      "keys": ["as cheap as; as quickly as; as important as."],
+      "traps": ["Giữa hai 'as' là dạng GỐC của tính từ/trạng từ (không phải -er/more)."],
+      "examples": [
+        "This model is as reliable as the premium one.",
+        "She works as efficiently as her colleagues."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "This model is as ___ as the premium version.\nA. reliable    B. more reliable    C. reliabler    D. most reliable", "a": "Đáp án: A (reliable). ||as + tính từ dạng GỐC + as."},
+        {"q": "The new assistant works as ___ as the senior staff.\nA. efficiently    B. more efficiently    C. efficient    D. most efficiently", "a": "Đáp án: A (efficiently). ||as + trạng từ gốc + as (bổ nghĩa động từ 'works')."},
+        {"q": "This option is as ___ as the other one.\nA. cheap    B. cheaper    C. cheapest    D. more cheap", "a": "Đáp án: A (cheap). ||as + adj gốc + as."},
+        {"q": "Our service is as ___ as our competitors'.\nA. fast    B. faster    C. fastest    D. more fast", "a": "Đáp án: A (fast). ||as + adj/adv gốc + as."},
+        {"q": "Tìm và sửa lỗi:\n\"This plan is as cheaper as the other one.\"", "a": "Lỗi: \"as cheaper as\" → \"as cheap as\". ||Giữa hai 'as' dùng dạng gốc."},
+        {"q": "The new printer is as ___ as the old model.\nA. quiet    B. quieter    C. quietest    D. more quiet", "a": "Đáp án: A (quiet). ||as + adj gốc + as."},
+        {"q": "Chọn câu ĐÚNG:\nA. This task is as important as the previous one.\nB. This task is as more important as the previous one.\nC. This task is as importanter as the previous one.\nD. This task is as most important as the previous one.", "a": "Đáp án: A. ||as + adj gốc (important) + as."},
+        {"q": "Điền vào quảng cáo (Part 6):\n\"Our budget model performs as ___ as the high-end version.\"\nA. well    B. better    C. best    D. more well", "a": "Đáp án: A (well). ||as + trạng từ gốc (well) + as."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Phủ định: not as/so ... as",
+      "theory": ["Phủ định so sánh ngang bằng: not as + adj/adv + as = not so + adj/adv + as (kém hơn)."],
+      "keys": ["A is not as expensive as B = A rẻ hơn B. not so + adj + as cũng đúng."],
+      "traps": ["Vẫn dùng dạng gốc giữa hai 'as': 'not as fast as' (không 'not as faster as')."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "This year's profit is not as ___ as last year's.\nA. high    B. higher    C. highest    D. more high", "a": "Đáp án: A (high). ||not as + adj gốc + as."},
+        {"q": "The new process is not as ___ as we expected.\nA. fast    B. faster    C. fastest    D. more fast", "a": "Đáp án: A (fast). ||not as + adj/adv gốc + as."},
+        {"q": "Their service is not ___ reliable as ours.\nA. as    B. more    C. most    D. than", "a": "Đáp án: A (as). ||not as + adj + as."},
+        {"q": "This model is not so ___ as the older one.\nA. durable    B. more durable    C. durabler    D. most durable", "a": "Đáp án: A (durable). ||not so + adj gốc + as."},
+        {"q": "Tìm và sửa lỗi:\n\"The new system is not as faster as the old one.\"", "a": "Lỗi: \"as faster as\" → \"as fast as\". ||Giữa hai 'as' dùng dạng gốc."},
+        {"q": "Sales this month are not as ___ as last month.\nA. strong    B. stronger    C. strongest    D. more strong", "a": "Đáp án: A (strong). ||not as + adj gốc + as."},
+        {"q": "Chọn câu ĐÚNG:\nA. This brand is not as popular as that one.\nB. This brand is not as popularer as that one.\nC. This brand is not so more popular as that one.\nD. This brand is not as most popular as that one.", "a": "Đáp án: A. ||not as + adj gốc (popular) + as."},
+        {"q": "Điền vào nhận định (Part 6):\n\"The trial version is not as ___ as the full version.\"\nA. powerful    B. more powerful    C. powerfuller    D. most powerful", "a": "Đáp án: A (powerful). ||not as + adj gốc + as."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · the same as, similar to, as much/many as",
+      "theory": ["the same as = giống như. similar to = tương tự. as much + danh từ không đếm + as; as many + danh từ đếm được + as."],
+      "keys": ["the same price as; similar to the old one; as much time as; as many staff as."],
+      "traps": ["the same AS (không 'the same with'/'the same than'); similar TO."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "This product costs the same ___ the previous one.\nA. as    B. than    C. with    D. like", "a": "Đáp án: A (as). ||the same + (danh từ) + as."},
+        {"q": "The new layout is similar ___ the old one.\nA. to    B. as    C. than    D. with", "a": "Đáp án: A (to). ||similar to."},
+        {"q": "We don't have as ___ time as we need.\nA. much    B. many    C. more    D. most", "a": "Đáp án: A (much). ||as much + danh từ không đếm (time) + as."},
+        {"q": "They hired as ___ staff as last year.\nA. many    B. much    C. more    D. most", "a": "Đáp án: A (many). ||as many + danh từ đếm được (staff) + as."},
+        {"q": "Tìm và sửa lỗi:\n\"This design is the same than the previous version.\"", "a": "Lỗi: \"the same than\" → \"the same as\". ||the same + as."},
+        {"q": "Our revenue is similar ___ that of our main competitor.\nA. to    B. as    C. than    D. with", "a": "Đáp án: A (to). ||similar to."},
+        {"q": "Chọn câu ĐÚNG:\nA. They produced as much units as last quarter.\nB. They produced as many units as last quarter.\nC. They produced as more units as last quarter.\nD. They produced as most units as last quarter.", "a": "Đáp án: B. ||as many + danh từ đếm được (units) + as."},
+        {"q": "Điền vào nhận định (Part 6):\n\"The new contract offers the same terms ___ the previous agreement.\"\nA. as    B. than    C. with    D. like", "a": "Đáp án: A (as). ||the same + danh từ + as."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · twice/three times as ... as; as ... as possible",
+      "theory": ["Bội số: twice/three times/half + as + adj + as. Cấu trúc: as + adj/adv + as possible (càng... càng tốt)."],
+      "keys": ["twice as large as; half as expensive as; as soon as possible; as quickly as possible."],
+      "traps": ["Bội số đứng TRƯỚC 'as ... as': 'twice as big as' (không 'as twice big as')."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "The new warehouse is ___ as large as the old one.\nA. twice    B. two    C. double the    D. two times more", "a": "Đáp án: A (twice). ||twice as + adj + as = gấp đôi."},
+        {"q": "Please reply ___ as possible.\nA. as soon    B. sooner    C. soonest    D. as sooner", "a": "Đáp án: A (as soon). ||as + adv + as possible (as soon as possible)."},
+        {"q": "This model is ___ as expensive as the premium one.\nA. half    B. halfly    C. a half    D. half of", "a": "Đáp án: A (half). ||half as + adj + as = bằng một nửa."},
+        {"q": "We aim to resolve issues as ___ as possible.\nA. quickly    B. quicker    C. quickest    D. more quickly", "a": "Đáp án: A (quickly). ||as + adv gốc + as possible."},
+        {"q": "Tìm và sửa lỗi:\n\"The new office is as twice big as the old one.\"", "a": "Lỗi: \"as twice big as\" → \"twice as big as\". ||Bội số đứng trước 'as ... as'."},
+        {"q": "Their output is ___ as high as ours.\nA. three times    B. three    C. triple the    D. three times more", "a": "Đáp án: A (three times). ||three times as + adj + as."},
+        {"q": "Chọn câu ĐÚNG:\nA. Please submit it as early as possible.\nB. Please submit it as earlier as possible.\nC. Please submit it as earliest as possible.\nD. Please submit it earlier as possible.", "a": "Đáp án: A. ||as + adv gốc (early) + as possible."},
+        {"q": "Điền vào yêu cầu (Part 6):\n\"We need to fill the position as ___ as possible.\"\nA. soon    B. sooner    C. soonest    D. more soon", "a": "Đáp án: A (soon). ||as soon as possible (adv gốc)."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn as ... as, phủ định, the same as/similar to, bội số và as ... as possible."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "This laptop is as ___ as the more expensive model.\nA. powerful    B. more powerful    C. powerfuller    D. most powerful", "a": "Đáp án: A (powerful). ||as + adj gốc + as."},
+        {"q": "Their delivery is not as ___ as ours.\nA. fast    B. faster    C. fastest    D. more fast", "a": "Đáp án: A (fast). ||not as + adj gốc + as."},
+        {"q": "The new design is similar ___ the previous one.\nA. to    B. as    C. than    D. with", "a": "Đáp án: A (to). ||similar to."},
+        {"q": "The new plant is ___ as large as the original.\nA. twice    B. two    C. double the    D. two times more", "a": "Đáp án: A (twice). ||twice as + adj + as."},
+        {"q": "Tìm và sửa lỗi:\n\"This option is as cheaper as the other.\"", "a": "Lỗi: \"as cheaper as\" → \"as cheap as\". ||Dùng dạng gốc giữa hai 'as'."},
+        {"q": "Please confirm your attendance as ___ as possible.\nA. soon    B. sooner    C. soonest    D. more soon", "a": "Đáp án: A (soon). ||as soon as possible."},
+        {"q": "This plan costs the same ___ the standard package.\nA. as    B. than    C. with    D. like", "a": "Đáp án: A (as). ||the same + as."},
+        {"q": "We didn't receive as ___ applications as expected.\nA. many    B. much    C. more    D. most", "a": "Đáp án: A (many). ||as many + danh từ đếm được + as."},
+        {"q": "Chọn câu ĐÚNG:\nA. The report is twice as long as the summary.\nB. The report is as twice long as the summary.\nC. The report is twice as longer as the summary.\nD. The report is two times longer as the summary.", "a": "Đáp án: A. ||twice as + adj gốc (long) + as."},
+        {"q": "Điền vào nhận định (Part 6):\n\"Our prices are not as ___ as those of larger chains.\"\nA. low    B. lower    C. lowest    D. more low", "a": "Đáp án: A (low). ||not as + adj gốc + as."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "This model is as ___ as the premium version.\nA. reliable    B. more reliable    C. reliabler    D. most reliable", "a": "A (reliable). ||as + adj gốc + as."},
+      {"q": "The new hire works as ___ as the experienced staff.\nA. efficiently    B. more efficiently    C. efficient    D. most efficiently", "a": "A (efficiently). ||as + trạng từ gốc + as."},
+      {"q": "This year's profit is not as ___ as last year's.\nA. high    B. higher    C. highest    D. more high", "a": "A (high). ||not as + adj gốc + as."},
+      {"q": "This product costs the same ___ the previous one.\nA. as    B. than    C. with    D. like", "a": "A (as). ||the same + as."},
+      {"q": "Tìm và sửa lỗi:\n\"This plan is as cheaper as the other one.\"", "a": "Lỗi: \"as cheaper as\" → \"as cheap as\". ||Dùng dạng gốc giữa hai 'as'."},
+      {"q": "The new layout is similar ___ the old one.\nA. to    B. as    C. than    D. with", "a": "A (to). ||similar to."},
+      {"q": "The new warehouse is ___ as large as the old one.\nA. twice    B. two    C. double the    D. two times more", "a": "A (twice). ||twice as + adj + as."},
+      {"q": "Please reply ___ as possible.\nA. as soon    B. sooner    C. soonest    D. as sooner", "a": "A (as soon). ||as soon as possible."},
+      {"q": "Chọn câu ĐÚNG:\nA. They hired as much staff as last year.\nB. They hired as many staff as last year.\nC. They hired as more staff as last year.\nD. They hired as most staff as last year.", "a": "B. ||as many + danh từ đếm được (staff) + as."},
+      {"q": "The trial version is not so ___ as the full one.\nA. powerful    B. more powerful    C. powerfuller    D. most powerful", "a": "A (powerful). ||not so + adj gốc + as."},
+      {"q": "Tìm và sửa lỗi:\n\"This design is the same than the previous version.\"", "a": "Lỗi: \"the same than\" → \"the same as\". ||the same + as."},
+      {"q": "We don't have as ___ time as we need to finish.\nA. much    B. many    C. more    D. most", "a": "A (much). ||as much + danh từ không đếm (time) + as."},
+      {"q": "Their output is ___ as high as ours.\nA. three times    B. three    C. triple the    D. three times more", "a": "A (three times). ||three times as + adj + as."},
+      {"q": "We aim to resolve complaints as ___ as possible.\nA. quickly    B. quicker    C. quickest    D. more quickly", "a": "A (quickly). ||as + adv gốc + as possible."},
+      {"q": "Chọn câu ĐÚNG:\nA. The new office is as twice big as the old one.\nB. The new office is twice as big as the old one.\nC. The new office is twice as bigger as the old one.\nD. The new office is two times bigger as the old one.", "a": "B. ||twice as + adj gốc (big) + as."},
+      {"q": "Điền vào nhận định (Part 6):\n\"Our prices are not as ___ as those of large chains, but our service is better.\"\nA. low    B. lower    C. lowest    D. more low", "a": "A (low). ||not as + adj gốc + as."}
+    ]
+  },
+  "summary": [
+    "So sánh ngang bằng: as + tính từ/trạng từ DẠNG GỐC + as.",
+    "Phủ định: not as / not so + adj/adv gốc + as (kém hơn).",
+    "the same as (giống như), similar to (tương tự). as much + danh từ không đếm + as; as many + danh từ đếm được + as.",
+    "Bội số: twice/three times/half + as + adj + as. Cấu trúc: as + adj/adv + as possible."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy: giữa hai 'as' luôn dùng DẠNG GỐC (as fast as, không 'as faster as'). the same AS, similar TO. Bội số đứng TRƯỚC: 'twice as big as'.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 3 (the same as / much vs many) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

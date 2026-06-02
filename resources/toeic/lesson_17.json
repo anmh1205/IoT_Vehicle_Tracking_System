@@ -1,0 +1,131 @@
+{
+  "page_id": "357df50b-1fcd-81a0-89d9-f61f4159443d",
+  "title": "17. Must và Have to",
+  "intro": [
+    {"text": "Bài 17 — Must và Have to. Làm câu hỏi ngay sau mỗi phần, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 & 7 hỏi bắt buộc/cấm/suy đoán; đặc biệt phân biệt mustn't (cấm) với don't have to (không cần), và quá khứ 'had to'.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Bắt buộc và cần thiết",
+      "theory": ["must + V nguyên thể và have to + V đều chỉ sự bắt buộc. must thiên về quy tắc/nhấn mạnh của người nói; have to thiên về yêu cầu từ bên ngoài."],
+      "keys": ["I/you/we/they + have to + V. he/she/it/danh từ số ít + has to + V. must + V (mọi ngôi, không chia)."],
+      "traps": ["Sau must KHÔNG có 'to': 'must submit' (không 'must to submit')."],
+      "examples": [
+        "All employees must wear ID badges on site.",
+        "She has to travel frequently for her job."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "All employees ___ wear identification badges while on site.\nA. must    B. must to    C. musts    D. musting", "a": "Đáp án: A (must). ||must + V nguyên thể (không 'to')."},
+        {"q": "I ___ finish this report by 5 p.m. today.\nA. have to    B. has to    C. must to    D. having to", "a": "Đáp án: A (have to). ||'I' → have to + V."},
+        {"q": "All visitors ___ sign in at the reception desk.\nA. must    B. must to    C. musts    D. musting", "a": "Đáp án: A (must). ||must + V nguyên thể."},
+        {"q": "Because of her role, she ___ travel abroad several times a year.\nA. has to    B. have to    C. must to    D. having", "a": "Đáp án: A (has to). ||'she' → has to."},
+        {"q": "Tìm và sửa lỗi:\n\"He must to submit the application form today.\"", "a": "Lỗi: \"must to submit\" → \"must submit\". ||Sau must không có 'to'."},
+        {"q": "We ___ comply with the updated environmental regulations.\nA. must    B. must to    C. musts    D. musting", "a": "Đáp án: A (must). ||must + V."},
+        {"q": "Chọn câu ĐÚNG:\nA. The team have to work overtime tonight.\nB. The team has to work overtime tonight.\nC. The team must to work overtime tonight.\nD. The team having to work overtime.", "a": "Đáp án: B. ||'team' xem là số ít → has to."},
+        {"q": "Điền vào nội quy (Part 6):\n\"Drivers ___ follow all posted speed limits within the facility.\"\nA. must    B. must to    C. musts    D. musting", "a": "Đáp án: A (must). ||must + V."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Cấm đoán và không cần thiết",
+      "theory": ["mustn't = CẤM (không được phép làm). don't have to / don't need to = KHÔNG CẦN (không bắt buộc, làm cũng được). Hai nghĩa khác hẳn nhau."],
+      "keys": ["You mustn't + V (cấm). You don't have to + V (không cần)."],
+      "traps": ["KHÔNG viết 'don't must': sai → dùng 'mustn't' (cấm) hoặc 'don't have to' (không cần)."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "You ___ smoke inside the building at any time.\nA. mustn't    B. don't have to    C. haven't to    D. needn't", "a": "Đáp án: A (mustn't). ||Cấm hoàn toàn → mustn't."},
+        {"q": "You ___ pay extra for the upgrade; it is completely free.\nA. mustn't    B. don't have to    C. must    D. have to", "a": "Đáp án: B (don't have to). ||Không cần → don't have to."},
+        {"q": "Employees ___ share their account passwords with anyone.\nA. mustn't    B. don't have to    C. needn't    D. haven't", "a": "Đáp án: A (mustn't). ||Cấm → mustn't."},
+        {"q": "Attendance is optional, so we ___ attend the afternoon workshop.\nA. mustn't    B. don't have to    C. must    D. have to", "a": "Đáp án: B (don't have to). ||Không bắt buộc → don't have to."},
+        {"q": "Tìm và sửa lỗi:\n\"You don't must park in this area.\"", "a": "Lỗi: \"don't must\". ||Sửa: \"You mustn't park here\" (cấm) hoặc \"don't have to park\" (không cần) tùy nghĩa."},
+        {"q": "Guests ___ use the staff-only elevator under any circumstances.\nA. mustn't    B. don't have to    C. needn't    D. don't need", "a": "Đáp án: A (mustn't). ||Cấm → mustn't."},
+        {"q": "Chọn câu hợp nghĩa (không cần thiết):\n\"You ___ bring your own laptop; we will provide one.\"\nA. mustn't    B. don't have to    C. must    D. have to", "a": "Đáp án: B (don't have to). ||Không cần mang → don't have to."},
+        {"q": "Điền vào hướng dẫn an ninh (Part 6):\n\"Passengers ___ leave their luggage unattended at any time.\"\nA. mustn't    B. don't have to    C. needn't    D. don't need", "a": "Đáp án: A (mustn't). ||Cấm vì lý do an ninh → mustn't."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Suy đoán (deduction)",
+      "theory": ["must = chắc chắn là (suy đoán khẳng định, có bằng chứng). can't = chắc chắn không (suy đoán phủ định)."],
+      "keys": ["Someone must be in the office (đèn còn sáng). That can't be right (số liệu không khớp)."],
+      "traps": ["Suy đoán phủ định dùng 'can't', KHÔNG dùng 'mustn't' (mustn't = cấm)."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "The lights are still on, so someone ___ be in the office.\nA. must    B. can't    C. mustn't    D. doesn't", "a": "Đáp án: A (must). ||Suy đoán khẳng định có bằng chứng → must be."},
+        {"q": "He isn't answering his phone; he ___ be in a meeting.\nA. must    B. can't    C. mustn't    D. don't", "a": "Đáp án: A (must). ||Suy đoán hợp lý → must be."},
+        {"q": "That ___ be the correct address; the building doesn't even exist.\nA. must    B. can't    C. has to    D. mustn't", "a": "Đáp án: B (can't). ||Suy đoán phủ định → can't be."},
+        {"q": "She has worked here for years, so she ___ know the system well.\nA. must    B. can't    C. mustn't    D. doesn't", "a": "Đáp án: A (must). ||Suy đoán khẳng định → must know."},
+        {"q": "Tìm và sửa lỗi:\n\"This must to be the wrong invoice.\"", "a": "Lỗi: \"must to be\" → \"must be\". ||Sau must không có 'to'."},
+        {"q": "The report is full of errors; it ___ have been reviewed carefully.\nA. must    B. can't    C. mustn't    D. doesn't", "a": "Đáp án: B (can't). ||Suy đoán phủ định về quá khứ → can't have been."},
+        {"q": "Chọn câu ĐÚNG:\nA. They mustn't be serious; this is a huge discount.\nB. They must be serious; this is a huge discount.\nC. They doesn't be serious.\nD. They must to be serious.", "a": "Đáp án: B. ||Suy đoán khẳng định → must be."},
+        {"q": "Điền vào nhận định (Part 6):\n\"The store is completely packed, so the promotion ___ be very popular.\"\nA. must    B. can't    C. mustn't    D. doesn't", "a": "Đáp án: A (must). ||Suy đoán khẳng định → must be."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · had to, will have to, must have + V3",
+      "theory": ["Quá khứ của must/have to là HAD TO (không có 'musted'). Tương lai dùng will have to. Suy đoán về quá khứ: must have + V3 (chắc đã) / can't have + V3 (chắc đã không)."],
+      "keys": ["Yesterday we had to stay late. Next month you will have to renew it. Someone must have forgotten to lock the door."],
+      "traps": ["Không dùng 'must' cho nghĩa bắt buộc trong QUÁ KHỨ → dùng 'had to'."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "Yesterday, the whole team ___ stay late to finish the audit.\nA. must    B. had to    C. must to    D. have to", "a": "Đáp án: B (had to). ||Bắt buộc trong quá khứ → had to."},
+        {"q": "Last week, the staff ___ work two weekends in a row.\nA. must    B. had to    C. musts    D. have to", "a": "Đáp án: B (had to). ||Quá khứ → had to."},
+        {"q": "Next month, all drivers ___ renew their licenses.\nA. must    B. will have to    C. must to    D. had to", "a": "Đáp án: B (will have to). ||Bắt buộc trong tương lai → will have to."},
+        {"q": "The door was unlocked; someone ___ have forgotten to lock it.\nA. must    B. can't    C. mustn't    D. doesn't", "a": "Đáp án: A (must). ||Suy đoán về quá khứ → must have forgotten."},
+        {"q": "Tìm và sửa lỗi:\n\"Yesterday I must finish the report before midnight.\"", "a": "Lỗi: \"must finish\" cho quá khứ. ||Sửa: \"had to finish\" (bắt buộc trong quá khứ)."},
+        {"q": "The figures don't match; there ___ have been a calculation error.\nA. must    B. can't    C. mustn't    D. doesn't", "a": "Đáp án: A (must). ||Suy đoán quá khứ → must have been."},
+        {"q": "Chọn câu ĐÚNG:\nA. She isn't here; she must left already.\nB. She isn't here; she must have left already.\nC. She isn't here; she must to leave already.\nD. She isn't here; she musted leave already.", "a": "Đáp án: B. ||must have + V3 (left) = suy đoán quá khứ."},
+        {"q": "Điền vào thông báo (Part 6):\n\"Because of the new policy, all staff ___ have to complete annual training.\"\nA. must    B. will    C. musts    D. musting", "a": "Đáp án: B (will). ||Tương lai bắt buộc → will have to."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn bắt buộc, cấm/không cần, suy đoán và had to/will have to."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "All contractors ___ wear protective gear at the construction site.\nA. must    B. must to    C. musts    D. musting", "a": "Đáp án: A (must). ||Bắt buộc → must + V."},
+        {"q": "You ___ worry about the setup; the IT team will handle it.\nA. mustn't    B. don't have to    C. must    D. have to", "a": "Đáp án: B (don't have to). ||Không cần → don't have to."},
+        {"q": "Visitors ___ enter the server room without authorization.\nA. must    B. mustn't    C. don't have to    D. needn't", "a": "Đáp án: B (mustn't). ||Cấm → mustn't."},
+        {"q": "He ___ travel to the head office for the monthly review.\nA. has to    B. have to    C. must to    D. having", "a": "Đáp án: A (has to). ||'He' → has to."},
+        {"q": "Tìm và sửa lỗi:\n\"Last year, we must reduce our marketing budget.\"", "a": "Lỗi: \"must reduce\" cho quá khứ. ||Sửa: \"had to reduce\" (bắt buộc trong quá khứ)."},
+        {"q": "The office is completely empty; everyone ___ have gone home.\nA. must    B. can't    C. mustn't    D. doesn't", "a": "Đáp án: A (must). ||Suy đoán quá khứ → must have gone."},
+        {"q": "You ___ submit the form twice; submitting it once is enough.\nA. mustn't    B. don't have to    C. must    D. have to", "a": "Đáp án: B (don't have to). ||Không cần làm hai lần → don't have to."},
+        {"q": "That ___ be the manager on the call; she's on vacation this week.\nA. must    B. can't    C. has to    D. mustn't", "a": "Đáp án: B (can't). ||Suy đoán phủ định → can't be."},
+        {"q": "Chọn câu ĐÚNG:\nA. Next week we must to relocate the office.\nB. Next week we will have to relocate the office.\nC. Next week we had to relocate the office.\nD. Next week we musting relocate the office.", "a": "Đáp án: B. ||Tương lai bắt buộc → will have to + V."},
+        {"q": "Điền vào nội quy bảo mật (Part 6):\n\"For security, employees ___ lock their computers when away from the desk.\"\nA. must    B. must to    C. musts    D. musting", "a": "Đáp án: A (must). ||Bắt buộc → must + V."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "All employees ___ complete the safety training by Friday.\nA. must    B. must to    C. musts    D. musting", "a": "A (must). ||Bắt buộc → must + V."},
+      {"q": "I ___ leave now in order to catch the last train.\nA. have to    B. has to    C. must to    D. having", "a": "A (have to). ||'I' → have to + V."},
+      {"q": "You ___ park in the spaces reserved for visitors.\nA. mustn't    B. don't have to    C. needn't    D. don't need", "a": "A (mustn't). ||Cấm → mustn't."},
+      {"q": "You ___ bring lunch; a buffet is provided at the seminar.\nA. mustn't    B. don't have to    C. must    D. have to", "a": "B (don't have to). ||Không cần → don't have to."},
+      {"q": "Tìm và sửa lỗi:\n\"He must to renew his work contract this month.\"", "a": "Lỗi: \"must to renew\" → \"must renew\". ||Sau must không có 'to'."},
+      {"q": "All the lights are off, so the office ___ be closed.\nA. must    B. can't    C. mustn't    D. doesn't", "a": "A (must). ||Suy đoán khẳng định → must be."},
+      {"q": "That ___ be correct; the totals simply don't add up.\nA. must    B. can't    C. has to    D. mustn't", "a": "B (can't). ||Suy đoán phủ định → can't be."},
+      {"q": "Yesterday, the team ___ work late to resolve the outage.\nA. must    B. had to    C. must to    D. have to", "a": "B (had to). ||Bắt buộc trong quá khứ → had to."},
+      {"q": "The system crashed; there ___ have been a power surge.\nA. must    B. can't    C. mustn't    D. doesn't", "a": "A (must). ||Suy đoán quá khứ → must have been."},
+      {"q": "Tìm và sửa lỗi:\n\"You don't must use your phone during the exam.\"", "a": "Lỗi: \"don't must\" → \"mustn't\". ||Cấm → mustn't (don't have to nếu chỉ là không cần)."},
+      {"q": "Next quarter, the sales team ___ have to meet higher targets.\nA. must    B. will    C. musts    D. musting", "a": "B (will). ||Tương lai bắt buộc → will have to."},
+      {"q": "Guests ___ smoke anywhere inside the hotel premises.\nA. mustn't    B. don't have to    C. needn't    D. don't need", "a": "A (mustn't). ||Cấm → mustn't."},
+      {"q": "She knows every detail, so she ___ have read the full report.\nA. must    B. can't    C. mustn't    D. doesn't", "a": "A (must). ||Suy đoán quá khứ → must have read."},
+      {"q": "You ___ answer every question; just attempt the ones you know.\nA. mustn't    B. don't have to    C. must    D. have to", "a": "B (don't have to). ||Không bắt buộc → don't have to."},
+      {"q": "Chọn câu ĐÚNG:\nA. Drivers must to stop at red lights.\nB. Drivers must stop at red lights.\nC. Drivers musts stop at red lights.\nD. Drivers musting stop at red lights.", "a": "B. ||must + V nguyên thể."},
+      {"q": "Điền vào hướng dẫn (Part 6):\n\"To enter the laboratory, all visitors ___ obtain a temporary access card.\"\nA. must    B. must to    C. musts    D. musting", "a": "A (must). ||Bắt buộc → must + V."}
+    ]
+  },
+  "summary": [
+    "must / have to + V = bắt buộc (must + V nguyên thể). must: quy tắc/nhấn mạnh; have to: yêu cầu bên ngoài. 'team/company' số ít → has to.",
+    "mustn't = CẤM (không được phép); don't have to / don't need to = KHÔNG CẦN. Hai nghĩa khác hẳn nhau.",
+    "Suy đoán: must = chắc chắn (khẳng định); can't = chắc chắn không. Quá khứ: must have + V3 / can't have + V3.",
+    "Quá khứ của must/have to là HAD TO (không có 'musted'); tương lai là will have to."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy lớn: mustn't (cấm) ≠ don't have to (không cần). Quá khứ bắt buộc dùng 'had to' (không dùng 'must'). Suy đoán phủ định dùng 'can't' (không 'mustn't'). Sau must KHÔNG có 'to'.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 2 (mustn't vs don't have to) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

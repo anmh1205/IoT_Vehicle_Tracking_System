@@ -1,0 +1,131 @@
+{
+  "page_id": "357df50b-1fcd-81f5-935c-e90c583b3dc6",
+  "title": "08. Giới từ",
+  "intro": [
+    {"text": "Bài 08 — Giới từ (Prepositions). Đọc lý thuyết → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 & 6 hỏi giới từ thời gian (in/on/at, by/until), nơi chốn, cụm động từ + giới từ, và phân biệt giới từ (+danh từ) với liên từ (+mệnh đề).", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Giới từ chỉ thời gian",
+      "theory": ["in: tháng/năm/buổi (in May, in 2005, in the morning). on: ngày/thứ/ngày tháng (on Monday). at: giờ/thời điểm (at 3 p.m.)."],
+      "keys": ["by = không muộn hơn (hạn chót). until = kéo dài cho đến. for + khoảng (for five years). during + danh từ sự kiện. since + mốc. in + khoảng (in two days = sau 2 ngày)."],
+      "traps": ["by vs until: 'submit by Friday' (hạn chót) ≠ 'open until 10 p.m.' (kéo dài đến)."],
+      "examples": [
+        "The meeting is scheduled at 3 p.m. — at + giờ.",
+        "Please submit the report by Friday. — by = không muộn hơn."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The strategy meeting is scheduled ___ 3 p.m.\nA. in    B. on    C. at    D. by", "a": "Đáp án: C (at). ||at + giờ cụ thể."},
+        {"q": "The new pricing policy takes effect ___ Monday.\nA. in    B. on    C. at    D. by", "a": "Đáp án: B (on). ||on + ngày/thứ."},
+        {"q": "The company was founded ___ 2005 by two engineers.\nA. in    B. on    C. at    D. by", "a": "Đáp án: A (in). ||in + năm."},
+        {"q": "Please submit the budget report ___ Friday at the latest.\nA. in    B. on    C. until    D. by", "a": "Đáp án: D (by). ||by = hạn chót (không muộn hơn). 'at the latest' xác nhận."},
+        {"q": "The customer service hotline stays open ___ 10 p.m.\nA. by    B. until    C. for    D. since", "a": "Đáp án: B (until). ||until = kéo dài cho đến thời điểm đó."},
+        {"q": "The two firms have collaborated ___ five years.\nA. for    B. since    C. during    D. in", "a": "Đáp án: A (for). ||for + khoảng thời gian."},
+        {"q": "Tìm và sửa lỗi:\n\"The annual seminar will start in Monday morning.\"", "a": "Lỗi: \"in Monday\" → \"on Monday\". ||on + thứ/ngày."},
+        {"q": "Điền vào thông báo (Part 6):\n\"The renovation will be completed ___ the end of June.\"\nA. in    B. on    C. at    D. by", "a": "Đáp án: D (by). ||by the end of = hoàn tất không muộn hơn cuối tháng 6."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Giới từ chỉ nơi chốn",
+      "theory": ["in: bên trong (in the drawer). on: trên bề mặt/đường/tầng (on the table, on Main Street, on the third floor). at: điểm cụ thể (at the entrance)."],
+      "keys": ["between: giữa HAI đối tượng. among: giữa BA trở lên/một nhóm."],
+      "traps": ["between dùng cho 2; among dùng cho nhiều. 'on the ... floor' (không phải 'in the floor')."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "The signed contracts are ___ the top drawer of the cabinet.\nA. in    B. on    C. at    D. by", "a": "Đáp án: A (in). ||in = bên trong ngăn kéo."},
+        {"q": "Please place the package ___ the reception counter.\nA. in    B. on    C. at    D. of", "a": "Đáp án: B (on). ||on = trên bề mặt."},
+        {"q": "Let's meet ___ the main entrance at 9 a.m.\nA. in    B. on    C. at    D. of", "a": "Đáp án: C (at). ||at = một điểm/địa điểm cụ thể."},
+        {"q": "The conference room is located ___ the third floor.\nA. in    B. on    C. at    D. of", "a": "Đáp án: B (on). ||on the ... floor."},
+        {"q": "The board must choose ___ the two final candidates.\nA. between    B. among    C. in    D. at", "a": "Đáp án: A (between). ||between dùng cho HAI đối tượng."},
+        {"q": "The new policy was popular ___ the employees.\nA. between    B. among    C. in    D. at", "a": "Đáp án: B (among). ||among dùng cho một nhóm/nhiều người."},
+        {"q": "Tìm và sửa lỗi:\n\"She sat among her two colleagues at lunch.\"", "a": "Lỗi: \"among\" → \"between\". ||Chỉ có HAI đồng nghiệp → between."},
+        {"q": "Điền vào mô tả (Part 6):\n\"The new branch is located ___ Main Street, right next to the bank.\"\nA. in    B. on    C. at    D. of", "a": "Đáp án: B (on). ||on + tên đường (on Main Street)."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Cụm động từ + giới từ cố định",
+      "theory": ["Nhiều động từ luôn đi với một giới từ cố định. Học theo cụm để chọn nhanh."],
+      "keys": ["look for, refer to, specialize in, comply with, consist of, result in, adhere to, deal with, depend on, apply for."],
+      "traps": ["deal WITH (không phải 'deal for'); result IN (kết quả là); adhere TO (tuân thủ)."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "The management team is looking ___ a cost-effective solution.\nA. for    B. at    C. in    D. on", "a": "Đáp án: A (for). ||look for = tìm kiếm."},
+        {"q": "Please refer ___ the user manual for detailed instructions.\nA. to    B. for    C. at    D. in", "a": "Đáp án: A (to). ||refer to."},
+        {"q": "The firm specializes ___ supply chain logistics.\nA. in    B. on    C. at    D. for", "a": "Đáp án: A (in). ||specialize in."},
+        {"q": "All vendors must comply ___ the new safety regulations.\nA. with    B. to    C. for    D. on", "a": "Đáp án: A (with). ||comply with."},
+        {"q": "The proposal consists ___ three main sections.\nA. of    B. in    C. for    D. with", "a": "Đáp án: A (of). ||consist of."},
+        {"q": "Tìm và sửa lỗi:\n\"The support team is dealing for a difficult client today.\"", "a": "Lỗi: \"dealing for\" → \"dealing with\". ||deal with = xử lý/giải quyết."},
+        {"q": "The new automation will result ___ higher productivity.\nA. in    B. of    C. for    D. to", "a": "Đáp án: A (in). ||result in = dẫn đến."},
+        {"q": "Điền vào nội quy (Part 6):\n\"All employees must adhere ___ the company dress code.\"\nA. to    B. for    C. at    D. in", "a": "Đáp án: A (to). ||adhere to = tuân thủ."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Giới từ và liên từ (during/while, because of/because, despite/although)",
+      "theory": ["Cùng diễn đạt một ý nhưng chọn đúng loại: GIỚI TỪ + danh từ; LIÊN TỪ + mệnh đề (S + V)."],
+      "keys": ["Giới từ + N: during, because of, due to, despite, in spite of. Liên từ + mệnh đề: while, because, although, even though."],
+      "traps": ["during + danh từ (during the meeting); while + mệnh đề (while the meeting was going on)."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "___ the presentation, all mobile phones must be on silent.\nA. While    B. During    C. When    D. As", "a": "Đáp án: B (During). ||Theo sau là danh từ 'the presentation' → giới từ During."},
+        {"q": "___ the construction was ongoing, the office remained open.\nA. During    B. While    C. For    D. In", "a": "Đáp án: B (While). ||Theo sau là mệnh đề (the construction was ongoing) → liên từ While."},
+        {"q": "The flight was delayed ___ severe weather conditions.\nA. because    B. because of    C. although    D. while", "a": "Đáp án: B (because of). ||Theo sau là danh từ → because of."},
+        {"q": "___ the high initial cost, the company approved the plan.\nA. Although    B. Despite    C. Because    D. While", "a": "Đáp án: B (Despite). ||Theo sau là cụm danh từ (the high initial cost) → giới từ Despite."},
+        {"q": "Tìm và sửa lỗi:\n\"During the manager was away, sales dropped sharply.\"", "a": "Lỗi: \"During\" + mệnh đề. ||Sửa: \"While the manager was away...\" (liên từ + mệnh đề)."},
+        {"q": "The store remained fully open ___ the renovation work.\nA. while    B. during    C. although    D. because", "a": "Đáp án: B (during). ||Theo sau là danh từ 'the renovation work' → during."},
+        {"q": "___ sales increased, operating costs also rose.\nA. During    B. While    C. Because of    D. Despite", "a": "Đáp án: B (While). ||Theo sau là mệnh đề → liên từ While (trong khi/whereas)."},
+        {"q": "Điền vào thông báo (Part 6):\n\"___ the unusually long queue, customers waited patiently.\"\nA. Although    B. Despite    C. Because    D. While", "a": "Đáp án: B (Despite). ||Theo sau là cụm danh từ → giới từ Despite."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn giới từ thời gian, nơi chốn, cụm cố định và giới từ vs liên từ."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "The international conference will be held ___ March.\nA. in    B. on    C. at    D. by", "a": "Đáp án: A (in). ||in + tháng."},
+        {"q": "Please reply to this email ___ noon tomorrow.\nA. by    B. until    C. for    D. since", "a": "Đáp án: A (by). ||by = hạn chót (không muộn hơn trưa)."},
+        {"q": "The visitor passes are kept ___ the reception desk.\nA. in    B. of    C. at    D. into", "a": "Đáp án: C (at). ||at the reception desk = tại quầy."},
+        {"q": "The annual profit is shared ___ the three partners.\nA. between    B. among    C. in    D. at", "a": "Đáp án: B (among). ||among dùng cho ba người trở lên."},
+        {"q": "Tìm và sửa lỗi:\n\"We are looking forward the upcoming product launch.\"", "a": "Lỗi: thiếu 'to'. ||Sửa: \"looking forward to the upcoming product launch.\""},
+        {"q": "All suppliers must comply ___ the updated quality standards.\nA. with    B. to    C. for    D. on", "a": "Đáp án: A (with). ||comply with."},
+        {"q": "___ the negotiation, both parties remained calm and professional.\nA. While    B. During    C. Because    D. Although", "a": "Đáp án: B (During). ||Theo sau là danh từ 'the negotiation' → during."},
+        {"q": "___ the tight budget, the team delivered an excellent product.\nA. Although    B. Despite    C. Because    D. While", "a": "Đáp án: B (Despite). ||Theo sau là cụm danh từ (the tight budget) → Despite."},
+        {"q": "The replacement parts will arrive ___ two business days.\nA. in    B. on    C. at    D. by", "a": "Đáp án: A (in). ||in + khoảng thời gian (in two days = sau 2 ngày)."},
+        {"q": "Điền vào thông báo (Part 6):\n\"The office will be closed ___ the national holiday next week.\"\nA. while    B. during    C. although    D. because", "a": "Đáp án: B (during). ||Theo sau là danh từ 'the national holiday' → during."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "The onboarding session starts ___ 9 a.m. sharp.\nA. in    B. on    C. at    D. by", "a": "C (at). ||at + giờ cụ thể."},
+      {"q": "The agreement must be signed ___ the end of this week.\nA. in    B. on    C. until    D. by", "a": "D (by). ||by = hạn chót."},
+      {"q": "The company has been operating ___ 1998.\nA. for    B. since    C. during    D. in", "a": "B (since). ||since + mốc thời gian."},
+      {"q": "Please place your laptop ___ the conveyor belt at security.\nA. in    B. on    C. at    D. of", "a": "B (on). ||on = trên bề mặt."},
+      {"q": "The grand prize was shared ___ the two finalists.\nA. between    B. among    C. in    D. at", "a": "A (between). ||between dùng cho HAI."},
+      {"q": "Tìm và sửa lỗi:\n\"The meeting is scheduled on 2 p.m. this afternoon.\"", "a": "Lỗi: \"on 2 p.m.\" → \"at 2 p.m.\". ||at + giờ."},
+      {"q": "All contractors must comply ___ the on-site safety rules.\nA. with    B. to    C. for    D. on", "a": "A (with). ||comply with."},
+      {"q": "The final report consists ___ four detailed chapters.\nA. of    B. in    C. for    D. with", "a": "A (of). ||consist of."},
+      {"q": "___ the keynote presentation, please hold all your questions.\nA. While    B. During    C. When    D. As", "a": "B (During). ||Theo sau là danh từ → during."},
+      {"q": "___ the budget was limited, the team still met the deadline.\nA. During    B. While    C. Because of    D. Despite", "a": "B (While). ||Theo sau là mệnh đề → liên từ While."},
+      {"q": "The morning flight was canceled ___ a technical fault.\nA. because    B. because of    C. although    D. while", "a": "B (because of). ||Theo sau là danh từ → because of."},
+      {"q": "Tìm và sửa lỗi:\n\"Despite the road was closed, the team arrived early.\"", "a": "Lỗi: \"Despite\" + mệnh đề. ||Sửa: \"Although the road was closed...\" (liên từ + mệnh đề)."},
+      {"q": "The flagship store is located ___ Fifth Avenue.\nA. in    B. on    C. at    D. of", "a": "B (on). ||on + tên đường."},
+      {"q": "Please refer ___ page 12 for the full warranty terms.\nA. to    B. for    C. at    D. in", "a": "A (to). ||refer to."},
+      {"q": "___ the heavy rain, the outdoor ceremony continued as planned.\nA. Although    B. Despite    C. Because    D. While", "a": "B (Despite). ||Theo sau là cụm danh từ → Despite."},
+      {"q": "Điền vào thông báo (Part 6):\n\"Your order should reach you ___ three business days.\"\nA. in    B. on    C. at    D. by", "a": "A (in). ||in + khoảng thời gian (in three days)."}
+    ]
+  },
+  "summary": [
+    "Thời gian: in (tháng/năm/buổi), on (ngày/thứ), at (giờ/thời điểm).",
+    "by (không muộn hơn) ≠ until (kéo dài cho đến). for + khoảng; during + danh từ sự kiện; since + mốc; in + khoảng (in two days = sau 2 ngày).",
+    "Nơi chốn: in (bên trong), on (bề mặt/đường/tầng), at (điểm cụ thể). between (2) ≠ among (3+).",
+    "Cụm động từ + giới từ: look for, refer to, specialize in, comply with, consist of, result in, adhere to, deal with. Giới từ + danh từ (during/because of/despite); liên từ + mệnh đề (while/because/although)."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy lớn: during/because of/despite + DANH TỪ; while/because/although + MỆNH ĐỀ (S+V). by = hạn chót; until = kéo dài cho đến.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 4 (giới từ vs liên từ) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

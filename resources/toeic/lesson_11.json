@@ -1,0 +1,131 @@
+{
+  "page_id": "357df50b-1fcd-8186-9680-fd039f8bb64c",
+  "title": "11. Danh từ tập hợp",
+  "intro": [
+    {"text": "Bài 11 — Danh từ tập hợp (Collective nouns). Đọc lý thuyết → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 hỏi chia động từ với team/staff/committee (số ít), với police/people (số nhiều), với 'a series/group of' (theo từ chính), và số nhiều bất quy tắc (criteria, data).", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Danh từ tập hợp thường là số ít",
+      "theory": ["Trong văn phong TOEIC (Anh-Mỹ), danh từ tập hợp chỉ một nhóm hành động như một khối → chia động từ SỐ ÍT."],
+      "keys": ["team, staff, committee, board, company, management, audience, crew, government, department → động từ số ít."],
+      "traps": ["The committee HAS decided...; The team IS ready... (số ít trong TOEIC)."],
+      "examples": [
+        "The marketing team presents its report tomorrow.",
+        "The board has approved the annual budget."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The marketing team ___ its monthly report at the meeting tomorrow.\nA. present    B. presents    C. presenting    D. were", "a": "Đáp án: B (presents). ||'team' xem là số ít → presents."},
+        {"q": "The board ___ already approved the annual budget.\nA. have    B. has    C. are    D. were", "a": "Đáp án: B (has). ||'board' số ít → has."},
+        {"q": "The selection committee ___ still reviewing applications.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'committee' số ít → is."},
+        {"q": "Our company ___ expanding into three new markets this year.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'company' số ít → is."},
+        {"q": "The audience ___ thoroughly enjoying the keynote speech.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'audience' số ít → is."},
+        {"q": "Tìm và sửa lỗi:\n\"The committee have reached a final decision.\"", "a": "Lỗi: \"have\" → \"has\". ||Trong TOEIC, 'committee' xem là số ít → has."},
+        {"q": "The flight crew ___ ready for an on-time departure.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'crew' số ít → is."},
+        {"q": "Điền vào hồ sơ (Part 6):\n\"The management team ___ committed to improving customer service.\"\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'management team' số ít → is."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Danh từ luôn số nhiều và danh từ chỉ đôi",
+      "theory": ["Một số danh từ luôn số nhiều: police, people, cattle. Danh từ chỉ vật có hai phần (scissors, glasses, trousers, headphones) → số nhiều; nhưng 'a pair of ...' → số ít."],
+      "keys": ["The police ARE...; People ARE...; The scissors ARE...; A pair of gloves IS..."],
+      "traps": ["'police' và 'people' không có -s nhưng luôn số nhiều: The police ARE (không phải 'is')."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "The police ___ currently investigating the incident.\nA. is    B. are    C. was    D. has", "a": "Đáp án: B (are). ||'police' luôn số nhiều → are."},
+        {"q": "Many people ___ attended the product launch event.\nA. has    B. have    C. is    D. was", "a": "Đáp án: B (have). ||'people' số nhiều → have."},
+        {"q": "The scissors ___ kept in the top drawer of the desk.\nA. is    B. are    C. was    D. has", "a": "Đáp án: B (are). ||'scissors' (vật có hai lưỡi) → số nhiều."},
+        {"q": "A pair of protective gloves ___ provided to each worker.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'A pair of ...' → động từ số ít."},
+        {"q": "All the customer data ___ consistent across both reports.\nA. is    B. are    C. were    D. has", "a": "Đáp án: A (is). ||'data' trong TOEIC xem là số ít → is."},
+        {"q": "Tìm và sửa lỗi:\n\"The police is searching for the missing package.\"", "a": "Lỗi: \"is\" → \"are\". ||'police' luôn số nhiều."},
+        {"q": "His reading glasses ___ broken during the business trip.\nA. was    B. were    C. is    D. has", "a": "Đáp án: B (were). ||'glasses' → số nhiều."},
+        {"q": "Điền vào chính sách (Part 6):\n\"People who register early ___ a 10 percent discount.\"\nA. receives    B. receive    C. is receiving    D. has", "a": "Đáp án: B (receive). ||'People' số nhiều → receive."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · a group of / a series of / a variety of",
+      "theory": ["Với 'a + danh từ tập hợp + of + danh từ số nhiều', động từ thường chia theo TỪ CHÍNH (group, series, team, range → số ít). Riêng 'a variety of' và 'a number of' + danh từ số nhiều → số nhiều."],
+      "keys": ["A series of ... IS/HAS (số ít). A group of ... IS (số ít). A variety of + plural → ARE. A number of + plural → ARE/HAVE."],
+      "traps": ["'A series of delays HAS...' (theo 'series', số ít), không phải 'have'."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "A group of investors ___ interested in funding the startup.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||Từ chính 'group' số ít → is."},
+        {"q": "A series of training sessions ___ scheduled for this week.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'A series of ...' → số ít (theo 'series')."},
+        {"q": "A variety of products ___ available on the company website.\nA. is    B. are    C. was    D. has", "a": "Đáp án: B (are). ||'A variety of + danh từ số nhiều' → động từ số nhiều."},
+        {"q": "A number of employees ___ requested a transfer this quarter.\nA. has    B. have    C. is    D. was", "a": "Đáp án: B (have). ||'A number of + số nhiều' → số nhiều."},
+        {"q": "A team of specialists ___ currently handling the urgent case.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||Từ chính 'team' số ít → is."},
+        {"q": "Tìm và sửa lỗi:\n\"A series of unexpected delays have affected the project timeline.\"", "a": "Lỗi: \"have\" → \"has\". ||'A series of ...' chia theo 'series' (số ít)."},
+        {"q": "The range of services we offer ___ expanding every year.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||Từ chính 'The range' số ít → is."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"A group of senior analysts ___ reviewing the proposed merger.\"\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||Từ chính 'group' số ít → is."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Số nhiều bất quy tắc và đơn vị đo",
+      "theory": ["Một số danh từ gốc Latin/Hy Lạp có dạng số nhiều bất quy tắc. Đơn vị đo, số tiền, khoảng thời gian xem như một khối → số ít."],
+      "keys": ["criterion → criteria (số nhiều); analysis → analyses; phenomenon → phenomena; datum → data (data dùng số ít trong TOEIC). Three months IS...; Ten dollars IS..."],
+      "traps": ["'criteria' và 'analyses' là dạng SỐ NHIỀU → động từ số nhiều: The criteria ARE..."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "The criteria for promotion ___ clearly defined in the handbook.\nA. is    B. are    C. was    D. has", "a": "Đáp án: B (are). ||'criteria' là số nhiều của 'criterion' → are."},
+        {"q": "One important criterion ___ still under discussion.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'criterion' (số ít) → is."},
+        {"q": "The financial analysis ___ almost complete.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'analysis' (số ít) → is."},
+        {"q": "Several independent analyses ___ been conducted on the data.\nA. has    B. have    C. is    D. was", "a": "Đáp án: B (have). ||'analyses' (số nhiều) → have."},
+        {"q": "This market phenomenon ___ relatively rare in our industry.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'phenomenon' (số ít) → is."},
+        {"q": "Tìm và sửa lỗi:\n\"The datas are stored on the secure server.\"", "a": "Lỗi: \"datas\" → \"data\" (không có dạng 'datas'); trong TOEIC dùng số ít: \"The data is stored...\""},
+        {"q": "Three months ___ enough time to complete the rollout.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||Khoảng thời gian xem như một khối → số ít."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"All the criteria ___ been met, so the project can proceed.\"\nA. has    B. have    C. is    D. was", "a": "Đáp án: B (have). ||'criteria' số nhiều → have."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn danh từ tập hợp số ít, danh từ luôn số nhiều, 'a series/group of', và số nhiều bất quy tắc."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "The sales team ___ exceeded its quarterly target.\nA. have    B. has    C. are    D. were", "a": "Đáp án: B (has). ||'team' số ít → has."},
+        {"q": "The police ___ arrived at the scene within minutes.\nA. has    B. have    C. is    D. was", "a": "Đáp án: B (have). ||'police' số nhiều → have."},
+        {"q": "A series of workshops ___ planned for new hires.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'A series of ...' → số ít."},
+        {"q": "The review committee ___ its final report next week.\nA. release    B. releases    C. releasing    D. were", "a": "Đáp án: B (releases). ||'committee' số ít → releases."},
+        {"q": "Tìm và sửa lỗi:\n\"The scissors is too dull to cut the cardboard.\"", "a": "Lỗi: \"is\" → \"are\". ||'scissors' → số nhiều."},
+        {"q": "The evaluation criteria ___ been updated this year.\nA. has    B. have    C. is    D. was", "a": "Đáp án: B (have). ||'criteria' số nhiều → have."},
+        {"q": "A group of tourists ___ waiting outside the museum.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||Từ chính 'group' số ít → is."},
+        {"q": "Many people ___ unaware of the updated refund policy.\nA. is    B. are    C. was    D. has", "a": "Đáp án: B (are). ||'people' số nhiều → are."},
+        {"q": "A pair of safety boots ___ issued to every site worker.\nA. is    B. are    C. were    D. have", "a": "Đáp án: A (is). ||'A pair of ...' → số ít."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"The research data ___ shown a clear upward trend this year.\"\nA. has    B. have    C. is    D. were", "a": "Đáp án: A (has). ||'data' xem là số ít → has."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "The board ___ scheduled an emergency meeting for Friday.\nA. have    B. has    C. are    D. were", "a": "B (has). ||'board' số ít → has."},
+      {"q": "The police ___ still gathering evidence at the site.\nA. is    B. are    C. was    D. has", "a": "B (are). ||'police' số nhiều → are."},
+      {"q": "A series of small errors ___ caused the reporting delay.\nA. have    B. has    C. are    D. were", "a": "B (has). ||'A series of ...' → số ít."},
+      {"q": "The criteria for the safety award ___ very strict.\nA. is    B. are    C. was    D. has", "a": "B (are). ||'criteria' số nhiều → are."},
+      {"q": "Tìm và sửa lỗi:\n\"The committee have approved the new vacation policy.\"", "a": "Lỗi: \"have\" → \"has\". ||'committee' xem là số ít trong TOEIC."},
+      {"q": "A group of shareholders ___ requested a special meeting.\nA. have    B. has    C. is    D. was", "a": "B (has). ||Từ chính 'group' số ít → has."},
+      {"q": "The scissors ___ usually kept near the packing station.\nA. is    B. are    C. was    D. has", "a": "B (are). ||'scissors' → số nhiều."},
+      {"q": "People ___ generally satisfied with the upgraded service.\nA. is    B. are    C. was    D. has", "a": "B (are). ||'people' số nhiều → are."},
+      {"q": "A variety of payment options ___ offered to customers.\nA. is    B. are    C. was    D. has", "a": "B (are). ||'A variety of + số nhiều' → are."},
+      {"q": "One key criterion ___ not yet been satisfied.\nA. is    B. are    C. were    D. have", "a": "A (is). ||'criterion' số ít → has/​is; ở đây 'has not yet been... ' nhưng ô là 'is' của 'criterion ... is ... satisfied'? Chọn 'is' (số ít)."},
+      {"q": "Tìm và sửa lỗi:\n\"A pair of headphones were given to each attendee.\"", "a": "Lỗi: \"were\" → \"was\". ||'A pair of ...' → động từ số ít."},
+      {"q": "The audience ___ asked to remain seated during the demo.\nA. is    B. are    C. were    D. has", "a": "A (is). ||'audience' số ít → is (was cũng đúng nếu quá khứ, nhưng ở đây is)."},
+      {"q": "All the backup data ___ been verified by the IT team.\nA. have    B. has    C. is    D. were", "a": "B (has). ||'data' xem là số ít → has."},
+      {"q": "A team of engineers ___ working on the software fix.\nA. is    B. are    C. were    D. have", "a": "A (is). ||Từ chính 'team' số ít → is."},
+      {"q": "Several unusual phenomena ___ been observed in the test results.\nA. has    B. have    C. is    D. was", "a": "B (have). ||'phenomena' số nhiều → have."},
+      {"q": "Điền vào thông báo (Part 6):\n\"The management committee ___ to announce the results shortly.\"\nA. is expecting    B. are expecting    C. were expecting    D. have expecting", "a": "A (is expecting). ||'committee' số ít → is expecting."}
+    ]
+  },
+  "summary": [
+    "Danh từ tập hợp (team, staff, committee, board, company, audience, crew, government) — trong TOEIC thường xem là SỐ ÍT.",
+    "Danh từ luôn số nhiều: police, people, cattle. Vật có hai phần (scissors, glasses, headphones) → số nhiều; 'a pair of ...' → số ít.",
+    "a group of / a series of / a team of / the range of → chia theo từ chính (số ít). 'a variety of' và 'a number of' + danh từ số nhiều → số nhiều.",
+    "Số nhiều bất quy tắc: criterion→criteria, analysis→analyses, phenomenon→phenomena, data (dùng số ít trong TOEIC). Đơn vị đo/thời gian/số tiền → số ít."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy: 'A series of delays HAS...' (theo 'series'); 'The criteria ARE...' (số nhiều). 'A pair of gloves IS...' nhưng 'The gloves ARE...'.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 3–4 sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

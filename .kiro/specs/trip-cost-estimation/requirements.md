@@ -2,15 +2,15 @@
 
 ## Introduction
 
-Tính năng Trip Cost Estimation cho phép hệ thống IoT Vehicle Tracking ước tính và tính toán chi phí cho thuê xe dựa trên mô hình đơn giản: chi phí theo km, chi phí thuê theo ngày, và phí phạt trả xe muộn theo giờ. Flow bắt đầu khi operator gắn khách hàng với xe và kích hoạt cho thuê (rental activation), kết thúc khi xe được trả. Hệ thống tích hợp với dữ liệu GPS telemetry hiện có để tính km thực tế. Module này KHÔNG tính chi phí tài xế (drivers vẫn tồn tại trong hệ thống nhưng không liên quan đến cost calculation).
+Tính năng Trip Cost Estimation cho phép hệ thống IoT Vehicle Tracking ước tính và tính toán chi phí cho thuê xe dựa trên mô hình đơn giản: chi phí thuê theo ngày và phí phạt trả xe muộn theo giờ. Chi phí theo km được tính và hiển thị để tham khảo nhưng KHÔNG tính vào tổng chi phí. Flow bắt đầu khi operator gắn khách hàng với xe và kích hoạt cho thuê (rental activation), kết thúc khi xe được trả. Hệ thống tích hợp với dữ liệu GPS telemetry hiện có để tính km thực tế. Module này KHÔNG tính chi phí tài xế (drivers vẫn tồn tại trong hệ thống nhưng không liên quan đến cost calculation).
 
 ## Glossary
 
-- **Cost_Calculator**: Module backend tính toán chi phí cho thuê xe dựa trên distance_km, rental duration, và late return hours
+- **Cost_Calculator**: Module backend tính toán chi phí cho thuê xe dựa trên rental duration và late return hours. Distance cost chỉ để tham khảo, không tính vào tổng.
 - **Rental_Activation**: Hành động kích hoạt cho thuê xe, đánh dấu thời điểm bắt đầu tính thời gian thuê (actual_start)
-- **Rental_Rate_Config**: Bảng cấu hình đơn giá cho thuê bao gồm cost_per_km, daily_rental_rate, và late_penalty_per_hour
-- **Trip_Cost**: Bản ghi chi phí liên kết với một chuyến đi, bao gồm distance_cost, rental_cost, late_penalty, và total_cost
-- **Distance_Cost**: Chi phí tính theo km = total_distance_km × cost_per_km
+- **Rental_Rate_Config**: Bảng cấu hình đơn giá cho thuê bao gồm cost_per_km (tham khảo), daily_rental_rate, và late_penalty_per_hour
+- **Trip_Cost**: Bản ghi chi phí liên kết với một chuyến đi, bao gồm distance_cost (tham khảo), rental_cost, late_penalty, và total_cost
+- **Distance_Cost**: Chi phí ước tính theo km = total_distance_km × cost_per_km (CHỈ ĐỂ THAM KHẢO, không tính vào total_cost)
 - **Rental_Cost**: Chi phí thuê theo ngày = rental_days × daily_rental_rate (làm tròn lên nếu không đủ ngày)
 - **Late_Penalty**: Phí phạt trả xe muộn = late_hours × late_penalty_per_hour
 - **Planned_Return_Time**: Thời điểm trả xe theo kế hoạch (planned_end trong bảng trips)
@@ -47,16 +47,16 @@ Tính năng Trip Cost Estimation cho phép hệ thống IoT Vehicle Tracking ư�
 5. WHEN Rental_Activation is triggered, THE System SHALL record the planned_end time based on the agreed rental duration provided by the operator
 6. THE System SHALL require both a valid customer_id and vehicle_id before allowing Rental_Activation
 
-### Requirement 3: Tính chi phí km (Distance Cost)
+### Requirement 3: Tính chi phí km tham khảo (Distance Cost — Reference Only)
 
-**User Story:** As an operator, I want the system to calculate distance-based cost using actual GPS data, so that customers are charged accurately for the kilometers driven.
+**User Story:** As an operator, I want the system to calculate and display distance-based cost using actual GPS data as a reference metric, so that I can see how much the trip would cost per km without it affecting the actual bill.
 
 #### Acceptance Criteria
 
 1. WHEN a trip transitions to status "completed", THE Cost_Calculator SHALL calculate Distance_Cost as total_distance_km multiplied by cost_per_km from the applicable Rental_Rate_Config
 2. THE Cost_Calculator SHALL use the distance_km value from the trip record, which is derived from GPS telemetry data
-3. IF distance_km is zero or null for a completed trip, THEN THE Cost_Calculator SHALL set Distance_Cost to zero and flag the Trip_Cost record as "requires_review"
-4. THE Cost_Calculator SHALL use the Rental_Rate_Config that was effective at the Rental_Activation timestamp for cost_per_km calculation
+3. THE Distance_Cost SHALL be stored in the Trip_Cost record as a reference value but SHALL NOT be included in the total_cost calculation
+4. THE UI SHALL display Distance_Cost with a clear label indicating it is "Tham khảo" (reference only) and visually distinguish it from billable costs
 
 ### Requirement 4: Tính chi phí thuê theo ngày (Rental Cost)
 
@@ -86,11 +86,12 @@ Tính năng Trip Cost Estimation cho phép hệ thống IoT Vehicle Tracking ư�
 
 #### Acceptance Criteria
 
-1. WHEN a trip transitions to status "completed", THE Cost_Calculator SHALL calculate total_cost as the sum of Distance_Cost, Rental_Cost, and Late_Penalty
-2. THE Cost_Calculator SHALL store the Trip_Cost record with individual values for distance_cost, rental_cost, late_penalty, total_cost, distance_km, rental_days, and late_hours
+1. WHEN a trip transitions to status "completed", THE Cost_Calculator SHALL calculate total_cost as the sum of Rental_Cost and Late_Penalty ONLY (Distance_Cost is excluded from total)
+2. THE Cost_Calculator SHALL store the Trip_Cost record with individual values for distance_cost (reference), rental_cost, late_penalty, total_cost, distance_km, rental_days, and late_hours
 3. THE Cost_Calculator SHALL link the Trip_Cost record to the trip_id, vehicle_id, and customer_id
 4. WHEN any input value (distance_km, actual_start, actual_end, planned_end) is updated on a completed trip, THE Cost_Calculator SHALL recalculate the Trip_Cost automatically
 5. THE Cost_Calculator SHALL store the rate snapshot (cost_per_km, daily_rental_rate, late_penalty_per_hour used) in the Trip_Cost record for audit purposes
+6. THE UI SHALL clearly show total_cost = Rental_Cost + Late_Penalty, with Distance_Cost displayed separately as "Chi phí km (tham khảo)"
 
 ### Requirement 7: Lịch sử cho thuê
 

@@ -1,0 +1,131 @@
+{
+  "page_id": "357df50b-1fcd-8110-a051-c3b6835af7d5",
+  "title": "04. Hiện tại hoàn thành",
+  "intro": [
+    {"text": "Bài 04 — Hiện tại hoàn thành (Present Perfect: have/has + V3). Đọc lý thuyết → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 & 6 phân biệt hiện tại hoàn thành với quá khứ đơn qua dấu hiệu thời gian (since/for/already/yet ↔ yesterday/last/ago).", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Cấu trúc và cách dùng",
+      "theory": ["have/has + V3 (quá khứ phân từ). Dùng cho: kinh nghiệm đến hiện tại, hành động vừa hoàn tất còn ảnh hưởng, và việc bắt đầu trong quá khứ kéo dài đến nay."],
+      "keys": ["he/she/it/danh từ số ít → has + V3. I/you/we/they/danh từ số nhiều → have + V3. Động từ bất quy tắc dùng cột 3 (go→gone, see→seen, rise→risen)."],
+      "traps": ["Sau have/has luôn là V3, không phải V2: has gone (không phải has went); have seen (không phải have saw)."],
+      "examples": [
+        "The team has just finished the project. — vừa hoàn tất.",
+        "We have used this supplier for five years. — kéo dài đến nay."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The project team ___ just ___ the final deliverable.\nA. has / finished    B. have / finished    C. has / finish    D. had / finishing", "a": "Đáp án: A (has finished). ||'team' số ít → has + V3; 'just' → hiện tại hoàn thành."},
+        {"q": "We ___ this logistics supplier for over five years.\nA. use    B. used    C. have used    D. using", "a": "Đáp án: C (have used). ||'for over five years' → hiện tại hoàn thành."},
+        {"q": "She ___ already ___ the signed documents to the client.\nA. has / submitted    B. have / submitted    C. has / submit    D. had / submit", "a": "Đáp án: A (has submitted). ||'already' + has + V3."},
+        {"q": "The company ___ never ___ a major product recall.\nA. has / had    B. have / had    C. has / have    D. had / has", "a": "Đáp án: A (has had). ||'company' số ít → has; never + V3 (had)."},
+        {"q": "Chọn câu ĐÚNG:\nA. I have saw that quarterly report.\nB. I have seen that quarterly report.\nC. I have see that quarterly report.\nD. I has seen that quarterly report.", "a": "Đáp án: B. ||Sau have dùng V3 (seen), không phải V2 (saw)."},
+        {"q": "Tìm và sửa lỗi:\n\"He has went to the bank to deposit the check.\"", "a": "Lỗi: \"has went\" → \"has gone\". ||go–went–gone; sau has dùng V3."},
+        {"q": "Raw material prices ___ significantly since last year.\nA. rise    B. rose    C. have risen    D. rising", "a": "Đáp án: C (have risen). ||'since last year' → hiện tại hoàn thành; rise–rose–risen."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"Our membership ___ grown to over 10,000 users this year.\"\nA. has    B. have    C. had    D. is", "a": "Đáp án: A (has). ||'membership' số ít → has grown."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · since, for và các trạng từ đi kèm",
+      "theory": ["since + MỐC thời gian (since 2015, since Monday). for + KHOẢNG thời gian (for five years). already/yet/just/ever/never bổ nghĩa cho hành động."],
+      "keys": ["already: khẳng định (đã rồi). yet: phủ định/nghi vấn (chưa/đã...chưa). just: vừa mới. ever/never: kinh nghiệm. recently, lately, so far, over the past..."],
+      "traps": ["since đi với mốc, KHÔNG với khoảng: sai 'since five years' → 'for five years'."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "The downtown branch has been open ___ 2015.\nA. for    B. since    C. in    D. ago", "a": "Đáp án: B (since). ||since + mốc thời gian (2015)."},
+        {"q": "The two managers have worked together ___ ten years.\nA. for    B. since    C. in    D. ago", "a": "Đáp án: A (for). ||for + khoảng thời gian (ten years)."},
+        {"q": "Has the shipment arrived ___?\nA. already    B. yet    C. just    D. ever", "a": "Đáp án: B (yet). ||'yet' dùng trong câu hỏi/phủ định = đã ... chưa."},
+        {"q": "The maintenance crew has ___ left the building.\nA. yet    B. since    C. already    D. for", "a": "Đáp án: C (already). ||'already' = đã rồi, dùng trong câu khẳng định."},
+        {"q": "___ you ever ___ to an international trade fair?\nA. Have / been    B. Have / be    C. Did / been    D. Has / been", "a": "Đáp án: A (Have / been). ||'ever' (kinh nghiệm) → have + V3 (been)."},
+        {"q": "Tìm và sửa lỗi:\n\"I have worked at this firm since five years.\"", "a": "Lỗi: \"since five years\" → \"for five years\". ||five years là khoảng thời gian → dùng for."},
+        {"q": "Chọn câu ĐÚNG:\nA. She hasn't finished the report already.\nB. She hasn't finished the report yet.\nC. She hasn't finished the report since.\nD. She hasn't finished the report for.", "a": "Đáp án: B. ||Trong câu phủ định dùng 'yet', không dùng 'already'."},
+        {"q": "Điền vào bài viết (Part 6):\n\"The new system has ___ improved our average response time.\"\nA. yet    B. already    C. since    D. ago", "a": "Đáp án: B (already). ||Câu khẳng định, nhấn mạnh đã cải thiện → already."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Hiện tại hoàn thành vs quá khứ đơn",
+      "theory": ["Mốc quá khứ cụ thể → quá khứ đơn. Khoảng thời gian kéo dài đến hiện tại / kinh nghiệm không nêu thời điểm → hiện tại hoàn thành."],
+      "keys": ["Quá khứ đơn: yesterday, last, ago, in + năm. Hiện tại hoàn thành: since, for, so far, over the past, recently, already, yet, ever, never."],
+      "traps": ["KHÔNG ghép hiện tại hoàn thành với mốc quá khứ: sai 'has launched in 2019' → 'launched in 2019'."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "We ___ the partnership contract last week.\nA. have signed    B. signed    C. sign    D. signing", "a": "Đáp án: B (signed). ||'last week' → quá khứ đơn."},
+        {"q": "The current CEO ___ in this role since 2020.\nA. is    B. was    C. has been    D. been", "a": "Đáp án: C (has been). ||'since 2020' → hiện tại hoàn thành."},
+        {"q": "___ the monthly report yesterday afternoon?\nA. Have you sent    B. Did you send    C. Have you send    D. Has you sent", "a": "Đáp án: B (Did you send). ||'yesterday' → quá khứ đơn."},
+        {"q": "Sales ___ by 20 percent so far this year.\nA. increased    B. have increased    C. increases    D. increasing", "a": "Đáp án: B (have increased). ||'so far this year' → hiện tại hoàn thành."},
+        {"q": "Tìm và sửa lỗi:\n\"The company has launched the product in 2019.\"", "a": "Lỗi: hiện tại hoàn thành + 'in 2019'. ||Sửa: \"The company launched the product in 2019.\""},
+        {"q": "I ___ the new client at the conference last month.\nA. have met    B. met    C. meet    D. meeting", "a": "Đáp án: B (met). ||'last month' → quá khứ đơn."},
+        {"q": "Chọn câu ĐÚNG:\nA. We have completed the audit yesterday.\nB. We completed the audit yesterday.\nC. We have complete the audit yesterday.\nD. We had completed it yesterday already.", "a": "Đáp án: B. ||'yesterday' → quá khứ đơn."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"Since the policy changed, the number of complaints ___ noticeably.\"\nA. dropped    B. have dropped    C. drop    D. dropping", "a": "Đáp án: B (have dropped). ||'Since ...' → hiện tại hoàn thành (kéo dài đến nay)."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · been to vs gone to, và have been + V-ing",
+      "theory": ["have/has been to = đã đi và đã trở về (kinh nghiệm). have/has gone to = đã đi và CHƯA về. Hiện tại hoàn thành tiếp diễn: have/has been + V-ing nhấn hành động kéo dài."],
+      "keys": ["been to + số lần / kinh nghiệm. gone to + người đó hiện không ở đây. have been + V-ing + for/since."],
+      "traps": ["'has been to' không dùng khi người đó vẫn đang vắng mặt → dùng 'has gone to'."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "Ms. Kim isn't at her desk; she ___ to the bank.\nA. has been    B. has gone    C. went    D. going", "a": "Đáp án: B (has gone). ||'has gone to' = đã đi và chưa về (đang vắng)."},
+        {"q": "I ___ to Singapore twice for business negotiations.\nA. have been    B. have gone    C. has been    D. going", "a": "Đáp án: A (have been). ||Kinh nghiệm/số lần → have been to."},
+        {"q": "The procurement team ___ been waiting for the approval for weeks.\nA. has    B. have    C. is    D. are", "a": "Đáp án: B (have). ||'team members'/'they' số nhiều → have been waiting (ở đây 'team' dùng số nhiều)."},
+        {"q": "Our lead engineer ___ been working on the prototype since Monday.\nA. has    B. have    C. is    D. are", "a": "Đáp án: A (has). ||'engineer' số ít → has been working."},
+        {"q": "Tìm và sửa lỗi:\n\"She has been to the post office, so she is still out of the office.\"", "a": "Lỗi: 'has been to' mâu thuẫn với 'still out'. ||Sửa: \"She has gone to the post office...\" (đã đi và chưa về)."},
+        {"q": "We ___ been trying to reach you all morning.\nA. has    B. have    C. is    D. are", "a": "Đáp án: B (have). ||'We' → have been trying."},
+        {"q": "Chọn câu hợp nghĩa (đếm số lần đã trải nghiệm):\nA. He has gone to Japan three times.\nB. He has been to Japan three times.\nC. He has go to Japan three times.\nD. He has went to Japan three times.", "a": "Đáp án: B. ||Đếm số lần/kinh nghiệm → have/has been to."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"Our engineers ___ been testing the new prototype for three weeks.\"\nA. has    B. have    C. is    D. was", "a": "Đáp án: B (have). ||'engineers' số nhiều → have been testing."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn cấu trúc, since/for, và phân biệt với quá khứ đơn."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "We ___ already ___ your refund request.\nA. have / processed    B. has / processed    C. have / process    D. had / process", "a": "Đáp án: A (have processed). ||'already' + have + V3."},
+        {"q": "The flagship store ___ last Tuesday.\nA. has opened    B. opened    C. opens    D. opening", "a": "Đáp án: B (opened). ||'last Tuesday' → quá khứ đơn."},
+        {"q": "How long ___ you ___ for this company?\nA. have / worked    B. did / work    C. have / work    D. has / worked", "a": "Đáp án: A (have worked). ||'How long ... ?' về khoảng thời gian đến nay → hiện tại hoàn thành."},
+        {"q": "The figures ___ since the last quarterly review.\nA. changed    B. have changed    C. change    D. changing", "a": "Đáp án: B (have changed). ||'since ...' → hiện tại hoàn thành."},
+        {"q": "Tìm và sửa lỗi:\n\"They have finished the meeting an hour ago.\"", "a": "Lỗi: hiện tại hoàn thành + 'ago'. ||Sửa: \"They finished the meeting an hour ago.\""},
+        {"q": "___ the new policy ___ effect yet?\nA. Has / taken    B. Have / taken    C. Did / take    D. Has / take", "a": "Đáp án: A (Has taken). ||'yet' + câu hỏi → hiện tại hoàn thành; 'policy' số ít → Has + V3."},
+        {"q": "The supplier ___ us three times this week.\nA. called    B. has called    C. calls    D. calling", "a": "Đáp án: B (has called). ||'this week' (chưa kết thúc) → hiện tại hoàn thành."},
+        {"q": "Chọn câu ĐÚNG:\nA. I have seen the manager yesterday.\nB. I saw the manager yesterday.\nC. I have see the manager yesterday.\nD. I had saw the manager yesterday.", "a": "Đáp án: B. ||'yesterday' → quá khứ đơn."},
+        {"q": "The CEO ___ to Europe; she'll be back on Friday.\nA. has been    B. has gone    C. went    D. going", "a": "Đáp án: B (has gone). ||Hiện đang vắng mặt → has gone to."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"Since the upgrade, the website ___ noticeably faster.\"\nA. became    B. has become    C. become    D. becoming", "a": "Đáp án: B (has become). ||'Since the upgrade' → hiện tại hoàn thành."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "We ___ this accounting software for three years.\nA. use    B. used    C. have used    D. using", "a": "C (have used). ||'for three years' → hiện tại hoàn thành."},
+      {"q": "She ___ already ___ the proposal to the board.\nA. has / sent    B. have / sent    C. has / send    D. had / send", "a": "A (has sent). ||'already' + has + V3."},
+      {"q": "The original factory ___ in 2010.\nA. has opened    B. opened    C. opens    D. opening", "a": "B (opened). ||'in 2010' → quá khứ đơn."},
+      {"q": "The downtown branch has been operating ___ 2015.\nA. for    B. since    C. in    D. ago", "a": "B (since). ||since + mốc thời gian."},
+      {"q": "Tìm và sửa lỗi:\n\"I have met the new client last week.\"", "a": "Lỗi: hiện tại hoàn thành + 'last week'. ||Sửa: \"I met the new client last week.\""},
+      {"q": "___ the shipment arrived yet?\nA. Has    B. Have    C. Did    D. Is", "a": "A (Has). ||'shipment' số ít + 'yet' → Has + V3."},
+      {"q": "Material prices ___ steadily over the past six months.\nA. rose    B. have risen    C. rise    D. rising", "a": "B (have risen). ||'over the past six months' → hiện tại hoàn thành."},
+      {"q": "He isn't in the office; he ___ to a client meeting.\nA. has been    B. has gone    C. went    D. going", "a": "B (has gone). ||Đang vắng mặt → has gone to."},
+      {"q": "We ___ the final report yesterday afternoon.\nA. have submitted    B. submitted    C. submit    D. submitting", "a": "B (submitted). ||'yesterday' → quá khứ đơn."},
+      {"q": "They ___ been waiting for a reply since Monday.\nA. has    B. have    C. is    D. was", "a": "B (have). ||'They' → have been waiting."},
+      {"q": "Chọn câu ĐÚNG:\nA. The team have worked here since 2018.\nB. The team has worked here since 2018.\nC. The team have work here since 2018.\nD. The team is worked here since 2018.", "a": "B. ||'The team' số ít trong TOEIC → has worked."},
+      {"q": "___ you ever ___ a TOEIC test before?\nA. Have / taken    B. Did / take    C. Have / take    D. Has / taken", "a": "A (Have / taken). ||'ever' (kinh nghiệm) → have + V3 (taken)."},
+      {"q": "Tìm và sửa lỗi:\n\"The company has hired 50 new staff in 2022.\"", "a": "Lỗi: hiện tại hoàn thành + 'in 2022'. ||Sửa: \"The company hired 50 new staff in 2022.\""},
+      {"q": "Sales ___ by 15 percent so far this quarter.\nA. grew    B. have grown    C. grow    D. growing", "a": "B (have grown). ||'so far this quarter' → hiện tại hoàn thành."},
+      {"q": "I ___ never ___ such a detailed and well-structured report.\nA. have / seen    B. has / seen    C. have / saw    D. had / saw", "a": "A (have seen). ||never + V3 (seen)."},
+      {"q": "Điền vào báo cáo (Part 6):\n\"Since launching the loyalty program, the store ___ a steady rise in repeat customers.\"\nA. saw    B. has seen    C. see    D. seeing", "a": "B (has seen). ||'Since launching ...' → hiện tại hoàn thành."}
+    ]
+  },
+  "summary": [
+    "Hiện tại hoàn thành: have/has + V3. Dùng cho kinh nghiệm, việc vừa xong còn ảnh hưởng, việc kéo dài từ quá khứ đến nay.",
+    "since + mốc thời gian; for + khoảng thời gian. already (khẳng định), yet (phủ định/nghi vấn), just, ever, never, recently, so far, over the past.",
+    "KHÔNG dùng với mốc quá khứ cụ thể (yesterday, last, ago, in + năm) → dùng quá khứ đơn.",
+    "have/has been to = đã đi và đã về (kinh nghiệm); have/has gone to = đã đi và chưa về."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy: 'since five years' (sai) → 'for five years'; 'has launched in 2019' (sai) → 'launched in 2019'. Sau have/has luôn là V3.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 3 (hiện tại hoàn thành vs quá khứ đơn) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

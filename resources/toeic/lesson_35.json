@@ -1,0 +1,131 @@
+{
+  "page_id": "357df50b-1fcd-81c5-9576-c7ebf2eb919b",
+  "title": "35. Đảo ngữ phủ định",
+  "intro": [
+    {"text": "Bài 35 — Đảo ngữ phủ định (negative inversion): đưa trạng từ phủ định lên đầu câu để nhấn mạnh. Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 nâng cao — Never/Rarely/Not only/No sooner... + trợ động từ + S + V (đảo như câu hỏi). Trang trọng, dùng trong báo cáo/diễn văn.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Never / Rarely / Seldom / Hardly đầu câu",
+      "theory": ["Khi đưa trạng từ phủ định/hạn chế lên đầu câu, đảo trợ động từ lên trước chủ ngữ (như câu hỏi)."],
+      "keys": ["Never have I seen... Rarely does the system fail. Seldom do we receive complaints."],
+      "traps": ["Sau trạng từ phủ định đầu câu phải ĐẢO trợ động từ + S; nếu không có trợ động từ, thêm do/does/did."],
+      "examples": [
+        "Never has the company achieved such results.",
+        "Rarely do customers complain about the service."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "Never ___ the company achieved such impressive results.\nA. has    B. have    C. is    D. does", "a": "Đáp án: A (has). ||Never + đảo trợ động từ: Never has the company achieved (HTHT)."},
+        {"q": "Rarely ___ the system experience any downtime.\nA. does    B. do    C. is    D. has", "a": "Đáp án: A (does). ||Rarely + trợ động từ 'does' + S + V (the system, số ít)."},
+        {"q": "Seldom ___ we receive negative feedback from clients.\nA. do    B. does    C. are    D. has", "a": "Đáp án: A (do). ||Seldom + do + we + V (số nhiều)."},
+        {"q": "Hardly ever ___ the manager miss a deadline.\nA. does    B. do    C. is    D. has", "a": "Đáp án: A (does). ||Hardly ever + does + S (the manager) + V."},
+        {"q": "Tìm và sửa lỗi:\n\"Never I have seen such dedication from a team.\"", "a": "Lỗi: \"Never I have\" → \"Never have I\". ||Sau Never phải đảo trợ động từ trước chủ ngữ."},
+        {"q": "Never before ___ sales reached this level.\nA. have    B. has    C. do    D. is", "a": "Đáp án: A (have). ||Never before + have + sales (số nhiều) + V3."},
+        {"q": "Chọn câu ĐÚNG:\nA. Rarely the company offers such discounts.\nB. Rarely does the company offer such discounts.\nC. Rarely the company does offer such discounts.\nD. Rarely offers the company such discounts.", "a": "Đáp án: B. ||Rarely + does + S + V nguyên thể."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"Seldom ___ a project finish ahead of schedule, but this one did.\"\nA. does    B. do    C. is    D. has", "a": "Đáp án: A (does). ||Seldom + does + a project (số ít) + V."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Not only ... but also; No sooner ... than",
+      "theory": ["Not only đầu câu → đảo trợ động từ. No sooner + had + S + V3 + than... = vừa mới... thì..."],
+      "keys": ["Not only does it save time, but it also cuts costs. No sooner had we arrived than the meeting began."],
+      "traps": ["No sooner đi với 'than' (không 'then'); cấu trúc: No sooner + had + S + V3 + than + S + V2."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "Not only ___ the new system save time, but it also reduces errors.\nA. does    B. do    C. is    D. has", "a": "Đáp án: A (does). ||Not only + does + S (the system) + V nguyên thể."},
+        {"q": "No sooner had the product launched ___ demand surged.\nA. than    B. then    C. when    D. as", "a": "Đáp án: A (than). ||No sooner + had + S + V3 + than..."},
+        {"q": "Not only ___ the firm expand overseas, but it also opened new factories.\nA. did    B. does    C. is    D. has", "a": "Đáp án: A (did). ||Not only + did + S + V nguyên thể (ngữ cảnh quá khứ)."},
+        {"q": "No sooner ___ we finished one project than another began.\nA. had    B. have    C. did    D. were", "a": "Đáp án: A (had). ||No sooner + had + S + V3."},
+        {"q": "Tìm và sửa lỗi:\n\"No sooner had the meeting started then the power went out.\"", "a": "Lỗi: \"then\" → \"than\". ||No sooner ... than (không 'then')."},
+        {"q": "Not only ___ the proposal well written, but it was also persuasive.\nA. was    B. did    C. does    D. has", "a": "Đáp án: A (was). ||Not only + was + S (the proposal) (với động từ be)."},
+        {"q": "Chọn câu ĐÚNG:\nA. Not only the app is fast, but it is also secure.\nB. Not only is the app fast, but it is also secure.\nC. Not only the app does fast, but secure.\nD. Not only fast the app is, but secure.", "a": "Đáp án: B. ||Not only + is + S (đảo động từ be)."},
+        {"q": "Điền vào bài viết (Part 6):\n\"Not only ___ the campaign increase sales, but it also boosted brand awareness.\"\nA. did    B. does    C. is    D. has", "a": "Đáp án: A (did). ||Not only + did + S + V nguyên thể (quá khứ)."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Not until / Only + trạng ngữ đầu câu",
+      "theory": ["Not until + thời điểm/mệnh đề → đảo trợ động từ ở MỆNH ĐỀ CHÍNH. Only after/when/by → cũng đảo ở mệnh đề chính."],
+      "keys": ["Not until the report is finished will we leave. Only after the review did they approve it."],
+      "traps": ["Phần đảo nằm ở MỆNH ĐỀ CHÍNH (sau cụm Not until/Only...), không ở mệnh đề phụ."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "Not until the report is complete ___ we present it.\nA. will    B. we will    C. do    D. are", "a": "Đáp án: A (will). ||Not until + ... + đảo ở mệnh đề chính: will we present."},
+        {"q": "Only after the audit ___ the company release the results.\nA. did    B. does    C. was    D. has", "a": "Đáp án: A (did). ||Only after + ... + did + S + V nguyên thể (quá khứ)."},
+        {"q": "Not until last week ___ we receive the final figures.\nA. did    B. does    C. was    D. have", "a": "Đáp án: A (did). ||Not until + thời điểm quá khứ + did + S + V."},
+        {"q": "Only when all tests pass ___ the product be shipped.\nA. will    B. we will    C. does    D. is", "a": "Đáp án: A (will). ||Only when + ... + đảo ở mệnh đề chính: will the product be shipped."},
+        {"q": "Tìm và sửa lỗi:\n\"Not until the payment is received we will ship the order.\"", "a": "Lỗi: thiếu đảo ngữ ở mệnh đề chính. ||Sửa: \"Not until the payment is received WILL WE ship the order.\""},
+        {"q": "Only by working together ___ we achieve the target.\nA. can    B. we can    C. do    D. are", "a": "Đáp án: A (can). ||Only by + ... + đảo: can we achieve."},
+        {"q": "Chọn câu ĐÚNG:\nA. Only after the meeting they made a decision.\nB. Only after the meeting did they make a decision.\nC. Only after the meeting they did make a decision.\nD. Only after the meeting made they a decision.", "a": "Đáp án: B. ||Only after + ... + did + S + V nguyên thể."},
+        {"q": "Điền vào thông báo (Part 6):\n\"Not until the system is fully tested ___ it go live.\"\nA. will    B. it will    C. does    D. is", "a": "Đáp án: A (will). ||Not until + ... + đảo ở mệnh đề chính: will it go live."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Little / No / Under no circumstances",
+      "theory": ["Little did + S + V (= không hề). Under no circumstances / On no account / At no time + đảo trợ động từ. No + danh từ đầu câu cũng đảo."],
+      "keys": ["Little did we know... Under no circumstances should you share the password. At no time was the data exposed."],
+      "traps": ["Các cụm phủ định mạnh đầu câu đều yêu cầu đảo trợ động từ + S."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "Little ___ we know that the deal would fall through.\nA. did    B. do    C. was    D. has", "a": "Đáp án: A (did). ||Little did + S + V nguyên thể = không hề biết (quá khứ)."},
+        {"q": "Under no circumstances ___ employees share confidential data.\nA. should    B. employees should    C. do should    D. are", "a": "Đáp án: A (should). ||Under no circumstances + should + S + V."},
+        {"q": "At no time ___ the customer data exposed during the breach.\nA. was    B. were    C. did    D. has", "a": "Đáp án: A (was). ||At no time + was + S (the data) (động từ be)."},
+        {"q": "On no account ___ the machine be left unattended.\nA. should    B. it should    C. does    D. is", "a": "Đáp án: A (should). ||On no account + should + S + be + V3."},
+        {"q": "Tìm và sửa lỗi:\n\"Under no circumstances you should leave the door open.\"", "a": "Lỗi: \"you should\" → \"should you\". ||Đảo trợ động từ: Under no circumstances should you leave..."},
+        {"q": "No sooner had the alarm sounded ___ everyone evacuated.\nA. than    B. then    C. when    D. as", "a": "Đáp án: A (than). ||No sooner + had + S + V3 + than..."},
+        {"q": "Chọn câu ĐÚNG:\nA. Little they realized how big the project was.\nB. Little did they realize how big the project was.\nC. Little they did realize how big the project was.\nD. Little realized they how big the project was.", "a": "Đáp án: B. ||Little did + S + V nguyên thể."},
+        {"q": "Điền vào nội quy (Part 6):\n\"Under no circumstances ___ visitors enter the restricted area without a permit.\"\nA. may    B. visitors may    C. do may    D. are", "a": "Đáp án: A (may). ||Under no circumstances + may + S + V."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn Never/Rarely, Not only, Not until/Only, và Under no circumstances/Little."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "Never ___ the team faced such a tight deadline before.\nA. has    B. have    C. is    D. does", "a": "Đáp án: A (has). ||Never + has + S (the team, số ít) + V3."},
+        {"q": "Not only ___ the new model faster, but it is also cheaper.\nA. is    B. does    C. has    D. did", "a": "Đáp án: A (is). ||Not only + is + S (động từ be)."},
+        {"q": "Not until the contract is signed ___ work begin.\nA. will    B. it will    C. does    D. is", "a": "Đáp án: A (will). ||Not until + ... + đảo: will work begin."},
+        {"q": "Under no circumstances ___ staff disclose client information.\nA. should    B. staff should    C. do should    D. are", "a": "Đáp án: A (should). ||Under no circumstances + should + S + V."},
+        {"q": "Tìm và sửa lỗi:\n\"Rarely the company offers refunds without a receipt.\"", "a": "Lỗi: thiếu đảo ngữ. ||Sửa: \"Rarely does the company offer refunds without a receipt.\""},
+        {"q": "No sooner had we launched the site ___ traffic spiked.\nA. than    B. then    C. when    D. as", "a": "Đáp án: A (than). ||No sooner + had + S + V3 + than..."},
+        {"q": "Only after the inspection ___ the factory resume operations.\nA. did    B. does    C. was    D. has", "a": "Đáp án: A (did). ||Only after + ... + did + S + V nguyên thể."},
+        {"q": "Little ___ we know that the merger would be announced.\nA. did    B. do    C. was    D. has", "a": "Đáp án: A (did). ||Little did + S + V nguyên thể."},
+        {"q": "Chọn câu ĐÚNG:\nA. Not only does it save money, but it also saves time.\nB. Not only it saves money, but it also saves time.\nC. Not only saves it money, but time.\nD. Not only it does save money, but time.", "a": "Đáp án: A. ||Not only + does + S + V nguyên thể."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"Never before ___ the company recorded such strong quarterly growth.\"\nA. has    B. have    C. is    D. does", "a": "Đáp án: A (has). ||Never before + has + S (the company) + V3."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "Never ___ the company achieved such record profits.\nA. has    B. have    C. is    D. does", "a": "A (has). ||Never + has + S (the company) + V3."},
+      {"q": "Rarely ___ the system experience downtime.\nA. does    B. do    C. is    D. has", "a": "A (does). ||Rarely + does + S (the system) + V."},
+      {"q": "Not only ___ the campaign boost sales, but it also raised awareness.\nA. did    B. does    C. is    D. has", "a": "A (did). ||Not only + did + S + V nguyên thể (quá khứ)."},
+      {"q": "No sooner had the meeting begun ___ the fire alarm sounded.\nA. than    B. then    C. when    D. as", "a": "A (than). ||No sooner + had + S + V3 + than..."},
+      {"q": "Tìm và sửa lỗi:\n\"Never I have seen such a dedicated team.\"", "a": "Lỗi: \"Never I have\" → \"Never have I\". ||Đảo trợ động từ sau Never."},
+      {"q": "Not until the report is finished ___ we leave the office.\nA. will    B. we will    C. does    D. are", "a": "A (will). ||Not until + ... + đảo ở mệnh đề chính: will we leave."},
+      {"q": "Under no circumstances ___ employees share their passwords.\nA. should    B. employees should    C. do should    D. are", "a": "A (should). ||Under no circumstances + should + S + V."},
+      {"q": "Little ___ we know that demand would double overnight.\nA. did    B. do    C. was    D. has", "a": "A (did). ||Little did + S + V nguyên thể."},
+      {"q": "Chọn câu ĐÚNG:\nA. Rarely the manager misses a deadline.\nB. Rarely does the manager miss a deadline.\nC. Rarely the manager does miss a deadline.\nD. Rarely misses the manager a deadline.", "a": "B. ||Rarely + does + S + V nguyên thể."},
+      {"q": "Only after the audit ___ the company publish the results.\nA. did    B. does    C. was    D. has", "a": "A (did). ||Only after + ... + did + S + V nguyên thể."},
+      {"q": "Tìm và sửa lỗi:\n\"No sooner had we arrived then the presentation started.\"", "a": "Lỗi: \"then\" → \"than\". ||No sooner ... than."},
+      {"q": "Not only ___ the new app secure, but it is also easy to use.\nA. is    B. does    C. has    D. did", "a": "A (is). ||Not only + is + S (động từ be)."},
+      {"q": "At no time ___ the customer data compromised during the incident.\nA. was    B. were    C. did    D. has", "a": "A (was). ||At no time + was + S (the data)."},
+      {"q": "Seldom ___ we receive complaints about delivery.\nA. do    B. does    C. are    D. has", "a": "A (do). ||Seldom + do + we + V (số nhiều)."},
+      {"q": "Tìm và sửa lỗi:\n\"Under no circumstances you should leave the safe open.\"", "a": "Lỗi: \"you should\" → \"should you\". ||Đảo trợ động từ: Under no circumstances should you leave..."},
+      {"q": "Điền vào báo cáo (Part 6):\n\"Never before ___ the firm expanded so quickly into new markets.\"\nA. has    B. have    C. is    D. does", "a": "A (has). ||Never before + has + S (the firm) + V3."}
+    ]
+  },
+  "summary": [
+    "Đảo ngữ phủ định: đưa trạng từ phủ định/hạn chế lên đầu câu rồi ĐẢO trợ động từ + S (như câu hỏi). Trang trọng, nhấn mạnh.",
+    "Never/Rarely/Seldom/Hardly + trợ động từ + S + V. Nếu không có trợ động từ, thêm do/does/did + V nguyên thể.",
+    "Not only + đảo, ... but also...; No sooner + had + S + V3 + than...; Not until/Only + ... + đảo ở MỆNH ĐỀ CHÍNH.",
+    "Little did + S + V; Under no circumstances / At no time / On no account + đảo trợ động từ + S."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy: sau trạng từ phủ định đầu câu PHẢI đảo (Never have I, không 'Never I have'). No sooner đi với 'than' (không 'then'). Với Not until/Only..., phần đảo nằm ở mệnh đề chính.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 3–4 sau 1 ngày. Hoàn thành toàn bộ 35 bài — chúc bạn ôn thi hiệu quả!", "emoji": "📝", "color": "gray_background"}
+  ]
+}

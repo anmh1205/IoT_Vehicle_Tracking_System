@@ -1,0 +1,131 @@
+{
+  "page_id": "357df50b-1fcd-8193-abf6-e06c53c267c0",
+  "title": "24. Mệnh đề trạng ngữ chỉ thời gian",
+  "intro": [
+    {"text": "Bài 24 — Mệnh đề trạng ngữ chỉ thời gian (when, while, before, after, until, as soon as...). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 & 6 chọn liên từ thời gian đúng nghĩa; và quy tắc dùng HIỆN TẠI trong mệnh đề thời gian để chỉ tương lai.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Các liên từ thời gian phổ biến",
+      "theory": ["Liên từ thời gian nối mệnh đề thời gian (S + V) với mệnh đề chính: when, while, before, after, until, as soon as, once, since, as."],
+      "keys": ["when (khi), while (trong khi), before (trước khi), after (sau khi), until (cho đến khi), as soon as (ngay khi), once (một khi)."],
+      "traps": ["Theo sau là MỆNH ĐỀ (S + V); during/before + danh từ là giới từ."],
+      "examples": [
+        "We will start once everyone has arrived.",
+        "Please wait here until your name is called."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "Please remain seated ___ the presentation has finished.\nA. until    B. during    C. despite    D. because of", "a": "Đáp án: A (until). ||until + S + V = cho đến khi."},
+        {"q": "___ the report is ready, I will email it to everyone.\nA. As soon as    B. During    C. Despite    D. Because of", "a": "Đáp án: A (As soon as). ||as soon as + S + V = ngay khi."},
+        {"q": "The team celebrated ___ the project was completed.\nA. when    B. during    C. despite    D. because of", "a": "Đáp án: A (when). ||when + S + V = khi."},
+        {"q": "Double-check the figures ___ you submit the report.\nA. before    B. during    C. despite    D. because of", "a": "Đáp án: A (before). ||before + S + V = trước khi."},
+        {"q": "Tìm và sửa lỗi:\n\"During the manager was away, sales dropped.\"", "a": "Lỗi: \"During\" + mệnh đề. ||During là giới từ + danh từ. Sửa: \"While the manager was away...\""},
+        {"q": "We will review the proposal ___ we receive the final figures.\nA. once    B. during    C. despite    D. because of", "a": "Đáp án: A (once). ||once + S + V = một khi."},
+        {"q": "Chọn câu ĐÚNG:\nA. Please wait here during your name is called.\nB. Please wait here until your name is called.\nC. Please wait here despite your name is called.\nD. Please wait here because of your name is called.", "a": "Đáp án: B. ||until + mệnh đề (your name is called)."},
+        {"q": "Điền vào hướng dẫn (Part 6):\n\"Customers will receive a confirmation ___ their payment is processed.\"\nA. as soon as    B. during    C. despite    D. because of", "a": "Đáp án: A (as soon as). ||as soon as + S + V = ngay khi."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Hiện tại chỉ tương lai trong mệnh đề thời gian",
+      "theory": ["Trong mệnh đề thời gian, dùng thì HIỆN TẠI ĐƠN (hoặc hiện tại hoàn thành) để chỉ tương lai; chỉ mệnh đề chính dùng will/future."],
+      "keys": ["When the report is ready, we WILL send it. After you have finished, you may leave."],
+      "traps": ["KHÔNG dùng 'will' trong mệnh đề thời gian: 'when it will be ready' SAI → 'when it is ready'."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "When the shipment ___, we will notify you immediately.\nA. will arrive    B. arrives    C. arrived    D. arriving", "a": "Đáp án: B (arrives). ||Mệnh đề thời gian dùng hiện tại để chỉ tương lai."},
+        {"q": "I will call you as soon as I ___ the confirmation.\nA. will receive    B. receive    C. received    D. receiving", "a": "Đáp án: B (receive). ||Mệnh đề 'as soon as' dùng hiện tại."},
+        {"q": "After you ___ the form, please hand it to reception.\nA. will complete    B. complete    C. completed    D. completing", "a": "Đáp án: B (complete). ||Mệnh đề 'after' dùng hiện tại để chỉ tương lai."},
+        {"q": "We won't start the meeting until everyone ___ here.\nA. will be    B. is    C. was    D. being", "a": "Đáp án: B (is). ||Mệnh đề 'until' dùng hiện tại."},
+        {"q": "Tìm và sửa lỗi:\n\"We will begin the launch when the system will be ready.\"", "a": "Lỗi: \"when the system will be ready\" → \"when the system is ready\". ||Mệnh đề thời gian không dùng will."},
+        {"q": "Once the contract ___ signed, production will begin.\nA. will be    B. is    C. was    D. being", "a": "Đáp án: B (is). ||Mệnh đề 'once' dùng hiện tại (bị động is signed)."},
+        {"q": "Chọn câu ĐÚNG:\nA. When the goods will arrive, we will inspect them.\nB. When the goods arrive, we will inspect them.\nC. When the goods arrive, we inspect them.\nD. When the goods will arrive, we inspect them.", "a": "Đáp án: B. ||Mệnh đề thời gian + hiện tại, mệnh đề chính + will."},
+        {"q": "Điền vào email (Part 6):\n\"As soon as your order ___ shipped, you will receive a tracking number.\"\nA. will be    B. is    C. was    D. being", "a": "Đáp án: B (is). ||Mệnh đề 'as soon as' dùng hiện tại."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Phân biệt nghĩa các liên từ thời gian",
+      "theory": ["Chọn liên từ đúng nghĩa: while (hai việc song song), until (kéo dài đến), by the time (vào lúc), since (từ khi), as (khi/trong khi)."],
+      "keys": ["while = trong khi; until = cho đến khi; by the time = vào lúc (thường + QKHT/HTHT); since = từ khi (+ mốc)."],
+      "traps": ["by the time thường đi với hoàn thành: 'By the time we arrived, it had started.'"],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "He answered emails ___ he was waiting for the meeting to start.\nA. while    B. until    C. since    D. by the time", "a": "Đáp án: A (while). ||Hai việc song song → while."},
+        {"q": "The store stays open ___ the last customer leaves.\nA. while    B. until    C. since    D. as soon as", "a": "Đáp án: B (until). ||Kéo dài cho đến khi → until."},
+        {"q": "___ we arrived at the venue, the keynote had already started.\nA. While    B. Until    C. By the time    D. Since", "a": "Đáp án: C (By the time). ||'By the time' + QKHT (had started)."},
+        {"q": "The company has expanded rapidly ___ it went public in 2018.\nA. while    B. until    C. since    D. as soon as", "a": "Đáp án: C (since). ||'since' + mốc thời gian (it went public)."},
+        {"q": "Tìm và sửa lỗi:\n\"Until the meeting started, we discussed the agenda informally.\" (ý: trong khi chờ)", "a": "Lỗi nghĩa: 'Until' không hợp. ||Nếu ý là 'trong khi chờ', dùng \"While we waited...\" hoặc \"Before the meeting started...\""},
+        {"q": "___ the negotiations continued, the staff kept working as usual.\nA. While    B. Until    C. Since    D. By the time", "a": "Đáp án: A (While). ||Song song → While."},
+        {"q": "Chọn câu ĐÚNG:\nA. By the time the technician arrived, the issue was resolved already by itself.\nB. By the time the technician arrived, the issue had already been resolved.\nC. By the time the technician will arrive, the issue resolved.\nD. By the time the technician arrives, the issue had resolved.", "a": "Đáp án: B. ||'By the time' (quá khứ) + QKHT bị động (had been resolved)."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"Sales have grown steadily ___ the new manager joined last year.\"\nA. while    B. until    C. since    D. as soon as", "a": "Đáp án: C (since). ||'since' + mốc + hiện tại hoàn thành ở mệnh đề chính."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Rút gọn mệnh đề thời gian và giới từ thời gian",
+      "theory": ["Khi hai mệnh đề cùng chủ ngữ, có thể rút gọn: When/While/Before/After + V-ing. Giới từ thời gian + danh từ: during, before, after, until, by."],
+      "keys": ["When using the machine, wear gloves. (= When you use...). After completing the form, submit it."],
+      "traps": ["Rút gọn dùng V-ing (When reviewing...); during + danh từ (during the meeting)."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "When ___ the equipment, always wear protective gloves.\nA. use    B. using    C. used    D. to use", "a": "Đáp án: B (using). ||Rút gọn mệnh đề thời gian cùng chủ ngữ → When + V-ing."},
+        {"q": "After ___ the form, please submit it to the front desk.\nA. complete    B. completing    C. completed    D. to complete", "a": "Đáp án: B (completing). ||After + V-ing (rút gọn)."},
+        {"q": "Phones must be switched off ___ the presentation.\nA. while    B. during    C. when    D. as", "a": "Đáp án: B (during). ||Theo sau là danh từ (the presentation) → during."},
+        {"q": "Please review the figures ___ submitting the report.\nA. before    B. during    C. until    D. by", "a": "Đáp án: A (before). ||before + V-ing (rút gọn) = trước khi nộp."},
+        {"q": "Tìm và sửa lỗi:\n\"While use the machine, keep the area clear.\"", "a": "Lỗi: \"While use\" → \"While using\". ||Rút gọn mệnh đề thời gian dùng V-ing."},
+        {"q": "All systems will be offline ___ the maintenance window tonight.\nA. while    B. during    C. when    D. as", "a": "Đáp án: B (during). ||Theo sau là danh từ → during."},
+        {"q": "Chọn câu ĐÚNG (rút gọn):\nA. When reviewing the contract, check the payment terms.\nB. When review the contract, check the payment terms.\nC. When to review the contract, check the terms.\nD. When reviewed the contract, check the terms.", "a": "Đáp án: A. ||Rút gọn: When + V-ing (reviewing)."},
+        {"q": "Điền vào nội quy (Part 6):\n\"___ entering the laboratory, all visitors must sign in.\"\nA. Before    B. During    C. Until    D. By", "a": "Đáp án: A (Before). ||Before + V-ing (entering) = trước khi vào."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn liên từ thời gian, hiện tại chỉ tương lai, since/by the time, và rút gọn."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "We will notify you ___ the goods arrive at the warehouse.\nA. as soon as    B. during    C. despite    D. because of", "a": "Đáp án: A (as soon as). ||as soon as + S + V = ngay khi."},
+        {"q": "When the system ___ updated, performance will improve.\nA. will be    B. is    C. was    D. being", "a": "Đáp án: B (is). ||Mệnh đề thời gian dùng hiện tại."},
+        {"q": "The office has been busier ___ the new product launched.\nA. while    B. until    C. since    D. as soon as", "a": "Đáp án: C (since). ||'since' + mốc thời gian."},
+        {"q": "Please switch off your phone ___ the interview.\nA. while    B. during    C. when    D. as", "a": "Đáp án: B (during). ||Theo sau là danh từ → during."},
+        {"q": "Tìm và sửa lỗi:\n\"We will start when everyone will be ready.\"", "a": "Lỗi: \"when ... will be ready\" → \"when everyone is ready\". ||Mệnh đề thời gian không dùng will."},
+        {"q": "___ the technician arrived, the printer had already been fixed.\nA. While    B. Until    C. By the time    D. Since", "a": "Đáp án: C (By the time). ||'By the time' + QKHT (had been fixed)."},
+        {"q": "After ___ the documents, the assistant emailed them out.\nA. scan    B. scanning    C. scanned    D. to scan", "a": "Đáp án: B (scanning). ||After + V-ing (rút gọn)."},
+        {"q": "The store will remain open ___ midnight during the sale.\nA. until    B. while    C. since    D. as soon as", "a": "Đáp án: A (until). ||until + thời điểm = cho đến."},
+        {"q": "Chọn câu ĐÚNG:\nA. As soon as the report will be ready, send it.\nB. As soon as the report is ready, send it.\nC. As soon as the report ready, send it.\nD. As soon as the report was ready, send it.", "a": "Đáp án: B. ||Mệnh đề 'as soon as' dùng hiện tại để chỉ tương lai."},
+        {"q": "Điền vào hướng dẫn (Part 6):\n\"___ using the new software, please save your work frequently.\"\nA. When    B. During    C. Until    D. By", "a": "Đáp án: A (When). ||When + V-ing (rút gọn) = khi sử dụng."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "Please stay in the lobby ___ your name is announced.\nA. until    B. during    C. despite    D. because of", "a": "A (until). ||until + S + V = cho đến khi."},
+      {"q": "When the budget ___ approved, the project will begin.\nA. will be    B. is    C. was    D. being", "a": "B (is). ||Mệnh đề thời gian dùng hiện tại."},
+      {"q": "The company has grown rapidly ___ it entered the Asian market.\nA. while    B. until    C. since    D. as soon as", "a": "C (since). ||'since' + mốc thời gian."},
+      {"q": "All phones must be silent ___ the board meeting.\nA. while    B. during    C. when    D. as", "a": "B (during). ||Theo sau là danh từ → during."},
+      {"q": "Tìm và sửa lỗi:\n\"During the manager was on leave, the team managed well.\"", "a": "Lỗi: \"During\" + mệnh đề. ||Sửa: \"While the manager was on leave...\""},
+      {"q": "We will send a tracking link as soon as the parcel ___ shipped.\nA. will be    B. is    C. was    D. being", "a": "B (is). ||Mệnh đề 'as soon as' dùng hiện tại."},
+      {"q": "___ the technician arrived, the issue had already been resolved.\nA. While    B. Until    C. By the time    D. Since", "a": "C (By the time). ||'By the time' + QKHT."},
+      {"q": "After ___ the report, the analyst sent it to the manager.\nA. finish    B. finishing    C. finished    D. to finish", "a": "B (finishing). ||After + V-ing (rút gọn)."},
+      {"q": "Chọn câu ĐÚNG:\nA. When the goods will arrive, we will inspect them.\nB. When the goods arrive, we will inspect them.\nC. When the goods arrive, we inspect them.\nD. When the goods arrived, we will inspect them.", "a": "B. ||Mệnh đề thời gian + hiện tại, mệnh đề chính + will."},
+      {"q": "He took notes ___ the speaker was presenting the results.\nA. while    B. until    C. since    D. by the time", "a": "A (while). ||Hai việc song song → while."},
+      {"q": "Tìm và sửa lỗi:\n\"While use the equipment, always follow the safety rules.\"", "a": "Lỗi: \"While use\" → \"While using\". ||Rút gọn dùng V-ing."},
+      {"q": "The store will stay open ___ 11 p.m. during the holiday season.\nA. until    B. while    C. since    D. as soon as", "a": "A (until). ||until + thời điểm = cho đến."},
+      {"q": "___ entering the cleanroom, all staff must wear protective suits.\nA. Before    B. During    C. Until    D. By", "a": "A (Before). ||Before + V-ing (rút gọn) = trước khi vào."},
+      {"q": "Sales have improved ___ the loyalty program was launched.\nA. while    B. until    C. since    D. as soon as", "a": "C (since). ||'since' + mốc thời gian."},
+      {"q": "Once the installation ___ complete, the system will restart.\nA. will be    B. is    C. was    D. being", "a": "B (is). ||Mệnh đề 'once' dùng hiện tại."},
+      {"q": "Điền vào hướng dẫn (Part 6):\n\"___ the software update, the application may run slowly for a few minutes.\"\nA. While    B. During    C. Until    D. By", "a": "B (During). ||Theo sau là danh từ (the software update) → during."}
+    ]
+  },
+  "summary": [
+    "Liên từ thời gian + MỆNH ĐỀ: when, while, before, after, until, as soon as, once, since, by the time.",
+    "Trong mệnh đề thời gian dùng HIỆN TẠI để chỉ tương lai; chỉ mệnh đề chính dùng will.",
+    "Phân biệt nghĩa: while (song song), until (kéo dài đến), by the time (+ hoàn thành), since (+ mốc).",
+    "Rút gọn cùng chủ ngữ: When/Before/After + V-ing. Giới từ thời gian + danh từ: during, before, after, until, by."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy lớn: KHÔNG dùng will trong mệnh đề thời gian ('when it is ready', không 'when it will be ready'). during + danh từ, while + mệnh đề.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 2 (hiện tại chỉ tương lai) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

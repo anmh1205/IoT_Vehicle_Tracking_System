@@ -1,0 +1,131 @@
+{
+  "page_id": "357df50b-1fcd-8149-87f8-d35e544284f5",
+  "title": "22. Mệnh đề quan hệ xác định",
+  "intro": [
+    {"text": "Bài 22 — Mệnh đề quan hệ xác định (defining: thiết yếu, KHÔNG dấu phẩy). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 & 6 chọn who/which/that/whose/where/when; biết khi nào lược bỏ được đại từ; phân biệt with mệnh đề không xác định.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · who / which / that làm chủ ngữ",
+      "theory": ["Mệnh đề xác định giúp xác định danh từ, KHÔNG có dấu phẩy. Đại từ làm chủ ngữ: who (người), which (vật), that (cả hai). KHÔNG lược bỏ đại từ khi nó làm chủ ngữ."],
+      "keys": ["The employee who/that works...; The report which/that explains..."],
+      "traps": ["Đại từ làm chủ ngữ không được bỏ: 'The man works here is...' sai → 'The man who works here is...'"],
+      "examples": [
+        "The candidate who impressed the panel got the job.",
+        "The software that crashed has been fixed."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The employee ___ won the sales award works in our branch.\nA. who    B. which    C. whose    D. whom", "a": "Đáp án: A (who). ||Người + chủ ngữ trong mệnh đề xác định → who (hoặc that)."},
+        {"q": "The machine ___ broke down has now been repaired.\nA. who    B. which    C. whose    D. whom", "a": "Đáp án: B (which). ||Vật + chủ ngữ → which (hoặc that)."},
+        {"q": "We need a supplier ___ can deliver within 24 hours.\nA. who    B. which    C. whose    D. whom", "a": "Đáp án: A (who). ||'supplier' (người/công ty) + chủ ngữ → who/that."},
+        {"q": "The report ___ explains the new policy is on your desk.\nA. who    B. which    C. whose    D. whom", "a": "Đáp án: B (which). ||Vật + chủ ngữ → which/that."},
+        {"q": "Tìm và sửa lỗi:\n\"The technician fixed the server is on leave today.\"", "a": "Lỗi: thiếu đại từ chủ ngữ. ||Sửa: \"The technician who fixed the server is on leave today.\""},
+        {"q": "Customers ___ register early will receive a discount.\nA. who    B. which    C. whose    D. whom", "a": "Đáp án: A (who). ||Người + chủ ngữ → who/that."},
+        {"q": "Chọn câu ĐÚNG:\nA. The software crashed has been fixed.\nB. The software that crashed has been fixed.\nC. The software, that crashed, has been fixed.\nD. The software who crashed has been fixed.", "a": "Đáp án: B. ||Vật + chủ ngữ, mệnh đề xác định (không dấu phẩy) → that/which."},
+        {"q": "Điền vào thông báo (Part 6):\n\"Applicants ___ meet the criteria will be contacted for an interview.\"\nA. who    B. which    C. whose    D. whom", "a": "Đáp án: A (who). ||Người + chủ ngữ → who/that."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Đại từ làm tân ngữ và việc lược bỏ",
+      "theory": ["Khi đại từ làm TÂN NGỮ trong mệnh đề xác định, có thể LƯỢC BỎ (who/whom/which/that). Nếu giữ lại: who/that/which cho thông thường; whom trang trọng."],
+      "keys": ["The report (that) I submitted...; The client (whom) we met..."],
+      "traps": ["Có thể bỏ đại từ tân ngữ; nhưng nếu có giới từ đứng trước (to whom/for which) thì KHÔNG bỏ."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "The proposal ___ we submitted last week was approved.\nA. that    B. who    C. whose    D. where", "a": "Đáp án: A (that). ||Vật + tân ngữ → that/which (có thể lược bỏ)."},
+        {"q": "The client ___ we met at the fair placed a large order.\nA. whom    B. which    C. whose    D. where", "a": "Đáp án: A (whom). ||Người + tân ngữ → whom/who/that."},
+        {"q": "Câu nào lược bỏ đại từ ĐÚNG?\nA. The book I borrowed was very useful.\nB. The book what I borrowed was useful.\nC. The book, I borrowed, was useful.\nD. The book who I borrowed was useful.", "a": "Đáp án: A. ||Đại từ tân ngữ được lược bỏ: The book (that) I borrowed..."},
+        {"q": "The vendor ___ we rely on raised its prices.\nA. whom    B. which    C. whose    D. when", "a": "Đáp án: A (whom). ||Người + tân ngữ của 'rely on' → whom/that/who."},
+        {"q": "Tìm và sửa lỗi:\n\"The colleague to who I spoke was very helpful.\"", "a": "Lỗi: \"to who\" → \"to whom\". ||Sau giới từ dùng whom (to whom)."},
+        {"q": "The equipment ___ they ordered has finally arrived.\nA. which    B. who    C. whose    D. where", "a": "Đáp án: A (which). ||Vật + tân ngữ → which/that (có thể lược bỏ)."},
+        {"q": "Chọn câu trang trọng ĐÚNG:\nA. The manager who I reported to retired.\nB. The manager to whom I reported retired.\nC. The manager to who I reported retired.\nD. The manager which I reported to retired.", "a": "Đáp án: B. ||Giới từ + whom: 'to whom I reported'."},
+        {"q": "Điền vào email (Part 6):\n\"The samples ___ you requested have been shipped today.\"\nA. that    B. who    C. whose    D. where", "a": "Đáp án: A (that). ||Vật + tân ngữ → that/which (có thể lược bỏ)."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · whose, where, when",
+      "theory": ["whose = sở hữu (+ danh từ). where = nơi chốn (= in/at which). when = thời gian (= on/at which)."],
+      "keys": ["the company whose CEO...; the office where we work; the year when we launched."],
+      "traps": ["where dùng cho nơi chốn nhưng nếu sau đó là tân ngữ thiếu thì dùng which: 'the office which we rented' (rent cần tân ngữ)."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "We work for a company ___ products are sold worldwide.\nA. whose    B. which    C. where    D. when", "a": "Đáp án: A (whose). ||Sở hữu: whose + products."},
+        {"q": "This is the conference room ___ the board meets every Monday.\nA. whose    B. which    C. where    D. when", "a": "Đáp án: C (where). ||Nơi chốn → where (= in which)."},
+        {"q": "2015 was the year ___ the company went public.\nA. whose    B. which    C. where    D. when", "a": "Đáp án: D (when). ||Thời gian → when."},
+        {"q": "The startup ___ founder is only 25 has grown rapidly.\nA. whose    B. which    C. where    D. when", "a": "Đáp án: A (whose). ||Sở hữu: whose + founder."},
+        {"q": "Tìm và sửa lỗi:\n\"The warehouse where we rented is now too small.\"", "a": "Lỗi: \"where we rented\" → \"which/that we rented\". ||'rent' cần tân ngữ → dùng which, không where."},
+        {"q": "The hotel ___ we stayed had excellent service.\nA. whose    B. which    C. where    D. when", "a": "Đáp án: C (where). ||Nơi chốn, không thiếu tân ngữ (stay là nội động) → where."},
+        {"q": "Chọn câu ĐÚNG:\nA. The day when we signed the contract was rainy.\nB. The day where we signed the contract was rainy.\nC. The day which we signed the contract was rainy.\nD. The day whose we signed was rainy.", "a": "Đáp án: A. ||Thời gian → when."},
+        {"q": "Điền vào mô tả (Part 6):\n\"This is the facility ___ all our products are manufactured.\"\nA. whose    B. which    C. where    D. when", "a": "Đáp án: C (where). ||Nơi chốn → where (= in which)."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Phân biệt that/which và xác định/không xác định",
+      "theory": ["Mệnh đề xác định cho phép 'that'; mệnh đề không xác định (có dấu phẩy) KHÔNG dùng 'that'. Sau giới từ chỉ dùng which/whom (không that)."],
+      "keys": ["Defining: ... that/which ... (no comma). Non-defining: ..., which ..., (no that). Giới từ + which/whom."],
+      "traps": ["Sau giới từ: 'the topic about which...' (không 'about that')."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "(Xác định) The document ___ contains the figures is confidential.\nA. that    B. , which    C. who    D. , that", "a": "Đáp án: A (that). ||Mệnh đề xác định, không dấu phẩy → that/which."},
+        {"q": "The meeting ___ we discussed the budget lasted two hours.\nA. in which    B. which    C. that    D. whose", "a": "Đáp án: A (in which). ||Cần giới từ 'in' (discuss in the meeting) → in which (= where)."},
+        {"q": "The topic ___ which the report focuses is cybersecurity.\nA. on    B. in    C. at    D. of", "a": "Đáp án: A (on). ||'focus on' → 'on which'."},
+        {"q": "Tìm và sửa lỗi:\n\"The issue about that we talked is now resolved.\"", "a": "Lỗi: \"about that\" → \"about which\". ||Sau giới từ dùng which, không that."},
+        {"q": "Chọn câu ĐÚNG (sau giới từ):\nA. The colleague with who I work is reliable.\nB. The colleague with whom I work is reliable.\nC. The colleague with that I work is reliable.\nD. The colleague with which I work is reliable.", "a": "Đáp án: B. ||Sau giới từ + người → whom (with whom)."},
+        {"q": "(Xác định) Anyone ___ wants to join should sign up by Friday.\nA. who    B. , who    C. which    D. whom", "a": "Đáp án: A (who). ||Mệnh đề xác định, người + chủ ngữ → who/that, không dấu phẩy."},
+        {"q": "The reason ___ the project failed is still unclear.\nA. why    B. which    C. whose    D. whom", "a": "Đáp án: A (why). ||Lý do → why (= for which)."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"The vendor ___ we signed the agreement has a strong reputation.\"\nA. with whom    B. with who    C. with that    D. with which", "a": "Đáp án: A (with whom). ||Người + giới từ → with whom."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn chủ ngữ/tân ngữ, lược bỏ, whose/where/when và giới từ + which/whom."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "The candidate ___ has the most experience will be selected.\nA. who    B. which    C. whose    D. where", "a": "Đáp án: A (who). ||Người + chủ ngữ → who/that."},
+        {"q": "The contract ___ we signed yesterday is now in effect.\nA. that    B. who    C. whose    D. where", "a": "Đáp án: A (that). ||Vật + tân ngữ → that/which (có thể lược bỏ)."},
+        {"q": "We visited the factory ___ the components are assembled.\nA. whose    B. which    C. where    D. when", "a": "Đáp án: C (where). ||Nơi chốn → where."},
+        {"q": "The author ___ book won the prize will speak tonight.\nA. who    B. which    C. whose    D. whom", "a": "Đáp án: C (whose). ||Sở hữu: whose + book."},
+        {"q": "Tìm và sửa lỗi:\n\"The manager reported the issue has been promoted.\"", "a": "Lỗi: thiếu đại từ chủ ngữ. ||Sửa: \"The manager who reported the issue has been promoted.\""},
+        {"q": "This is the period ___ sales are usually highest.\nA. whose    B. which    C. where    D. when", "a": "Đáp án: D (when). ||Thời gian → when."},
+        {"q": "The colleague ___ I share an office is on vacation.\nA. with whom    B. with who    C. with that    D. who", "a": "Đáp án: A (with whom). ||Giới từ + người → with whom."},
+        {"q": "Chọn câu ĐÚNG (lược bỏ đại từ tân ngữ):\nA. The supplier we use is reliable.\nB. The supplier what we use is reliable.\nC. The supplier, we use, is reliable.\nD. The supplier who use is reliable.", "a": "Đáp án: A. ||Đại từ tân ngữ được lược bỏ: The supplier (that) we use..."},
+        {"q": "The company ___ headquarters is in Berlin is expanding.\nA. whose    B. which    C. where    D. whom", "a": "Đáp án: A (whose). ||Sở hữu: whose + headquarters."},
+        {"q": "Điền vào bài viết (Part 6):\n\"The product ___ we launched last month has sold out.\"\nA. that    B. who    C. whose    D. where", "a": "Đáp án: A (that). ||Vật + tân ngữ → that/which (có thể lược bỏ)."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "The employee ___ handles complaints is very experienced.\nA. who    B. which    C. whose    D. where", "a": "A (who). ||Người + chủ ngữ → who/that."},
+      {"q": "The proposal ___ we submitted has been approved.\nA. that    B. who    C. whose    D. where", "a": "A (that). ||Vật + tân ngữ → that/which (có thể lược bỏ)."},
+      {"q": "This is the office ___ the design team works.\nA. whose    B. which    C. where    D. when", "a": "C (where). ||Nơi chốn → where."},
+      {"q": "The startup ___ founder is under 30 attracted big investors.\nA. who    B. which    C. whose    D. whom", "a": "C (whose). ||Sở hữu: whose + founder."},
+      {"q": "Tìm và sửa lỗi:\n\"The technician repaired the printer is off today.\"", "a": "Lỗi: thiếu đại từ chủ ngữ. ||Sửa: \"The technician who repaired the printer is off today.\""},
+      {"q": "Customers ___ spend over $100 get free shipping.\nA. who    B. which    C. whose    D. where", "a": "A (who). ||Người + chủ ngữ → who/that."},
+      {"q": "2018 was the year ___ we opened our first overseas branch.\nA. whose    B. which    C. where    D. when", "a": "D (when). ||Thời gian → when."},
+      {"q": "The colleague ___ I work most closely is in marketing.\nA. with whom    B. with who    C. with that    D. who", "a": "A (with whom). ||Giới từ + người → with whom."},
+      {"q": "Chọn câu ĐÚNG (lược bỏ đại từ):\nA. The report we prepared was praised.\nB. The report what we prepared was praised.\nC. The report, we prepared, was praised.\nD. The report who we prepared was praised.", "a": "A. ||Đại từ tân ngữ được lược bỏ: The report (that) we prepared..."},
+      {"q": "The machine ___ malfunctioned has been replaced.\nA. who    B. which    C. whose    D. where", "a": "B (which). ||Vật + chủ ngữ → which/that."},
+      {"q": "Tìm và sửa lỗi:\n\"The issue about that we spoke is now resolved.\"", "a": "Lỗi: \"about that\" → \"about which\". ||Sau giới từ dùng which."},
+      {"q": "The reason ___ the launch was delayed remains unclear.\nA. why    B. which    C. whose    D. whom", "a": "A (why). ||Lý do → why (= for which)."},
+      {"q": "We need a vendor ___ can meet tight deadlines.\nA. who    B. which    C. whose    D. where", "a": "A (who). ||'vendor' (công ty/người) + chủ ngữ → who/that."},
+      {"q": "The hotel ___ we stayed offered excellent service.\nA. whose    B. which    C. where    D. when", "a": "C (where). ||Nơi chốn (stay nội động) → where."},
+      {"q": "Chọn câu ĐÚNG (trang trọng, sau giới từ):\nA. The director to who I reported has retired.\nB. The director to whom I reported has retired.\nC. The director to that I reported has retired.\nD. The director to which I reported has retired.", "a": "B. ||Giới từ + người → to whom."},
+      {"q": "Điền vào bài viết (Part 6):\n\"The product ___ we launched last quarter has exceeded sales targets.\"\nA. that    B. who    C. whose    D. where", "a": "A (that). ||Vật + tân ngữ → that/which."}
+    ]
+  },
+  "summary": [
+    "Mệnh đề quan hệ XÁC ĐỊNH: thiết yếu để xác định danh từ, KHÔNG có dấu phẩy, được dùng 'that'.",
+    "Đại từ chủ ngữ (who/which/that) KHÔNG được lược bỏ; đại từ tân ngữ (who/whom/which/that) CÓ THỂ lược bỏ.",
+    "whose = sở hữu (+ danh từ); where = nơi chốn (= in/at which); when = thời gian; why = lý do.",
+    "Sau giới từ dùng which/whom (không 'that'): to whom, about which, with whom."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy: đại từ làm CHỦ NGỮ không được bỏ; nơi chốn dùng 'where' chỉ khi không thiếu tân ngữ (rent cần tân ngữ → which). Sau giới từ dùng which/whom, không 'that'.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 3 (whose/where/when) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}
