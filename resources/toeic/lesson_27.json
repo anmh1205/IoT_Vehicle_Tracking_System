@@ -5,6 +5,40 @@
     {"text": "Bài 27 — Câu điều kiện loại 2 (giả định không/khó có thật ở hiện tại - tương lai). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 — If + quá khứ đơn, ... would/could/might + V. Bẫy: dùng 'were' cho mọi ngôi; mệnh đề chính dùng would.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Câu điều kiện loại 2 (second conditional) diễn tả giả định KHÔNG có thật hoặc khó xảy ra ở HIỆN TẠI/tương lai, và kết quả tưởng tượng. Dùng để bàn giả thuyết, đưa lời khuyên, hình dung tình huống."},
+
+    {"type": "h3", "text": "2. Công thức"},
+    {"type": "table", "headers": ["Mệnh đề If", "Mệnh đề chính", "Ví dụ"], "rows": [
+      ["If + quá khứ đơn", "would / could / might + V", "If we had more staff, we would finish sooner."]
+    ]},
+    {"type": "key", "text": "Mệnh đề If dùng QUÁ KHỨ ĐƠN (nhưng mang nghĩa hiện tại/giả định, KHÔNG phải quá khứ thật); vế chính dùng would/could/might + V nguyên thể."},
+
+    {"type": "h3", "text": "3. 'were' cho mọi ngôi"},
+    {"type": "p", "text": "Trong điều kiện loại 2, động từ 'to be' dùng 'were' cho TẤT CẢ các ngôi (kể cả I/he/she/it) trong văn chuẩn: If I were the manager, I would change the policy. If the price were lower, more people would buy."},
+
+    {"type": "h3", "text": "4. Lời khuyên 'If I were you'"},
+    {"type": "p", "text": "Cấu trúc đưa lời khuyên rất thông dụng: If I were you, I would negotiate the terms. (Nếu tôi là bạn, tôi sẽ…)."},
+
+    {"type": "h3", "text": "5. could / might trong vế chính"},
+    {"type": "ul", "items": [
+      "would: kết quả chắc chắn (trong giả định).",
+      "could: khả năng / năng lực (có thể).",
+      "might: khả năng không chắc chắn.",
+      "Ví dụ: If we lowered prices, we might attract more clients."
+    ]},
+
+    {"type": "h3", "text": "6. Phân biệt loại 1 và loại 2"},
+    {"type": "table", "headers": ["", "Loại 1 (có thật)", "Loại 2 (giả định)"], "rows": [
+      ["Mệnh đề If", "hiện tại đơn", "quá khứ đơn"],
+      ["Vế chính", "will + V", "would + V"],
+      ["Ý nghĩa", "có khả năng xảy ra", "không/khó xảy ra ở hiện tại"]
+    ]},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) If + QUÁ KHỨ ĐƠN, vế chính WOULD + V (không 'will'). (2) Dùng 'were' cho mọi ngôi (If I were…, không 'If I was' trong văn chuẩn). (3) Vế chính: would/could/might + V nguyên thể (không 'would to V', không 'would V-ed'). (4) Phân biệt với loại 1 (hiện tại + will)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Cấu trúc cơ bản",

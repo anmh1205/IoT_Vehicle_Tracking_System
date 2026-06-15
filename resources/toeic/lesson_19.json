@@ -5,6 +5,36 @@
     {"text": "Bài 19 — Câu bị động với động từ khuyết thiếu (modal + be + V3). Làm câu hỏi ngay sau mỗi phần, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 hỏi 'modal + be + V3' (can be done) và 'modal + have been + V3' (should have been done) cho quá khứ.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & công thức"},
+    {"type": "p", "text": "Khi câu bị động có động từ khuyết thiếu (modal), công thức là: modal + be + V3. Modal giữ nguyên, thêm 'be' (nguyên thể) rồi quá khứ phân từ. Rất phổ biến trong quy định, hướng dẫn: 'must be submitted', 'should be reviewed', 'can be done'."},
+
+    {"type": "h3", "text": "2. Công thức theo modal"},
+    {"type": "table", "headers": ["Modal", "Bị động", "Ví dụ"], "rows": [
+      ["must", "must be + V3", "Forms must be signed by both parties."],
+      ["should", "should be + V3", "The draft should be reviewed first."],
+      ["can", "can be + V3", "Payments can be made online."],
+      ["may/might", "may be + V3", "The launch may be delayed."],
+      ["will", "will be + V3", "You will be notified by email."],
+      ["have to", "have to be + V3", "The form has to be completed today."],
+      ["need to", "need to be + V3", "The device needs to be inspected."]
+    ]},
+
+    {"type": "h3", "text": "3. Thể phủ định & nghi vấn"},
+    {"type": "ul", "items": [
+      "Phủ định: modal + not + be + V3 — The data must not be shared.",
+      "Nghi vấn: Modal + S + be + V3? — Can the meeting be rescheduled?"
+    ]},
+
+    {"type": "h3", "text": "4. Modal hoàn thành bị động (mở rộng)"},
+    {"type": "p", "text": "modal + have been + V3 diễn tả bị động trong quá khứ/suy đoán: The package should have been delivered yesterday. (lẽ ra đã phải được giao). The error must have been overlooked. (chắc hẳn đã bị bỏ sót)."},
+
+    {"type": "h3", "text": "5. 'need + V-ing' = bị động"},
+    {"type": "p", "text": "Cấu trúc rút gọn: 'need + V-ing' mang nghĩa bị động, tương đương 'need to be + V3': The printer needs repairing = The printer needs to be repaired. (cần được sửa)."},
+
+    {"type": "h3", "text": "6. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Phải có 'be' giữa modal và V3: should BE reviewed (sai 'should reviewed'). (2) Sau modal là 'be' nguyên thể, không chia (must be, không 'must is'). (3) Dùng V3 (cột 3), không V2/V-ing: can be done (không 'can be did/doing'). (4) modal + have been + V3 cho bị động quá khứ."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · modal + be + V3",

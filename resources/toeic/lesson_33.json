@@ -5,6 +5,38 @@
     {"text": "Bài 33 — So sánh ngang bằng (as ... as). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 — as + adj/adv + as; phủ định not as/so ... as; the same as; similar to; as much/many ... as.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "So sánh ngang bằng diễn tả hai đối tượng NGANG NHAU (hoặc không ngang nhau) về một tính chất, dùng cấu trúc 'as … as'. Điểm cốt lõi: giữa hai 'as' luôn là tính từ/trạng từ ở DẠNG GỐC (không thêm -er/more)."},
+
+    {"type": "h3", "text": "2. as + adj/adv (gốc) + as"},
+    {"type": "p", "text": "as + tính từ/trạng từ nguyên gốc + as: This model is as reliable as the premium one. She works as efficiently as her colleagues. (không 'as reliabler as')."},
+
+    {"type": "h3", "text": "3. Phủ định: not as / not so … as"},
+    {"type": "p", "text": "not as + adj/adv + as = not so + adj/adv + as (kém hơn): This year's profit is not as high as last year's. (= thấp hơn)."},
+
+    {"type": "h3", "text": "4. the same as / similar to / different from"},
+    {"type": "table", "headers": ["Cấu trúc", "Giới từ", "Ví dụ"], "rows": [
+      ["the same … as", "as", "the same price as last year"],
+      ["similar to", "to", "similar to the old design"],
+      ["different from", "from", "different from the original"]
+    ]},
+
+    {"type": "h3", "text": "5. as much / as many … as"},
+    {"type": "ul", "items": [
+      "as much + danh từ KHÔNG đếm được + as: as much time as we need.",
+      "as many + danh từ ĐẾM ĐƯỢC + as: as many staff as last year."
+    ]},
+
+    {"type": "h3", "text": "6. Bội số & 'as … as possible'"},
+    {"type": "ul", "items": [
+      "Bội số đứng TRƯỚC 'as … as': twice as large as, three times as high as, half as expensive as.",
+      "as + adj/adv + as possible = càng… càng tốt: Please reply as soon as possible. Resolve issues as quickly as possible."
+    ]},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Giữa hai 'as' dùng DẠNG GỐC (as fast as, không 'as faster as'). (2) the same AS (không 'the same than'/'the same with'); similar TO; different FROM. (3) as much + không đếm / as many + đếm được. (4) Bội số đứng TRƯỚC: 'twice as big as' (không 'as twice big as')."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · as + adj/adv + as",

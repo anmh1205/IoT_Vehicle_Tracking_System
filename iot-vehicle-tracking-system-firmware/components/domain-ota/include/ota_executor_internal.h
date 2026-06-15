@@ -20,26 +20,44 @@
 // module contract without reaching into private implementation details.
 
 
+/** Log tag shared by all OTA util translation units. */
 #define UTIL_TAG "UTIL"
+/** Max binary bytes requested per AT+HTTPREAD chunk in binary transfer mode. */
 #define OTA_HTTP_BINARY_CHUNK_SIZE 1024
+/** Hex transport doubles the wire size, so its chunk ceiling is twice the binary one. */
 #define OTA_HTTP_HEX_CHUNK_SIZE (OTA_HTTP_BINARY_CHUNK_SIZE * 2)
+/** Response buffer holds one max chunk plus headroom for the +HTTPREAD framing/headers. */
 #define OTA_HTTP_READ_RESPONSE_MAX_LEN (OTA_HTTP_HEX_CHUNK_SIZE + 1024)
+/** Upper bound to wait for the asynchronous +HTTPACTION result (server fetch). */
 #define OTA_HTTP_ACTION_TIMEOUT_MS 120000U
+/** Timeout for short AT+HTTP* configuration commands. */
 #define OTA_HTTP_CMD_TIMEOUT_MS 30000U
+/** Timeout for one ranged AT+HTTPREAD payload read. */
 #define OTA_HTTP_READ_CMD_TIMEOUT_MS 45000U
+/** Poll cadence while draining URCs waiting for +HTTPACTION. */
 #define OTA_HTTP_URC_POLL_INTERVAL_MS 100U
+/** Bytes pulled from the modem RX buffer per URC poll iteration. */
 #define OTA_HTTP_URC_POLL_BYTES 512U
+/** Modem SSL context slot dedicated to OTA HTTPS transfers. */
 #define OTA_HTTP_SSL_CTX_INDEX 1
 
+/**
+ * @brief Snapshot of the most recent +HTTPACTION URC result.
+ *
+ * The URC arrives asynchronously after AT+HTTPACTION, so the request path arms
+ * @c waiting and then polls @c ready until the modem reports the outcome.
+ */
 typedef struct {
-    bool waiting;
-    bool ready;
-    int method;
-    int status_code;
-    int data_len;
+    bool waiting;     /**< True while a request is in flight and a URC is expected. */
+    bool ready;       /**< Set by the URC handler once a result line was parsed. */
+    int method;       /**< HTTP method echoed by the modem (0 == GET). */
+    int status_code;  /**< HTTP status, or a 7xx SIM7600 transport error code. */
+    int data_len;     /**< Response body length reported by the modem. */
 } ota_http_action_state_t;
 
+/** Shared in-flight HTTP action state populated by the +HTTPACTION URC handler. */
 extern ota_http_action_state_t s_ota_http_action;
+/** Guards one-time registration of the +HTTPACTION URC callback. */
 extern bool s_ota_http_urc_registered;
 
 void util_ota_http_action_reset(void);

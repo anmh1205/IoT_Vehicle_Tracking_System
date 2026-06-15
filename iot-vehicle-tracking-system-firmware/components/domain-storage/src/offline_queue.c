@@ -87,11 +87,13 @@ static uint32_t offline_queue_depth_from_meta(const sd_log_meta_t *meta) {
         return 0;
     }
 
+    // replay_seq starts at 1 by convention; treat a stored 0 as "read from the first record".
     uint32_t replay_seq = meta->replay_seq == 0 ? 1 : meta->replay_seq;
     if (meta->write_seq < replay_seq) {
-        return 0;
+        return 0; // Replay cursor caught up to (or past) the write head: queue is drained.
     }
 
+    // Inclusive span [replay_seq .. write_seq] => count = write_seq - replay_seq + 1.
     return meta->write_seq - replay_seq + 1;
 }
 
@@ -450,6 +452,7 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
     const char *payload = offline_queue_payload_for_publish(rec, payload_scratch, sizeof(payload_scratch));
     int msg_id = tracker_mqtt_publish_with_msg_id(topic, payload, qos);
     if (msg_id < 0) {
+        // Publish was rejected by the modem path; leave the record in place for the next replay tick.
         ESP_LOGW(TAG,
                  "replay publish failed seq=%lu topic_class=%s qos=%d",
                  (unsigned long)rec->seq,
@@ -467,6 +470,7 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
                  topic_class,
                  qos,
                  msg_id);
+        // Move the cursor one past this record so the next tick reads the following entry.
         return sd_log_store_set_replay_seq(rec->seq + 1);
     }
 
@@ -478,6 +482,7 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
              topic_class,
              qos,
              msg_id);
+    // Atomically record the critical ACK watermark (rec->seq) and advance replay (rec->seq + 1).
     return sd_log_store_ack_critical_and_advance_replay(rec->seq, rec->seq + 1);
 }
 
@@ -573,7 +578,6 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
     rec.gps_fix = gps_fix ? 1 : 0;
     rec.net_up = net_up ? 1 : 0;
     rec.time_trusted = time_trusted ? 1 : 0;
-    // Bound payload size before copying so the persisted fixed-width record always stays NUL-terminated.
     size_t payload_len = strlen(payload);
     if (payload_len >= sizeof(rec.payload)) {
         telemetry_counters_inc_sd_write_fail();
@@ -584,7 +588,7 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
                  (unsigned)sizeof(rec.payload));
         return ESP_ERR_INVALID_SIZE;
     }
-    memcpy(rec.payload, payload, payload_len + 1U);
+    memcpy(rec.payload, payload, payload_len + 1U); // Copy payload plus its terminating NUL.
 
     if (CONFIG_TRACKER_SD_LOG_ENABLE) {
         /* Treat a temporarily unavailable card as best-effort; do not fail caller telemetry paths. */
@@ -612,7 +616,7 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
 #if CONFIG_TRACKER_SD_DIAG_ENABLE
     offline_queue_log_enqueue_result(&rec);
 #endif
-    s_ctx.next_seq += 1;
+    s_ctx.next_seq += 1; // Advance the monotonic sequence so the next record gets a fresh number.
     return ESP_OK;
 }
 
@@ -657,7 +661,7 @@ void offline_queue_replay_tick(void) {
     uint32_t replay_seq = meta.replay_seq == 0 ? 1 : meta.replay_seq;
     sd_log_record_t rec = {0};
     if (sd_log_store_peek_next(replay_seq, &rec) != ESP_OK) {
-        return;
+        return; // Nothing readable at the current cursor (drained or transient read miss).
     }
 
     if (rec.critical && rec.seq <= meta.ack_seq_critical) {
@@ -730,7 +734,7 @@ bool offline_queue_should_throttle_rawdata(void) {
 
     /* Raw telemetry slows down earlier than the hard GC threshold to reduce churn. */
     size_t soft_limit = (stats.quota_bytes * (size_t)CONFIG_TRACKER_SD_LOG_SOFT_QUOTA_PERCENT) / 100U;
-    return stats.bytes_used >= soft_limit;
+    return stats.bytes_used >= soft_limit; // Throttle once usage crosses the soft watermark.
 }
 
 /**
@@ -756,9 +760,10 @@ uint32_t offline_queue_depth(void) {
         return 0;
     }
 
+    // Same inclusive-span math as the diagnostics helper, computed from live metadata.
     uint32_t replay_seq = meta.replay_seq == 0 ? 1 : meta.replay_seq;
     if (meta.write_seq < replay_seq) {
-        return 0;
+        return 0; // Replay cursor reached the write head: queue empty.
     }
 
     return meta.write_seq - replay_seq + 1;

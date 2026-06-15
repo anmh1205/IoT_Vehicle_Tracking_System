@@ -1,0 +1,330 @@
+===== PAGE 19 =====
+vi 
+ 
+MỤC LỤC - TABLE OF CONTENT 
+TÓM TẮT ĐỒ ÁN TỐT NGHIỆP ............................................................................. ii 
+LỜI CẢM ƠN ................................................................................................................ iv 
+MỤC LỤC - TABLE OF CONTENT ........................................................................... vi 
+DANH MỤC BẢNG - LIST OF TABLES ................................................................... ix 
+DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ - LIST OF PICTURES AND GRAPHS ....... xi 
+DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATIONS ................................... xiii 
+CHƯƠNG 1. TỔNG QUAN - SUMMARY ................................................................... 1 
+1.1. Đặt vấn đề/ Bối cảnh của dự án – Problem definition and Background ............... 1 
+1.2. Mục tiêu và phạm vi của dự án ............................................................................. 1 
+1.3. Các tiêu chí cần đạt được của dự án ...................................................................... 2 
+1.4. Phương pháp tiếp cận thiết kế kỹ thuật – Engineering design approach .............. 2 
+CHƯƠNG 2. PHÂN TÍCH VẤN ĐỀ KỸ THUẬT – PROBLEM ANALYSIS ............ 4 
+2.1. Mô tả vấn đề - Problem statement ........................................................................ 4 
+2.2. Bối cảnh và cơ sở kỹ thuật – Background and Technical reviews ....................... 5 
+2.3. Yêu cầu kỹ thuật và các tiêu chuẩn thiết kế - Design criteria and Constraints ..... 8 
+2.4. Yêu cầu từ các bên liên quan – Constituent’s requirements ............................... 10 
+CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ - DESIGN SOLUTIONS ........................ 11 
+3.1. Phân tích tổng hợp – General analysis ................................................................ 11 
+3.1.1. Nguyên lý hoạt động .................................................................................... 11 
+3.1.2. Các ràng buộc kỹ thuật chi phối phương án – Governing technical constraints
+ ................................................................................................................................ 12 
+3.2. Đề xuất các giải pháp – Proposed multiple solutions ......................................... 12 
+3.2.1. Đề xuất giải pháp phần cứng thiết bị (Hardware Design)............................ 12 
+3.2.2. Đề xuất giải pháp phần mềm nhúng (Embedded Software) ........................ 18 
+3.2.3. Đề xuất gi ải pháp truy ền b ản tin và đ ịnh hướng t ổ chức phía máy ch ủ 
+(Communication and Server Organization) ........................................................... 20 
+3.3. Phân tích, đánh giá và lựa chọn phương án khả thi – Analysis, Evaluation and 
+Selection ..................................................................................................................... 24 
+3.3.1. Kiến trúc hệ thống được chọn – Selected system architecture .................... 24 
+
+===== PAGE 20 =====
+vii 
+ 
+3.3.2. Phân tích ch ức năng các kh ối trong phương án đư ợc ch ọn – Functional 
+analysis of selected blocks ..................................................................................... 24 
+CHƯƠNG 4. TRIỂN KHAI GI ẢI PHÁP VÀ K ẾT QUẢ - IMPMENTATION AND 
+RESULTS ...................................................................................................................... 28 
+4.1. Triển khai phần cứng thiết bị – Hardware implementation ................................ 28 
+4.2. Triển khai phần mềm hệ thống – Software implementation ............................... 33 
+4.2.1. Phần điều khiển trên thiết bị – Device firmware ......................................... 33 
+4.2.2. Hạ tầng máy chủ và xử lý dữ liệu – Server infrastructure and data processing
+ ................................................................................................................................ 38 
+4.2.3. Giao diện quản lý – Management interface ................................................. 40 
+4.3. Kết quả kiểm thử và đo lường – Measurements and Results .............................. 45 
+4.3.1. Kết quả kiểm thử phần cứng thiết bị ............................................................ 46 
+4.3.2. Kết quả kiểm thử phần mềm thiết bị ............................................................ 49 
+4.3.3. Kết quả kiểm thử phần mềm hệ thống ......................................................... 52 
+4.4. Đối chiếu với mục tiêu của đồ án – Comparison against project objectives ...... 53 
+CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUY ẾN NGH Ị - EVALUATION AND 
+RECOMMENDATION ................................................................................................. 56 
+5.1. Đánh giá hiệu năng.............................................................................................. 56 
+5.2. Đánh giá kinh tế và môi trường .......................................................................... 57 
+5.3. Đánh giá rủi ro và biện pháp giảm thiểu ............................................................. 58 
+5.4. Khuyến nghị cho tương lai .................................................................................. 58 
+CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM – REFLECTION ............. 60 
+6.1. Ứng dụng kiến thức kỹ thuật – Earlier course work ........................................... 60 
+6.2. Giải quyết các vấn đề kỹ thuật phức tạp – Complex engineering problems....... 60 
+6.3. Tác động đạo đức và xã hội – Ethical and Social impacts .................................. 61 
+6.4. Tổng kết và bài học kinh nghiệm – General reflection and case studies ............ 62 
+TÀI LIỆU THAM KHẢO - REFERENCES ................................................................ 63 
+PHỤ LỤC 1 – BÁO CÁO TÀI CHÍNH ........................................................................ 66 
+PHỤ LỤC 2 – CÁC TIÊU CHUẨN THIẾT KẾ ........................................................... 69 
+PHỤ LỤC 3 – KẾ HOẠCH THỰC HIỆN .................................................................... 70 
+PHỤ LỤC 4 – TÀI LIỆU BỔ TRỢ ............................................................................... 71 
+
+===== PAGE 24 =====
+xi 
+ 
+DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ - LIST OF PICTURES AND GRAPHS 
+Hình 3.1: Nguyên lý chuyển hóa dữ liệu từ phương tiện thành thông tin quản lý ........ 11 
+Hình 3.2: Nguyên lý đọc dữ liệu OBD-II qua bộ đọc Bluetooth vgate iCar Pro .......... 13 
+Hình 3.3: Nguyên lý giữ nhánh phát hiện chuyển động bằng LIS3DSH khi xe đỗ ...... 15 
+Hình 3.4: Nguyên lý sử dụng SIM7600CE-T cho tuyến truyền dữ liệu và định vị ...... 17 
+Hình 3.5: Vai trò điều phối trung tâm của ESP32-S3 trong phương án thiết bị ........... 18 
+Hình 3.6: Kiến trúc tổng thể của phương án hệ thống được chọn ................................ 24 
+Hình 3.7: Mối liên hệ giữa các ràng buộc kỹ thuật và các lựa chọn chính của phương án
+ ....................................................................................................................................... 26 
+Hình 4.1: Sơ đồ khối tổng quan của thiết bị theo dõi trên xe ........................................ 28 
+Hình 4.2: Khối ESP32-S3 và các nhánh mà b ộ điều khiển trung tâm tr ực tiếp quản lý
+ ....................................................................................................................................... 28 
+Hình 4.3: Các mô-đun chính có trên bo mạch và quan hệ giữa các cụm chức năng .... 29 
+Hình 4.4: Cấu trúc khối nguồn chính, nguồn dự phòng và các mức nguồn làm việc của 
+thiết bị ............................................................................................................................ 30 
+Hình 4.5: Bố trí mặt trước của PCB với các cụm chính gồm khối xử lý, truyền thông, 
+nguồn và pin dự phòng .................................................................................................. 31 
+Hình 4.6: Bo mạch nguyên mẫu sau khi hàn lắp đầy đủ linh kiện và kiểm tra hoạt động 
+ban đầu ........................................................................................................................... 32 
+Hình 4.7: Nguyên mẫu phần cứng sau khi lắp trong vỏ và hoàn thiện các kết nối chính
+ ....................................................................................................................................... 32 
+Hình 4.8: Thiết bị sau khi đóng vỏ, sẵn sàng cho bước lắp thử và đo kiểm trên xe ..... 33 
+Hình 4.9: Trình tự khởi động và chọn nhịp làm việc ban đầu của thiết bị .................... 35 
+Hình 4.10: Nguyên lý thu dữ liệu và gửi bản tin trong pha hoạt động của thiết bị ....... 36 
+Hình 4.11: Nguyên lý chuyển thiết bị sang chế độ ngủ và đánh thức lại khi xe đỗ ...... 37 
+Hình 4.12: Tuyến tiếp nhận, xử lý, lưu trữ và khai thác dữ liệu phía máy chủ ............. 39 
+Hình 4.13: Các nhóm chức năng chính trong không gian triển khai phía máy chủ ...... 40 
+Hình 4.14: Màn hình danh sách thiết bị với thẻ tổng quan, bộ lọc và bảng tra cứu nhanh
+ ....................................................................................................................................... 41 
+Hình 4.15: Màn hình bản đồ theo dõi với vị trí xe, bảng tóm tắt ở bên trái và dải thông 
+tin nhanh ở bên phải ...................................................................................................... 42 
+
+===== PAGE 32 =====
+6 
+ 
+hành trình và 
+trạng thái cơ 
+bản của 
+phương tiện. 
+hành qua OBD-II 
+nên chưa đáp ứng 
+đầy đủ mục tiêu 
+của đồ án. 
+2 
+ 
+OBD Vcar 
+Viettel [3] 
+Thiết bị của 
+Viettel, Việt 
+Nam; cắm 
+trực tiếp vào 
+cổng OBD-II, 
+hỗ trợ định vị, 
+theo dõi hành 
+trình, phát Wi-
+Fi và kiểm tra 
+tình trạng xe. 
+Giá tham khảo 
+khoảng 
+2.000.000 
+VND, kèm gói 
+dịch vụ hằng 
+tháng. 
+Đại diện cho 
+nhóm thiết bị 
+OBD thương mại 
+trong nước. 
+Nhưng thiết bị 
+phụ thuộc nền 
+tảng dịch vụ của 
+nhà cung cấp nên 
+chưa phù hợp với 
+yêu cầu tự chủ về 
+phần quản lý, tối 
+ưu theo nhu cầu. 
+3 
+ 
+Queclink 
+GV305CEU 
+[4]  
+Thiết bị của 
+Queclink, 
+Trung Quốc; 
+hỗ trợ LTE 
+Cat 1, GNSS, 
+BLE 5.2, 
+nguồn 8–32 
+VDC, pin dự 
+phòng 250 
+mAh, 
+Có giá trị tham 
+khảo về kiến trúc 
+và khả năng mở 
+rộng cho quản lý 
+đội xe. Tuy nhiên, 
+chi phí, độ phức 
+tạp và nhiều chức 
+năng vượt quá 
+nhu cầu thiết kế 
+
+
+===== PAGE 38 =====
+12 
+ 
+3.1.2. Các ràng buộc kỹ thuật chi phối phương án – Governing technical 
+constraints 
+Các ràng buộc kỹ thuật chi phối phương án thiết kế có thể quy về bốn nhóm 
+chính như sau: 
+- Ràng buộc ở lớp thiết bị: Bộ theo dõi phải gọn, ít dây, dễ tháo lắp khi đổi xe, 
+đồng thời không làm tăng mức can thiệp vào hệ điện hay ECU c ủa xe. Vì v ậy, 
+khối điều khiển trung tâm, khối truyền dữ liệu - định vị và cách lấy dữ liệu OBD-
+II phải được cân nhắc cùng nhau. 
+- Ràng buộc về năng lượng: Thiết bị bám vào ắc quy xe nên không được để dòng 
+nền tích lũy thành mức hao điện đáng kể khi xe đỗ dài ngày. Tuy nhiên, hệ thống 
+vẫn phải giữ được khả năng trở lại trạng thái hoạt động để phát hiện rung, dịch 
+chuyển hoặc thay đổi trạng thái xe; do đó phần nguồn, cảm biến và cơ chế chuyển 
+giữa hoạt động và ngủ sâu phải được xét như một cụm chung. 
+- Ràng buộc ở tuyến truyền dữ liệu: Xe hoạt động trong điều kiện sóng thay đổi 
+liên tục, nên phương án truyền không thể giả định kết nối luôn ổn định. Kiến trúc 
+được chọn phải chấp nhận mất sóng cục bộ, có bộ nhớ đệm phù hợp và phục hồi 
+được tuyến dữ liệu sau khi kết nối lại. 
+- Ràng buộc ở lớp khai thác thông tin : Dữ liệu thu được có nhi ều lớp, nhưng 
+giao diện vận hành không th ể trở thành nơi dồn mọi thứ. Phương án chỉ được 
+xem là đạt khi phần phức tạp được giữ ở lớp thiết bị và lớp máy chủ, còn giao 
+diện chỉ giữ những tín hiệu thực sự cần cho quyết định quản lý. 
+3.2. Đề xuất các giải pháp – Proposed multiple solutions 
+3.2.1. Đề xuất giải pháp phần cứng thiết bị (Hardware Design) 
+a, Phương án lấy dữ liệu từ phương tiện 
+Ở nhánh OBD-II, đồ án chỉ cần thu nhóm dữ liệu phục vụ quản lý nên không đi 
+theo hướng chẩn đoán sâu hay can thiệp nhiều vào xe. Hai hướng triển khai thực tế được 
+xét gồm: 
+
+===== PAGE 50 =====
+24 
+ 
+Phục vụ đồng thời cập nhật 
+gần thời gian thực và tra 
+cứu lịch sử 
+20 3 4 4 
+Tổng điểm quy đổi 100 1,90 3,20 4,80 
+Từ Bảng 3.7, hướng tổ chức theo MQTT broker, lớp trung gian và lưu trữ tách 
+vai trò được chọn cho phần máy chủ. Cách tổ chức này giúp tách lớp nhận bản tin khỏi 
+lớp xử lý nghiệp vụ, nên phù hợp hơn khi thiết bị gửi bù dữ liệu hoặc khi hệ thống cần 
+mở rộng giám sát. 
+3.3. Phân tích, đánh giá và lựa chọn phương án khả thi – Analysis, Evaluation 
+and Selection 
+3.3.1. Kiến trúc hệ thống được chọn – Selected system architecture 
+Sau bước so sánh ở Mục 3.2, phương án khả thi được chốt theo ba khối chính: 
+thiết bị theo dõi trên xe, cụm tiếp nhận - xử lý dữ liệu ở máy chủ và giao diện khai 
+thác. Hình 3.6 thể hiện quan hệ giữa ba khối trong cùng một tuyến giám sát. 
+ 
+Hình 3.6: Kiến trúc tổng thể của phương án hệ thống được chọn 
+3.3.2. Phân tích chức năng các khối trong phương án được chọn – Functional 
+analysis of selected blocks 
+- Khối 1 - Thiết bị theo dõi trên xe 
+
+
+===== PAGE 96 =====
+70 
+ 
+PHỤ LỤC 3 – KẾ HOẠCH THỰC HIỆN 
+APPENDIX 3 – IMPLEMENTATION TIMELINE 
+ 
+ 
+TaskTargetAssignment
+ anuary 2026
+ 2 3 4
+ ebruary 2026
+ 1 2 3 4
+March 2026
+ 1 2 3 4
+April 2026
+ 1 2 3 4
+May 2026
+ 1 2
+1. Lần họp 1Xác định mục tiêu, phạm vi và đầu ra hệ thống
+IoT quản lý phương tiện.Lê Trọng An
+2. Nghiên cứu đề
+tài
+Khảo sát GPS/GSM, IoT, máy chủ và giao diện
+quản lý liên quan.Lê Trọng An
+3. Phân tích yêu
+cầu
+Bóc tách yêu cầu chức năng, kỹ thuật và tiêu
+chí đánh giá.Lê Trọng An
+4. Đề xuất kiến
+trúc
+Lập sơ đồ khối, chọn phương án phần cứng,
+ irmware và server.Lê Trọng An
+5. Lần họp 2Báo cáo phương án thiết kế và thống nhất các
+mốc triển khai.Lê Trọng An
+6. Thiết kế phần
+cứng
+Thiết kế nguyên lý, chọn linh kiện, PCB và
+kiểm tra an toàn điện.Lê Trọng An
+ . Phát triển
+ irm are
+Lập trình GPS, truyền dữ liệu, trạng thái
+thiết bị và ngoại vi.Lê Trọng An
+ . Xây dựng
+server/C DL
+Thiết kế CSDL, API nhận dữ liệu, lưu vị trí
+và trạng thái xe.Lê Trọng An
+ . Xây dựng giao
+diện
+Thiết kế bản đồ, danh sách xe, trạng thái
+thiết bị và cảnh báo.Lê Trọng An
+10. Tích hợp hệ
+thống
+Kết nối thiết bị, máy chủ, giao diện và kiểm
+tra luồng dữ liệu.Lê Trọng An
+11. Lần họp 3Báo cáo tiến độ tích hợp, ghi nhận lỗi và
+điều chỉnh kiểm thử.Lê Trọng An
+12. Kiểm thử đo
+lường
+Đo ổn định truyền dữ liệu, vị trí, phản hồi
+và giao diện.Lê Trọng An
+13. Đánh giá rủi
+ro
+Đối chiếu mục tiêu, phân tích rủi ro và biện
+pháp giảm thiểu.Lê Trọng An
+14. Viết báo cáoHoàn thiện chương, phụ lục, tài liệu tham
+khảo, hình và bảng.Lê Trọng An
+
+===== PAGE 97 =====
+71 
+ 
+PHỤ LỤC 4 – TÀI LIỆU BỔ TRỢ 
+APPENDIX 4 – SUPPORTING MATERIALS 
+ 
+Mã nguồn dự án (Source Code Repository): 
+Toàn bộ thiết kế mạch, mã nguồn thiết bị, mã nguồn hệ thống máy chủ của dự án được 
+quản lý trên GitHub: 
+- Repository: https://github.com/anmh1205/IoT_Vehicle_Tracking_System 
+- Branch chính:main (nhánh ổn định để triển khai) 
+ 
+Tài liệu API (API Documentation): 
+Tài liệu API đầy đủ được tạo tự động bằng Swagger/OpenAPI và có thể truy cập tại: 
+- Domain (cloud/UAT):api.thingdock.dev (đường dẫn Swagger: /api-docs) 
+- URL (development - khi chạy Docker):http://localhost:4000/api-docs 
+ 
+Truy cập cloud UAT của đồ án này: 
+Dịch vụ URL Tài khoản mặc định 
+Frontend thingdock.dev admin / Admin@2026 
+Backend API api.thingdock.dev Auth token khi đăng nhập 
+Swagger Docs api.thingdock.dev/api-docs --- 
+MQTT TLS Broker mqtt.thingdock.dev admin / anmh1205 
+EMQX Dashboard emqx.thingdock.dev admin / anmh1205 
+ 
+Bản vẽ mạch 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

@@ -41,10 +41,11 @@ static bool s_gnss_powered = false;
 #define MODEM_GNSS_QUERY_READY_RESUME_MS 0U
 #define MODEM_GNSS_HOT_START_OFF_WINDOW_MS 5000ULL
 
+/* Outcome of one GNSS read attempt, used to choose between fallback and recovery. */
 typedef enum {
-    MODEM_GNSS_READ_OK = 0,
-    MODEM_GNSS_READ_TRANSPORT_FAIL,
-    MODEM_GNSS_READ_PARSE_FAIL,
+    MODEM_GNSS_READ_OK = 0,             /**< Reply received and parsed (fix may still be invalid). */
+    MODEM_GNSS_READ_TRANSPORT_FAIL,     /**< Modem returned no usable reply (AT transport problem). */
+    MODEM_GNSS_READ_PARSE_FAIL,         /**< Reply received but the payload could not be parsed. */
 } modem_gnss_read_result_t;
 
 /* Consecutive query failure count for self-heal decision. */
@@ -91,6 +92,7 @@ static uint64_t s_query_ready_ms = 0;
  * @return Parsed epoch milliseconds (UTC), or uptime fallback on parse failure.
  */
 static uint64_t modem_gnss_parse_timestamp(const char *utc_string) {
+    // Need at least YYYYMMDDhhmmss (14 chars); shorter strings fall back to monotonic uptime.
     if (utc_string == NULL || strlen(utc_string) < 14) {
         return util_uptime_ms();
     }
@@ -98,10 +100,12 @@ static uint64_t modem_gnss_parse_timestamp(const char *utc_string) {
     int year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0;
     char fractional[4] = {0};
 
+    // CGNSINF timestamp layout: YYYYMMDDhhmmss.sss (fractional seconds optional).
     sscanf(utc_string,
            "%4d%2d%2d%2d%2d%2d.%3s",
            &year, &month, &day, &hour, &minute, &second, fractional);
 
+    // Reject impossible calendar/clock fields rather than emitting a bogus epoch.
     if (year < 1970 || month < 1 || month > 12 || day < 1 || day > 31 ||
         hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
         return util_uptime_ms();
@@ -109,21 +113,25 @@ static uint64_t modem_gnss_parse_timestamp(const char *utc_string) {
 
     /* Manual UTC epoch calculation — avoids mktime() timezone dependency. */
     uint64_t days = 0;
+    // Sum whole days for every full year since 1970, accounting for leap years.
     for (int y = 1970; y < year; ++y) {
         days += ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)) ? 366ULL : 365ULL;
     }
     static const uint8_t mdays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    // Add days for each elapsed month this year, adding the leap day in February when applicable.
     for (int m = 1; m < month; ++m) {
         days += mdays[m - 1];
         if (m == 2 && ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))) {
             days += 1;
         }
     }
-    days += (uint64_t)(day - 1);
+    days += (uint64_t)(day - 1);  // Days elapsed within the current month.
 
+    // Convert accumulated days + time-of-day into seconds since the Unix epoch.
     uint64_t epoch_s = days * 86400ULL + (uint64_t)hour * 3600ULL +
                        (uint64_t)minute * 60ULL + (uint64_t)second;
 
+    // Parse optional fractional seconds (milliseconds), clamping out-of-range values.
     long frac_ms = 0;
     if (fractional[0] != '\0') {
         char *end = NULL;
@@ -237,7 +245,15 @@ static void modem_gnss_arm_query_ready_window(const char *start_path,
              (unsigned)delay_ms);
 }
 
+/**
+ * @brief Parse a CGPSINFO date+time pair into UTC epoch milliseconds.
+ *
+ * @param date_ddmmyy Date field in ddmmyy form.
+ * @param time_hhmmss Time field in hhmmss(.s) form.
+ * @return Epoch milliseconds (UTC), or uptime fallback on malformed input.
+ */
 static uint64_t modem_gnss_parse_cgpsinfo_timestamp(const char *date_ddmmyy, const char *time_hhmmss) {
+    // CGPSINFO splits date/time into two fields: ddmmyy and hhmmss(.s). Both must be present.
     if (date_ddmmyy == NULL || time_hhmmss == NULL || strlen(date_ddmmyy) < 6 || strlen(time_hhmmss) < 6) {
         return util_uptime_ms();
     }
@@ -249,6 +265,7 @@ static uint64_t modem_gnss_parse_cgpsinfo_timestamp(const char *date_ddmmyy, con
     int minute = 0;
     int second = 0;
 
+    // Date arrives as ddmmyy (two-digit year); time as hhmmss.
     if (sscanf(date_ddmmyy, "%2d%2d%2d", &day, &month, &year) != 3) {
         return util_uptime_ms();
     }
@@ -256,7 +273,7 @@ static uint64_t modem_gnss_parse_cgpsinfo_timestamp(const char *date_ddmmyy, con
         return util_uptime_ms();
     }
 
-    int full_year = 2000 + year;
+    int full_year = 2000 + year;  // Two-digit GNSS year is relative to 2000.
     if (full_year < 1970 || month < 1 || month > 12 || day < 1 || day > 31 ||
         hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
         return util_uptime_ms();
@@ -281,6 +298,17 @@ static uint64_t modem_gnss_parse_cgpsinfo_timestamp(const char *date_ddmmyy, con
     return epoch_s * 1000ULL;
 }
 
+/**
+ * @brief Convert an NMEA ddmm.mmmm coordinate plus hemisphere into signed decimal degrees.
+ *
+ * NMEA encodes coordinates as degrees*100 + minutes (e.g. "4807.038" = 48 deg 7.038 min).
+ * The hemisphere letter (N/S/E/W) determines the sign (S/W are negative).
+ *
+ * @param value NMEA coordinate string (ddmm.mmmm / dddmm.mmmm).
+ * @param hemisphere Hemisphere character: N/S/E/W.
+ * @param out_decimal Output signed decimal degrees.
+ * @return true if a positive, well-formed value was converted; false otherwise.
+ */
 static bool modem_gnss_parse_nmea_degrees(const char *value, char hemisphere, double *out_decimal) {
     if (value == NULL || out_decimal == NULL || value[0] == '\0') {
         return false;
@@ -288,13 +316,15 @@ static bool modem_gnss_parse_nmea_degrees(const char *value, char hemisphere, do
 
     double raw = atof(value);
     if (raw <= 0.0) {
-        return false;
+        return false;  // Empty/zero coordinate means no usable fix component.
     }
 
+    // Split the combined ddmm.mmmm value: integer degrees are the hundreds part, the rest is minutes.
     int degrees = (int)(raw / 100.0);
     double minutes = raw - ((double)degrees * 100.0);
-    double decimal = (double)degrees + (minutes / 60.0);
+    double decimal = (double)degrees + (minutes / 60.0);  // 60 minutes per degree.
 
+    // Southern / Western hemispheres are negative in decimal-degree convention.
     if (hemisphere == 'S' || hemisphere == 's' || hemisphere == 'W' || hemisphere == 'w') {
         decimal = -decimal;
     }
@@ -303,6 +333,16 @@ static bool modem_gnss_parse_nmea_degrees(const char *value, char hemisphere, do
     return true;
 }
 
+/**
+ * @brief Run the legacy CGPSINFO query path and parse its NMEA-style CSV reply.
+ *
+ * Used as the simpler fallback when CGNSINF is unavailable or has been demoted.
+ * Distinguishes transport failure (no usable reply) from parse failure (reply but
+ * malformed) and from a valid "alive but no fix" frame.
+ *
+ * @param data Output GNSS sample.
+ * @return Read result classification (OK / transport fail / parse fail).
+ */
 static modem_gnss_read_result_t modem_gnss_send_cgpsinfo_and_parse(gnss_data_t *data) {
     char response[512] = {0};
     esp_err_t err = ESP_FAIL;
@@ -410,6 +450,15 @@ static modem_gnss_read_result_t modem_gnss_send_cgpsinfo_and_parse(gnss_data_t *
     return MODEM_GNSS_READ_OK;
 }
 
+/**
+ * @brief Run the primary CGNSINF query path and parse its CSV reply.
+ *
+ * CGNSINF returns richer data (separate GPS/GLONASS satellite counts, course).
+ * Performs coordinate-range validation to reject obvious modem garbage.
+ *
+ * @param data Output GNSS sample.
+ * @return Read result classification (OK / transport fail / parse fail).
+ */
 static modem_gnss_read_result_t modem_gnss_send_and_parse(gnss_data_t *data) {
     char response[512] = {0};
     bool transport_ok = false;
@@ -506,12 +555,22 @@ static modem_gnss_read_result_t modem_gnss_send_and_parse(gnss_data_t *data) {
     return MODEM_GNSS_READ_OK;
 }
 
+/**
+ * @brief Power-cycle the GNSS engine to recover from a sustained query-failure streak.
+ *
+ * Rate-limited by a cooldown so a flapping modem is not repeatedly repowered.
+ *
+ * @param now_ms Current uptime in milliseconds.
+ * @return true if a repower was performed this call, false if skipped or failed.
+ */
 static bool modem_gnss_try_self_heal(uint64_t now_ms) {
+    // Respect the cooldown so back-to-back failures do not trigger constant repower cycles.
     if (s_last_self_heal_ms != 0 && (now_ms - s_last_self_heal_ms) < MODEM_GNSS_QUERY_SELF_HEAL_COOLDOWN_MS) {
         return false;
     }
 
     s_last_self_heal_ms = now_ms;
+    // Toggle GNSS power off then on to reset a stuck engine.
     esp_err_t power_off_err = modem_gnss_power_off();
     esp_err_t power_on_err = modem_gnss_power_on();
 
@@ -528,10 +587,20 @@ static bool modem_gnss_try_self_heal(uint64_t now_ms) {
     return true;
 }
 
+/**
+ * @brief Two-stage recovery for a long no-fix streak: power off, wait, then power on.
+ *
+ * Unlike self-heal, the power-on is deferred by a restart delay so the GNSS engine
+ * fully cold-restarts. State is carried across calls via the pending flag.
+ *
+ * @param now_ms Current uptime in milliseconds.
+ * @return true when the deferred power-on completes; false while scheduling/waiting.
+ */
 static bool modem_gnss_try_no_fix_recover(uint64_t now_ms) {
+    // Stage 2: a power-off was already scheduled; complete the cold restart once the delay elapses.
     if (s_no_fix_recover_pending) {
         if (now_ms < s_no_fix_recover_ready_ms) {
-            return false;
+            return false;  // Still inside the restart delay window.
         }
 
         esp_err_t on_err = modem_gnss_power_on();
@@ -547,11 +616,13 @@ static bool modem_gnss_try_no_fix_recover(uint64_t now_ms) {
         return true;
     }
 
+    // Respect the cooldown between full no-fix recovery cycles.
     if (s_last_no_fix_recover_ms != 0 &&
         (now_ms - s_last_no_fix_recover_ms) < MODEM_GNSS_NO_FIX_RECOVER_COOLDOWN_MS) {
         return false;
     }
 
+    // Stage 1: power the GNSS engine off and schedule the delayed power-on.
     esp_err_t off_err = modem_gnss_power_off();
     if (off_err != ESP_OK) {
         ESP_LOGW(TAG, "event=gnss_no_fix_recover_power_off_failed err=%s", esp_err_to_name(off_err));

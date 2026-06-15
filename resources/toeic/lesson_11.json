@@ -5,6 +5,44 @@
     {"text": "Bài 11 — Danh từ tập hợp (Collective nouns). Đọc lý thuyết → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 hỏi chia động từ với team/staff/committee (số ít), với police/people (số nhiều), với 'a series/group of' (theo từ chính), và số nhiều bất quy tắc (criteria, data).", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Danh từ tập hợp (collective noun) chỉ một NHÓM gồm nhiều cá thể nhưng được nói đến như một đơn vị: team, staff, committee, board, management, company, department, family, government, audience, crew, faculty, jury, public. Điểm khó là chia động từ số ít hay số nhiều."},
+
+    {"type": "h3", "text": "2. Số ít hay số nhiều?"},
+    {"type": "ul", "items": [
+      "Coi nhóm như MỘT KHỐI thống nhất → động từ SỐ ÍT (phổ biến trong TOEIC, văn phong Mỹ): The committee has reached a decision. The staff is professional.",
+      "Nhấn mạnh CÁC THÀNH VIÊN hành động riêng lẻ → động từ SỐ NHIỀU (văn phong Anh): The staff are divided over the plan.",
+      "Mẹo TOEIC: nếu không có ngữ cảnh nhấn mạnh cá nhân, chọn SỐ ÍT."
+    ]},
+
+    {"type": "h3", "text": "3. Danh từ LUÔN đi với động từ số nhiều"},
+    {"type": "p", "text": "police, people, cattle, staff (theo nghĩa các nhân viên), the media (thường) → động từ SỐ NHIỀU: The police are investigating. Many people were waiting."},
+
+    {"type": "h3", "text": "4. Hình thức số nhiều nhưng nghĩa số ít"},
+    {"type": "table", "headers": ["Nhóm", "Số", "Ví dụ"], "rows": [
+      ["Môn học/ngành: economics, mathematics, statistics, physics", "SỐ ÍT", "Economics is difficult."],
+      ["news", "SỐ ÍT", "The news is good."],
+      ["Tên nước/tổ chức có -s: the United States", "SỐ ÍT", "The United States is…"],
+      ["Số tiền/khoảng thời gian/khoảng cách (một khối)", "SỐ ÍT", "Ten dollars is enough. Five years is a long time."]
+    ]},
+
+    {"type": "h3", "text": "5. Danh từ đôi (luôn số nhiều)"},
+    {"type": "p", "text": "scissors, glasses, trousers, jeans, headphones, premises → động từ SỐ NHIỀU. Khi dùng 'a pair of …' thì chia theo 'pair' → SỐ ÍT: A pair of scissors is on the desk."},
+
+    {"type": "h3", "text": "6. 'the + tính từ' chỉ nhóm người → số nhiều"},
+    {"type": "p", "text": "the unemployed, the elderly, the rich, the poor → động từ SỐ NHIỀU: The elderly are entitled to discounts."},
+
+    {"type": "h3", "text": "7. number / majority"},
+    {"type": "ul", "items": [
+      "a number of + N số nhiều → động từ SỐ NHIỀU: A number of staff are absent.",
+      "the number of + N → động từ SỐ ÍT: The number of complaints has dropped.",
+      "the majority of + N số nhiều → thường SỐ NHIỀU: The majority of employees support the change."
+    ]},
+
+    {"type": "h3", "text": "8. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) team/staff/committee/management thường + động từ SỐ ÍT trong TOEIC. (2) police/people → SỐ NHIỀU. (3) news/economics/statistics (môn) → SỐ ÍT. (4) số tiền/thời gian là một khối → SỐ ÍT (Ten dollars is…). (5) 'a number of' (số nhiều) vs 'the number of' (số ít)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Danh từ tập hợp thường là số ít",

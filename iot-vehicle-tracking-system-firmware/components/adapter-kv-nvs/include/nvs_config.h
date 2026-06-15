@@ -43,24 +43,34 @@ esp_err_t nvs_config_save(const config_t *config);
 
 /**
  * @brief OTA confirm context persisted in NVS across reboot.
+ *
+ * Captures everything the post-reboot OTA state machine needs to decide whether
+ * to confirm a freshly booted image or roll back to the previous one.
  */
 typedef struct {
-    bool pending_confirm;
-    uint32_t confirm_timeout_sec;
-    uint64_t confirm_deadline_ms;
-    char job_id[TRACKER_JOB_ID_MAX_LEN];
-    char target_version[TRACKER_TARGET_VERSION_MAX_LEN];
-    char previous_version[TRACKER_TARGET_VERSION_MAX_LEN];
-    char partition[TRACKER_PARTITION_MAX_LEN];
+    bool pending_confirm;                              /**< True while a booted image still awaits confirm/rollback. */
+    uint32_t confirm_timeout_sec;                      /**< Allowed window (seconds) to confirm before auto-rollback. */
+    uint64_t confirm_deadline_ms;                      /**< Absolute deadline (epoch ms) by which confirm must occur. */
+    char job_id[TRACKER_JOB_ID_MAX_LEN];               /**< Backend OTA job identifier driving this update. */
+    char target_version[TRACKER_TARGET_VERSION_MAX_LEN];   /**< Firmware version being flashed/confirmed. */
+    char previous_version[TRACKER_TARGET_VERSION_MAX_LEN]; /**< Prior version, used for rollback reporting. */
+    char partition[TRACKER_PARTITION_MAX_LEN];         /**< OTA partition label holding the new image. */
 } ota_persist_context_t;
 
+/** @brief Max length of the per-boot identifier string (incl. NUL). */
 #define TRACKER_SESSION_BOOT_ID_LEN 48
 
+/**
+ * @brief Session-recovery context persisted across an unexpected reset.
+ *
+ * Lets the device reconcile an interrupted drive/session after reboot by
+ * re-linking the local session key to its canonical backend session ID.
+ */
 typedef struct {
-    bool active;
-    uint32_t local_session_key;
-    uint64_t canonical_session_id;
-    char boot_id[TRACKER_SESSION_BOOT_ID_LEN];
+    bool active;                              /**< True when a session was in progress at persist time. */
+    uint32_t local_session_key;              /**< Device-local handle for the in-progress session. */
+    uint64_t canonical_session_id;           /**< Backend-assigned canonical session identifier. */
+    char boot_id[TRACKER_SESSION_BOOT_ID_LEN]; /**< Unique per-boot tag distinguishing reboots. */
 } session_persist_context_t;
 
 /**
@@ -89,6 +99,28 @@ esp_err_t nvs_config_load_ota_context(ota_persist_context_t *out_context, bool *
  */
 esp_err_t nvs_config_clear_ota_context(void);
 
+/**
+ * @brief Persist the active session-recovery context for post-reboot reconciliation.
+ *
+ * @param context Session context to save.
+ *
+ * @return ESP_OK on success, otherwise NVS error.
+ */
 esp_err_t nvs_config_save_session_context(const session_persist_context_t *context);
+
+/**
+ * @brief Load the persisted session-recovery context.
+ *
+ * @param out_context Output session context.
+ * @param out_found Set true when a valid persisted context exists.
+ *
+ * @return ESP_OK on success, otherwise NVS error.
+ */
 esp_err_t nvs_config_load_session_context(session_persist_context_t *out_context, bool *out_found);
+
+/**
+ * @brief Clear the persisted session-recovery context.
+ *
+ * @return ESP_OK on success, otherwise NVS error.
+ */
 esp_err_t nvs_config_clear_session_context(void);

@@ -222,11 +222,15 @@ static void state_machine_reset_heartbeat_window(void) {
 static tracker_ignition_state_t state_machine_resolve_effective_ignition_state(uint64_t now_ms) {
     (void)now_ms;
 
+    // Highest trust: the debounced session-manager verdict wins whenever it has
+    // settled, because it already filtered out ignition-line chatter.
     if (session_mgr_has_stable_ignition()) {
         return session_mgr_stable_ignition() ? TRACKER_IGNITION_STATE_ON
                                              : TRACKER_IGNITION_STATE_OFF;
     }
 
+    // No stable verdict yet: a raw fused ON candidate may elevate to ON, but a
+    // raw OFF/absent signal must stay UNKNOWN (never assert OFF on weak data).
     if (s_telemetry.ignition) {
         return TRACKER_IGNITION_STATE_ON;
     }
@@ -256,15 +260,21 @@ static bool state_machine_effective_ignition_on(uint64_t now_ms) {
  * @return tracker_motion_state_t: MOVING, STATIONARY, or UNKNOWN based on sensor fusion.
  */
 static tracker_motion_state_t state_machine_resolve_motion_state(uint64_t now_ms) {
+    // Priority 1: a valid GNSS fix is the most direct speed source. 3 km/h is
+    // the MOVING threshold that rejects GPS jitter while a vehicle is stopped.
     if (s_telemetry.gnss.fix_valid) {
         return s_telemetry.gnss.speed_kmh > 3.0f ? TRACKER_MOTION_STATE_MOVING
                                                  : TRACKER_MOTION_STATE_STATIONARY;
     }
+    // Priority 2: fall back to OBD speed, but only while the ELM327 is ready and
+    // the last live sample is still fresh enough to trust.
     if (s_telemetry.obd_elm_ready &&
         state_machine_has_recent_obd_sample(now_ms, TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS)) {
         return s_telemetry.obd_speed > 3 ? TRACKER_MOTION_STATE_MOVING
                                          : TRACKER_MOTION_STATE_STATIONARY;
     }
+    // Priority 3: no speed source. If the engine is off we can safely assume the
+    // vehicle is stationary; otherwise motion is genuinely UNKNOWN.
     return state_machine_effective_ignition_on(now_ms) ? TRACKER_MOTION_STATE_UNKNOWN
                                                         : TRACKER_MOTION_STATE_STATIONARY;
 }
@@ -288,24 +298,31 @@ static tracker_motion_state_t state_machine_resolve_motion_state(uint64_t now_ms
  */
 static tracker_vehicle_state_t state_machine_resolve_vehicle_state(tracker_ignition_state_t ignition_state,
                                                                    tracker_motion_state_t motion_state) {
+    // ON + MOVING => actively driving.
     if (ignition_state == TRACKER_IGNITION_STATE_ON && motion_state == TRACKER_MOTION_STATE_MOVING) {
         return TRACKER_VEHICLE_STATE_MOVING_ON;
     }
+    // ON + STATIONARY => engine running but not moving (idling at a stop).
     if (ignition_state == TRACKER_IGNITION_STATE_ON && motion_state == TRACKER_MOTION_STATE_STATIONARY) {
         return TRACKER_VEHICLE_STATE_IDLING_ON;
     }
+    // OFF + MOVING => coasting/being towed with ignition off (rare but real).
     if (ignition_state == TRACKER_IGNITION_STATE_OFF && motion_state == TRACKER_MOTION_STATE_MOVING) {
         return TRACKER_VEHICLE_STATE_ROLLING_IGN_OFF;
     }
+    // OFF + STATIONARY => the normal parked-and-off condition.
     if (ignition_state == TRACKER_IGNITION_STATE_OFF && motion_state == TRACKER_MOTION_STATE_STATIONARY) {
         return TRACKER_VEHICLE_STATE_PARKED_OFF;
     }
+    // Ignition is UNKNOWN below: classify by motion alone so the cloud still gets
+    // a useful hint instead of a bare UNKNOWN.
     if (motion_state == TRACKER_MOTION_STATE_MOVING) {
         return TRACKER_VEHICLE_STATE_UNKNOWN_MOVING;
     }
     if (motion_state == TRACKER_MOTION_STATE_STATIONARY) {
         return TRACKER_VEHICLE_STATE_UNKNOWN_STATIONARY;
     }
+    // Neither ignition nor motion could be resolved.
     return TRACKER_VEHICLE_STATE_UNKNOWN;
 }
 
@@ -357,11 +374,14 @@ static tracker_device_state_t state_machine_resolve_device_state(app_state_t app
  */
 void state_machine_sync_runtime_axes(app_state_t app_state) {
     uint64_t now_ms = util_uptime_ms();
+    // Resolve ignition first because both motion and vehicle state derive from it.
     tracker_ignition_state_t ignition_state = state_machine_resolve_effective_ignition_state(now_ms);
     s_telemetry.ignition_state = ignition_state;
+    // Motion is fused from GNSS/OBD/ignition; vehicle state then combines the two axes.
     s_telemetry.motion_state = state_machine_resolve_motion_state(now_ms);
     s_telemetry.vehicle_state = state_machine_resolve_vehicle_state(s_telemetry.ignition_state,
                                                                     s_telemetry.motion_state);
+    // Device/sleep axes are derived purely from the FSM state hint for cloud reporting.
     s_telemetry.device_state = state_machine_resolve_device_state(app_state);
     s_telemetry.sleep_mode = state_machine_resolve_sleep_mode(app_state);
 }
@@ -1236,10 +1256,13 @@ app_state_t state_machine_core_run(app_state_t current_state) {
             break;
         case APP_STATE_PARKED:
             s_runtime_state_hint = APP_STATE_PARKED;
+            // Fresh ignition evidence while parked short-circuits straight back to
+            // the debounce path so a real engine-on edge is never missed.
             if (s_telemetry.ignition && command_handler_is_tracking_enabled()) {
                 next_state = APP_STATE_CHECK_IGN;
                 break;
             }
+            // Otherwise arm a new heartbeat window (once) and hand off to it.
             if (s_heartbeat_started_ms == 0) {
                 s_heartbeat_started_ms = util_uptime_ms();
                 s_heartbeat_raw_published = false;

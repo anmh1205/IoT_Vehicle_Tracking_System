@@ -19,14 +19,19 @@
  */
 
 
+/* --- RDY token: set by the URC callback, polled by the WAIT_RDY FSM state. --- */
+
+/** @brief Return true if the modem emitted "RDY" during the current connect cycle. */
 bool modem_lte_rdy_seen_in_cycle(void) {
     return s_rdy_seen;
 }
 
+/** @brief Clear the RDY-seen flag at the start of a new bring-up cycle. */
 void modem_lte_clear_rdy_token(void) {
     s_rdy_seen = false;
 }
 
+/** @brief Latch that the modem signaled boot completion via "RDY". */
 void modem_lte_mark_rdy_seen(void) {
     s_rdy_seen = true;
 }
@@ -43,6 +48,7 @@ void modem_lte_on_urc_rdy(const char *urc_line) {
         return;
     }
 
+    // Exact match only: "RDY" is the SIM7600 boot-complete indication, distinct from other URCs.
     if (strcmp(urc_line, "RDY") == 0) {
         modem_lte_mark_rdy_seen();
         ESP_LOGI(MODEM_LTE_TAG, "RDY marker seen from UART");
@@ -163,11 +169,14 @@ static esp_err_t modem_lte_apply_uart_cfg(const modem_lte_uart_probe_cfg_t *cfg)
         return ESP_ERR_INVALID_ARG;
     }
 
+    // Apply each UART parameter in a fixed order, bailing out on the first failure so the caller
+    // learns exactly which transport setting the modem/driver rejected.
     esp_err_t pin_err = modem_at_set_pins(cfg->tx_pin, cfg->rx_pin);
     if (pin_err != ESP_OK) {
         return pin_err;
     }
 
+    // Line inversion must match board wiring or the modem will see garbage on RX.
     esp_err_t inverse_err = modem_at_set_line_inverse(cfg->inverse_mask);
     if (inverse_err != ESP_OK) {
         return inverse_err;
@@ -183,6 +192,7 @@ static esp_err_t modem_lte_apply_uart_cfg(const modem_lte_uart_probe_cfg_t *cfg)
         return baud_err;
     }
 
+    // Frame format (data/parity/stop bits) applied last; returns its own error to the caller.
     return modem_at_set_frame_format(cfg->data_bits, cfg->parity, cfg->stop_bits);
 }
 
@@ -254,17 +264,14 @@ void modem_lte_log_fixed_uart_cfg(void) {
 /**
  * @brief Force DTR toggle for wake.
  *
- * Toggles DTR line to wake modem from sleep.
- */
-/**
- * @brief Force DTR toggle for wake.
- *
- * Toggles DTR line to wake modem from sleep.
+ * Pulses the DTR line high then low to wake the modem from low-power sleep.
+ * Compiled out entirely when MODEM_LTE_ENABLE_DTR_WAKE_PULSE is 0.
  */
 void modem_lte_force_dtr_wake_pulse(void) {
 #if !MODEM_LTE_ENABLE_DTR_WAKE_PULSE
-    return;
+    return;  // Wake pulse disabled at build time on this board.
 #else
+    // Assert DTR high to signal the modem to wake.
     esp_err_t dtr_err = modem_set_dtr(true);
     if (dtr_err != ESP_OK && dtr_err != ESP_ERR_NOT_SUPPORTED) {
         ESP_LOGW(MODEM_LTE_TAG, "Set DTR high failed: %s", esp_err_to_name(dtr_err));
@@ -272,6 +279,7 @@ void modem_lte_force_dtr_wake_pulse(void) {
 
     vTaskDelay(pdMS_TO_TICKS((uint32_t)MODEM_LTE_DTR_WAKE_PULSE_MS));
 
+    // Release DTR low again so it does not hold the modem in a forced state.
     dtr_err = modem_set_dtr(false);
     if (dtr_err != ESP_OK && dtr_err != ESP_ERR_NOT_SUPPORTED) {
         ESP_LOGW(MODEM_LTE_TAG, "Set DTR low failed: %s", esp_err_to_name(dtr_err));

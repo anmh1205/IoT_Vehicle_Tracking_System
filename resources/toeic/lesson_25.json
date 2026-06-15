@@ -5,6 +5,35 @@
     {"text": "Bài 25 — Câu điều kiện loại 1 (điều kiện có thật ở hiện tại/tương lai). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 — If + hiện tại đơn, ... will + V. Bẫy: KHÔNG dùng will trong mệnh đề if.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Câu điều kiện loại 1 (first conditional) diễn tả điều kiện CÓ THẬT, có khả năng xảy ra ở hiện tại hoặc tương lai và kết quả nếu điều kiện được thỏa. Rất hay gặp trong email, điều khoản, hướng dẫn TOEIC."},
+
+    {"type": "h3", "text": "2. Công thức"},
+    {"type": "table", "headers": ["Mệnh đề If", "Mệnh đề chính", "Ví dụ"], "rows": [
+      ["If + hiện tại đơn", "will + V (nguyên thể)", "If you order today, we will ship tomorrow."]
+    ]},
+    {"type": "key", "text": "Mệnh đề If dùng HIỆN TẠI ĐƠN (dù nói về tương lai) — KHÔNG dùng 'will' trong mệnh đề If. Hai vế đổi chỗ được; nếu If đứng đầu thì có dấu phẩy."},
+
+    {"type": "h3", "text": "3. Biến thể vế chính"},
+    {"type": "ul", "items": [
+      "Thay 'will' bằng can/may/should/might để đổi sắc thái: If you finish early, you can leave.",
+      "Mệnh lệnh (imperative): If you have questions, contact HR.",
+      "Khả năng: If the file is too large, it may not upload."
+    ]},
+
+    {"type": "h3", "text": "4. unless = if … not"},
+    {"type": "p", "text": "unless mang nghĩa 'nếu… không / trừ khi': We will miss the deadline unless we start now. (= if we do not start now). Sau unless dùng động từ KHẲNG ĐỊNH (vì 'unless' đã chứa nghĩa phủ định)."},
+
+    {"type": "h3", "text": "5. if vs when"},
+    {"type": "p", "text": "if = điều kiện CÓ THỂ xảy ra (không chắc); when = điều CHẮC CHẮN sẽ xảy ra, chỉ là vấn đề thời gian. If it rains, we will postpone (có thể mưa). When the shipment arrives, we will notify you (chắc chắn sẽ tới)."},
+
+    {"type": "h3", "text": "6. Liên từ điều kiện khác"},
+    {"type": "p", "text": "as long as, provided (that), in case, on condition that + hiện tại đơn: You can use the lounge as long as you have a pass. Take an umbrella in case it rains."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Mệnh đề If KHÔNG dùng 'will' → hiện tại đơn (If it will rain → If it rains). (2) Vế chính dùng will + V nguyên thể. (3) unless = if not, theo sau là động từ khẳng định. (4) Phân biệt loại 1 (if + hiện tại, will) với loại 2 (if + quá khứ, would)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Cấu trúc cơ bản",

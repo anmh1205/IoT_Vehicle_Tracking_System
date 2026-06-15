@@ -5,6 +5,52 @@
     {"text": "Bài 03 — Tương lai với will. Đọc lý thuyết từng phần → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 phân biệt will với be going to, và đặc biệt bẫy 'không dùng will trong mệnh đề if/when/as soon as'.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & bản chất"},
+    {"type": "p", "text": "Thì tương lai đơn với 'will' diễn tả hành động sẽ xảy ra trong tương lai: quyết định tức thì, dự đoán, lời hứa, lời đề nghị. 'will + V(nguyên thể)' dùng cho mọi ngôi, không chia."},
+
+    {"type": "h3", "text": "2. Cách dùng (đầy đủ)"},
+    {"type": "ul", "items": [
+      "Quyết định tức thì ngay lúc nói: The phone is ringing — I'll answer it.",
+      "Dự đoán/niềm tin (thường với think, believe, expect, probably, I'm sure): I think sales will rise next quarter.",
+      "Lời hứa, lời đề nghị, yêu cầu: I will send the file today. Will you help me?",
+      "Sự thật/sự kiện chắc chắn trong tương lai: The conference will take place in May."
+    ]},
+
+    {"type": "h3", "text": "3. Công thức"},
+    {"type": "table", "headers": ["Thể", "Cấu trúc", "Ví dụ"], "rows": [
+      ["Khẳng định", "S + will + V", "She will attend the meeting."],
+      ["Phủ định", "S + will not (won't) + V", "We won't ship until Friday."],
+      ["Nghi vấn", "(Wh-) Will + S + V?", "Will the order arrive on time?"]
+    ]},
+    {"type": "key", "text": "Sau 'will' luôn là động từ NGUYÊN THỂ (will send, will be), không thêm -s, không chia: 'He will sends' là SAI."},
+
+    {"type": "h3", "text": "4. will vs be going to"},
+    {"type": "table", "headers": ["", "will", "be going to"], "rows": [
+      ["Quyết định", "tức thì, lúc nói", "kế hoạch/dự định đã có sẵn"],
+      ["Dự đoán", "dựa cảm nhận, không bằng chứng", "có bằng chứng hiện tại"],
+      ["Ví dụ", "I'll call him now.", "We are going to launch in June. (đã lên kế hoạch)"]
+    ]},
+
+    {"type": "h3", "text": "5. KHÔNG dùng 'will' trong mệnh đề thời gian/điều kiện"},
+    {"type": "p", "text": "Sau when, as soon as, until, before, after, if, unless… dùng HIỆN TẠI ĐƠN; vế chính mới dùng 'will'. Ví dụ: When the payment arrives, we will ship the goods. (không 'When the payment will arrive'). I will call you as soon as I finish."},
+
+    {"type": "h3", "text": "6. Dấu hiệu thời gian"},
+    {"type": "ul", "items": [
+      "tomorrow; next + (week/month/year); soon; later; in the future; in + khoảng thời gian (in two days); by + thời điểm (by Friday); from now on.",
+      "Cụm dự đoán: I think/believe/expect…, probably, definitely, I'm sure."
+    ]},
+
+    {"type": "h3", "text": "7. 'shall' và các dạng liên quan"},
+    {"type": "ul", "items": [
+      "shall + I/we: dùng để đề nghị hoặc xin ý kiến (Shall I open the window? Shall we begin?). Trang trọng.",
+      "Tương lai tiếp diễn: will be + V-ing (hành động đang diễn ra tại thời điểm tương lai).",
+      "Tương lai hoàn thành: will have + V3 (hoàn tất trước một mốc tương lai) — thường đi với 'by + thời điểm'."
+    ]},
+
+    {"type": "h3", "text": "8. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Dùng 'will' sau when/if/as soon as/until/before (sai → hiện tại đơn). (2) Thêm -s hoặc chia động từ sau 'will' (will sends → will send). (3) Lẫn will (quyết định tức thì) với be going to (kế hoạch sẵn). (4) 'by + mốc tương lai' thường gợi ý tương lai hoàn thành (will have + V3)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Cách dùng will",

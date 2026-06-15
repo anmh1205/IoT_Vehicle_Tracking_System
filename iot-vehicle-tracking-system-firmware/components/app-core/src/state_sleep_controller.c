@@ -89,6 +89,15 @@ static void state_machine_prepare_deep_sleep_wakeup_for_interval_us(uint64_t wak
 static app_state_t state_machine_enter_light_sleep_for_interval_us(uint64_t wake_interval_us,
                                                                    bool allow_usb_guard);
 
+/**
+ * @brief Report whether parked sleep should keep the modem/GNSS path warm.
+ *
+ * Keeping the modem in low-power idle (instead of full power-down) trades a
+ * little parked current for much faster wake-time reconnect and avoids GNSS
+ * cold-start delays. Controlled at build time by the parked-warm Kconfig flag.
+ *
+ * @return true when the warm-keep policy is enabled for this build.
+ */
 static bool state_machine_should_keep_parked_modem_gnss_warm(void) {
     return CONFIG_TRACKER_PARKED_KEEP_MODEM_GNSS_WARM != 0;
 }
@@ -266,17 +275,22 @@ static void state_machine_clear_gnss_cache(void) {
  * @return Resolved runtime sleep mode.
  */
 tracker_sleep_mode_t state_machine_resolve_sleep_mode(app_state_t app_state) {
+    // Only the dedicated SLEEP state ever sleeps; every other state runs at full power.
     if (app_state != APP_STATE_SLEEP) {
         return TRACKER_SLEEP_MODE_NONE;
     }
 
 #if CONFIG_TRACKER_FAKE_SLEEP_ENABLED
+    // Bench/debug builds emulate sleep with a timed idle loop instead of real low-power entry.
     return TRACKER_SLEEP_MODE_FAKE;
 #elif CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_TRACKER_FIELD_VALIDATION_KEEP_AWAKE
+    // Validation builds can pin the device awake to keep acceptance sessions observable.
     return TRACKER_SLEEP_MODE_NONE;
 #elif CONFIG_TRACKER_PARKED_KEEP_MODEM_GNSS_WARM
+    // Warm-keep policy requires light sleep so RAM and the modem/GNSS context survive the dwell.
     return TRACKER_SLEEP_MODE_LIGHT;
 #else
+    // Otherwise pick light sleep when motion wake needs the GPIO path, else the lowest-power deep sleep.
     return state_machine_should_use_light_sleep_motion_wake() ? TRACKER_SLEEP_MODE_LIGHT
                                                               : TRACKER_SLEEP_MODE_DEEP;
 #endif

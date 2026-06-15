@@ -46,12 +46,19 @@
 
 
 /**
- * @brief Get topic class name.
+ * @brief Classify a topic string into its tracker topic class for logging.
  *
- * @param topic Topic string.
- * @return Class name.
+ * Compares the topic first by pointer (fast path for the module's own cached
+ * topic buffers) and then by content against each device-scoped topic. The
+ * returned label is used only in diagnostics, so an unrecognized topic is
+ * reported as "external" rather than rejected.
+ *
+ * @param topic Topic string to classify (may be NULL).
+ * @return Static class label: "rawdata", "status", "events", "firmware",
+ *         "commands", or "external".
  */
 static const char *tracker_mqtt_topic_class(const char *topic) {
+    // Pointer compare catches the common case where callers pass our own cached topic buffer.
     if (topic == s_topic_rawdata || (topic != NULL && strcmp(topic, s_topic_rawdata) == 0)) {
         return "rawdata";
     }
@@ -67,16 +74,24 @@ static const char *tracker_mqtt_topic_class(const char *topic) {
     if (topic == s_topic_commands || (topic != NULL && strcmp(topic, s_topic_commands) == 0)) {
         return "commands";
     }
-    return "external";
+    return "external"; // not one of the device-scoped topics
 }
 
 /**
- * @brief Publish with message ID.
+ * @brief Publish a payload to a topic and return a locally-assigned message ID.
  *
- * @param topic Topic.
- * @param payload Payload.
- * @param qos QoS level.
- * @return Message ID or -1 on failure.
+ * Runs the SIM7600 three-phase publish transaction: stage the topic bytes via
+ * AT+CMQTTTOPIC, stage the JSON payload via AT+CMQTTPAYLOAD, then issue
+ * AT+CMQTTPUB. The final publish status may come back inline on the PUB
+ * response or later as an asynchronous +CMQTTPUB URC, so both completion paths
+ * are handled. The modem does not return a broker message ID, so a monotonic
+ * local ID is allocated for higher-level correlation.
+ *
+ * @param topic Target topic (non-empty, <= 1024 bytes).
+ * @param payload Message payload (non-empty, <= 10240 bytes).
+ * @param qos MQTT QoS level (0-2).
+ * @return Locally-assigned message ID (>= 0) on success, -1 on any failure or
+ *         when the session is not connected.
  */
 int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *payload, int qos) {
     // Drive one full modem publish transaction here so topic/payload staging and PUB result handling stay in one place.
@@ -140,6 +155,7 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
 
     int publish_err = 0;
     bool parsed = false;
+    // First try to read the publish status inline from the PUB command response.
     esp_err_t result_err = tracker_mqtt_expect_result(response,
                                                       "+CMQTTPUB:",
                                                       true,
@@ -180,27 +196,43 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
     // The modem path does not return a broker message ID, so track one locally for higher-level correlation.
     int msg_id = s_next_msg_id++;
     if (s_next_msg_id <= 0) {
-        s_next_msg_id = 1;
+        s_next_msg_id = 1; // wrap back to 1 so IDs stay positive after int overflow
     }
     return msg_id;
 }
 
+/**
+ * @brief Subscribe the active session to the device command topic.
+ *
+ * Issues AT+CMQTTSUB for `v1/{device}/commands` at QoS 1 so remote commands are
+ * delivered reliably. The subscription is staged via the prompt-mode data-entry
+ * helper (topic bytes are streamed after the setup prompt). Idempotent: returns
+ * immediately if already subscribed.
+ *
+ * @return ESP_OK on success or when already subscribed; ESP_ERR_INVALID_STATE
+ *         when not connected; ESP_ERR_NOT_FINISHED if the link dropped mid-
+ *         subscribe (caller should retry after reconnect); ESP_FAIL on a
+ *         modem-reported subscribe error.
+ */
 esp_err_t tracker_mqtt_subscribe_commands_internal(void) {
     ESP_RETURN_ON_FALSE(s_connected, ESP_ERR_INVALID_STATE, TRACKER_MQTT_TAG, "MQTT not connected");
     if (s_commands_subscribed) {
-        return ESP_OK;
+        return ESP_OK; // already subscribed on this session
     }
 
     size_t topic_len = strlen(s_topic_commands);
+    // CMQTTSUB declares the byte count up front, so validate against the modem limit first.
     ESP_RETURN_ON_FALSE(topic_len > 0 && topic_len <= 1024,
                         ESP_ERR_INVALID_ARG,
                         TRACKER_MQTT_TAG,
                         "invalid commands topic");
 
     char cmd[96] = {0};
+    // QoS 1 (trailing ,1) ensures the broker re-delivers commands until acknowledged.
     (void)snprintf(cmd, sizeof(cmd), "AT+CMQTTSUB=%d,%u,1\r", MQTT_CLIENT_INDEX, (unsigned int)topic_len);
     if (tracker_mqtt_input_data(cmd, s_topic_commands, "+CMQTTSUB:", true) != ESP_OK) {
         if (!s_connected) {
+            // The data-entry helper flips s_connected on a disconnect code; this is a deferrable failure.
             ESP_LOGW(TRACKER_MQTT_TAG, "CMQTTSUB deferred because MQTT disconnected");
             return ESP_ERR_NOT_FINISHED;
         }
@@ -208,7 +240,7 @@ esp_err_t tracker_mqtt_subscribe_commands_internal(void) {
         return ESP_FAIL;
     }
 
-    s_commands_subscribed = true;
+    s_commands_subscribed = true; // confirmed; URC handler may also set this on async +CMQTTSUB
     ESP_LOGI(TRACKER_MQTT_TAG, "mqtt subscribed topic_class=commands");
     return ESP_OK;
 }

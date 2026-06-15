@@ -30,44 +30,53 @@
  */
 
 
+/* Per-scan-cycle duration handed to ble_gap_disc(); scanning self-restarts on completion. */
 #define BLE_DISCOVERY_TIMEOUT_MS 5000U
+/* Upper bound NimBLE waits for a single GAP connection attempt to complete. */
 #define BLE_CONNECT_ATTEMPT_TIMEOUT_MS 7000U
+/* Total time the synchronous disconnect path polls for link teardown before giving up. */
 #define BLE_DISCONNECT_WAIT_MS 1200U
+/* Poll granularity while waiting for the async disconnect event to clear connection state. */
 #define BLE_DISCONNECT_POLL_MS 20U
 
 /* CCCD payload enabling notifications (0x0001 little-endian). */
 static const uint8_t cccd_notify_enable_cfg[] = {0x01, 0x00};
 
+/* Mailbox message carrying the outcome of an async GAP/GATT operation back to the API caller. */
 typedef struct {
-    ble_mgr_status_t status;
+    ble_mgr_status_t status; /* Final status posted by a BLE callback. */
 } ble_mgr_result_t;
 
+/* Singleton central-manager state shared between the public API and NimBLE callbacks. */
 struct ble_mgr_ctx {
-    uint16_t conn_handle;
-    bool is_connected;
-    bool is_connecting;
-    bool peer_addr_valid;
-    ble_addr_t peer_addr;
-    const ble_mgr_disc_cfg_t *disc_cfg;
-    void *usr_ctx;
+    uint16_t conn_handle;                 /* Active GATT connection handle, or BLE_HS_CONN_HANDLE_NONE. */
+    bool is_connected;                    /* True once link established and discovery succeeded. */
+    bool is_connecting;                   /* True between candidate selection and connect completion. */
+    bool peer_addr_valid;                 /* True when peer_addr holds the currently/last connected address. */
+    ble_addr_t peer_addr;                 /* Address of the connected peripheral. */
+    const ble_mgr_disc_cfg_t *disc_cfg;   /* Active discovery profile (service + filter/disconnect callbacks). */
+    void *usr_ctx;                        /* Opaque context forwarded to user callbacks. */
+    /* Snapshot of the chosen candidate, captured before scan is cancelled to start connect. */
     struct {
-        ble_addr_t addr;
-        int8_t rssi;
-        bool service_match;
-        bool armed;
+        ble_addr_t addr;                  /* Address of the device we are about to connect to. */
+        int8_t rssi;                      /* Signal strength of the selecting advertisement. */
+        bool service_match;               /* True when target service UUID was present in the adv payload. */
+        bool armed;                       /* True while a pending connect is staged but not yet issued. */
     } pending_connect;
+    /* Rolling scan counters used for rate-limited diagnostic logging. */
     struct {
-        uint32_t adv_seen;
-        uint32_t parse_failures;
-        uint32_t connect_matches;
+        uint32_t adv_seen;                /* Total advertisements observed this scan session. */
+        uint32_t parse_failures;          /* Advertisements that failed adv-field parsing. */
+        uint32_t connect_matches;         /* Candidates that passed filtering and triggered a connect. */
     } scan_diag;
+    /* GATT discovery progress flags driving completion detection across two callback stages. */
     struct {
-        bool svc_disc_completed;
-        bool chr_disc_completed;
-        bool chr_disc_started;
+        bool svc_disc_completed;          /* Service enumeration finished (BLE_HS_EDONE seen). */
+        bool chr_disc_completed;          /* Characteristic enumeration finished for the matched service. */
+        bool chr_disc_started;            /* Characteristic discovery was launched for the matched service. */
     } svc_disc_ctx;
-    QueueHandle_t result_queue;
-    SemaphoreHandle_t lock_mtx;
+    QueueHandle_t result_queue;           /* Single-slot mailbox delivering async results to the waiter. */
+    SemaphoreHandle_t lock_mtx;           /* Serializes public API calls and guards context lifecycle. */
 };
 
 static const char *TAG = "BLE_MGR";
@@ -101,22 +110,24 @@ static const ble_init_config_t s_ble_init_cfg = {
     .sync_cb = ble_mgr_gap_stack_sync_cb,
 };
 
+/* Active scan parameters: solicit scan responses, fully-utilized scan window, drop duplicate adverts. */
 static const struct ble_gap_disc_params s_disc_params = {
-    .passive = 0,
-    .itvl = 0x0010,
-    .window = 0x0010,
-    .filter_duplicates = 1,
+    .passive = 0,             /* Active scan so peripherals return their scan-response (name) payload. */
+    .itvl = 0x0010,           /* Scan interval (0x0010 * 0.625ms = 10ms). */
+    .window = 0x0010,         /* Scan window equals interval => continuous listening. */
+    .filter_duplicates = 1,   /* Controller suppresses repeated adverts from the same device. */
 };
 
+/* Connection parameters used when initiating the GATT link to the selected peripheral. */
 static const struct ble_gap_conn_params s_conn_params = {
-    .scan_itvl = 0x0010,
-    .scan_window = 0x0010,
-    .itvl_min = 0x0010,
-    .itvl_max = 0x0020,
-    .latency = 0,
-    .supervision_timeout = 0x0100,
-    .min_ce_len = 0x0010,
-    .max_ce_len = 0x0300,
+    .scan_itvl = 0x0010,          /* Scan interval used while attempting to connect. */
+    .scan_window = 0x0010,        /* Scan window used while attempting to connect. */
+    .itvl_min = 0x0010,           /* Min connection interval (0x0010 * 1.25ms = 20ms). */
+    .itvl_max = 0x0020,           /* Max connection interval (0x0020 * 1.25ms = 40ms). */
+    .latency = 0,                 /* No slave latency: peripheral answers every connection event. */
+    .supervision_timeout = 0x0100, /* Link-loss timeout (0x0100 * 10ms = 2.56s). */
+    .min_ce_len = 0x0010,         /* Minimum connection event length hint. */
+    .max_ce_len = 0x0300,         /* Maximum connection event length hint. */
 };
 
 /**
@@ -190,21 +201,33 @@ static bool ble_mgr_queue_wait(ble_mgr_ctx_t *mgr_ctx, ble_mgr_status_t *status,
     return true;
 }
 
+/**
+ * @brief Tear down RTOS primitives and clear all manager state to a pristine value.
+ *
+ * Called when reinitializing the singleton after a stack deinit left stale
+ * handles behind. Frees the result queue and API mutex, then zeroes every
+ * connection/scan/discovery field so a fresh init starts clean.
+ *
+ * @param mgr_ctx BLE manager context.
+ */
 static void ble_mgr_reset_context(ble_mgr_ctx_t *mgr_ctx) {
     if (mgr_ctx == NULL) {
         return;
     }
 
+    /* Release the async mailbox if it survived a partial teardown. */
     if (mgr_ctx->result_queue != NULL) {
         xQueueReset(mgr_ctx->result_queue);
         vQueueDelete(mgr_ctx->result_queue);
         mgr_ctx->result_queue = NULL;
     }
+    /* Release the API lock so a fresh init can recreate it. */
     if (mgr_ctx->lock_mtx != NULL) {
         vSemaphoreDelete(mgr_ctx->lock_mtx);
         mgr_ctx->lock_mtx = NULL;
     }
 
+    /* Reset every connection/scan/discovery field to a known-idle baseline. */
     mgr_ctx->disc_cfg = NULL;
     mgr_ctx->usr_ctx = NULL;
     mgr_ctx->is_connecting = false;
@@ -236,8 +259,10 @@ static ble_mgr_status_t ble_mgr_connect_complete(ble_mgr_ctx_t *mgr_ctx, ble_mgr
     mgr_ctx->is_connected = (status == BLE_MGR_E_OK);
     mgr_ctx->pending_connect.armed = false;
     if (status != BLE_MGR_E_OK) {
+        /* On any failure the handle is no longer valid for sends. */
         mgr_ctx->conn_handle = BLE_HS_CONN_HANDLE_NONE;
     }
+    /* Wake the API caller blocked in ble_mgr_queue_wait() with the verdict. */
     ble_mgr_queue_send(mgr_ctx, status);
     return status;
 }
@@ -370,26 +395,31 @@ static void ble_mgr_gatt_svc_chr_disc_completed_check(ble_mgr_ctx_t *mgr_ctx,
     }
 
     if (error->status == 0) {
+        /* status == 0 reports an individual entry, not completion; nothing to finalize yet. */
         return;
     }
 
     if (error->status != BLE_HS_EDONE) {
+        /* Any non-EDONE terminal status indicates the discovery procedure itself failed. */
         ESP_LOGE(TAG, "event=ble_discovery_failed status=%d", error->status);
         ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_DISCOVERY_FAILED);
         return;
     }
 
     if (mgr_ctx->svc_disc_ctx.chr_disc_started && !mgr_ctx->svc_disc_ctx.chr_disc_completed) {
+        /* Service pass finished but characteristic enumeration is still in flight; wait for it. */
         return;
     }
 
     if ((mgr_ctx->svc_disc_ctx.svc_disc_completed && mgr_ctx->svc_disc_ctx.chr_disc_completed) ||
         (!mgr_ctx->svc_disc_ctx.chr_disc_started && mgr_ctx->svc_disc_ctx.svc_disc_completed)) {
+        /* Both stages done, or services enumerated without ever matching the target service. */
         /* Validate that all required characteristics were found. */
         const ble_mgr_svc_def_t *svc_def = mgr_ctx->disc_cfg->svc_def;
         bool missing_required_char = false;
         for (size_t i = 0; i < svc_def->num_chars; ++i) {
             if (svc_def->chars[i].handle == 0) {
+                /* A zero handle means this characteristic was never discovered. */
                 missing_required_char = true;
                 break;
             }
@@ -400,6 +430,7 @@ static void ble_mgr_gatt_svc_chr_disc_completed_check(ble_mgr_ctx_t *mgr_ctx,
             return;
         }
 
+        /* Full profile resolved: report the connection as ready. */
         ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_OK);
     }
 }
@@ -430,13 +461,16 @@ static int ble_mgr_gatt_chr_discovered_cb(uint16_t conn_handle,
         for (size_t i = 0; i < mgr_ctx->disc_cfg->svc_def->num_chars; ++i) {
             ble_gatt_char_def_t *char_def = &mgr_ctx->disc_cfg->svc_def->chars[i];
             if (char_def->uuid == NULL || strcmp(uuid_str, char_def->uuid) != 0) {
+                /* Skip characteristics this profile does not care about. */
                 continue;
             }
 
             /* Save characteristic value handle for future writes/notifications. */
             char_def->handle = chr->val_handle;
             if (char_def->notify_cb != NULL) {
-                /* Subscribe by writing CCCD at handle + 1 for this profile. */
+                /* Subscribe by writing CCCD at handle + 1 for this profile.
+                 * The Client Characteristic Configuration descriptor conventionally
+                 * sits immediately after the value attribute for these OBD adapters. */
                 int rc = ble_gattc_write_flat(conn_handle,
                                               chr->val_handle + 1,
                                               cccd_notify_enable_cfg,

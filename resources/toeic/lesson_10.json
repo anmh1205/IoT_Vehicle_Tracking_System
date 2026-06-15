@@ -5,6 +5,36 @@
     {"text": "Bài 10 — Either/Neither và hòa hợp chủ-vị. Đọc lý thuyết → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 hỏi chia động từ với either/neither (số ít), với either...or / neither...nor (theo chủ ngữ gần nhất), và both...and (số nhiều).", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "either = một trong hai (mang nghĩa khẳng định/lựa chọn); neither = không cái nào trong hai (đã mang nghĩa PHỦ ĐỊNH nên không dùng kèm 'not'). Cả hai liên quan đến HAI đối tượng và thường gây bẫy hòa hợp chủ-vị."},
+
+    {"type": "h3", "text": "2. either / neither + danh từ số ít + động từ số ít"},
+    {"type": "p", "text": "Khi đứng trước danh từ, either/neither đi với danh từ SỐ ÍT và động từ SỐ ÍT: Either option is acceptable. Neither candidate was selected."},
+
+    {"type": "h3", "text": "3. either of / neither of + the + danh từ số nhiều"},
+    {"type": "p", "text": "either of / neither of + (the/my/these) + danh từ SỐ NHIỀU. Động từ trang trọng dùng SỐ ÍT: Neither of the proposals was approved. Either of the dates is fine. (văn nói đôi khi dùng số nhiều, nhưng TOEIC ưu tiên số ít)."},
+
+    {"type": "h3", "text": "4. either … or / neither … nor (chia theo chủ ngữ GẦN)"},
+    {"type": "table", "headers": ["Cấu trúc", "Nghĩa", "Động từ chia theo"], "rows": [
+      ["either A or B", "hoặc A hoặc B", "chủ ngữ GẦN động từ (B)"],
+      ["neither A nor B", "không A cũng không B", "chủ ngữ GẦN động từ (B)"]
+    ]},
+    {"type": "key", "text": "Quy tắc 'gần': Neither the manager nor the employees ARE here (gần = employees → are). Neither the employees nor the manager IS here (gần = manager → is)."},
+
+    {"type": "h3", "text": "5. neither đã là phủ định"},
+    {"type": "p", "text": "Vì neither/nor đã mang nghĩa phủ định, KHÔNG dùng thêm 'not': sai 'I don't like neither' → đúng 'I like neither' hoặc 'I don't like either'."},
+
+    {"type": "h3", "text": "6. so / neither trong câu đồng tình ngắn (đảo ngữ)"},
+    {"type": "ul", "items": [
+      "Đồng tình khẳng định: So + trợ động từ + S — 'I agree.' 'So do I.'",
+      "Đồng tình phủ định: Neither + trợ động từ + S — 'I can't attend.' 'Neither can I.'",
+      "Lưu ý đảo trợ động từ lên trước chủ ngữ giống câu hỏi."
+    ]},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) either/neither + N SỐ ÍT + V số ít. (2) neither … nor / either … or chia động từ theo chủ ngữ GẦN nhất. (3) neither/nor đã phủ định — không thêm 'not'. (4) 'neither of the + N số nhiều' nhưng động từ số ít. (5) Phân biệt 'both … and' (luôn số nhiều) với either/neither."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · either / neither đứng một mình → số ít",

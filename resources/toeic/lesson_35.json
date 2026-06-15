@@ -5,6 +5,37 @@
     {"text": "Bài 35 — Đảo ngữ phủ định (negative inversion): đưa trạng từ phủ định lên đầu câu để nhấn mạnh. Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 nâng cao — Never/Rarely/Not only/No sooner... + trợ động từ + S + V (đảo như câu hỏi). Trang trọng, dùng trong báo cáo/diễn văn.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Đảo ngữ phủ định: khi đưa một trạng từ/cụm phủ định hoặc hạn chế lên ĐẦU CÂU để nhấn mạnh, phải ĐẢO trợ động từ lên trước chủ ngữ (giống câu hỏi). Cấu trúc trang trọng, dùng trong diễn văn, báo cáo — phần câu khó của TOEIC."},
+
+    {"type": "h3", "text": "2. Cấu trúc chung"},
+    {"type": "p", "text": "Cụm phủ định + trợ động từ + S + V (phần còn lại). Nếu câu gốc không có trợ động từ, mượn do/does/did: Rarely does the system fail. (từ 'The system rarely fails')."},
+
+    {"type": "h3", "text": "3. Các cụm phủ định mở đầu thường gặp"},
+    {"type": "table", "headers": ["Cụm đầu câu", "Ví dụ"], "rows": [
+      ["Never / Rarely / Seldom / Hardly ever", "Never has the company achieved such results."],
+      ["Not only … (but also)", "Not only does it save time, but it also cuts costs."],
+      ["No sooner … than", "No sooner had we launched than demand surged."],
+      ["Hardly/Scarcely … when", "Hardly had the meeting begun when the alarm rang."],
+      ["Not until …", "Not until the report is done will we leave."],
+      ["Only after / Only when / Only by …", "Only after the audit did they approve it."],
+      ["Little", "Little did we know that demand would double."],
+      ["Under no circumstances / At no time / On no account", "Under no circumstances should staff share the password."]
+    ]},
+
+    {"type": "h3", "text": "4. No sooner … than / Hardly … when"},
+    {"type": "p", "text": "Diễn tả 'vừa mới… thì…': No sooner + had + S + V3 + than + S + V2. Lưu ý đi với 'than' (KHÔNG 'then'). Hardly/Scarcely + had + S + V3 + when …"},
+
+    {"type": "h3", "text": "5. Not until / Only + … → đảo ở MỆNH ĐỀ CHÍNH"},
+    {"type": "p", "text": "Với Not until và Only + (after/when/by…), phần đảo ngữ nằm ở MỆNH ĐỀ CHÍNH, không phải mệnh đề phụ: Not until the payment arrives WILL WE ship the order. Only when all tests pass CAN the product be released."},
+
+    {"type": "h3", "text": "6. Little / Under no circumstances …"},
+    {"type": "p", "text": "Little did + S + V (= không hề): Little did they realize the risk. Các cụm phủ định mạnh: Under no circumstances / On no account / At no time + trợ động từ + S: At no time was the data exposed."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Sau cụm phủ định đầu câu PHẢI đảo (Never have I…, không 'Never I have'). (2) Không có trợ động từ thì mượn do/does/did (Rarely does the manager…). (3) No sooner đi với 'than' (không 'then'). (4) Với Not until/Only…, phần đảo nằm ở MỆNH ĐỀ CHÍNH. (5) Little did + S + V nguyên thể."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Never / Rarely / Seldom / Hardly đầu câu",

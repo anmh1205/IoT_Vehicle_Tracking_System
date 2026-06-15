@@ -5,6 +5,37 @@
     {"text": "Bài 16 — Should và Ought to. Làm câu hỏi ngay sau mỗi phần, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 7 dùng should/ought to cho lời khuyên, kỳ vọng; mệnh đề giả định sau suggest/recommend/insist; và should have + V3 chỉ tiếc nuối.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & bản chất"},
+    {"type": "p", "text": "should và ought to là modal diễn tả LỜI KHUYÊN, bổn phận, hoặc kỳ vọng ('nên'). ought to mang nghĩa gần như should nhưng trang trọng hơn và là modal duy nhất có 'to'. Sau cả hai là động từ nguyên thể."},
+
+    {"type": "h3", "text": "2. Cách dùng"},
+    {"type": "ul", "items": [
+      "Lời khuyên / đề xuất: You should confirm the booking early.",
+      "Bổn phận nhẹ, điều nên làm: Staff should wear ID badges.",
+      "Kỳ vọng / dự đoán hợp lý: The parcel should arrive by Friday. (đáng lẽ sẽ tới)",
+      "ought to (= should, trang trọng): We ought to review the policy."
+    ]},
+
+    {"type": "h3", "text": "3. Công thức"},
+    {"type": "table", "headers": ["Thể", "Cấu trúc", "Ví dụ"], "rows": [
+      ["Khẳng định", "S + should / ought to + V", "You should apply now."],
+      ["Phủ định", "S + should not (shouldn't) + V / ought not to + V", "You shouldn't miss it."],
+      ["Nghi vấn", "Should + S + V?", "Should I send a reminder?"]
+    ]},
+
+    {"type": "h3", "text": "4. should have + V3 (lẽ ra nên)"},
+    {"type": "p", "text": "should have + V3 = lẽ ra NÊN làm nhưng ĐÃ KHÔNG làm (tiếc nuối/trách): We should have booked earlier. (đáng lẽ nên đặt sớm — nhưng đã không). shouldn't have + V3 = lẽ ra không nên (nhưng đã làm)."},
+
+    {"type": "h3", "text": "5. had better (khuyên mạnh / cảnh báo)"},
+    {"type": "p", "text": "had better + V (nguyên thể, không 'to') = nên… (kèm ngụ ý hậu quả nếu không làm), mạnh hơn should: You'd better submit the report today. Phủ định: had better not + V."},
+
+    {"type": "h3", "text": "6. should trong mệnh đề giả định (subjunctive)"},
+    {"type": "p", "text": "Sau các động từ/tính từ đề nghị: suggest, recommend, insist, request, demand, propose; important/essential/necessary that… → dùng '(should) + V nguyên thể' cho mọi ngôi: The manager recommended that he (should) submit early. We suggest that the report be revised. (động từ ở dạng nguyên thể, không chia)."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) ought TO + V (có 'to'); should + V (không 'to'). (2) Sau should/ought to dùng V nguyên thể (should submits → should submit). (3) should have + V3 = lẽ ra đã nên. (4) Sau suggest/recommend/insist/important that + S + (should) + V NGUYÊN THỂ (he be, she submit — không chia). (5) had better + V (bare)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Lời khuyên và đề nghị",

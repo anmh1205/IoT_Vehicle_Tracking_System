@@ -5,6 +5,34 @@
     {"text": "Bài 21 — Mệnh đề quan hệ không xác định (non-defining: bổ sung thông tin, có dấu phẩy). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 hỏi chọn who/which/whose; nhớ non-defining KHÔNG dùng 'that' và không lược bỏ đại từ; 'which' thay được cả mệnh đề.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Mệnh đề quan hệ KHÔNG xác định (non-defining) cung cấp thông tin BỔ SUNG về danh từ đã rõ — bỏ đi câu vẫn đủ nghĩa. Luôn tách khỏi câu bằng DẤU PHẨY. Thường gặp với tên riêng, chức danh, vật duy nhất."},
+
+    {"type": "h3", "text": "2. Đại từ quan hệ dùng được"},
+    {"type": "table", "headers": ["Đại từ", "Thay cho", "Ví dụ"], "rows": [
+      ["who", "người (chủ ngữ)", "Mr. Tan, who leads sales, will speak."],
+      ["whom", "người (tân ngữ, trang trọng)", "Ms. Lee, whom we hired last year, …"],
+      ["which", "vật/sự việc", "The HQ, which opened in 2019, is in Hanoi."],
+      ["whose", "sở hữu (người/vật)", "The client, whose order was delayed, complained."]
+    ]},
+
+    {"type": "h3", "text": "3. Ba khác biệt then chốt so với mệnh đề xác định (Bài 22)"},
+    {"type": "ul", "items": [
+      "BẮT BUỘC có dấu phẩy ngăn cách hai bên mệnh đề.",
+      "KHÔNG dùng 'that' (sai: Mr. Tan, that leads sales…).",
+      "KHÔNG được lược bỏ đại từ quan hệ (luôn giữ who/which/whom)."
+    ]},
+
+    {"type": "h3", "text": "4. 'which' bổ nghĩa cả mệnh đề trước"},
+    {"type": "p", "text": "Dùng ', which' để bình luận về cả ý vừa nói: Sales rose 20%, which pleased the board. (which = việc doanh số tăng 20%)."},
+
+    {"type": "h3", "text": "5. Giới từ + whom / which (trang trọng)"},
+    {"type": "p", "text": "Trong văn trang trọng, giới từ có thể đứng trước whom/which: The supplier, with whom we have worked for years, offered a discount. The building, in which the office is located, was renovated."},
+
+    {"type": "h3", "text": "6. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Mệnh đề không xác định CẦN dấu phẩy; (2) KHÔNG dùng 'that' sau dấu phẩy → dùng who/which; (3) KHÔNG lược đại từ quan hệ; (4) whose + danh từ (không 'who's'); (5) ', which' có thể thay cho cả mệnh đề đứng trước."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Đặc điểm mệnh đề không xác định",

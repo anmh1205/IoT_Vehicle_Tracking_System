@@ -5,6 +5,69 @@
     {"text": "Bài 02 — Hiện tại đơn (Present Simple). Đọc lý thuyết từng phần → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 hỏi chia động từ ngôi thứ 3 số ít (thêm -s/-es), thể phủ định/nghi vấn với do/does, và hòa hợp chủ ngữ - động từ.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & bản chất"},
+    {"type": "p", "text": "Hiện tại đơn (Present Simple) diễn tả sự thật hiển nhiên, thói quen, lịch trình cố định và tình trạng kéo dài ở hiện tại. Đây là thì 'mặc định' khi nói về điều luôn đúng hoặc lặp lại đều đặn — rất phổ biến trong nội quy, mô tả công việc, lịch họp ở TOEIC."},
+
+    {"type": "h3", "text": "2. Cách dùng (đầy đủ)"},
+    {"type": "ul", "items": [
+      "Sự thật/chân lý: Water boils at 100°C. The office opens at 8 a.m.",
+      "Thói quen, hành động lặp lại: She checks her emails every morning.",
+      "Lịch trình cố định (tàu, máy bay, sự kiện) — kể cả tương lai: The train leaves at 6 p.m. tomorrow.",
+      "Hướng dẫn, quy trình: First, you log in; then you submit the form.",
+      "Trạng thái/cảm xúc với động từ trạng thái: The manager wants a report. I understand the policy."
+    ]},
+
+    {"type": "h3", "text": "3. Công thức"},
+    {"type": "table", "headers": ["Thể", "Động từ thường", "Động từ to be"], "rows": [
+      ["Khẳng định", "S + V(s/es với he/she/it)", "S + am/is/are"],
+      ["Phủ định", "S + do/does + not + V", "S + am/is/are + not"],
+      ["Nghi vấn", "(Wh-) Do/Does + S + V?", "(Wh-) Am/Is/Are + S …?"]
+    ]},
+    {"type": "key", "text": "Ngôi thứ 3 số ít (he/she/it, danh từ số ít) → động từ thêm -s/-es. Sau 'does/doesn't' động từ về NGUYÊN THỂ: She doesn't work (không 'doesn't works')."},
+
+    {"type": "h3", "text": "4. Quy tắc thêm -s/-es cho ngôi thứ 3 số ít"},
+    {"type": "table", "headers": ["Trường hợp", "Quy tắc", "Ví dụ"], "rows": [
+      ["Thông thường", "+ s", "work → works"],
+      ["Tận cùng -o, -s, -x, -z, -ch, -sh", "+ es", "go → goes, watch → watches"],
+      ["Phụ âm + y", "đổi y → ies", "study → studies"],
+      ["Nguyên âm + y", "+ s", "play → plays"],
+      ["Bất quy tắc", "have → has", "have → has"]
+    ]},
+
+    {"type": "h3", "text": "5. Phát âm đuôi -s/-es"},
+    {"type": "table", "headers": ["Đọc là", "Khi nào", "Ví dụ"], "rows": [
+      ["/ɪz/", "sau âm /s, z, ʃ, tʃ, dʒ/", "watches, uses, manages"],
+      ["/s/", "sau âm vô thanh /p, t, k, f/", "works, stops"],
+      ["/z/", "sau âm hữu thanh & nguyên âm", "plays, runs, goes"]
+    ]},
+
+    {"type": "h3", "text": "6. Trạng từ tần suất & dấu hiệu thời gian"},
+    {"type": "ul", "items": [
+      "Tần suất: always (100%), usually, often, frequently, sometimes, occasionally, rarely/seldom, never (0%).",
+      "Vị trí: TRƯỚC động từ thường (She always arrives early.), SAU động từ to be (He is always punctual.).",
+      "Cụm tần suất đứng đầu/cuối câu: every day, every week, once/twice a week, on Mondays, daily, monthly."
+    ]},
+
+    {"type": "h3", "text": "7. Động từ trạng thái (stative verbs)"},
+    {"type": "p", "text": "Các động từ chỉ trạng thái thường KHÔNG chia tiếp diễn mà dùng hiện tại đơn: like, love, hate, want, need, prefer, know, understand, believe, remember, mean, belong, own, contain, cost, seem, appear. Ví dụ: I need the report now (không 'I am needing')."},
+
+    {"type": "h3", "text": "8. Hiện tại đơn vs Hiện tại tiếp diễn"},
+    {"type": "table", "headers": ["", "Hiện tại đơn", "Hiện tại tiếp diễn"], "rows": [
+      ["Ý nghĩa", "thói quen, sự thật", "đang xảy ra lúc nói / tạm thời"],
+      ["Dấu hiệu", "always, usually, every day, on Mondays", "now, at the moment, currently, right now"],
+      ["Ví dụ", "He works in Hanoi.", "He is working from home this week."]
+    ]},
+
+    {"type": "h3", "text": "9. Hiện tại đơn diễn tả tương lai"},
+    {"type": "ul", "items": [
+      "Lịch trình/thời gian biểu cố định: The meeting starts at 9 a.m. next Monday.",
+      "Sau when/if/as soon as/until/before/after (mệnh đề thời gian–điều kiện) dùng HIỆN TẠI ĐƠN, vế chính dùng tương lai: When the report is ready, I will send it. (không 'will be ready')."
+    ]},
+
+    {"type": "h3", "text": "10. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Quên -s/-es ở ngôi thứ 3 số ít (The system require → requires). (2) Sau do/does + V nguyên thể (doesn't works → doesn't work). (3) Chủ ngữ số nhiều/each/every: 'Each employee receives' (each + số ít). (4) Dùng 'will' sau when/if (sai → hiện tại đơn)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Cách dùng và dấu hiệu",

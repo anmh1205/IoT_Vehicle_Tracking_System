@@ -5,6 +5,47 @@
     {"text": "Bài 06 — Tính từ (Adjectives). Đọc lý thuyết → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 hỏi word form (tính từ vs danh từ/trạng từ) và đặc biệt cặp -ed/-ing (interested vs interesting).", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & chức năng"},
+    {"type": "p", "text": "Tính từ (adjective) mô tả/bổ nghĩa cho danh từ hoặc đại từ, cho biết tính chất, đặc điểm. Trong TOEIC, chỗ trống đứng ngay TRƯỚC danh từ hoặc SAU động từ nối thường là tính từ."},
+
+    {"type": "h3", "text": "2. Vị trí của tính từ"},
+    {"type": "ul", "items": [
+      "Trước danh từ (thuộc ngữ): a reliable supplier, an experienced manager.",
+      "Sau động từ nối (vị ngữ): be, seem, become, look, feel, sound, taste, remain, stay, appear → The product is reliable.",
+      "Sau danh từ trong vài cụm cố định: something important, the people responsible."
+    ]},
+
+    {"type": "h3", "text": "3. Thứ tự nhiều tính từ (OSASCOMP)"},
+    {"type": "p", "text": "Khi nhiều tính từ cùng bổ nghĩa: Opinion → Size → Age → Shape → Color → Origin → Material → Purpose. Ví dụ: a nice large new black leather office chair. TOEIC ít hỏi sâu phần này nhưng nên biết trật tự tự nhiên."},
+
+    {"type": "h3", "text": "4. Tính từ đuôi -ed vs -ing"},
+    {"type": "table", "headers": ["Dạng", "Nghĩa", "Ví dụ"], "rows": [
+      ["-ing", "gây ra cảm giác (tả vật/sự việc)", "an interesting report, boring training"],
+      ["-ed", "cảm thấy (tả người)", "interested clients, bored employees"]
+    ]},
+    {"type": "key", "text": "Quy tắc nhanh: vật/nguyên nhân → -ing; người cảm nhận → -ed. The results were surprising. / The staff were surprised."},
+
+    {"type": "h3", "text": "5. Tính từ tận cùng -ly (DỄ NHẦM là trạng từ)"},
+    {"type": "p", "text": "Một số từ kết thúc -ly nhưng vẫn là TÍNH TỪ: friendly, lovely, likely, costly, timely, orderly, daily, weekly, monthly, yearly. Ví dụ: a friendly colleague, a timely reminder, a daily report."},
+
+    {"type": "h3", "text": "6. Hậu tố nhận diện tính từ"},
+    {"type": "table", "headers": ["Hậu tố", "Ví dụ"], "rows": [
+      ["-ful / -less", "helpful, careful / useless, harmless"],
+      ["-ous", "famous, dangerous, previous"],
+      ["-ive", "effective, competitive, attractive"],
+      ["-al", "professional, financial, original"],
+      ["-able / -ible", "reliable, available, responsible"],
+      ["-ant / -ent", "important, significant, different, confident"],
+      ["-ic / -ary / -ous", "economic, necessary, various"]
+    ]},
+
+    {"type": "h3", "text": "7. Tính từ ghép (compound adjectives)"},
+    {"type": "p", "text": "Ghép bằng gạch nối, danh từ ở giữa để SỐ ÍT: a five-year plan (không 'five-years'), a well-known brand, a 30-minute break, state-of-the-art technology, high-quality products."},
+
+    {"type": "h3", "text": "8. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Chỗ trống trước danh từ → tính từ (a ___ decision). (2) Sau be/seem/remain + tính từ (remain confident, không 'confidently'). (3) -ed vs -ing chọn theo người/vật. (4) friendly/timely/costly là tính từ, đừng tưởng là trạng từ. (5) Tính từ KHÔNG có số nhiều: 'a five-year plan'."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Vị trí của tính từ",

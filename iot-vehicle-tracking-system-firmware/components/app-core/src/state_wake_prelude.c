@@ -44,14 +44,18 @@ static const char *TAG = "WAKE_PRELUDE";
  */
 static bool state_machine_try_rearm_gnss(const char *reason) {
     uint64_t now_ms = util_uptime_ms();
+    // Cooldown gate: refuse to power-cycle GNSS again until the rearm interval has elapsed.
     if (s_last_gnss_rearm_ms != 0 && (now_ms - s_last_gnss_rearm_ms) < TRACKER_GNSS_REARM_COOLDOWN_MS) {
         return false;
     }
 
+    // Stamp the attempt time up front so a failed power-cycle still enforces the cooldown.
     s_last_gnss_rearm_ms = now_ms;
+    // Full power cycle: off then on is the strongest recovery for a wedged GNSS engine.
     esp_err_t off_err = modem_gnss_power_off();
     esp_err_t on_err = modem_gnss_power_on();
     if (off_err == ESP_OK && on_err == ESP_OK) {
+        // Mark GNSS live again and clear the failure streak that triggered this rearm.
         s_gnss_started = true;
         s_gnss_poll_fail_streak = 0;
         ESP_LOGW(TAG, "event=gnss_rearmed reason=%s", reason);
@@ -77,11 +81,13 @@ static bool state_machine_try_rearm_gnss(const char *reason) {
  */
 static bool state_machine_try_reassert_gnss_power(const char *reason) {
     uint64_t now_ms = util_uptime_ms();
+    // Share the same cooldown as the full rearm path so the two recovery routes cannot thrash the power domain.
     if (s_last_gnss_rearm_ms != 0 && (now_ms - s_last_gnss_rearm_ms) < TRACKER_GNSS_REARM_COOLDOWN_MS) {
         return false;
     }
 
     s_last_gnss_rearm_ms = now_ms;
+    // Lighter recovery: only assert power-on (no power-off) when GNSS just needs to be re-enabled, e.g. after LTE recovery.
     esp_err_t on_err = modem_gnss_power_on();
     if (on_err == ESP_OK) {
         s_gnss_started = true;
@@ -103,6 +109,7 @@ static bool state_machine_try_reassert_gnss_power(const char *reason) {
  * @return True if ready.
  */
 bool state_machine_can_poll_gnss(void) {
+    // GNSS is pollable only when it is powered, the modem AT channel is ready, and the GNSS query path is armed.
     return s_gnss_started && modem_lte_is_at_ready() && modem_gnss_is_query_ready();
 }
 
@@ -110,11 +117,13 @@ bool state_machine_can_poll_gnss(void) {
  * @brief Try to start GNSS non-blocking.
  */
 void state_machine_try_start_gnss_nonblocking(void) {
+    // Nothing to do if GNSS is already up, and there is no point trying before the modem AT channel is ready.
     if (s_gnss_started || !modem_lte_is_at_ready()) {
         return;
     }
 
     uint64_t now_ms = util_uptime_ms();
+    // Respect the rearm cooldown so repeated FSM passes do not hammer GNSS power-on right after a recent attempt.
     if (s_last_gnss_rearm_ms != 0 &&
         now_ms > s_last_gnss_rearm_ms &&
         (now_ms - s_last_gnss_rearm_ms) < TRACKER_GNSS_REARM_COOLDOWN_MS) {
@@ -130,6 +139,7 @@ void state_machine_try_start_gnss_nonblocking(void) {
         return;
     }
 
+    // GNSS failing to start is non-fatal: publishing continues without a fix until the next attempt.
     ESP_LOGW(TAG,
              "event=gnss_power_on_failed err=%s fallback=publish_without_gnss",
              esp_err_to_name(err));
@@ -139,27 +149,32 @@ void state_machine_try_start_gnss_nonblocking(void) {
  * @brief Bootstrap RTC hardware.
  */
 void state_machine_bootstrap_rtc(void) {
+    // One-shot per boot: skip once bootstrap is done or if no DS3231M is present on the bus.
     if (s_hw_bootstrap_done || !rtc_ds3231m_is_available()) {
         return;
     }
 
     uint64_t now_ms = util_uptime_ms();
+    // Gate retries so a failing RTC does not get probed on every single FSM loop iteration.
     if (!retry_state_can_run(&s_rtc_bootstrap_retry, now_ms)) {
         return;
     }
 
     uint64_t rtc_ms = 0;
+    // If the RTC already holds a plausible wall-clock time, accept it and finish bootstrap immediately.
     if (rtc_ds3231m_get_time_ms(&rtc_ms) == ESP_OK && rtc_ds3231m_is_time_valid_ms(rtc_ms)) {
         s_hw_bootstrap_done = true;
         retry_state_reset(&s_rtc_bootstrap_retry);
         return;
     }
 
+    // RTC has no trusted time yet: seed it from a fresh GNSS fix when available, otherwise a fixed epoch baseline.
     uint64_t fallback_ms = s_telemetry.gnss.fix_valid && rtc_ds3231m_is_time_valid_ms(s_telemetry.gnss.timestamp_ms)
                                ? s_telemetry.gnss.timestamp_ms
                                : 1735689600000ULL;
     if (rtc_ds3231m_set_time_ms(fallback_ms) == ESP_OK) {
         uint64_t verify_ms = 0;
+        // Read-back verification confirms the seed actually stuck before declaring bootstrap complete.
         if (rtc_ds3231m_get_time_ms(&verify_ms) == ESP_OK && rtc_ds3231m_is_time_valid_ms(verify_ms)) {
             ESP_LOGI(TAG,
                      "event=rtc_bootstrap_ok set_ms=%llu read_ms=%llu",
@@ -242,10 +257,13 @@ void state_machine_bootstrap_imu(void) {
  * @param[in] read_obd True to poll OBD when a BLE session is connected.
  */
 void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
+    // Raw ADC voltages from the vehicle supply rail and the device's own battery rail.
     float vehicle_battery_raw_v = adc_read_vehicle_battery_voltage();
     float device_battery_raw_v = adc_read_device_battery_voltage();
+    // Apply per-rail calibration gains so reported volts match the physical divider/reference.
     s_telemetry.vehicle_battery = vehicle_battery_raw_v * TRACKER_ADC_SUPPLY_CALIB_GAIN;
     s_telemetry.device_battery = device_battery_raw_v * TRACKER_ADC_BATT_CALIB_GAIN;
+    // Vibration magnitude is only meaningful when the IMU is present; otherwise report zero motion.
     s_telemetry.imu_accel_delta_mps2 = s_imu_available ? imu_get_peak_accel_delta_mps2() : 0.0f;
 
     if (read_obd && s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
@@ -342,18 +360,25 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
     }
 
     float ignition_threshold_v = (float)s_config.ignition_adc_threshold_mv / 1000.0f;
+    // ADC evidence: vehicle supply rail at/above the configured ignition threshold suggests key-on.
     bool adc_ignition = s_telemetry.vehicle_battery >= ignition_threshold_v;
+    // OBD sample must be recent enough to be trusted as ignition evidence at all.
     bool obd_sample_fresh =
         state_machine_has_recent_obd_sample(now_ms, TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS);
+    // Debounced session-level ignition state, the authoritative "stable on" signal.
     bool stable_ignition_on =
         session_mgr_has_stable_ignition() &&
         session_mgr_stable_ignition();
+    // OBD live evidence requires a connected adapter reporting a "live" ECU and a fresh sample.
     bool obd_live_ignition = obd_connected &&
                              strcmp(obd_ecu_state, "live") == 0 &&
                              obd_sample_fresh;
+    // Strongest positive: live OBD plus recent engine-on evidence (non-zero RPM/load within hold window).
     bool obd_engine_on_evidence = obd_live_ignition &&
                                   state_machine_has_recent_obd_engine_on_evidence(now_ms);
+    // Non-zero RPM under a live session is direct proof the engine is running.
     bool rpm_ignition = obd_live_ignition && s_telemetry.obd_rpm > 0;
+    // Ambiguous case: live link and stable-on, yet RPM/speed/load all read zero (possible key-on-engine-off or stall).
     bool obd_live_zero_candidate =
         obd_live_ignition &&
         stable_ignition_on &&
@@ -361,18 +386,23 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
         s_telemetry.obd_speed == 0 &&
         s_telemetry.obd_engine_load == 0;
     if (obd_live_zero_candidate) {
+        // Start (or keep) the debounce timer that decides whether the all-zero reading really means OFF.
         if (s_obd_live_zero_started_ms == 0 || now_ms < s_obd_live_zero_started_ms) {
             s_obd_live_zero_started_ms = now_ms;
         }
     } else {
+        // Any non-zero signal clears the all-zero debounce so a brief idle dip cannot trip an OFF.
         s_obd_live_zero_started_ms = 0;
     }
+    // Only confirm OFF after the all-zero condition has persisted past the confirmation window.
     bool obd_live_zero_confirmed_off =
         obd_live_zero_candidate &&
         s_obd_live_zero_started_ms != 0 &&
         now_ms >= s_obd_live_zero_started_ms &&
         (now_ms - s_obd_live_zero_started_ms) >= (uint64_t)TRACKER_OBD_LIVE_ZERO_OFF_CONFIRM_MS;
+    // While all-zero is still within its grace window, hold ignition ON rather than flapping it off.
     bool hold_live_zero_on = obd_live_zero_candidate && !obd_live_zero_confirmed_off;
+    // Grace bridge: keep ON briefly after the last engine-on evidence so one missed poll does not drop the session.
     bool confirmed_obd_live_grace =
         stable_ignition_on &&
         obd_live_ignition &&
@@ -381,6 +411,7 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
         now_ms >= s_last_obd_engine_on_evidence_ms &&
         (now_ms - s_last_obd_engine_on_evidence_ms) <=
             (uint64_t)TRACKER_OBD_ENGINE_ON_CONFIRMED_GRACE_MS;
+    // Degraded-quality hold: ADC says off and OBD evidence is merely absent (not proven off) while session was stable-on.
     bool preserve_degraded_ignition_on =
         !adc_ignition &&
         !obd_live_ignition &&

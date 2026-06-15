@@ -15,17 +15,19 @@
 // module contract without reaching into private implementation details.
 
 
+/** @brief Maximum number of DTC codes stored per OBD mode snapshot. */
 #define TRACKER_OBD_MAX_DTC_CODES 8
+/** @brief Buffer length per DTC code: 5 chars (e.g. "P0171") plus null terminator. */
 #define TRACKER_OBD_DTC_CODE_LEN 6
 
 /**
  * @brief Readiness state for an individual OBD monitor.
  */
 typedef enum {
-    OBD_MONITOR_STATUS_UNKNOWN = 0,
-    OBD_MONITOR_STATUS_COMPLETE,
-    OBD_MONITOR_STATUS_INCOMPLETE,
-    OBD_MONITOR_STATUS_UNSUPPORTED,
+    OBD_MONITOR_STATUS_UNKNOWN = 0,    /**< Not yet decoded / state indeterminate. */
+    OBD_MONITOR_STATUS_COMPLETE,       /**< Monitor has run and finished its self-test. */
+    OBD_MONITOR_STATUS_INCOMPLETE,     /**< Monitor is supported but has not completed yet. */
+    OBD_MONITOR_STATUS_UNSUPPORTED,    /**< Vehicle does not implement this monitor. */
 } obd_monitor_status_t;
 
 /**

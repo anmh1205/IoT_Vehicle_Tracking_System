@@ -5,6 +5,36 @@
     {"text": "Bài 23 — Mệnh đề nhượng bộ (concession: tuy/mặc dù). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 phân biệt although/though/even though (+ mệnh đề), despite/in spite of (+ danh từ), however/nevertheless (trạng từ nối).", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Mệnh đề nhượng bộ diễn tả sự TƯƠNG PHẢN/trái ngược với mệnh đề chính ('mặc dù… nhưng…'). Điểm cốt lõi của TOEIC là chọn đúng từ nối theo sau là MỆNH ĐỀ hay DANH TỪ."},
+
+    {"type": "h3", "text": "2. although / though / even though + MỆNH ĐỀ"},
+    {"type": "p", "text": "Theo sau là một mệnh đề đầy đủ (S + V): Although the price rose, demand stayed strong. even though nhấn mạnh hơn although; though có thể đứng cuối câu (informal)."},
+
+    {"type": "h3", "text": "3. despite / in spite of + DANH TỪ / V-ing"},
+    {"type": "p", "text": "Theo sau là DANH TỪ, đại từ, hoặc V-ing — KHÔNG phải mệnh đề: Despite the rain, the event continued. In spite of being late, she finished on time. Để đi với mệnh đề phải thêm 'the fact that': Despite the fact that the price rose, …"},
+
+    {"type": "h3", "text": "4. Bảng đối chiếu"},
+    {"type": "table", "headers": ["Theo sau là", "Dùng", "Ví dụ"], "rows": [
+      ["MỆNH ĐỀ (S+V)", "although / though / even though", "Although it was costly, …"],
+      ["DANH TỪ / V-ing", "despite / in spite of", "Despite the cost, …"],
+      ["MỆNH ĐỀ (nối 2 câu)", "however / nevertheless (trạng từ)", "It was costly. However, we proceeded."]
+    ]},
+
+    {"type": "h3", "text": "5. while / whereas (tương phản)"},
+    {"type": "p", "text": "while và whereas chỉ sự đối lập giữa hai vế: Sales rose in Asia, whereas they fell in Europe. The new model is fast, while the old one is reliable."},
+
+    {"type": "h3", "text": "6. Cấu trúc nhượng bộ nâng cao"},
+    {"type": "ul", "items": [
+      "no matter how/what/where + S + V: No matter how hard it is, we will finish.",
+      "Adjective + as + S + V (mặc dù): Difficult as it was, the team succeeded.",
+      "however + adj/adv + S + V: However challenging the task, they completed it."
+    ]},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) although/though/even though + MỆNH ĐỀ; despite/in spite of + DANH TỪ/V-ing. (2) KHÔNG dùng 'Although … but …' trong cùng câu — chỉ dùng một. (3) however/nevertheless là TRẠNG TỪ nối, cần dấu chấm/chấm phẩy, không nối trực tiếp hai mệnh đề bằng dấu phẩy. (4) 'despite the fact that' mới đi với mệnh đề."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · although / though / even though + mệnh đề",

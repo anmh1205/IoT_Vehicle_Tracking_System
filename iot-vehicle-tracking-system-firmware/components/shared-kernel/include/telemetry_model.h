@@ -17,44 +17,63 @@
 // module contract without reaching into private implementation details.
 
 
+/**
+ * @brief Ignition axis: whether the vehicle key/ignition line is energized.
+ */
 typedef enum {
-    TRACKER_IGNITION_STATE_UNKNOWN = 0,
-    TRACKER_IGNITION_STATE_OFF,
-    TRACKER_IGNITION_STATE_ON,
+    TRACKER_IGNITION_STATE_UNKNOWN = 0,  /**< Not yet determined (e.g. at boot before first read). */
+    TRACKER_IGNITION_STATE_OFF,          /**< Ignition confirmed OFF. */
+    TRACKER_IGNITION_STATE_ON,           /**< Ignition confirmed ON. */
 } tracker_ignition_state_t;
 
+/**
+ * @brief Motion axis: whether the device is physically moving, per IMU/GNSS.
+ */
 typedef enum {
-    TRACKER_MOTION_STATE_UNKNOWN = 0,
-    TRACKER_MOTION_STATE_STATIONARY,
-    TRACKER_MOTION_STATE_MOVING,
+    TRACKER_MOTION_STATE_UNKNOWN = 0,    /**< Motion not yet classified. */
+    TRACKER_MOTION_STATE_STATIONARY,     /**< No significant movement detected. */
+    TRACKER_MOTION_STATE_MOVING,         /**< Sustained movement detected. */
 } tracker_motion_state_t;
 
+/**
+ * @brief Derived vehicle state combining the ignition and motion axes.
+ *
+ * This is the fused, higher-level interpretation reported to the cloud; the
+ * `UNKNOWN_*` variants cover cases where ignition is indeterminate but motion
+ * is known (e.g. ADC fallback in use).
+ */
 typedef enum {
-    TRACKER_VEHICLE_STATE_UNKNOWN = 0,
-    TRACKER_VEHICLE_STATE_PARKED_OFF,
-    TRACKER_VEHICLE_STATE_ROLLING_IGN_OFF,
-    TRACKER_VEHICLE_STATE_IDLING_ON,
-    TRACKER_VEHICLE_STATE_MOVING_ON,
-    TRACKER_VEHICLE_STATE_UNKNOWN_STATIONARY,
-    TRACKER_VEHICLE_STATE_UNKNOWN_MOVING,
+    TRACKER_VEHICLE_STATE_UNKNOWN = 0,            /**< Neither axis resolved yet. */
+    TRACKER_VEHICLE_STATE_PARKED_OFF,             /**< Ignition off and stationary (normal parked). */
+    TRACKER_VEHICLE_STATE_ROLLING_IGN_OFF,        /**< Moving with ignition off (towed/coasting/theft). */
+    TRACKER_VEHICLE_STATE_IDLING_ON,              /**< Ignition on but stationary (engine idling). */
+    TRACKER_VEHICLE_STATE_MOVING_ON,              /**< Ignition on and moving (normal driving). */
+    TRACKER_VEHICLE_STATE_UNKNOWN_STATIONARY,     /**< Ignition unknown, confirmed stationary. */
+    TRACKER_VEHICLE_STATE_UNKNOWN_MOVING,         /**< Ignition unknown, confirmed moving. */
 } tracker_vehicle_state_t;
 
+/**
+ * @brief Device runtime lifecycle state (mirrors the firmware FSM phase).
+ */
 typedef enum {
-    TRACKER_DEVICE_STATE_BOOTING = 0,
-    TRACKER_DEVICE_STATE_ACTIVE,
-    TRACKER_DEVICE_STATE_SLEEP_PREPARE,
-    TRACKER_DEVICE_STATE_SLEEPING,
-    TRACKER_DEVICE_STATE_WAKING,
-    TRACKER_DEVICE_STATE_ALARM,
-    TRACKER_DEVICE_STATE_OTA,
-    TRACKER_DEVICE_STATE_FAULT,
+    TRACKER_DEVICE_STATE_BOOTING = 0,    /**< Powering up / initializing peripherals. */
+    TRACKER_DEVICE_STATE_ACTIVE,         /**< Fully awake, sampling and publishing telemetry. */
+    TRACKER_DEVICE_STATE_SLEEP_PREPARE,  /**< Flushing work and arming wakeup sources before sleep. */
+    TRACKER_DEVICE_STATE_SLEEPING,       /**< In a low-power sleep mode. */
+    TRACKER_DEVICE_STATE_WAKING,         /**< Resuming from sleep, restoring context. */
+    TRACKER_DEVICE_STATE_ALARM,          /**< Motion alarm triggered while parked. */
+    TRACKER_DEVICE_STATE_OTA,            /**< Performing a firmware over-the-air update. */
+    TRACKER_DEVICE_STATE_FAULT,          /**< Unrecoverable error condition. */
 } tracker_device_state_t;
 
+/**
+ * @brief Sleep strategy currently selected for the device.
+ */
 typedef enum {
-    TRACKER_SLEEP_MODE_NONE = 0,
-    TRACKER_SLEEP_MODE_FAKE,
-    TRACKER_SLEEP_MODE_LIGHT,
-    TRACKER_SLEEP_MODE_DEEP,
+    TRACKER_SLEEP_MODE_NONE = 0,  /**< Not sleeping. */
+    TRACKER_SLEEP_MODE_FAKE,      /**< Stay powered but idle (debug/simulated sleep, no real power saving). */
+    TRACKER_SLEEP_MODE_LIGHT,     /**< Light sleep: CPU paused, RAM retained, fast wake. */
+    TRACKER_SLEEP_MODE_DEEP,      /**< Deep sleep: most domains off, wake via RTC/IMU, lowest power. */
 } tracker_sleep_mode_t;
 
 /**

@@ -5,6 +5,53 @@
     {"text": "Bài 05 — Trạng từ (Adverbs). Đọc lý thuyết → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 hỏi word form — chọn TRẠNG TỪ (bổ nghĩa động từ/tính từ/trạng từ) hay TÍNH TỪ (bổ nghĩa danh từ). Nhìn từ bị bổ nghĩa để quyết định.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & chức năng"},
+    {"type": "p", "text": "Trạng từ (adverb) bổ nghĩa cho động từ, tính từ, một trạng từ khác hoặc cả câu — cho biết cách thức, mức độ, thời gian, nơi chốn, tần suất. Trong TOEIC Part 5, chỗ trống đứng cạnh động từ/tính từ/trạng từ và KHÔNG phải vị trí của danh từ thì thường là trạng từ."},
+
+    {"type": "h3", "text": "2. Các loại trạng từ"},
+    {"type": "ul", "items": [
+      "Cách thức (manner): quickly, carefully, efficiently — trả lời 'như thế nào'.",
+      "Mức độ (degree): very, quite, extremely, too, enough, almost, nearly.",
+      "Tần suất (frequency): always, usually, often, sometimes, rarely, never.",
+      "Thời gian: now, soon, recently, already, yet, still, then.",
+      "Nơi chốn: here, there, everywhere, abroad.",
+      "Trạng từ câu (sentence adverb): fortunately, unfortunately, clearly, obviously — bổ nghĩa cả câu, đứng đầu."
+    ]},
+
+    {"type": "h3", "text": "3. Cách tạo trạng từ từ tính từ"},
+    {"type": "table", "headers": ["Trường hợp", "Quy tắc", "Ví dụ"], "rows": [
+      ["Thông thường", "adj + ly", "quick → quickly"],
+      ["Tận cùng phụ âm + y", "đổi y → ily", "easy → easily, happy → happily"],
+      ["Tận cùng -le", "đổi -le → -ly", "simple → simply"],
+      ["Tận cùng -ic", "+ ally", "automatic → automatically"],
+      ["Bất quy tắc", "—", "good → well, fast → fast, hard → hard, late → late"]
+    ]},
+
+    {"type": "h3", "text": "4. Tính từ vs trạng từ dễ nhầm"},
+    {"type": "table", "headers": ["Tính từ", "Trạng từ -ly (nghĩa khác)", "Lưu ý"], "rows": [
+      ["hard (khó/chăm)", "hardly (hầu như không)", "nghĩa khác hẳn"],
+      ["late (muộn)", "lately (gần đây)", "nghĩa khác hẳn"],
+      ["near (gần)", "nearly (gần như)", "nghĩa khác hẳn"],
+      ["high (cao)", "highly (rất, cao độ)", "nghĩa khác"],
+      ["good (adj)", "well (adv của good)", "well còn là adj 'khỏe'"]
+    ]},
+
+    {"type": "h3", "text": "5. Vị trí của trạng từ"},
+    {"type": "ul", "items": [
+      "Bổ nghĩa tính từ/trạng từ khác: đứng TRƯỚC nó (extremely important, very carefully).",
+      "Bổ nghĩa động từ (manner): thường sau động từ hoặc sau tân ngữ (She speaks English fluently / works efficiently).",
+      "Tần suất: trước động từ thường, sau động từ to be (always checks / is always punctual).",
+      "Trạng từ câu: đầu câu, có dấu phẩy (Fortunately, the deal closed.).",
+      "Một số trạng từ bổ nghĩa cả động từ lẫn đứng giữa trợ động từ và động từ chính (has recently joined)."
+    ]},
+
+    {"type": "h3", "text": "6. Sau động từ nối (linking verb) dùng TÍNH TỪ, không dùng trạng từ"},
+    {"type": "p", "text": "Sau be, seem, become, look, feel, sound, taste, remain, stay, appear + TÍNH TỪ (chỉ trạng thái), KHÔNG dùng trạng từ: The plan looks good (không 'looks well'); She seems happy. Nhưng nếu bổ nghĩa hành động thật thì dùng trạng từ: She looked carefully at the report (look = hành động nhìn)."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Chỗ trống bổ nghĩa ĐỘNG TỪ/tính từ → chọn trạng từ, không chọn tính từ. (2) hardly/lately/nearly ≠ hard/late/near. (3) Sau linking verb dùng tính từ (remain competitive, không 'remain competitively'). (4) Trạng từ chen giữa trợ động từ và V chính: 'will quickly review'."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Trạng từ là gì và cách tạo",

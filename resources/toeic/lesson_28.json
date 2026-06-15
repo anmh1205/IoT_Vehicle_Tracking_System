@@ -5,6 +5,40 @@
     {"text": "Bài 28 — Câu điều kiện loại 3 (giả định trái với quá khứ - điều đã không xảy ra). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 — If + had + V3, ... would have + V3. Bẫy: cả hai vế đều ở dạng hoàn thành (had / would have).", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Câu điều kiện loại 3 (third conditional) diễn tả giả định TRÁI VỚI QUÁ KHỨ — điều đã KHÔNG xảy ra, và kết quả tưởng tượng nếu nó đã xảy ra. Thường mang sắc thái tiếc nuối hoặc trách móc."},
+
+    {"type": "h3", "text": "2. Công thức"},
+    {"type": "table", "headers": ["Mệnh đề If", "Mệnh đề chính", "Ví dụ"], "rows": [
+      ["If + had + V3 (quá khứ hoàn thành)", "would have + V3", "If we had booked earlier, we would have saved money."]
+    ]},
+    {"type": "key", "text": "Mệnh đề If dùng QUÁ KHỨ HOÀN THÀNH (had + V3); vế chính dùng would have + V3. Cả hai vế đều trái với sự thật quá khứ."},
+
+    {"type": "h3", "text": "3. could have / might have trong vế chính"},
+    {"type": "ul", "items": [
+      "would have + V3: kết quả chắc chắn (trong giả định).",
+      "could have + V3: đã có thể (năng lực/khả năng).",
+      "might have + V3: có lẽ đã (không chắc).",
+      "Ví dụ: If they had tested it, they might have caught the bug."
+    ]},
+
+    {"type": "h3", "text": "4. Ý nghĩa tiếc nuối / trách móc"},
+    {"type": "p", "text": "Loại 3 hàm ý điều ngược đã xảy ra: 'If we had acted sooner, we would have avoided the loss' → thực tế: chúng ta đã KHÔNG hành động sớm, nên ĐÃ chịu tổn thất."},
+
+    {"type": "h3", "text": "5. Điều kiện hỗn hợp (mixed conditional)"},
+    {"type": "p", "text": "Trái quá khứ → kết quả ở HIỆN TẠI: If + had + V3, would + V (now). Ví dụ: If we had hired more staff last year, we would not be so busy now. (quá khứ ảnh hưởng hiện tại)."},
+
+    {"type": "h3", "text": "6. So sánh 3 loại điều kiện"},
+    {"type": "table", "headers": ["Loại", "If", "Vế chính", "Thời gian"], "rows": [
+      ["1", "hiện tại đơn", "will + V", "tương lai có thật"],
+      ["2", "quá khứ đơn", "would + V", "hiện tại giả định"],
+      ["3", "had + V3", "would have + V3", "quá khứ trái thật"]
+    ]},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) If + HAD + V3 (quá khứ hoàn thành); vế chính WOULD HAVE + V3. (2) Đừng dùng 'would have' trong mệnh đề If (sai 'If we would have known'). (3) could/might have + V3 thay would have để đổi sắc thái. (4) Phân biệt rõ loại 2 (had + V → would + V) với loại 3 (had + V3 → would have + V3)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Cấu trúc cơ bản",

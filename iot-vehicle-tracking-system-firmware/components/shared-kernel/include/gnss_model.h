@@ -13,14 +13,24 @@
 // module contract without reaching into private implementation details.
 
 
+/**
+ * @brief Which modem AT command produced a given GNSS fix.
+ *
+ * Recorded so downstream consumers know how trustworthy the satellite count is:
+ * the CGNSINF path reports a real constellation count while the CGPSINFO
+ * fallback only approximates it.
+ */
 typedef enum {
-    GNSS_QUERY_MODE_UNKNOWN = 0,
+    GNSS_QUERY_MODE_UNKNOWN = 0,  /**< Source not set yet (no fix decoded). */
     /** Primary path: AT+CGNSINF with full constellation count. */
     GNSS_QUERY_MODE_CGNSINF,
     /** Fallback path: AT+CGPSINFO; no constellation count, satellites is approximate. */
     GNSS_QUERY_MODE_CGPSINFO,
 } gnss_query_mode_t;
 
+/**
+ * @brief Single GNSS fix snapshot decoded from the modem's positioning report.
+ */
 typedef struct {
     /** Latitude in decimal degrees. */
     double latitude;

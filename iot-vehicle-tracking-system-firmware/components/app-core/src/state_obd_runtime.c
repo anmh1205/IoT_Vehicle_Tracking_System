@@ -25,6 +25,8 @@ static const char *TAG = "OBD_RUNTIME";
 static bool s_field_validation_ble_skip_logged = false;
 
 /* Diagnostic query sequence for OBD DTC modes. */
+/* Fixed rotation of diagnostic reads: readiness monitors first, then the three
+ * DTC stores. Mode-only queries use pid=-1 (no PID byte on the wire). */
 static const tracker_obd_diag_query_t s_state_obd_diag_queries[] = {
     {.mode = OBD_MODE_CURRENT_DATA, .pid = OBD_PID_MONITOR_STATUS},
     {.mode = OBD_MODE_STORED_DTC, .pid = -1},
@@ -32,6 +34,11 @@ static const tracker_obd_diag_query_t s_state_obd_diag_queries[] = {
     {.mode = OBD_MODE_PERMANENT_DTC, .pid = -1},
 };
 
+/**
+ * @brief Report whether a non-zero BLE adapter MAC is retained in RTC memory.
+ *
+ * @return true when at least one byte of the retained MAC hint is set.
+ */
 static bool state_machine_has_rtc_ble_mac(void) {
     for (size_t i = 0; i < sizeof(g_rtc_context.ble_mac); ++i) {
         if (g_rtc_context.ble_mac[i] != 0U) {
@@ -41,11 +48,20 @@ static bool state_machine_has_rtc_ble_mac(void) {
     return false;
 }
 
+/**
+ * @brief Forget the retained BLE adapter MAC hint stored in RTC memory.
+ */
 static void state_machine_clear_rtc_ble_mac(void) {
     // Reset the retained adapter hint when it is proven stale so later wakes can fall back to discovery.
     memset(g_rtc_context.ble_mac, 0, sizeof(g_rtc_context.ble_mac));
 }
 
+/**
+ * @brief Render the retained RTC BLE MAC bytes into a printable address string.
+ *
+ * @param[out] out Buffer of size `TRACKER_MAC_ADDR_STR_LEN` for the formatted MAC.
+ * @return true when a retained MAC existed and was successfully formatted.
+ */
 static bool state_machine_copy_rtc_ble_mac_string(char out[TRACKER_MAC_ADDR_STR_LEN]) {
     // Translate the retained adapter bytes into a printable MAC string for BLE reconnect hints.
     if (out == NULL || !state_machine_has_rtc_ble_mac()) {
@@ -58,6 +74,12 @@ static bool state_machine_copy_rtc_ble_mac_string(char out[TRACKER_MAC_ADDR_STR_
     return ble_addr_to_str(&rtc_addr, out) != NULL;
 }
 
+/**
+ * @brief Persist a freshly observed adapter MAC into RTC memory if it changed.
+ *
+ * @param[in] address Printable MAC string from the connected adapter.
+ * @return true when a new, different MAC was stored (worth logging upstream).
+ */
 static bool state_machine_store_rtc_ble_mac_string(const char *address) {
     // Keep the last known adapter identity across sleep so parked wakes can reconnect deterministically.
     ble_addr_t parsed_addr = {0};
@@ -73,6 +95,13 @@ static bool state_machine_store_rtc_ble_mac_string(const char *address) {
     return true;
 }
 
+/**
+ * @brief Resolve the MAC the next BLE connect attempt should target.
+ *
+ * @param[out] out Buffer of size `TRACKER_MAC_ADDR_STR_LEN` for the chosen MAC.
+ * @param[out] out_from_rtc Optional flag set true when the MAC came from the RTC hint.
+ * @return true when a preferred MAC is available; false means auto-discovery.
+ */
 static bool state_machine_resolve_preferred_ble_mac(char out[TRACKER_MAC_ADDR_STR_LEN], bool *out_from_rtc) {
     // Prefer explicit config first, then reuse the last adapter discovered before sleep as a soft hint.
     if (out != NULL) {
@@ -138,15 +167,18 @@ static void state_machine_reset_dtc_list(obd_dtc_list_t *list, bool valid) {
  */
 static bool state_machine_format_dtc_code(uint8_t high, uint8_t low, char out[TRACKER_OBD_DTC_CODE_LEN]) {
     // Build the format DTC code representation here so every caller emits the same contract.
+    // SAE J2012 DTC families selected by the top two bits of the high byte.
     static const char families[] = {'P', 'C', 'B', 'U'};
 
     if (out == NULL) {
         return false;
     }
     if (high == 0 && low == 0) {
+        // All-zero pair is the OBD "no fault" filler, not a real code.
         return false;
     }
 
+    // family + 4 hex nibbles, e.g. P0420: bits[7:6]=family, [5:4]/[3:0]=high digits, low byte=last two.
     snprintf(out,
              TRACKER_OBD_DTC_CODE_LEN,
              "%c%1X%1X%1X%1X",
@@ -176,6 +208,7 @@ static void state_machine_decode_dtc_payload(obd_dtc_list_t *list, const uint8_t
     }
 
     for (size_t i = 0; i + 1 < len && list->count < TRACKER_OBD_MAX_DTC_CODES; i += 2) {
+        // DTCs arrive as 2-byte pairs; stop early on a zero pair (end-of-list padding).
         char dtc_code[TRACKER_OBD_DTC_CODE_LEN] = {0};
         if (!state_machine_format_dtc_code(data[i], data[i + 1], dtc_code)) {
             if (data[i] == 0 && data[i + 1] == 0) {
@@ -234,10 +267,13 @@ static void state_machine_decode_readiness_payload(obd_readiness_t *readiness,
     uint8_t byte_d = data[3];
 
     readiness->valid = true;
+    // Byte A: bit7 is the MIL (check-engine) lamp; low 7 bits carry the stored DTC count.
     readiness->mil_on = (byte_a & 0x80U) != 0U;
     readiness->reported_dtc_count = byte_a & 0x7FU;
+    // Byte B bit3 selects the monitor layout: compression (diesel) vs spark ignition.
     readiness->compression_ignition = (byte_b & 0x08U) != 0U;
 
+    // Low nibble = supported common monitors; high nibble = which of those are still incomplete.
     uint8_t common_supported = byte_b & 0x07U;
     uint8_t common_incomplete = (byte_b >> 4) & 0x07U;
     readiness->misfire = state_machine_decode_monitor_status(common_supported, common_incomplete, 0);
@@ -246,6 +282,7 @@ static void state_machine_decode_readiness_payload(obd_readiness_t *readiness,
         state_machine_decode_monitor_status(common_supported, common_incomplete, 2);
 
     if (readiness->compression_ignition) {
+        // Bytes C/D map to diesel-specific monitors when the ECU is compression-ignition.
         readiness->nmhc_catalyst = state_machine_decode_monitor_status(byte_c, byte_d, 0);
         readiness->nox_aftertreatment = state_machine_decode_monitor_status(byte_c, byte_d, 1);
         readiness->boost_pressure = state_machine_decode_monitor_status(byte_c, byte_d, 2);
@@ -256,6 +293,7 @@ static void state_machine_decode_readiness_payload(obd_readiness_t *readiness,
     }
 
     readiness->catalyst = state_machine_decode_monitor_status(byte_c, byte_d, 0);
+    // Spark-ignition (gasoline) monitor layout for bytes C/D.
     readiness->heated_catalyst = state_machine_decode_monitor_status(byte_c, byte_d, 1);
     readiness->evaporative_system = state_machine_decode_monitor_status(byte_c, byte_d, 2);
     readiness->secondary_air_system = state_machine_decode_monitor_status(byte_c, byte_d, 3);
@@ -384,30 +422,35 @@ void state_machine_obd_response_cb(uint8_t mode, int pid, const uint8_t *data, s
     // Only the selected scalar PIDs below refresh the "last live OBD sample" timestamp.
     switch ((uint8_t)pid) {
         case 0x0C:
+            // Engine RPM (PID 0x0C) decoded from the 2-byte ((A*256)+B)/4 formula.
             if (obd_convert_rpm(&converted, data, len) == 0) {
                 s_telemetry.obd_rpm = converted;
                 updated = true;
             }
             break;
         case 0x0D:
+            // Vehicle speed (PID 0x0D) is a single raw km/h byte.
             if (len >= 1) {
                 s_telemetry.obd_speed = data[0];
                 updated = true;
             }
             break;
         case 0x05:
+            // Engine coolant temperature (PID 0x05), already offset-corrected by the converter.
             if (obd_convert_temperature(&converted, data, len) == 0) {
                 s_telemetry.obd_coolant_temp = converted;
                 updated = true;
             }
             break;
         case 0x2F:
+            // Fuel tank level (PID 0x2F) scaled to a 0-100% reading.
             if (obd_convert_percent(&converted, data, len) == 0) {
                 s_telemetry.obd_fuel_level = converted;
                 updated = true;
             }
             break;
         case 0x04:
+            // Calculated engine load (PID 0x04) scaled to a 0-100% reading.
             if (obd_convert_percent(&converted, data, len) == 0) {
                 s_telemetry.obd_engine_load = converted;
                 updated = true;

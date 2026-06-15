@@ -5,6 +5,43 @@
     {"text": "Bài 32 — So sánh hơn (comparative). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 — adj-er + than / more + adj + than; bất quy tắc (better/worse); the + so sánh + the + so sánh; much/far + so sánh.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "So sánh hơn (comparative) so sánh HAI đối tượng, chỉ ra cái nào hơn về một tính chất. Thường đi kèm 'than'."},
+
+    {"type": "h3", "text": "2. Quy tắc cấu tạo"},
+    {"type": "table", "headers": ["Loại", "Cấu trúc", "Ví dụ"], "rows": [
+      ["1 âm tiết", "adj-er + than", "cheap → cheaper than"],
+      ["tận cùng -e", "+ r", "large → larger than"],
+      ["nguyên âm-phụ âm", "gấp đôi + er", "big → bigger than"],
+      ["phụ âm + y", "đổi y → ier", "easy → easier than"],
+      ["2+ âm tiết", "more + adj + than", "expensive → more expensive than"]
+    ]},
+
+    {"type": "h3", "text": "3. Bất quy tắc"},
+    {"type": "table", "headers": ["Gốc", "So sánh hơn"], "rows": [
+      ["good / well", "better than"],
+      ["bad / badly", "worse than"],
+      ["far", "farther / further than"],
+      ["many / much", "more than"],
+      ["little", "less than"]
+    ]},
+
+    {"type": "h3", "text": "4. Tăng cường mức độ so sánh"},
+    {"type": "p", "text": "Dùng much / far / even / a lot / slightly / a bit + so sánh hơn để nhấn mạnh — KHÔNG dùng 'very': The new system is much faster than the old one. Sales were slightly higher than expected. (Sai: 'very faster')."},
+
+    {"type": "h3", "text": "5. less + adj + than (kém hơn)"},
+    {"type": "p", "text": "less + tính từ (mọi độ dài) + than = kém hơn: This plan is less expensive than the premium one. (= cheaper)."},
+
+    {"type": "h3", "text": "6. Cấu trúc 'càng… càng…' và 'ngày càng'"},
+    {"type": "ul", "items": [
+      "The + so sánh hơn …, the + so sánh hơn …: The sooner we start, the better. The more you practice, the better you get.",
+      "so sánh hơn + and + so sánh hơn (ngày càng): Prices are getting higher and higher. The product is becoming more and more popular."
+    ]},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) KHÔNG dùng cả 'more' và '-er' (more cheaper → cheaper). (2) Tăng cường dùng much/far/even (không 'very cheaper'). (3) good→better, bad→worse. (4) 'than' (so sánh) ≠ 'then' (sau đó). (5) Cấu trúc 'the + comparative, the + comparative' mỗi vế bắt đầu bằng 'the'."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Cấu trúc cơ bản",

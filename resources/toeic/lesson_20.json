@@ -5,6 +5,38 @@
     {"text": "Bài 20 — Câu bị động hoàn thành (has/have been + V3, had been + V3, will have been + V3). Làm câu hỏi ngay sau mỗi phần, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 hỏi bị động hoàn thành theo dấu hiệu (already/yet/since/for/by). Bẫy: sau 'been' phải là V3.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & công thức"},
+    {"type": "p", "text": "Bị động hoàn thành kết hợp thì hoàn thành với bị động: have/has/had been + V3. Diễn tả hành động đã hoàn tất, nhấn vào đối tượng bị tác động. Đây là dạng nâng cao hay xuất hiện trong báo cáo, email công sở ở TOEIC."},
+
+    {"type": "h3", "text": "2. Công thức theo thì"},
+    {"type": "table", "headers": ["Thì", "Bị động hoàn thành", "Ví dụ"], "rows": [
+      ["Hiện tại hoàn thành", "have/has been + V3", "The contract has been signed."],
+      ["Quá khứ hoàn thành", "had been + V3", "The goods had been shipped before we called."],
+      ["Tương lai hoàn thành", "will have been + V3", "The work will have been finished by Monday."],
+      ["Modal hoàn thành", "modal + have been + V3", "It should have been approved earlier."]
+    ]},
+
+    {"type": "h3", "text": "3. Khi nào dùng"},
+    {"type": "ul", "items": [
+      "Hành động đã hoàn tất tính đến hiện tại, còn liên hệ: The report has been submitted (giờ đã nộp xong).",
+      "Hành động xong TRƯỚC một mốc/hành động quá khứ khác: The order had been processed before the deadline.",
+      "Dự kiến hoàn tất trước mốc tương lai (thường có 'by + thời điểm'): The system will have been updated by Friday."
+    ]},
+
+    {"type": "h3", "text": "4. Dấu hiệu thường gặp"},
+    {"type": "p", "text": "already, just, yet, recently, so far (hiện tại hoàn thành bị động); by + thời điểm, before + mệnh đề (quá khứ/tương lai hoàn thành bị động). Ví dụ: The invoices have already been paid."},
+
+    {"type": "h3", "text": "5. Phân biệt với hoàn thành CHỦ ĐỘNG"},
+    {"type": "table", "headers": ["", "Chủ động", "Bị động"], "rows": [
+      ["Hiện tại HT", "has completed", "has been completed"],
+      ["Cấu trúc", "have/has + V3", "have/has + BEEN + V3"],
+      ["Ví dụ", "She has reviewed it.", "It has been reviewed."]
+    ]},
+
+    {"type": "h3", "text": "6. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Phải đủ 'been': has BEEN signed (sai 'has signed' khi mang nghĩa bị động). (2) Sau been là V3 (cột 3), không V-ing: has been completed (không 'has been completing' cho bị động). (3) will have been + V3 cho tương lai hoàn thành bị động ('by + mốc'). (4) Chia have/has đúng số chủ ngữ."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Hiện tại hoàn thành bị động (has/have been + V3)",

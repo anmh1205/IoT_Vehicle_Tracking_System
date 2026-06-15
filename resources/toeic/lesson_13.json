@@ -5,6 +5,45 @@
     {"text": "Bài 13 — Danh động từ (Gerund = V-ing dùng như một danh từ). Cách học: đọc lý thuyết từng phần → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 hay hỏi chọn V-ing hay to V. Quy tắc vàng: sau giới từ và sau nhóm động từ enjoy/finish/avoid... luôn dùng V-ing. So sánh trực tiếp với Bài 12 (nhóm want/decide + to V).", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & chức năng"},
+    {"type": "p", "text": "Danh động từ (gerund) là V-ing dùng như một DANH TỪ: làm chủ ngữ, tân ngữ, bổ ngữ, hoặc đứng sau giới từ. Đối lập với động từ nguyên mẫu có 'to' (Bài 12) — đây là điểm TOEIC hay đối chiếu ở Part 5."},
+
+    {"type": "h3", "text": "2. Vị trí của danh động từ"},
+    {"type": "ul", "items": [
+      "Làm chủ ngữ: Reading reports is part of the job. (động từ chia số ít)",
+      "Làm tân ngữ của động từ: My role involves planning events.",
+      "Làm bổ ngữ: Her responsibility is managing the budget.",
+      "Sau giới từ (luôn V-ing): interested in working, before submitting, good at planning."
+    ]},
+
+    {"type": "h3", "text": "3. Sau giới từ LUÔN dùng V-ing"},
+    {"type": "p", "text": "Mọi giới từ (in, on, at, of, for, about, after, before, by, without, instead of…) đều theo sau bởi V-ing, không phải to V: She is responsible for training new staff. We improved sales by lowering prices."},
+
+    {"type": "h3", "text": "4. Động từ theo sau bởi V-ing"},
+    {"type": "p", "text": "enjoy, avoid, finish, mind, suggest, recommend, consider, postpone, delay, deny, admit, discuss, practice, keep (on), miss, involve, risk, imagine, quit, give up, can't stand, feel like + V-ing. Ví dụ: We recommend booking early. They avoided raising prices."},
+
+    {"type": "h3", "text": "5. Cụm cố định + V-ing"},
+    {"type": "table", "headers": ["Cụm", "Ví dụ"], "rows": [
+      ["look forward to + V-ing", "I look forward to hearing from you."],
+      ["be/get used to + V-ing", "She is used to working late."],
+      ["be worth + V-ing", "The plan is worth considering."],
+      ["can't help + V-ing", "I can't help worrying about it."],
+      ["spend/waste time + V-ing", "We spent hours reviewing data."],
+      ["have difficulty (in) + V-ing", "They had difficulty meeting the deadline."],
+      ["it's no use / there's no point in + V-ing", "There's no point in waiting."],
+      ["busy + V-ing", "He is busy preparing the report."]
+    ]},
+
+    {"type": "h3", "text": "6. 'to' là GIỚI TỪ → + V-ing (rất hay bẫy)"},
+    {"type": "p", "text": "Trong các cụm sau, 'to' là GIỚI TỪ nên theo sau là V-ing, KHÔNG phải nguyên thể: look forward to doing, be used to doing, be committed to doing, object to doing, in addition to doing, when it comes to doing. Ví dụ: We look forward to meeting you (không 'to meet')."},
+
+    {"type": "h3", "text": "7. Sở hữu + V-ing (trang trọng)"},
+    {"type": "p", "text": "Có thể dùng tính từ sở hữu trước danh động từ trong văn trang trọng: We appreciate your attending the meeting. Do you mind my opening the window?"},
+
+    {"type": "h3", "text": "8. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Sau giới từ luôn V-ing (good at solving, không 'to solve'). (2) enjoy/avoid/suggest/recommend/consider + V-ing (không to V). (3) 'look forward to / be used to / be committed to' + V-ing (to là giới từ). (4) Danh động từ làm chủ ngữ → động từ SỐ ÍT."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Danh động từ làm chủ ngữ, tân ngữ, bổ ngữ",

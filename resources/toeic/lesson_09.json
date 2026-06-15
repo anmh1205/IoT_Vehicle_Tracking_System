@@ -5,6 +5,44 @@
     {"text": "Bài 09 — Hòa hợp chủ ngữ - động từ. Đọc lý thuyết → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 đặt cụm xen giữa (of.../along with...) để đánh lừa; phải chia động từ theo CHỦ NGỮ CHÍNH. Cũng hay hỏi a number of / the number of và there is/are.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Nguyên tắc cốt lõi"},
+    {"type": "p", "text": "Hòa hợp chủ-vị (subject–verb agreement): động từ phải chia theo SỐ của chủ ngữ. Chủ ngữ số ít → động từ số ít (adds, is, was, has); chủ ngữ số nhiều → động từ số nhiều (add, are, were, have). Quy tắc này áp dụng rõ nhất ở thì hiện tại đơn và động từ to be."},
+
+    {"type": "h3", "text": "2. Quy tắc cơ bản"},
+    {"type": "table", "headers": ["Chủ ngữ", "Hiện tại đơn", "to be (hiện tại/quá khứ)"], "rows": [
+      ["số ít (he/she/it, N số ít)", "V + s/es", "is / was"],
+      ["số nhiều (we/they, N số nhiều)", "V (nguyên thể)", "are / were"],
+      ["I / you", "V (nguyên thể)", "am-are / was-were"]
+    ]},
+
+    {"type": "h3", "text": "3. Cụm chen giữa chủ ngữ và động từ (KHÔNG làm đổi số)"},
+    {"type": "p", "text": "Các cụm sau KHÔNG đổi số của động từ — vẫn chia theo chủ ngữ CHÍNH: with, along with, together with, as well as, including, in addition to, accompanied by. Ví dụ: The manager, along with two assistants, IS attending. (chủ ngữ chính 'the manager' → is)."},
+    {"type": "key", "text": "Mẹo: gạch bỏ cụm nằm giữa hai dấu phẩy hoặc cụm giới từ (of/with/in…) để lộ chủ ngữ chính rồi mới chia động từ."},
+
+    {"type": "h3", "text": "4. Đại từ & lượng từ"},
+    {"type": "ul", "items": [
+      "Luôn SỐ ÍT: each, every, either, neither, one, everyone/everybody, someone, anyone, no one, nobody, everything, much, a little.",
+      "Luôn SỐ NHIỀU: both, few, several, many, others.",
+      "Tùy danh từ phía sau (some, all, most, none, half, a lot of + N): of + N số ít → số ít; of + N số nhiều → số nhiều (Most of the staff are… / Most of the budget is…)."
+    ]},
+
+    {"type": "h3", "text": "5. Cấu trúc 'of' & 'number'"},
+    {"type": "ul", "items": [
+      "one of the + N số nhiều + động từ SỐ ÍT: One of the employees is on leave.",
+      "the number of + N + động từ SỐ ÍT (số lượng): The number of orders has risen.",
+      "a number of + N số nhiều + động từ SỐ NHIỀU (nhiều): A number of orders have arrived."
+    ]},
+
+    {"type": "h3", "text": "6. Danh từ không đếm được → số ít"},
+    {"type": "p", "text": "information, equipment, furniture, advice, news, knowledge, research, software, machinery, luggage → luôn số ít: The equipment is new. Không thêm -s, không 'an information' (dùng 'a piece of information')."},
+
+    {"type": "h3", "text": "7. There is / There are"},
+    {"type": "p", "text": "Động từ chia theo danh từ ĐỨNG SAU: There is a problem. / There are several problems. Với danh từ liệt kê, chia theo danh từ đầu tiên: There is a laptop and two monitors."},
+
+    {"type": "h3", "text": "8. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Cụm 'as well as / along with / including + N' KHÔNG đổi số động từ. (2) one of the + N số nhiều + V SỐ ÍT. (3) each/every/everyone → số ít. (4) danh từ không đếm (information, equipment) → số ít. (5) 'the number of' (số ít) vs 'a number of' (số nhiều)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Quy tắc cơ bản",

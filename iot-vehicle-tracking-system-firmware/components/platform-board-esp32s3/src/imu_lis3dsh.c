@@ -27,45 +27,74 @@
  */
 
 
+/* I2C controller instance the sensor bus is wired to. */
 #define IMU_I2C_PORT I2C_NUM_0
+/* Preferred (fast-mode) SCL clock for the IMU bus. */
 #define IMU_I2C_FREQ_HZ 400000
+/* Slower standard-mode SCL clock retried when fast-mode probing fails. */
 #define IMU_I2C_FREQ_FALLBACK_HZ 100000
+/* LIS3DH (legacy variant) 7-bit I2C address with SA0=0. */
 #define LIS3DH_LEGACY_ADDR_PRIMARY 0x18
+/* LIS3DH (legacy variant) 7-bit I2C address with SA0=1. */
 #define LIS3DH_LEGACY_ADDR_SECONDARY 0x19
+/* LIS3DSH 7-bit I2C address with SDO/SA0=0. */
 #define LIS3DSH_ADDR_PRIMARY 0x1D
+/* LIS3DSH 7-bit I2C address with SDO/SA0=1. */
 #define LIS3DSH_ADDR_SECONDARY 0x1E
+/* WHO_AM_I device identity register, shared address on both variants. */
 #define IMU_WHO_AM_I_REG 0x0F
+/* Expected WHO_AM_I value identifying a legacy LIS3DH. */
 #define LIS3DH_LEGACY_WHO_AM_I_VALUE 0x33
+/* Expected WHO_AM_I value identifying a LIS3DSH. */
 #define LIS3DSH_WHO_AM_I_VALUE 0x3F
+/* First (low byte) acceleration output register; X/Y/Z follow consecutively. */
 #define IMU_OUT_X_L_REG 0x28
+/* LIS3DH CTRL_REG1: output data rate + per-axis enable + low-power mode. */
 #define LIS3DH_LEGACY_CTRL_REG1 0x20
+/* LIS3DH CTRL_REG2: high-pass filter configuration for interrupt path. */
 #define LIS3DH_LEGACY_CTRL_REG2 0x21
+/* LIS3DH CTRL_REG3: interrupt-generator-to-INT1 pin routing. */
 #define LIS3DH_LEGACY_CTRL_REG3 0x22
+/* LIS3DH CTRL_REG4: block-data-update, full-scale, high-resolution mode. */
 #define LIS3DH_LEGACY_CTRL_REG4 0x23
+/* LIS3DH CTRL_REG5: FIFO/latch/reboot control. */
 #define LIS3DH_LEGACY_CTRL_REG5 0x24
+/* LIS3DSH CTRL_REG4: ODR + block-data-update + per-axis enable (different map vs LIS3DH). */
 #define LIS3DSH_CTRL_REG4 0x20
+/* LIS3DSH CTRL_REG5: anti-alias bandwidth + full-scale select. */
 #define LIS3DSH_CTRL_REG5 0x24
+/* Interrupt-1 configuration register (axis/event enable), shared layout. */
 #define IMU_INT1_CFG_REG 0x30
+/* Interrupt-1 source/status register; reading it clears latched interrupts. */
 #define IMU_INT1_SRC_REG 0x31
+/* Interrupt-1 threshold register (motion trigger level). */
 #define IMU_INT1_THS_REG 0x32
+/* Interrupt-1 duration register (debounce/min-event time). */
 #define IMU_INT1_DURATION_REG 0x33
+/* Per-transfer I2C timeout to avoid blocking the caller indefinitely. */
 #define IMU_I2C_XFER_TIMEOUT_MS 20U
+/* Cooldown applied after repeated read failures to let the bus recover. */
 #define IMU_READ_FAIL_BACKOFF_MS 2000ULL
+/* Number of consecutive read failures that triggers the backoff window. */
 #define IMU_READ_FAIL_BACKOFF_THRESHOLD 3U
+/* Minimum inter-sample delta (in mg) considered real motion vs sensor noise. */
 #define IMU_ACCEL_DELTA_DEADZONE_MG 60.0f
+/* Conversion factor: 1 mg of acceleration expressed in m/s^2 (g = 9.80665). */
 #define IMU_MG_TO_MPS2 0.00980665f
 
 static const char *TAG = "IMU_LIS3DSH";
 
+/* Which accelerometer silicon was detected; selects the active register map. */
 typedef enum {
-    IMU_CHIP_LIS3DH_LEGACY = 0,
-    IMU_CHIP_LIS3DSH,
+    IMU_CHIP_LIS3DH_LEGACY = 0, /* Legacy LIS3DH (WHO_AM_I 0x33). */
+    IMU_CHIP_LIS3DSH,           /* LIS3DSH (WHO_AM_I 0x3F). */
 } imu_chip_t;
 
+/* One candidate sensor to probe during auto-detection. */
 typedef struct {
-    uint8_t addr;
-    uint8_t who_am_i;
-    imu_chip_t chip;
+    uint8_t addr;       /* 7-bit I2C address to try. */
+    uint8_t who_am_i;   /* Expected WHO_AM_I value at that address. */
+    imu_chip_t chip;    /* Chip variant that address/ID pair belongs to. */
 } imu_probe_target_t;
 
 /* I2C bus/device handles owned by this module. */
@@ -120,6 +149,7 @@ static const char *imu_detected_chip_name(void) {
  * @return ESP_OK on success, otherwise I2C error.
  */
 static esp_err_t imu_write_reg(uint8_t reg, uint8_t value) {
+    // I2C register write = [register address][value] in a single transmit.
     uint8_t payload[2] = {reg, value};
     return i2c_master_transmit(s_dev_handle,
                                payload,
@@ -137,21 +167,25 @@ static esp_err_t imu_write_reg(uint8_t reg, uint8_t value) {
  */
 static esp_err_t imu_read_reg(uint8_t reg, uint8_t *value) {
     ESP_RETURN_ON_NULL(value, ESP_ERR_INVALID_ARG, TAG, "value is NULL");
+    // Combined write-then-read: send the register pointer, then read one byte back.
     esp_err_t err = i2c_master_transmit_receive(s_dev_handle,
                                                 &reg,
                                                 1,
                                                 value,
                                                 1,
                                                 IMU_I2C_XFER_TIMEOUT_MS);
+    // Success, or a non-recoverable error that the split-transfer retry cannot fix.
     if (err == ESP_OK || err != ESP_ERR_INVALID_STATE) {
         return err;
     }
 
+    // Some bus states reject the combined transfer; recover by resetting and splitting it.
     ESP_LOGW(TAG, "imu_read_reg fallback split-xfer reg=0x%02X err=%s", reg, esp_err_to_name(err));
     if (s_bus_handle != NULL) {
         (void)i2c_master_bus_reset(s_bus_handle);
     }
 
+    // Fallback path: separate write (register pointer) then read (value).
     err = i2c_master_transmit(s_dev_handle, &reg, 1, IMU_I2C_XFER_TIMEOUT_MS);
     if (err != ESP_OK) {
         return err;
@@ -176,6 +210,7 @@ static esp_err_t imu_read_regs(uint8_t reg, uint8_t *data, size_t len) {
      * unchanged on I2C burst reads.
      */
     uint8_t read_reg = imu_is_lis3dsh() ? reg : (uint8_t)(reg | 0x80);
+    // Combined write-then-read burst: send start register, read `len` bytes.
     esp_err_t err = i2c_master_transmit_receive(s_dev_handle,
                                                 &read_reg,
                                                 1,
@@ -186,6 +221,7 @@ static esp_err_t imu_read_regs(uint8_t reg, uint8_t *data, size_t len) {
         return err;
     }
 
+    // Same combined-transfer recovery as the single-register read path.
     ESP_LOGW(TAG, "imu_read_regs fallback split-xfer reg=0x%02X len=%u err=%s",
              read_reg,
              (unsigned)len,
@@ -194,6 +230,7 @@ static esp_err_t imu_read_regs(uint8_t reg, uint8_t *data, size_t len) {
         (void)i2c_master_bus_reset(s_bus_handle);
     }
 
+    // Fallback: split the burst into an address write followed by a multi-byte read.
     err = i2c_master_transmit(s_dev_handle, &read_reg, 1, IMU_I2C_XFER_TIMEOUT_MS);
     if (err != ESP_OK) {
         return err;
@@ -219,11 +256,12 @@ static esp_err_t imu_try_bind_device(uint8_t device_addr,
     ESP_RETURN_ON_NULL(out_who_am_i, ESP_ERR_INVALID_ARG, TAG, "out_who_am_i is NULL");
 
     i2c_device_config_t dev_cfg = {
-        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .dev_addr_length = I2C_ADDR_BIT_LEN_7,  // LIS3DH/LIS3DSH use 7-bit addressing.
         .device_address = device_addr,
-        .scl_speed_hz = scl_speed_hz,
+        .scl_speed_hz = scl_speed_hz,           // Per-device clock (fast or fallback profile).
     };
 
+    // Attach a device handle on the shared bus before any register access.
     esp_err_t err = i2c_master_bus_add_device(s_bus_handle, &dev_cfg, &s_dev_handle);
     if (err != ESP_OK) {
         return err;
@@ -231,6 +269,7 @@ static esp_err_t imu_try_bind_device(uint8_t device_addr,
 
     uint8_t who_am_i = 0;
     err = imu_read_reg(IMU_WHO_AM_I_REG, &who_am_i);
+    // Reject and detach when the read fails or the identity does not match the expected chip.
     if (err != ESP_OK || who_am_i != expected_who_am_i) {
         i2c_master_bus_rm_device(s_dev_handle);
         s_dev_handle = NULL;
@@ -299,9 +338,10 @@ esp_err_t imu_init(void) {
     size_t candidate_count = 0;
 
     for (size_t i = 0; i < ARRAY_SIZE(s_probe_targets); ++i) {
+        // ACK-probe each known address; a positive ACK means a device is present there.
         esp_err_t probe_err = i2c_master_probe(s_bus_handle, s_probe_targets[i].addr, IMU_I2C_XFER_TIMEOUT_MS);
         if (probe_err == ESP_OK) {
-            candidate_targets[candidate_count++] = s_probe_targets[i];
+            candidate_targets[candidate_count++] = s_probe_targets[i];  // Remember it for WHO_AM_I confirmation.
             continue;
         }
         ESP_LOGW(TAG,
@@ -361,13 +401,18 @@ esp_err_t imu_init(void) {
          * for the full-scale/bandwidth bank. Writing the LIS3DH map here left
          * the output registers pinned and the acceleration delta stayed at zero.
          */
+        /* 0x6F = ODR 100 Hz (0110) + block-data-update + X/Y/Z axes enabled. */
         ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DSH_CTRL_REG4, 0x6F), fail, TAG, "LIS3DSH CTRL_REG4 write failed");
+        /* 0x00 = full-scale +/-2g with default anti-alias bandwidth. */
         ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DSH_CTRL_REG5, 0x00), fail, TAG, "LIS3DSH CTRL_REG5 write failed");
     } else {
         /* 10 Hz, XYZ enabled; combine with high-resolution mode for stable delta sampling. */
+        /* 0x27 = ODR 10 Hz (0010) + normal mode + X/Y/Z axes enabled. */
         ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DH_LEGACY_CTRL_REG1, 0x27), fail, TAG, "CTRL_REG1 write failed");
         /* BDU=1, high-resolution enabled, full-scale +/-2g. */
+        /* 0x88 = BDU bit set + HR (high-resolution) bit set, FS field 00 = +/-2g. */
         ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DH_LEGACY_CTRL_REG4, 0x88), fail, TAG, "CTRL_REG4 write failed");
+        /* 0x00 = no FIFO, no latched interrupt, no reboot. */
         ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DH_LEGACY_CTRL_REG5, 0x00), fail, TAG, "CTRL_REG5 write failed");
     }
 
@@ -410,8 +455,10 @@ esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_
     ESP_RETURN_ON_NULL(s_dev_handle, ESP_ERR_INVALID_STATE, TAG, "IMU not initialized");
 
     /* LIS3DH threshold unit ~16mg/LSB in +/-2g mode. */
+    // Convert the requested mg threshold to register LSBs (round up), clamped to the 1..127 valid range.
     uint8_t threshold = (uint8_t)util_clamp_int((int)((threshold_mg + 15U) / 16U), 1, 127);
     /* Duration LSB ~= 100ms at 10 Hz ODR. */
+    // Convert the requested duration to ODR-period counts (round up); 0 means "trigger immediately".
     uint8_t duration = (uint8_t)util_clamp_int((int)((duration_ms + 99U) / 100U), 0, 127);
 
     if (imu_is_lis3dsh()) {
@@ -422,6 +469,7 @@ esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_
          * Threshold unit for LIS3DSH at FS=+/-2g: 1 LSB = 16mg (same as LIS3DH).
          */
         /* CTRL_REG3: enable INT1, active-high output */
+        // 0x48: INT1 enable + active-high level; latched/non-latched per IEL bit kept at the datasheet default.
         ESP_RETURN_ON_FALSE(imu_write_reg(0x23, 0x48) == ESP_OK, ESP_FAIL, TAG, "LIS3DSH CTRL_REG3 write failed");
         /* Ensure CTRL_REG5 full-scale stays at +/-2g for consistent threshold scaling */
         ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_CTRL_REG5, 0x00) == ESP_OK, ESP_FAIL, TAG, "LIS3DSH CTRL_REG5 write failed");
@@ -431,12 +479,15 @@ esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_
         /* Enable high-pass filtering on interrupt 1 to reject static gravity. */
         ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG2, 0x01) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG2 write failed");
         /* Route IA1 interrupt generator to INT1 pin. */
+        // 0x40: I1_IA1 bit set so the interrupt-generator-1 activity is driven onto the physical INT1 pin.
         ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG3, 0x40) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG3 write failed");
         ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG4, 0x88) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG4 write failed");
         ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG5, 0x00) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG5 write failed");
     }
     ESP_RETURN_ON_FALSE(imu_write_reg(IMU_INT1_CFG_REG, 0x2A) == ESP_OK, ESP_FAIL, TAG, "INT1_CFG write failed");
+    // INT1_CFG=0x2A enables OR-combined high events on X/Y/Z (XHIE|YHIE|ZHIE) for omnidirectional motion.
     ESP_RETURN_ON_FALSE(imu_write_reg(IMU_INT1_THS_REG, threshold) == ESP_OK, ESP_FAIL, TAG, "INT1_THS write failed");
+    // INT1_THS sets the motion magnitude that must be exceeded; INT1_DURATION sets how long it must persist.
     ESP_RETURN_ON_FALSE(imu_write_reg(IMU_INT1_DURATION_REG, duration) == ESP_OK,
                         ESP_FAIL,
                         TAG,
@@ -454,6 +505,7 @@ esp_err_t imu_clear_motion_interrupt(void) {
     ESP_RETURN_ON_NULL(s_dev_handle, ESP_ERR_INVALID_STATE, TAG, "IMU not initialized");
 
     uint8_t src = 0;
+    // Reading INT1_SRC latches-clears the pending interrupt source bits inside the IMU.
     return imu_read_reg(IMU_INT1_SRC_REG, &src);
 }
 
@@ -467,6 +519,7 @@ esp_err_t imu_clear_motion_interrupt(void) {
  * @return true if motion interrupt line is asserted.
  */
 bool imu_motion_detected(void) {
+    // The motion INT line is configured active-high, so a HIGH level means motion was latched.
     return gpio_get_level(PIN_LIS3DSH_INT) == 1;
 }
 
@@ -492,6 +545,7 @@ esp_err_t imu_read_accel(int16_t *x, int16_t *y, int16_t *z) {
                         "Accel read failed");
 
     /* Convert little-endian register bytes into signed 16-bit values. */
+    // Each axis is two bytes: low byte first (OUT_x_L), then high byte (OUT_x_H).
     *x = (int16_t)((raw[1] << 8) | raw[0]);
     *y = (int16_t)((raw[3] << 8) | raw[2]);
     *z = (int16_t)((raw[5] << 8) | raw[4]);
@@ -504,9 +558,10 @@ esp_err_t imu_read_accel(int16_t *x, int16_t *y, int16_t *z) {
  * @return Peak acceleration delta in m/s^2.
  */
 float imu_get_peak_accel_delta_mps2(void) {
+    // While inside a post-failure backoff window, skip the bus entirely and report the last known peak.
     uint64_t now_ms = util_uptime_ms();
     if (s_read_backoff_until_ms != 0 && now_ms < s_read_backoff_until_ms) {
-        s_prev_sample_valid = false;
+        s_prev_sample_valid = false;  // Force a fresh baseline once sampling resumes.
         return s_accel_delta_window_peak_mps2;
     }
 
@@ -515,9 +570,11 @@ float imu_get_peak_accel_delta_mps2(void) {
     int16_t z = 0;
 
     if (imu_read_accel(&x, &y, &z) != ESP_OK) {
+        // Read failed: invalidate the baseline and count the failure toward the backoff threshold.
         s_prev_sample_valid = false;
         s_read_fail_streak += 1U;
         if (s_read_fail_streak >= IMU_READ_FAIL_BACKOFF_THRESHOLD) {
+            // Too many failures in a row: pause reads for a cooldown so the I2C bus can recover.
             s_read_backoff_until_ms = now_ms + IMU_READ_FAIL_BACKOFF_MS;
             ESP_LOGW(TAG,
                      "IMU read fail streak=%lu, apply backoff=%llums",
@@ -528,6 +585,7 @@ float imu_get_peak_accel_delta_mps2(void) {
         return s_accel_delta_window_peak_mps2;
     }
 
+    // Successful read clears the failure streak and any pending backoff.
     s_read_fail_streak = 0;
     s_read_backoff_until_ms = 0;
 
@@ -536,12 +594,14 @@ float imu_get_peak_accel_delta_mps2(void) {
      * LIS3DH (12-bit left-justified in 16-bit, FS=+/-2g): 1 mg/LSB after >>4, so raw/16.
      * LIS3DSH (16-bit, FS=+/-2g): 0.06 mg/LSB per datasheet.
      */
+    // Per-LSB scale to milli-g depends on the detected silicon's data format and full scale.
     float scale = imu_is_lis3dsh() ? 0.06f : (1.0f / 16.0f);
-    float x_mg = (float)x * scale;
-    float y_mg = (float)y * scale;
-    float z_mg = (float)z * scale;
+    float x_mg = (float)x * scale;  // X acceleration in milli-g.
+    float y_mg = (float)y * scale;  // Y acceleration in milli-g.
+    float z_mg = (float)z * scale;  // Z acceleration in milli-g.
 
     if (!s_prev_sample_valid) {
+        // First valid sample after init/backoff: seed the baseline and skip the delta this round.
         s_prev_x_mg = x_mg;
         s_prev_y_mg = y_mg;
         s_prev_z_mg = z_mg;
@@ -553,18 +613,23 @@ float imu_get_peak_accel_delta_mps2(void) {
      * Use acceleration delta instead of absolute magnitude so static gravity,
      * sensor offset, and mounting bias do not pin the score at rest.
      */
+    // Per-axis change since the previous sample (removes the constant gravity/offset component).
     float dx_mg = x_mg - s_prev_x_mg;
     float dy_mg = y_mg - s_prev_y_mg;
     float dz_mg = z_mg - s_prev_z_mg;
+    // Advance the baseline to the current sample for the next delta computation.
     s_prev_x_mg = x_mg;
     s_prev_y_mg = y_mg;
     s_prev_z_mg = z_mg;
 
+    // Euclidean magnitude of the 3-axis delta vector = overall movement intensity in mg.
     float delta_mg = sqrtf((dx_mg * dx_mg) + (dy_mg * dy_mg) + (dz_mg * dz_mg));
     if (delta_mg <= IMU_ACCEL_DELTA_DEADZONE_MG) {
+        // Below the deadzone: treat as sensor noise, do not raise the window peak.
         return s_accel_delta_window_peak_mps2;
     }
 
+    // Convert the movement magnitude to m/s^2 and keep only the largest seen this window (peak-hold).
     float accel_delta_mps2 = delta_mg * IMU_MG_TO_MPS2;
     if (accel_delta_mps2 > s_accel_delta_window_peak_mps2) {
         s_accel_delta_window_peak_mps2 = accel_delta_mps2;

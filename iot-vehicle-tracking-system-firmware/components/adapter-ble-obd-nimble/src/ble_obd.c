@@ -25,22 +25,23 @@
  */
 
 
-#define OBD_MODE_CURRENT_DATA 0x01
-#define OBD_TX_CHAR_UUID "0x2af1"
-#define OBD_RX_CHAR_UUID "0x2af0"
-#define OBD_SERVICE_UUID "0x18f0"
-#define BLE_OBD_ELM327_INTER_CMD_DELAY_MS 80
-#define BLE_OBD_DIAG_LOG_INTERVAL_MS 10000U
-#define BLE_OBD_CONNECT_TIMEOUT_DEFAULT_MS 15000U
-#define BLE_OBD_CONNECT_TIMEOUT_MIN_MS 7000U
+#define OBD_MODE_CURRENT_DATA 0x01           /* OBD-II service/mode 01: live current data. */
+#define OBD_TX_CHAR_UUID "0x2af1"            /* GATT characteristic the host writes ELM327 commands to. */
+#define OBD_RX_CHAR_UUID "0x2af0"            /* GATT characteristic delivering adapter responses via notifications. */
+#define OBD_SERVICE_UUID "0x18f0"            /* Vendor BLE service exposing the serial-over-GATT OBD adapter. */
+#define BLE_OBD_ELM327_INTER_CMD_DELAY_MS 80 /* Settling delay between consecutive ELM327 init commands. */
+#define BLE_OBD_DIAG_LOG_INTERVAL_MS 10000U  /* Minimum spacing between rolling diagnostic counter dumps. */
+#define BLE_OBD_CONNECT_TIMEOUT_DEFAULT_MS 15000U /* Fallback connect/discovery timeout when caller passes 0. */
+#define BLE_OBD_CONNECT_TIMEOUT_MIN_MS 7000U /* Floor applied to connect timeout so discovery always has room. */
 
+/* ECU/session state inferred from the latest OBD response, surfaced to higher layers for telemetry. */
 typedef enum {
-    BLE_OBD_RESPONSE_STATE_UNKNOWN = 0,
-    BLE_OBD_RESPONSE_STATE_LIVE,
-    BLE_OBD_RESPONSE_STATE_STOPPED,
-    BLE_OBD_RESPONSE_STATE_NO_DATA,
-    BLE_OBD_RESPONSE_STATE_SEARCHING,
-    BLE_OBD_RESPONSE_STATE_ERROR,
+    BLE_OBD_RESPONSE_STATE_UNKNOWN = 0,  /* No classification yet, or response did not match any known pattern. */
+    BLE_OBD_RESPONSE_STATE_LIVE,         /* Valid OBD payload decoded: ECU is responding with live data. */
+    BLE_OBD_RESPONSE_STATE_STOPPED,      /* Adapter reported "STOPPED" (transaction interrupted). */
+    BLE_OBD_RESPONSE_STATE_NO_DATA,      /* Adapter reported "NO DATA" (PID unsupported or ECU silent). */
+    BLE_OBD_RESPONSE_STATE_SEARCHING,    /* Adapter still negotiating the OBD protocol with the vehicle bus. */
+    BLE_OBD_RESPONSE_STATE_ERROR,        /* Error/'?'/"UNABLE TO CONNECT" reply observed. */
 } ble_obd_response_state_t;
 
 /**
@@ -99,7 +100,9 @@ struct ble_obd_ctx {
 
 static const char *TAG = "BLE_OBD";
 
-/* Characteristic definition order: TX first, RX second. */
+/* Characteristic definition order: TX first, RX second.
+ * Index 0 = write target (commands out), index 1 = notify source (responses in).
+ * ble_obd_tx_handle()/ble_obd_rx_handle() depend on this fixed ordering. */
 static ble_gatt_char_def_t s_obd_chars[] = {
     {.uuid = OBD_TX_CHAR_UUID, .handle = 0, .notify_cb = NULL},
     {.uuid = OBD_RX_CHAR_UUID, .handle = 0, .notify_cb = NULL},
@@ -265,10 +268,12 @@ static ble_obd_response_state_t ble_obd_classify_response_state(ble_obd_ctx_t *c
         return BLE_OBD_RESPONSE_STATE_UNKNOWN;
     }
 
+    /* A decoded OBD payload is the strongest signal: ECU is live. */
     if (has_valid_obd) {
         return BLE_OBD_RESPONSE_STATE_LIVE;
     }
 
+    /* Otherwise inspect the raw ELM327 text for well-known status keywords. */
     const char *response = ctx->rx_data.buf;
     if (ble_obd_name_contains_keyword(response, "stopped")) {
         return BLE_OBD_RESPONSE_STATE_STOPPED;
@@ -279,6 +284,7 @@ static ble_obd_response_state_t ble_obd_classify_response_state(ble_obd_ctx_t *c
     if (ble_obd_name_contains_keyword(response, "searching")) {
         return BLE_OBD_RESPONSE_STATE_SEARCHING;
     }
+    /* '?' flag or explicit error text maps to the error state. */
     if (ctx->rx_data.has_error || ble_obd_name_contains_keyword(response, "error") ||
         ble_obd_name_contains_keyword(response, "unable to connect")) {
         return BLE_OBD_RESPONSE_STATE_ERROR;
@@ -389,6 +395,7 @@ static bool ble_obd_parse_hex_response(const char *response, uint8_t *values, si
     size_t copy_len = MIN_VALUE(strlen(response), sizeof(parse_buf) - 1);
     memcpy(parse_buf, response, copy_len);
 
+    /* Turn the ELM prompt marker into whitespace so it splits tokens cleanly. */
     for (size_t i = 0; i < copy_len; ++i) {
         if (parse_buf[i] == '>') {
             parse_buf[i] = ' ';
@@ -397,18 +404,23 @@ static bool ble_obd_parse_hex_response(const char *response, uint8_t *values, si
 
     *out_count = 0;
     char *save = NULL;
+    /* Split on any whitespace/punctuation ELM327 may use between hex bytes. */
     char *token = strtok_r(parse_buf, " \r\n\t,;:", &save);
     while (token != NULL && *out_count < max_values) {
         size_t token_len = strlen(token);
+        /* Only even-length tokens of >=1 byte represent packed hex octets. */
         if ((token_len % 2) == 0 && token_len >= 2) {
             for (size_t i = 0; i + 1 < token_len && *out_count < max_values; i += 2) {
+                /* Skip non-hex pairs rather than aborting the whole token. */
                 if (!isxdigit((unsigned char)token[i]) || !isxdigit((unsigned char)token[i + 1])) {
                     continue;
                 }
 
+                /* Convert one two-char hex pair into a single byte value. */
                 char hex[3] = {token[i], token[i + 1], '\0'};
                 char *end_ptr = NULL;
                 long value = strtol(hex, &end_ptr, 16);
+                /* Accept only a fully-consumed pair within byte range. */
                 if (end_ptr == hex + 2 && value >= 0 && value <= 0xFF) {
                     values[*out_count] = (uint8_t)value;
                     (*out_count)++;
@@ -519,18 +531,22 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
     bool has_hex = ble_obd_parse_hex_response(ctx->rx_data.buf, values, ARRAY_SIZE(values), &value_count);
 
     bool has_valid_obd = false;
-    size_t payload_offset = 0;
+    size_t payload_offset = 0; /* Index of the first data byte once the response header is located. */
+    /* PID-bearing modes echo back mode+PID (2 bytes); modes like 03/07/0A echo only the mode (1 byte). */
     size_t required_header_len = ctx->tx_data.expect_pid_header ? 2U : 1U;
     if (has_hex && value_count >= required_header_len) {
         // Search the parsed bytes for the expected mode/PID header and discard stray echo/noise ahead of it.
         for (size_t i = 0; i + required_header_len - 1U < value_count; ++i) {
+            /* OBD-II positive responses set the high bit of the mode byte (request mode + 0x40). */
             if (values[i] != (ctx->tx_data.mode + 0x40)) {
                 continue;
             }
+            /* For PID requests the byte after the mode echo must match the requested PID. */
             if (ctx->tx_data.expect_pid_header && values[i + 1] != ctx->tx_data.pid) {
                 continue;
             }
 
+            /* Header matched: payload begins right after the mode (+PID) echo. */
             has_valid_obd = true;
             payload_offset = i + required_header_len;
             break;
@@ -855,15 +871,18 @@ int ble_obd_request_mode(ble_obd_ctx_t *ctx, uint8_t mode, uint32_t timeout_ms) 
 esp_err_t ble_obd_elm327_init(ble_obd_ctx_t *ctx) {
     ESP_RETURN_ON_NULL(ctx, ESP_ERR_INVALID_ARG, TAG, "ctx is NULL");
 
+    /* Baseline ELM327 setup: reset, disable echo/linefeed/spaces, hide headers,
+     * then force ISO 15765-4 CAN 11-bit/500k (protocol 6). */
     const char *commands[] = {
-        "ATZ\r",
-        "ATE0\r",
-        "ATL0\r",
-        "ATS0\r",
-        "ATH0\r",
-        "ATSP6\r",
+        "ATZ\r",    /* Full reset of the adapter. */
+        "ATE0\r",   /* Echo off so responses omit the sent command. */
+        "ATL0\r",   /* Linefeeds off. */
+        "ATS0\r",   /* Spaces off in hex output. */
+        "ATH0\r",   /* Headers off; only data bytes returned. */
+        "ATSP6\r",  /* Select protocol 6 (CAN 11-bit, 500 kbps). */
     };
 
+    /* Per-command timeouts; ATZ needs the longest as it reboots the adapter. */
     static const uint32_t command_timeouts_ms[] = {
         5000,
         2000,

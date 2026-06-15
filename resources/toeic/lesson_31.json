@@ -5,6 +5,45 @@
     {"text": "Bài 31 — So sánh nhất (superlative). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 — the + adj-est / the most + adj; bất quy tắc (best/worst); 'the' bắt buộc; one of the + so sánh nhất + danh từ số nhiều.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "So sánh nhất (superlative) so sánh một đối tượng với CẢ NHÓM (từ 3 trở lên), chỉ ra mức cao/thấp nhất. Luôn có mạo từ 'the' đứng trước."},
+
+    {"type": "h3", "text": "2. Quy tắc cấu tạo"},
+    {"type": "table", "headers": ["Loại tính từ/trạng từ", "Cấu trúc", "Ví dụ"], "rows": [
+      ["1 âm tiết", "the + adj-est", "cheap → the cheapest"],
+      ["1 âm tiết tận cùng -e", "+ st", "large → the largest"],
+      ["1 âm tiết nguyên âm-phụ âm", "gấp đôi + est", "big → the biggest"],
+      ["tận cùng phụ âm + y", "đổi y → iest", "easy → the easiest, busy → the busiest"],
+      ["2+ âm tiết", "the most + adj", "expensive → the most expensive"],
+      ["trạng từ -ly", "the most + adv", "efficiently → the most efficiently"]
+    ]},
+
+    {"type": "h3", "text": "3. Bất quy tắc"},
+    {"type": "table", "headers": ["Gốc", "So sánh nhất"], "rows": [
+      ["good / well", "the best"],
+      ["bad / badly", "the worst"],
+      ["far", "the farthest / the furthest"],
+      ["many / much", "the most"],
+      ["little", "the least"]
+    ]},
+
+    {"type": "h3", "text": "4. one of the + so sánh nhất + danh từ SỐ NHIỀU"},
+    {"type": "p", "text": "Cấu trúc rất hay gặp: one of the + superlative + N số nhiều: It is one of the largest factories in Asia. (không 'factory'). She is one of the most experienced managers."},
+
+    {"type": "h3", "text": "5. Phạm vi so sánh: in / of"},
+    {"type": "p", "text": "in + nơi chốn/nhóm (in the company, in Asia); of + tập hợp (of all the options, of the three): the tallest building in the city; the best of all the proposals."},
+
+    {"type": "h3", "text": "6. Trật tự & lưu ý"},
+    {"type": "ul", "items": [
+      "Luôn có 'the' trước so sánh nhất: the cheapest, the most reliable.",
+      "Có thể thêm sở hữu thay 'the': our best product, the company's largest market.",
+      "Nhấn mạnh: by far the best, the second largest."
+    ]},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) KHÔNG dùng cả 'most' và '-est' (most cheapest → the cheapest). (2) BẮT BUỘC có 'the'. (3) Tính từ dài → the most + adj (không thêm -est). (4) one of the + superlative + N SỐ NHIỀU. (5) good→the best, bad→the worst (bất quy tắc). (6) Phân biệt so sánh nhất (cả nhóm) với so sánh hơn (hai đối tượng)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Cấu trúc cơ bản",

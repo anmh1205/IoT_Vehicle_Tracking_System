@@ -283,11 +283,13 @@ static bool command_parse_u32_positive(const cJSON *value, uint32_t *out_value) 
     }
 
     if (cJSON_IsNumber(value)) {
+        // Reject non-positive or out-of-range numbers before narrowing the double.
         if (value->valuedouble <= 0.0 || value->valuedouble > (double)UINT32_MAX) {
             return false;
         }
 
         uint32_t parsed = (uint32_t)value->valuedouble;
+        // Round-trip check rejects fractional values like 12.5 that would be silently truncated.
         if ((double)parsed != value->valuedouble) {
             return false;
         }
@@ -300,14 +302,17 @@ static bool command_parse_u32_positive(const cJSON *value, uint32_t *out_value) 
         errno = 0;
         char *end_ptr = NULL;
         unsigned long parsed = strtoul(value->valuestring, &end_ptr, 10);
+        // No digits consumed or libc range error => not a valid number.
         if (end_ptr == value->valuestring || errno != 0) {
             return false;
         }
 
+        // Tolerate trailing whitespace, but nothing else after the digits.
         while (end_ptr != NULL && (*end_ptr == ' ' || *end_ptr == '\t')) {
             ++end_ptr;
         }
 
+        // Require full consumption, a strictly positive value, and a value within uint32 range.
         if (end_ptr == NULL || *end_ptr != '\0' || parsed == 0UL || parsed > (unsigned long)UINT32_MAX) {
             return false;
         }
@@ -448,6 +453,7 @@ static bool command_parse_u16_update_field(const cJSON *params,
         return false;
     }
 
+    // Clamp into the per-field safe range, then mark this rule index present in the delta bitmask.
     update->u16_values[rule_index] =
         (uint16_t)util_clamp_int((int)parsed, (int)rule->min_value, (int)rule->max_value);
     update->u16_present_mask |= (1UL << rule_index);
@@ -511,10 +517,11 @@ static bool command_apply_u16_updates(config_t *next_config, const command_confi
         }
 
         const command_u16_update_rule_t *rule = &s_update_u16_rules[i];
+        // Resolve the destination field by byte offset so one rule table drives every uint16 config member.
         uint16_t *target = (uint16_t *)((uint8_t *)next_config + rule->field_offset);
         uint16_t next_value = pending_update->u16_values[i];
         if (*target != next_value) {
-            *target = next_value;
+            *target = next_value; // Only write (and flag changed) when the value actually differs.
             changed = true;
         }
     }
@@ -543,10 +550,11 @@ static bool command_apply_bool_updates(config_t *next_config, const command_conf
         }
 
         const command_bool_update_rule_t *rule = &s_update_bool_rules[i];
+        // Resolve the destination bool field by byte offset, mirroring the uint16 apply path.
         bool *target = (bool *)((uint8_t *)next_config + rule->field_offset);
         bool next_value = pending_update->bool_values[i];
         if (*target != next_value) {
-            *target = next_value;
+            *target = next_value; // Only write (and flag changed) when the value actually differs.
             changed = true;
         }
     }

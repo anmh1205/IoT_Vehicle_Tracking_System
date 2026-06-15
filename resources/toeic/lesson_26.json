@@ -5,6 +5,33 @@
     {"text": "Bài 26 — Câu điều kiện loại 0 (sự thật/quy luật/quy định luôn đúng). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 — If + hiện tại đơn, ... hiện tại đơn (cả hai vế hiện tại). Dùng cho quy định, chỉ dẫn, sự thật hiển nhiên.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Câu điều kiện loại 0 (zero conditional) diễn tả SỰ THẬT HIỂN NHIÊN, quy luật khoa học, thói quen luôn đúng, hoặc hướng dẫn/quy trình — điều kiện luôn dẫn đến cùng kết quả. Phổ biến trong sổ tay, quy định công ty TOEIC."},
+
+    {"type": "h3", "text": "2. Công thức"},
+    {"type": "table", "headers": ["Mệnh đề If/When", "Mệnh đề chính", "Ví dụ"], "rows": [
+      ["If/When + hiện tại đơn", "hiện tại đơn", "If you heat water to 100°C, it boils."],
+      ["If/When + hiện tại đơn", "hiện tại đơn (quy trình)", "When the light turns red, the machine stops."]
+    ]},
+    {"type": "key", "text": "Cả HAI vế đều dùng HIỆN TẠI ĐƠN — đây là điểm khác biệt cốt lõi với loại 1 (vế chính dùng will)."},
+
+    {"type": "h3", "text": "3. if = when (với chân lý)"},
+    {"type": "p", "text": "Với sự thật luôn đúng, 'if' và 'when' thay thế được cho nhau (cùng nghĩa 'mỗi khi'): If/When you press this button, the system restarts."},
+
+    {"type": "h3", "text": "4. Dùng cho hướng dẫn & quy trình"},
+    {"type": "p", "text": "Loại 0 thường mô tả quy trình vận hành, chính sách: If an employee is sick, they notify their manager. When a payment is overdue, a reminder is sent automatically."},
+
+    {"type": "h3", "text": "5. Phân biệt loại 0 và loại 1"},
+    {"type": "table", "headers": ["", "Loại 0", "Loại 1"], "rows": [
+      ["Ý nghĩa", "luôn đúng / quy luật", "một tình huống tương lai cụ thể"],
+      ["Vế chính", "hiện tại đơn", "will + V"],
+      ["Ví dụ", "Ice melts if it gets warm.", "If it gets warm tomorrow, the ice will melt."]
+    ]},
+
+    {"type": "h3", "text": "6. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Loại 0: cả hai vế HIỆN TẠI ĐƠN (không 'will' ở vế chính). (2) if = when khi nói về chân lý/quy trình. (3) Đừng nhầm với loại 1 (kết quả tương lai cụ thể → will)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Cấu trúc cơ bản",

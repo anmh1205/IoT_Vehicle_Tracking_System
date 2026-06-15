@@ -5,6 +5,37 @@
     {"text": "Bài 34 — Đảo ngữ trong câu điều kiện (lược bỏ 'if', đưa trợ động từ lên đầu). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 nâng cao — Should + S + V (loại 1), Were + S (loại 2), Had + S + V3 (loại 3). Trang trọng, bỏ 'if'.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Đảo ngữ điều kiện là cách viết câu điều kiện TRANG TRỌNG bằng cách BỎ 'if' và đưa trợ động từ (Should/Were/Had) lên trước chủ ngữ. Nghĩa không đổi, chỉ trang trọng hơn — hay gặp trong văn bản, email công sở ở TOEIC."},
+
+    {"type": "h3", "text": "2. Bảng đảo ngữ theo loại điều kiện"},
+    {"type": "table", "headers": ["Loại", "Câu thường (if)", "Đảo ngữ (bỏ if)"], "rows": [
+      ["1", "If you need help, …", "Should you need help, …"],
+      ["2 (be)", "If I were you, …", "Were I you, …"],
+      ["2 (động từ thường)", "If the company expanded, …", "Were the company to expand, …"],
+      ["3", "If we had known, …", "Had we known, …"]
+    ]},
+
+    {"type": "h3", "text": "3. Loại 1 — Should + S + V"},
+    {"type": "p", "text": "Should + S + V (nguyên thể), vế chính dùng will/imperative: Should you have any questions, please contact us. (= If you should have / If you have any questions). Diễn tả khả năng ở tương lai."},
+
+    {"type": "h3", "text": "4. Loại 2 — Were + S (+ to V)"},
+    {"type": "p", "text": "Dùng 'Were' cho MỌI ngôi: Were I in your position, I would accept. Với động từ thường dùng 'Were + S + to + V': Were the deal to fall through, we would lose a client."},
+
+    {"type": "h3", "text": "5. Loại 3 — Had + S + V3"},
+    {"type": "p", "text": "Had + S + V3, vế chính would have + V3: Had we acted sooner, we would have avoided the loss. (= If we had acted sooner)."},
+
+    {"type": "h3", "text": "6. Cách chọn nhanh"},
+    {"type": "ul", "items": [
+      "Khả năng tương lai → Should + S + V (loại 1).",
+      "Giả định hiện tại → Were + S (loại 2).",
+      "Trái với quá khứ → Had + S + V3 (loại 3)."
+    ]},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) KHÔNG dùng cả 'if' và đảo ngữ ('If had we known' SAI → 'Had we known'). (2) Loại 2 dùng 'Were' cho mọi ngôi (không 'Was I'). (3) Sau Should + S dùng V NGUYÊN THỂ (không 'will'). (4) Had + S + V3 (cột 3), vế chính would have + V3."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Đảo ngữ điều kiện loại 1 (Should)",

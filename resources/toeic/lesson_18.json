@@ -5,6 +5,38 @@
     {"text": "Bài 18 — Câu bị động cơ bản (be + V3). Làm câu hỏi ngay sau mỗi phần, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 hỏi chọn dạng bị động (be + V3) theo đúng thì, và phân biệt với chủ động. Bẫy: sau be/been/modal phải là V3.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & khi nào dùng"},
+    {"type": "p", "text": "Câu bị động (passive voice) nhấn mạnh vào ĐỐI TƯỢNG bị tác động thay vì người thực hiện. Dùng khi: tác nhân không quan trọng/không biết, hoặc muốn khách quan, trang trọng (rất phổ biến trong thông báo, quy trình, báo cáo TOEIC). Công thức gốc: be + V3 (quá khứ phân từ)."},
+
+    {"type": "h3", "text": "2. Cách chuyển chủ động → bị động"},
+    {"type": "p", "text": "Tân ngữ của câu chủ động trở thành chủ ngữ của câu bị động; động từ đổi thành 'be + V3' (chia 'be' theo thì và số của chủ ngữ mới); chủ ngữ cũ (tác nhân) chuyển ra sau 'by' (có thể bỏ). Ví dụ: The team completed the project. → The project was completed (by the team)."},
+
+    {"type": "h3", "text": "3. Bị động theo từng thì"},
+    {"type": "table", "headers": ["Thì", "Bị động (be + V3)", "Ví dụ"], "rows": [
+      ["Hiện tại đơn", "am/is/are + V3", "The reports are reviewed daily."],
+      ["Quá khứ đơn", "was/were + V3", "The contract was signed yesterday."],
+      ["Tương lai (will)", "will be + V3", "The goods will be shipped on Friday."],
+      ["Hiện tại tiếp diễn", "am/is/are being + V3", "The office is being renovated."],
+      ["Quá khứ tiếp diễn", "was/were being + V3", "The system was being upgraded."]
+    ]},
+    {"type": "note", "text": "Hiện tại/quá khứ hoàn thành bị động (has been/had been + V3) học ở Bài 20; bị động với modal (must be done) học ở Bài 19.", "emoji": "📌", "color": "gray_background"},
+
+    {"type": "h3", "text": "4. 'by + tác nhân'"},
+    {"type": "p", "text": "Thêm 'by + người/vật thực hiện' khi cần nêu tác nhân: The proposal was approved by the board. Bỏ 'by …' khi tác nhân không quan trọng hoặc đã rõ: The store is closed at 9 p.m."},
+
+    {"type": "h3", "text": "5. Bị động với động từ có 2 tân ngữ"},
+    {"type": "p", "text": "Các động từ như give, send, offer, show, tell, pay có 2 tân ngữ → có 2 cách bị động: They sent the client a quote. → The client was sent a quote. / A quote was sent to the client."},
+
+    {"type": "h3", "text": "6. Động từ KHÔNG có dạng bị động"},
+    {"type": "p", "text": "Nội động từ (không có tân ngữ) không thể chuyển bị động: happen, occur, arrive, appear, exist, rise, seem, become. Sai: 'The accident was happened' → đúng 'The accident happened'."},
+
+    {"type": "h3", "text": "7. Tính từ -ed dễ nhầm với bị động"},
+    {"type": "p", "text": "Một số cấu trúc 'be + V3' thực chất là tính từ chỉ trạng thái + giới từ cố định: be interested in, be involved in, be located in, be satisfied with, be known for. Đây là điểm giao với Bài 06 (tính từ -ed)."},
+
+    {"type": "h3", "text": "8. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Bị động = be + V3 (cột 3), KHÔNG phải be + V-ing (The report is reviewed, không 'is reviewing' khi mang nghĩa bị động). (2) Chia 'be' đúng thì & số. (3) Nội động từ (happen, arrive) không có bị động. (4) Dùng V3 đúng (was wrote → was written)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Cấu trúc và cách dùng",

@@ -189,6 +189,15 @@ bool s_last_ignition_state = false;
 /** @brief Current FSM state hint used by shared helpers outside the main switch. */
 app_state_t s_runtime_state_hint = APP_STATE_INIT;
 
+/*
+ * Each policy below uses max_attempts=0 (retry forever) and jitter_ms=0 because
+ * these recovery paths must keep trying for the lifetime of the boot; the caller
+ * gates them by ignition/runtime context rather than by an attempt ceiling.
+ */
+
+/* Driving-mode BLE OBD reconnect: exponential backoff that can grow up to the
+ * full max backoff because an active drive can tolerate longer gaps between
+ * connect attempts once the link is repeatedly failing. */
 const retry_policy_t g_state_ble_retry_policy = {
     .mode = RETRY_MODE_EXPONENTIAL,
     .base_delay_ms = (uint32_t)TRACKER_BLE_RETRY_MIN_BACKOFF_MS,
@@ -197,6 +206,9 @@ const retry_policy_t g_state_ble_retry_policy = {
     .jitter_ms = 0,
 };
 
+/* Parked-mode BLE OBD reconnect: same shape as the driving policy but capped at
+ * a shorter max backoff so a parked tracker still re-probes the OBD link often
+ * enough to detect an ignition-on event promptly. */
 const retry_policy_t g_state_ble_retry_parked_policy = {
     .mode = RETRY_MODE_EXPONENTIAL,
     .base_delay_ms = (uint32_t)TRACKER_BLE_RETRY_MIN_BACKOFF_MS,
@@ -205,6 +217,8 @@ const retry_policy_t g_state_ble_retry_parked_policy = {
     .jitter_ms = 0,
 };
 
+/* Network/MQTT reconnect: exponential backoff to avoid hammering the broker
+ * while the LTE link recovers. */
 const retry_policy_t g_state_network_retry_policy = {
     .mode = RETRY_MODE_EXPONENTIAL,
     .base_delay_ms = (uint32_t)TRACKER_NETWORK_RETRY_MIN_BACKOFF_MS,
@@ -213,6 +227,8 @@ const retry_policy_t g_state_network_retry_policy = {
     .jitter_ms = 0,
 };
 
+/* RTC bootstrap: fixed 1s cadence. The I2C RTC either responds quickly or not,
+ * so a steady poll is preferable to exponential growth here. */
 const retry_policy_t g_state_rtc_bootstrap_retry_policy = {
     .mode = RETRY_MODE_FIXED,
     .base_delay_ms = 1000,
@@ -221,6 +237,7 @@ const retry_policy_t g_state_rtc_bootstrap_retry_policy = {
     .jitter_ms = 0,
 };
 
+/* RTC time read: fixed cadence retry for transient bus read failures. */
 const retry_policy_t g_state_rtc_read_retry_policy = {
     .mode = RETRY_MODE_FIXED,
     .base_delay_ms = (uint32_t)TRACKER_RTC_READ_RETRY_BACKOFF_MS,
@@ -229,6 +246,8 @@ const retry_policy_t g_state_rtc_read_retry_policy = {
     .jitter_ms = 0,
 };
 
+/* IMU bootstrap: exponential backoff so a missing/unhealthy accelerometer does
+ * not keep the I2C bus busy with rapid-fire init attempts. */
 const retry_policy_t g_state_imu_bootstrap_retry_policy = {
     .mode = RETRY_MODE_EXPONENTIAL,
     .base_delay_ms = (uint32_t)TRACKER_IMU_BOOTSTRAP_RETRY_MIN_BACKOFF_MS,

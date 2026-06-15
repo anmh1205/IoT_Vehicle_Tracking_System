@@ -5,6 +5,37 @@
     {"text": "Bài 22 — Mệnh đề quan hệ xác định (defining: thiết yếu, KHÔNG dấu phẩy). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 chọn who/which/that/whose/where/when; biết khi nào lược bỏ được đại từ; phân biệt with mệnh đề không xác định.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Mệnh đề quan hệ XÁC ĐỊNH (defining) xác định/giới hạn danh từ đứng trước — bỏ đi thì câu thiếu nghĩa hoặc đổi nghĩa. KHÔNG dùng dấu phẩy. Đây là dạng phổ biến nhất ở Part 5/6."},
+
+    {"type": "h3", "text": "2. Đại từ & trạng từ quan hệ"},
+    {"type": "table", "headers": ["Từ", "Thay cho", "Ví dụ"], "rows": [
+      ["who", "người (chủ/tân ngữ)", "the manager who approved it"],
+      ["which", "vật/sự việc", "the report which arrived late"],
+      ["that", "người HOẶC vật", "the client that called / the file that we sent"],
+      ["whose", "sở hữu", "the employee whose ID expired"],
+      ["where", "nơi chốn", "the office where she works"],
+      ["when", "thời gian", "the day when we launched"],
+      ["why", "lý do", "the reason why it failed"]
+    ]},
+
+    {"type": "h3", "text": "3. 'that' trong mệnh đề xác định"},
+    {"type": "p", "text": "Trong mệnh đề xác định, 'that' có thể thay who/which (cho cả người và vật) và rất thông dụng: the candidate that/who impressed us; the product that/which sells best. (Lưu ý: mệnh đề KHÔNG xác định ở Bài 21 thì không dùng 'that'.)"},
+
+    {"type": "h3", "text": "4. Lược bỏ đại từ quan hệ (khi là TÂN NGỮ)"},
+    {"type": "p", "text": "Có thể BỎ who/which/that khi nó làm TÂN NGỮ của mệnh đề quan hệ: the report (that) we sent yesterday; the client (whom) we met. KHÔNG được bỏ khi nó làm CHỦ NGỮ: the employee WHO signed it (không bỏ 'who')."},
+    {"type": "key", "text": "Mẹo: sau đại từ quan hệ nếu NGAY LẬP TỨC là một động từ → nó là chủ ngữ → KHÔNG lược. Nếu sau đó là một chủ ngữ mới (we, the company…) → nó là tân ngữ → CÓ THỂ lược."},
+
+    {"type": "h3", "text": "5. Hòa hợp động từ trong mệnh đề quan hệ"},
+    {"type": "p", "text": "Động từ trong mệnh đề quan hệ chia theo DANH TỪ mà nó thay thế: the employees who work here (số nhiều); the employee who works here (số ít)."},
+
+    {"type": "h3", "text": "6. Giới từ với mệnh đề quan hệ"},
+    {"type": "p", "text": "Văn nói: để giới từ ở cuối — the project (that) we are working on. Văn trang trọng: giới từ + whom/which — the project on which we are working."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) KHÔNG dấu phẩy trong mệnh đề xác định. (2) Lược đại từ quan hệ chỉ khi là TÂN NGỮ, không lược khi là CHỦ NGỮ. (3) who cho người, which cho vật, that cho cả hai. (4) whose + danh từ (sở hữu). (5) Động từ trong mệnh đề chia theo tiền ngữ (danh từ được thay thế)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · who / which / that làm chủ ngữ",

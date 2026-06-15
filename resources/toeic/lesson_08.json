@@ -5,6 +5,50 @@
     {"text": "Bài 08 — Giới từ (Prepositions). Đọc lý thuyết → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 hỏi giới từ thời gian (in/on/at, by/until), nơi chốn, cụm động từ + giới từ, và phân biệt giới từ (+danh từ) với liên từ (+mệnh đề).", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & chức năng"},
+    {"type": "p", "text": "Giới từ (preposition) đứng trước danh từ/đại từ/V-ing để chỉ thời gian, nơi chốn, hướng, hoặc tạo cụm cố định. Sau giới từ luôn là DANH TỪ hoặc V-ing, không phải mệnh đề có chủ ngữ–động từ chia."},
+
+    {"type": "h3", "text": "2. Giới từ chỉ thời gian"},
+    {"type": "table", "headers": ["Giới từ", "Dùng cho", "Ví dụ"], "rows": [
+      ["at", "giờ, thời điểm, night", "at 9 a.m., at noon, at night"],
+      ["on", "ngày, thứ, ngày tháng", "on Monday, on May 5, on weekdays"],
+      ["in", "tháng, năm, mùa, buổi", "in July, in 2020, in the morning"],
+      ["by", "hạn chót (trước/đúng lúc)", "Submit by Friday."],
+      ["until/till", "kéo dài đến", "Open until 6 p.m."],
+      ["during", "trong suốt (+ N)", "during the meeting"],
+      ["for / since", "khoảng / mốc", "for two hours / since 2019"],
+      ["within / in", "trong vòng", "within 24 hours"]
+    ]},
+
+    {"type": "h3", "text": "3. Giới từ chỉ nơi chốn & hướng"},
+    {"type": "ul", "items": [
+      "at (một điểm): at the office, at the entrance. in (không gian/bên trong): in the building, in Hanoi. on (bề mặt): on the desk, on the wall.",
+      "Hướng/chuyển động: to, into, onto, from, through, across, along, toward(s), out of.",
+      "Vị trí khác: between (giữa 2), among (giữa nhiều), next to, near, above, below, in front of, behind, opposite."
+    ]},
+
+    {"type": "h3", "text": "4. by vs until (hay bẫy)"},
+    {"type": "p", "text": "by = hành động HOÀN TẤT trước/đúng một mốc (Please reply by Monday – nộp trước thứ Hai). until/till = trạng thái KÉO DÀI cho đến mốc đó (The office is open until 6 – mở liên tục tới 6 giờ)."},
+
+    {"type": "h3", "text": "5. Cụm giới từ cố định công sở (TOEIC ruột)"},
+    {"type": "ul", "items": [
+      "in charge of, responsible for, in addition to, due to, according to, regardless of, on behalf of, in advance, in response to, in accordance with, instead of, prior to, thanks to, as a result of, with regard to."
+    ]},
+
+    {"type": "h3", "text": "6. Giới từ đi sau động từ / tính từ"},
+    {"type": "table", "headers": ["Loại", "Ví dụ cặp cố định"], "rows": [
+      ["Verb + prep", "depend on, rely on, comply with, account for, apply for, deal with, focus on, consist of, result in"],
+      ["Adj + prep", "interested in, responsible for, capable of, aware of, familiar with, similar to, different from"],
+      ["Be + prep", "be committed to, be related to, be subject to"]
+    ]},
+
+    {"type": "h3", "text": "7. Giới từ + V-ing"},
+    {"type": "p", "text": "Sau giới từ, động từ phải ở dạng V-ing: interested in working, before submitting, instead of waiting, by improving, look forward to hearing (to ở đây là giới từ → hearing, không phải 'to hear')."},
+
+    {"type": "h3", "text": "8. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) at/on/in thời gian: at + giờ, on + ngày, in + tháng/năm. (2) by (hạn chót) vs until (kéo dài). (3) due to / despite / because of + DANH TỪ, không + mệnh đề. (4) Sau giới từ dùng V-ing (look forward to meeting). (5) Thuộc cụm verb/adj + prep cố định để chọn đúng giới từ."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Giới từ chỉ thời gian",

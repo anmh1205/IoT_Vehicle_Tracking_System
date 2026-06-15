@@ -5,6 +5,41 @@
     {"text": "Bài 14 — Phân biệt Danh động từ (V-ing) và Nguyên mẫu có to (to V). Đây là bài tổng hợp của Bài 12 và Bài 13. Làm câu hỏi ngay sau mỗi phần, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 hỏi chọn to V hay V-ing sau một động từ; và cấu trúc 'động từ + tân ngữ + to V' vs 'make/let/have sb + V trần'.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Tổng quan"},
+    {"type": "p", "text": "Sau một động từ, động từ thứ hai có thể ở dạng to V hoặc V-ing tùy động từ đứng trước. Có 3 nhóm: (a) chỉ theo to V; (b) chỉ theo V-ing; (c) theo cả hai — có khi nghĩa giống, có khi nghĩa KHÁC hẳn."},
+
+    {"type": "h3", "text": "2. Nhóm chỉ theo to V"},
+    {"type": "p", "text": "want, need, decide, agree, hope, plan, expect, refuse, manage, offer, promise, learn, afford, fail, intend, arrange, prepare, choose, would like + to V. Ví dụ: They decided to postpone the launch."},
+
+    {"type": "h3", "text": "3. Nhóm chỉ theo V-ing"},
+    {"type": "p", "text": "enjoy, avoid, finish, mind, suggest, recommend, consider, postpone, delay, deny, admit, discuss, practice, keep, miss, involve, risk, imagine, give up + V-ing. Ví dụ: We recommend reviewing the contract."},
+
+    {"type": "h3", "text": "4. Nhóm theo cả hai — NGHĨA GIỐNG NHAU"},
+    {"type": "p", "text": "like, love, hate, prefer, start, begin, continue, bother + to V hoặc V-ing, nghĩa gần như không đổi: It started to rain = It started raining."},
+
+    {"type": "h3", "text": "5. Nhóm theo cả hai — NGHĨA KHÁC NHAU (trọng tâm)"},
+    {"type": "table", "headers": ["Động từ", "+ to V", "+ V-ing"], "rows": [
+      ["remember", "nhớ SẼ làm (việc chưa làm)", "nhớ ĐÃ làm (việc đã xong)"],
+      ["forget", "quên PHẢI làm", "quên rằng ĐÃ làm"],
+      ["stop", "dừng lại ĐỂ làm việc khác", "ngừng HẲN việc đang làm"],
+      ["try", "cố gắng (nỗ lực)", "thử (làm xem sao)"],
+      ["regret", "tiếc PHẢI báo (tin xấu)", "hối hận VÌ đã làm"],
+      ["need", "cần làm (chủ động)", "cần ĐƯỢC làm (= bị động)"],
+      ["mean", "có ý định, định", "đồng nghĩa là, kéo theo"]
+    ]},
+    {"type": "key", "text": "Ví dụ: Remember to send the email (nhớ gửi đi) ≠ I remember sending it (nhớ đã gửi). The report needs to be revised = The report needs revising (cần được sửa)."},
+
+    {"type": "h3", "text": "6. Mẹo nhận diện trong Part 5"},
+    {"type": "ul", "items": [
+      "Nhìn ĐỘNG TỪ đứng trước chỗ trống → tra nhóm (a/b/c) để quyết định to V hay V-ing.",
+      "Sau GIỚI TỪ → luôn V-ing (không phụ thuộc động từ).",
+      "Sau modal (will/can/must) và make/let + sb → nguyên thể KHÔNG 'to'."
+    ]},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) suggest/recommend/consider/avoid + V-ing (không to V). (2) decide/agree/manage/refuse + to V. (3) remember/stop/try đổi nghĩa theo to V hay V-ing. (4) 'need + V-ing' = 'need to be + V3' (bị động): The machine needs cleaning = needs to be cleaned."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Nhóm động từ + to V",

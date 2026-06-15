@@ -146,15 +146,30 @@ static const char *util_ota_http_transport_error_name(int status_code) {
 
 /**
  * @brief Reset HTTP action state.
+ *
+ * Clears the latched +HTTPACTION result so a new request starts from a clean
+ * slate. Sentinels of -1 mark "no value yet" for method/status/length.
  */
 void util_ota_http_action_reset(void) {
-    s_ota_http_action.waiting = false;
-    s_ota_http_action.ready = false;
-    s_ota_http_action.method = -1;
-    s_ota_http_action.status_code = -1;
-    s_ota_http_action.data_len = -1;
+    s_ota_http_action.waiting = false;     // Not yet armed for a response.
+    s_ota_http_action.ready = false;       // No result latched.
+    s_ota_http_action.method = -1;         // Unknown HTTP method.
+    s_ota_http_action.status_code = -1;    // Unknown status code.
+    s_ota_http_action.data_len = -1;       // Unknown body length.
 }
 
+/**
+ * @brief Parse a single "+HTTPACTION: method,status,len" URC line.
+ *
+ * Accepts both the spaced and unspaced modem formats. All three numeric fields
+ * must be present for the line to be considered valid.
+ *
+ * @param[in] line Raw URC text line.
+ * @param[out] out_method Parsed HTTP method id (0 == GET).
+ * @param[out] out_status_code Parsed HTTP/transport status code.
+ * @param[out] out_data_len Parsed response body length.
+ * @return true when all three fields parsed, false otherwise.
+ */
 static bool util_ota_parse_httpaction_urc_line(const char *line,
                                                int *out_method,
                                                int *out_status_code,
@@ -166,12 +181,13 @@ static bool util_ota_parse_httpaction_urc_line(const char *line,
     int method = -1;
     int status_code = -1;
     int data_len = -1;
+    // Try the spaced format first, then fall back to the compact (no-space) variant.
     int parsed = sscanf(line, "+HTTPACTION: %d,%d,%d", &method, &status_code, &data_len);
     if (parsed != 3) {
         parsed = sscanf(line, "+HTTPACTION:%d,%d,%d", &method, &status_code, &data_len);
     }
     if (parsed != 3) {
-        return false;
+        return false; // Not a complete HTTPACTION result line.
     }
 
     *out_method = method;
@@ -180,18 +196,28 @@ static bool util_ota_parse_httpaction_urc_line(const char *line,
     return true;
 }
 
+/**
+ * @brief URC callback that latches the asynchronous +HTTPACTION result.
+ *
+ * Invoked from the modem RX path for every matching URC. It only records a
+ * result while a request is actively waiting, then sets `ready` so the polling
+ * waiter can pick it up.
+ *
+ * @param[in] line Raw URC line delivered by the modem driver.
+ */
 static void util_ota_httpaction_urc_cb(const char *line) {
     if (!s_ota_http_action.waiting || line == NULL) {
-        return;
+        return; // Ignore stray URCs when no request is in flight.
     }
 
     int method = -1;
     int status_code = -1;
     int data_len = -1;
     if (!util_ota_parse_httpaction_urc_line(line, &method, &status_code, &data_len)) {
-        return;
+        return; // Not the line we are waiting for.
     }
 
+    // Latch the result and flag it ready for the blocking waiter to consume.
     s_ota_http_action.method = method;
     s_ota_http_action.status_code = status_code;
     s_ota_http_action.data_len = data_len;
@@ -199,11 +225,18 @@ static void util_ota_httpaction_urc_cb(const char *line) {
 }
 
 /**
- * @brief Register HTTP URC once.
+ * @brief Register the +HTTPACTION URC callback exactly once per boot.
+ *
+ * The SIM7600 reports HTTP transfer completion asynchronously, so the URC
+ * handler must be installed before any AT+HTTPACTION request. Registration is
+ * idempotent: the guard flag prevents stacking duplicate handlers across
+ * repeated OTA attempts within the same session.
+ *
+ * @note Safe to call on every OTA run; only the first call installs the URC.
  */
 void util_ota_http_register_urc_once(void) {
     if (s_ota_http_urc_registered) {
-        return;
+        return; // Handler already installed; avoid duplicate registrations.
     }
 
     modem_at_register_urc("+HTTPACTION:", util_ota_httpaction_urc_cb);
@@ -211,42 +244,58 @@ void util_ota_http_register_urc_once(void) {
 }
 
 /**
- * @brief Wait for HTTP action response.
+ * @brief Block until the asynchronous +HTTPACTION result arrives or time out.
  *
- * @param out_status_code Output status code.
- * @param out_data_len Output data length.
- * @param timeout_ms Timeout in ms.
- * @return ESP_OK on success.
+ * Polls the modem RX path so the URC handler can latch the transfer outcome,
+ * then hands back the status code and body length. The waiter is disarmed on
+ * both success and timeout so a late/stray URC from this request is ignored by
+ * a subsequent transfer.
+ *
+ * @param[out] out_status_code Receives the HTTP status (or a 7xx transport error).
+ * @param[out] out_data_len Receives the response body length reported by the modem.
+ * @param[in] timeout_ms Maximum time to wait for the result, in milliseconds.
+ * @return ESP_OK when a result was latched, ESP_ERR_TIMEOUT on deadline,
+ *         ESP_ERR_INVALID_ARG when an output pointer is NULL.
  */
 esp_err_t util_ota_wait_http_action(int *out_status_code, int *out_data_len, uint32_t timeout_ms) {
     ESP_RETURN_ON_NULL(out_status_code, ESP_ERR_INVALID_ARG, UTIL_TAG, "out_status_code is NULL");
     ESP_RETURN_ON_NULL(out_data_len, ESP_ERR_INVALID_ARG, UTIL_TAG, "out_data_len is NULL");
 
+    // Poll the URC pump until the result is latched or the deadline passes.
     uint64_t deadline_ms = util_uptime_ms() + (uint64_t)timeout_ms;
     while (util_uptime_ms() < deadline_ms) {
         if (s_ota_http_action.ready) {
+            // Result arrived: hand it back and disarm so late URCs are ignored.
             *out_status_code = s_ota_http_action.status_code;
             *out_data_len = s_ota_http_action.data_len;
             s_ota_http_action.waiting = false;
             return ESP_OK;
         }
 
+        // Drain modem RX so the +HTTPACTION URC can be parsed, then back off briefly.
         (void)modem_at_poll_urc(OTA_HTTP_URC_POLL_BYTES);
         vTaskDelay(pdMS_TO_TICKS(OTA_HTTP_URC_POLL_INTERVAL_MS));
     }
 
+    // Timed out waiting for the transfer result; disarm to avoid a stale match later.
     s_ota_http_action.waiting = false;
     return ESP_ERR_TIMEOUT;
 }
 
 /**
- * @brief Parse HTTPREAD payload from response.
+ * @brief Extract the binary payload span out of a raw +HTTPREAD response.
  *
- * @param response Response buffer.
- * @param response_len Buffer length.
- * @param out_data Output data pointer.
- * @param out_len Output data length.
- * @return True if parsed successfully.
+ * The modem frames each ranged read as `+HTTPREAD: [DATA,]<len>\r\n<bytes>`.
+ * This locates the header anywhere in the buffer, parses the declared length
+ * (rejecting overflow or sizes that exceed the buffer), skips to the byte after
+ * the header newline, and returns a pointer/length into the original buffer.
+ * No copy is made; the caller must not free @p out_data separately.
+ *
+ * @param[in] response Raw modem response buffer (header + framed payload).
+ * @param[in] response_len Number of valid bytes in @p response.
+ * @param[out] out_data Receives a pointer to the first payload byte inside @p response.
+ * @param[out] out_len Receives the declared payload length in bytes.
+ * @return true when a complete, in-bounds payload was located, false otherwise.
  */
 bool util_ota_parse_httpread_payload(const uint8_t *response,
                                      size_t response_len,
@@ -256,6 +305,7 @@ bool util_ota_parse_httpread_payload(const uint8_t *response,
         return false;
     }
 
+    // Step 1: locate the "+HTTPREAD:" header anywhere inside the response buffer.
     const char *prefix = "+HTTPREAD:";
     size_t prefix_len = strlen(prefix);
     size_t header_pos = SIZE_MAX;
@@ -266,9 +316,10 @@ bool util_ota_parse_httpread_payload(const uint8_t *response,
         }
     }
     if (header_pos == SIZE_MAX) {
-        return false;
+        return false; // No HTTPREAD framing present.
     }
 
+    // Step 2: skip optional whitespace and an optional "DATA," token after the header.
     size_t cursor = header_pos + prefix_len;
     while (cursor < response_len && (response[cursor] == ' ' || response[cursor] == '\t')) {
         ++cursor;
@@ -278,9 +329,10 @@ bool util_ota_parse_httpread_payload(const uint8_t *response,
         cursor += strlen("DATA,");
     }
     if (cursor >= response_len || !isdigit((unsigned char)response[cursor])) {
-        return false;
+        return false; // Expected a numeric declared-length field here.
     }
 
+    // Step 3: parse the declared payload length, rejecting overflow or impossible sizes.
     size_t declared_len = 0U;
     while (cursor < response_len && isdigit((unsigned char)response[cursor])) {
         size_t next = (declared_len * 10U) + (size_t)(response[cursor] - '0');
@@ -292,38 +344,47 @@ bool util_ota_parse_httpread_payload(const uint8_t *response,
         ++cursor;
     }
     if (declared_len == 0U) {
-        return false;
+        return false; // A zero-length payload carries no data.
     }
 
+    // Step 4: advance to the end of the header line; the binary payload starts after the newline.
     while (cursor < response_len && response[cursor] != '\n') {
         ++cursor;
     }
     if (cursor >= response_len) {
-        return false;
+        return false; // Header line was never terminated.
     }
 
+    // Step 5: ensure the declared payload actually fits inside the received buffer.
     size_t data_offset = cursor + 1U;
     if (data_offset + declared_len > response_len) {
-        return false;
+        return false; // Truncated payload.
     }
 
-    *out_data = response + data_offset;
-    *out_len = declared_len;
+    *out_data = response + data_offset; // Point at the first payload byte.
+    *out_len = declared_len;            // Report the exact declared length.
     return true;
 }
 
 /**
- * @brief Check if data is hex ASCII bytes.
+ * @brief Probe whether a chunk is ASCII-hex encoded rather than raw binary.
  *
- * @param data Data buffer.
- * @param len Buffer length.
- * @return True if all bytes are hex digits.
+ * Some SIM7600 firmware returns the HTTP body as an ASCII hex string instead of
+ * raw bytes. A hex stream must be non-empty, have an even length (two chars per
+ * byte), and contain only hexadecimal digits. A single non-hex byte means the
+ * transport is raw binary and the image can be written without decoding.
+ *
+ * @param[in] data Chunk bytes to inspect.
+ * @param[in] len Number of bytes in @p data.
+ * @return true when every byte is a hex digit (treat as hex transport), else false.
  */
 bool util_is_hex_ascii_bytes(const uint8_t *data, size_t len) {
+    // Hex-encoded payloads must be non-empty and have an even length (2 chars per byte).
     if (data == NULL || len == 0U || (len % 2U) != 0U) {
         return false;
     }
 
+    // A single non-hex character means the stream is raw binary, not ASCII hex.
     for (size_t i = 0; i < len; ++i) {
         if (!isxdigit((unsigned char)data[i])) {
             return false;
@@ -333,6 +394,19 @@ bool util_is_hex_ascii_bytes(const uint8_t *data, size_t len) {
     return true;
 }
 
+/**
+ * @brief Program the modem SSL context used for OTA HTTPS downloads.
+ *
+ * Configures the dedicated OTA SSL context slot end to end: pins a modern TLS
+ * version, applies the build-time server-verification auth mode, loads the CA
+ * certificate (when verification is enabled), sets the local-time and
+ * negotiation policies, enables SNI for shared-hostname firmware CDNs, and
+ * finally binds the prepared context to the modem HTTP client profile. Each
+ * AT+CSSLCFG step is checked so a misconfigured context fails fast before the
+ * download starts.
+ *
+ * @return ESP_OK when every SSL/HTTP parameter was accepted, else ESP_FAIL.
+ */
 esp_err_t util_ota_configure_https_ssl_context(void) {
     char cmd[96] = {0};
 
@@ -393,6 +467,16 @@ esp_err_t util_ota_configure_https_ssl_context(void) {
     return ESP_OK;
 }
 
+/**
+ * @brief Map a SIM7600 transport status code to a human-readable name.
+ *
+ * Thin public wrapper over the internal 7xx error-name table so OTA logging can
+ * annotate non-200 outcomes (e.g. TLS handshake or DNS failures) with a stable
+ * label. Codes outside the known transport range return "n/a".
+ *
+ * @param status_code +HTTPACTION transport status code reported by the modem.
+ * @return Stable error-name string; never NULL.
+ */
 const char *util_ota_http_status_name(int status_code) {
     return util_ota_http_transport_error_name(status_code);
 }

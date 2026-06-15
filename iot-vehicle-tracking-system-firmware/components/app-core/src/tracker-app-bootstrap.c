@@ -33,9 +33,15 @@
 /* Logging tag for main application module. */
 static const char *TAG = "TRACKER_MAIN";
 
-/** Init retry state. */
+/** Init retry state: tracks attempt count and next-allowed time for state_machine_init(). */
 static retry_state_t s_init_retry = {0};
-/** Init retry policy. */
+/**
+ * Init retry policy: fixed 10s cadence with no attempt cap.
+ *
+ * A bounded, deterministic delay keeps boot logs readable and guarantees the
+ * device keeps trying to initialize subsystems forever rather than wedging if
+ * one driver is briefly unavailable at power-on.
+ */
 static const retry_policy_t s_init_retry_policy = {
     .mode = RETRY_MODE_FIXED,
     .base_delay_ms = 10000,
@@ -149,6 +155,14 @@ static const char *tracker_obd_get_ecu_state_label_port(void *ctx) {
     return ble_obd_get_last_ecu_state_label((ble_obd_ctx_t *)ctx);
 }
 
+/*
+ * Port registry: concrete adapter functions wired into the dependency-injection
+ * structs that app-core consumes. Grouping each subsystem behind a port keeps
+ * the FSM/orchestration code decoupled from specific driver implementations and
+ * makes the wiring auditable in one place at boot.
+ */
+
+/* Modem transport port: APN/connect/state plus low-power sleep/wake hooks. */
 static const modem_transport_port_t s_modem_transport_port = {
     .set_apn = modem_lte_set_apn,
     .request_connect = modem_lte_request_connect,
@@ -158,6 +172,7 @@ static const modem_transport_port_t s_modem_transport_port = {
     .wakeup = modem_lte_wakeup,
 };
 
+/* MQTT transport port: connection lifecycle, publish variants, and command subscribe. */
 static const mqtt_transport_port_t s_mqtt_transport_port = {
     .init = tracker_mqtt_init,
     .connect = tracker_mqtt_connect,
@@ -169,23 +184,27 @@ static const mqtt_transport_port_t s_mqtt_transport_port = {
     .set_command_callback = tracker_mqtt_set_command_callback_port,
 };
 
+/* Storage queue port: offline buffering of payloads with replay-on-reconnect. */
 static const storage_queue_port_t s_storage_queue_port = {
     .init = offline_queue_init,
     .enqueue = tracker_storage_queue_enqueue_port,
     .replay_tick = offline_queue_replay_tick,
 };
 
+/* OTA download port: forward apply and manual rollback entry points. */
 static const ota_download_port_t s_ota_download_port = {
     .apply_update = util_ota_apply_update,
     .manual_rollback = util_ota_trigger_manual_rollback,
 };
 
+/* Config store port: NVS-backed load/save of the runtime config snapshot. */
 static const config_store_port_t s_config_store_port = {
     .init = nvs_config_init,
     .load = nvs_config_load,
     .save = nvs_config_save,
 };
 
+/* RTC clock port: external DS3231M time get/set plus health reporting. */
 static const rtc_clock_port_t s_rtc_clock_port = {
     .init = rtc_ds3231m_init,
     .get_time_ms = rtc_ds3231m_get_time_ms,
@@ -193,6 +212,7 @@ static const rtc_clock_port_t s_rtc_clock_port = {
     .get_health = rtc_ds3231m_get_health,
 };
 
+/* OBD reader port: BLE OBD session lifecycle and PID/mode request helpers. */
 static const obd_reader_port_t s_obd_reader_port = {
     .connect = tracker_obd_connect_port,
     .disconnect = tracker_obd_disconnect_port,
@@ -203,6 +223,7 @@ static const obd_reader_port_t s_obd_reader_port = {
     .get_ecu_state_label = tracker_obd_get_ecu_state_label_port,
 };
 
+/* Power control port: power-manager init and modem power/DTR/status lines. */
 static const power_control_port_t s_power_control_port = {
     .init = power_mgr_init,
     .power_on = modem_power_on,
@@ -211,6 +232,7 @@ static const power_control_port_t s_power_control_port = {
     .read_status = modem_read_status,
 };
 
+/* Aggregate registry: the single struct app-core validates and consumes at boot. */
 static const tracker_runtime_ports_t s_runtime_ports = {
     .modem = &s_modem_transport_port,
     .mqtt = &s_mqtt_transport_port,
@@ -346,15 +368,19 @@ void app_core_bootstrap_run(void) {
     // Boot count lives in RTC-retained context so deep-sleep wakeups keep a monotonic local history.
     g_rtc_context.boot_count += 1U;
 
+    // Default to a full INIT pass; the wake cause below may shortcut straight into a service state.
     app_state_t state = APP_STATE_INIT;
     esp_sleep_wakeup_cause_t wakeup = esp_sleep_get_wakeup_cause();
     if (util_is_sleep_enabled()) {
         // Wake cause remaps the very first FSM state only when parked sleep is actually part of runtime policy.
         if (wakeup == ESP_SLEEP_WAKEUP_TIMER) {
+            // Timer wake = scheduled parked heartbeat cadence.
             state = APP_STATE_HEARTBEAT;
         } else if (wakeup == ESP_SLEEP_WAKEUP_EXT0 && config.imu_wakeup_enabled) {
+            // EXT0 with IMU wake armed = motion detected on a parked vehicle, treat as alarm.
             state = APP_STATE_ALARM;
         } else if (wakeup == ESP_SLEEP_WAKEUP_EXT0) {
+            // EXT0 without IMU policy = treat the unexpected wake conservatively as a heartbeat.
             state = APP_STATE_HEARTBEAT;
         }
     }
@@ -365,6 +391,7 @@ void app_core_bootstrap_run(void) {
              (int)wakeup,
              (int)state);
 
+    // Gate that flips true only once app-core has fully initialized every subsystem.
     bool state_machine_ready = false;
     while (true) {
         uint64_t now_ms = util_uptime_ms();
@@ -373,6 +400,7 @@ void app_core_bootstrap_run(void) {
             if (retry_state_can_run(&s_init_retry, now_ms)) {
                 err = state_machine_init(&config);
                 if (err == ESP_OK) {
+                    // Initialization succeeded: clear backoff and switch the loop into normal FSM service mode.
                     retry_state_reset(&s_init_retry);
                     state_machine_ready = true;
                 } else {
@@ -398,6 +426,7 @@ void app_core_bootstrap_run(void) {
 
         // Once initialized, every loop iteration is just "run one cooperative FSM step, then yield".
         state = state_machine_run(state);
+        // Fixed 100ms cadence keeps the loop cooperative so timers, BLE, and modem tasks all get CPU time.
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

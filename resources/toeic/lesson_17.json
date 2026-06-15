@@ -5,6 +5,41 @@
     {"text": "Bài 17 — Must và Have to. Làm câu hỏi ngay sau mỗi phần, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 7 hỏi bắt buộc/cấm/suy đoán; đặc biệt phân biệt mustn't (cấm) với don't have to (không cần), và quá khứ 'had to'.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & bản chất"},
+    {"type": "p", "text": "must và have to đều diễn tả sự BẮT BUỘC ('phải'). Khác biệt tinh tế: must thường là bắt buộc CHỦ QUAN (người nói/nội quy áp đặt) hoặc suy đoán chắc chắn; have to là bắt buộc KHÁCH QUAN (do hoàn cảnh, quy định bên ngoài). have to chia theo ngôi và thì; must không đổi dạng."},
+
+    {"type": "h3", "text": "2. Cách dùng"},
+    {"type": "ul", "items": [
+      "must — bắt buộc/nội quy: All visitors must sign in. Employees must wear badges.",
+      "have to — bắt buộc do hoàn cảnh: I have to leave early because of a meeting.",
+      "must — suy đoán chắc chắn (gần như chắc): The office is empty; everyone must be at lunch.",
+      "have to chia mọi thì: has to (số ít), had to (quá khứ), will have to (tương lai)."
+    ]},
+
+    {"type": "h3", "text": "3. mustn't vs don't have to (KHÁC NHAU hoàn toàn)"},
+    {"type": "table", "headers": ["Cấu trúc", "Nghĩa", "Ví dụ"], "rows": [
+      ["mustn't + V", "CẤM, không được phép", "You mustn't share the password. (cấm)"],
+      ["don't/doesn't have to + V", "KHÔNG CẦN (tùy ý)", "You don't have to attend. (không bắt buộc, tùy bạn)"]
+    ]},
+    {"type": "key", "text": "Đây là bẫy kinh điển: mustn't = cấm tuyệt đối; don't have to = không bắt buộc/không cần. Đừng nhầm hai nghĩa này."},
+
+    {"type": "h3", "text": "4. Công thức"},
+    {"type": "ul", "items": [
+      "must + V nguyên thể (không 'to', không chia): She must submit it.",
+      "have/has to + V; had to + V (quá khứ); will have to + V (tương lai).",
+      "Phủ định: must not (mustn't) + V / do not have to + V."
+    ]},
+
+    {"type": "h3", "text": "5. must have + V3 (suy đoán quá khứ)"},
+    {"type": "p", "text": "must have + V3 = chắc hẳn ĐÃ (suy đoán chắc chắn về quá khứ): The report is done — she must have stayed late. Phủ định suy đoán: can't have + V3 (chắc chắn đã không)."},
+
+    {"type": "h3", "text": "6. must không có dạng quá khứ/tương lai → dùng have to"},
+    {"type": "p", "text": "Vì 'must' chỉ có dạng hiện tại, khi cần quá khứ hay tương lai phải dùng have to: Yesterday we had to reschedule. (không 'musted'). Next week they will have to relocate. (không 'will must')."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) mustn't (cấm) ≠ don't have to (không cần). (2) Sau must dùng V nguyên thể (must to submit → must submit). (3) Quá khứ/tương lai của 'phải' dùng had to / will have to (không musted/will must). (4) must have + V3 = chắc hẳn đã (suy đoán)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Bắt buộc và cần thiết",

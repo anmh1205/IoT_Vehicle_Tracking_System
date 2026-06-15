@@ -1,0 +1,113 @@
+{
+  "page_id": "37adf50b-1fcd-81d4-9886-ff3d40325430",
+  "title": "06. Quá khứ tiếp diễn",
+  "intro": [
+    {"text": "Bài 06 — Quá khứ tiếp diễn (Past Continuous). Học theo thứ tự: đọc kỹ 📚 Kiến thức đầy đủ → làm câu hỏi từng phần → mở đáp án. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: hành động NỀN đang diễn ra khi hành động khác xen vào; while (nền) vs when (xen vào).", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Quá khứ tiếp diễn (was/were + V-ing) diễn tả hành động ĐANG XẢY RA tại một thời điểm hoặc khoảng thời gian trong quá khứ. Thường đóng vai 'hành động nền' trong khi quá khứ đơn là hành động 'ngắn xen vào'."},
+    {"type": "h3", "text": "2. Cách dùng"},
+    {"type": "ul", "items": [
+      "Đang diễn ra tại thời điểm QK: At 9 a.m., the team was presenting the proposal.",
+      "Hành động nền bị xen ngang: While we were reviewing the contract, the client called.",
+      "Hai hành động song song (while): She was drafting the report while he was entering the data.",
+      "Bối cảnh câu chuyện: It was raining and the office was quiet when the CEO arrived."
+    ]},
+    {"type": "h3", "text": "3. Công thức"},
+    {"type": "table", "headers": ["Thể", "Cấu trúc", "Ví dụ"], "rows": [
+      ["Khẳng định", "S + was/were + V-ing", "She was presenting when I arrived."],
+      ["Phủ định", "S + was/were + not + V-ing", "They weren't listening."],
+      ["Nghi vấn", "(Wh-) Was/Were + S + V-ing?", "What were you working on?"]
+    ]},
+    {"type": "h3", "text": "4. when vs while"},
+    {"type": "table", "headers": ["", "when + QK đơn", "while + QK tiếp diễn"], "rows": [
+      ["Vai trò", "hành động xen vào, ngắn", "hành động nền, đang diễn ra"],
+      ["Ví dụ", "when the phone rang", "while I was working"],
+      ["Kết hợp chuẩn", "I was working when the phone rang.", "While I was working, the phone rang."]
+    ]},
+    {"type": "h3", "text": "5. QK tiếp diễn vs QK đơn"},
+    {"type": "p", "text": "QK đơn: hoàn tất. QK tiếp diễn: đang diễn ra, chưa rõ kết thúc. We were working on the report all afternoon vs We finished the report."},
+    {"type": "h3", "text": "6. Stative verbs không dùng tiếp diễn"},
+    {"type": "p", "text": "know, want, believe, seem, own… → dùng QK đơn: She knew the answer. (không 'was knowing')."},
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) while + was/were V-ing (nền); when + V2 (xen vào). (2) was (I/he/she/it) / were (you/we/they). (3) Stative verbs → QK đơn. (4) 'at that time yesterday' → đang diễn ra → QK tiếp diễn."}
+  ],
+  "parts": [
+    {"heading": "Phần 1 · Cấu tạo và nhận biết", "practice_heading": "Luyện tập Phần 1 (8 câu)", "questions": [
+      {"q": "The manager ___ the board when I entered the room.\nA. briefed    B. was briefing    C. briefs    D. is briefing", "a": "B (was briefing). ||đang làm khi tôi vào → QK tiếp diễn."},
+      {"q": "They ___ data all morning when the system crashed.\nA. entered    B. were entering    C. are entering    D. enter", "a": "B (were entering). ||hành động nền + xen vào (crashed)."},
+      {"q": "While the team ___ the contract, the supplier called.\nA. reviewed    B. was reviewing    C. reviews    D. is reviewing", "a": "B (was reviewing). ||while + nền → QK tiếp diễn."},
+      {"q": "Tìm và sửa lỗi:\n\"While she was presenting, everyone were taking notes.\"", "a": "Lỗi: 'were' → 'was'. ||everyone (số ít) → was taking."},
+      {"q": "What ___ you ___ when the fire alarm rang?\nA. did / do    B. were / doing    C. have / done    D. are / doing", "a": "B (were / doing). ||when + QK đơn → nền QK tiếp diễn."},
+      {"q": "___ the finance team ___ the figures when the error was found?\nA. Was / checking    B. Did / check    C. Were / checking    D. Had / checked", "a": "C (Were / checking). ||the finance team số nhiều → were."},
+      {"q": "Chọn câu ĐÚNG:\nA. When the CEO arrived, the staff was presenting.\nB. When the CEO arrived, the staff were presenting.\nC. While the CEO arrived, the staff were presenting.\nD. While the CEO arrived, the staff was presenting.", "a": "B. ||the staff số nhiều → were; when + xen vào ngắn."},
+      {"q": "Điền vào báo cáo (Part 6):\n\"At 3 p.m. yesterday, the procurement team ___ a virtual meeting with suppliers.\"\nA. had    B. was having    C. is having    D. had had", "a": "B (was having). ||at 3 p.m. yesterday + đang diễn ra."}
+    ]},
+    {"heading": "Phần 2 · while/when và phân biệt thì", "practice_heading": "Luyện tập Phần 2 (8 câu)", "questions": [
+      {"q": "I ___ a report when my colleague asked for help.\nA. wrote    B. was writing    C. write    D. had written", "a": "B (was writing). ||nền + when + xen vào."},
+      {"q": "While she ___ the presentation, the projector stopped.\nA. prepares    B. prepared    C. was preparing    D. has prepared", "a": "C (was preparing). ||while + nền."},
+      {"q": "We ___ the issues on your account when you called back.\nA. still investigated    B. were still investigating    C. still investigate    D. had investigated", "a": "B (were still investigating). ||were + still + V-ing."},
+      {"q": "Tìm và sửa lỗi:\n\"She was seeming nervous during the interview.\"", "a": "Lỗi: 'was seeming' → 'seemed'. ||seem = stative verb."},
+      {"q": "When I ___ to the meeting room, the discussion ___ already.\nA. got / started    B. got / was starting    C. was getting / started    D. got / had already started", "a": "D (got / had already started). ||đã bắt đầu trước khi tôi đến → QK hoàn thành."},
+      {"q": "___ you ___ on a project when the system went down?\nA. Were / working    B. Did / work    C. Was / working    D. Have / worked", "a": "A (Were / working). ||you → were."},
+      {"q": "Chọn câu mô tả đúng bối cảnh quá khứ:\nA. The office hummed; staff worked at their desks.\nB. The office was humming; staff were working at their desks.\nC. The office is humming; staff are working.\nD. None of the above.", "a": "B. ||bối cảnh QK tiếp diễn."},
+      {"q": "Điền vào câu chuyện (Part 6):\n\"Last Tuesday, the team ___ the annual report when the power cut occurred.\"\nA. finalized    B. was finalizing    C. has finalized    D. finalizes", "a": "B (was finalizing). ||đang làm khi sự cố xảy ra."}
+    ]},
+    {"heading": "Phần 3 · Luyện trộn (8 câu)", "practice_heading": "Luyện tập Phần 3 (8 câu)", "questions": [
+      {"q": "She ___ a presentation while the others ___ the projector.\nA. was giving / were setting up    B. gave / set up    C. was giving / set up    D. gave / were setting up", "a": "A. ||hai hành động song song → cả hai QK tiếp diễn."},
+      {"q": "I ___ the proposal when my computer suddenly shut down.\nA. wrote    B. was writing    C. had written    D. write", "a": "B (was writing). ||nền + xen vào."},
+      {"q": "The clients ___ when we finally reached their office.\nA. waited    B. were waiting    C. have waited    D. wait", "a": "B (were waiting). ||hành động nền khi chúng ta đến."},
+      {"q": "Tìm và sửa lỗi:\n\"They were work overtime to meet the deadline.\"", "a": "Lỗi: 'were work' → 'were working'. ||QK tiếp diễn = was/were + V-ING."},
+      {"q": "He ___ emails while his colleague ___ for the meeting.\nA. wrote / was preparing    B. was writing / prepared    C. was writing / was preparing    D. wrote / prepared", "a": "C (was writing / was preparing). ||hai hành động song song."},
+      {"q": "At 10 a.m. on Monday, ___ the CEO ___ with investors?\nA. was / meeting    B. did / meet    C. is / meeting    D. has / met", "a": "A (was / meeting). ||thời điểm cụ thể QK + đang diễn ra."},
+      {"q": "Chọn câu ĐÚNG:\nA. They were having a heated discussion when I came in.\nB. They had a heated discussion when I was coming in.\nC. They discuss heatedly when I came.\nD. They were have a heated discussion.", "a": "A. ||nền tiếp diễn + xen vào QK đơn."},
+      {"q": "Điền vào email (Part 6):\n\"When the outage occurred, our team ___ a major software update.\"\nA. installed    B. was installing    C. has installed    D. installs", "a": "B (was installing). ||khi sự cố xảy ra = đang cài đặt."}
+    ]},
+    {"heading": "Phần 4 · Luyện trộn nhanh (10 câu)", "practice_heading": "", "questions": [
+      {"q": "___ the staff ___ lunch when the fire alarm went off?\nA. Was / having    B. Were / having    C. Did / have    D. Is / having", "a": "B (Were / having). ||the staff số nhiều → were."},
+      {"q": "While the director ___, the audience began asking questions.\nA. spoke    B. was speaking    C. is speaking    D. had spoken", "a": "B (was speaking). ||while + nền."},
+      {"q": "She ___ across the room when she heard her name.\nA. was walking    B. walked    C. has walked    D. walks", "a": "A (was walking). ||đang diễn ra khi nghe tên."},
+      {"q": "Tìm và sửa lỗi:\n\"He weren't paying attention during the briefing.\"", "a": "Lỗi: 'weren't' → 'wasn't'. ||he → was not (wasn't)."},
+      {"q": "What ___ the engineering team ___ last quarter?\nA. did / work on    B. were / working on    C. Both A and B    D. have / worked on", "a": "C. ||A hỏi kết quả; B hỏi trong quá trình."},
+      {"q": "I ___ knew the answer before he explained.", "a": "Câu SAI ngữ pháp. Đúng: 'I knew the answer before he explained.' — 'knew' QK đơn, không cần 'was'."},
+      {"q": "The customer ___ not ___ when we called to follow up.\nA. was / responding    B. did / respond    C. Both A and B    D. Neither", "a": "C. ||A: đang không phản hồi; B: không phản hồi."},
+      {"q": "Chọn câu ĐÚNG:\nA. I was knew the answer.\nB. I knew the answer.\nC. I was knowing the answer.\nD. I have knew the answer.", "a": "B. ||know = stative → QK đơn."},
+      {"q": "The manager ___ a presentation when the power went out.\nA. gave    B. was giving    C. gives    D. has given", "a": "B (was giving). ||nền + xen vào."},
+      {"q": "Điền vào báo cáo (Part 6):\n\"At the time of the inspection, workers ___ according to all safety protocols.\"\nA. operated    B. were operating    C. operate    D. have operated", "a": "B (were operating). ||at the time of = đang diễn ra trong QK."}
+    ]}
+  ],
+  "minitest": {
+    "heading": "🏋️ Mini Test · 16 câu",
+    "note": "Làm liên tục, mục tiêu ≥13/16.",
+    "questions": [
+      {"q": "I ___ the analysis when my supervisor asked for an update.\nA. was completing    B. completed    C. complete    D. have completed", "a": "A. ||nền QK tiếp diễn."},
+      {"q": "While the team ___ the new software, a critical error was discovered.\nA. tested    B. was testing    C. tests    D. has tested", "a": "B. ||while + nền."},
+      {"q": "___ the manager ___ a meeting when you arrived?\nA. Was / having    B. Did / have    C. Has / had    D. Is / having", "a": "A. ||thời điểm QK + đang diễn ra."},
+      {"q": "They ___ a report when the system crashed and lost all their work.\nA. were writing    B. wrote    C. write    D. had written", "a": "A. ||nền bị xen ngang."},
+      {"q": "Tìm và sửa lỗi:\n\"She was knowing the client well, so she handled it easily.\"", "a": "Lỗi: 'was knowing' → 'knew'. ||know = stative."},
+      {"q": "At 2 p.m. yesterday, he ___ a call with the supplier.\nA. was having    B. had    C. is having    D. has", "a": "A. ||at 2 p.m. yesterday + đang diễn ra."},
+      {"q": "While she ___ the budget, he ___ data in the spreadsheet.\nA. reviewed / entered    B. was reviewing / was entering    C. reviewed / was entering    D. was reviewing / entered", "a": "B. ||hai hành động song song."},
+      {"q": "The staff ___ lunch in the break room when the fire alarm went off.\nA. was eating    B. were eating    C. ate    D. eat", "a": "B. ||the staff số nhiều → were."},
+      {"q": "Chọn câu ĐÚNG:\nA. She was seemed nervous.\nB. She seemed nervous.\nC. She was seeming nervous.\nD. She is seeming nervous.", "a": "B. ||seem = stative."},
+      {"q": "What ___ the construction crew ___ when the inspector arrived?\nA. was / doing    B. were / doing    C. did / do    D. had / done", "a": "B. ||the construction crew số nhiều → were."},
+      {"q": "While we ___ the presentation, the clients ___ notes.\nA. were giving / were taking    B. gave / took    C. were giving / took    D. gave / were taking", "a": "A. ||hai hành động song song."},
+      {"q": "Tìm và sửa lỗi:\n\"They was working overtime last night.\"", "a": "Lỗi: 'was' → 'were'. ||they → were."},
+      {"q": "The manager ___ on the phone when I knocked on the door.\nA. talked    B. was talking    C. has talked    D. is talking", "a": "B. ||hành động nền khi tôi gõ cửa."},
+      {"q": "___ the company ___ its market share when the recession hit?\nA. Was / losing    B. Were / losing    C. Did / lose    D. Has / lost", "a": "A. ||the company số ít → was."},
+      {"q": "Chọn câu ĐÚNG:\nA. When I entered, they discussed the proposal.\nB. When I entered, they were discussing the proposal.\nC. While I entered, they discussed.\nD. While I entered, they were discuss.", "a": "B. ||when + xen vào; nền = were discussing."},
+      {"q": "Điền vào báo cáo (Part 6):\n\"At the time of the board meeting, the CFO ___ a complete financial summary.\"\nA. presented    B. was presenting    C. presents    D. has presented", "a": "B. ||at the time of = đang diễn ra trong QK."}
+    ]
+  },
+  "summary": [
+    "Quá khứ tiếp diễn = was/were + V-ing: đang diễn ra tại thời điểm QK.",
+    "while + QK tiếp diễn (hành động nền); when + QK đơn (hành động xen vào).",
+    "was (I/he/she/it) / were (you/we/they/số nhiều).",
+    "Stative verbs (know/seem/want…) dùng QK đơn thay vì tiếp diễn."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy: while + was/were + V-ing (nền); when + V2 (xen vào). Stative verbs → QK đơn.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, ôn lại kết hợp while/when và stative verbs.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

@@ -36,6 +36,9 @@
  */
 
 
+/* Per-topic formatter signature: turns telemetry + topic args into a JSON
+ * payload string, stamped with the shared identity/timestamp metadata. The
+ * common pipeline owns the lifetime of the returned buffer. */
 typedef char *(*state_publish_formatter_t)(const config_t *cfg,
                                           const telemetry_t *telemetry,
                                           const void *format_arg,
@@ -46,18 +49,21 @@ typedef char *(*state_publish_formatter_t)(const config_t *cfg,
                                           uint32_t seq_no,
                                           const char *boot_id);
 
+/* Live transport sender signature: publishes one already-formatted payload. */
 typedef esp_err_t (*state_publish_sender_t)(const char *payload);
 
+/* Extra arguments carried through the pipeline for status publishes. */
 typedef struct {
-    const char *status;
-    uint32_t session_id;
-    const char *boundary_event;
+    const char *status;          /**< Lifecycle status label (running/stopped/heartbeat). */
+    uint32_t session_id;         /**< Local session key emitted with the status. */
+    const char *boundary_event;  /**< Authoritative boundary marker (started/ended/none). */
 } state_publish_status_args_t;
 
+/* Extra arguments carried through the pipeline for event publishes. */
 typedef struct {
-    const char *event_type;
-    int code;
-    const char *message;
+    const char *event_type;  /**< Event family or severity label. */
+    int code;                /**< Stable numeric event code. */
+    const char *message;     /**< Short operator-facing message. */
 } state_publish_event_args_t;
 
 static const char *TAG = "PUBLISH_PIPE";
@@ -304,6 +310,22 @@ static void state_machine_defer_firmware_report(const firmware_status_t *firmwar
              firmware->job_id);
 }
 
+/**
+ * @brief Populate a firmware status struct from primitive OTA fields.
+ *
+ * Centralizes the copy/clear of every firmware-report field so immediate and
+ * deferred publish paths build byte-identical payloads. The current running
+ * version is always stamped from `s_current_version`; partition/error are only
+ * copied when non-empty so empty inputs never overwrite valid prior values.
+ *
+ * @param[out] firmware Destination status struct (zeroed first).
+ * @param[in] status OTA lifecycle status label.
+ * @param[in] progress OTA progress percentage/state.
+ * @param[in] version Target firmware version.
+ * @param[in] job_id Cloud OTA job identifier.
+ * @param[in] partition Optional partition label.
+ * @param[in] error Optional short error string.
+ */
 static void state_machine_fill_firmware_status(firmware_status_t *firmware,
                                                const char *status,
                                                uint8_t progress,
@@ -432,6 +454,19 @@ void state_machine_publish_firmware_status(const char *status,
     state_machine_publish_firmware_payload(&firmware);
 }
 
+/**
+ * @brief Build a firmware status payload and defer it for the next online window.
+ *
+ * Used when MQTT is down: the report is staged in memory rather than dropped so
+ * the most recent OTA state is still delivered once connectivity returns.
+ *
+ * @param[in] status OTA lifecycle status label.
+ * @param[in] progress OTA progress percentage/state.
+ * @param[in] version Target firmware version.
+ * @param[in] job_id Cloud OTA job identifier.
+ * @param[in] partition Optional partition label.
+ * @param[in] error Optional short error string.
+ */
 static void state_machine_stage_firmware_status_for_online_publish(const char *status,
                                                                    uint8_t progress,
                                                                    const char *version,

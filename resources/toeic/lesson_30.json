@@ -5,6 +5,50 @@
     {"text": "Bài 30 — Câu tường thuật (reported/indirect speech). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 — lùi thì, đổi đại từ và trạng từ thời gian; tường thuật câu hỏi và mệnh lệnh.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Câu tường thuật (reported/indirect speech) thuật lại lời người khác mà không trích nguyên văn. Khi động từ tường thuật ở quá khứ (said, told), thường phải LÙI THÌ và đổi đại từ, trạng từ chỉ thời gian/nơi chốn."},
+
+    {"type": "h3", "text": "2. Lùi thì (backshift)"},
+    {"type": "table", "headers": ["Lời trực tiếp", "Lời tường thuật"], "rows": [
+      ["hiện tại đơn (work)", "quá khứ đơn (worked)"],
+      ["hiện tại tiếp diễn (am working)", "quá khứ tiếp diễn (was working)"],
+      ["hiện tại hoàn thành / quá khứ đơn", "quá khứ hoàn thành (had + V3)"],
+      ["will", "would"],
+      ["can", "could"],
+      ["may", "might"],
+      ["must (bắt buộc)", "had to"]
+    ]},
+
+    {"type": "h3", "text": "3. Đổi đại từ & sở hữu"},
+    {"type": "p", "text": "Đổi theo ngữ cảnh người nói: 'I will send you my report.' → He said he would send me his report."},
+
+    {"type": "h3", "text": "4. Đổi trạng từ thời gian & nơi chốn"},
+    {"type": "table", "headers": ["Trực tiếp", "Tường thuật"], "rows": [
+      ["now", "then"],
+      ["today", "that day"],
+      ["tomorrow", "the next day / the following day"],
+      ["yesterday", "the day before / the previous day"],
+      ["ago", "before"],
+      ["this/these", "that/those"],
+      ["here", "there"]
+    ]},
+
+    {"type": "h3", "text": "5. say vs tell"},
+    {"type": "p", "text": "tell + TÂN NGỮ người (tell me, told the staff); say KHÔNG đi trực tiếp với tân ngữ người (say that…, hoặc say to someone). Sai: 'He said me…' → đúng 'He told me…' hoặc 'He said to me…'."},
+
+    {"type": "h3", "text": "6. Tường thuật câu hỏi & mệnh lệnh"},
+    {"type": "ul", "items": [
+      "Câu hỏi: ask (+ if/whether cho Yes/No, hoặc từ hỏi) + S + V (không đảo): She asked if the report was ready. He asked where the office was.",
+      "Mệnh lệnh/yêu cầu: tell/ask + sb + (not) to V: The manager told us to submit the form. She asked me not to be late."
+    ]},
+
+    {"type": "h3", "text": "7. KHÔNG lùi thì khi nào"},
+    {"type": "p", "text": "Không bắt buộc lùi thì nếu: nội dung vẫn ĐÚNG ở hiện tại (chân lý, thói quen) — He said water boils at 100°C; hoặc động từ tường thuật ở hiện tại (He says he is busy)."},
+
+    {"type": "h3", "text": "8. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Lùi thì khi động từ tường thuật ở quá khứ (will→would, can→could, hiện tại→quá khứ). (2) tell + tân ngữ người; say + that (không 'say me'). (3) Câu hỏi tường thuật KHÔNG đảo ngữ, dùng if/whether cho Yes/No. (4) Mệnh lệnh → (not) to V."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Lùi thì khi tường thuật",

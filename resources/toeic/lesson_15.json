@@ -5,6 +5,42 @@
     {"text": "Bài 15 — Động từ khuyết thiếu Can và Could. Làm câu hỏi ngay sau mỗi phần, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 hỏi can/could chỉ khả năng, xin phép, đề nghị, suy đoán; và phân biệt 'could' với 'was able to / managed to' cho thành công cụ thể trong quá khứ.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & bản chất"},
+    {"type": "p", "text": "can và could là động từ khuyết thiếu (modal). Sau modal luôn là động từ NGUYÊN THỂ không 'to' (can go, could send). can dùng cho hiện tại/khả năng chung; could dùng cho quá khứ, lời đề nghị lịch sự, và khả năng/giả định."},
+
+    {"type": "h3", "text": "2. Cách dùng của can"},
+    {"type": "ul", "items": [
+      "Khả năng hiện tại: She can speak three languages.",
+      "Xin phép / cho phép: Can I use this room? You can leave early today.",
+      "Đề nghị giúp đỡ / yêu cầu: Can you send me the file? Can I help you?",
+      "Khả năng chung (sự thật): Stress can affect productivity."
+    ]},
+
+    {"type": "h3", "text": "3. Cách dùng của could"},
+    {"type": "ul", "items": [
+      "Khả năng trong quá khứ: When I was younger, I could work all night.",
+      "Xin phép / yêu cầu LỊCH SỰ hơn can: Could you review this report?",
+      "Khả năng/giả định ở hiện tại–tương lai: This plan could save costs.",
+      "could have + V3: lẽ ra đã có thể (nhưng không xảy ra): We could have won the contract."
+    ]},
+
+    {"type": "h3", "text": "4. Công thức"},
+    {"type": "table", "headers": ["Thể", "Cấu trúc", "Ví dụ"], "rows": [
+      ["Khẳng định", "S + can/could + V", "He can attend."],
+      ["Phủ định", "S + cannot (can't) / could not (couldn't) + V", "She can't join today."],
+      ["Nghi vấn", "Can/Could + S + V?", "Could you confirm the time?"]
+    ]},
+
+    {"type": "h3", "text": "5. be able to (thay thế can)"},
+    {"type": "p", "text": "be able to + V cũng diễn tả khả năng và dùng được ở MỌI thì mà can/could không có dạng: tương lai will be able to, hiện tại hoàn thành has been able to, sau modal khác (might be able to). Ví dụ: We will be able to deliver next week. (không 'will can')."},
+
+    {"type": "h3", "text": "6. Suy đoán: can't vs could"},
+    {"type": "p", "text": "can't = chắc chắn KHÔNG (suy đoán phủ định mạnh): He can't be the manager — he's too young. could = có thể (khả năng): The delay could be due to weather."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Sau can/could dùng V NGUYÊN THỂ, không thêm to/-s/-ed (can sends → can send). (2) Thì tương lai/hoàn thành phải dùng be able to (will be able to, không 'will can'). (3) couldn't = không thể (quá khứ); can't = chắc chắn không (suy đoán). (4) 'could have + V3' = lẽ ra đã có thể."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Diễn tả khả năng (ability)",

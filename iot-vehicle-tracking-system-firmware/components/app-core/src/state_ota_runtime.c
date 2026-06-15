@@ -141,16 +141,20 @@ static void state_machine_ota_status_callback(const firmware_status_t *firmware,
  * traffic cannot starve telemetry, retry, or sleep logic in the main FSM loop.
  */
 void state_machine_handle_pending_action(void) {
+    // Bounded drain: process at most a fixed number of queued actions per loop pass.
     for (uint32_t i = 0; i < TRACKER_PENDING_ACTION_DRAIN_LIMIT; ++i) {
         command_action_t action = command_handler_consume_action();
         if (action == COMMAND_ACTION_NONE) {
+            // Queue empty for this pass; nothing more to do.
             return;
         }
         if (action == COMMAND_ACTION_APPLY_CONFIG) {
+            // Apply a staged config change, then keep draining remaining actions.
             (void)command_handler_apply_pending_config();
             continue;
         }
         if (action == COMMAND_ACTION_REBOOT) {
+            // Reboot is terminal: control never returns past this call.
             esp_restart();
         }
         if (action == COMMAND_ACTION_ASSIGN_SESSION) {
@@ -166,6 +170,7 @@ void state_machine_handle_pending_action(void) {
 
         state_machine_process_ota_command(action);
         if (s_ota_in_progress) {
+            // OTA started flashing; stop draining so the FSM can enter the OTA-safe path immediately.
             return;
         }
     }

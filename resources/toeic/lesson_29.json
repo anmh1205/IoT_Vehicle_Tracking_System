@@ -5,6 +5,37 @@
     {"text": "Bài 29 — Câu hỏi gián tiếp (indirect/embedded questions). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 — câu hỏi gián tiếp dùng TRẬT TỰ KHẲNG ĐỊNH (S + V), không đảo trợ động từ; câu Yes/No dùng if/whether.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Câu hỏi gián tiếp (indirect/embedded question) là câu hỏi được lồng trong một câu khác để LỊCH SỰ, trang trọng hơn. Điểm cốt lõi: phần câu hỏi lồng vào KHÔNG đảo ngữ và KHÔNG dùng do/does/did."},
+
+    {"type": "h3", "text": "2. Cụm mở đầu thường gặp"},
+    {"type": "ul", "items": [
+      "Could you tell me … / Do you know … / Would you mind telling me … (lịch sự).",
+      "I wonder … / I'd like to know … / Can you explain … (mềm mại).",
+      "Cả câu có thể là câu hỏi (Could you tell me…?) hoặc câu kể (I wonder….)."
+    ]},
+
+    {"type": "h3", "text": "3. Cấu trúc lõi: trật tự S + V (không đảo)"},
+    {"type": "table", "headers": ["Câu hỏi trực tiếp", "Câu hỏi gián tiếp"], "rows": [
+      ["Where is the office?", "Could you tell me where the office is?"],
+      ["When does it open?", "Do you know when it opens?"],
+      ["Did he sign it?", "I wonder if he signed it."]
+    ]},
+    {"type": "key", "text": "Sau từ để hỏi/if là CHỦ NGỮ + ĐỘNG TỪ (như câu kể), KHÔNG đảo trợ động từ, KHÔNG dùng do/does/did: 'where the office is' (không 'where is the office')."},
+
+    {"type": "h3", "text": "4. Câu hỏi Yes/No → if / whether"},
+    {"type": "p", "text": "Câu hỏi không có từ để hỏi (Yes/No) được nối bằng if hoặc whether: Is the report ready? → Do you know if the report is ready? whether trang trọng hơn và đi được với 'or not'."},
+
+    {"type": "h3", "text": "5. Câu hỏi Wh- → giữ từ để hỏi"},
+    {"type": "p", "text": "Giữ nguyên what/where/when/why/who/how rồi theo trật tự S + V: How much does it cost? → Could you tell me how much it costs?"},
+
+    {"type": "h3", "text": "6. Bỏ do/does/did và chia lại động từ"},
+    {"type": "p", "text": "Vì không còn trợ động từ, động từ chính phải tự mang thì: 'Where does she work?' → 'Do you know where she works?' (thêm -s). 'What did he say?' → 'I wonder what he said.' (V2)."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) KHÔNG đảo ngữ trong phần lồng (where the office is, không 'where is the office'). (2) Bỏ do/does/did và chia lại động từ (where she works). (3) Câu Yes/No → if/whether. (4) Nếu cả câu là câu hỏi → có dấu '?'; nếu là câu kể (I wonder…) → dấu '.'."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Trật tự từ trong câu hỏi gián tiếp",

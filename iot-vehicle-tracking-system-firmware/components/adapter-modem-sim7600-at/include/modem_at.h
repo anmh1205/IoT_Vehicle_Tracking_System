@@ -21,19 +21,26 @@
 /**
  * @brief Callback type for unsolicited modem result codes (URC).
  *
+ * URCs are async lines the modem pushes without a matching command (e.g. "RDY",
+ * "+CMTI", "+CGEV"). The handler runs in the polling task context, not an ISR,
+ * but it shares the AT lock window, so it must be fast and non-blocking.
+ *
  * @param urc_line Null-terminated URC line (without trailing CRLF).
  */
 typedef void (*modem_urc_cb_t)(const char *urc_line);
 
 /**
  * @brief UART receive error counters captured from ESP-IDF UART event queue.
+ *
+ * Cumulative since the last reset; used to surface physical-layer health (wiring,
+ * baud mismatch, buffer pressure) when AT sync misbehaves.
  */
 typedef struct {
-    uint32_t frame_err_count;
-    uint32_t parity_err_count;
-    uint32_t fifo_overflow_count;
-    uint32_t buffer_full_count;
-    uint32_t break_count;
+    uint32_t frame_err_count;     /**< UART framing errors (often baud/wiring mismatch). */
+    uint32_t parity_err_count;    /**< UART parity errors (frame format mismatch/noise). */
+    uint32_t fifo_overflow_count; /**< Hardware FIFO overruns (RX not drained fast enough). */
+    uint32_t buffer_full_count;   /**< Driver ring buffer full events (back-pressure). */
+    uint32_t break_count;         /**< UART break conditions detected on the line. */
 } modem_at_uart_diag_t;
 
 /**

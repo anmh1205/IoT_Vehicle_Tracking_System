@@ -1,0 +1,167 @@
+{
+  "page_id": "37adf50b-1fcd-8196-8bdb-da7aed5aa5f2",
+  "title": "03. Hiện tại tiếp diễn",
+  "intro": [
+    {"text": "Bài 03 — Hiện tại tiếp diễn (Present Continuous). Học theo thứ tự: đọc kỹ 📚 Kiến thức đầy đủ → làm câu hỏi từng phần → mở đáp án. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5/6 — phân biệt đang xảy ra (am/is/are + V-ing) vs thói quen (hiện tại đơn); động từ trạng thái KHÔNG dùng tiếp diễn.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & bản chất"},
+    {"type": "p", "text": "Hiện tại tiếp diễn (Present Continuous) = am/is/are + V-ing diễn tả hành động đang xảy ra ngay LÚC NÓI, hoặc tình trạng TẠM THỜI quanh thời điểm hiện tại. Khác hiện tại đơn (thói quen/sự thật) ở tính THỜI ĐIỂM cụ thể và tính TẠM THỜI."},
+
+    {"type": "h3", "text": "2. Cách dùng (đầy đủ)"},
+    {"type": "ul", "items": [
+      "Đang xảy ra ngay lúc nói (dấu hiệu now, right now, at the moment): The team is presenting now.",
+      "Tạm thời, không thường xuyên: She is working from home this week. (bình thường làm ở văn phòng)",
+      "Xu hướng đang thay đổi (với verbs of change: rising, growing, falling): Costs are rising steadily.",
+      "Kế hoạch đã xếp lịch trong tương lai gần (thường có thời điểm): We are meeting the client tomorrow at 3 p.m.",
+      "Phàn nàn về thói quen khó chịu (với always): He is always interrupting meetings."
+    ]},
+
+    {"type": "h3", "text": "3. Công thức"},
+    {"type": "table", "headers": ["Thể", "Cấu trúc", "Ví dụ"], "rows": [
+      ["Khẳng định", "S + am/is/are + V-ing", "She is reviewing the report."],
+      ["Phủ định", "S + am/is/are + not + V-ing", "They are not attending today."],
+      ["Nghi vấn", "(Wh-) Am/Is/Are + S + V-ing?", "Is the project going well?"]
+    ]},
+
+    {"type": "h3", "text": "4. Quy tắc thêm -ing"},
+    {"type": "table", "headers": ["Trường hợp", "Quy tắc", "Ví dụ"], "rows": [
+      ["Thông thường", "+ ing", "work → working"],
+      ["Tận cùng -e (câm)", "bỏ e + ing", "write → writing, make → making"],
+      ["Nguyên âm + phụ âm (1 âm tiết)", "gấp đôi phụ âm + ing", "run → running, sit → sitting"],
+      ["Tận cùng -ie", "đổi ie → y + ing", "lie → lying, die → dying"]
+    ]},
+
+    {"type": "h3", "text": "5. Động từ trạng thái KHÔNG dùng tiếp diễn (stative verbs)"},
+    {"type": "p", "text": "Các động từ chỉ trạng thái (không hành động) dùng HIỆN TẠI ĐƠN, không tiếp diễn:"},
+    {"type": "ul", "items": [
+      "Suy nghĩ/nhận thức: know, understand, believe, remember, forget, mean, realize.",
+      "Cảm xúc/sở thích: like, love, hate, prefer, want, need, wish, fear.",
+      "Giác quan: see, hear, smell, taste (trạng thái), feel.",
+      "Sở hữu/tồn tại: have, own, belong, contain, consist, exist, include.",
+      "Nhận định: seem, appear, look (= appear), sound, cost, weigh."
+    ]},
+    {"type": "key", "text": "Sai: 'I am knowing the answer' → Đúng: 'I know the answer'. Ngoại lệ: have (sở hữu) → hiện tại đơn; have (đang ăn/trải nghiệm) → tiếp diễn (She is having lunch)."},
+
+    {"type": "h3", "text": "6. Hiện tại tiếp diễn vs Hiện tại đơn"},
+    {"type": "table", "headers": ["", "Hiện tại tiếp diễn", "Hiện tại đơn"], "rows": [
+      ["Ý nghĩa", "đang xảy ra / tạm thời", "thói quen / sự thật"],
+      ["Dấu hiệu", "now, at the moment, currently, right now, this week/month", "always, usually, often, every day, never"],
+      ["Ví dụ", "He is working from home today.", "He works from home every Friday."]
+    ]},
+
+    {"type": "h3", "text": "7. Hiện tại tiếp diễn cho tương lai"},
+    {"type": "p", "text": "Kế hoạch đã xếp lịch (arranged future): We are launching the product next Monday. They are meeting the board at 2 p.m. Khác với 'will' (quyết định tức thì): Khác với 'be going to' (dự định chưa xếp lịch cụ thể)."},
+
+    {"type": "h3", "text": "8. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Động từ trạng thái (know/want/like…) KHÔNG dùng tiếp diễn (is knowing → knows). (2) Chia am/is/are đúng ngôi. (3) Quy tắc gấp đôi phụ âm (running, not runing). (4) Phân biệt tạm thời (hiện tại tiếp diễn) với thói quen (hiện tại đơn)."}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Cấu tạo và cách dùng cơ bản",
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The manager ___ a call with the client right now.\nA. has    B. is having    C. having    D. have", "a": "Đáp án: B (is having). ||'right now' + have (đang thực hiện cuộc gọi, không phải sở hữu) → hiện tại tiếp diễn."},
+        {"q": "She ___ the quarterly report at the moment.\nA. reviews    B. reviewed    C. is reviewing    D. to review", "a": "Đáp án: C (is reviewing). ||'at the moment' → hiện tại tiếp diễn."},
+        {"q": "The sales team ___ currently ___ on a new campaign.\nA. is / working    B. are / working    C. work / —    D. works / —", "a": "Đáp án: B (are / working). ||'the sales team' → số nhiều; currently → tiếp diễn."},
+        {"q": "Tìm và sửa lỗi:\n\"She is knowing all the answers to the quiz.\"", "a": "Lỗi: 'is knowing' → 'knows'. ||'know' là động từ trạng thái — KHÔNG dùng tiếp diễn."},
+        {"q": "We ___ the new software system this month.\nA. test    B. are testing    C. tested    D. will testing", "a": "Đáp án: B (are testing). ||'this month' (tạm thời) → hiện tại tiếp diễn."},
+        {"q": "What ___ the department ___ to solve the problem?\nA. is / doing    B. does / do    C. did / do    D. has / done", "a": "Đáp án: A (is / doing). ||Câu hỏi về hành động đang diễn ra → Is + S + V-ing."},
+        {"q": "Chọn câu ĐÚNG:\nA. He is wanting a promotion.\nB. He wants a promotion.\nC. He is want a promotion.\nD. He wanting a promotion.", "a": "Đáp án: B. ||'want' là động từ trạng thái → hiện tại đơn."},
+        {"q": "Điền vào email (Part 6):\n\"Our team ___ the project proposal for next week's meeting.\"\nA. prepares    B. is preparing    C. prepared    D. will preparing", "a": "Đáp án: B (is preparing). ||Đang làm ngay lúc này → hiện tại tiếp diễn."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Phân biệt tiếp diễn vs đơn",
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "She ___ from home every Friday, but today she ___ in the office.\nA. works / is working    B. is working / works    C. worked / working    D. work / is work", "a": "Đáp án: A (works / is working). ||every Friday = thói quen → đơn; today = tạm thời → tiếp diễn."},
+        {"q": "Sales ___ rapidly this quarter compared to last year.\nA. grow    B. are growing    C. grew    D. have grown", "a": "Đáp án: B (are growing). ||xu hướng đang thay đổi → tiếp diễn."},
+        {"q": "I ___ the company's privacy policy — it ___ that all data is protected.\nA. am reading / states    B. read / is stating    C. am reading / is stating    D. read / states", "a": "Đáp án: A (am reading / states). ||đang đọc = tiếp diễn; states (sự thật) = đơn."},
+        {"q": "Tìm và sửa lỗi:\n\"The report always contains errors, and now the editor is correcting them.\"", "a": "Câu ĐÚNG — không có lỗi. ||'always contains' (thói quen) và 'is correcting' (đang diễn ra) đều đúng."},
+        {"q": "The CEO ___ all branch managers twice a year, but he ___ the Singapore branch this week.\nA. meets / is visiting    B. is meeting / visits    C. meet / visiting    D. meets / visiting", "a": "Đáp án: A (meets / is visiting). ||twice a year = thói quen; this week = tạm thời."},
+        {"q": "Costs ___ significantly due to inflation.\nA. are rising    B. rise    C. rose    D. will rise", "a": "Đáp án: A (are rising). ||xu hướng đang thay đổi → tiếp diễn."},
+        {"q": "Chọn câu ĐÚNG:\nA. The company is consisting of five divisions.\nB. The company consists of five divisions.\nC. The company is consist of five divisions.\nD. The company consisting of five divisions.", "a": "Đáp án: B. ||'consist' là stative verb → hiện tại đơn."},
+        {"q": "Điền vào thông báo (Part 6):\n\"The IT department ___ a new security system this week, so some services may be slow.\"\nA. installs    B. is installing    C. installed    D. will installing", "a": "Đáp án: B (is installing). ||'this week' → đang xảy ra → tiếp diễn."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Quy tắc -ing và stative verbs",
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "Cách viết đúng: 'to run' ở hiện tại tiếp diễn là gì?\nA. runing    B. running    C. runeing    D. runnning", "a": "Đáp án: B (running). ||nguyên âm + phụ âm → gấp đôi phụ âm cuối."},
+        {"q": "Cách viết đúng của 'to write' ở hiện tại tiếp diễn?\nA. writeing    B. writting    C. writing    D. writting", "a": "Đáp án: C (writing). ||tận cùng -e câm → bỏ e + ing."},
+        {"q": "Chọn câu có stative verb đúng:\nA. She is owning three properties.\nB. She owns three properties.\nC. She is own three properties.\nD. She owning three properties.", "a": "Đáp án: B. ||'own' là stative verb → hiện tại đơn."},
+        {"q": "I ___ your point, but the data ___ otherwise.\nA. understand / suggests    B. am understanding / is suggesting    C. understand / is suggesting    D. am understanding / suggests", "a": "Đáp án: A (understand / suggests). ||understand = stative; the data suggests = sự thật → đơn."},
+        {"q": "Tìm và sửa lỗi:\n\"The sample is tasting bitter according to the lab report.\"", "a": "Lỗi: 'is tasting' → 'tastes'. ||taste (mang trạng thái) = stative verb."},
+        {"q": "Cách viết đúng của 'to lie' (nằm) ở hiện tại tiếp diễn?\nA. lieing    B. liing    C. lying    D. lyeing", "a": "Đáp án: C (lying). ||ie → y + ing."},
+        {"q": "He ___ what to do because he ___ the manual right now.\nA. doesn't know / isn't reading    B. isn't knowing / isn't reading    C. doesn't know / is reading    D. isn't knowing / is reading", "a": "Đáp án: C (doesn't know / is reading). ||know = stative; read (đang thực hiện) = tiếp diễn."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"The company ___ more and more revenue from its digital channels.\"\nA. generates    B. is generating    C. generated    D. generate", "a": "Đáp án: B (is generating). ||xu hướng tăng đang xảy ra → tiếp diễn."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Tiếp diễn cho tương lai gần",
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "We ___ the new branch next Friday at 10 a.m.\nA. open    B. are opening    C. will be open    D. opened", "a": "Đáp án: B (are opening). ||kế hoạch đã xếp lịch cụ thể → hiện tại tiếp diễn cho tương lai."},
+        {"q": "The CEO ___ the Tokyo office in March.\nA. visits    B. is visiting    C. visited    D. will visiting", "a": "Đáp án: B (is visiting). ||đã có kế hoạch → hiện tại tiếp diễn."},
+        {"q": "They ___ a conference call with the partners tomorrow afternoon.\nA. have    B. are having    C. will have    D. had", "a": "Đáp án: B (are having). ||cuộc gọi đã xếp lịch → tiếp diễn cho tương lai."},
+        {"q": "Tìm và sửa lỗi:\n\"He is always forgetting to lock the office door.\"", "a": "Câu ĐÚNG. ||'always + tiếp diễn' diễn tả thói quen khó chịu — đây là dùng đúng."},
+        {"q": "I ___ with the HR team at 2 p.m. today about the new policy.\nA. meet    B. am meeting    C. will meeting    D. met", "a": "Đáp án: B (am meeting). ||lịch hẹn cụ thể → tiếp diễn cho tương lai."},
+        {"q": "What ___ you ___ this evening — do you have any plans?\nA. do / do    B. are / doing    C. will / doing    D. did / do", "a": "Đáp án: B (are / doing). ||hỏi về kế hoạch tương lai gần → tiếp diễn."},
+        {"q": "Chọn câu ĐÚNG để nói về lịch đã xếp:\nA. The team will present the findings at next Tuesday's meeting.\nB. The team is presenting the findings at next Tuesday's meeting.\nC. Both A and B are correct in this context.\nD. Neither is correct.", "a": "Đáp án: C. ||Cả 'will' và 'tiếp diễn' đều dùng được cho tương lai, nhưng tiếp diễn nhấn mạnh lịch đã xếp."},
+        {"q": "Điền vào thư mời (Part 6):\n\"We ___ a product demonstration for all interested clients on June 15.\"\nA. hold    B. are holding    C. held    D. to hold", "a": "Đáp án: B (are holding). ||sự kiện đã lên kế hoạch → tiếp diễn."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "practice_heading": "",
+      "questions": [
+        {"q": "She ___ the quarterly results with her team right now.\nA. discusses    B. is discussing    C. discussed    D. discuss", "a": "Đáp án: B (is discussing). ||right now → tiếp diễn."},
+        {"q": "The factory ___ production levels this month due to high demand.\nA. increases    B. is increasing    C. increased    D. has increased", "a": "Đáp án: B (is increasing). ||xu hướng tạm thời → tiếp diễn."},
+        {"q": "He ___ that the new policy will work.\nA. is believing    B. believes    C. is belief    D. believe", "a": "Đáp án: B (believes). ||believe = stative verb → đơn."},
+        {"q": "They ___ for the annual conference next week.\nA. prepare    B. are preparing    C. will preparing    D. prepared", "a": "Đáp án: B (are preparing). ||tạm thời/kế hoạch → tiếp diễn."},
+        {"q": "Tìm và sửa lỗi:\n\"The warehouse is containing 500 units.\"", "a": "Lỗi: 'is containing' → 'contains'. ||contain = stative verb → hiện tại đơn."},
+        {"q": "I ___ your concerns, but our team ___ every issue you raised.\nA. hear / is addressing    B. am hearing / addresses    C. hear / addresses    D. am hearing / is addressing", "a": "Đáp án: A (hear / is addressing). ||hear (stative) → đơn; addressing (đang làm) → tiếp diễn."},
+        {"q": "The market ___ at a rate of 12% annually.\nA. grows    B. is growing    C. grew    D. A or B", "a": "Đáp án: D (A or B). ||grows (sự thật) và is growing (xu hướng đang diễn ra) đều đúng tùy ngữ cảnh."},
+        {"q": "He ___ always ___ late to meetings without any explanation.\nA. is / arriving    B. is / arrive    C. always / arriving    D. always / arrives", "a": "Đáp án: A (is / arriving). ||always + tiếp diễn = phàn nàn về thói quen."},
+        {"q": "Chọn câu ĐÚNG:\nA. We are having our annual review meeting tomorrow at 9 a.m.\nB. We are having a new car. (sở hữu)\nC. Both are correct.\nD. Neither is correct.", "a": "Đáp án: A. ||have (cuộc họp = tổ chức) → tiếp diễn ổn; have (sở hữu xe) → phải dùng đơn."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"The company ___ its digital infrastructure as part of a long-term growth plan.\"\nA. upgrades    B. is upgrading    C. upgraded    D. to upgrade", "a": "Đáp án: B (is upgrading). ||đang trong quá trình thực hiện → tiếp diễn."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "The technician ___ the server at the moment.\nA. reboots    B. is rebooting    C. rebooted    D. reboot", "a": "B (is rebooting). ||at the moment → tiếp diễn."},
+      {"q": "Demand for our products ___ steadily this quarter.\nA. grows    B. is growing    C. grew    D. has grown", "a": "B (is growing). ||xu hướng tạm thời → tiếp diễn."},
+      {"q": "She ___ the new marketing strategy very well.\nA. is understanding    B. understands    C. understood    D. understand", "a": "B (understands). ||understand = stative verb."},
+      {"q": "The legal team ___ the contract clause at this very moment.\nA. review    B. is reviewing    C. reviews    D. reviewed", "a": "B (is reviewing). ||at this very moment → tiếp diễn."},
+      {"q": "Tìm và sửa lỗi:\n\"He is seeming very confident in his presentation.\"", "a": "Lỗi: 'is seeming' → 'seems'. ||seem = stative verb."},
+      {"q": "We ___ the new system today, so expect some downtime.\nA. test    B. are testing    C. tested    D. will testing", "a": "B (are testing). ||today (tạm thời, đang diễn ra) → tiếp diễn."},
+      {"q": "She usually ___ to work, but today she ___ because her car broke down.\nA. drives / is taking the bus    B. is driving / takes the bus    C. drives / takes the bus    D. is driving / is taking the bus", "a": "A (drives / is taking the bus). ||thói quen → đơn; tạm thời hôm nay → tiếp diễn."},
+      {"q": "The new regulations ___ that all shipments be documented.\nA. is requiring    B. require    C. are requiring    D. required", "a": "B (require). ||quy định (sự thật) + require = stative-like → đơn."},
+      {"q": "Cách viết V-ing đúng của 'sit' là:\nA. siting    B. sitting    C. siting    D. siteing", "a": "B (sitting). ||nguyên âm + phụ âm → gấp đôi phụ âm."},
+      {"q": "Our R&D team ___ a new product line for the Asian market this year.\nA. develops    B. is developing    C. developed    D. develop", "a": "B (is developing). ||this year (tạm thời) → tiếp diễn."},
+      {"q": "I ___ to meet you, Ms. Park. Please, come in.\nA. am pleased    B. am being pleased    C. am pleasing    D. is pleased", "a": "A (am pleased). ||pleased = trạng thái cảm xúc → không dùng tiếp diễn."},
+      {"q": "Tìm và sửa lỗi:\n\"The product is costing $500 per unit.\"", "a": "Lỗi: 'is costing' → 'costs'. ||cost (giá cả) = stative verb → hiện tại đơn."},
+      {"q": "They ___ a major client over for a factory tour next Thursday.\nA. have    B. are having    C. will having    D. had", "a": "B (are having). ||kế hoạch cụ thể → tiếp diễn cho tương lai."},
+      {"q": "Chọn câu có dùng tiếp diễn ĐÚNG:\nA. The policy is belonging to the company.\nB. He is always checking his phone during meetings.\nC. She is knowing the procedure.\nD. They are owning a large warehouse.", "a": "B. ||always + tiếp diễn = phàn nàn. A/C/D dùng stative verbs → sai."},
+      {"q": "The number of remote workers ___ rapidly across all departments.\nA. grows    B. is growing    C. grow    D. will growing", "a": "B (is growing). ||xu hướng đang xảy ra → tiếp diễn."},
+      {"q": "Điền vào email (Part 6):\n\"We ___ to your message and will get back to you within 24 hours.\"\nA. attend    B. are attending    C. attended    D. will attend", "a": "B (are attending). ||đang xử lý yêu cầu → tiếp diễn."}
+    ]
+  },
+  "summary": [
+    "Hiện tại tiếp diễn = am/is/are + V-ing: đang xảy ra (now/at the moment), tạm thời, xu hướng đang thay đổi.",
+    "KHÔNG dùng tiếp diễn với stative verbs: know, understand, believe, want, need, like, own, contain, seem…",
+    "Quy tắc -ing: bỏ -e câm; gấp đôi phụ âm (nguyên âm + phụ âm); ie → ying.",
+    "Tiếp diễn cho tương lai: kế hoạch đã xếp lịch cụ thể (We are meeting tomorrow at 3).",
+    "Always + tiếp diễn = phàn nàn về thói quen (He is always interrupting)."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy: stative verbs (know/want/consist/belong…) KHÔNG dùng tiếp diễn. 'have' sở hữu → đơn; 'have' hành động (having lunch) → tiếp diễn.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái thành 'Cần ôn' và ôn lại bảng stative verbs sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

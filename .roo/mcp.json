@@ -1,5 +1,13 @@
 {
   "mcpServers": {
+    "word": {
+      "command": "e:\\anmh1205\\IoT_Vehicle_Tracking_System\\.venv\\Scripts\\word_mcp_server.exe",
+      "args": [],
+      "env": {
+        "MCP_AUTHOR": "Admin",
+        "MCP_AUTHOR_INITIALS": "A"
+      }
+    },
     "sequentialthinking": {
       "command": "npx",
       "args": [

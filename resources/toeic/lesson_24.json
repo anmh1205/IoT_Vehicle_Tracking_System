@@ -5,6 +5,39 @@
     {"text": "Bài 24 — Mệnh đề trạng ngữ chỉ thời gian (when, while, before, after, until, as soon as...). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 chọn liên từ thời gian đúng nghĩa; và quy tắc dùng HIỆN TẠI trong mệnh đề thời gian để chỉ tương lai.", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Mệnh đề trạng ngữ chỉ thời gian cho biết hành động chính xảy ra KHI NÀO, mở đầu bằng các liên từ thời gian. Trọng tâm TOEIC: chọn đúng liên từ và chia đúng thì (đặc biệt quy tắc 'không dùng will trong mệnh đề thời gian')."},
+
+    {"type": "h3", "text": "2. Các liên từ thời gian"},
+    {"type": "ul", "items": [
+      "when (khi), while (trong khi), as (khi/trong lúc), as soon as (ngay khi).",
+      "before (trước khi), after (sau khi), until/till (cho đến khi), since (kể từ khi).",
+      "by the time (vào lúc), once (một khi), whenever (bất cứ khi nào), every time (mỗi lần)."
+    ]},
+
+    {"type": "h3", "text": "3. Quy tắc thì QUAN TRỌNG: không dùng 'will' trong mệnh đề thời gian"},
+    {"type": "p", "text": "Khi nói về tương lai, mệnh đề thời gian dùng HIỆN TẠI ĐƠN (hoặc hiện tại hoàn thành); chỉ vế chính dùng 'will'. Ví dụ: When the report is ready, I will send it. (không 'When the report will be ready'). As soon as we receive payment, we will ship."},
+
+    {"type": "h3", "text": "4. when + quá khứ đơn vs while + quá khứ tiếp diễn"},
+    {"type": "p", "text": "while + hành động NỀN đang diễn ra (quá khứ tiếp diễn); when + hành động NGẮN xen vào (quá khứ đơn): While the team was presenting, the power went out. When the manager arrived, the meeting started."},
+
+    {"type": "h3", "text": "5. by the time & since"},
+    {"type": "table", "headers": ["Liên từ", "Quy tắc thì", "Ví dụ"], "rows": [
+      ["by the time + hiện tại", "vế chính: tương lai hoàn thành", "By the time you arrive, we will have finished."],
+      ["by the time + quá khứ", "vế chính: quá khứ hoàn thành", "By the time he called, we had left."],
+      ["since + mốc quá khứ", "vế chính: hiện tại hoàn thành", "She has worked here since she graduated."]
+    ]},
+
+    {"type": "h3", "text": "6. Rút gọn mệnh đề thời gian"},
+    {"type": "p", "text": "Khi hai vế cùng chủ ngữ, có thể rút gọn bằng V-ing: When/While reviewing the data, she found an error. (= While she was reviewing…). Before/After + V-ing: After submitting the form, you will receive a confirmation."},
+
+    {"type": "h3", "text": "7. no sooner … than / hardly … when (nâng cao)"},
+    {"type": "p", "text": "Diễn tả 'vừa mới… thì…': No sooner had we launched than demand surged. Hardly had the meeting begun when the alarm rang. (đảo ngữ — xem Bài 35)."},
+
+    {"type": "h3", "text": "8. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) KHÔNG dùng 'will' sau when/as soon as/until/before/after/by the time → dùng hiện tại đơn cho ý tương lai. (2) while + quá khứ tiếp diễn / when + quá khứ đơn. (3) since + mốc → vế chính hiện tại hoàn thành. (4) by the time + hiện tại → vế chính tương lai hoàn thành (will have + V3)."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Các liên từ thời gian phổ biến",

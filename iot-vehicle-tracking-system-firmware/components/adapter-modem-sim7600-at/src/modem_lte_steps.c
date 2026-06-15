@@ -61,16 +61,19 @@ bool modem_lte_diag_log_due(uint64_t now_ms, uint64_t *last_log_ms, uint64_t int
  * @return True if modem is alive.
  */
 bool modem_lte_try_resume_alive_modem(uint64_t now_ms) {
+    // Need a working UART before we can probe; if the driver fails, fall back to the full power-on path.
     esp_err_t at_init_err = modem_at_init();
     if (at_init_err != ESP_OK) {
         return false;
     }
 
+    // Ensure the RDY URC handler is registered even on this fast path (modem may still emit RDY later).
     if (!s_rdy_urc_registered) {
         modem_at_register_urc("RDY", modem_lte_on_urc_rdy);
         s_rdy_urc_registered = true;
     }
 
+    // Apply the known-good serial profile so the probe uses the same wiring/baud as steady state.
     modem_lte_set_fixed_uart_cfg();
     modem_lte_reset_at_sync_sweep();
     if (modem_lte_apply_at_sync_config() != ESP_OK) {
@@ -79,15 +82,17 @@ bool modem_lte_try_resume_alive_modem(uint64_t now_ms) {
 
     char response[128] = {0};
     modem_at_reset_uart_diag();
+    // Short "AT" probe: a quick "OK" proves the modem is already booted and responsive.
     esp_err_t probe_err = modem_at_send("AT\r",
                                         response,
                                         sizeof(response),
                                         MODEM_LTE_BOOT_ALIVE_PROBE_TIMEOUT_MS);
     bool at_ready = probe_err == ESP_OK && strstr(response, "OK") != NULL;
     if (!at_ready) {
-        return false;
+        return false;  // No response: caller must run the full PWRKEY/boot sequence.
     }
 
+    // Modem is alive: clear bring-up bookkeeping and jump straight to echo-disable (ATE0).
     s_at_sync_fail_count = 0;
     s_at_sync_diag_log_ms = 0;
     s_rdy_diag_log_ms = 0;
@@ -140,15 +145,17 @@ bool modem_lte_parse_cereg(const char *response, int *out_n, int *out_stat) {
         return false;
     }
 
+    // Locate the "+CEREG:" prefix; the response may carry echo/URC noise before it.
     const char *marker = strstr(response, "+CEREG:");
     if (marker == NULL) {
         return false;
     }
 
+    // Expected form: "+CEREG: <n>,<stat>" where n is the URC config and stat is the registration state.
     int n = 0;
     int stat = 0;
     if (sscanf(marker, "+CEREG: %d,%d", &n, &stat) != 2) {
-        return false;
+        return false;  // Malformed or unsolicited variant; let the caller treat as a parse miss.
     }
 
     if (out_n != NULL) {
@@ -195,12 +202,13 @@ void modem_lte_log_registration_snapshot(void) {
         const char *cmd;
         const char *label;
     } k_diag_cmds[] = {
-        {"AT+CPIN?\r", "CPIN"},
-        {"AT+CEREG?\r", "CEREG"},
-        {"AT+CSQ\r", "CSQ"},
-        {"AT+COPS?\r", "COPS"},
+        {"AT+CPIN?\r", "CPIN"},   // SIM lock/ready state.
+        {"AT+CEREG?\r", "CEREG"}, // EPS network registration state.
+        {"AT+CSQ\r", "CSQ"},      // Signal quality (RSSI/BER).
+        {"AT+COPS?\r", "COPS"},   // Selected operator / access technology.
     };
 
+    // Issue each diagnostic command in turn; failures are logged but do not stop the sweep.
     for (size_t i = 0; i < (sizeof(k_diag_cmds) / sizeof(k_diag_cmds[0])); ++i) {
         char response[256] = {0};
         esp_err_t err = modem_at_send(k_diag_cmds[i].cmd,

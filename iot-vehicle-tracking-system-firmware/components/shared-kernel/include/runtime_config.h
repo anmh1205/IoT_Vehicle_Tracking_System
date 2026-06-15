@@ -41,21 +41,21 @@
 #define TRACKER_ADC_BATT_CALIB_GAIN 1.01995f
 
 /** @brief Runtime config bounds shared by parser + validator. */
-#define TRACKER_CONFIG_MIN_TRACKING_INTERVAL_S 1U
-#define TRACKER_CONFIG_MAX_TRACKING_INTERVAL_S 3600U
-#define TRACKER_CONFIG_MIN_HEARTBEAT_INTERVAL_S 60U
-#define TRACKER_CONFIG_MAX_HEARTBEAT_INTERVAL_S 65535U
-#define TRACKER_CONFIG_MIN_ALARM_INTERVAL_S 1U
-#define TRACKER_CONFIG_MAX_ALARM_INTERVAL_S 60U
-#define TRACKER_CONFIG_MIN_IGNITION_OFF_HOLD_MS 1000U
-#define TRACKER_CONFIG_EFFECTIVE_MIN_IGNITION_OFF_HOLD_MS 15000U
-#define TRACKER_CONFIG_MAX_IGNITION_OFF_HOLD_MS 60000U
-#define TRACKER_CONFIG_MIN_ALARM_TIMEOUT_S 30U
-#define TRACKER_CONFIG_MAX_ALARM_TIMEOUT_S 3600U
-#define TRACKER_CONFIG_MIN_OTA_BATTERY_MV 3300U
-#define TRACKER_CONFIG_MAX_OTA_BATTERY_MV 4500U
-#define TRACKER_CONFIG_MIN_IGNITION_ADC_THRESHOLD_MV 11000U
-#define TRACKER_CONFIG_MAX_IGNITION_ADC_THRESHOLD_MV 15000U
+#define TRACKER_CONFIG_MIN_TRACKING_INTERVAL_S 1U     /**< Fastest driving-telemetry cadence (1s). */
+#define TRACKER_CONFIG_MAX_TRACKING_INTERVAL_S 3600U   /**< Slowest driving-telemetry cadence (1h). */
+#define TRACKER_CONFIG_MIN_HEARTBEAT_INTERVAL_S 60U    /**< Floor on heartbeat period so sleep is still worthwhile. */
+#define TRACKER_CONFIG_MAX_HEARTBEAT_INTERVAL_S 65535U /**< Ceiling fits the uint16_t storage field. */
+#define TRACKER_CONFIG_MIN_ALARM_INTERVAL_S 1U         /**< Fastest alarm-mode upload cadence (1s). */
+#define TRACKER_CONFIG_MAX_ALARM_INTERVAL_S 60U        /**< Slowest alarm-mode upload cadence (1m). */
+#define TRACKER_CONFIG_MIN_IGNITION_OFF_HOLD_MS 1000U  /**< Absolute minimum ignition-off debounce (1s). */
+#define TRACKER_CONFIG_EFFECTIVE_MIN_IGNITION_OFF_HOLD_MS 15000U /**< Recommended default debounce (15s) to ride out brief dropouts. */
+#define TRACKER_CONFIG_MAX_IGNITION_OFF_HOLD_MS 60000U /**< Longest ignition-off debounce (60s). */
+#define TRACKER_CONFIG_MIN_ALARM_TIMEOUT_S 30U         /**< Shortest time alarm mode persists without motion (30s). */
+#define TRACKER_CONFIG_MAX_ALARM_TIMEOUT_S 3600U       /**< Longest alarm-mode persistence (1h). */
+#define TRACKER_CONFIG_MIN_OTA_BATTERY_MV 3300U        /**< Lowest selectable OTA battery floor (3.30V). */
+#define TRACKER_CONFIG_MAX_OTA_BATTERY_MV 4500U        /**< Highest selectable OTA battery floor (4.50V, full Li-ion). */
+#define TRACKER_CONFIG_MIN_IGNITION_ADC_THRESHOLD_MV 11000U /**< Lowest supply threshold for ADC ignition detect (11V). */
+#define TRACKER_CONFIG_MAX_IGNITION_ADC_THRESHOLD_MV 15000U /**< Highest supply threshold for ADC ignition detect (15V). */
 
 /**
  * @brief Runtime configuration persisted in NVS and used by all modules.

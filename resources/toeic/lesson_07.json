@@ -5,6 +5,50 @@
     {"text": "Bài 07 — Liên từ (Conjunctions). Cách học: đọc lý thuyết từng phần → làm ngay câu hỏi bên dưới → tự chọn đáp án → rồi mới mở toggle Đáp án & giải thích. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
     {"text": "Trọng tâm TOEIC: Part 5 & 6 cực hay bẫy giữa LIÊN TỪ (nối 2 mệnh đề, theo sau là S + V), GIỚI TỪ (theo sau là danh từ), và TRẠNG TỪ NỐI (đứng giữa 2 câu riêng, có dấu chấm hoặc chấm phẩy).", "emoji": "🎯", "color": "gray_background"}
   ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & phân loại"},
+    {"type": "p", "text": "Liên từ (conjunction) nối từ, cụm từ hoặc mệnh đề. Ba nhóm: kết hợp (coordinating – FANBOYS), tương quan (correlative), và phụ thuộc (subordinating). Phân biệt với GIỚI TỪ (đi với danh từ) và TRẠNG TỪ NỐI (đứng giữa hai câu) là điểm TOEIC hay hỏi."},
+
+    {"type": "h3", "text": "2. Liên từ kết hợp — FANBOYS"},
+    {"type": "ul", "items": [
+      "for (vì), and (và), nor (cũng không), but (nhưng), or (hoặc), yet (tuy nhiên), so (vì vậy).",
+      "Nối hai mệnh đề độc lập → thêm DẤU PHẨY trước liên từ: The price rose, so demand fell.",
+      "Nối hai từ/cụm cùng loại (song song): efficient and reliable; by phone or by email."
+    ]},
+
+    {"type": "h3", "text": "3. Liên từ tương quan (correlative)"},
+    {"type": "table", "headers": ["Cặp", "Nghĩa", "Hòa hợp chủ-vị"], "rows": [
+      ["both … and", "cả … và", "động từ số nhiều"],
+      ["either … or", "hoặc … hoặc", "chia theo chủ ngữ GẦN"],
+      ["neither … nor", "không … cũng không", "chia theo chủ ngữ GẦN"],
+      ["not only … but also", "không những … mà còn", "chia theo chủ ngữ GẦN"],
+      ["whether … or", "liệu … hay", "—"]
+    ]},
+    {"type": "key", "text": "Hai vế của cặp tương quan phải SONG SONG về loại từ: 'not only fast but also reliable' (adj–adj), 'either by email or by phone' (cụm giới từ–cụm giới từ)."},
+
+    {"type": "h3", "text": "4. Liên từ phụ thuộc (subordinating)"},
+    {"type": "ul", "items": [
+      "Nguyên nhân: because, since, as. Kết quả/mục đích: so that, in order that.",
+      "Nhượng bộ: although, though, even though, while, whereas.",
+      "Thời gian: when, while, before, after, until, as soon as, by the time.",
+      "Điều kiện: if, unless, provided that, as long as.",
+      "Mệnh đề phụ + dấu phẩy nếu đứng đầu: Although it rained, the event continued."
+    ]},
+
+    {"type": "h3", "text": "5. Liên từ vs Giới từ vs Trạng từ nối (rất hay bẫy)"},
+    {"type": "table", "headers": ["Ý nghĩa", "Liên từ + MỆNH ĐỀ", "Giới từ + DANH TỪ", "Trạng từ nối"], "rows": [
+      ["Nguyên nhân", "because / since", "because of / due to", "therefore"],
+      ["Nhượng bộ", "although / though", "despite / in spite of", "however / nevertheless"],
+      ["Thêm ý", "—", "in addition to / besides", "in addition / moreover"]
+    ]},
+    {"type": "p", "text": "Trạng từ nối (however, therefore, moreover, nevertheless) KHÔNG nối được hai mệnh đề bằng dấu phẩy — phải dùng dấu chấm hoặc chấm phẩy: Sales fell; however, profit rose."},
+
+    {"type": "h3", "text": "6. Cấu trúc song song (parallelism)"},
+    {"type": "p", "text": "Các thành phần nối bởi and/or/but phải cùng dạng ngữ pháp: 'The job requires planning, organizing, and reporting' (cùng V-ing). Sai khi trộn: 'planning, to organize, and reports'."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Although + mệnh đề / Despite + danh từ — đừng lẫn (Despite the rain, KHÔNG 'Despite it rained'). (2) Because + mệnh đề vs Because of + N. (3) Không dùng 'Although … but …' trong cùng câu (chỉ chọn 1). (4) However/Therefore là TRẠNG TỪ, cần dấu chấm/chấm phẩy, không phải liên từ. (5) neither…nor / either…or chia động từ theo chủ ngữ gần."}
+  ],
   "parts": [
     {
       "heading": "Phần 1 · Liên từ chỉ lý do và kết quả",

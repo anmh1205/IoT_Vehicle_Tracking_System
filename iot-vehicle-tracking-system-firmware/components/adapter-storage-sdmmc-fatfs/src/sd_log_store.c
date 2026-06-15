@@ -26,16 +26,27 @@
  */
 
 
+/* FATFS mount point for the SD card volume. */
 #define SD_LOG_MOUNT_POINT "/sdcard"
+/* Root directory owned by this tracker store on the card. */
 #define SD_LOG_ROOT_DIR SD_LOG_MOUNT_POINT "/tracker"
+/* Directory holding the persistent queue metadata snapshot. */
 #define SD_LOG_META_DIR SD_LOG_ROOT_DIR "/meta"
+/* Directory holding the append-only queue log file. */
 #define SD_LOG_LOG_DIR SD_LOG_ROOT_DIR "/logs"
+/* Live metadata file (current committed queue cursors). */
 #define SD_LOG_META_PATH SD_LOG_META_DIR "/queue.dat"
+/* Staging file for an in-progress metadata write (temp -> live rotation). */
 #define SD_LOG_META_TMP_PATH SD_LOG_META_DIR "/queue.tmp"
+/* Previous metadata snapshot kept as rollback backup during rotation. */
 #define SD_LOG_META_BAK_PATH SD_LOG_META_DIR "/queue.bak"
+/* Live append-only queue data file (one record per line). */
 #define SD_LOG_DATA_PATH SD_LOG_LOG_DIR "/queue.log"
+/* Staging file for compacted queue data before promotion. */
 #define SD_LOG_DATA_TMP_PATH SD_LOG_LOG_DIR "/queue.tmp"
+/* Previous queue data file kept as rollback backup during compaction. */
 #define SD_LOG_DATA_BAK_PATH SD_LOG_LOG_DIR "/queue.bak"
+/* Max log line buffer: payload capacity plus headroom for the pipe-delimited header fields. */
 #define SD_LOG_LINE_MAX (SD_LOG_RECORD_PAYLOAD_MAX_LEN + 256U)
 
 static const char *TAG = "SD_LOG_STORE";
@@ -407,17 +418,35 @@ static esp_err_t sd_log_store_copy_payload_from_line(const char *payload_start, 
     return ESP_OK;
 }
 
+/**
+ * @brief Parse one pipe-delimited log line back into a queue record.
+ *
+ * The on-disk line format is a header of fixed scalar fields separated by '|'
+ * followed by the JSON payload as the final field:
+ *   seq|ts_ms|session_id|type|critical|gps_fix|net_up|time_trusted|<payload>
+ *
+ * To stay forward/backward compatible across firmware upgrades, this first
+ * tries the newer 8-field header (which carries `time_trusted`), then falls
+ * back to the older 7-field header. The `%n` conversion records the byte
+ * offset just past the trailing '|' so the payload can be copied verbatim.
+ *
+ * @param line       NUL-terminated log line read from the queue file.
+ * @param out_record Destination record populated on success.
+ *
+ * @return ESP_OK on a successful parse, otherwise ESP_FAIL / ESP_ERR_INVALID_ARG.
+ */
 static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *out_record) {
     ESP_RETURN_ON_NULL(line, ESP_ERR_INVALID_ARG, TAG, "line null");
     ESP_RETURN_ON_NULL(out_record, ESP_ERR_INVALID_ARG, TAG, "record null");
 
     sd_log_record_t rec = {0};
-    int payload_offset = 0;
+    int payload_offset = 0; // Set by `%n` to the index of the first payload byte.
 
     /*
      * Newer format stores `time_trusted`.
      * Fallback parser keeps older log files readable after firmware upgrades.
      */
+    // Attempt the current 8-scalar header; the final `%n` yields payload_offset.
     int matched = sscanf(line,
                          "%" SCNu32 "|%" SCNu64 "|%" SCNu32 "|%hhu|%hhu|%hhu|%hhu|%hhu|%n",
                          &rec.seq,
@@ -429,12 +458,14 @@ static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *ou
                          &rec.net_up,
                          &rec.time_trusted,
                          &payload_offset);
+    // All 8 scalars parsed and a payload tail exists -> accept as new-format record.
     if (matched == 8 && payload_offset > 0 &&
         sd_log_store_copy_payload_from_line(&line[payload_offset], &rec) == ESP_OK) {
         *out_record = rec;
         return ESP_OK;
     }
 
+    // New-format parse failed: reset and retry the legacy 7-scalar header.
     memset(&rec, 0, sizeof(rec));
     payload_offset = 0;
     matched = sscanf(line,
@@ -448,7 +479,7 @@ static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *ou
                      &rec.net_up,
                      &payload_offset);
     ESP_RETURN_ON_FALSE(matched == 7 && payload_offset > 0, ESP_FAIL, TAG, "parse record failed");
-    rec.time_trusted = 0;
+    rec.time_trusted = 0; // Legacy records predate trusted-time tracking; default to untrusted.
     ESP_RETURN_ON_FALSE(sd_log_store_copy_payload_from_line(&line[payload_offset], &rec) == ESP_OK,
                         ESP_FAIL,
                         TAG,
@@ -649,6 +680,8 @@ esp_err_t sd_log_store_append(const sd_log_record_t *record) {
         return ESP_FAIL;
     }
 
+    // Serialize the record as one newline-terminated, pipe-delimited line matching
+    // the newer parser format: seq|ts_ms|session_id|type|critical|gps_fix|net_up|time_trusted|payload.
     int write_len = fprintf(fp,
                             "%u|%llu|%u|%u|%u|%u|%u|%u|%s\n",
                             (unsigned)record->seq,
