@@ -1,0 +1,1154 @@
+                                    1                                  2                          3                                                                  4
+
+A                                                                                                                                                                                 A
+
+                                            U_Power                    U_ESP32S3                         U_SIM7600CE
+                                            Power.SchDoc               ESP32S3.SchDoc                    SIM7600CE.SchDoc
+B
+                                                                                       MCU-TX            SIMCOM-RX
+                                                             BATTERY+
+                                                           POWER-VOL                   MCU-RX            SIMCOM-TX
+
+C                                                                                      MCU-DTR           SIMCOM-DTR
+
+                                                                                       MCU-RESET         SIMCOM-RESET
+
+                                                                                       MCU-PWKEY         SIMCOM-POWER-KEY                                                         B
+
+                                                                          BATTERY+     IMU-SCL           U_LIS3DH
+                                                                          POWER-VOL    IMU-SDA           LIS3DH.SchDoc
+                                                                                       IMU-INT1
+                                                                                       IMU-INT2                IMU-SCL
+                                                                                                               IMU-SDA
+                                                                                                               IMU-INT1
+                                                                                                               IMU-INT2
+
+                                                                                                                                                                                  C
+
+D                                                                                                 Title                                                                           D
+                                    1
+                                                                                                  Size   Number                                                         Revision
+
+                                                                                                  A
+
+                                                                                                  Date:  4/04/2026         Sheet of
+                                                                                                  File:
+                                                                                                         E:\1. Phenikaa University\..\Main-SchematDicr.SawchnDBoyc:
+
+                                                                       2                          3                                                                  4
+                         1                                                                                          2                                                                  3                                                                                                        4                                                  5                                                             6                                             7                                 8
+
+A 12-24V -> 5V                                                                                                                                                                                                                                                                                                                                        5V BOOST                                                                                                                                                                A
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              B
+                                +12V                                                                 +12V                                                        CUOU11                                                                                                                                                                                                                                                                                                                                                       C
+                                                                                                                                                              8 IN PIU108                                                                                                                                                                                                                                                                                                                                                     D
+             PI102               2                                                                                                                                                                       BST 2 PIU102                     PIC10                                                                          +5.0V-NET                                                                                                                                                          +5V  8
+
+                                                                                                                                                                                                                                          PIC102  CCOC11                                  CLOL22                         i                    +5V                                                                   LCOL11                        DCOD11                        PIC502
+                                                                                                                                                                                                                                                  0.1uF
+                                                                                                                                                              3 VCC PIU103                                                                                                                         CDOD22                           PIC601                      BATTERY+                                                                                                           CCOC55
+                                                                                                                                                              6 PG PIU106
+                                                                                                                                                              7PIU107 EN/SYNC                            SW 1 PIU101                                                                                                                   CCOC66                             PIC402                                    PIL101        PIL102        PID101 PID102                   PIC501 22u
+                                                                                                                                                                                                         FB 5 PIU105
+                         P1                                                                                                                                                                                                                                                             PIL201     PIL202 PID201 PID202             PIC602 100u                                  CCOC44                                                         SS54
+
+                         COP1                                                                              PIC201 PIC302                      CROR11                                                                                                                PID302   CDOD33       4.7uH         SS54             PIR20                                            PIC401 22u                                CUOU22 10uH                0.6V            PIR302
+
+                           PI10  1                                                                                  CCOC22            CCOC33  PIR102  PIR101                                                                                                                                                              CROR22                                                                                    5 IN PIU205   SW 1 PIU201                   RCOR33
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                91K
+                                                                                                           PIC20 22u PIC301 1u                100k                                                                                                                  PID301 SS54                                            110K
+                                                                                                                                                                                                                                                                                                                                                                                                                                                               PIR301
+                                    N0L0VV                                                                                                    CROR44                                                                                                                                                                     PIR201                                                                                     4 EN PIU204   NC 6 PIU206
+                                                                                                                                                                                                                                                                                                                                                                                                                                                               PIR602
+   +12V                                                                                                                                       PIR402  PIR401
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                RCOR66
+         CDOD44                                                                                      0V                                       10K                               4 GND                                                                      BATTERY-                                                      PIR502                                                                                                                                 12k
+                                                                                                                                                                                      EXP EXP
+                                                                                                                                                                                PIU104 PIU10EXP                                                                                                                           CROR55                                                                                    2 GND PIU202  FB 3 PIU203                  PIR601
+                                                                                                                                                                                                                                                                                                                                                                                                                        SX1308
+                                 CROR77 0V                                                                                                                              MP2482                                                                                                                                             20k
+         PID401  PID402  PIR701          PIR702
+                                                                                                                                                                                                                                                                                                                         PIR501
+
+                                 10K
+
+                                                                                                                                                                                                                                                                                                                         BATTERY-                               BATTERY- BATTERY-                                                                         BATTERY- BATTERY-
+
+                                    PONPeOtRW8E_2R0VOL Main-Schematic[2C], ESP32S3[2A]
+
+   +12V          CROR88                   CROR99
+
+         PIR801          PIR802     PIR901                 PIR902
+
+B                100K                     10K
+
+                                                           BATTERY-
+
+   1S LI-ION CHARGER                                                                                                                                                                                                                              PONBeAtRT1T0_E2RY0 Main-Schematic[2B], ESP32S3[2A]                                                  3.3V - ESP32S3
+
+                                                                                                             +5V                                                                                                       RCOR1100                           CROR1111                                                                                                                                      +5V
+
+                                                                                                                                                                                                                 PIR1001         PIR1002          PIR1101           PIR1102                                                                                                             PIC802                                                                    +3.3V-NET
+
+                                                                                                                                                                                                                       100K                               10K                                                                                                                                            CCOC88                                           V-MCU         i
+
+                                                           CDOD55                                                                                                       CCOC77                                                                                      BATTERY-                                                                                                            PIC801 1u                   UCOU33
+
+                            NSLTSTDDBYBY                                                                                                                                                                                                                                                                                                                                                            BATTERY-        1 VIN PIU301  VOUT       5
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                          PIU305
+
+                                                                                                                                                                        PIC702 PIC701
+
+                                                           PID502 PID501                                                      CUOU44                                                                                                                                NBLBAATTTTEREY0RY+                                                                                                                                                                             PIC902
+
+                                                                                   CROR1122                                                                             10u                                                                                                                                                                                                                                         3 EN PIU303                                         CCOC99
+
+                                                                                   PIR1201   PIR1202                                                  VCC 4 PIU404                                                                                                  NBLBAATTTTEREY0RY-                                                                                                                                                                             PIC901 1u
+
+                                                           LED                     1K                                                                                           BATTERY-                         BCOB11A A                                                                                                                                                                                                        GND 2 PIU302                 BATTERY-
+
+                                                                                   CROR1133                NTLTEEMMP P 1 PIU401       TEMP       BAT          5 PIU405                                   1 C1+ C1- 2 PIB101
+                                                             CDOD66                                                 8 PIU408          CE      STDBY           6 PIU406                                                                            PIB102
+                                                                                                                                                              PIU7407
+                            NCLCHHRRG G                    PID602 PID601           PIR1301   PIR1302                                           CHRG                     STDBY                                                                                                                                                                                                                                       AP2112K-3.3TRG1
+                                                                                                                                                                        CHRG
+                                                                                   1K                                                                                                                                  21700-1C
+
+                                                                                                                 2 PROG PIU402                        EP 9 PIU409                                                           CCOC1100
+
+                                                           LED                                             PIR1401
+
+C                                                                                                                   CROR1144                          GND 3 PIU403                                                     PIC1002 PIC1001
+                                                                                                                    1.2K
+                                                                                                           PIR1402                                                                                                        10u
+
+                                                                                                                              TP4056
+
+                                                                                                           BATTERY-                                           BATTERY-                                                                BATTERY-
+
+   4V - SIM7600CE
+
+                                                                                                                                                                                                                                                                                                   V-SIM                    +3.8V-NET
+                                                                                                                                                                                                                                                                                                                                  i
+
+                                                                                                                                                                                                         LCOL33
+
+                                                                                                                                                                                                         PIL301                  PIL302
+
+                                                                                                           PIC102                                                                                PID702      4.7uH-3A                             PIC1201                    PIC1301
+                                                                                                                                                                                                         CDOD77
+                                                                                                              CCOC1111                                                                                                                               CCOC1122                   CCOC1133
+                                                                                                                                                                                                 PID701 SS34
+                         +5V                                                                               PIC101 0.1u                          CUOU55                                                                                            PIC120 47u                 PIC1302 47u                        PIR1502
+                                                                                                                                              TPS54231
+                                                                                                                                                                                                                                                                                                   BATTERY-              CROR1155
+                                                                                                                              1                                  8                                                                                                                                                       20K/1%
+                                                                                                                                      BOOT                PH                                                                                                                                                    PIR1501
+                                                                                                                              PIU501  VIN               GND   PIU508                                                             CCOC1144
+                                                                                                                                      EN              COMP
+                                                                                                                              2       SS              VSNS       7                                                          PIC1402 PIC1401                                                        0.8V Vsense
+
+                                                  PIC1602                 PIC1702           PIC1801                           PIU502                          PIU507                                                             33p
+
+                                                                                                                              3                                  6
+
+                                                                                                                              PIU503                          PIU506
+
+                                                                                                                              4                                  5
+
+                                                                                                                              PIU504                          PIU505
+
+D                                                          CCOC1166 CCOC1177 CCOC1188 PIC1902                                                                                                               CCOC1155                                      CROR1166
+                                                  PIC1601 105 PIC1701 104 PIC1802 47u                        CCOC1199                                                                                                                                                                                           PIR1702
+                                                                                                                                                                                                         PIC1502 PIC1501                          PIR1602           PIR1601
+                                                                                                           PIC1901 10n                                                                                                                                                                                           CROR1177
+                                                                                                                                                                                                            1n                                            30K/1%
+                                                                                                                                                                                                                                                                                                                  5K/1%
+
+                                                                                                                                                                                                                                                                                                                PIR1701
+
+                                    BATTERY-
+
+                                                                                                                                                                                                                                                                                                   BATTERY-
+
+                         1                                                                                          2                                                                  3                                                                                                        4                                                  5                                                             6                                             7
+               1                                                                                                2                                                                                           3                                                                               4                                                                         5                                                         6                                                         7                                                                                         8
+
+                                                                        V-MCU                                                                V-MCU
+
+A GPIO                                                                                                                                       PIR1802                                                                   SYS                                                                                                                                                                                                                             ANTENNA                                                                                                                                A
+
+B                                                                             PIR1902                                                         CROR1188                                                                          U6C                                                                                                                                       JCO1J1                                                                                                                                             CJOJ22 ANT_CONN
+
+                                                                               RCOR1199                                                      PIR1801 10K                                                                                                                                                                                                                                                                                                                                                                  ANT PIJ201
+
+                                                                               10K                                                                                                                                                                             4 PIU604                         ESP-RESET                                                                                                                                                                                    CLOL44                                PIJ20 PIJ203 PIJ204 PIJ205
+                                                                                                                                                                                                                                                                                               NALANNT T
+                                                                              PIR1901                                                                                                                                                                                                           OSCIN                                                                                                                                                                                     PIL401
+                                                                                                                                                                                                                                                                                               NOLOSSCCOUOT UT
+                            U6B                                                          POII2CM0U-0SCSLCL                                                POII2CM0U-S0DSADA                                                                 NLOSCIN CHIP_PU                                    NULUSSEERR0L-ELD ED                                                  A4/B9                                   A6        USB-D+                                                     ANT
+                                                                                                                                                                                                                                                                                                                                                                        PIJ10A40B9                                    USB-D-
+                                                                                                                                                                                                                                               LNA_IN                                             NULU00RRX X                                                                                             PIJ10A6
+                                                                                                                                                                                                                                               XTAL_P                                             NULU00TTX X                                                       A9/B4
+                                                                                                                                                                                                                                              XTAL_N                                                                                                                    PIJ10A90B4                          A7
+                                                                                                                                                                                                                                        XTAL_32K_P                                          PIR2202
+                                                                                                                                                                                                                                        XTAL_32K_N                                                                                                                                                        PIJ10A7
+                                                        5 NBLBOOOOT0TI-OI0O0                                                                                                                                                                                   1 PIU601                         FL-HD                                                     P2.54                          VBUS       D+1                                                                                   PIC202 3nH     PIL402
+                                                                                                                                                                                                                                                 MTCK                                           FL-WP                                                                                                                                                                                                                                                                  GVBUSD-1
+                                             GPIO0   PIU605                              NI2LIC2C00-0SSCCL L                                                                                                                                     MTDO          54 PIU6054                       FL-CS                                                                                                                                                                                                                                                                     GPIC2102
+                                             GPIO1                                                                                                                                                                                                MTDI                                                                                                                                                                                                                                                                                                                        G
+                                             GPIO2      6                                                                                                        NIL2IC2C00-0SSDDA A                                                             MTMS          PIU60553 3                       FL-CLK                                                                                                                                                                                                                                                                           GB6USB-D+CCOC2200CCOC2211
+                                             GPIO3                                                                                                                                                                                              U0RXD                                           FL-DO
+                                             GPIO4   PIU606                                                                                                                                                                                     U0TXD                   21                      FL-DI                                                                                               D+2   PIJ10B6     USB-D-                                                              PIC201 NP         PIC210 1.8p
+                                             GPIO5                                                                                                                                                                                          SPICLK_P           PIU6021                                                                                                                              D-2                         RCOR2200
+                                             GPIO6      7                                PONBeAtRT1T0_E2RY0 PONPeOtRW8E_2R0VOL Main-Schematic[2C], Power[1B]                                                                                SPICLK_N                                                                                                                                                        B7
+                                             GPIO7                                                                                                                                                                                               SPIHD                  22
+                                             GPIO8   PIU607                                                                                                                                                                                      SPIWP                                                                                                                                                    PIJ10B7
+                                             GPIO9                                                                                                                                                                                              SPICS0
+                                            GPIO10      8                                                                                                                                                                                        SPICS1        PIU6022
+                                            GPIO11                                                                                                                                                                                             SPICLK
+                                            GPIO12   PIU608                              NULUSSEERR0B-BUTUTOTN0T1ON-1                                                                                                                                                   44                                                                                                                                A5 PIJ10A5           5.1K PIR2002
+                                            GPIO13                                                                                                                                                                                                 SPIQ        PIU6044                                                                                                                                    B5 PIJ10B5
+                                            GPIO14      9                                                                                                                                                                                          SPID
+                                            GPIO17                                       NULUSSEERR0B-BUTUTOTN0T2ON-2                                                                                                                                                   45                                                                                                                          CC1               PIR2001
+                                            GPIO18   PIU609                                                                                                                                                                                                                                                                                                                                         CC2
+                                            GPIO19                                                                                                                                                                                                             PIU6045
+                                            GPIO20   10 PIU6010
+                                            GPIO21                                                                                                                                                                                                                      47                                                                                                                                            PIR2101  PIR2102                                           BATTERY-                BATTERY-                               BATTERY-
+                                            GPIO33   11 PIU6011
+                                            GPIO34                                       SD-DAT2                                                                                                                                                               PIU6047                                                                                              A1/B12 PIJ10A10B12                                           RCOR2211
+                                            GPIO35   12 PIU6012                                                                                                                                                                                                                                                                                                     A12/B1 PIJ10A120B1                                           5.1K
+                                            GPIO36                                       SD-DAT3                                                                                                                                                                        48                                                                                                               GND              A8 PIJ10A8
+                                            GPIO37   13 PIU6013                          SD-CMD                                                                                                                                                                PIU6048                                                                                                 Shell PIJ10Shell  GND              B8 PIJ10B8
+                                            GPIO38                                       SD-CLK                                                                                             NULUSSBB0D-0D-                                                                                                                                                                               Shield
+                                            GPIO45   14 PIU6014                                                                                                                             NULUSSBB0D-0D+                                                              50                                                                                                                          SBU1
+                                            GPIO46                                                                                                                                                                                                             PIU6050                                                                                                                              SBU2
+                                                     15 PIU6015
+                                                                                                                                                                                                                                                                        49
+                                                     16 PIU6016                                                                                                                                                                                                PIU6049 PIR2201
+
+                                                     17 PIU6017                          SD-DAT0                                                            PIR2302                                                                                               37              CROR2222                                                                                                                                                   BATTERY-
+                                                                                         SD-DAT1                                                                                                                                                                                  30R
+                                                     18 PIU6018                          SD-CD                                                                 RCOR2233                                                                                        PIU6037
+
+                                                     19 PIU6019                                                                                         PIR2402 0R                                                                                                36
+                                                                                                                                                         CROR2244PIR2301
+                                                        23                                                                                                                                                                                                     PIU6036
+
+                                                     PIU6023                                                                                                                                                                                                      30
+                                                                                                                                                                                                                                                               PIU6030
+                                                     24 PIU6024
+                                                                                                                                                                                                                                                                        31                                                                                  BATTERY-
+                                                     PIU60225 5                                                                                                                                                                                                PIU6031
+                                                        26
+                                                                                         PONeMtQC2_U3 0TX                                                                                                                                                         32                                                                                                                                                                                   RESONATOR
+                                                     PIU6026
+                                                                                                                                                                                                                                                               PIU6032
+                                                        27
+                                                                                                                                                        PIR2401  0R                                                                                               28
+                                                     PIU6027
+                                                                                         PONeMtCC54U_10RX                                                                                                                                                      PIU6028
+                                                        38
+                                                                                                                                                                                                                                                                  33
+                                                     PIU6038
+                                                                                                                                                                                                                                                               PIU6033
+                                                        39
+                                                                                                                                                                                                                                                                  34                                                                                                                                                                                                                                        CYOY11
+                                                     PIU6039
+                                                                                                                                                                                                                                                               PIU6034
+                                                        40
+                                                                                         PONMetQC1U_30DTR Main-Schematic[3B]                                                                                                                                      35
+                                                     PIU6040                             PONMetRC5U7_01 PWKEY
+                                                                                         PONMetRC5U6_01 RESET                                                                                                                                                  PIU6035
+                                                        41                               PONIeMtUU06_I4N1T1
+                                                                                         PONIeMtUU06_I4N2T2                                                                                                                                                                                                                                                                                 CPOP22                      V-MCU                                                             OSCIN          1                PIC2302 GND 4 PIY104                                      BATTERY-
+                                                     PIU6041                                                                                                                                                                                                                                                                                                                                           2                                                                                               PIC202 PIY101
+                                                                                                                                                                                                                                ESP32-S3                                                                                                                            ESP-RESET 1                                                                                                              CCOC2222                                                                                         B
+                                                        42                                                                                                                                                                                                                                                                                                                                          PIP202                                                                                                                                      CCOC2233
+                                                                                                                                                                                                                                                                                                                                                                                         PIP201
+                                                     PIU6042                                                                                                                                                                                                                                                                                                                                           4
+                                                                                                                                                                                                                                                                                                                                                                    U0TX                 3                                                                                                   PIC201 22p  2 GND PIY102     PIC2301 3 PIY103 22p OSCOUT
+                                                        43                                                                                                                                                                                                                                                                                                                               PIP203     PIP204
+
+                                                     PIU6043                                                                                                                                                                                                                                                                                                        U0RX                 5             6 BOOT-IO0                                                               BATTERY-
+                                                                                                                                                                                                                                                                                                                                                                                         PIP205
+                                                        51                                                                                                                                                                                                                                                                                                                                          PIP206
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            40MHz
+                                                     PIU6051                                                                                                                                                                                                                                                                                                                                                          BATTERY-
+
+                                                        52
+
+                                                     PIU6052
+
+                            ESP32-S3
+
+   POWER                                                                                                        +3.3V-MCU                                                                  V-MCU +3.3V-NET             RTC                                                                                                                                                               LED
+                                                                                                                                                                                                                i
+   CUOU6CAB6A                                                                                                                                CLOL55                                                                                 V-MCU                                         UCOU77
+                                                                                                                                                                                    PIC2702 PIC2802
+           VDDA1       55                                                                                                PIL501                         PIL502                                                                    PIC2901                               1                                      8                       I2C0-SCL
+           VDDA2                                                                                                                                                                       CCOC2277 CCOC2288
+         VDD_SPI    PIU6055                                                                                                                  2.7nH                                                                                        CCOC2299                      PIU701    32KHZ                SCL  PIU708                                          I2C0-SDA
+          VDD3P3                                                                                                                                                                    PIC2701 105 PIC2801 104                                                                       VCC                  SDA
+          VDD3P3       56                   FL-VDD                                                                                                                                                                                PIC2902 104                           2         INT                VBAT      7                                                                                                                                       CDOD88
+   VDD3P3_CPU                                                                                                                                                                                                                                                                     RST                 GND
+   VDD3P3_RTC       PIU6056                                                              PIC2402 PIC2502 PIC2602                                                                                                                                                        PIU702                              PIU707                     CJO3J3
+                                                                                                                                                                                                                                                                                                                                                1
+               GND     29                                                                                                                                                                                                                                               3                                      6
+                                                                                                                                                                                                                                                                                                                                                    PIJ301
+                    PIU6029                                                                                                                                                                                                                                             PIU703                              PIU706
+                                                                                                                                                                                                                                                                                                                                                2
+                    2 PIU602                                                                                                                                                                                                                                            4                                      5
+                    3 PIU603                                                                                                                                                                                                                                                                                                                        PIJ302
+                    46 PIU6046                                                                                                                                                                                                                                          PIU704                              PIU705
+                    20 PIU6020                                                                                                                                                                                                                                                                                                         NTC 10K
+                    57 PIU6057                                                           CCOC2244 CCOC2255 CCOC2266                                                                                                                                                               DS3231M                                                                                                                                                    USER-LED                  RCOR2255
+                                                                        PIC3102 PIC2401 106 PIC2501 105 PIC2601 104
+                                                       PIC302                                                                                                                                                                                                                                                                                                                                                                                          PID801  PID802  PIR2501   PIR2502
+
+                                                               CCOC3300 CCOC3311                                                                                                                                                                                                                                                                                                                                                                                       330
+
+   ESP32-S3                                            PIC301 105 PIC310 104
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 BATTERY-
+
+C                                                                                                                                                                BATTERY-                                                                                                                                                                                                                                                                                                                                                                                                                     C
+
+                            BATTERY-                                    BATTERY-                                                                                                                                                        BATTERY-                                                                    BATTERY-                              BATTERY-
+
+   FLASH                                                                                                                                                                                    BUTTON                                                  USER-BUTTON-2
+
+                                                                                                                                                                                                                           V-MCU                                                                            V-MCU
+
+                                            PIR2602 PIR2702 PIR2802 PIR2902 PIR302 PIR3102 PIR320                                                       V-MCU
+
+                                                     CROR2266 CROR2277 CROR2288 CROR2299 CROR3300 CROR3311 CROR3322                                                                                                             PIR302                                                                              PIR3402
+
+                                                     10K 10K 10K 10K 10K 10K 10K                                                                                                                                                        CROR3333                                                                             CROR3344
+
+                            NSLSDD0-DDATA2T2PIR2601            PIR2701  PIR2801 PIR2901          PIR301 PIR310           PIR3201                                                                            CSOSWW1 1             10K                                                     CSOSWW2 2                   10K
+                                                                                                                              1
+                            NSLSDD0-DDATA3T3                                                                                                 DAT2                    Micro SD Card                             1                PIR301                                                       1                      PIR3401
+                            NSLSDD0-CCMDMD                                                                                  PIJ401           CD/DAT3
+                                                                                                                                             CMD                                                            PISW101       2             NELESSPP0-RREESEST ET                             PISW201       2                              USER-BUTTON-1
+                                                                                                                              2              Vdd
+                                                                                                                                             CLK                                                                       PISW102                                                                       PISW202
+                                                                                                                            PIJ402           Vss 2
+               PIC3402      NSLSDD0-CCLKLK                                                                                                   DAT0                                                                               PIC3201                                                                             PIC301
+                                                                                                                              3              DAT1
+                  CCOC3344  NSLSDD0-DDATA0T0                                                                                                 CD                                                                                    CCOC3322                                                                            CCOC3333
+                            NSLSDD0-DDATA1T1                                                                                PIJ403           Shield
+               PIC3401 104  NSLSDD0-CCD D                                                                                                                                                                                       PIC320 104                                                                          PIC302 104
+                                                                                                                              4
+                                                                                                                                                                                                            BATTERY-   BATTERY-
+                                                                                                                            PIJ404
+                                                                                                                                                                                                                                                                        BATTERY-                     BATTERY-
+                                                                                                                              5
+                                                                                                                                                                                    CJO4J4
+                                                                                                                            PIJ405
+
+                                                                                                                              6
+
+                                                                                                                            PIJ406
+
+                                                                                                                              7
+
+                                                                                                                            PIJ407
+
+                                                                                                                              8
+
+                                                                                                                            PIJ408
+
+                                                                                                                              9
+
+                                                                                                                            PIJ409
+
+                                                                                                                           Shell
+
+                                                                                                                            PIJ40Shell
+
+                                                                                                                                                                                                                                                   V-MCU
+
+               BATTERY-                                                                                                  FL-VDD
+
+D                               CUOU88                                                                                                                                                                                                                         PIR3502                                                                                                                                                                                                                                                                                                                        D
+
+               NFLLFL-0CCSS 1                                                               8                                                                                                                                                                           CROR3355
+                                    PIU801
+                                            /CS                                   VCC    PIU808  NFLFLL0-HHD D                      PIC3602                                                                                             CSOSWW3 3                10K
+               NFLLFL-0DDOO 2               DO (IO1)                    /HOLD (IO3)                                                 PIC3601                                                                                                1
+                                    PIU802  /WP (IO2)                                       7    NFLFLL-0CCLLK KPIC3502                                                                                                                                        PIR3501
+                                            GND                                   CLK                                                                                                                                                   PISW301
+               NFLLFL-0WWP P3                                                 DI (IO0)   PIU807  NFLFLL0-DDI I           CCOC335 5           CCOC336 6                                                                                                2                           USER-BUTTON-2
+                                    PIU803                                                                               105                 106
+                        4                                                                   6           PIC3501                                                                                                                                    PISW302
+                                    PIU804
+                                                                                         PIU806
+
+                                                                                            5
+
+                                                                                         PIU805
+
+                                W25Q128                                                                                                                                                                                                                        PIC3701
+
+                                                                                                                                                                                                                                                                        CCOC3377
+                                                                                                                                                                                                                                                               PIC3702 104
+
+                                                                                                                                                                                                                       BATTERY-                    BATTERY-
+
+               BATTERY-
+
+               1                                                                                                2                                                                                           3                                                                               4                                                                         5                                                         6                                                         7                                                                                         8
+                        1                                                     2                                             3                                                              4                                                                                                   5                                                                                   6                                                                                              7                                                                                               8
+
+A SIM7600CE                                                                                                                 ANTENNA                                                                                                                                                                                                                                                                                                                                                                                                                                                          A
+
+                                                                                                                                                                                                                                                                                                                                                                                   MAIN-ANT                     CROR3366                              RCOR3377              JCO5J5 ANT_CONN
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ANT PIJ501
+                                                                                                                                                                                                                                                                                                                                                                                                      PIR3601             PIR3602           PIR3701             PIR3702                               G        G  G  G
+
+                                                                                                                                                                                                                                                                                                                                                                                                                0R                                    0R                                                PIJ502 PIJ503 PIJ504 PIJ50
+
+                                                                                                                                                                                                                                           CROR3388               V-SIM                                                                                                                      PIC3802  CCOC3388                     PIC3902  CCOC3399                     PID902   CDOD99
+
+                                                                                                                                                                                                                                           PIR3802       PIR3801
+
+                                                                                                                                                                                                                                                  10R                                                                                                                                        PIC3801 Cap_NP PIC3901 Cap_NP                                               PID901   SMAJ5.0
+
+                                                                                                                                                                                                                                           PIL602                                                                                                                                                                                                                                                              BATTERY-
+
+                                                                                                                                                                                                                                            CLOL66
+
+                                                                                                                                                                                                                                            47n
+
+                                                                                                                                                                                                                                                                                                                                                                                      BATTERY-                            BATTERY-                              BATTERY-
+
+                                                                                          NVLV-S0SIIMM038039                                                                                  CCOC4400                             CCOC4411 PIL601 JCO6J6 ANT_CONN
+
+                           CUOU99                                                                                                                               GNSS-ANT                   PIC4002 PIC4001                PIC4102 PIC4101  ANT PIJ601    G                                                                                                                                                                                                                  JCO7J7 ANT_CONN
+                                                                                                                                                                                                                                                            G
+                                                                              38 PIU9038                                                                                                      Cap_NP                                                            G                                                                                                                                               CROR3399                              RCOR4400           ANT PIJ701
+                                                                              39 PIU9039                                                                                                                                                                           G
+                                                                              62 PIU9062                                                                                                                                                                                                                                                                                                                                                                                          PIJ702 PIJ703 PIJ704 PIJ705
+                                                                        VBAT  63 PIU9063                                                                                                                                           33p                            PIJ602 PIJ603 PIJ604 PIJ605                                                                                      AUX-ANT            PIR3901             PIR3902           PIR4001             PIR4002                               G        G  G  G
+                                                                        VBAT  44 PIU9044
+                                                                        VBAT  15 PIU9015         VNL-VS0ISMIM0-66220-663 3                                                         PIL702                        PIL802                                                                                                                                                                                         0R                                    0R
+                                                                        VBAT
+   NRLREESSETET         4 PIU904                    RESET        VDD_AUX         20                   +1.8V                                                                         CLOL77                        CLOL88                                                                                                                                                                     PIC420                                PIC4302
+   NPLWPWRR0K-EKY EY       3                        PWRKEY         VDD_1V8                NULUSSIIMM0V-DVD DD
+                                                    FLIGHTMODE   USIM_VDD     PIU9020                                                                                               L_NP                          L_NP                                                                                                                                                                          CCOC4422                              CCOC4433
+                        PIU903                                                            NNLNEETT0-LLIIGGHTHT
+                                                                                          NSLTSTAATTUSUS                                                                                                                                                                                                                                                                                     PIC4201 Cap_NP                        PIC4301 Cap_NP
+                        54 PIU9054
+                                                                                                                                                                                   PIL701                        PIL801                                           BATTERY-
+                                                                              PIU950151
+                          47                        ADC1         NETLIGHT        49                                                                                                                                                                                                                                                                                                   BATTERY- BATTERY-                                                                                                        BATTERY-
+                                                    ADC2            STATUS
+                        PIU9047                                               PIU9049
+
+                          46
+
+                        PIU9046
+
+                                                                 USB_VBUS        11                                                                                     BATTERY- BATTERY-
+                                                                    USB_DN
+B                         85                        BOOT_CFG0        USB_DP   PIU9011                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        B
+                                                                     USB_ID
+                        PIU9085                                                  12
+
+                          21                        SD_CMD                    PIU9012                                       POWER                                                                                                                                                                                                                   USIM
+                                                    SD_CLK
+                        PIU9021                     SD_DATA0                     13
+                                                    SD_DATA1
+                          26                        SD_DATA2                  PIU9013
+                                                    SD_DATA3
+                        PIU9026                                                  16
+
+                          22                                                  PIU9016
+
+                        PIU9022                                                                                                                                 V-MCU                                                     V-SIM
+
+                          23                                     SD_DET          48
+
+                        PIU9023                                               PIU9048
+
+                          24                                        SDIO_CMD     29                                                                                                V-MCU                                                   NVLV-0SSIIMM                                                                                                                                                                                                                  BATTERY-BATTERYB-ATTERY- BATTERY-
+                                                                    SDIO_CLK
+                        PIU9024                                  SDIO_DATA0   PIU9029
+                                                                 SDIO_DATA1
+                          25                                     SDIO_DATA2      32
+                                                                 SDIO_DATA3
+                        PIU9025                                               PIU9032
+
+   NULUSSIMM0D-DATAA TA 17                          USIM_DATA                    30                                                                                                                                                                                                                         V-SIM                                                                                                                                                                 PIC402 PIC4502 PIC4602                                               PIC4702
+                                           PIU9017  USIM_RST
+                                                    USIM_CLK                  PIU9030                                                                                                         CLOL99                                                                                                      PID102                                                                                                                                                                            CCOC4444           CCOC4455 CCOC4466                          CCOC4477
+   NULUSSIMM0R-SRTST 18                             USIM_DET
+                                           PIU9018                               27                                            V-SIM-62-63                                                 PIL901                                                                                                             CDOD1100                                                                                                                                                            PIC401 22p PIC4501 22p PIC4601 22p                                   PIC4701 104
+                                                                                                                                                                                                                                                                                                              SMAJ5.0
+   NULUSSIMM0C-LCKLK 19                                                       PIU9027                                                      PIC4802 PIC4901 PIC501                              FB-30R
+                                           PIU9019                                                                                                                                                                                                                                                        PID101
+                       53                                                        28                                                                 CCOC4488 CCOC4499 CCOC5500
+                                           PIU9053
+                                                                              PIU9028                                                      PIC4801 1u PIC4902 100u PIC502 100u
+
+                                                                                 31
+
+                                                                              PIU9031
+
+                                                                                                                                                                                                                 PIL902                                                                                                                                                                               VCC              1                                                                                                                                                          USIM-VDD
+                                                                                                                                                                                                                                                                                                                                                                                                        I/O                                                                                                                                                                       USIM-DATA
+   NSLSIIMM0-RRX X        68                        RXD          SPI_MOSI        8                                                                                                                                                                                                                                                                                                                                  PIJ801                                                                                                          PIR4101  PIR4102                              USIM-CLK
+   NSLSIIMM0-TTX X                                  TXD          SPI_MISO                                                                                                                                                                                                                                                                                                                             CLK                                                                                                                           PIR4201  PIR4202                              USIM-RST
+   NSLSIMIM0-RRTSTS     PIU9068                     RTS          SPI_CLK      PIU908                                                                                                                                                                                                                                                                                                                  RST              7                                                                                                            PIR4301  PIR4302
+                                                    CTS                                                                                                                                                                                                                                                                                                                                                 NC
+   NSLSIMIM0-DDTRTR       71                        DTR             SPI_CS       7                                                                                                                                                                                                                                                                                                                      NC          PIJ807
+                                                    DCD                                                                                                                                                                                                                                                                                                                                                VPP
+                        PIU9071                     RI                        PIU907                                                                                                                                                                                                                                                                                                                  GND              3
+
+                          66                                                     6                                                                                                                                                                                                                                                                                                                                  PIJ803
+
+                        PIU9066                                               PIU906                                                                                                                                                                                                                                                                                                                                   2
+
+                          67                                                     9                                                                                                                                                                                                                                                                                                                                  PIJ802
+
+                        PIU9067                                               PIU909                                                                                                                                                                                                                                                                                                                                   4
+
+                          72                                                     33                                                                                                                              V-SIM                                                                                                                                                                                              PIJ804                  5PID105 PID104 PID103 PID10                                                             CROR4411 51R
+                                                                                                                                                                                                                                                                                                                                                                                                                                               4                                                                                    CROR4422 51R
+                        PIU9072                                               PIU9033                                                                                                                                       PIC5102 PIC5201 PIC5301                                                                                                                                                                    8                          3COM_A 2 PID1102                                                                  CROR4433 51R
+                                                                                                                                                                                                                                                                                                                                                                                                                                                     1CDOD1111
+                        70 PIU9070                                            34 PIU9034                                                                                                                                                                                                                                                                                                                            PIJ808                  ESDA6V1W5
+                        69 PIU9069                                GPIO3       50 PIU9050                                                                                                                                                   CCOC5511 CCOC5522 CCOC5533 BATTERY-                                                                                                                                                                       K_4
+                                                                  GPIO6       52 PIU9052                                                                                                                                                                                                                                                                                                                               6                                K_3
+                                                                 GPIO43       87 PIU9087                                                                                                                                                                                                                                                                                                                                                                   K_2
+                                                                 GPIO41                                                                                                                                                                                                                                                                                                                                             PIJ806                                    K_1
+                                                                 GPIO77
+                                                                                                                                                                                                                                                                                                                                                                                                                    5 PIJ805
+
+                                                                                                                                               BATTERYB-ATTERYB-ATTERY-                                                                    PIC510 100n PIC520 100u PIC5302 100u
+
+                                                                                                                                                                                                                                                                                                                                                                           JCO8J8
+
+                        73 PIU9073                  PCM_OUT      SCL          PIU950555                                                                                                                                            BATTERYB-ATTERYB-ATTERY-
+                        74 PIU9074                  PCM_IN       SDA             56
+                        PI7U95075                   PCM_SYNC
+                                                    PCM_CLK                   PIU9056
+                          76
+
+                        PIU9076
+
+                          35                                                                                                                                                                                                                                                                                                                                                                                    BATTERY-                                                          BATTERY-
+
+C                       PIU9035                     HSIC_STROBE                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              C
+                                                    HSIC_DATA
+                          36
+
+                        PIU9036
+
+                          83                        COEX1                                                                   LOGIC SHIFT
+                                                    COEX2
+                        PIU9083                     COEX3
+
+                          84
+
+                        PIU9084
+
+                          86
+
+                        PIU9086
+
+   NALAUUXX0A-NAT NT      59                        AUX_ANT                                                                                       CCOC5544              PONSeItCM5C4_O1M0TX Main-Schematic[3B]                                                                                                                                                    PONSeItQM2C_3OM0RX Main-Schematic[3B]
+   NGLGNNSSSS0A-NAT NT                              GNSS_ANT
+   NMLMAAIINN0A-NAT NT  PIU9059                     MAIN_ANT                                                                                   PIC5402 PIC5401
+
+                          79                                                                                                                                                                                                                                                                                                                                                                                                                          SIM-DTR                                                  C
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  B
+                        PIU9079
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         E
+                          82                                                                                                                    470p                                                                                                                                                                                                                                                                                                                                                    PIQ102 PIQ103 PONSeItQM1C_3OM0DTR Main-Schematic[3B]
+                                                                                                                                               CROR4444
+                        PIU9082
+
+                                                                                                                                                                                                                                                                                                  SIM-RX                                  CPIQ202         PIQ203
+                                                                                                                                                                                                                                                                                                                                             B
+                          45                        ISINK                                                                       VNL-VM0MCCU U  PIR4402  PIR4401 PIQ302C PIQ303             SIM-TX                                                                                                                                                                                                                                                                        PIR4502             2N3904 PIQ10 CQOQ11
+                                                                                                                               +1.8V                               B                                                                                                                                                                                E
+                        PIU9045                                                                                                                                                                                                                                                                           PIR4602 2N3904 PIQ201 CQOQ22
+                                                                                                                                                                          E
+                        42 NC PIU9042                                                                                                          1K 2N3904 PIQ301 CQOQ33                                                                                                                                             RCOR4466                                                                                                                                                       RCOR4455                        PIR4702
+                                                                                                                                                                                                                                                                                                                                                    PIR4802                                                                                                                       1K PIC502
+                                                                                                                                                                        PIR4902                                                                                                                                    1K PIC5602                                                                                                                                            PIR4501                                   CROR4477
+                                                                                 1                                                             PIC5702                                                                                                                                                    PIR4601              CCOC5566              CROR4488                                                                                                                                        CCOC5555
+                                                                 GND1                                                                                                    CROR4499                                                                                                                                                                                                                                                                                                           PIC501 102              4.7K
+                                                                 GND1         PIU901                                                              CCOC5577                                                                                                                                                                   PIC5601 102              4.7K
+                                                                 GND1                                                                                                     4.7K                                                                                                                                                                                                                                                                                                                                    PIR4701
+                                                                 GND1            2                                                             PIC5701 102                                                                                                                                                                                          PIR4801
+                                                                 GND1                                                                                                   PIR4901                                                                                                                                                                                                                                                                       +1.8V
+                                                                 GND1         PIU902                                                                                                                                                                                                              +1.8V
+                                                                 GND1
+                                                                 GND1            5                                                                                                                                                                                                                                                        CCOC5588                                                                                                                       CDOD1122                                                                           DCOD1133
+                                                                 GND1
+                                                                 GND1         PIU905                                                                                                          CCOC5599                                                                                                                         PIC5801 PIC5802                                                                                              CROR5500                                                                                         RCOR5511
+                                                                 GND1
+                                                                 GND1            10                                                                                                        PIC5901 PIC5902                                                                                                                                                                                            V-SIM                                 PIR5002       PIR5001 PID1201 PID1202                              V-SIM                         PIR5102   PIR5101 PID1301 PID1302
+                                                                 GND1
+                                                                 GND1         PIU9010                                                                                                                                                                                                                    RESET                            104                                                                                               1K                                                                                               1K
+                                                                 GND1                                                                                                                                                                                                                                                          PIQ402C            PIQ403                                                                                                  LED                                                                                              LED
+                                                                 GND2            14                                                                                                                                                                                                                                               B
+                                                                 GND2                                                                                           PWR-KEY                            104
+                                                                 GND2         PIU9014                                                                                                      CPIQ502      PIQ503                                                                                                                           E
+                                                                 GND2                                                                                                                         B                                                                                                                                           PIQ401 QCOQ44 CROR5522
+                                                                                 37                                                                                                                                                                                                                                BC817
+                                                                                                                                                                                                     E
+                                                                              PIU9037                                                                                                BC817         PIQ501 QCOQ55CROR5533                                                                                                                            PIR5201       PIR5202                                                                                                         CQOQ66 PIQ6C02                                                                             QCOQ77 PIQ70C2
+                                                                                                                               Main-Schematic[3B] POSIMCOM0PONWeEtR507K_E1 Y
+D                                                                                40                                                                                                                     PIR5301           PIR5302                                                                                                         PIR5602 47K                                                                                       COR54 R54 B BC817 PIR5402                                                                        COR55 R55 B BC817 PIR5502                       D
+                                    SIM7600E
+                                                                              PIU9040                                                                                                              PIR5702 47K                                                                                                                            RCOR5566                                                    NET-LIGHT                                                 PIR5401 PIQ601                                    STATUS                                    PIR5501 PIQ701
+
+                                                                                 41                                                                                                                RCOR5577                                                                                                                                 4.7K                                                                                                      4.7K               PIR5802            PIQ6E03                                                   4.7K          PIR5902       PIQ70E3
+
+                                                                              PIU9041                                                                                                               4.7K                                                                                                                                  PIR5601                                                                                                                         RCOR5588                                                                                   RCOR5599
+
+                                                                                 43                                                                                                                PIR5701                                                                                                                                                        BATTERY-                                                                                               PIR5801  47K                                                                               PIR5901  47K
+
+                                                                              PIU9043                                                                                                                                     BATTERY-
+
+                                                                                 57
+
+                                                                              PIU9057
+
+                                                                                 58
+
+                                                                              PIU9058
+
+                                                                                 60
+
+                                                                              PIU9060
+
+                                                                                 61
+
+                                                                              PIU9061
+
+                                                                              PIU960464
+                                                                                 65
+
+                                                                              PIU9065
+
+                                                                                 77
+
+                                                                              PIU9077
+
+                                                                                 78
+
+                                                                              PIU9078
+
+                                                                                 80
+
+                                                                              PIU9080
+
+                                                                                 81
+
+                                                                              PIU9081
+
+                                                                                                                                                                                                                                           Main-Schematic[3B] POSIMCONMe0tRR5E6S_1ET
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  BATTERY-                                                                                   BATTERY-
+
+                                                                                          BATTERY-
+
+                        1                                                     2                                             3                                                              4                                                                                                   5                                                                                   6                                                                                              7                                                                                               8
+   1  2  3                                                                                                                4                       5                                 6  7  8
+
+A                                                                                                                                                                                            A
+
+                                                                                                                                                     V-MCU +3.3V-NET
+                                                                                                                                                                          i
+
+B                                                                                                                                                    PIC602            PIC6102               B
+
+                                                                                                                     V-MCU                              CCOC6600          CCOC6611
+
+                                                                                                                                                     PIC601 104        PIC610 104
+
+                                                                                                     CUOU110 0                                               BATTERY-
+
+                                                                                                      8          CS              VDD      14
+                                                                                                                             VDD_IO
+                                                                                                       PIU1008                         PIU10014
+                                                                                                                                  RES
+                                                                                                     11                                   1
+                                                                                                       PIU10011
+                                                                                                      9                                PIU1001
+                                                                                                       PIU1009
+                                                                                                                                          10
+                                                                                                      4
+                                                                                                                                       PIU10010
+                                                                                                       PIU1004
+                                                   Main-Schematic[3C], ESP32S3[2B]PONIeMtU06_I4N1T1              INT1         ADC1        16
+                                                   Main-Schematic[3C], ESP32S3[2B]PONIeMtU06_I4N2T2   7          INT2         ADC2
+                                                                                                                              ADC3     PIU10016
+      Main-Schematic[3C], ESP32S3[2A]POII2MC0U-0SCSLCL                                                 PIU1007   SCL/SPC
+                                                                                                                                          15
+      Main-Schematic[3C], ESP32S3[2A]POII2CM0U-S0DSADA                                                6
+                                                                                                                                       PIU10015
+                                                                                                       PIU1006
+                                                                                                                                          13
+
+                                                                                                                                       PIU10013
+
+                                                                                                                 SDO/SA0
+
+                                                                                                                 SDA/SDI/SDO          5 PIU1005
+                                                                                                                              GGNNDD 12 PIU10012
+
+                                                                                                     LIS3DSH
+
+                                                                                                                                       BATTERY-
+
+C                                                                                                                                                                                            C
+
+D                                                                                                                                                                                            D
+
+   1  2  3                                                                                                                4                       5                                 6  7  8
+                                  COP2                                                                                                                              COJ2                                                                                          COJ1
+
+                      COR26 PAR2601 PAR2602                                                                                                                                                                                                                                                                                                                                               PAU705                                              PAU704                             PAB102
+
+                        COR27 PAR2701 PAR2702                                          PAP205 PAP203 PAP201                                                          PAJ202                                                                                             PAJ10Shel PAJ10MH2                                                                                             PAU706                                         PAU703
+                        COR28 PAR2801 PAR2802                                          PAP206 PAP204 PAP202                                                                                                                                                                                                                                                                                                                           PAU702
+                        COR29 PAR2901 PAR2902                                                                                                                                PAJ201                                                                                                                                                                                              COU7 PAU707
+                        COR30 PAR3001 PAR3002                                                                                                                                                                                                                                                                                                                                                PAU708                                           PAU701
+                        COR31 PAR3101 PAR3102                                                                                                                       COC21PAC2102 PAC2101
+                                                                                                                                                                                                                                                                                                                      PAJ10MH1                                                                                                 PAJ302
+                      COR32 PAR3201 PAR3202
+                                                                                                                                                                    PAL402                                                                                              PAJ10A20B1 PAJ10A90B4 PAJ10B5PAJ10A8 PAJ10A7PAJ10A6PAJ10B7 PAJ10A5PAJ10B8PAJ10A40B9PAJ10A10B126B01JAP                                                  PAJ301
+                 COJ4
+                                                                                                                               COR22PAR2202 PAR2201                 COR21COR23COR24COR20 COL4                                                                                               PAR2101 PAR2302 PAR2402 PAR2001                                                      COJ3
+                                      PAJ40MH1                                                                                                                           PAL401                                                                                                             PAR2102 PAR2301 PAR2401 PAR2002
+
+                                                                                                                               PAJ409                   COC20PAC2001 PAC2002
+                                                                                                                                                                    COC30COC24COC26COC31COC25 COR18COR19 COU10 PAC3001 PAC2401PAC2601 PAC3101 PAC2501
+                                                                                                                               COC34 PAJ408    COU6                                 PAC3002 PAC2402PAC2602 PAC3102 PAC2502                                                                                                                                                                                                                                                                                      PAL501                         PAU304  PAU303
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       PAU302
+                                                                                                                               PAJ407                                                                                                                                                                                                                                                                                                                                                                       COL5                               PAU305          COU3
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       PAU301
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                PAL502
+                                                                                                                               PAJ406                   PAU6014PAU6013PAU6012PAU601PAU601PAU609PAU608PAU607PAU606PAU605PAU604PAU603PAU602PAU601                         PAC202 PAC2201
+                                                                                                                                                                                                                                                                                                                      PAR1802 PAR1902                                                     PAU10016PAU10015 PAU10014
+                                                                                                                               PAJ405 PAC3401                                                                                                                                                                                                                                    PAC6002 PAC6102 PAU1002
+                                                                                                                                                                                                                                                                                                                                                                                 COC60 PAC6001 PAC6101COC61 PAU1004PAU1001PAU10013                                                                          PAC2702 PAC2802 PAC2901 PAC902 PAC802
+                                                                                                                               PAJ404 PAC3402
+                                                                                                                               PAJ403                                                                                                                                   PAY101 PAY104COC22                                                                                                                           PAU10012                                                                               PAC2701 PAC2801 PAC2902 PAC901 PAC801 COC8
+                                                                                                                               PAJ402                                                                                                                                                         PAR1801 PAR1901
+                                                                                                                                               PAU6015                                                                                                   PAU6056                                                                                                                 PAU1003                             PAU10011                                                                               COC27 COC28COC29 COC9
+
+                                                                                                                                               PAU6016              PAU6057                                                                              PAU6055                                                                                                                                                     PAU10010
+
+                                                                                                                                               PAU6017                                                                                                   PAU6054        PAY102 PAY103 COY1                                                                                       PAU1005 PAU106PAU107 PAU108PAU1009
+                                                                                                                                               PAU6018                                                                                                   PAU6053
+                                                                                                                                               PAU6019                                                                                                   PAU6052                                                                                                                          COD8 COR25
+                                                                                                                                               PAU6020                                                                                                   PAU6051
+                                                                                                                                               PAU6021                                                                                                   PAU6050
+                                                                                                                                               PAU6022                                                                                                   PAU6049
+
+                                                                                                                                               PAU6023                                                                                                   PAU6048        PAC2302 PAC2301 COC23
+
+                                                                                                                                               PAU6024                                                                                                   PAU6047
+
+                                                                           PAJ40MH2                                            PAJ401          PAU6025                                                                                                   PAU6046        COC59 COR57 COR53 COC58 PAD801 PAD802 PAR2501 PAR2502
+                                                                                                                                               PAU6026                                                                                                   PAU6045
+
+                                                                                                                                               PAU6027                                                                                                   PAU6044
+
+                                                                                                                                               PAU6028                                                                                                   PAU6043
+
+                                                                                                                                                        PAU6029PAU603PAU6031PAU6032PAU603PAU6034PAU6035PAU6036PAU6037PAU6038PAU6039PAU604PAU6041PAU6042                                              COQ5                                                                                 COQ4
+
+                                                                                                                                                                                                                                                                            PAQ502                            PAQ501 PAR5701 PAR5301 PAC5801 PAQ402                                       PAQ401 PAR5601 PAR5201                                                                                            PAC1201 PAC1202 COC12
+
+                                                                                                                                       PAU808 PAU807 PAU806 PAU805                                                                                                      PAC5901
+
+                                                                           PAJ40Shell                                                                                                                                                                                   PAC5902                               PAR5702 PAR5302 PAC5802                                                                                          PAR5602 PAR5202
+
+COR3 COC32 PAR302 PAC3202                                                                           PAC3502 PAC3602                                                                                                                                                           PAQ503                                                                                                      PAQ403 COR56 COR52                                                                     COB1                       PAC1301 PAC1302 COC13
+    PAR301 PAC3201
+                                                                                       PAJ602 COJ6 PAC3501 PAC3601                                                                                                                                                      COR4 COC54
+                                                                                                                                                                                                                                                                    COC57COR49 COQ1 PAR4402 PAC5402 COQ3
+                                                             PAJ601                                                                                                 COR47 COC5 COR48COC56 COR46 PAQ103 PAR4401 PAC5401 PAQ302 PAQ301 PAC5702PAR4902
+
+                              COR38 PAR3801 PAR3802PAL602 PAL601COL6
+COC35COC36 PASW102                                                                                                                                                                                                                                                                                                                                                                                                             COQ2                                                                         COL3
+
+                                                                                                                                       PAU801 PAU802 PAU803 PAU804                                                                                                                                                                                                                                                             PAQ203
+
+                       COSW1                                                           PAC4101                                                 COC50 COC49 PAR4701 PAC501                                                                                               PAR4501                                                 PAC5701PAR4901 PAR4801 PAC5601                                                                                  PAR4601
+                                                                                           COC41                                       COU8 PAC5002 PAC4902 PAR4702 PAC502 PAQ101 PAQ102 PAR4502
+                                                                                                                                                                                                                                                                                                              PAQ303                                                                      PAR4802 PAC5602 PAQ201 PAQ202 PAR4602
+                                                                                       PAC4102
+
+   PASW101                                                                             PAL801 PAL802 COL8                                                           COC48 COR45                                                                                                                                                                                                                                                                                                                             PAL301 PAL302
+
+COR34 COC3 PAR3402 PAC302                                                                    PAC40 1
+    PAR3401 PAC3 01                                                                       COC40                                                PAC5001 PAC4901 PAC4802 PAC4801
+   PASW202                                                                             PAC40 2
+                                                                                                                                                                    COL9 PAL901 PAL902
+                                                                                       PAL701 PAL702 COL7
+                                       COU9 PAU9086 PAU908 PAU9079 PAU9078 PAU907 PAU9076 PAU9075 PAU9074 PAU9073 PAU9072 PAU9071 PAU9070 PAU9069 PAU9068 PAU9067 PAU906 PAU9065 PAU9064 PAU9063 PAU9062 PAU9061 PAU9087
+
+                       COSW2                                                                                                                                                                                                                                                                                  COR39 COR40 COC42 COC43                                                                                                                                                                       PAD702 PAD701 COD7
+
+                                                                                                                                                                                                                                                                                            PAC4201 PAU9085                                                             PAC4301                                                                                                                                                                PAU508 PAU507 PAU506 PAU50 COR15 PAR1501 PAR1502
+                              PAU901                                                                                                                                                                                                                                                        PAU9060
+
+PASW201                       PAU902                                                                                                                                                                                                                                                        PAU9059 PAC4202PAR3901 PAR3902PAC4302 PAR4001 PAR4002 PAJ701                                                                                        COJ7                                                                                                           PAR1702 PAR1701 COR17
+
+                              PAU903                                                                                                                                                                                                                                                        PAU9058                                                                                                                                                                                                                                                            PAR1602 PAR1601 COR16
+
+                              PAU904                                                                                                                                                                                                                                                        PAU9057                                                                                                                            PAJ702
+
+COR35 COC37 PAR3502 PAC3702                                                                                                                                                                                                                                                                                                                                                      COQ6 COD12                                                                                                                 COU5 PAC1 02                                       PAC1502 PAC1501 COC15
+                              PAU905                                                                                                                                                                                                                                                        COR54 COR58 COR50 PAU9056                                                                                                                                                                                       COC11 PAC101 PAU501 PAU502 PAU503 PAU504 PAC1902 PAC1402 PAC1401 COC14
+
+PAR3501 PAC3701               PAU906                                                                                                                                                                                                                                                        PAU9055
+
+                              PAU907                                                                                                                                                                                                                                                        PAU9054                       PAQ603
+
+PASW302                       PAU908                                                                                                                                                                                                                                                        PAU9053           PAR5402 PAR5801                                                                                        PAD1201                                                                                                                           PAC1901 COC19
+                                                                                                                                                                                                                                                                                                                                                                                                                              PAR5001
+
+                              PAU909                                                                                                                                                                                                                                                        PAU9052           PAR5401 PAR5802 PAQ601 PAQ602 PAD1202 PAR50 2                                                                                                                                                 PAC1802 PAC1801 PAC1601PAC1701
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 PAC1602PAC1702
+                                            PAU9010                                                                                                                                                                                                                                         PAU9051
+
+                       COSW3 PAU9011                                                                                                                                                                                                                                                        COR5 COR59 COR51 PAU9050
+                                            PAU9012                                                                                                                                                                                                                                         PAU9049                                                                              COQ7 COD13                                                                                                                   COC18 COC16COC17
+
+                              PAU9013                                                                                                                                                                                                                                                       PAU9048                                                                              PAQ703                              PAD1301 PAR5101                                                                        COL1
+                                                                                                                                                                                                                                                                                            PAU9047
+PASW301                       PAU9014                                                                                                                                                                                                                                                                         PAR5502 PAR5901
+                              PAU9015
+                                                                                                                                                                                                                                                                                            PAU9046           PAR5501 PAR5902 PAQ701 PAQ702 PAD1302 PAR5102
+                              PAU9016                                                                                                                                                                                                                                                       PAU9045                                                                                                                                                                              PAB10                      PAL101 COC4
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         COR6 PAC402 PAC401 PAR601
+                                                                  PAU9017                                                                                                                                                                                                                   PAU9044           COC38 COR36 COC39 COR37                                                                                                                                                                                             PAU206 PAU205 PAU204 PAR602
+
+                                 PAU9018                                                                                                                                                                                                                                                    PAU9043           PAC3802PAR3601 PAR3602PAC3902 PAR3701 PAR3702 PAJ501                                                                              COJ5                                                        PAL102 COR3 PAR301
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  PAU201 PAU202 PAU203 PAR302
+                                                                  PAU9019                                                                                                                                                                                                                   PAU9042                                                                                                                                                                                                                        COU2PAC501 PAC502 COC5
+
+                                 PAU9020                                                                                                                                                                                                                                                    PAU9041
+                                                                                                                                                                                                                                                                                            PAU9082
+COR42 PAR4202 PAR4201 PAU9081
+COC45 PAC4502 PAC4501                                                                                                                                                                                                                                                                                         PAD902 PAC3801 PAC3901                                                                                           PAJ502
+
+    COD11 PAC4701 PAD103PAD102 PAD101                                                  PAU9084 PAU9021 PAU902 PAU9023 PAU9024 PAU9025 PAU9026 PAU9027 PAU9028 PAU9029 PAU903 PAU9031 PAU9032 PAU903 PAU9034 PAU9035 PAU9036 PAU9037 PAU9038 PAU9039 PAU904 PAU9083                                                                                                      COD9                                                                                                     PAB101                                                                PAD101 PAD102 COD1
+
+COC47 PAC4702 PAD104 PAD105                                                                                                                                                                                                                                                                                                                                                               PAD901
+
+COR43 PAR4302 PAR4301                                                      COJ8                                                                         PAC5201 PAC5102 PAC5301 PAD1002                                                                                                                                                                                                                                        COR8 COR9                                         COD5 COR12 PAR1202 PAR1201 PAD501 PAD502 COR10PAR1001 PAR102 PAR1101
+COC44 PAC4402 PAC4401                                                         PAJ805 PAJ801PAJ806 PAJ802 PAJ807 PAJ803 PAJ808                                                                                                                                                                                                                                                                                                                                                    COD6 COR11 PAD601 PAD602 COR13 PAR1302 PAR1301
+                                                                                                                                                                    PAC5101
+
+COR41 PAR4102 PAR4101                                                                                                                                   PAC5202 PAC5302 PAD1001                                                                                                                                                                                                                                                                                                                             COC10PAC1002 PAC1001PAR1102
+COC46 PAC4602 PAC4601
+                                                                                                                                                        COC52 COC51 COC53 COD10                                                                                                                                                                                                                                                PAR802 PAR901
+           PAJ804                                                                                                                                             PAP102                                                                                                                                                                                                                                                 COR4 COR2 PAD301 PAR402                                      PAD302
+                                                                                                                                                                                                                                                                                                                                                                                                                               PAR801 PAR902                          COR1                          PAC602  PAU408 PAU407 PAU406 PAU405
+                                                                                                                                                              PAP101                                                                                                                                                                                                                                                 PAC101 PAR401                                                     COD3
+                                                                                                                                                                                                                                                                                                              COC2                                                                                                             PAR502           PAR501      PAR101  PAR102                                  PAU409 COU4
+                                                                                                                                                              COP1                                                                                                                                                                                                                                                             PAR201                                            PAC102 COC1
+                                                                                                                                                                                                                                                                                                                                                                                                                                                PAR202COR5  PAC301  PAC302 COC3
+
+                                                                                                                                                                                                                                                                                                              PAC201                                                                                                           PAU105                       PAU104               COC6 PAC601 PAU401 PAU402 PAU403 PAU40
+
+                                                                                                                                                                                                                                                                                                                                                                                          PAU10EXP COD4 PAU106                                              PAU103
+
+                                                                                                                                                                                                                                                                                                                                                                                                                               PAU107                       PAU102
+                                                                                                                                                                                                                                                                                                                                                                                          PAD401 PAU108
+                                                                                                                                                                                                                                                                                                              PAC202                                                                                                                                        PAU101 PAL201        PAL202                          PAR1401 PAR1402PAC701 PAC702
+
+                                                                                                                                                                                                                                                                                                                                                                                          PAD402 PAR701 PAR702 COU1 COL2                                                            PAD201          PAD202 COR14 COC7
+
+                                                                                                                                                                                                                                                                                                                                                                                                                               COR7
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              COD2
+Comment       Description               Designator             Footprint          LibRef            Quantity
+
+21700-1C                                B1                     18650-2C           18650-2C                    1
+
+0.1uF         Non-polarized             C1                     CAP_1206           Cap_NP                      1
+              capacitor
+
+22u           Polarized aluminum C2                            ALU-SMD-CAP-D-     Cap_Alu                     1
+
+              capacitor                                        6.3mm
+
+1u            Non-polarized             C3, C8, C9, C48        CAP_0603           Cap_NP                      4
+
+              capacitor
+
+22u           Non-polarized             C4, C5                 CAP_0603           Cap_NP                      2
+              capacitor
+
+100u          Polarized aluminum C6                            ALU-SMD-CAP-D-     Cap_Alu                     1
+
+              capacitor                                        6.3mm
+
+10u           Non-polarized             C7, C10                CAP_0603           Cap_NP                      2
+
+              capacitor
+
+0.1u          Non-polarized             C11                    CAP_0603           Cap_NP                      1
+              capacitor
+
+47u           Polarized tantaLum C12, C13, C18                 C_Tanta_C6032      Cap_Tatan                   3
+              capacitor
+
+33p           Non-polarized             C14, C41               CAP_0603           Cap_NP                      2
+
+              capacitor
+
+1n            Non-polarized             C15                    CAP_0603           Cap_NP                      1
+              capacitor
+
+105           Non-polarized             C16, C25, C27, C30, CAP_0603              Cap_NP                      5
+
+              capacitor                 C35
+
+                                        C17, C26, C28, C29,
+
+104           Non-polarized             C31, C32, C33, C34, CAP_0603              Cap_NP                      14
+
+              capacitor                 C37, C47, C58, C59,
+
+                                        C60, C61
+
+10n           Non-polarized             C19                    CAP_0603           Cap_NP                      1
+
+              capacitor
+
+NP            Non-polarized             C20                    CAP_0603           Cap_NP                      1
+
+              capacitor
+
+1.8p          Non-polarized             C21                    CAP_0603           Cap_NP                      1
+              capacitor
+
+22p           Non-polarized             C22, C23, C44, C45, CAP_0603              Cap_NP                      5
+
+              capacitor                 C46
+
+106           Non-polarized             C24, C36               CAP_0603           Cap_NP                      2
+
+              capacitor
+
+Cap_NP        Non-polarized             C38, C39, C40, C42,    CAP_0603           Cap_NP                      5
+              capacitor                 C43
+
+100u          Polarized tantaLum C49, C50, C52, C53 C_Tanta_B3528                 Cap_Tatan                   4
+              capacitor
+
+100n          Non-polarized             C51                    CAP_0603           Cap_NP                      1
+
+              capacitor
+
+470p          Non-polarized             C54                    CAP_0603           Cap_NP                      1
+              capacitor
+
+102           Non-polarized             C55, C56, C57          CAP_0603           Cap_NP                      3
+
+              capacitor
+
+SS54          Schottky diode            D1, D2, D3             SMB                S-Diode                     3
+
+              Light EmittingDiode D4, D8                       LED-0805-Red       LED                         2
+
+LED           Light EmittingDiode D5, D6, D12, D13             LED-0805-Red       LED                         4
+
+SS34          Schottky diode            D7                     SMA                S-Diode                     1
+
+SMAJ5.0       TVS diode                 D9, D10                SMA                TVS-Diode                   2
+
+ESDA6V1W5     Integrated Circuit        D11                    SOT65P210X110-5N ESDA6V1W5                     1
+
+              WR-COM USB 2.0 Type
+
+629722000214  C Receptacle              J1                     629722000214       629722000214                1
+
+              Horizontal SMT
+
+ANT_CONN      ATENNA PIN 1              J2, J5, J6, J7         IPEX               ANT_CONN                    4
+
+NTC 10K                                 J3                     XH2.54M-2          Conn_Cai_2P_2.54            1
+
+              WR-CRD SD Card
+
+693071040911  Connector Push & J4                              693071040911       693071040911                1
+
+              Push Socket, 9 pins
+
+MicroSimcard  Micro Simcard Socket J8                          MICROSIMSOCKET MicroSimcard                    1
+
+10uH          Magnetic-Core             L1                     CD75               Inductor Iron               1
+
+              Inductor
+
+4.7uH         Magnetic-Core             L2                     IND-0520           Inductor Iron               1
+              Inductor
+
+4.7uH-3A      Magnetic-Core             L3                     IND_CDRH127-       Inductor Iron               1
+
+              Inductor                                         4R7NC_SUM
+
+3nH           Inductor                  L4                     INDC-0805          Inductor                    1
+
+2.7nH         Inductor                  L5                     INDC-0805          Inductor                    1
+
+47n           Inductor                  L6                     INDC-0805          Inductor                    1
+
+L_NP          Inductor                  L7, L8                 INDC-0805          Inductor                    2
+
+FB-30R        Inductor                  L9                     INDC-0805          Inductor                    1
+
+              WR-MPC4 THTMale
+
+64900229522   Right Angled Header, P1                          64900229522        64900229522                 1
+
+              pitch 4.2mm, 2p
+
+              WR-BHD Male Box
+
+61200621621   Header, THTStraight,      P2                     61200621621        61200621621                 1
+
+              pitch 2.54 mm, 2
+
+              Rows, 6 Pins
+
+2N3904                                  Q1, Q2, Q3             SOT-23             N-Trans                     3
+
+BC817                                   Q4, Q5, Q6, Q7         SOT-23             N-Trans                     4
+
+100k                                    R1, R8, R10            RES_0603           Resistor                    3
+
+110K                                    R2                     RES_0603           Resistor                    1
+
+91K                                     R3                     RES_0603           Resistor                    1
+
+                                        R4, R7, R9, R11, R18,
+
+                                        R19, R26, R27, R28,                                                   16
+10K                                     R29, R30, R31, R32, RES_0603              Resistor
+
+                                        R33, R34, R35
+
+20k                                     R5                     RES_0603           Resistor                    1
+
+12k                                     R6                     RES_0603           Resistor                    1
+
+1K                                      R12, R13, R44, R45,    RES_0603           Resistor                    7
+                                        R46, R50, R51
+
+1.2K                                    R14                    RES_0603           Resistor                    1
+
+20K/1%                                  R15                    RES_0603           Resistor                    1
+
+30K/1%                                  R16                    RES_0603           Resistor                    1
+
+5K/1%                                   R17                    RES_0603           Resistor                    1
+
+5.1K                                    R20, R21               RES_0603           Resistor                    2
+
+30R                                     R22                    RES_0603           Resistor                    1
+
+0R                                      R23, R24, R36, R37, RES_0603              Resistor                    6
+                                        R39, R40
+
+330                                     R25                    RES_0603           Resistor                    1
+
+10R                                     R38                    RES_0603           Resistor                    1
+
+51R                                     R41, R42, R43          RES_0603           Resistor                    3
+
+4.7K                                    R47, R48, R49, R54,    RES_0603           Resistor                    7
+
+                                        R55, R56, R57
+
+47K                                     R52, R53, R58, R59 RES_0603               Resistor                    4
+
+              WS-TASV SMT Tact
+
+434121050816  Switch, 6mm x3.5mm, SW1, SW2, SW3                434121050816       434121050816                3
+              160gf, SPST-NO, 12V,
+
+              50mA
+
+MP2482        5A, 30V, 420kHzStep- U1                          SOP8-P             MP2482                      1
+              Down Converter
+
+SX1308        1.2MHz 2A Step Up         U2                     SOT23-6            SX1308                      1
+
+              Converter 85T
+
+              Linear Voltage
+
+              Regulator IC Positive                            SOT95P285X140-5N AP2112K-3.3TRG1
+AP2112K-3.3TRG1 Fixed 1 Output 600mA U3                                                                       1
+
+              SOT-25
+
+              Complete single cell Li-
+
+              Ion battery with a
+
+TP4056        constant current / U4                            SOP127P600X175-9N TP4056                       1
+
+              constant voltage linear
+
+              charger
+
+              2-A, 28-V Input, Step-
+
+TPS54231      Down DC-DC                U5                     SOIC8-1.75H        TPS54231                    1
+
+              Converter
+
+ESP32-S3                                U6                     QFN56              ESP32-S3                    1
+
+DS3231M       I2Crealtime clock         U7                     SOP8-P1.27         DS3231M                     1
+
+              (RTC)
+
+W25Q128       256M-bit (32MB) Serial    U8                     SOIC127P790X216-8N W25Q256JV                   1
+              Flash memory
+
+              LTE-FDD/LTE-
+
+              TDD/HSPA+/UMTS/ED
+
+              GE/GPRS/GSMModule
+
+              On Module 10Mbps
+
+SIM7600E      800MHz/850MHz/900 U9                             XCVR_SIM7600E      SIM7600E                    1
+
+              MHz/1800MHz/2100M
+
+              Hz/2300MHz/2500MH
+
+              z/2600MHz3.4Vto
+
+              4.2V 24dBm
+
+              Accelerometer X, Y, Z
+
+LIS3DSH       Axis ±2g, 4g, 6g, 8g,    U10                    LGA16R50P5X3_300X  LIS3DSH                     1
+              16g 1.56Hz ~ 800Hz 16-
+                                                               300X100N
+
+              LGA _3x3_
+
+40MHz                                   Y1                     Y-3225             Resonator                   1
+
