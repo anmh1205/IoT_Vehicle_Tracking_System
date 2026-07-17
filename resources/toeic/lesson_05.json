@@ -1,0 +1,178 @@
+{
+  "page_id": "357df50b-1fcd-813b-bfce-e7beeaa26b68",
+  "title": "05. Trạng từ",
+  "intro": [
+    {"text": "Bài 05 — Trạng từ (Adverbs). Đọc lý thuyết → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 hỏi word form — chọn TRẠNG TỪ (bổ nghĩa động từ/tính từ/trạng từ) hay TÍNH TỪ (bổ nghĩa danh từ). Nhìn từ bị bổ nghĩa để quyết định.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & chức năng"},
+    {"type": "p", "text": "Trạng từ (adverb) bổ nghĩa cho động từ, tính từ, một trạng từ khác hoặc cả câu — cho biết cách thức, mức độ, thời gian, nơi chốn, tần suất. Trong TOEIC Part 5, chỗ trống đứng cạnh động từ/tính từ/trạng từ và KHÔNG phải vị trí của danh từ thì thường là trạng từ."},
+
+    {"type": "h3", "text": "2. Các loại trạng từ"},
+    {"type": "ul", "items": [
+      "Cách thức (manner): quickly, carefully, efficiently — trả lời 'như thế nào'.",
+      "Mức độ (degree): very, quite, extremely, too, enough, almost, nearly.",
+      "Tần suất (frequency): always, usually, often, sometimes, rarely, never.",
+      "Thời gian: now, soon, recently, already, yet, still, then.",
+      "Nơi chốn: here, there, everywhere, abroad.",
+      "Trạng từ câu (sentence adverb): fortunately, unfortunately, clearly, obviously — bổ nghĩa cả câu, đứng đầu."
+    ]},
+
+    {"type": "h3", "text": "3. Cách tạo trạng từ từ tính từ"},
+    {"type": "table", "headers": ["Trường hợp", "Quy tắc", "Ví dụ"], "rows": [
+      ["Thông thường", "adj + ly", "quick → quickly"],
+      ["Tận cùng phụ âm + y", "đổi y → ily", "easy → easily, happy → happily"],
+      ["Tận cùng -le", "đổi -le → -ly", "simple → simply"],
+      ["Tận cùng -ic", "+ ally", "automatic → automatically"],
+      ["Bất quy tắc", "—", "good → well, fast → fast, hard → hard, late → late"]
+    ]},
+
+    {"type": "h3", "text": "4. Tính từ vs trạng từ dễ nhầm"},
+    {"type": "table", "headers": ["Tính từ", "Trạng từ -ly (nghĩa khác)", "Lưu ý"], "rows": [
+      ["hard (khó/chăm)", "hardly (hầu như không)", "nghĩa khác hẳn"],
+      ["late (muộn)", "lately (gần đây)", "nghĩa khác hẳn"],
+      ["near (gần)", "nearly (gần như)", "nghĩa khác hẳn"],
+      ["high (cao)", "highly (rất, cao độ)", "nghĩa khác"],
+      ["good (adj)", "well (adv của good)", "well còn là adj 'khỏe'"]
+    ]},
+
+    {"type": "h3", "text": "5. Vị trí của trạng từ"},
+    {"type": "ul", "items": [
+      "Bổ nghĩa tính từ/trạng từ khác: đứng TRƯỚC nó (extremely important, very carefully).",
+      "Bổ nghĩa động từ (manner): thường sau động từ hoặc sau tân ngữ (She speaks English fluently / works efficiently).",
+      "Tần suất: trước động từ thường, sau động từ to be (always checks / is always punctual).",
+      "Trạng từ câu: đầu câu, có dấu phẩy (Fortunately, the deal closed.).",
+      "Một số trạng từ bổ nghĩa cả động từ lẫn đứng giữa trợ động từ và động từ chính (has recently joined)."
+    ]},
+
+    {"type": "h3", "text": "6. Sau động từ nối (linking verb) dùng TÍNH TỪ, không dùng trạng từ"},
+    {"type": "p", "text": "Sau be, seem, become, look, feel, sound, taste, remain, stay, appear + TÍNH TỪ (chỉ trạng thái), KHÔNG dùng trạng từ: The plan looks good (không 'looks well'); She seems happy. Nhưng nếu bổ nghĩa hành động thật thì dùng trạng từ: She looked carefully at the report (look = hành động nhìn)."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Chỗ trống bổ nghĩa ĐỘNG TỪ/tính từ → chọn trạng từ, không chọn tính từ. (2) hardly/lately/nearly ≠ hard/late/near. (3) Sau linking verb dùng tính từ (remain competitive, không 'remain competitively'). (4) Trạng từ chen giữa trợ động từ và V chính: 'will quickly review'."}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Trạng từ là gì và cách tạo",
+      "theory": ["Trạng từ bổ nghĩa cho động từ, tính từ, trạng từ khác hoặc cả câu. Đa số tạo bằng tính từ + ly (quick → quickly)."],
+      "keys": ["Bất quy tắc: good → well, hard → hard (chăm chỉ), fast → fast, late → late. Một số từ -ly là tính từ: friendly, lovely, daily (không phải trạng từ)."],
+      "traps": ["Chọn trạng từ khi bổ nghĩa ĐỘNG TỪ; chọn tính từ khi bổ nghĩa DANH TỪ. She is a careful worker (adj) ↔ She works carefully (adv)."],
+      "examples": [
+        "The team completed the task quickly. — quickly bổ nghĩa động từ completed.",
+        "The project went well. — well là trạng từ của good."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The project team completed the task ___.\nA. quick    B. quickly    C. quicker    D. quickness", "a": "Đáp án: B (quickly). ||Bổ nghĩa động từ 'completed' → trạng từ."},
+        {"q": "The manager spoke ___ to the new employees.\nA. polite    B. politely    C. politeness    D. politer", "a": "Đáp án: B (politely). ||Bổ nghĩa động từ 'spoke' → trạng từ."},
+        {"q": "Company sales grew ___ during the last quarter.\nA. rapid    B. rapidly    C. rapidity    D. rapider", "a": "Đáp án: B (rapidly). ||Bổ nghĩa động từ 'grew' → trạng từ."},
+        {"q": "Chọn từ đúng:\n\"She is a ___ worker who rarely makes mistakes.\"\nA. careful    B. carefully    C. carefulness    D. cared", "a": "Đáp án: A (careful). ||Bổ nghĩa danh từ 'worker' → tính từ."},
+        {"q": "Chọn từ đúng:\n\"She always handles client requests ___.\"\nA. careful    B. carefully    C. carefulness    D. cared", "a": "Đáp án: B (carefully). ||Bổ nghĩa động từ 'handles' → trạng từ."},
+        {"q": "Tìm và sửa lỗi:\n\"He drives very careful on the highway.\"", "a": "Lỗi: \"careful\" → \"carefully\". ||Bổ nghĩa động từ 'drives' → trạng từ."},
+        {"q": "Despite the challenges, the project went ___.\nA. good    B. well    C. goodly    D. best", "a": "Đáp án: B (well). ||'well' là trạng từ của 'good' (không có 'goodly')."},
+        {"q": "Điền vào mô tả (Part 6):\n\"The new software runs ___ even on older devices.\"\nA. smooth    B. smoothly    C. smoothness    D. smoother", "a": "Đáp án: B (smoothly). ||Bổ nghĩa động từ 'runs' → trạng từ."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Trạng từ bổ nghĩa động từ (word form)",
+      "theory": ["Khi ô trống bổ nghĩa cho một động từ (hoặc cả mệnh đề), hãy chọn trạng từ. Trạng từ thường đứng sau động từ/tân ngữ hoặc cuối câu."],
+      "keys": ["V + (tân ngữ) + trạng từ: handled the issue professionally; increased significantly."],
+      "traps": ["Nhiều câu TOEIC đặt một động từ rõ ràng trước ô trống → chọn trạng từ, không chọn tính từ/danh từ."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "The technician ___ inspected all the safety equipment.\nA. careful    B. carefully    C. care    D. cares", "a": "Đáp án: B (carefully). ||Bổ nghĩa động từ 'inspected' → trạng từ."},
+        {"q": "The instructions were written ___ so anyone can follow them.\nA. clear    B. clearly    C. clearness    D. clearer", "a": "Đáp án: B (clearly). ||Bổ nghĩa 'were written' → trạng từ."},
+        {"q": "The support staff handled the complaint ___.\nA. professional    B. professionally    C. profession    D. professionalism", "a": "Đáp án: B (professionally). ||Bổ nghĩa động từ 'handled' → trạng từ."},
+        {"q": "He answered all the interview questions ___.\nA. confident    B. confidently    C. confidence    D. confide", "a": "Đáp án: B (confidently). ||Bổ nghĩa động từ 'answered' → trạng từ."},
+        {"q": "Revenue increased ___ after the marketing campaign.\nA. significant    B. significantly    C. significance    D. signify", "a": "Đáp án: B (significantly). ||Bổ nghĩa động từ 'increased' → trạng từ."},
+        {"q": "Tìm và sửa lỗi:\n\"The machine operates efficient and quietly.\"", "a": "Lỗi: \"efficient\" → \"efficiently\". ||Bổ nghĩa động từ 'operates' → trạng từ (song song với 'quietly')."},
+        {"q": "The delivery arrived ___ ahead of the promised schedule.\nA. surprising    B. surprisingly    C. surprise    D. surprised", "a": "Đáp án: B (surprisingly). ||Bổ nghĩa cả cụm 'ahead of schedule' → trạng từ."},
+        {"q": "Điền vào nội quy (Part 6):\n\"All employees must follow the safety guidelines ___.\"\nA. strict    B. strictly    C. strictness    D. stricter", "a": "Đáp án: B (strictly). ||Bổ nghĩa động từ 'follow' → trạng từ."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Trạng từ chỉ mức độ (bổ nghĩa tính từ/trạng từ)",
+      "theory": ["Trạng từ mức độ đứng TRƯỚC tính từ hoặc trạng từ: very, extremely, quite, fairly, too, so. Riêng 'enough' đứng SAU tính từ."],
+      "keys": ["too + adj + to V (quá ... để); adj + enough + (to V) (đủ ...); so + adj + that; such + a + adj + noun + that."],
+      "traps": ["enough đứng SAU tính từ: 'good enough' (không phải 'enough good'); nhưng đứng TRƯỚC danh từ: 'enough time'."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "The keynote presentation was ___ informative and well organized.\nA. extreme    B. extremely    C. extremity    D. extremer", "a": "Đáp án: B (extremely). ||Bổ nghĩa tính từ 'informative' → trạng từ mức độ."},
+        {"q": "The new onboarding guide is ___ clear and concise.\nA. very    B. much    C. many    D. a lot", "a": "Đáp án: A (very). ||'very' bổ nghĩa tính từ 'clear'. much/many/a lot không bổ nghĩa tính từ thường."},
+        {"q": "The crate is ___ heavy to lift without a forklift.\nA. too    B. enough    C. so much    D. very much", "a": "Đáp án: A (too). ||cấu trúc too + adj + to V = quá nặng để nâng."},
+        {"q": "The meeting room is not large ___ for fifty attendees.\nA. too    B. enough    C. very    D. so", "a": "Đáp án: B (enough). ||adj + enough (large enough)."},
+        {"q": "Tìm và sửa lỗi:\n\"The proposal was enough detailed to convince the board.\"", "a": "Lỗi: \"enough detailed\" → \"detailed enough\". ||enough đứng SAU tính từ."},
+        {"q": "The customer service was ___ good that we became loyal clients.\nA. so    B. such    C. too    D. very", "a": "Đáp án: A (so). ||so + adj (good) + that."},
+        {"q": "Chọn từ đúng:\n\"It was ___ a useful workshop that everyone took notes.\"\nA. so    B. such    C. too    D. very", "a": "Đáp án: B (such). ||such + a + adj + noun (a useful workshop) + that."},
+        {"q": "Điền vào ghi chú (Part 6):\n\"The deadline is ___ tight, so please prioritize the key tasks.\"\nA. quite    B. quietly    C. quiet    D. quietness", "a": "Đáp án: A (quite). ||'quite' (khá) bổ nghĩa tính từ 'tight'. quiet (yên tĩnh) sai nghĩa."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Trạng từ tần suất và trạng từ nối",
+      "theory": ["Trạng từ tần suất (always, usually, often, sometimes, rarely, never) đứng TRƯỚC động từ thường nhưng SAU động từ be và trợ động từ. Trạng từ nối (however, therefore, nevertheless) nối hai câu, thường sau dấu chấm/chấm phẩy."],
+      "keys": ["S + always/usually + V (thường). S + be + always + ... . S + has/have + always + V3. Câu 1. However/Therefore, câu 2."],
+      "traps": ["Tần suất đứng trước động từ thường: 'He always comes early' (không phải 'He comes always early')."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "The manager ___ checks his emails before the morning meeting.\nA. always    B. always is    C. is always    D. all ways", "a": "Đáp án: A (always). ||Trạng từ tần suất đứng trước động từ thường 'checks'."},
+        {"q": "She has ___ been punctual for client meetings.\nA. always    B. ever    C. yet    D. since", "a": "Đáp án: A (always). ||Sau trợ động từ 'has' → always; nghĩa 'luôn đúng giờ'."},
+        {"q": "Sales fell in the first half. ___, the company remained profitable.\nA. However    B. Although    C. Despite    D. Because", "a": "Đáp án: A (However). ||Đầu câu mới, sau dấu chấm → trạng từ nối tương phản."},
+        {"q": "The plan carries some risk; ___, the board decided to proceed.\nA. nevertheless    B. although    C. despite    D. while", "a": "Đáp án: A (nevertheless). ||Sau dấu chấm phẩy → trạng từ nối."},
+        {"q": "Tìm và sửa lỗi:\n\"He comes always late to the weekly standup.\"", "a": "Lỗi: \"comes always\" → \"always comes\". ||Trạng từ tần suất đứng trước động từ thường."},
+        {"q": "We ___ hold the department meeting on Monday mornings.\nA. usually    B. usual    C. usualness    D. used", "a": "Đáp án: A (usually). ||Trạng từ tần suất bổ nghĩa động từ 'hold'."},
+        {"q": "The office is ___ closed on national holidays.\nA. usually    B. usual    C. usualness    D. use", "a": "Đáp án: A (usually). ||Sau động từ be (is) → trạng từ tần suất 'usually'."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"The system rarely crashes; ___, we keep daily backups as a precaution.\"\nA. however    B. therefore    C. although    D. despite", "a": "Đáp án: B (therefore). ||Quan hệ kết quả/đề phòng → trạng từ nối 'therefore'."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn word form, trạng từ mức độ, tần suất và các cặp dễ nhầm (hard/hardly)."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "The whole team worked ___ to meet the tight deadline.\nA. hard    B. hardly    C. harder    D. hardness", "a": "Đáp án: A (hard). ||'work hard' = làm việc chăm chỉ. 'hardly' nghĩa là 'hầu như không' (sai nghĩa)."},
+        {"q": "She ___ ever arrives late, so today is unusual.\nA. hard    B. hardly    C. harder    D. hardness", "a": "Đáp án: B (hardly). ||'hardly ever' = hiếm khi."},
+        {"q": "The trainer explained each step ___ and patiently.\nA. clear    B. clearly    C. clearness    D. clearer", "a": "Đáp án: B (clearly). ||Bổ nghĩa động từ 'explained' → trạng từ."},
+        {"q": "The product sold ___ well during the holiday promotion.\nA. surprising    B. surprisingly    C. surprise    D. surprised", "a": "Đáp án: B (surprisingly). ||Bổ nghĩa trạng từ 'well' → trạng từ mức độ."},
+        {"q": "Tìm và sửa lỗi:\n\"The staff responded quick to the customer complaint.\"", "a": "Lỗi: \"quick\" → \"quickly\". ||Bổ nghĩa động từ 'responded' → trạng từ."},
+        {"q": "The venue was ___ enough to seat all the guests.\nA. large    B. largely    C. enlarge    D. largeness", "a": "Đáp án: A (large). ||adj + enough (large enough). 'largely' nghĩa 'phần lớn' (sai)."},
+        {"q": "It was ___ a successful launch that sales doubled.\nA. so    B. such    C. too    D. very", "a": "Đáp án: B (such). ||such + a + adj + noun."},
+        {"q": "Chọn từ đúng:\n\"He gave a ___ presentation to the investors.\"\nA. confident    B. confidently    C. confidence    D. confide", "a": "Đáp án: A (confident). ||Bổ nghĩa danh từ 'presentation' → tính từ."},
+        {"q": "After the repair, the machine works ___ again.\nA. perfect    B. perfectly    C. perfection    D. perfecter", "a": "Đáp án: B (perfectly). ||Bổ nghĩa động từ 'works' → trạng từ."},
+        {"q": "Điền vào mô tả (Part 6):\n\"The new procedure is ___ simple, so training takes very little time.\"\nA. relative    B. relatively    C. relativity    D. relate", "a": "Đáp án: B (relatively). ||Bổ nghĩa tính từ 'simple' → trạng từ mức độ."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "The assistant replied to the inquiry ___.\nA. prompt    B. promptly    C. promptness    D. prompter", "a": "B (promptly). ||Bổ nghĩa động từ 'replied' → trạng từ."},
+      {"q": "Revenue grew ___ throughout the third quarter.\nA. steady    B. steadily    C. steadiness    D. steadier", "a": "B (steadily). ||Bổ nghĩa động từ 'grew' → trạng từ."},
+      {"q": "The onboarding guide is ___ clear and easy to follow.\nA. perfect    B. perfectly    C. perfection    D. perfecter", "a": "B (perfectly). ||Bổ nghĩa tính từ 'clear' → trạng từ mức độ."},
+      {"q": "Tìm và sửa lỗi:\n\"The technician fixed the network issue quick.\"", "a": "Lỗi: \"quick\" → \"quickly\". ||Bổ nghĩa động từ 'fixed' → trạng từ."},
+      {"q": "The crate was ___ heavy to carry without assistance.\nA. too    B. enough    C. very much    D. so", "a": "A (too). ||too + adj + to V."},
+      {"q": "The conference hall is not big ___ to host the gala.\nA. too    B. enough    C. very    D. so", "a": "B (enough). ||adj + enough (big enough)."},
+      {"q": "She ___ arrives before 8 a.m. to prepare the room.\nA. always    B. is always    C. always is    D. be always", "a": "A (always). ||Trạng từ tần suất đứng trước động từ thường 'arrives'."},
+      {"q": "The plan is risky; ___, the board approved it unanimously.\nA. nevertheless    B. although    C. despite    D. while", "a": "A (nevertheless). ||Sau dấu chấm phẩy → trạng từ nối."},
+      {"q": "The prototype performed ___ well in the stress tests.\nA. surprising    B. surprisingly    C. surprise    D. surprised", "a": "B (surprisingly). ||Bổ nghĩa trạng từ 'well' → trạng từ mức độ."},
+      {"q": "Tìm và sửa lỗi:\n\"The proposal was enough convincing to win the contract.\"", "a": "Lỗi: \"enough convincing\" → \"convincing enough\". ||enough đứng sau tính từ."},
+      {"q": "Chọn từ đúng:\n\"It was a ___ written report that impressed the client.\"\nA. clear    B. clearly    C. clearness    D. clearer", "a": "B (clearly). ||Bổ nghĩa phân từ 'written' → trạng từ (a clearly written report)."},
+      {"q": "The service was ___ good that we recommended it to partners.\nA. so    B. such    C. too    D. very", "a": "A (so). ||so + adj (good) + that."},
+      {"q": "The review committee ___ meets on the first Friday of the month.\nA. rare    B. rarely    C. rareness    D. rarer", "a": "B (rarely). ||Trạng từ tần suất bổ nghĩa động từ 'meets'."},
+      {"q": "The portable device runs ___ even on low battery.\nA. smooth    B. smoothly    C. smoothness    D. smoother", "a": "B (smoothly). ||Bổ nghĩa động từ 'runs' → trạng từ."},
+      {"q": "The audited figures were ___ accurate and well documented.\nA. extreme    B. extremely    C. extremity    D. extremer", "a": "B (extremely). ||Bổ nghĩa tính từ 'accurate' → trạng từ mức độ."},
+      {"q": "Điền vào báo cáo (Part 6):\n\"Customers responded ___ to the new loyalty program.\"\nA. positive    B. positively    C. positivity    D. positiveness", "a": "B (positively). ||Bổ nghĩa động từ 'responded' → trạng từ."}
+    ]
+  },
+  "summary": [
+    "Trạng từ bổ nghĩa động từ, tính từ, trạng từ khác hoặc cả câu; thường tạo bằng tính từ + ly. Bất quy tắc: good→well, hard→hard, fast→fast.",
+    "Chọn TRẠNG TỪ khi bổ nghĩa động từ/tính từ/trạng từ; chọn TÍNH TỪ khi bổ nghĩa danh từ.",
+    "Trạng từ mức độ: too + adj + to; adj + enough; so + adj + that; such + a + adj + noun + that.",
+    "Tần suất (always, usually, rarely) đứng trước động từ thường, sau be/trợ động từ. Trạng từ nối (however, therefore, nevertheless) nối hai câu."
+  ],
+  "summary_callouts": [
+    {"text": "Phân biệt cặp dễ nhầm: hard (chăm chỉ) ≠ hardly (hầu như không). 'enough' đứng SAU tính từ (good enough) nhưng TRƯỚC danh từ (enough time).", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 1–2 (phân biệt trạng từ vs tính từ) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

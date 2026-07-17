@@ -1,13 +1,22 @@
 flowchart LR
-    Supply["Nguon DC"]
-    OBD["OBD2 simulator"]
-    DMM["Dong ho do"]
-    Scope["Oscilloscope"]
-    Tracker["Tracker prototype"]
-    Laptop["Laptop thu log"]
+    subgraph Inputs["Nguồn cấp và dữ liệu đưa vào"]
+        direction TB
+        Supply["Nguồn DC mô phỏng nguồn xe"]
+        OBD["Bộ mô phỏng dữ liệu xe"]
+    end
+
+    Tracker["Nguyên mẫu thiết bị theo dõi"]
+
+    subgraph Instruments["Thiết bị đo và ghi nhận"]
+        direction TB
+        DMM["Đồng hồ đo dòng và điện áp"]
+        Scope["Máy hiện sóng"]
+        Laptop["Máy tính ghi nhận kết quả"]
+    end
 
     Supply --> Tracker
     OBD --> Tracker
-    DMM --> Tracker
-    Scope --> Tracker
+    Tracker --> DMM
+    Tracker --> Scope
     Tracker --> Laptop
+

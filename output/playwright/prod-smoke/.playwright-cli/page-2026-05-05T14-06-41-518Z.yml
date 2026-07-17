@@ -1,0 +1,547 @@
+- generic [active] [ref=e1]:
+  - link "Bỏ qua đến nội dung chính" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e7]:
+    - generic [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Hệ thống theo dõi phương tiện IoT IVTS V1" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard/command
+            - generic [ref=e15]:
+              - img "Hệ thống theo dõi phương tiện IoT" [ref=e17]
+              - generic [ref=e18]:
+                - generic [ref=e19]: IVTS
+                - generic [ref=e20]: V1
+      - generic [ref=e22]:
+        - generic [ref=e23]: Hệ thống
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Điều hành" [ref=e26] [cursor=pointer]:
+              - /url: /dashboard/command
+              - img [ref=e27]
+              - generic [ref=e29]: Điều hành
+          - listitem [ref=e30]:
+            - button "Vận hành" [ref=e31]:
+              - img [ref=e32]
+              - generic [ref=e34]: Vận hành
+              - img [ref=e35]
+          - listitem [ref=e37]:
+            - button "Đội xe" [ref=e38]:
+              - img [ref=e39]
+              - generic [ref=e49]: Đội xe
+              - img [ref=e50]
+          - listitem [ref=e52]:
+            - button "Cảnh báo" [ref=e53]:
+              - img [ref=e54]
+              - generic [ref=e57]: Cảnh báo
+              - img [ref=e58]
+          - listitem [ref=e60]:
+            - button "Nền tảng" [expanded] [ref=e61]:
+              - img [ref=e62]
+              - generic [ref=e66]: Nền tảng
+              - img [ref=e67]
+            - list [ref=e70]:
+              - listitem [ref=e71]:
+                - link "Trạng thái hệ thống" [ref=e72] [cursor=pointer]:
+                  - /url: /dashboard/platform/system-status
+                  - generic [ref=e73]: Trạng thái hệ thống
+              - listitem [ref=e74]:
+                - link "Firmware" [ref=e75] [cursor=pointer]:
+                  - /url: /dashboard/platform/firmware
+                  - generic [ref=e76]: Firmware
+              - listitem [ref=e77]:
+                - link "Xuất dữ liệu" [ref=e78] [cursor=pointer]:
+                  - /url: /dashboard/platform/exports
+                  - generic [ref=e79]: Xuất dữ liệu
+              - listitem [ref=e80]:
+                - link "Mô phỏng" [ref=e81] [cursor=pointer]:
+                  - /url: /dashboard/platform/simulator
+                  - generic [ref=e82]: Mô phỏng
+              - listitem [ref=e83]:
+                - link "Quản lý người dùng" [ref=e84] [cursor=pointer]:
+                  - /url: /dashboard/platform/users
+                  - generic [ref=e85]: Quản lý người dùng
+              - listitem [ref=e86]:
+                - link "Quản trị hệ thống" [ref=e87] [cursor=pointer]:
+                  - /url: /dashboard/platform/system-admin
+                  - generic [ref=e88]: Quản trị hệ thống
+              - listitem [ref=e89]:
+                - link "Cài đặt cá nhân" [ref=e90] [cursor=pointer]:
+                  - /url: /dashboard/platform/my-settings
+                  - generic [ref=e91]: Cài đặt cá nhân
+      - list [ref=e93]:
+        - listitem [ref=e94]:
+          - button "System Administrator System Administrator admin@tracking.local" [ref=e95]:
+            - generic [ref=e98]: System Administrator
+            - generic [ref=e100]:
+              - generic [ref=e101]: System Administrator
+              - generic [ref=e102]: admin@tracking.local
+            - img [ref=e103]
+      - button "Bật/tắt thanh bên" [ref=e105]
+    - main [ref=e106]:
+      - generic [ref=e107]:
+        - generic [ref=e108]:
+          - button "Bật/tắt thanh bên" [ref=e109]:
+            - img
+            - generic [ref=e110]: Bật/tắt thanh bên
+          - navigation "breadcrumb" [ref=e111]:
+            - list [ref=e112]:
+              - listitem [ref=e113]:
+                - link "Nền tảng" [ref=e114] [cursor=pointer]:
+                  - /url: /dashboard/platform
+              - listitem [ref=e115]:
+                - img [ref=e116]
+              - link "Firmware" [disabled] [ref=e118]
+        - generic [ref=e119]:
+          - button "Mở thông báo, 282 chưa đọc" [ref=e121]:
+            - img
+            - generic [ref=e122]: 99+
+          - generic [ref=e124]:
+            - generic [ref=e125]: Giao diện
+            - combobox "Giao diện" [ref=e126]:
+              - generic [ref=e127]: "Chọn giao diện:"
+              - generic: Mặc định
+              - img
+          - button "Chuyển giao diện" [ref=e128]:
+            - img
+            - generic [ref=e129]: Chuyển giao diện
+      - generic [ref=e134]:
+        - generic [ref=e135]:
+          - generic [ref=e136]:
+            - heading "Firmware OTA" [level=2] [ref=e137]
+            - paragraph [ref=e138]: Quản lý kho firmware, chọn bản stable và gán chính sách OTA riêng cho từng thiết bị.
+          - button "Tải lên firmware" [ref=e140]:
+            - img
+            - text: Tải lên firmware
+        - generic [ref=e141]:
+          - generic [ref=e142]:
+            - generic [ref=e143]:
+              - generic [ref=e144]:
+                - generic [ref=e145]: Tổng bản firmware
+                - img [ref=e147]
+              - generic [ref=e150]:
+                - generic [ref=e151]: "21"
+                - paragraph [ref=e153]: Mới nhất vota-20260414-badsha2-1776125474
+            - generic [ref=e154]:
+              - generic [ref=e155]:
+                - generic [ref=e156]: Bản stable
+                - img [ref=e158]
+              - generic [ref=e161]:
+                - generic [ref=e162]: "0"
+                - paragraph [ref=e164]: Chưa có bản stable
+            - generic [ref=e165]:
+              - generic [ref=e166]:
+                - generic [ref=e167]: Đợt triển khai
+                - img [ref=e169]
+              - generic [ref=e173]:
+                - generic [ref=e174]: "0"
+                - generic [ref=e175]:
+                  - generic [ref=e176]: 0% tiến độ trung bình
+                  - paragraph [ref=e177]: 0 thiết bị đã nhận OTA
+            - generic [ref=e178]:
+              - generic [ref=e179]:
+                - generic [ref=e180]: Đợt lỗi / kẹt
+                - img [ref=e182]
+              - generic [ref=e184]:
+                - generic [ref=e185]: "0"
+                - generic [ref=e186]:
+                  - generic [ref=e187]: 0 đợt ổn định
+                  - paragraph [ref=e188]: Chưa có lịch sử
+          - generic [ref=e189]:
+            - generic [ref=e190]:
+              - generic [ref=e191]: Tình trạng phát hành hiện hành
+              - generic [ref=e192]: "Tổng dung lượng lưu trữ: 17.0 MB · Cờ stable phản ánh kho firmware, còn OTA phản ánh lịch sử triển khai trên thiết bị."
+            - generic [ref=e193]:
+              - generic [ref=e194]:
+                - paragraph [ref=e195]: Bản stable hiện tại
+                - paragraph [ref=e196]: "--"
+                - paragraph [ref=e197]: Chưa có bản stable
+              - generic [ref=e198]:
+                - paragraph [ref=e199]: Bản gần nhất
+                - paragraph [ref=e200]: vota-20260414-badsha2-1776125474
+                - paragraph [ref=e201]: badsha2-ota-20260414-badsha2-1776125474.bin
+              - generic [ref=e202]:
+                - paragraph [ref=e203]: Đợt gần nhất
+                - paragraph [ref=e204]: "--"
+                - paragraph [ref=e205]: Chưa có đợt OTA nào
+              - generic [ref=e206]:
+                - paragraph [ref=e207]: Phạm vi OTA
+                - paragraph [ref=e208]: 0 thiết bị
+                - paragraph [ref=e209]: Không ghi nhận lỗi trong đợt gần nhất
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - generic [ref=e212]:
+              - generic [ref=e213]: Bản stable và kho phát hành
+              - generic [ref=e214]: Đặt một bản stable để thiết bị mới mặc định đi theo cùng chuẩn phát hành. Dùng bản cố định khi cần khóa riêng cho một thiết bị hoặc nhóm thử nghiệm.
+            - generic [ref=e215]:
+              - generic [ref=e216]:
+                - paragraph [ref=e217]: Stable toàn hệ thống
+                - paragraph [ref=e218]: Chưa chọn
+                - paragraph [ref=e219]: Kho firmware chưa có bản stable để thiết bị mặc định đi theo.
+              - generic [ref=e220]:
+                - paragraph [ref=e221]: Bản phát hành mới nhất
+                - paragraph [ref=e222]: vota-20260414-badsha2-1776125474
+                - paragraph [ref=e223]: badsha2-ota-20260414-badsha2-1776125474.bin • 502.7 KB
+          - generic [ref=e224]:
+            - generic [ref=e225]:
+              - generic [ref=e226]: Tình hình rollout hiện tại
+              - generic [ref=e227]: "Tách riêng ba lớp vận hành: kho phát hành, chính sách theo thiết bị và lịch sử OTA."
+            - generic [ref=e228]:
+              - generic [ref=e229]:
+                - paragraph [ref=e230]: Chính sách thiết bị
+                - paragraph [ref=e231]: 2 theo stable • 0 bản cố định
+                - paragraph [ref=e232]: Tất cả thiết bị đã khớp với chính sách firmware hiện tại.
+              - generic [ref=e233]:
+                - paragraph [ref=e234]: Đợt OTA gần nhất
+                - paragraph [ref=e235]: Chưa có đợt OTA
+                - paragraph [ref=e236]: Khi có đợt triển khai mới, trạng thái gần nhất sẽ hiển thị ở đây.
+        - generic [ref=e237]:
+          - tablist [ref=e238]:
+            - tab "Thư viện firmware" [selected] [ref=e239]
+            - tab "Gán theo thiết bị" [ref=e240]
+            - tab "Lịch sử triển khai" [ref=e241]
+          - tabpanel "Thư viện firmware" [ref=e242]:
+            - generic [ref=e243]:
+              - generic [ref=e245]:
+                - generic [ref=e246]:
+                  - generic [ref=e247]: Kho firmware
+                  - generic [ref=e248]: Quản lý release, tải file mới, chọn stable và mở nhanh luồng triển khai OTA.
+                - generic [ref=e249]: 21/21 bản phát hành đang hiển thị
+              - generic [ref=e250]:
+                - textbox "Tìm theo phiên bản, tên file hoặc ghi chú phát hành..." [ref=e252]
+                - generic [ref=e253]:
+                  - button "Cột hiển thị" [ref=e256]:
+                    - img
+                    - text: Cột hiển thị
+                  - table [ref=e260]:
+                    - rowgroup [ref=e261]:
+                      - row "Phiên bản Ghi chú phát hành Thời điểm tải lên" [ref=e262]:
+                        - columnheader "Phiên bản" [ref=e263]:
+                          - button "Phiên bản" [ref=e554]:
+                            - text: Phiên bản
+                            - img
+                        - columnheader "Ghi chú phát hành" [ref=e265]
+                        - columnheader "Thời điểm tải lên" [ref=e266]
+                        - columnheader [ref=e267]
+                    - rowgroup [ref=e268]:
+                      - row "vota-20260414-badsha2-1776125474 Đã lưu trữ Mới nhất badsha2-ota-20260414-badsha2-1776125474.bin • 502.7 KB intentional bad sha after live-publish fix 07:11 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e269]:
+                        - cell "vota-20260414-badsha2-1776125474 Đã lưu trữ Mới nhất badsha2-ota-20260414-badsha2-1776125474.bin • 502.7 KB" [ref=e270]:
+                          - generic [ref=e555]:
+                            - generic [ref=e556]:
+                              - paragraph [ref=e557]: vota-20260414-badsha2-1776125474
+                              - generic [ref=e558]: Đã lưu trữ
+                              - generic [ref=e559]: Mới nhất
+                            - paragraph [ref=e560]: badsha2-ota-20260414-badsha2-1776125474.bin • 502.7 KB
+                        - cell "intentional bad sha after live-publish fix" [ref=e277]
+                        - cell "07:11 14/4/26" [ref=e278]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e279]:
+                          - generic [ref=e561]:
+                            - button "Đặt stable" [ref=e562]
+                            - button "Triển khai" [ref=e563]
+                            - button "Mở thêm thao tác firmware" [ref=e564]:
+                              - img
+                      - row "vota-20260414-badsha-1776124972 Đã lưu trữ badsha-ota-20260414-badsha-1776124972.bin • 502.7 KB intentional bad sha e2e validation 07:02 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e284]:
+                        - cell "vota-20260414-badsha-1776124972 Đã lưu trữ badsha-ota-20260414-badsha-1776124972.bin • 502.7 KB" [ref=e285]:
+                          - generic [ref=e565]:
+                            - generic [ref=e566]:
+                              - paragraph [ref=e567]: vota-20260414-badsha-1776124972
+                              - generic [ref=e568]: Đã lưu trữ
+                            - paragraph [ref=e569]: badsha-ota-20260414-badsha-1776124972.bin • 502.7 KB
+                        - cell "intentional bad sha e2e validation" [ref=e291]
+                        - cell "07:02 14/4/26" [ref=e292]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e293]:
+                          - generic [ref=e570]:
+                            - button "Đặt stable" [ref=e571]
+                            - button "Triển khai" [ref=e572]
+                            - button "Mở thêm thao tác firmware" [ref=e573]:
+                              - img
+                      - row "vota-20260414-r19-1776124423 Đã lưu trữ 1776124423980-tracking_firmware.bin • 502.7 KB duplicate-filename-test-2 06:53 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e298]:
+                        - cell "vota-20260414-r19-1776124423 Đã lưu trữ 1776124423980-tracking_firmware.bin • 502.7 KB" [ref=e299]:
+                          - generic [ref=e574]:
+                            - generic [ref=e575]:
+                              - paragraph [ref=e576]: vota-20260414-r19-1776124423
+                              - generic [ref=e577]: Đã lưu trữ
+                            - paragraph [ref=e578]: 1776124423980-tracking_firmware.bin • 502.7 KB
+                        - cell "duplicate-filename-test-2" [ref=e305]
+                        - cell "06:53 14/4/26" [ref=e306]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e307]:
+                          - generic [ref=e579]:
+                            - button "Đặt stable" [ref=e580]
+                            - button "Triển khai" [ref=e581]
+                            - button "Mở thêm thao tác firmware" [ref=e582]:
+                              - img
+                      - row "vota-20260414-r18-1776124420 Đã lưu trữ 1776124421210-tracking_firmware.bin • 502.7 KB duplicate-filename-test-1 06:53 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e312]:
+                        - cell "vota-20260414-r18-1776124420 Đã lưu trữ 1776124421210-tracking_firmware.bin • 502.7 KB" [ref=e313]:
+                          - generic [ref=e583]:
+                            - generic [ref=e584]:
+                              - paragraph [ref=e585]: vota-20260414-r18-1776124420
+                              - generic [ref=e586]: Đã lưu trữ
+                            - paragraph [ref=e587]: 1776124421210-tracking_firmware.bin • 502.7 KB
+                        - cell "duplicate-filename-test-1" [ref=e319]
+                        - cell "06:53 14/4/26" [ref=e320]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e321]:
+                          - generic [ref=e588]:
+                            - button "Đặt stable" [ref=e589]
+                            - button "Triển khai" [ref=e590]
+                            - button "Mở thêm thao tác firmware" [ref=e591]:
+                              - img
+                      - row "vota-20260414-r17-1776123841 Đã lưu trữ Tracking_Firmware-ota-20260414-r17-1776123841.bin • 502.7 KB OTA e2e verify boot-seq-reset fix 06:44 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e326]:
+                        - cell "vota-20260414-r17-1776123841 Đã lưu trữ Tracking_Firmware-ota-20260414-r17-1776123841.bin • 502.7 KB" [ref=e327]:
+                          - generic [ref=e592]:
+                            - generic [ref=e593]:
+                              - paragraph [ref=e594]: vota-20260414-r17-1776123841
+                              - generic [ref=e595]: Đã lưu trữ
+                            - paragraph [ref=e596]: Tracking_Firmware-ota-20260414-r17-1776123841.bin • 502.7 KB
+                        - cell "OTA e2e verify boot-seq-reset fix" [ref=e333]
+                        - cell "06:44 14/4/26" [ref=e334]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e335]:
+                          - generic [ref=e597]:
+                            - button "Đặt stable" [ref=e598]
+                            - button "Triển khai" [ref=e599]
+                            - button "Mở thêm thao tác firmware" [ref=e600]:
+                              - img
+                      - row "vota-20260414-r16-1776123178 Đã lưu trữ Tracking_Firmware-ota-20260414-r16-1776123178.bin • 502.7 KB OTA e2e after mqtt bridge bigint patch 06:33 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e340]:
+                        - cell "vota-20260414-r16-1776123178 Đã lưu trữ Tracking_Firmware-ota-20260414-r16-1776123178.bin • 502.7 KB" [ref=e341]:
+                          - generic [ref=e601]:
+                            - generic [ref=e602]:
+                              - paragraph [ref=e603]: vota-20260414-r16-1776123178
+                              - generic [ref=e604]: Đã lưu trữ
+                            - paragraph [ref=e605]: Tracking_Firmware-ota-20260414-r16-1776123178.bin • 502.7 KB
+                        - cell "OTA e2e after mqtt bridge bigint patch" [ref=e347]
+                        - cell "06:33 14/4/26" [ref=e348]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e349]:
+                          - generic [ref=e606]:
+                            - button "Đặt stable" [ref=e607]
+                            - button "Triển khai" [ref=e608]
+                            - button "Mở thêm thao tác firmware" [ref=e609]:
+                              - img
+                      - row "vota-20260414-r15-1776121864 Đã lưu trữ Tracking_Firmware-ota-20260414-r15-1776121864.bin • 502.7 KB OTA r15 mqtt-bridge enum fix + firmware ota nvs persist 06:11 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e354]:
+                        - cell "vota-20260414-r15-1776121864 Đã lưu trữ Tracking_Firmware-ota-20260414-r15-1776121864.bin • 502.7 KB" [ref=e355]:
+                          - generic [ref=e610]:
+                            - generic [ref=e611]:
+                              - paragraph [ref=e612]: vota-20260414-r15-1776121864
+                              - generic [ref=e613]: Đã lưu trữ
+                            - paragraph [ref=e614]: Tracking_Firmware-ota-20260414-r15-1776121864.bin • 502.7 KB
+                        - cell "OTA r15 mqtt-bridge enum fix + firmware ota nvs persist" [ref=e361]
+                        - cell "06:11 14/4/26" [ref=e362]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e363]:
+                          - generic [ref=e615]:
+                            - button "Đặt stable" [ref=e616]
+                            - button "Triển khai" [ref=e617]
+                            - button "Mở thêm thao tác firmware" [ref=e618]:
+                              - img
+                      - row "vota-20260414-r14-1776118245 Đã lưu trữ Tracking_Firmware_r14_1776118245.bin • 501.2 KB ota live firmware-status flush + 90 progress throttle 05:10 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e368]:
+                        - cell "vota-20260414-r14-1776118245 Đã lưu trữ Tracking_Firmware_r14_1776118245.bin • 501.2 KB" [ref=e369]:
+                          - generic [ref=e619]:
+                            - generic [ref=e620]:
+                              - paragraph [ref=e621]: vota-20260414-r14-1776118245
+                              - generic [ref=e622]: Đã lưu trữ
+                            - paragraph [ref=e623]: Tracking_Firmware_r14_1776118245.bin • 501.2 KB
+                        - cell "ota live firmware-status flush + 90 progress throttle" [ref=e375]
+                        - cell "05:10 14/4/26" [ref=e376]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e377]:
+                          - generic [ref=e624]:
+                            - button "Đặt stable" [ref=e625]
+                            - button "Triển khai" [ref=e626]
+                            - button "Mở thêm thao tác firmware" [ref=e627]:
+                              - img
+                      - row "vota-20260414-r13-1776115831 Đã lưu trữ Tracking_Firmware_r13_1776115831.bin • 1.0 MB binary path retest 04:30 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e382]:
+                        - cell "vota-20260414-r13-1776115831 Đã lưu trữ Tracking_Firmware_r13_1776115831.bin • 1.0 MB" [ref=e383]:
+                          - generic [ref=e628]:
+                            - generic [ref=e629]:
+                              - paragraph [ref=e630]: vota-20260414-r13-1776115831
+                              - generic [ref=e631]: Đã lưu trữ
+                            - paragraph [ref=e632]: Tracking_Firmware_r13_1776115831.bin • 1.0 MB
+                        - cell "binary path retest" [ref=e389]
+                        - cell "04:30 14/4/26" [ref=e390]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e391]:
+                          - generic [ref=e633]:
+                            - button "Đặt stable" [ref=e634]
+                            - button "Triển khai" [ref=e635]
+                            - button "Mở thêm thao tác firmware" [ref=e636]:
+                              - img
+                      - row "vota-20260414-r12-1776115324 Đã lưu trữ Tracking_Firmware_r12_1776115324.bin • 1.0 MB validate modem_at_send_collect OTA 04:22 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e396]:
+                        - cell "vota-20260414-r12-1776115324 Đã lưu trữ Tracking_Firmware_r12_1776115324.bin • 1.0 MB" [ref=e397]:
+                          - generic [ref=e637]:
+                            - generic [ref=e638]:
+                              - paragraph [ref=e639]: vota-20260414-r12-1776115324
+                              - generic [ref=e640]: Đã lưu trữ
+                            - paragraph [ref=e641]: Tracking_Firmware_r12_1776115324.bin • 1.0 MB
+                        - cell "validate modem_at_send_collect OTA" [ref=e403]
+                        - cell "04:22 14/4/26" [ref=e404]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e405]:
+                          - generic [ref=e642]:
+                            - button "Đặt stable" [ref=e643]
+                            - button "Triển khai" [ref=e644]
+                            - button "Mở thêm thao tác firmware" [ref=e645]:
+                              - img
+                      - row "vota-20260414-r11-1776114888 Đã lưu trữ Tracking_Firmware_r11_1776114888.bin • 1.0 MB capture raw preview 04:14 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e410]:
+                        - cell "vota-20260414-r11-1776114888 Đã lưu trữ Tracking_Firmware_r11_1776114888.bin • 1.0 MB" [ref=e411]:
+                          - generic [ref=e646]:
+                            - generic [ref=e647]:
+                              - paragraph [ref=e648]: vota-20260414-r11-1776114888
+                              - generic [ref=e649]: Đã lưu trữ
+                            - paragraph [ref=e650]: Tracking_Firmware_r11_1776114888.bin • 1.0 MB
+                        - cell "capture raw preview" [ref=e417]
+                        - cell "04:14 14/4/26" [ref=e418]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e419]:
+                          - generic [ref=e651]:
+                            - button "Đặt stable" [ref=e652]
+                            - button "Triển khai" [ref=e653]
+                            - button "Mở thêm thao tác firmware" [ref=e654]:
+                              - img
+                      - row "vota-20260414-r10-1776114623 Đã lưu trữ Tracking_Firmware_r10_1776114623.bin • 1.0 MB capture accepted url 04:10 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e424]:
+                        - cell "vota-20260414-r10-1776114623 Đã lưu trữ Tracking_Firmware_r10_1776114623.bin • 1.0 MB" [ref=e425]:
+                          - generic [ref=e655]:
+                            - generic [ref=e656]:
+                              - paragraph [ref=e657]: vota-20260414-r10-1776114623
+                              - generic [ref=e658]: Đã lưu trữ
+                            - paragraph [ref=e659]: Tracking_Firmware_r10_1776114623.bin • 1.0 MB
+                        - cell "capture accepted url" [ref=e431]
+                        - cell "04:10 14/4/26" [ref=e432]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e433]:
+                          - generic [ref=e660]:
+                            - button "Đặt stable" [ref=e661]
+                            - button "Triển khai" [ref=e662]
+                            - button "Mở thêm thao tác firmware" [ref=e663]:
+                              - img
+                      - row "vota-20260414-r9-1776114387 Đã lưu trữ Tracking_Firmware_r9_1776114387.bin • 1.0 MB retest ota accept-encoding identity 04:06 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e438]:
+                        - cell "vota-20260414-r9-1776114387 Đã lưu trữ Tracking_Firmware_r9_1776114387.bin • 1.0 MB" [ref=e439]:
+                          - generic [ref=e664]:
+                            - generic [ref=e665]:
+                              - paragraph [ref=e666]: vota-20260414-r9-1776114387
+                              - generic [ref=e667]: Đã lưu trữ
+                            - paragraph [ref=e668]: Tracking_Firmware_r9_1776114387.bin • 1.0 MB
+                        - cell "retest ota accept-encoding identity" [ref=e445]
+                        - cell "04:06 14/4/26" [ref=e446]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e447]:
+                          - generic [ref=e669]:
+                            - button "Đặt stable" [ref=e670]
+                            - button "Triển khai" [ref=e671]
+                            - button "Mở thêm thao tác firmware" [ref=e672]:
+                              - img
+                      - row "vota-20260414-r8-1776114154 Đã lưu trữ Tracking_Firmware_r8_1776114154.bin • 1.0 MB retest ota httpread parse 04:02 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e452]:
+                        - cell "vota-20260414-r8-1776114154 Đã lưu trữ Tracking_Firmware_r8_1776114154.bin • 1.0 MB" [ref=e453]:
+                          - generic [ref=e673]:
+                            - generic [ref=e674]:
+                              - paragraph [ref=e675]: vota-20260414-r8-1776114154
+                              - generic [ref=e676]: Đã lưu trữ
+                            - paragraph [ref=e677]: Tracking_Firmware_r8_1776114154.bin • 1.0 MB
+                        - cell "retest ota httpread parse" [ref=e459]
+                        - cell "04:02 14/4/26" [ref=e460]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e461]:
+                          - generic [ref=e678]:
+                            - button "Đặt stable" [ref=e679]
+                            - button "Triển khai" [ref=e680]
+                            - button "Mở thêm thao tác firmware" [ref=e681]:
+                              - img
+                      - row "vota-20260414-r7-1776113918 Đã lưu trữ Tracking_Firmware_r7_1776113918.bin • 1.0 MB retest ota after no-compress fix 03:58 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e466]:
+                        - cell "vota-20260414-r7-1776113918 Đã lưu trữ Tracking_Firmware_r7_1776113918.bin • 1.0 MB" [ref=e467]:
+                          - generic [ref=e682]:
+                            - generic [ref=e683]:
+                              - paragraph [ref=e684]: vota-20260414-r7-1776113918
+                              - generic [ref=e685]: Đã lưu trữ
+                            - paragraph [ref=e686]: Tracking_Firmware_r7_1776113918.bin • 1.0 MB
+                        - cell "retest ota after no-compress fix" [ref=e473]
+                        - cell "03:58 14/4/26" [ref=e474]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e475]:
+                          - generic [ref=e687]:
+                            - button "Đặt stable" [ref=e688]
+                            - button "Triển khai" [ref=e689]
+                            - button "Mở thêm thao tác firmware" [ref=e690]:
+                              - img
+                      - row "vota-20260414-r6-1776113867 Đã lưu trữ Tracking_Firmware_r6_1776113867.bin • 1.0 MB retest ota flow no gzip 03:57 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e480]:
+                        - cell "vota-20260414-r6-1776113867 Đã lưu trữ Tracking_Firmware_r6_1776113867.bin • 1.0 MB" [ref=e481]:
+                          - generic [ref=e691]:
+                            - generic [ref=e692]:
+                              - paragraph [ref=e693]: vota-20260414-r6-1776113867
+                              - generic [ref=e694]: Đã lưu trữ
+                            - paragraph [ref=e695]: Tracking_Firmware_r6_1776113867.bin • 1.0 MB
+                        - cell "retest ota flow no gzip" [ref=e487]
+                        - cell "03:57 14/4/26" [ref=e488]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e489]:
+                          - generic [ref=e696]:
+                            - button "Đặt stable" [ref=e697]
+                            - button "Triển khai" [ref=e698]
+                            - button "Mở thêm thao tác firmware" [ref=e699]:
+                              - img
+                      - row "vota-20260413-r3-r4-r5 Đã lưu trữ Tracking_Firmware_r3.bin-1776109020-1776110554 • 1.0 MB OTA field-validation command-subscribe force enabled 03:02 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e494]:
+                        - cell "vota-20260413-r3-r4-r5 Đã lưu trữ Tracking_Firmware_r3.bin-1776109020-1776110554 • 1.0 MB" [ref=e495]:
+                          - generic [ref=e700]:
+                            - generic [ref=e701]:
+                              - paragraph [ref=e702]: vota-20260413-r3-r4-r5
+                              - generic [ref=e703]: Đã lưu trữ
+                            - paragraph [ref=e704]: Tracking_Firmware_r3.bin-1776109020-1776110554 • 1.0 MB
+                        - cell "OTA field-validation command-subscribe force enabled" [ref=e501]
+                        - cell "03:02 14/4/26" [ref=e502]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e503]:
+                          - generic [ref=e705]:
+                            - button "Đặt stable" [ref=e706]
+                            - button "Triển khai" [ref=e707]
+                            - button "Mở thêm thao tác firmware" [ref=e708]:
+                              - img
+                      - row "vota-20260413-r3-r4 Đã lưu trữ Tracking_Firmware_r3.bin-1776109020 • 1.0 MB OTA field-validation command-subscribe force enabled 02:36 14/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e508]:
+                        - cell "vota-20260413-r3-r4 Đã lưu trữ Tracking_Firmware_r3.bin-1776109020 • 1.0 MB" [ref=e509]:
+                          - generic [ref=e709]:
+                            - generic [ref=e710]:
+                              - paragraph [ref=e711]: vota-20260413-r3-r4
+                              - generic [ref=e712]: Đã lưu trữ
+                            - paragraph [ref=e713]: Tracking_Firmware_r3.bin-1776109020 • 1.0 MB
+                        - cell "OTA field-validation command-subscribe force enabled" [ref=e515]
+                        - cell "02:36 14/4/26" [ref=e516]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e517]:
+                          - generic [ref=e714]:
+                            - button "Đặt stable" [ref=e715]
+                            - button "Triển khai" [ref=e716]
+                            - button "Mở thêm thao tác firmware" [ref=e717]:
+                              - img
+                      - row "vota-20260413-r3 Đã lưu trữ Tracking_Firmware_r3.bin • 1.0 MB OTA field-validation command-subscribe force enabled 17:09 13/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e522]:
+                        - cell "vota-20260413-r3 Đã lưu trữ Tracking_Firmware_r3.bin • 1.0 MB" [ref=e523]:
+                          - generic [ref=e718]:
+                            - generic [ref=e719]:
+                              - paragraph [ref=e720]: vota-20260413-r3
+                              - generic [ref=e721]: Đã lưu trữ
+                            - paragraph [ref=e722]: Tracking_Firmware_r3.bin • 1.0 MB
+                        - cell "OTA field-validation command-subscribe force enabled" [ref=e529]
+                        - cell "17:09 13/4/26" [ref=e530]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e531]:
+                          - generic [ref=e723]:
+                            - button "Đặt stable" [ref=e724]
+                            - button "Triển khai" [ref=e725]
+                            - button "Mở thêm thao tác firmware" [ref=e726]:
+                              - img
+                      - row "vota-20260413-r2 Đã lưu trữ Tracking_Firmware_r2.bin • 1.0 MB OTA command-subscribe enabled build 16:45 13/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e536]:
+                        - cell "vota-20260413-r2 Đã lưu trữ Tracking_Firmware_r2.bin • 1.0 MB" [ref=e537]:
+                          - generic [ref=e727]:
+                            - generic [ref=e728]:
+                              - paragraph [ref=e729]: vota-20260413-r2
+                              - generic [ref=e730]: Đã lưu trữ
+                            - paragraph [ref=e731]: Tracking_Firmware_r2.bin • 1.0 MB
+                        - cell "OTA command-subscribe enabled build" [ref=e543]
+                        - cell "16:45 13/4/26" [ref=e544]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e545]:
+                          - generic [ref=e732]:
+                            - button "Đặt stable" [ref=e733]
+                            - button "Triển khai" [ref=e734]
+                            - button "Mở thêm thao tác firmware" [ref=e735]:
+                              - img
+                      - row "vota-20260413-r1 Đã lưu trữ Tracking_Firmware.bin • 1.0 MB OTA end-to-end validation build 16:34 13/4/26 Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e736]:
+                        - cell "vota-20260413-r1 Đã lưu trữ Tracking_Firmware.bin • 1.0 MB" [ref=e737]:
+                          - generic [ref=e738]:
+                            - generic [ref=e739]:
+                              - paragraph [ref=e740]: vota-20260413-r1
+                              - generic [ref=e741]: Đã lưu trữ
+                            - paragraph [ref=e742]: Tracking_Firmware.bin • 1.0 MB
+                        - cell "OTA end-to-end validation build" [ref=e743]
+                        - cell "16:34 13/4/26" [ref=e744]
+                        - cell "Đặt stable Triển khai Mở thêm thao tác firmware" [ref=e745]:
+                          - generic [ref=e746]:
+                            - button "Đặt stable" [ref=e747]
+                            - button "Triển khai" [ref=e748]
+                            - button "Mở thêm thao tác firmware" [ref=e749]:
+                              - img
+                - generic [ref=e550]:
+                  - paragraph [ref=e551]: Đã tải 21 / 21 bản firmware.
+                  - paragraph [ref=e750]: Đã hiển thị hết dữ liệu phù hợp.
+  - region "Notifications alt+T"
+  - alert [ref=e6]

@@ -1,0 +1,21 @@
+stateDiagram-v2
+    [*] --> INIT
+    INIT --> CHECK_IGN
+
+    CHECK_IGN --> DRIVING: ignition true
+    CHECK_IGN --> PARKED: ignition false
+
+    DRIVING --> DRIVING: tracking loop + commands
+    DRIVING --> PARKED: ignition off hold reached
+
+    PARKED --> SLEEP
+
+    SLEEP --> CHECK_IGN: sleep rejected
+    SLEEP --> [*]: deep sleep entered
+
+    [*] --> HEARTBEAT: timer wake
+    [*] --> ALARM: ext0 IMU wake
+
+    HEARTBEAT --> SLEEP
+    ALARM --> DRIVING: ignition true
+    ALARM --> PARKED: motion cleared or timeout

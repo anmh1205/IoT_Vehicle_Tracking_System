@@ -1,0 +1,28 @@
+flowchart TB
+    Title["Kế hoạch thực hiện dự án<br/>Theo giai đoạn trong 24 tuần"]
+
+    subgraph Row1[" "]
+        direction LR
+        P1["GĐ1 | Tuần 1-2<br/>Khảo sát yêu cầu<br/>Chốt phạm vi"]
+        P2["GĐ2 | Tuần 3-7<br/>Thiết kế phần cứng<br/>Nguồn + PCB"]
+    end
+
+    subgraph Row2[" "]
+        direction LR
+        P3["GĐ3 | Tuần 5-13<br/>Firmware ESP-IDF<br/>OBD2 BLE + power FSM"]
+        P4["GĐ4 | Tuần 7-15<br/>EMQX + MQTT Bridge<br/>Lưu trữ dữ liệu"]
+    end
+
+    subgraph Row3[" "]
+        direction LR
+        P5["GĐ5 | Tuần 10-19<br/>API + web + mobile shell<br/>Realtime dashboard"]
+        P6["GĐ6 | Tuần 17-22<br/>Tích hợp hệ thống<br/>Kiểm thử thực địa"]
+    end
+
+    subgraph Row4[" "]
+        direction LR
+        P7["GĐ7 | Tuần 21-24<br/>Đánh giá và báo cáo<br/>Phụ lục + kiểm tra PDF"]
+    end
+
+    Title --> P1
+    P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7

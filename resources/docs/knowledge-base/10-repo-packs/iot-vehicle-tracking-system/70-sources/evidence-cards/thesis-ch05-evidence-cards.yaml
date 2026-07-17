@@ -1,0 +1,34 @@
+- type: evidence_card
+  id: thesis-ch05-risk-and-hardening-roadmap
+  domain: risks-hardening
+  subdomain: production-readiness
+  source_kind: thesis_toc
+  source_path: resources/reports/thesis/final/thesis-final-report.toc
+  source_anchor: "5.3 risk evaluation + 5.4 future recommendations"
+  statement: "The thesis treats risk reduction and staged hardening as part of the design, not as optional follow-up."
+  evidence_excerpt: "Chapter 5 contains a risk matrix, detailed risk analysis, and future operational recommendations."
+  status: validated
+  confidence: medium
+  validated_against:
+    - docs/system-architecture.md
+    - README.md
+  reviewer_agent: coordinator
+  last_reviewed: 2026-04-24
+
+- type: evidence_card
+  id: thesis-ch05-mobile-as-future-stage
+  domain: frontend-operations-dashboard
+  subdomain: roadmap
+  source_kind: thesis_toc
+  source_path: resources/reports/thesis/final/thesis-final-report.toc
+  source_anchor: "5.4.3 mobile application"
+  statement: "The thesis frames the mobile application as a future-stage recommendation rather than a first-class runtime surface in the validated design baseline."
+  evidence_excerpt: "Chapter 5 places mobile under future recommendations."
+  status: historical-design
+  confidence: medium
+  validated_against:
+    - README.md
+    - iot-vehicle-tracking-system-cloud/Tracking_Mobile/.env.example
+  reviewer_agent: coordinator
+  last_reviewed: 2026-04-24
+

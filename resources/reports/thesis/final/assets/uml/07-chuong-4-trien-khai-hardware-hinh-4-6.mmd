@@ -1,30 +1,22 @@
-flowchart LR
-    Vin["Nguồn xe 12V/24V"]
-    Buck["MP2482 Buck 5V"]
+flowchart TB
+    Vin["Nguồn xe 12 - 24 V"]
+    Sense["Nhánh đo điện áp nguồn<br/>Đưa trạng thái nguồn về ESP32-S3"]
+    Buck5["MP2482<br/>Tạo nguồn 5 V chính"]
+    Bus5["Đường 5 V làm việc của thiết bị"]
+    Charge["TP5100<br/>Sạc pin dự phòng"]
+    Battery["Pin Li-ion 18650"]
+    Boost5["SX1308<br/>Tạo lại 5 V khi mất nguồn xe"]
+    Logic3["AP2112<br/>Tạo 3.3 V cho điều khiển, cảm biến và bộ nhớ"]
+    Modem4["TPS54231<br/>Tạo 4 V riêng cho SIM7600CE-T"]
+    Aux5["Nhánh 5 V phụ<br/>USB-C, đèn báo và các phần hỗ trợ"]
 
-    subgraph MainRail["Nhánh nguồn chính"]
-        direction TB
-        Rail33["Rail 3.3V\nMCU + IMU"]
-        Rail4["Rail ~4V\nModem LTE"]
-    end
-
-    subgraph BackupRail["Nhánh nguồn dự phòng"]
-        direction LR
-        Charge["TP4056 Sạc pin"]
-        Cell["Pin 18650"]
-        Boost["SX1308 Boost 5V"]
-        BackupBus["Bus backup 5V"]
-    end
-
-    Fsm["Power FSM\nGPIO5 / GPIO18 / GPIO19"]
-
-    Vin ----> Buck
-    Buck ----> Rail33
-    Buck ----> Rail4
-    Buck ----> Charge
-    Charge ----> Cell
-    Cell ----> Boost
-    Boost ----> BackupBus
-
-    Fsm -.->|điều khiển| Buck
-    Fsm -.->|ưu tiên nguồn| BackupBus
+    Vin --> Buck5
+    Vin --> Sense
+    Buck5 --> Bus5
+    Buck5 --> Charge
+    Charge --> Battery
+    Battery --> Boost5
+    Boost5 --> Bus5
+    Bus5 --> Logic3
+    Bus5 --> Modem4
+    Bus5 --> Aux5

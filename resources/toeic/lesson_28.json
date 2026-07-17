@@ -1,0 +1,165 @@
+{
+  "page_id": "357df50b-1fcd-8129-9d7c-cac56ae7aefe",
+  "title": "28. Câu điều kiện loại 3",
+  "intro": [
+    {"text": "Bài 28 — Câu điều kiện loại 3 (giả định trái với quá khứ - điều đã không xảy ra). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 — If + had + V3, ... would have + V3. Bẫy: cả hai vế đều ở dạng hoàn thành (had / would have).", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Câu điều kiện loại 3 (third conditional) diễn tả giả định TRÁI VỚI QUÁ KHỨ — điều đã KHÔNG xảy ra, và kết quả tưởng tượng nếu nó đã xảy ra. Thường mang sắc thái tiếc nuối hoặc trách móc."},
+
+    {"type": "h3", "text": "2. Công thức"},
+    {"type": "table", "headers": ["Mệnh đề If", "Mệnh đề chính", "Ví dụ"], "rows": [
+      ["If + had + V3 (quá khứ hoàn thành)", "would have + V3", "If we had booked earlier, we would have saved money."]
+    ]},
+    {"type": "key", "text": "Mệnh đề If dùng QUÁ KHỨ HOÀN THÀNH (had + V3); vế chính dùng would have + V3. Cả hai vế đều trái với sự thật quá khứ."},
+
+    {"type": "h3", "text": "3. could have / might have trong vế chính"},
+    {"type": "ul", "items": [
+      "would have + V3: kết quả chắc chắn (trong giả định).",
+      "could have + V3: đã có thể (năng lực/khả năng).",
+      "might have + V3: có lẽ đã (không chắc).",
+      "Ví dụ: If they had tested it, they might have caught the bug."
+    ]},
+
+    {"type": "h3", "text": "4. Ý nghĩa tiếc nuối / trách móc"},
+    {"type": "p", "text": "Loại 3 hàm ý điều ngược đã xảy ra: 'If we had acted sooner, we would have avoided the loss' → thực tế: chúng ta đã KHÔNG hành động sớm, nên ĐÃ chịu tổn thất."},
+
+    {"type": "h3", "text": "5. Điều kiện hỗn hợp (mixed conditional)"},
+    {"type": "p", "text": "Trái quá khứ → kết quả ở HIỆN TẠI: If + had + V3, would + V (now). Ví dụ: If we had hired more staff last year, we would not be so busy now. (quá khứ ảnh hưởng hiện tại)."},
+
+    {"type": "h3", "text": "6. So sánh 3 loại điều kiện"},
+    {"type": "table", "headers": ["Loại", "If", "Vế chính", "Thời gian"], "rows": [
+      ["1", "hiện tại đơn", "will + V", "tương lai có thật"],
+      ["2", "quá khứ đơn", "would + V", "hiện tại giả định"],
+      ["3", "had + V3", "would have + V3", "quá khứ trái thật"]
+    ]},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) If + HAD + V3 (quá khứ hoàn thành); vế chính WOULD HAVE + V3. (2) Đừng dùng 'would have' trong mệnh đề If (sai 'If we would have known'). (3) could/might have + V3 thay would have để đổi sắc thái. (4) Phân biệt rõ loại 2 (had + V → would + V) với loại 3 (had + V3 → would have + V3)."}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Cấu trúc cơ bản",
+      "theory": ["Loại 3 nói về điều KHÔNG xảy ra trong quá khứ và kết quả giả định của nó: If + had + V3, S + would have + V3."],
+      "keys": ["If + S + had + V3, S + would have + V3. (Diễn tả tiếc nuối/điều ngược với thực tế quá khứ.)"],
+      "traps": ["Cả hai vế đều hoàn thành: mệnh đề if dùng 'had + V3', mệnh đề chính dùng 'would have + V3'."],
+      "examples": [
+        "If we had started earlier, we would have finished on time.",
+        "If they had tested it, they would have caught the bug."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "If we ___ earlier, we would have met the deadline.\nA. start    B. started    C. had started    D. would start", "a": "Đáp án: C (had started). ||Loại 3: mệnh đề if dùng had + V3."},
+        {"q": "If the team had tested the system, they ___ the bug.\nA. would catch    B. would have caught    C. caught    D. had caught", "a": "Đáp án: B (would have caught). ||Mệnh đề chính loại 3 → would have + V3."},
+        {"q": "We would have won the contract if we ___ a lower bid.\nA. submit    B. submitted    C. had submitted    D. would submit", "a": "Đáp án: C (had submitted). ||Mệnh đề if loại 3 → had + V3."},
+        {"q": "If the manager had known, she ___ the order.\nA. would approve    B. would have approved    C. approved    D. had approved", "a": "Đáp án: B (would have approved). ||Mệnh đề chính → would have + V3."},
+        {"q": "Tìm và sửa lỗi:\n\"If we would have planned better, we would have succeeded.\"", "a": "Lỗi: \"If we would have\" → \"If we had\". ||Mệnh đề if loại 3 dùng had + V3, không 'would have'."},
+        {"q": "If they had invested sooner, profits ___ higher.\nA. would be    B. would have been    C. were    D. had been", "a": "Đáp án: B (would have been). ||Mệnh đề chính loại 3 → would have been."},
+        {"q": "Chọn câu ĐÚNG:\nA. If we had left earlier, we would have caught the train.\nB. If we left earlier, we would have caught the train.\nC. If we had left earlier, we would catch the train.\nD. If we would have left earlier, we caught the train.", "a": "Đáp án: A. ||If + had + V3, mệnh đề chính + would have + V3."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"If the supplier ___ on time, we would have avoided the delay.\"\nA. delivers    B. delivered    C. had delivered    D. would deliver", "a": "Đáp án: C (had delivered). ||Loại 3: had + V3."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · could have / might have trong mệnh đề chính",
+      "theory": ["Mệnh đề chính loại 3 có thể dùng could have + V3 (đã có thể) hoặc might have + V3 (có lẽ đã)."],
+      "keys": ["could have + V3; might have + V3."],
+      "traps": ["Sau could/might have luôn là V3."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "If we had had more time, we ___ run more tests.\nA. could have    B. could    C. can have    D. would", "a": "Đáp án: A (could have). ||Loại 3: could have + V3 (could have run)."},
+        {"q": "If the weather had been better, the event ___ outdoors.\nA. might have been held    B. might be held    C. was held    D. had held", "a": "Đáp án: A (might have been held). ||Loại 3 bị động: might have been + V3."},
+        {"q": "If they had warned us, we ___ the loss.\nA. could have avoided    B. could avoid    C. avoided    D. had avoided", "a": "Đáp án: A (could have avoided). ||could have + V3."},
+        {"q": "If she had applied, she ___ the job.\nA. might have got    B. might get    C. got    D. had got", "a": "Đáp án: A (might have got). ||might have + V3."},
+        {"q": "Tìm và sửa lỗi:\n\"If we had known, we could have avoid the mistake.\"", "a": "Lỗi: \"could have avoid\" → \"could have avoided\". ||Sau could have dùng V3."},
+        {"q": "If the budget had been larger, we ___ more staff.\nA. could have hired    B. could hire    C. hired    D. had hired", "a": "Đáp án: A (could have hired). ||could have + V3."},
+        {"q": "Chọn câu ĐÚNG:\nA. If they had checked, they might have found the error.\nB. If they had checked, they might find the error.\nC. If they checked, they might have found the error.\nD. If they would have checked, they might found the error.", "a": "Đáp án: A. ||If + had + V3, might have + V3."},
+        {"q": "Điền vào đánh giá (Part 6):\n\"If the team had double-checked, the defect ___ earlier.\"\nA. could have been caught    B. could be caught    C. was caught    D. had caught", "a": "Đáp án: A (could have been caught). ||Loại 3 bị động: could have been + V3."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Đảo ngữ (Had + S + V3)",
+      "theory": ["Loại 3 có thể đảo ngữ trang trọng: Had + S + V3, S + would have + V3 (bỏ 'if')."],
+      "keys": ["Had we known, we would have acted. = If we had known, we would have acted."],
+      "traps": ["Khi đảo, bỏ 'if' và đưa 'had' lên đầu; không dùng cả 'if' và đảo cùng lúc."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "___ we known about the issue, we would have fixed it sooner.\nA. If    B. Had    C. Have    D. Did", "a": "Đáp án: B (Had). ||Đảo ngữ loại 3: Had + S + V3 (= If we had known)."},
+        {"q": "Had the company invested earlier, it ___ more competitive.\nA. would be    B. would have been    C. was    D. had been", "a": "Đáp án: B (would have been). ||Đảo ngữ loại 3, mệnh đề chính → would have been."},
+        {"q": "___ the manager approved it, the project would have started.\nA. If    B. Had    C. Have    D. Did", "a": "Đáp án: B (Had). ||Đảo ngữ: Had the manager approved it..."},
+        {"q": "Had they reviewed the contract, they ___ the error.\nA. would notice    B. would have noticed    C. noticed    D. had noticed", "a": "Đáp án: B (would have noticed). ||Đảo ngữ loại 3 → would have + V3."},
+        {"q": "Tìm và sửa lỗi:\n\"If had we known, we would have prepared better.\"", "a": "Lỗi: dùng cả 'If' và đảo ngữ. ||Sửa: \"Had we known...\" hoặc \"If we had known...\" (chọn một)."},
+        {"q": "Had the data been backed up, nothing ___ lost.\nA. would be    B. would have been    C. was    D. had been", "a": "Đáp án: B (would have been). ||Đảo ngữ loại 3 → would have been."},
+        {"q": "Chọn câu đảo ngữ ĐÚNG:\nA. Had we left earlier, we would have avoided the traffic.\nB. Had we left earlier, we would avoid the traffic.\nC. If had we left earlier, we would have avoided the traffic.\nD. Had we left earlier, we avoided the traffic.", "a": "Đáp án: A. ||Had + S + V3, would have + V3."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"___ the team followed the checklist, the error would have been prevented.\"\nA. If    B. Had    C. Have    D. Did", "a": "Đáp án: B (Had). ||Đảo ngữ loại 3: Had the team followed..."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Phân biệt loại 2 và loại 3; điều kiện hỗn hợp",
+      "theory": ["Loại 2: giả định hiện tại (if + quá khứ, would + V). Loại 3: giả định quá khứ (if + had V3, would have + V3). Hỗn hợp: quá khứ ảnh hưởng hiện tại (If + had V3, ... would + V now)."],
+      "keys": ["Loại 2: If I had time now... Loại 3: If I had had time then... Hỗn hợp: If we had saved money, we would be rich now."],
+      "traps": ["Loại 3 nói về quá khứ đã rồi (would have + V3); loại 2 nói về hiện tại giả định (would + V)."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "(Quá khứ) If we had hired more staff last year, we ___ the targets.\nA. would meet    B. would have met    C. met    D. had met", "a": "Đáp án: B (would have met). ||Quá khứ đã rồi → loại 3 (would have + V3)."},
+        {"q": "(Hiện tại) If I had more time now, I ___ you.\nA. would help    B. would have helped    C. helped    D. had helped", "a": "Đáp án: A (would help). ||Giả định hiện tại → loại 2 (would + V)."},
+        {"q": "(Hỗn hợp) If we had saved more, we ___ financially secure now.\nA. would be    B. would have been    C. were    D. had been", "a": "Đáp án: A (would be). ||Hỗn hợp: nguyên nhân quá khứ (had saved) → kết quả hiện tại (would be now)."},
+        {"q": "(Quá khứ) If the alarm had worked, the fire ___ sooner.\nA. would be detected    B. would have been detected    C. was detected    D. had detected", "a": "Đáp án: B (would have been detected). ||Loại 3 bị động → would have been + V3."},
+        {"q": "Tìm và sửa lỗi:\n\"If we had launched earlier, we would dominate the market last year.\"", "a": "Lỗi: \"would dominate ... last year\" → \"would have dominated\". ||Kết quả thuộc quá khứ → loại 3 (would have + V3)."},
+        {"q": "(Hiện tại) If the office were closer, I ___ on time every day.\nA. would arrive    B. would have arrived    C. arrived    D. had arrived", "a": "Đáp án: A (would arrive). ||Giả định hiện tại → loại 2 (would + V)."},
+        {"q": "Chọn câu loại 3 ĐÚNG:\nA. If they had prepared, they would have passed the audit.\nB. If they prepared, they would have passed the audit.\nC. If they had prepared, they would pass the audit.\nD. If they would have prepared, they passed the audit.", "a": "Đáp án: A. ||Loại 3: if + had V3, would have + V3."},
+        {"q": "Điền vào nhận định (Part 6):\n\"If the company had adopted the technology sooner, it ___ a leader today.\"\nA. would be    B. would have been    C. was    D. had been", "a": "Đáp án: A (would be). ||Hỗn hợp: quá khứ ảnh hưởng hiện tại → would be (now)."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn cấu trúc loại 3, could/might have, đảo ngữ Had, và phân biệt loại 2/3/hỗn hợp."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "If we ___ the issue sooner, we would have avoided the loss.\nA. notice    B. noticed    C. had noticed    D. would notice", "a": "Đáp án: C (had noticed). ||Loại 3: had + V3."},
+        {"q": "If they had reviewed the figures, they ___ the mistake.\nA. would catch    B. would have caught    C. caught    D. had caught", "a": "Đáp án: B (would have caught). ||Mệnh đề chính loại 3 → would have + V3."},
+        {"q": "___ we known earlier, we would have changed the plan.\nA. If    B. Had    C. Have    D. Did", "a": "Đáp án: B (Had). ||Đảo ngữ loại 3."},
+        {"q": "If the data had been saved, we ___ it now.\nA. would have    B. would have had    C. had    D. would having", "a": "Đáp án: A (would have). ||Hỗn hợp: quá khứ (had been saved) → hiện tại (would have it now)."},
+        {"q": "Tìm và sửa lỗi:\n\"If we would have known, we would have acted differently.\"", "a": "Lỗi: \"If we would have known\" → \"If we had known\". ||Mệnh đề if loại 3 dùng had + V3."},
+        {"q": "If she had been informed, she ___ to the meeting.\nA. would come    B. would have come    C. came    D. had come", "a": "Đáp án: B (would have come). ||Loại 3 → would have + V3."},
+        {"q": "If the team had had more support, they ___ the project.\nA. could have completed    B. could complete    C. completed    D. had completed", "a": "Đáp án: A (could have completed). ||could have + V3."},
+        {"q": "(Hiện tại) If I were the manager, I ___ the policy.\nA. would change    B. would have changed    C. changed    D. had changed", "a": "Đáp án: A (would change). ||Giả định hiện tại → loại 2 (would + V)."},
+        {"q": "Chọn câu đảo ngữ ĐÚNG:\nA. Had they tested it, they would have found the flaw.\nB. Had they tested it, they would find the flaw.\nC. If had they tested it, they would have found the flaw.\nD. Had they tested it, they found the flaw.", "a": "Đáp án: A. ||Had + S + V3, would have + V3."},
+        {"q": "Điền vào đánh giá (Part 6):\n\"If the company ___ the warning, the crisis would have been prevented.\"\nA. heeds    B. heeded    C. had heeded    D. would heed", "a": "Đáp án: C (had heeded). ||Loại 3: had + V3."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "If we ___ earlier, we would have met the deadline.\nA. start    B. started    C. had started    D. would start", "a": "C (had started). ||Loại 3: had + V3."},
+      {"q": "If they had tested the product, they ___ the defect.\nA. would catch    B. would have caught    C. caught    D. had caught", "a": "B (would have caught). ||Mệnh đề chính → would have + V3."},
+      {"q": "___ we known the risks, we would have acted differently.\nA. If    B. Had    C. Have    D. Did", "a": "B (Had). ||Đảo ngữ loại 3 (Had we known)."},
+      {"q": "If the manager had approved it, the project ___ on time.\nA. would start    B. would have started    C. started    D. had started", "a": "B (would have started). ||Loại 3 → would have + V3."},
+      {"q": "Tìm và sửa lỗi:\n\"If we would have planned better, we would have succeeded.\"", "a": "Lỗi: \"If we would have planned\" → \"If we had planned\". ||Mệnh đề if loại 3 dùng had + V3."},
+      {"q": "If we had had more time, we ___ additional tests.\nA. could have run    B. could run    C. ran    D. had run", "a": "A (could have run). ||could have + V3."},
+      {"q": "If the data had been backed up, nothing ___ lost.\nA. would be    B. would have been    C. was    D. had been", "a": "B (would have been). ||Loại 3 bị động → would have been + V3."},
+      {"q": "(Hiện tại) If I had more staff now, I ___ the workload.\nA. would manage    B. would have managed    C. managed    D. had managed", "a": "A (would manage). ||Giả định hiện tại → loại 2 (would + V)."},
+      {"q": "Chọn câu loại 3 ĐÚNG:\nA. If we had left earlier, we would have caught the flight.\nB. If we left earlier, we would have caught the flight.\nC. If we had left earlier, we would catch the flight.\nD. If we would have left earlier, we caught the flight.", "a": "A. ||If + had + V3, would have + V3."},
+      {"q": "If she had applied, she ___ the position.\nA. might have got    B. might get    C. got    D. had got", "a": "A (might have got). ||might have + V3."},
+      {"q": "Tìm và sửa lỗi:\n\"If had we known, we would have prepared more.\"", "a": "Lỗi: dùng cả 'If' và đảo ngữ. ||Sửa: \"Had we known...\" hoặc \"If we had known...\""},
+      {"q": "(Hỗn hợp) If we had saved more, we ___ secure now.\nA. would be    B. would have been    C. were    D. had been", "a": "A (would be). ||Hỗn hợp: quá khứ ảnh hưởng hiện tại → would be (now)."},
+      {"q": "If the alarm had worked, the fire ___ sooner.\nA. would be detected    B. would have been detected    C. was detected    D. had detected", "a": "B (would have been detected). ||Loại 3 bị động → would have been + V3."},
+      {"q": "Had the company acted sooner, it ___ the crisis.\nA. would avoid    B. would have avoided    C. avoided    D. had avoided", "a": "B (would have avoided). ||Đảo ngữ loại 3 → would have + V3."},
+      {"q": "If they had prepared, they ___ the audit easily.\nA. would pass    B. would have passed    C. passed    D. had passed", "a": "B (would have passed). ||Loại 3 → would have + V3."},
+      {"q": "Điền vào nhận định (Part 6):\n\"If management ___ the feedback, the product would have been much better.\"\nA. considers    B. considered    C. had considered    D. would consider", "a": "C (had considered). ||Loại 3: had + V3."}
+    ]
+  },
+  "summary": [
+    "Điều kiện loại 3 (trái với quá khứ): If + had + V3, S + would have + V3.",
+    "Mệnh đề chính có thể dùng could have + V3 / might have + V3.",
+    "Đảo ngữ trang trọng: Had + S + V3, S + would have + V3 (bỏ 'if').",
+    "Phân biệt loại 2 (hiện tại: if + quá khứ, would + V), loại 3 (quá khứ: if + had V3, would have + V3), và hỗn hợp (quá khứ → hiện tại)."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy lớn: mệnh đề if loại 3 dùng 'had + V3', KHÔNG 'would have' ('If we had known', không 'If we would have known'). Sau would/could/might have luôn là V3.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 4 (loại 2 vs loại 3) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

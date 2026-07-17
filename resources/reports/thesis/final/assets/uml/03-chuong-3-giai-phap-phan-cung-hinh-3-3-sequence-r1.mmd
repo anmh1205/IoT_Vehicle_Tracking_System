@@ -1,0 +1,88 @@
+---
+config:
+  theme: base
+  sequence:
+    mirrorActors: false
+    actorMargin: 145
+    messageMargin: 64
+    noteMargin: 24
+    diagramMarginX: 36
+    diagramMarginY: 24
+    boxMargin: 12
+    boxTextMargin: 8
+    actorFontSize: 18
+    messageFontSize: 18
+  themeVariables:
+    primaryColor: "#ffffff"
+    primaryBorderColor: "#000000"
+    primaryTextColor: "#000000"
+    secondaryColor: "#ffffff"
+    tertiaryColor: "#ffffff"
+    lineColor: "#000000"
+  themeCSS: |
+    .actor,
+    .actor-top,
+    .actor-bottom,
+    .labelBox,
+    .note {
+      fill: #ffffff !important;
+      stroke: #000000 !important;
+    }
+    .actor-line,
+    .messageLine0,
+    .messageLine1,
+    .loopLine,
+    .innerArc {
+      stroke: #000000 !important;
+      stroke-width: 2.4px !important;
+    }
+    [id$="-arrowhead"] path,
+    .marker,
+    .marker.cross {
+      fill: #000000 !important;
+      stroke: #000000 !important;
+    }
+    .messageText,
+    .messageText tspan,
+    .loopText,
+    .loopText tspan,
+    .labelText,
+    .labelText tspan {
+      paint-order: stroke;
+      stroke: #ffffff;
+      stroke-width: 12px;
+      stroke-linejoin: round;
+    }
+    .actor text,
+    .actor tspan,
+    .messageText,
+    .loopText,
+    .labelText {
+      fill: #000000 !important;
+    }
+---
+sequenceDiagram
+    participant Xe as Xe đang đỗ
+    participant Nguon as Khối nguồn
+    participant LIS as LIS3DSH
+    participant ESP32 as ESP32-S3
+    participant Tai as Modem / GNSS / OBD-II
+    participant MayChu as Máy chủ
+
+    Xe->>Nguon: Khóa điện tắt
+    Nguon->>ESP32: Chuyển sang chế độ<br/>tiết kiệm
+    ESP32->>Tai: Cho ngủ sâu hoặc<br/>tạm ngắt nguồn
+    Nguon->>LIS: Duy trì nhánh cấp<br/>nguồn nhỏ
+
+    loop Trong thời gian xe đỗ
+        LIS->>LIS: Theo dõi rung hoặc<br/>dịch chuyển
+    end
+
+    alt Không vượt ngưỡng
+        LIS-->>Nguon: Tiếp tục giám sát<br/>tiêu thụ thấp
+    else Vượt ngưỡng
+        LIS-->>ESP32: Phát tín hiệu đánh thức
+        ESP32->>Tai: Bật lại các khối<br/>cần dùng
+        Tai-->>ESP32: Trả dữ liệu xe, vị trí<br/>và trạng thái
+        ESP32->>MayChu: Gửi bản tin giám sát<br/>hoặc cảnh báo
+    end

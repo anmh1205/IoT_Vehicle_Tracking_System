@@ -1,0 +1,17 @@
+flowchart TB
+    Root["Trang bản đồ"]
+    Sidebar["Thanh bên điều khiển"]
+
+    subgraph RealtimeMap["Khu bản đồ thời gian thực"]
+        direction TB
+        MapCore["Lõi bản đồ Leaflet"]
+        Overlays["Marker xe<br/>Tuyến đường<br/>Vùng giám sát"]
+    end
+
+    DataSync["Socket.IO + TanStack Query"]
+
+    Root --> Sidebar
+    Root --> RealtimeMap
+    DataSync --> MapCore
+    DataSync --> Overlays
+    MapCore --> Overlays

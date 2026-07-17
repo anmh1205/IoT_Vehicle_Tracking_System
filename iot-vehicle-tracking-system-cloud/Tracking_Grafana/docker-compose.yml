@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: tracking-grafana
+    user: "0"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?GRAFANA_PASSWORD is required}
+      GF_INSTALL_PLUGINS: grafana-clock-panel
+      GF_SERVER_HTTP_PORT: "4002"
+    volumes:
+      - ../Tracking_Data/Tracking_Grafana:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning
+    ports:
+      - "0.0.0.0:4002:4002"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4002/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - tracking-network
+
+networks:
+  tracking-network:
+    external: true

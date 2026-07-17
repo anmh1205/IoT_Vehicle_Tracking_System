@@ -1,0 +1,10 @@
+idf_component_register(
+    SRCS
+        "src/tracker-runtime-ports.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        contracts-device-cloud
+        log
+        shared-kernel
+)

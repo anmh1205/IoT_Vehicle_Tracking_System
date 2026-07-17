@@ -1,5 +1,12 @@
 flowchart LR
-    TX["GPIO16 TX"] --> RXM["SIM RX"]
-    RX["GPIO17 RX"] --> TXM["SIM TX"]
-    PWRKEY["GPIO26 PWRKEY"] --> SIMPWR["SIM PWRKEY"]
-    V4["Rail 4V"] --> VBAT["SIM VBAT"]
+    MCU["ESP32-S3"]
+    UART["UART1<br/>TX GPIO17 / RX GPIO18"]
+    Ctrl["GPIO34<br/>PWR-KEY"]
+    Reset["GPIO35<br/>RESET"]
+    Power["Rail ~4V modem"]
+    Modem["SIM7600CE-T<br/>LTE + GNSS"]
+
+    MCU --> UART --> Modem
+    MCU --> Ctrl --> Modem
+    MCU --> Reset --> Modem
+    Power --> Modem

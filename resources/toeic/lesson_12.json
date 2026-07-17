@@ -1,0 +1,152 @@
+{
+  "page_id": "357df50b-1fcd-81a0-8ba6-d4a53e86b254",
+  "title": "12. Động từ nguyên mẫu có to",
+  "intro": [
+    {"text": "Bài 12 — Động từ nguyên mẫu có to (To-infinitive). Học theo thứ tự: đọc kỹ 📚 Kiến thức đầy đủ → làm câu hỏi từng phần → mở đáp án. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5/6 — chọn 'to + V' sau động từ/tính từ/danh từ nhất định, chỉ mục đích; phân biệt với V-ing (Bài 13–14) và nguyên thể không 'to' sau modal/make/let.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & chức năng"},
+    {"type": "p", "text": "Động từ nguyên mẫu có 'to' (to-infinitive = to + V nguyên thể) có thể làm chủ ngữ, tân ngữ, bổ ngữ, chỉ mục đích, hoặc đi sau nhiều động từ, tính từ và danh từ. Đây là cấu trúc cốt lõi, thường đối lập với danh động từ (V-ing) ở Bài 13–14."},
+
+    {"type": "h3", "text": "2. Chỉ mục đích (= in order to / so as to)"},
+    {"type": "p", "text": "to + V diễn tả mục đích 'để…', tương đương 'in order to' / 'so as to'. Có thể đứng đầu câu kèm dấu phẩy: To cut costs, we changed suppliers. KHÔNG dùng 'for + V nguyên thể' để chỉ mục đích (sai 'for cut costs'); 'for' chỉ đi với danh từ/V-ing."},
+
+    {"type": "h3", "text": "3. Động từ + to V"},
+    {"type": "p", "text": "want, need, decide, plan, hope, expect, agree, refuse, offer, promise, manage, fail, afford, learn, prepare, intend, tend, arrange, aim, choose, would like + to V. Ví dụ: The board decided to expand. We hope to hear from you."},
+
+    {"type": "h3", "text": "4. Động từ + tân ngữ + to V"},
+    {"type": "p", "text": "want / ask / tell / advise / allow / encourage / expect / invite / remind / warn / enable / require / permit / force / cause + somebody + to V. Ví dụ: The manager asked the team to work overtime. The policy requires employees to wear badges."},
+
+    {"type": "h3", "text": "5. Tính từ + to V"},
+    {"type": "p", "text": "Nhiều tính từ đi với to V: easy, difficult, hard, happy, glad, pleased, ready, able, willing, eager, likely, reluctant, proud + to V. Cấu trúc phổ biến: It is + adj + to V (It is important to confirm early). The software is easy to use."},
+
+    {"type": "h3", "text": "6. Danh từ + to V"},
+    {"type": "p", "text": "decision, plan, ability, chance, opportunity, way, time, effort, right, permission, need, attempt, failure + to V. Ví dụ: They made a decision to invest. She has the ability to solve problems."},
+
+    {"type": "h3", "text": "7. too … to / enough … to"},
+    {"type": "table", "headers": ["Cấu trúc", "Nghĩa", "Ví dụ"], "rows": [
+      ["too + adj/adv + to V", "quá… đến mức KHÔNG thể", "too heavy to lift (quá nặng không nhấc nổi)"],
+      ["adj/adv + enough + to V", "đủ… để", "experienced enough to lead"],
+      ["enough + danh từ + to V", "đủ (lượng)… để", "enough staff to finish on time"]
+    ]},
+
+    {"type": "h3", "text": "8. Nguyên thể KHÔNG 'to' (bare infinitive)"},
+    {"type": "ul", "items": [
+      "Sau động từ khuyết thiếu (modal): will, can, could, may, must, should, would + V (không 'to'): must follow.",
+      "make / let / have + somebody + V (bare): The manager made the team work late. The CEO let the intern leave early.",
+      "help + (to) V: cả 'help to do' và 'help do' đều đúng.",
+      "would rather / had better + V (bare): You had better confirm now."
+    ]},
+
+    {"type": "h3", "text": "9. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Chỉ mục đích dùng 'to V' / 'in order to', KHÔNG 'for + V'. (2) Nhiều động từ buộc 'to V' (decide/agree/refuse/manage to do) — đừng dùng V-ing. (3) require/ask/advise/allow + sb + to V. (4) Sau modal và make/let dùng nguyên thể KHÔNG 'to' (must follow, let him go). (5) too + adj + to V (quá… không thể) ≠ adj + enough + to V (đủ… để)."}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Động từ + to V",
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The board decided ___ the budget for next year.\nA. increase    B. to increase    C. increasing    D. increased", "a": "Đáp án: B (to increase). ||decide + to V."},
+        {"q": "We hope ___ from you soon.\nA. hearing    B. to hear    C. hear    D. heard", "a": "Đáp án: B (to hear). ||hope + to V."},
+        {"q": "The supplier agreed ___ the delivery date.\nA. to move    B. moving    C. move    D. moved", "a": "Đáp án: A (to move). ||agree + to V."},
+        {"q": "Management plans ___ a new branch in Da Nang.\nA. opening    B. to open    C. open    D. opens", "a": "Đáp án: B (to open). ||plan + to V."},
+        {"q": "Tìm và sửa lỗi:\n\"She refused signing the revised contract.\"", "a": "Lỗi: \"refused signing\" → \"refused to sign\". ||refuse + to V."},
+        {"q": "The new hire managed ___ the project on time.\nA. complete    B. to complete    C. completing    D. completed", "a": "Đáp án: B (to complete). ||manage to V = xoay xở làm được."},
+        {"q": "Chọn câu ĐÚNG:\nA. We expect receiving the goods Friday.\nB. We expect to receive the goods on Friday.\nC. We expect receive the goods on Friday.\nD. We expecting to receive the goods on Friday.", "a": "Đáp án: B. ||expect + to V."},
+        {"q": "Điền vào email (Part 6):\n\"Our team aims ___ customer satisfaction this quarter.\"\nA. improving    B. to improve    C. improve    D. improved", "a": "Đáp án: B (to improve). ||aim + to V."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Động từ + tân ngữ + to V",
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "The manager asked the team ___ overtime this week.\nA. work    B. to work    C. working    D. worked", "a": "Đáp án: B (to work). ||ask + somebody + to V."},
+        {"q": "The policy requires all employees ___ ID badges.\nA. wear    B. to wear    C. wearing    D. worn", "a": "Đáp án: B (to wear). ||require + sb + to V."},
+        {"q": "We encourage customers ___ feedback through the app.\nA. to provide    B. providing    C. provide    D. provided", "a": "Đáp án: A (to provide). ||encourage + sb + to V."},
+        {"q": "The supervisor reminded us ___ the report by noon.\nA. submitting    B. to submit    C. submit    D. submitted", "a": "Đáp án: B (to submit). ||remind + sb + to V."},
+        {"q": "Tìm và sửa lỗi:\n\"The trainer advised them practicing daily.\"", "a": "Lỗi: \"advised them practicing\" → \"advised them to practice\". ||advise + sb + to V."},
+        {"q": "HR invited all staff ___ the workshop on Friday.\nA. attend    B. to attend    C. attending    D. attended", "a": "Đáp án: B (to attend). ||invite + sb + to V."},
+        {"q": "Chọn câu ĐÚNG:\nA. The rule allows visitors to park here.\nB. The rule allows visitors park here.\nC. The rule allows visitors parking here.\nD. The rule allows visitors parked here.", "a": "Đáp án: A. ||allow + sb + to V."},
+        {"q": "Điền vào email (Part 6):\n\"The new system enables managers ___ data in real time.\"\nA. to track    B. tracking    C. track    D. tracked", "a": "Đáp án: A (to track). ||enable + sb + to V."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Chỉ mục đích, tính từ & danh từ + to V",
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "He arrived early ___ the venue before the guests.\nA. to check    B. checking    C. for check    D. check", "a": "Đáp án: A (to check). ||to V chỉ mục đích."},
+        {"q": "___ reduce costs, the firm switched suppliers.\nA. To    B. For    C. So    D. Because", "a": "Đáp án: A (To). ||To + V đầu câu = mục đích (= In order to)."},
+        {"q": "This accounting software is easy ___.\nA. to use    B. using    C. use    D. used", "a": "Đáp án: A (to use). ||tính từ (easy) + to V."},
+        {"q": "We are pleased ___ you to our team.\nA. to welcome    B. welcoming    C. welcome    D. welcomed", "a": "Đáp án: A (to welcome). ||pleased + to V."},
+        {"q": "The company made a decision ___ in renewable energy.\nA. to invest    B. investing    C. invest    D. invested", "a": "Đáp án: A (to invest). ||danh từ (decision) + to V."},
+        {"q": "Tìm và sửa lỗi:\n\"She has the ability solve complex problems.\"", "a": "Lỗi: \"ability solve\" → \"ability to solve\". ||danh từ (ability) + to V."},
+        {"q": "Chọn câu ĐÚNG:\nA. He stayed late for finish the report.\nB. He stayed late to finish the report.\nC. He stayed late for finish report.\nD. He stayed late finish the report.", "a": "Đáp án: B. ||mục đích dùng to V, không 'for + V'."},
+        {"q": "Điền vào thông báo (Part 6):\n\"Employees are encouraged to take short breaks ___ stay productive.\"\nA. to    B. for    C. so    D. because", "a": "Đáp án: A (to). ||to V chỉ mục đích (= in order to)."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · too…to / enough…to & nguyên thể không to",
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "The instructions were ___ complicated to follow.\nA. too    B. enough    C. very much    D. as", "a": "Đáp án: A (too). ||too + adj + to V = quá… không thể."},
+        {"q": "She is experienced ___ to lead the team.\nA. enough    B. too    C. very    D. so", "a": "Đáp án: A (enough). ||adj + enough + to V = đủ… để."},
+        {"q": "The report was clear ___ for everyone to understand.\nA. enough    B. too    C. so    D. very", "a": "Đáp án: A (enough). ||adj + enough (+ for sb) + to V."},
+        {"q": "All staff must ___ the safety guidelines.\nA. follow    B. to follow    C. following    D. follows", "a": "Đáp án: A (follow). ||sau modal (must) dùng nguyên thể KHÔNG 'to'."},
+        {"q": "Tìm và sửa lỗi:\n\"The manager let the intern to leave early.\"", "a": "Lỗi: \"let the intern to leave\" → \"let the intern leave\". ||let + sb + V (bare)."},
+        {"q": "The supervisor made the team ___ overtime to meet the deadline.\nA. work    B. to work    C. working    D. worked", "a": "Đáp án: A (work). ||make + sb + V (bare)."},
+        {"q": "Chọn câu ĐÚNG:\nA. The box was too heavy to lift.\nB. The box was too heavy for lift.\nC. The box was enough heavy to lift.\nD. The box was so heavy to lift.", "a": "Đáp án: A. ||too + adj + to V; 'enough' đứng SAU tính từ."},
+        {"q": "Điền vào mô tả (Part 6):\n\"The conference hall is large ___ to host 500 guests.\"\nA. enough    B. too    C. so    D. very", "a": "Đáp án: A (enough). ||adj + enough + to V."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "practice_heading": "",
+      "questions": [
+        {"q": "We plan ___ the office to a larger building next month.\nA. to relocate    B. relocating    C. relocate    D. relocated", "a": "Đáp án: A (to relocate). ||plan + to V."},
+        {"q": "The client asked us ___ the quotation.\nA. to revise    B. revising    C. revise    D. revised", "a": "Đáp án: A (to revise). ||ask + sb + to V."},
+        {"q": "___ avoid delays, please confirm your order early.\nA. To    B. For    C. So    D. Because", "a": "Đáp án: A (To). ||to V chỉ mục đích."},
+        {"q": "The old machine is ___ slow to handle current demand.\nA. too    B. enough    C. very much    D. as", "a": "Đáp án: A (too). ||too + adj + to V."},
+        {"q": "Tìm và sửa lỗi:\n\"They decided postponing the product launch.\"", "a": "Lỗi: \"decided postponing\" → \"decided to postpone\". ||decide + to V."},
+        {"q": "All managers are required ___ the compliance training.\nA. to complete    B. completing    C. complete    D. completed", "a": "Đáp án: A (to complete). ||require + sb + to V (bị động: be required to V)."},
+        {"q": "This printer is reliable ___ to handle high print volume.\nA. enough    B. too    C. so    D. very", "a": "Đáp án: A (enough). ||adj + enough + to V."},
+        {"q": "The supervisor had the technician ___ the device.\nA. inspect    B. to inspect    C. inspecting    D. inspected", "a": "Đáp án: A (inspect). ||have + sb + V (bare)."},
+        {"q": "Chọn câu ĐÚNG:\nA. She wants that you call her.\nB. She wants you to call her.\nC. She wants you call her.\nD. She wants calling you.", "a": "Đáp án: B. ||want + sb + to V."},
+        {"q": "Điền vào email (Part 6):\n\"We are happy ___ that the partnership has been finalized.\"\nA. to announce    B. announcing    C. announce    D. announced", "a": "Đáp án: A (to announce). ||happy + to V."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "The committee agreed ___ the proposal.\nA. to approve    B. approving    C. approve    D. approved", "a": "A (to approve). ||agree + to V."},
+      {"q": "The manager asked the assistant ___ the documents.\nA. to prepare    B. preparing    C. prepare    D. prepared", "a": "A (to prepare). ||ask + sb + to V."},
+      {"q": "___ improve efficiency, the company upgraded its software.\nA. To    B. For    C. So    D. Because", "a": "A (To). ||to V chỉ mục đích."},
+      {"q": "The crate is ___ heavy to carry alone.\nA. too    B. enough    C. very much    D. as", "a": "A (too). ||too + adj + to V."},
+      {"q": "Tìm và sửa lỗi:\n\"He hopes joining the marketing team.\"", "a": "Lỗi: \"hopes joining\" → \"hopes to join\". ||hope + to V."},
+      {"q": "The policy requires staff ___ all visitors at reception.\nA. to register    B. registering    C. register    D. registered", "a": "A (to register). ||require + sb + to V."},
+      {"q": "This user guide is simple ___.\nA. to follow    B. following    C. follow    D. followed", "a": "A (to follow). ||tính từ (simple) + to V."},
+      {"q": "The CEO let the team ___ the final decision.\nA. make    B. to make    C. making    D. made", "a": "A (make). ||let + sb + V (bare)."},
+      {"q": "Chọn câu ĐÚNG:\nA. We expect to finish by Friday.\nB. We expect finish by Friday.\nC. We expecting to finish by Friday.\nD. We expects to finish by Friday.", "a": "A. ||expect + to V."},
+      {"q": "The firm plans ___ overseas next year.\nA. to expand    B. expanding    C. expand    D. expanded", "a": "A (to expand). ||plan + to V."},
+      {"q": "Employees are encouraged ___ ideas at the meeting.\nA. to share    B. sharing    C. share    D. shared", "a": "A (to share). ||encourage + sb + to V (bị động: be encouraged to V)."},
+      {"q": "Tìm và sửa lỗi:\n\"The trainer made us to repeat the task.\"", "a": "Lỗi: \"made us to repeat\" → \"made us repeat\". ||make + sb + V (bare)."},
+      {"q": "She is qualified ___ to manage the entire department.\nA. enough    B. too    C. so    D. very", "a": "A (enough). ||adj + enough + to V."},
+      {"q": "___ ensure quality, each item is inspected twice.\nA. To    B. For    C. So    D. Because", "a": "A (To). ||to V chỉ mục đích."},
+      {"q": "The supplier promised ___ the goods on time.\nA. to deliver    B. delivering    C. deliver    D. delivered", "a": "A (to deliver). ||promise + to V."},
+      {"q": "Điền vào báo cáo (Part 6):\n\"Our goal is ___ response time to under one hour.\"\nA. to reduce    B. reducing    C. reduce    D. reduced", "a": "A (to reduce). ||to V làm bổ ngữ cho 'goal is…'."}
+    ]
+  },
+  "summary": [
+    "to + V làm chủ ngữ/tân ngữ/bổ ngữ, chỉ mục đích, và đi sau nhiều động từ, tính từ, danh từ.",
+    "Mục đích: to V / in order to / so as to (KHÔNG 'for + V').",
+    "Động từ + to V: decide, agree, plan, hope, manage, refuse… ; Động từ + sb + to V: ask, require, advise, encourage, allow, enable…",
+    "too + adj + to V (quá… không thể) ≠ adj + enough + to V (đủ… để).",
+    "Nguyên thể KHÔNG 'to' sau modal (must do) và sau make/let/have + sb + V."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy lớn nhất: phân biệt 'to V' với 'V-ing' (Bài 13–14). Sau giới từ và một số động từ (enjoy, avoid, suggest…) phải dùng V-ing, KHÔNG dùng to V.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và xem lại danh sách động từ + to V sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

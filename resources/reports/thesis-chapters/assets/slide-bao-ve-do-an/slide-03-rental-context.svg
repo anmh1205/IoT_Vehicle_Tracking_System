@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" font-family="Times New Roman, serif">
+  <defs>
+    <marker id="arrowR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a5276"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="640" fill="#ffffff"/>
+
+  <!-- Phần 1: Xu hướng dịch vụ cho thuê xe -->
+  <g transform="translate(40, 40)">
+    <rect width="380" height="540" rx="4" fill="#ffffff" stroke="#1a5276" stroke-width="2"/>
+    <rect width="380" height="60" rx="4" fill="#1a5276"/>
+    <rect y="40" width="380" height="20" fill="#1a5276"/>
+    <text x="190" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">DỊCH VỤ CHO THUÊ XE</text>
+
+    <!-- Car fleet illustration -->
+    <g transform="translate(50, 90)">
+      <!-- Car 1 -->
+      <rect x="0" y="40" width="80" height="28" rx="6" fill="#1a5276"/>
+      <rect x="10" y="22" width="60" height="22" rx="4" fill="#5b9bd5"/>
+      <circle cx="18" cy="72" r="7" fill="#1e293b"/>
+      <circle cx="62" cy="72" r="7" fill="#1e293b"/>
+      <!-- Car 2 -->
+      <rect x="100" y="40" width="80" height="28" rx="6" fill="#1a5276"/>
+      <rect x="110" y="22" width="60" height="22" rx="4" fill="#5b9bd5"/>
+      <circle cx="118" cy="72" r="7" fill="#1e293b"/>
+      <circle cx="162" cy="72" r="7" fill="#1e293b"/>
+      <!-- Car 3 -->
+      <rect x="200" y="40" width="80" height="28" rx="6" fill="#1a5276"/>
+      <rect x="210" y="22" width="60" height="22" rx="4" fill="#5b9bd5"/>
+      <circle cx="218" cy="72" r="7" fill="#1e293b"/>
+      <circle cx="262" cy="72" r="7" fill="#1e293b"/>
+      <!-- Plus sign -->
+      <text x="290" y="55" font-size="36" font-weight="bold" fill="#1a5276">...</text>
+    </g>
+
+    <line x1="40" y1="200" x2="340" y2="200" stroke="#1a5276" stroke-width="1"/>
+
+    <text x="190" y="240" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a5276">
+      Đặc điểm thị trường
+    </text>
+
+    <g font-size="17" fill="#000000">
+      <text x="40" y="285">• Tăng trưởng nhanh tại Việt Nam</text>
+      <text x="40" y="320">• Đội xe quy mô nhỏ và vừa</text>
+      <text x="40" y="355">• Khách thuê đa dạng, lưu động</text>
+      <text x="40" y="390">• Xe rời tay chủ trong thời gian dài</text>
+    </g>
+
+    <line x1="40" y1="430" x2="340" y2="430" stroke="#1a5276" stroke-width="1"/>
+    <text x="190" y="475" text-anchor="middle" font-size="18" fill="#1a5276" font-style="italic">
+      Tài sản giá trị cao,
+    </text>
+    <text x="190" y="500" text-anchor="middle" font-size="18" fill="#1a5276" font-style="italic">
+      khó kiểm soát thủ công
+    </text>
+  </g>
+
+  <!-- Mũi tên ở giữa -->
+  <line x1="430" y1="310" x2="490" y2="310" stroke="#1a5276" stroke-width="3" marker-end="url(#arrowR)"/>
+  <text x="460" y="295" text-anchor="middle" font-size="14" fill="#1a5276" font-style="italic">phát sinh</text>
+
+  <!-- Phần 2: Nhu cầu quản lý -->
+  <g transform="translate(500, 40)">
+    <rect width="350" height="540" rx="4" fill="#ffffff" stroke="#1a5276" stroke-width="2"/>
+    <rect width="350" height="60" rx="4" fill="#1a5276"/>
+    <rect y="40" width="350" height="20" fill="#1a5276"/>
+    <text x="175" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">NHU CẦU QUẢN LÝ</text>
+
+    <text x="175" y="110" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a5276">
+      Người quản lý cần biết:
+    </text>
+
+    <g font-size="18" fill="#000000">
+      <g transform="translate(40, 145)">
+        <circle cx="10" cy="12" r="10" fill="#1a5276"/>
+        <text x="10" y="17" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">1</text>
+        <text x="35" y="17" font-weight="bold">Vị trí xe</text>
+        <text x="35" y="38" font-size="15" fill="#475569">Xe đang ở đâu trên bản đồ?</text>
+      </g>
+
+      <g transform="translate(40, 200)">
+        <circle cx="10" cy="12" r="10" fill="#1a5276"/>
+        <text x="10" y="17" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">2</text>
+        <text x="35" y="17" font-weight="bold">Trạng thái vận hành</text>
+        <text x="35" y="38" font-size="15" fill="#475569">Xe chạy, đỗ, hay tắt máy?</text>
+      </g>
+
+      <g transform="translate(40, 255)">
+        <circle cx="10" cy="12" r="10" fill="#1a5276"/>
+        <text x="10" y="17" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">3</text>
+        <text x="35" y="17" font-weight="bold">Cảnh báo bất thường</text>
+        <text x="35" y="38" font-size="15" fill="#475569">Va chạm, dịch chuyển khi đỗ?</text>
+      </g>
+
+      <g transform="translate(40, 310)">
+        <circle cx="10" cy="12" r="10" fill="#1a5276"/>
+        <text x="10" y="17" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">4</text>
+        <text x="35" y="17" font-weight="bold">Sử dụng tài sản</text>
+        <text x="35" y="38" font-size="15" fill="#475569">Quãng đường, thời gian thuê?</text>
+      </g>
+
+      <g transform="translate(40, 365)">
+        <circle cx="10" cy="12" r="10" fill="#1a5276"/>
+        <text x="10" y="17" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">5</text>
+        <text x="35" y="17" font-weight="bold">Đối chiếu sau chuyến đi</text>
+        <text x="35" y="38" font-size="15" fill="#475569">Có sự cố nào cần xử lý?</text>
+      </g>
+    </g>
+
+    <line x1="30" y1="430" x2="320" y2="430" stroke="#1a5276" stroke-width="1"/>
+    <text x="175" y="475" text-anchor="middle" font-size="18" fill="#1a5276" font-style="italic">
+      Cần hệ thống giám sát IoT
+    </text>
+    <text x="175" y="500" text-anchor="middle" font-size="18" fill="#1a5276" font-style="italic">
+      thay cho quản lý thủ công
+    </text>
+  </g>
+
+  <!-- Mũi tên 2 -->
+  <line x1="860" y1="310" x2="920" y2="310" stroke="#1a5276" stroke-width="3" marker-end="url(#arrowR)"/>
+
+  <!-- Phần 3: Đề tài -->
+  <g transform="translate(930, 40)">
+    <rect width="310" height="540" rx="4" fill="#f0f6fb" stroke="#1a5276" stroke-width="3"/>
+    <rect width="310" height="60" rx="4" fill="#1a5276"/>
+    <rect y="40" width="310" height="20" fill="#1a5276"/>
+    <text x="155" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">ĐỀ TÀI</text>
+
+    <text x="155" y="110" text-anchor="middle" font-size="18" font-weight="bold" fill="#1a5276">Hệ thống IoT giám sát</text>
+    <text x="155" y="135" text-anchor="middle" font-size="18" font-weight="bold" fill="#1a5276">phương tiện cho thuê</text>
+
+    <line x1="30" y1="170" x2="280" y2="170" stroke="#1a5276" stroke-width="1"/>
+
+    <text x="40" y="210" font-size="17" font-weight="bold" fill="#1a5276">Phạm vi:</text>
+    <g font-size="16" fill="#000000">
+      <text x="55" y="240">– Đội xe nhỏ và vừa</text>
+      <text x="55" y="270">– Xe ô tô con thông dụng</text>
+      <text x="55" y="300">– Tự chủ phần cứng + phần mềm</text>
+    </g>
+
+    <text x="40" y="345" font-size="17" font-weight="bold" fill="#1a5276">Mục tiêu:</text>
+    <g font-size="16" fill="#000000">
+      <text x="55" y="375">– Theo dõi liên tục</text>
+      <text x="55" y="405">– Cảnh báo bất thường</text>
+      <text x="55" y="435">– Đối chiếu sử dụng</text>
+    </g>
+
+    <line x1="30" y1="470" x2="280" y2="470" stroke="#1a5276" stroke-width="1"/>
+    <text x="155" y="510" text-anchor="middle" font-size="16" fill="#1a5276" font-style="italic" font-weight="bold">
+      Chi phí phù hợp đội xe nhỏ
+    </text>
+  </g>
+</svg>

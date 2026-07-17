@@ -1,0 +1,2288 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[a4paper]{extarticle}
+\usepackage{fix-cm}
+\usepackage[fontsize=13pt]{scrextend}
+\usepackage{xcolor}
+\usepackage[margin=2.5cm,top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm,headheight=1.25cm,headsep=0.5cm,footskip=1.25cm]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T5,T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+  \IfFileExists{newtxtext.sty}{\usepackage{newtxtext,newtxmath}}{\usepackage{lmodern}}
+\else % if luatex or xetex
+  \usepackage{fontspec}
+  \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{TeX Gyre Termes}}
+  \setmonofont{Consolas}[Scale=MatchLowercase]
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},formatcom=\rmfamily}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\small}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{\textbf{#1}}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{caption}
+\newcounter{none} % for unnumbered tables
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash\hyphenpenalty=10000\exhyphenpenalty=10000}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\providecommand{\tabularnewline}{\\}
+\newlength{\thesisdefaulttabcolsep}
+\setlength{\thesisdefaulttabcolsep}{2pt}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\makebox[\linewidth][c]{\scalebox{\@tempa}{\usebox\pandoc@box}}%
+  \else\makebox[\linewidth][c]{\usebox\pandoc@box}%
+  \fi%
+}
+% Keep implicit figure floats fixed at their source position.
+\def\fps@figure{H}
+\makeatother
+\usepackage{xstring}
+\newcommand{\safeincludesvg}[1]{%
+  \StrSubstitute{#1}{.svg}{.png}[\safeincludepngpath]%
+  \StrSubstitute{#1}{./assets/figures/}{./svg-inkscape/}[\safeincludepdfbasepath]%
+  \StrSubstitute{\safeincludepdfbasepath}{.svg}{_svg-raw.pdf}[\safeincludepdfpath]%
+  \IfFileExists{\safeincludepngpath}{%
+    \includegraphics[width=0.96\linewidth,height=0.78\textheight,keepaspectratio]{\safeincludepngpath}%
+  }{%
+    \IfFileExists{\safeincludepdfpath}{%
+      \includegraphics[width=0.96\linewidth,height=0.78\textheight,keepaspectratio]{\safeincludepdfpath}%
+    }{%
+      \fbox{\parbox{0.9\linewidth}{\centering Missing figure assets for:\\ \texttt{\detokenize{#1}}}}%
+    }%
+  }%
+}
+\newcommand{\safeincludesvgsmall}[1]{%
+  \StrSubstitute{#1}{.svg}{.png}[\safeincludepngpath]%
+  \StrSubstitute{#1}{./assets/figures/}{./svg-inkscape/}[\safeincludepdfbasepath]%
+  \StrSubstitute{\safeincludepdfbasepath}{.svg}{_svg-raw.pdf}[\safeincludepdfpath]%
+  \IfFileExists{\safeincludepngpath}{%
+    \includegraphics[width=0.76\linewidth,height=0.56\textheight,keepaspectratio]{\safeincludepngpath}%
+  }{%
+    \IfFileExists{\safeincludepdfpath}{%
+      \includegraphics[width=0.76\linewidth,height=0.56\textheight,keepaspectratio]{\safeincludepdfpath}%
+    }{%
+      \fbox{\parbox{0.9\linewidth}{\centering Missing figure assets for:\\ \texttt{\detokenize{#1}}}}%
+    }%
+  }%
+}
+\newcommand{\safeincludesvgcompact}[1]{%
+  \StrSubstitute{#1}{.svg}{.png}[\safeincludepngpath]%
+  \StrSubstitute{#1}{./assets/figures/}{./svg-inkscape/}[\safeincludepdfbasepath]%
+  \StrSubstitute{\safeincludepdfbasepath}{.svg}{_svg-raw.pdf}[\safeincludepdfpath]%
+  \IfFileExists{\safeincludepngpath}{%
+    \includegraphics[width=0.68\linewidth,height=0.46\textheight,keepaspectratio]{\safeincludepngpath}%
+  }{%
+    \IfFileExists{\safeincludepdfpath}{%
+      \includegraphics[width=0.68\linewidth,height=0.46\textheight,keepaspectratio]{\safeincludepdfpath}%
+    }{%
+      \fbox{\parbox{0.9\linewidth}{\centering Missing figure assets for:\\ \texttt{\detokenize{#1}}}}%
+    }%
+  }%
+}
+\newcommand{\safeincludesvgnarrow}[1]{%
+  \StrSubstitute{#1}{.svg}{.png}[\safeincludepngpath]%
+  \StrSubstitute{#1}{./assets/figures/}{./svg-inkscape/}[\safeincludepdfbasepath]%
+  \StrSubstitute{\safeincludepdfbasepath}{.svg}{_svg-raw.pdf}[\safeincludepdfpath]%
+  \IfFileExists{\safeincludepngpath}{%
+    \includegraphics[width=0.56\linewidth,height=0.34\textheight,keepaspectratio]{\safeincludepngpath}%
+  }{%
+    \IfFileExists{\safeincludepdfpath}{%
+      \includegraphics[width=0.56\linewidth,height=0.34\textheight,keepaspectratio]{\safeincludepdfpath}%
+    }{%
+      \fbox{\parbox{0.9\linewidth}{\centering Missing figure assets for:\\ \texttt{\detokenize{#1}}}}%
+    }%
+  }%
+}
+\newcommand{\safeincludesvgchart}[1]{%
+  \StrSubstitute{#1}{.svg}{.png}[\safeincludepngpath]%
+  \StrSubstitute{#1}{./assets/figures/}{./svg-inkscape/}[\safeincludepdfbasepath]%
+  \StrSubstitute{\safeincludepdfbasepath}{.svg}{_svg-raw.pdf}[\safeincludepdfpath]%
+  \IfFileExists{\safeincludepngpath}{%
+    \includegraphics[width=0.72\linewidth,height=0.28\textheight,keepaspectratio]{\safeincludepngpath}%
+  }{%
+    \IfFileExists{\safeincludepdfpath}{%
+      \includegraphics[width=0.72\linewidth,height=0.28\textheight,keepaspectratio]{\safeincludepdfpath}%
+    }{%
+      \fbox{\parbox{0.9\linewidth}{\centering Missing figure assets for:\\ \texttt{\detokenize{#1}}}}%
+    }%
+  }%
+}
+\setlength{\emergencystretch}{10em} % reduce overfull lines
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\setlength{\tabcolsep}{\thesisdefaulttabcolsep}
+\setlength{\arrayrulewidth}{0.5pt}
+\captionsetup[figure]{justification=centering,singlelinecheck=false}
+\captionsetup[table]{justification=centering,singlelinecheck=false,labelfont=it,textfont=it}
+\captionsetup[longtable]{justification=centering,singlelinecheck=false,labelfont=it,textfont=it}
+\setlength{\LTcapwidth}{\linewidth}
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+% Pandoc-generated longtables in this thesis render correctly but emit repeated
+% box warnings during the output routine; raise fuzz thresholds to silence this
+% known-noise without changing the visible layout.
+\setlength{\hfuzz}{460pt}
+\setlength{\vfuzz}{360pt}
+\hbadness=10000
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\usepackage{setspace}
+\setstretch{1.15}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\setcounter{tocdepth}{3}
+\renewcommand{\arraystretch}{1.15}
+\newcommand{\thesisterm}[1]{{\rmfamily #1}}
+\usepackage{titlesec}
+\titleformat{\section}{\bfseries\Large\centering}{}{0pt}{}
+\titlespacing*{\section}{0pt}{12pt}{6pt}
+\titleformat{\subsection}{\bfseries\normalsize}{}{0pt}{}
+\titlespacing*{\subsection}{0pt}{12pt}{0pt}
+\titleformat{\paragraph}[block]{\bfseries\normalsize}{}{0pt}{}
+\titlespacing*{\paragraph}{0pt}{10pt}{0pt}
+\titleformat{\subparagraph}[block]{\bfseries\normalsize}{}{0pt}{}
+\titlespacing*{\subparagraph}{0pt}{8pt}{0pt}
+\newcommand{\thesisfrontmatterentry}[1]{%
+  \phantomsection
+  \addcontentsline{toc}{section}{#1}%
+}
+\newcommand{\majorheading}[1]{%
+  \clearpage
+  \phantomsection
+  \section*{#1}%
+  \addcontentsline{toc}{section}{#1}%
+}
+\newcommand{\chapterheading}[1]{%
+  \clearpage
+  \phantomsection
+  \section*{#1}%
+  \addcontentsline{toc}{section}{#1}%
+  \setcounter{subsection}{0}%
+}
+\newcommand{\appendixsection}[1]{\clearpage\section{#1}}
+\newcommand{\frontmatterstart}{\clearpage\hypersetup{pageanchor=true}\pagenumbering{roman}\setcounter{page}{1}}
+\newcommand{\mainmatterstart}{\clearpage\pagenumbering{arabic}\setcounter{page}{1}}
+\newcommand{\checkbox}{\(\square\)}
+\newcommand{\thesisspacer}{\hspace{2em}}
+\newcommand{\figref}[1]{Hình~\ref{#1}}
+\newcommand{\tabref}[1]{Bảng~\ref{#1}}
+\definecolor{thesisphenikaablue}{RGB}{42, 63, 130}
+\newcommand{\thesislogopath}{./assets/brand/phenikaa-university-logo.jpeg}
+\newcommand{\thesisfrontseparator}{\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}}
+\newcommand{\thesisdrawtemplateframe}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \draw[line width=1.4pt] ($(current page.north west)+(1.00cm,-1.00cm)$) rectangle ($(current page.south east)+(-1.00cm,1.00cm)$);
+    \draw[line width=0.5pt] ($(current page.north west)+(1.14cm,-1.14cm)$) rectangle ($(current page.south east)+(-1.14cm,1.14cm)$);
+  \end{tikzpicture}%
+}
+\newcommand{\thesisdrawsidebarframe}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \draw[line width=0.5pt] ($(current page.north west)+(1.35cm,-1.35cm)$) rectangle ($(current page.south east)+(-1.35cm,1.35cm)$);
+    \draw[line width=0.5pt] ($(current page.north west)+(3.65cm,-1.35cm)$) -- ($(current page.south west)+(3.65cm,1.35cm)$);
+  \end{tikzpicture}%
+}
+\newcommand{\thesiscoverstart}{%
+  \clearpage
+  \newgeometry{top=1.5cm,bottom=1.5cm,left=1.6cm,right=1.6cm}
+  \thispagestyle{empty}
+}
+\newcommand{\thesiscoverend}{%
+  \clearpage
+  \restoregeometry
+}
+\newcommand{\thesisofficialheader}{%
+  \noindent
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \textbf{BỘ GIÁO DỤC VÀ ĐÀO TẠO}\\
+    \textbf{ĐẠI HỌC PHENIKAA}\\
+    \rule{0.72\linewidth}{0.6pt}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \textbf{CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM}\\
+    \textbf{Độc lập - Tự do - Hạnh phúc}\\
+    \rule{0.72\linewidth}{0.6pt}
+  \end{minipage}
+  \par\vspace{0.6cm}
+}
+\newcommand{\thesissignaturepair}[4]{%
+  \vspace{0.8cm}
+  \noindent
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \textbf{#1}\\
+    \emph{(Ký, ghi rõ họ tên)}\\[2.8cm]
+    #2
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \textbf{#3}\\
+    \emph{(Ký, ghi rõ họ tên)}\\[2.8cm]
+    #4
+  \end{minipage}
+}
+\renewcommand{\figurename}{Hình}
+\renewcommand{\tablename}{Bảng}
+\renewcommand{\listtablename}{DANH MỤC BẢNG - LIST OF TABLES}
+\renewcommand{\listfigurename}{DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ - LIST OF PICTURES AND GRAPHS}
+\makeatletter
+\newcommand{\thesissetfigureid}[2]{%
+  \renewcommand{\thefigure}{#1}%
+  \renewcommand{\theHfigure}{#2}%
+}
+\newcommand{\thesissettableid}[2]{%
+  \renewcommand{\thetable}{#1}%
+  \renewcommand{\theHtable}{#2}%
+}
+\newcommand{\thesistableofcontentsbody}{\@starttoc{toc}}
+\newcommand{\thesislistoftablesbody}{\@starttoc{lot}}
+\newcommand{\thesislistoffiguresbody}{\@starttoc{lof}}
+\renewcommand*\l@table{\@dottedtocline{1}{0em}{5.8em}}
+\renewcommand*\l@figure{\@dottedtocline{1}{0em}{5.8em}}
+\makeatother
+\newcounter{ieeeref}
+\newcommand{\ieeebibitem}[2]{%
+  \refstepcounter{ieeeref}\noindent[\theieeeref]\label{#1} #2\par
+}
+\newcommand{\ieeecite}[1]{[\ref{#1}]}
+\providecommand{\textcite}[1]{\ieeecite{#1}}
+\providecommand{\parencite}[1]{\ieeecite{#1}}
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\hyphenation{Mos-quit-to Post-gre-SQL Vic-to-ria-Met-rics Vic-to-ria-Logs Au-then-ti-ca-tion Ku-ber-ne-tes Os-cil-lo-scope Dash-board Web-Socket}
+\urlstyle{same}
+\hypersetup{
+  hidelinks,
+  linktoc=all,
+  bookmarksnumbered=true,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+\hypersetup{pageanchor=false}
+\pagenumbering{gobble}
+
+\thesiscoverstart
+\thesisdrawsidebarframe
+\noindent
+\begin{minipage}[t][0.965\textheight][t]{0.16\textwidth}
+  \centering
+  \vspace*{1.0cm}
+  \rotatebox{90}{\textbf{\Large LÊ TRỌNG AN}}\\[1.5cm]
+  \rotatebox{90}{\textbf{\large KỸ THUẬT CƠ ĐIỆN TỬ}}
+\end{minipage}\hfill
+\begin{minipage}[t][0.965\textheight][t]{0.77\textwidth}
+  \centering
+  \textbf{\Large BỘ GIÁO DỤC VÀ ĐÀO TẠO}\\[0.2cm]
+  \textbf{\Large ĐẠI HỌC PHENIKAA}\\[-0.05cm]
+  \rule{0.34\linewidth}{0.6pt}
+
+  \vspace{1.7cm}
+  \includegraphics[width=0.36\linewidth]{\thesislogopath}
+
+  \vspace{1.5cm}
+  {\fontsize{28}{30}\selectfont\textbf{ĐỒ ÁN TỐT NGHIỆP}}\\[1.0cm]
+  {\fontsize{17}{21}\selectfont\textbf{THIẾT KẾ HỆ THỐNG IOT CHO ỨNG DỤNG QUẢN LÝ PHƯƠNG TIỆN}}\\
+  {\fontsize{17}{21}\selectfont\textbf{GIAO THÔNG TRONG LĨNH VỰC CHO THUÊ XE TỰ LÁI}}\par
+
+  \vfill
+  \begin{minipage}{0.90\linewidth}
+    \raggedright
+    \textbf{Sinh viên:} Lê Trọng An\\[0.15cm]
+    \textbf{Mã số sinh viên:} 21010389 \hfill \textbf{Khóa:} K15\\[0.15cm]
+    \textbf{Ngành:} Kỹ thuật Cơ Điện tử \hfill \textbf{Hệ:} Đại học chính quy\\[0.15cm]
+    \textbf{Giảng viên hướng dẫn:} TS. Nguyễn Đức Nam
+  \end{minipage}
+
+  \vspace*{\fill}
+  \raisebox{-0.70cm}[0pt][0pt]{\textbf{\Large Hà Nội - 2026}}\par
+\end{minipage}
+\thesiscoverend
+
+\thesiscoverstart
+\thesisdrawtemplateframe
+\begin{center}
+  \textbf{\Large BỘ GIÁO DỤC VÀ ĐÀO TẠO}\\[0.15cm]
+  \textbf{\Large ĐẠI HỌC PHENIKAA}\\[-0.05cm]
+  \rule{0.28\linewidth}{0.6pt}
+
+  \vspace{1.6cm}
+  \includegraphics[width=0.30\linewidth]{\thesislogopath}
+
+  \vspace{1.4cm}
+  {\fontsize{27}{30}\selectfont\textbf{ĐỒ ÁN TỐT NGHIỆP}}\\[0.9cm]
+  {\fontsize{18}{22}\selectfont\textbf{THIẾT KẾ HỆ THỐNG IOT CHO ỨNG DỤNG QUẢN LÝ}}\\
+  {\fontsize{18}{22}\selectfont\textbf{PHƯƠNG TIỆN GIAO THÔNG TRONG LĨNH VỰC}}\\
+  {\fontsize{18}{22}\selectfont\textbf{CHO THUÊ XE TỰ LÁI}}
+
+  \vfill
+  \begin{minipage}{0.78\linewidth}
+    \raggedright
+    \textbf{Sinh viên:} Lê Trọng An\\[0.18cm]
+    \textbf{Mã số sinh viên:} 21010389 \hfill \textbf{Khóa:} K15\\[0.18cm]
+    \textbf{Ngành:} Kỹ thuật Cơ Điện tử \hfill \textbf{Hệ:} Đại học chính quy\\[0.18cm]
+    \textbf{Giảng viên hướng dẫn:} TS. Nguyễn Đức Nam
+  \end{minipage}
+
+  \vspace{1.3cm}
+  \textbf{\Large Hà Nội – 2026}
+\end{center}
+\thesiscoverend
+
+\thesiscoverstart
+\thesisdrawtemplateframe
+\begin{center}
+  {\color{thesisphenikaablue}\textbf{\Large PHENIKAA UNIVERSITY}}\\[0.18cm]
+  {\color{thesisphenikaablue}\textbf{\Large FACULTY OF MECHANICAL ENGINEERING AND MECHATRONICS}}\\[0.25cm]
+  \includegraphics[width=0.28\linewidth]{\thesislogopath}
+
+  \vspace{1.0cm}
+  {\fontsize{22}{26}\selectfont\textbf{MEM710071 – CAPSTONE DESIGN 2}}\\[0.55cm]
+  {\fontsize{18}{22}\selectfont\textbf{DESIGN OF AN IOT SYSTEM FOR VEHICLE MANAGEMENT}}\\
+  {\fontsize{18}{22}\selectfont\textbf{IN SELF-DRIVE CAR RENTAL SERVICES}}\\[0.35cm]
+  {\fontsize{15}{18}\selectfont\textbf{Semester: I Academic year: 2025--2026}}
+
+  \vfill
+  \begin{minipage}{0.76\linewidth}
+    \raggedright
+    \textbf{Project Team:}
+    \begin{center}
+      \begin{tabular}{|p{0.42\linewidth}|p{0.20\linewidth}|p{0.12\linewidth}|}
+       \hline
+        \centering\textbf{Student name} & \centering\textbf{Student ID} & \centering\textbf{Cohort}\tabularnewline\hline
+        Le Trong An & \centering 21010389 & \centering K15\tabularnewline\hline
+      \end{tabular}
+    \end{center}
+    \vspace{0.2cm}
+    \textbf{Course Instructor:} Dr. Nguyen Duc Nam
+  \end{minipage}
+
+  \vfill
+  \begin{minipage}{0.88\linewidth}
+    \centering
+    This report is submitted to the Faculty of Mechanical Engineering and Mechatronics,\\
+    School of Engineering, Phenikaa University in partial fulfillment of the requirements\\
+    of the Graduation Thesis course MEM710071.
+  \end{minipage}
+
+  \vspace{0.8cm}
+  \textbf{\Large HANOI – 2026}
+\end{center}
+\thesiscoverend
+
+\thesiscoverstart
+\thesisdrawtemplateframe
+\begin{center}
+  {\color{thesisphenikaablue}\textbf{\Large ĐẠI HỌC PHENIKAA}}\\[0.15cm]
+  {\color{thesisphenikaablue}\textbf{\Large KHOA CƠ KHÍ – CƠ ĐIỆN TỬ}}\\[0.25cm]
+  \includegraphics[width=0.27\linewidth]{\thesislogopath}
+
+  \vspace{0.8cm}
+  {\fontsize{21}{25}\selectfont\textbf{MEM710071}}\\[0.15cm]
+  {\fontsize{26}{30}\selectfont\textbf{ĐỒ ÁN TỐT NGHIỆP}}\\[0.45cm]
+  {\fontsize{18}{22}\selectfont\textbf{THIẾT KẾ HỆ THỐNG IOT CHO ỨNG DỤNG QUẢN LÝ}}\\
+  {\fontsize{18}{22}\selectfont\textbf{PHƯƠNG TIỆN GIAO THÔNG TRONG LĨNH VỰC CHO THUÊ XE TỰ LÁI}}\\[0.35cm]
+  {\fontsize{15}{18}\selectfont\textbf{Học kỳ I Năm học 2025--2026}}
+
+  \vfill
+  \begin{center}
+    \begin{tabular}{|p{0.32\linewidth}|p{0.20\linewidth}|p{0.16\linewidth}|}
+     \hline
+      \centering\textbf{Họ và tên sinh viên} & \centering\textbf{Mã số sinh viên} & \centering\textbf{Lớp}\tabularnewline\hline
+      Lê Trọng An & \centering 21010389 & \centering \mbox{K15-KTCĐT2}\tabularnewline\hline
+    \end{tabular}
+  \end{center}
+
+  \vspace{0.45cm}
+  \textbf{Giảng viên hướng dẫn:} TS. Nguyễn Đức Nam
+
+  \vfill
+  \textbf{\Large HÀ NỘI, 2026}
+\end{center}
+\thesiscoverend
+
+\frontmatterstart
+
+\thispagestyle{plain}
+\thesisofficialheader
+\begin{center}
+  \textbf{\Large NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN HƯỚNG DẪN}
+\end{center}
+\thesisfrontmatterentry{NHẬN XÉT CỦA GIẢNG VIÊN HƯỚNG DẪN}
+
+\textbf{Giảng viên hướng dẫn:} TS. Nguyễn Đức Nam \hfill \textbf{Khoa:} Cơ khí -- Cơ Điện tử.\\
+\textbf{Tên đề tài:} Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê xe tự lái.\\
+\textbf{Sinh viên thực hiện:} Lê Trọng An. \hfill \textbf{Lớp:} K15-KTCĐT2.
+
+\begin{center}
+  \textbf{NỘI DUNG NHẬN XÉT}
+\end{center}
+\textbf{I. Nhận xét Đồ án tốt nghiệp:}\\
+- Nhận xét về hình thức: \dotfill\\[0.45cm]
+- Tính cấp thiết của đề tài: \dotfill\\[0.45cm]
+- Mục tiêu của đề tài: \dotfill\\[0.45cm]
+- Nội dung của đề tài: \dotfill\\[0.45cm]
+- Tài liệu tham khảo: \dotfill\\[0.45cm]
+- Phương pháp nghiên cứu: \dotfill\\[0.45cm]
+- Tính sáng tạo và ứng dụng: \dotfill\\[0.45cm]
+\textbf{II. Nhận xét về tinh thần và thái độ làm việc của sinh viên:} \dotfill\\[0.45cm]
+\textbf{III. Kết quả đạt được:} \dotfill\\[0.45cm]
+\textbf{IV. Kết luận:} Đồng ý cho bảo vệ: \checkbox \thesisspacer Không đồng ý cho bảo vệ: \checkbox
+
+\vspace*{\fill}
+\begin{flushright}
+  Hà Nội, ngày \ldots, tháng \ldots năm 20\ldots\\
+  \textbf{GIẢNG VIÊN HƯỚNG DẪN}\\
+  \emph{(Ký, ghi rõ họ tên)}\\[2.15cm]
+  TS. Nguyễn Đức Nam
+\end{flushright}
+\clearpage
+
+\thispagestyle{plain}
+\thesisofficialheader
+\begin{center}
+  \textbf{\Large NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN PHẢN BIỆN}
+\end{center}
+\thesisfrontmatterentry{NHẬN XÉT CỦA GIẢNG VIÊN PHẢN BIỆN}
+
+\textbf{Giảng viên phản biện:} Theo quyết định phân công phản biện của Khoa \\
+\textbf{Tên đề tài:} Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê xe tự lái.\\
+\textbf{Sinh viên thực hiện:} Lê Trọng An \hfill \textbf{Lớp:} K15-KTCĐT2\\
+\textbf{Giảng viên hướng dẫn:} TS. Nguyễn Đức Nam
+
+\begin{center}
+  \textbf{NỘI DUNG NHẬN XÉT}
+\end{center}
+\textbf{I. Nhận xét Đồ án tốt nghiệp:}\\
+- Bố cục, hình thức trình bày: \dotfill\\[0.55cm]
+- Đảm bảo tính cấp thiết, hiện đại, không trùng lặp: \dotfill\\[0.55cm]
+- Nội dung: \dotfill\\[0.55cm]
+- Mức độ thực hiện: \dotfill\\[0.55cm]
+\textbf{II. Kết quả đạt được:} \dotfill\\[0.55cm]
+\textbf{III. Ưu nhược điểm:} \dotfill\\[0.55cm]
+\textbf{IV. Kết luận:} Đồng ý cho bảo vệ: \checkbox \thesisspacer Không đồng ý cho bảo vệ: \checkbox
+
+\begin{flushright}
+  Hà Nội, ngày \ldots, tháng \ldots năm 20\ldots\\
+  \textbf{GIẢNG VIÊN PHẢN BIỆN}\\
+  \emph{(Ký, ghi rõ họ tên)}\\[2.6cm]
+  Theo quyết định phân công phản biện của Khoa
+\end{flushright}
+\clearpage
+
+\thispagestyle{plain}
+\thesisofficialheader
+\begin{center}
+  \textbf{\Large BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP}
+\end{center}
+\thesisfrontmatterentry{BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP}
+
+\textbf{I. Thông tin chung}
+\begin{enumerate}
+  \item Thời gian: từ \ldots giờ \ldots đến \ldots giờ \ldots ngày \ldots/\ldots/20\ldots
+  \item Địa điểm: \dotfill
+  \item Họ và tên sinh viên: Lê Trọng An \hfill Mã số SV: 21010389
+  \item Lớp: K15-KTCĐT2 \hfill Ngành: Kỹ thuật Cơ Điện tử \hfill Khóa: K15
+  \item Tên đề tài: Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê xe tự lái.
+  \item Giảng viên hướng dẫn: TS. Nguyễn Đức Nam
+\end{enumerate}
+
+\textbf{II. Thành phần hội đồng}
+\begin{enumerate}
+  \item \dotfill Chủ tịch
+  \item \dotfill Thư ký
+  \item \dotfill Giảng viên phản biện
+  \item \dotfill Ủy viên 1
+\end{enumerate}
+
+\textbf{III. Tổng hợp câu hỏi của thành viên hội đồng:} \dotfill\\[0.6cm]
+\textbf{IV. Tổng hợp nội dung trả lời của sinh viên:} \dotfill\\[0.6cm]
+\textbf{V. Nội dung đánh giá của Hội đồng}
+\begin{enumerate}
+  \item Ý nghĩa của đồ án: \dotfill
+  \item Về nội dung, kết cấu của đồ án: \dotfill
+  \item Phương pháp nghiên cứu: \dotfill
+  \item Các kết quả nghiên cứu đạt được: \dotfill
+\end{enumerate}
+\textbf{VI. Điểm kết luận:} \dotfill\ (Bằng chữ: \dotfill)
+
+\thesissignaturepair{CHỦ TỊCH HỘI ĐỒNG}{}{THƯ KÝ}{}
+\clearpage
+
+\thispagestyle{plain}
+\begin{center}
+  \textbf{\Large GIẢI TRÌNH CÁC CHỈNH SỬA}\\[0.2cm]
+  \textit{(Nếu có)}
+\end{center}
+\thesisfrontmatterentry{GIẢI TRÌNH CÁC CHỈNH SỬA}
+
+\vspace{0.5cm}
+\begin{center}
+  Chưa phát sinh nội dung cần giải trình.
+\end{center}
+\clearpage
+
+\majorheading{LỜI CAM ĐOAN}
+
+Tên tôi là: \textbf{Lê Trọng An}.
+
+Mã số sinh viên: \textbf{21010389} ~~~~~~ Lớp: \textbf{K15-KTCĐT2}
+Ngành: \textbf{Kỹ thuật Cơ điện tử}.
+
+Tôi cam đoan đồ án tốt nghiệp với đề tài \textbf{``Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê xe tự lái''} là kết quả nghiên cứu do tôi trực tiếp thực hiện, dưới sự hướng dẫn của \textbf{TS. Nguyễn Đức Nam}.
+
+Toàn bộ nội dung, số liệu, hình ảnh và kết quả trình bày trong báo cáo là trung thực, được trích dẫn rõ nguồn khi tham khảo tài liệu bên ngoài, và chưa từng công bố dưới danh nghĩa tác giả khác. Nếu có bất kỳ sai phạm nào về học thuật hoặc bản quyền, tôi xin hoàn toàn chịu trách nhiệm trước nhà trường và pháp luật.
+
+\begin{flushright}
+  Hà Nội, ngày \ldots{} tháng \ldots{} năm 2026\\
+  \textbf{SINH VIÊN THỰC HIỆN}\\
+  Lê Trọng An
+\end{flushright}
+
+\majorheading{TÓM TẮT ĐỒ ÁN TỐT NGHIỆP - ABSTRACT}
+
+Đồ án xây dựng một hệ thống IoT phục vụ quản lý đội xe cho thuê tự lái theo hướng triển khai thực tế, với mục tiêu kết nối liền mạch ba lớp: \textbf{thiết bị gắn trên xe}, \textbf{máy chủ xử lý dữ liệu}, và \textbf{giao diện khai thác cho người vận hành}. Bài toán kỹ thuật trung tâm của hệ thống không chỉ là theo dõi vị trí, mà là đồng thời đáp ứng bốn yêu cầu vận hành: bám xe theo thời gian thực, lấy dữ liệu vận hành cơ bản từ OBD-II, phát hiện sự kiện bất thường đủ sớm để can thiệp, và duy trì mức tiêu thụ điện an toàn khi xe dừng lâu.
+
+Thiết bị trên xe sử dụng nguồn 12-24 VDC, nền tảng ESP32-S3, modem LTE/GNSS và kết nối OBD-II không dây để thu dữ liệu vị trí, tốc độ, trạng thái và một số thông số vận hành cơ bản. Dữ liệu được truyền qua MQTT về máy chủ để chuẩn hóa, lưu trữ, tổng hợp hành trình và phát cảnh báo. Giao diện web hiển thị bản đồ, trạng thái thiết bị, dữ liệu chuyến đi và cảnh báo theo sự kiện nhằm hỗ trợ quyết định vận hành trong thời gian thực.
+
+Kết quả triển khai cho thấy hệ thống đã được chế tạo thành nguyên mẫu hoàn chỉnh (PCB + vỏ in 3D), lắp thử trên xe thật và kiểm chứng bằng đo kiểm trong phòng thí nghiệm lẫn ngoài thực địa. Các chỉ tiêu chính về dòng ngủ sâu, thời gian kết nối OBD-II, độ trễ toàn tuyến dữ liệu và khả năng phục vụ đồng thời nhiều thiết bị đều đạt ngưỡng đề ra. Kết quả này xác nhận phương án của đồ án vừa đúng về mặt thiết kế kỹ thuật, vừa khả thi ở mức triển khai thực tế cho bài toán quản lý đội xe quy mô nhỏ và vừa.
+
+\textbf{Từ khóa:} IoT, quản lý phương tiện, xe cho thuê tự lái, GPS, OBD-II, MQTT
+
+\textbf{Abstract (English)}
+
+This capstone thesis presents an IoT-based fleet tracking system for self-drive rental operations, designed for practical deployment with three tightly integrated layers: an onboard device, a cloud-side processing backend, and an operator-facing dashboard. The core engineering objective is not only location tracking, but also balancing four operational constraints at once: near real-time tracking, basic OBD-II telemetry acquisition, timely event alerting, and low-power behavior during long parking periods.
+
+The onboard unit operates from a 12-24 VDC vehicle source and is built around ESP32-S3, LTE/GNSS connectivity, and wireless OBD-II integration. Telemetry packets are delivered through MQTT to the server, where data is normalized, stored, aggregated into trip history, and converted into operational alerts. The web interface provides map tracking, device status, trip-level insights, and event notifications to support immediate operational decisions.
+
+The final implementation includes a full prototype (custom PCB and 3D-printed enclosure), installed and validated on a real vehicle through both laboratory and field tests. Key performance metrics---deep-sleep current, OBD-II connection latency, end-to-end data delay, and concurrent device handling---meet the target thresholds. These results confirm that the proposed architecture is not only technically sound but also deployable for small- and medium-scale rental fleet management.
+
+\textbf{Keywords:} IoT, vehicle tracking, self-drive rental, GPS, OBD-II, MQTT
+
+\majorheading{LỜI CẢM ƠN - ACKNOWLEDGEMENTS}
+\label{lux1eddi-cux1ea3m-ux1a1n---acknowledgements}
+\majorheading{MỤC LỤC - TABLE OF CONTENTS}
+\label{mux1ee5c-lux1ee5c---table-of-contents}
+
+\thesistableofcontentsbody
+
+\majorheading{DANH MỤC BẢNG - LIST OF TABLES}
+\label{danh-mux1ee5c-bux1ea3ng---list-of-tables}
+
+\thesislistoftablesbody
+
+\majorheading{DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ - LIST OF FIGURES}
+\label{danh-mux1ee5c-hux1ecnh-ux1ea3nh-vuxe0-ux111ux1ed3-thux1ecb---list-of-figures}
+
+\thesislistoffiguresbody
+
+\majorheading{DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATIONS}
+\label{danh-mux1ee5c-tux1eeb-viux1ebft-tux1eaft---list-of-abbreviations}
+
+{\def\LTcaptype{none} % do not increment counter
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{|L{0.180\linewidth}|L{0.740\linewidth}|}
+\hline
+\textbf{Từ viết tắt} & \textbf{Nghĩa} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Từ viết tắt} & \textbf{Nghĩa} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+ADC & Bộ chuyển đổi tương tự sang số \\\hline
+API & Giao diện lập trình ứng dụng \\\hline
+BLE & Bluetooth năng lượng thấp \\\hline
+BOM & Danh sách linh kiện \\\hline
+ECU & Bộ điều khiển điện tử trên xe \\\hline
+ESP & Nền tảng vi điều khiển Espressif \\\hline
+GNSS & Hệ thống vệ tinh dẫn đường \\\hline
+GPS & Hệ thống định vị toàn cầu \\\hline
+HTTPS & Giao thức HTTP bảo mật qua TLS \\\hline
+IMU & Cảm biến quán tính \\\hline
+IoT & Internet vạn vật \\\hline
+LTE & Mạng dữ liệu di động 4G \\\hline
+MCU & Vi điều khiển trung tâm \\\hline
+MQTT & Giao thức truyền bản tin nhẹ \\\hline
+OBD-II & Cổng chẩn đoán trên xe \\\hline
+OTA & Cập nhật phần mềm từ xa \\\hline
+PCB & Bảng mạch in \\\hline
+QoS & Mức đảm bảo truyền bản tin \\\hline
+REST & Kiểu giao tiếp API dựa trên tài nguyên \\\hline
+RTC & Đồng hồ thời gian thực \\\hline
+TCP & Giao thức điều khiển truyền vận \\\hline
+TLS & Lớp bảo mật truyền tải \\\hline
+VPS & Máy chủ ảo \\\hline
+\end{longtable}
+}
+
+\mainmatterstart
+\chapterheading{CHƯƠNG 1. GIỚI THIỆU DỰ ÁN - SUMMARY}\label{chux1b0ux1a1ng-1.-giux1edbi-thiux1ec7u-dux1ef1-uxe1n---summary}
+
+\subsection{1.1. Đặt vấn đề/ Bối cảnh của dự án -- Problem definition and Background}\label{ux111ux1eb7t-vux1ea5n-ux111ux1ec1-bux1ed1i-cux1ea3nh-cux1ee7a-dux1ef1-uxe1n-problem-definition-and-background}
+
+Trong những năm gần đây, dịch vụ cho thuê xe tự lái phát triển nhanh cùng với nhu cầu số hóa vận hành đội xe. Vì vậy, thiết bị định vị GPS đã trở thành lựa chọn phổ biến để giải quyết bài toán giám sát vị trí cơ bản. Tuy nhiên trong thực tế, nhu cầu quản lý không dừng ở việc biết xe đang ở đâu, mà còn cần thêm những thông tin phản ánh trạng thái vận hành của xe và các dấu hiệu sử dụng bất thường. Nếu thiếu nó, hệ thống quản lý chỉ dừng ở mức lưu vết hành trình, chưa hỗ trợ tốt cho bài toán giám sát và khai thác đội xe.
+
+Khoảng trống đó cho thấy bài toán quản lý xe cần một cách tiếp cận thích hợp hơn để liên kết dữ liệu hành trình, dữ liệu vận hành và thông tin cảnh báo trong cùng một hệ thống.
+
+\subsection{1.2. Mục tiêu và phạm vi của dự án}\label{mux1ee5c-tiuxeau-vuxe0-phux1ea1m-vi-cux1ee7a-dux1ef1-uxe1n}
+
+Đồ án hướng tới xây dựng một hệ thống IoT phục vụ quản lý phương tiện trong dịch vụ cho thuê xe tự lái. Trong hệ thống này, thiết bị gắn trên xe, máy chủ xử lý dữ liệu và giao diện quản trị được liên kết thành một chuỗi thống nhất, nhằm hỗ trợ theo dõi vị trí, ghi nhận dữ liệu vận hành cơ bản, nhận biết các bất thường và đối chiếu khai thác sau mỗi chuyến đi.
+
+Để bảo đảm hệ thống phù hợp với bối cảnh triển khai thực tế, phương án thiết kế phải đáp ứng các ràng buộc và chỉ tiêu chính sau:
+
+{\thesissettableid{1.1}{condensed-r2-bang-1-1-muc-tieu-va-rang-buoc-chinh-cua-do-an}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 2\tabcolsep) * \real{0.2840}}|L{(\linewidth - 2\tabcolsep) * \real{0.7160}}|}
+\caption{Mục tiêu và ràng buộc chính của đồ án}\label{tab:condensed-r2-bang-1-1-muc-tieu-va-rang-buoc-chinh-cua-do-an}\\
+\hline
+\textbf{Hạng mục} & \textbf{Chỉ tiêu chính} \\
+\hline
+\endfirsthead
+\caption[]{Mục tiêu và ràng buộc chính của đồ án (tiếp theo)}\\
+\hline
+\textbf{Hạng mục} & \textbf{Chỉ tiêu chính} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Nguồn cấp thiết bị & 12-24 VDC \\\hline
+Bộ điều khiển trung tâm & ESP32-S3 \\\hline
+Giao tiếp với xe & OBD-II \\\hline
+Dữ liệu chính cần thu & Tọa độ GPS, tốc độ, một số dữ liệu vận hành cơ bản \\\hline
+Cảnh báo chính & Vượt tốc độ, đỗ lâu, ra khỏi vùng quản lý \\\hline
+Chức năng tổng hợp & Quãng đường, thời gian sử dụng, ước tính chi phí khai thác \\\hline
+Ràng buộc chi phí & Không vượt 20.000.000 VND cho phương án của đồ án \\\hline
+Môi trường kiểm chứng & Phòng thí nghiệm và xe thử nghiệm \\\hline
+Khả năng chế tạo & PCB chuyên dụng, vỏ in 3D \\\hline
+Chuẩn tham chiếu & IPC-2221, IEC 60664-1 \\\hline
+\end{longtable}
+}
+Trong phạm vi đồ án, hệ thống được giới hạn ở bốn nhóm chức năng chính:
+
+\begin{itemize}
+\tightlist
+\item
+  theo dõi hành trình và trạng thái xe;
+\item
+  thu dữ liệu vận hành cơ bản;
+\item
+  phát hiện các cảnh báo khai thác;
+\item
+  tổng hợp dữ liệu sau chuyến đi để hỗ trợ đối chiếu khai thác.
+\end{itemize}
+
+\subsection{1.3. Các tiêu chí cần đạt được của dự án}\label{cuxe1c-tiuxeau-chuxed-cux1ea7n-ux111ux1ea1t-ux111ux1b0ux1ee3c-cux1ee7a-dux1ef1-uxe1n}
+
+Từ mục tiêu và ràng buộc ở Bảng 1.1, hệ thống đồ án xây dựng cần đặt ra tiêu chí theo năm nhóm như bảng sau:
+
+{\thesissettableid{1.2}{condensed-r2-bang-1-2-cac-tieu-chi-can-dat-cua-do-an}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 2\tabcolsep) * \real{0.1593}}|L{(\linewidth - 2\tabcolsep) * \real{0.8407}}|}
+\caption{Các tiêu chí cần đạt của đồ án}\label{tab:condensed-r2-bang-1-2-cac-tieu-chi-can-dat-cua-do-an}\\
+\hline
+\textbf{Nhóm tiêu chí} & \textbf{Nội dung cần đạt} \\
+\hline
+\endfirsthead
+\caption[]{Các tiêu chí cần đạt của đồ án (tiếp theo)}\\
+\hline
+\textbf{Nhóm tiêu chí} & \textbf{Nội dung cần đạt} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Lắp đặt và nguồn & Thiết bị gọn, dùng được với nguồn xe 12-24 VDC, lắp được trên xe thật \\\hline
+Thu dữ liệu & Theo dõi được tọa độ GPS, tốc độ và dữ liệu OBD-II cơ bản \\\hline
+Quản lý năng lượng & Có chế độ ngủ để tiết kiệm năng lượng, có nguồn dự phòng, không làm ảnh hưởng lớn đến ắc quy xe \\\hline
+Khai thác dữ liệu & Hiển thị được vị trí, hành trình, trạng thái và cảnh báo trên giao diện dễ hiểu \\\hline
+Kiểm chứng & Có nguyên mẫu PCB, vỏ in 3D, đo kiểm trong phòng thí nghiệm và trên xe \\\hline
+\end{longtable}
+}
+\subsection{1.4. Phương pháp tiếp cận thiết kế kỹ thuật -- Engineering design approach}\label{phux1b0ux1a1ng-phuxe1p-tiux1ebfp-cux1eadn-thiux1ebft-kux1ebf-kux1ef9-thuux1eadt-engineering-design-approach}
+
+Để giải quyết bài toán quản lý phương tiện trong dịch vụ cho thuê xe tự lái, đồ án áp dụng cách tiếp cận thiết kế kỹ thuật theo hướng đi từ yêu cầu khai thác thực tế đến giải pháp tích hợp. Toàn bộ quá trình được tổ chức bám theo các tiêu chí đã xác lập ở Bảng 1.2 để bảo đảm phương án đề xuất phù hợp với mục tiêu và phạm vi của đề tài.
+
+\begin{itemize}
+\tightlist
+\item
+  Quy trình thực hiện: Đồ án bắt đầu từ việc xác định nhóm dữ liệu cần thu và các chức năng cốt lõi phục vụ quản lý phương tiện, sau đó mới lựa chọn phần cứng, xây dựng firmware, triển khai máy chủ và giao diện quản trị. Trình tự này giúp từng quyết định kỹ thuật bám sát nhu cầu khai thác, đồng thời hạn chế việc triển khai dàn trải khi yêu cầu chưa được xác định rõ.
+\item
+  Tổ chức giải pháp kỹ thuật: Hệ thống được hình thành theo ba khối chính gồm thiết bị gắn trên xe, máy chủ xử lý dữ liệu và giao diện quản trị tập trung. Trong ba khối này, thiết bị trên xe được xem là điểm xuất phát của toàn bộ phương án vì đây là nơi chịu tác động trực tiếp của nguồn cấp, kết nối dữ liệu, khả năng lắp đặt và yêu cầu tiêu thụ năng lượng.
+\item
+  Kiểm chứng: Sau khi hoàn thiện từng khối chức năng, đồ án tiến hành tích hợp nguyên mẫu và đo kiểm trong phạm vi đã đặt ra nhằm đối chiếu với các tiêu chí về thu dữ liệu, theo dõi phương tiện, khai thác thông tin và mức độ phù hợp của hệ thống với bối cảnh thử nghiệm thực tế.
+\end{itemize}
+
+\subsection{1.5. Đầu ra hướng tới và định hướng sử dụng -- Expected outputs and intended use}\label{ux111ux1ea7u-ra-hux1b0ux1edbng-tux1edbi-vuxe0-ux111ux1ecbnh-hux1b0ux1edbng-sux1eed-dux1ee5ng-expected-outputs-and-intended-use}
+
+Trên cơ sở mục tiêu, phạm vi và các tiêu chí đã xác lập, đồ án hướng tới hình thành được một nguyên mẫu hệ thống IoT phục vụ quản lý phương tiện trong dịch vụ cho thuê xe tự lái. Trong phạm vi đó, các đầu ra chính của đồ án được xác định như sau:
+
+\begin{itemize}
+\tightlist
+\item
+  Xây dựng thiết bị gắn trên xe có khả năng thu thập và truyền các dữ liệu cần thiết phục vụ giám sát phương tiện.
+\item
+  Xây dựng máy chủ xử lý dữ liệu thực hiện tiếp nhận, lưu trữ, tổ chức và cung cấp thông tin từ xe.
+\item
+  Xây dựng giao diện quản trị tập trung hỗ trợ theo dõi trạng thái xe và tra cứu dữ liệu phục vụ khai thác.
+\item
+  Tổ chức toàn bộ hệ thống theo hướng đáp ứng bài toán theo dõi hành trình, ghi nhận dữ liệu vận hành cơ bản, phát hiện dấu hiệu bất thường và hỗ trợ đối chiếu khai thác sau mỗi chuyến đi.
+\end{itemize}
+
+Với các đầu ra nêu trên, hệ thống được định hướng sử dụng cho các đơn vị cho thuê xe tự lái quy mô nhỏ và vừa, nơi nhu cầu chính là giám sát hành trình phương tiện, nắm được dữ liệu vận hành cơ bản và hỗ trợ quản lý khai thác theo hướng tập trung, có cơ sở tra cứu và đối chiếu sau quá trình sử dụng xe.
+
+\chapterheading{CHƯƠNG 2. PHÂN TÍCH VẤN ĐỀ KỸ THUẬT - PROBLEM ANALYSIS}\label{chux1b0ux1a1ng-2.-phuxe2n-tuxedch-vux1ea5n-ux111ux1ec1-kux1ef9-thuux1eadt---problem-analysis}
+
+\subsection{2.1. Mô tả vấn đề - Problem statement}\label{muxf4-tux1ea3-vux1ea5n-ux111ux1ec1---problem-statement}
+
+Hệ thống của đồ án không chỉ theo dõi vị trí xe, mà còn phải thu dữ liệu vận hành, phát hiện bất thường và hỗ trợ đối chiếu khai thác sau mỗi chuyến đi. Khi quy các yêu cầu đã đặt ra ở Chương 1 về góc nhìn kỹ thuật, bài toán được tách thành các nhóm vấn đề chính như Bảng 2.1.
+
+{\thesissettableid{2.1}{condensed-r2-bang-2-1-cac-van-de-ky-thuat-chinh-cua-he-thong-giam-sat-xe}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 4\tabcolsep) * \real{0.1304}}|L{(\linewidth - 4\tabcolsep) * \real{0.2298}}|L{(\linewidth - 4\tabcolsep) * \real{0.6398}}|}
+\caption{Các vấn đề kỹ thuật chính của hệ thống giám sát xe}\label{tab:condensed-r2-bang-2-1-cac-van-de-ky-thuat-chinh-cua-he-thong-giam-sat-xe}\\
+\hline
+\textbf{Nhóm vấn đề} & \textbf{Thách thức} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\caption[]{Các vấn đề kỹ thuật chính của hệ thống giám sát xe (tiếp theo)}\\
+\hline
+\textbf{Nhóm vấn đề} & \textbf{Thách thức} & \textbf{Mô tả} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Theo dõi hành trình và trạng thái xe & Duy trì dữ liệu vị trí và trạng thái xe liên tục trong quá trình di chuyển & Hệ thống phải cập nhật được hành trình đủ ổn định để người quản lý biết xe đang ở đâu và đang ở trạng thái nào, nhưng không làm tuyến dữ liệu trở nên quá nặng hoặc đứt quãng khi điều kiện vận hành thay đổi. \\\hline
+Thu dữ liệu vận hành cơ bản & Lấy được dữ liệu cần thiết nhưng không làm ảnh hưởng đến xe & Các thông số vận hành giúp việc giám sát có chiều sâu hơn, nhưng việc thu nhận phải giữ mức can thiệp thấp, không tác động đến ECU và vẫn phù hợp cho lắp đặt thực tế trên nhiều xe khác nhau. \\\hline
+Phát hiện bất thường và cảnh báo khai thác & Nhận biết được sự kiện cần chú ý trong lúc xe chạy hoặc khi xe đỗ & Thiết bị phải đủ nhạy để phát hiện các dấu hiệu bất thường như rung, dịch chuyển hoặc trạng thái sử dụng không mong muốn, đồng thời hạn chế các cảnh báo giả gây nhiễu cho vận hành. \\\hline
+Quản lý năng lượng trên xe & Hoạt động bền trên nguồn ắc quy nhưng không gây hao điện quá mức & Vì thiết bị dùng chung nguồn với xe, bài toán quan trọng là duy trì khả năng theo dõi và cảnh báo trong các trạng thái cần thiết mà không làm ảnh hưởng đến khả năng khởi động khi xe đỗ lâu. \\\hline
+Tổng hợp và khai thác dữ liệu & Đưa toàn bộ thông tin về cùng một nền tảng để theo dõi và đối chiếu & Dữ liệu hành trình, dữ liệu vận hành và cảnh báo phải được gom về cùng một tuyến xử lý và hiển thị theo cách dễ theo dõi trong lúc vận hành, nhưng vẫn đủ chi tiết để tra cứu lại sau chuyến đi. \\\hline
+\end{longtable}
+}
+Năm vấn đề trên là cơ sở để chuyển sang phần khảo sát kỹ thuật, xác lập tiêu chí thiết kế và lựa chọn phương án ở các mục tiếp theo.
+
+\subsection{2.2. Bối cảnh và cơ sở kỹ thuật -- Background and Technical reviews}\label{bux1ed1i-cux1ea3nh-vuxe0-cux1a1-sux1edf-kux1ef9-thuux1eadt-background-and-technical-reviews}
+
+Trên thị trường hiện nay, các hệ thống giám sát phương tiện đã được phát triển theo nhiều hướng khác nhau, từ các thiết bị định vị đơn chức năng đến các nền tảng quản lý đội xe tương đối hoàn chỉnh. Tuy nhiên, mỗi nhóm giải pháp thường chỉ tối ưu mạnh cho một mục tiêu riêng: hoặc ưu tiên lắp đặt nhanh và chi phí thấp, hoặc ưu tiên lấy thêm dữ liệu vận hành, hoặc ưu tiên sự đa năng ở quy mô lớn. Vì vậy, chưa có nhiều giải pháp thật sự phù hợp với nhu cầu của đội xe nhỏ và vừa, nơi cần đồng thời theo dõi hành trình, nhận biết bất thường và hỗ trợ đối chiếu khai thác sau chuyến đi.
+
+Để cụ thể hóa bối cảnh đó, Bảng 2.2 trình bày một số thiết bị tiêu biểu đại diện cho ba nhóm giải pháp đang có trên thị trường.
+
+{\thesissettableid{2.2}{condensed-r2-bang-2-2-mot-so-thiet-bi-theo-doi-phuong-tien-pho-bien-tren-thi-truong}
+\def\LTcaptype{table}
+\begin{longtable}{|C{0.20\linewidth}|L{0.25\linewidth}|L{0.47\linewidth}|}
+\caption{Một số thiết bị theo dõi phương tiện phổ biến trên thị trường}\label{tab:condensed-r2-bang-2-2-mot-so-thiet-bi-theo-doi-phuong-tien-pho-bien-tren-thi-truong}\\
+\hline
+\textbf{Hình ảnh} & \textbf{Thiết bị} & \textbf{Đặc điểm và hạn chế} \\
+\hline
+\endfirsthead
+\caption[]{Một số thiết bị theo dõi phương tiện phổ biến trên thị trường (tiếp theo)}\\
+\hline
+\textbf{Hình ảnh} & \textbf{Thiết bị} & \textbf{Đặc điểm và hạn chế} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+\includegraphics[width=0.82\linewidth,height=0.10\textheight,keepaspectratio]{./assets/result/market-devices/fmc920.png} & \textbf{Teltonika FMC920}~[10]\par Nhóm thiết bị nhỏ gọn & Phù hợp cho giám sát hành trình cơ bản, nhưng không theo dõi được thông số vận hành của xe. \\\hline
+\includegraphics[width=0.82\linewidth,height=0.10\textheight,keepaspectratio]{./assets/result/market-devices/fmm003.png} & \textbf{Teltonika FMM003}~[11]\par Nhóm theo dõi được thông số vận hành & Cắm trực tiếp cổng OBD-II, phù hợp khi ưu tiên lắp đặt nhanh và lấy dữ liệu OBD-II cơ bản. \\\hline
+\includegraphics[width=0.82\linewidth,height=0.10\textheight,keepaspectratio]{./assets/result/market-devices/gv305ceu.png} & \textbf{Queclink GV305CEU}~[12]\par Nhóm thiết bị có nhiều giao tiếp mở rộng & Hỗ trợ nhiều giao tiếp mở rộng; phù hợp cho theo dõi dữ liệu mở rộng, nhưng thường vượt nhu cầu tối thiểu của đồ án. \\\hline
+\end{longtable}
+}
+
+Để làm rõ hạn chế đó, sinh viên tiến hành phân loại và so sánh các hướng triển khai phổ biến dựa trên bốn tiêu chí kỹ thuật chính: mức độ dữ liệu thu được, khả năng lắp đặt thực tế, mức độ hoàn chỉnh của hệ thống và chi phí triển khai.
+
+{\thesissettableid{2.3}{condensed-r2-bang-2-3-so-sanh-cac-huong-trien-khai-giam-sat-xe-hien-co}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 6\tabcolsep) * \real{0.1521}}|L{(\linewidth - 6\tabcolsep) * \real{0.1974}}|L{(\linewidth - 6\tabcolsep) * \real{0.2880}}|L{(\linewidth - 6\tabcolsep) * \real{0.3625}}|}
+\caption{So sánh các hướng triển khai giám sát xe hiện có}\label{tab:condensed-r2-bang-2-3-so-sanh-cac-huong-trien-khai-giam-sat-xe-hien-co}\\
+\hline
+\textbf{Hướng triển khai} & \textbf{Dữ liệu thu được} & \textbf{Ưu điểm kỹ thuật} & \textbf{Hạn chế chính} \\
+\hline
+\endfirsthead
+\caption[]{So sánh các hướng triển khai giám sát xe hiện có (tiếp theo)}\\
+\hline
+\textbf{Hướng triển khai} & \textbf{Dữ liệu thu được} & \textbf{Ưu điểm kỹ thuật} & \textbf{Hạn chế chính} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Thiết bị định vị cơ bản & Vị trí, tốc độ, trạng thái kết nối & Lắp nhanh, cấu hình gọn, chi phí đầu tư thấp & Chỉ phù hợp cho giám sát hành trình cơ bản, thiếu dữ liệu vận hành và khó nhận biết bất thường khi xe đã tắt máy \\\hline
+Thiết bị định vị có khai thác dữ liệu chẩn đoán & Vị trí và một phần trạng thái vận hành của xe & Có thêm dữ liệu phục vụ giám sát khai thác, thuận lợi hơn cho việc đối chiếu sử dụng xe & Khả năng tập trung quản lý hạn chế, dữ liệu thường chưa đủ sâu và khả năng tùy biến hạn chế \\\hline
+Nền tảng quản lý đội xe thương mại & Vị trí, hành trình, cảnh báo, báo cáo, quản trị tập trung & Hệ thống hoàn chỉnh ở mức sản phẩm, triển khai nhanh, phù hợp quy mô lớn & Chi phí thuê bao và tích hợp cao, khó điều chỉnh theo nhu cầu kỹ thuật riêng của từng bài toán \\\hline
+Phương án tích hợp theo yêu cầu & Vị trí, dữ liệu vận hành, cảnh báo sự kiện, lịch sử khai thác & Linh hoạt theo mục tiêu quản lý, dễ mở rộng theo yêu cầu nghiên cứu và triển khai thực tế & Phải tự giải quyết đồng thời bài toán thiết bị, truyền dữ liệu, xử lý máy chủ và giao diện khai thác \\\hline
+\end{longtable}
+}
+Bảng 2.3 cho thấy khoảng trống kỹ thuật nằm ở nhóm giải pháp cần nhiều hơn một thiết bị định vị đơn thuần, nhưng chưa cần tới một nền tảng thương mại có chi phí đầu tư và vận hành cao. Đối với bài toán quản lý xe cho thuê quy mô nhỏ và vừa, hướng tiếp cận phù hợp hơn là một hệ thống tích hợp vừa đủ: đủ dữ liệu để theo dõi hành trình, nhận biết bất thường và đối chiếu khai thác, nhưng vẫn giữ được khả năng lắp đặt gọn và mở rộng theo điều kiện triển khai thực tế.
+
+Từ đó, cơ sở kỹ thuật của hệ thống được xác định theo ba điểm chính:
+
+\begin{itemize}
+\tightlist
+\item
+  dữ liệu vị trí, dữ liệu vận hành và dữ liệu sự kiện phải được xem là ba nguồn bổ sung cho nhau, không thể thay thế hoàn toàn cho nhau;
+\item
+  tuyến truyền dữ liệu phải phù hợp với đặc tính bản tin nhỏ, xuất hiện liên tục và có các mức ưu tiên khác nhau giữa dữ liệu nền và dữ liệu cảnh báo;
+\item
+  lớp xử lý và khai thác dữ liệu phải đủ rõ ràng để vừa phục vụ giám sát thời gian thực, vừa hỗ trợ tra cứu lịch sử và đối chiếu khai thác sau mỗi chuyến đi.
+\end{itemize}
+
+Các nhận định này là cơ sở để chuyển sang phần xác lập tiêu chí thiết kế ở Mục 2.3.
+
+\subsection{2.3. Yêu cầu kỹ thuật và các tiêu chuẩn thiết kế - Design criteria and Constraints}\label{yuxeau-cux1ea7u-kux1ef9-thuux1eadt-vuxe0-cuxe1c-tiuxeau-chuux1ea9n-thiux1ebft-kux1ebf---design-criteria-and-constraints}
+
+Các yêu cầu kỹ thuật và ràng buộc thiết kế của hệ thống được trình bày tại Bảng 2.4 và Bảng 2.5 như sau.
+
+{\thesissettableid{2.4}{condensed-r2-bang-2-4-chi-tieu-thiet-ke-chinh}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 4\tabcolsep) * \real{0.1282}}|L{(\linewidth - 4\tabcolsep) * \real{0.4103}}|L{(\linewidth - 4\tabcolsep) * \real{0.4615}}|}
+\caption{Chỉ tiêu thiết kế chính}\label{tab:condensed-r2-bang-2-4-chi-tieu-thiet-ke-chinh}\\
+\hline
+\textbf{Yếu tố thiết kế} & \textbf{Yêu cầu / giá trị} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\caption[]{Chỉ tiêu thiết kế chính (tiếp theo)}\\
+\hline
+\textbf{Yếu tố thiết kế} & \textbf{Yêu cầu / giá trị} & \textbf{Ghi chú} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Nguồn cấp & 12-24 VDC & Phù hợp với hệ điện của phương tiện và là điều kiện nền cho việc lắp đặt trên xe thật \\\hline
+MCU điều khiển chính & Vi điều khiển họ ESP & Đáp ứng yêu cầu tích hợp truyền thông, đọc dữ liệu và điều khiển trạng thái năng lượng \\\hline
+Giao tiếp với phương tiện & Chuẩn OBD-II & Cho phép thu dữ liệu cơ bản phục vụ quản lý mà không đi theo hướng can thiệp điều khiển xe \\\hline
+Tham số quản lý chính & Tọa độ GPS, tốc độ hoạt động & Là các thông số tối thiểu để theo dõi hành trình và trạng thái sử dụng xe \\\hline
+Tính năng chính & Tính toán quãng đường, thời gian sử dụng, ước tính chi phí; Có cảnh báo hệ thống & Theo nhu cầu quản lý và khai thác \\\hline
+\end{longtable}
+}
+{\thesissettableid{2.5}{condensed-r2-bang-2-5-rang-buoc-thiet-ke}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 4\tabcolsep) * \real{0.1266}}|L{(\linewidth - 4\tabcolsep) * \real{0.3038}}|L{(\linewidth - 4\tabcolsep) * \real{0.5696}}|}
+\caption{Ràng buộc thiết kế}\label{tab:condensed-r2-bang-2-5-rang-buoc-thiet-ke}\\
+\hline
+\textbf{Loại ràng buộc} & \textbf{Thông tin} & \textbf{Tác động đến thiết kế} \\
+\hline
+\endfirsthead
+\caption[]{Ràng buộc thiết kế (tiếp theo)}\\
+\hline
+\textbf{Loại ràng buộc} & \textbf{Thông tin} & \textbf{Tác động đến thiết kế} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Tài chính & Tổng chi phí giải pháp không vượt 20.000.000 VND & Ưu tiên linh kiện phổ biến,~bảo đảm tính khả thi khi triển khai \\\hline
+Điều kiện kiểm chứng & Phòng thí nghiệm và xe thử nghiệm & Giải pháp phải đo kiểm được trên nguyên mẫu và đối chiếu được với điều kiện vận hành thực \\\hline
+Khả năng gia công & Mạch PCB, vỏ in 3D & Kết cấu phần cứng phải gọn, dễ chế tạo và phù hợp cho nguyên mẫu của đồ án \\\hline
+Tiêu chuẩn áp dụng & IPC-2221, IEC 60664-1 & Làm cơ sở cho bố trí mạch, khoảng cách cách điện và đánh giá an toàn điện ở mức nguyên mẫu \\\hline
+\end{longtable}
+}
+\subsection{2.4. Yêu cầu từ các bên liên quan -- Constituent's requirements}\label{yuxeau-cux1ea7u-tux1eeb-cuxe1c-buxean-liuxean-quan-constituents-requirements}
+
+Bên cạnh tiêu chí kỹ thuật, bài toán còn chịu chi phối bởi cách các nhóm sử dụng và vận hành hệ thống trên thực tế. Bảng 2.6 tổng hợp các yêu cầu chính và ảnh hưởng của chúng đến thiết kế.
+
+{\thesissettableid{2.6}{condensed-r2-bang-2-6-yeu-cau-tu-cac-ben-lien-quan-va-tac-dong-den-thiet-ke}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 4\tabcolsep) * \real{0.1466}}|L{(\linewidth - 4\tabcolsep) * \real{0.4346}}|L{(\linewidth - 4\tabcolsep) * \real{0.4188}}|}
+\caption{Yêu cầu từ các bên liên quan và tác động đến thiết kế}\label{tab:condensed-r2-bang-2-6-yeu-cau-tu-cac-ben-lien-quan-va-tac-dong-den-thiet-ke}\\
+\hline
+\textbf{Bên liên quan} & \textbf{Nhu cầu chính} & \textbf{Ảnh hưởng tới thiết kế} \\
+\hline
+\endfirsthead
+\caption[]{Yêu cầu từ các bên liên quan và tác động đến thiết kế (tiếp theo)}\\
+\hline
+\textbf{Bên liên quan} & \textbf{Nhu cầu chính} & \textbf{Ảnh hưởng tới thiết kế} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Đơn vị quản lý đội xe & Theo dõi vị trí, hành trình, cảnh báo và dữ liệu vận hành~xe trên cùng một hệ thống & Giao diện phải ưu tiên bản đồ quản lý, trạng thái, cảnh báo~và lịch sử chuyến đi \\\hline
+Người phụ trách kỹ thuật & Biết thiết bị nào online/offline, lỗi nguồn, lỗi mạng hoặc thiếu dữ liệu & Phải có lớp giám sát kỹ thuật tách khỏi lớp vận hành thường ngày \\\hline
+Đội lắp đặt/bảo trì & Lắp nhanh, ít xâm lấn, dễ thay xe và dễ khoanh vùng lỗi & Kết cấu phải gọn, kết nối rõ ràng, thao tác tháo lắp lặp lại được \\\hline
+Người lái hoặc người thuê xe & Thiết bị không ảnh hưởng tới vận hành xe và không thu thập vượt nhu cầu quản lý & Chức năng giám sát phải tách khỏi mọi hành vi điều khiển phương tiện \\\hline
+\end{longtable}
+}
+Điểm chung của các nhóm trên là đều cần thông tin rõ ràng, đủ để theo dõi và ra quyết định, nhưng không làm tăng gánh nặng thao tác trong quá trình sử dụng. Vì vậy, các xử lý kỹ thuật phức tạp nên được thực hiện ở lớp thiết bị và máy chủ; còn giao diện vận hành chỉ nên tập trung vào các thông tin chính như vị trí, trạng thái và cảnh báo.
+
+\chapterheading{CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ - DESIGN SOLUTIONS}\label{chux1b0ux1a1ng-3.-cuxe1c-giux1ea3i-phuxe1p-thiux1ebft-kux1ebf---design-solutions}
+
+\subsection{3.1. Phân tích tổng hợp -- General analysis}\label{phuxe2n-tuxedch-tux1ed5ng-hux1ee3p-general-analysis}
+
+\subsubsection{3.1.1. Nguyên lý hoạt động}\label{nguyuxean-luxfd-houx1ea1t-ux111ux1ed9ng}
+
+Để đáp ứng yêu cầu giám sát phương tiện trong khai thác cho thuê xe tự lái, nguyên lý làm việc của hệ thống có thể trình bày theo năm bước liên tiếp như sau:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Bước 1 - Ghi nhận trạng thái thực của xe:} Trên phương tiện tồn tại ba nhóm thông tin đầu vào chính gồm vị trí, dữ liệu vận hành và chuyển động. Đây là lớp thông tin phản ánh trực tiếp trạng thái vật lý của xe trong quá trình khai thác.
+\item
+  \textbf{Bước 2 - Thu nhận và xử lý tại thiết bị theo dõi:} Thiết bị trên xe tiếp nhận tín hiệu định vị từ GNSS, cổng chẩn đoán OBD-II và cảm biến gia tốc IMU, sau đó thực hiện tiền xử lý, chọn lọc và đóng gói dữ liệu. Nói cách khác, bản tin giám sát được hình thành ngay tại thiết bị chứ không phải ở mạng truyền dẫn.
+\item
+  \textbf{Bước 3 - Tạo và truyền bản tin giám sát:} Sau khi được đóng gói, dữ liệu được tổ chức thành bản tin giám sát định kỳ hoặc theo sự kiện và truyền về máy chủ qua mạng di động. Vai trò của kênh 4G/LTE trong giai đoạn này chỉ là mang bản tin đã tạo đi khỏi phương tiện.
+\item
+  \textbf{Bước 4 - Xử lý tại máy chủ:} Máy chủ tiếp nhận bản tin, thực hiện chuẩn hóa, lưu trữ, đối chiếu và phát hiện các trạng thái cần cảnh báo. Kết quả của bước này là lớp thông tin có thể dùng trực tiếp cho khai thác và theo dõi đội xe.
+\item
+  \textbf{Bước 5 - Biểu diễn thông tin quản lý:} Dữ liệu sau xử lý được đưa lên giao diện để hiển thị vị trí hiện thời, trạng thái hoạt động, lịch sử hành trình, dữ liệu chi tiết và các cảnh báo liên quan. Nhờ đó, người quản lý có thể theo dõi tập trung tình trạng phương tiện trên cùng một giao diện quản lý.
+\end{itemize}
+
+Theo cách tổ chức trên, hệ thống không chỉ dừng ở chức năng thu thập dữ liệu mà còn bảo đảm quá trình chuyển hóa từ trạng thái thực của phương tiện thành thông tin có ý nghĩa quản lý.
+
+{\thesissetfigureid{3.1}{condensed-r2-hinh-3-1-nguyen-ly-chuyen-hoa-du-lieu-tu-phuong-tien-thanh-thong-tin-quan-ly}
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.04\linewidth,height=0.34\textheight,keepaspectratio,trim=10mm 8mm 10mm 12mm,clip]{./assets/result/thesis-figure-3-1/hinh-3-1-nguyen-ly-chuyen-hoa-du-lieu-gpt-image.png}}
+\caption{Nguyên lý chuyển hóa dữ liệu từ phương tiện thành thông tin quản lý}
+\label{fig:condensed-r2-hinh-3-1-nguyen-ly-chuyen-hoa-du-lieu-tu-phuong-tien-thanh-thong-tin-quan-ly}
+\end{figure}
+}
+\subsubsection{3.1.2. Các ràng buộc kỹ thuật chi phối phương án -- Governing technical constraints}\label{cuxe1c-ruxe0ng-buux1ed9c-kux1ef9-thuux1eadt-chi-phux1ed1i-phux1b0ux1a1ng-uxe1n-governing-technical-constraints}
+
+Các ràng buộc kỹ thuật chi phối phương án thiết kế có thể quy về bốn nhóm chính như sau:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Ràng buộc ở lớp thiết bị:} Bộ theo dõi phải gọn, ít dây, dễ tháo lắp khi đổi xe, đồng thời không làm tăng mức can thiệp vào hệ điện hay ECU của xe. Vì vậy, khối điều khiển trung tâm, khối truyền dữ liệu - định vị và cách lấy dữ liệu OBD-II phải được cân nhắc cùng nhau.
+\item
+  \textbf{Ràng buộc về năng lượng:} Thiết bị bám vào ắc quy xe nên không được để dòng nền tích lũy thành mức hao điện đáng kể khi xe đỗ dài ngày. Tuy nhiên, hệ thống vẫn phải giữ được khả năng trở lại trạng thái hoạt động để phát hiện rung, dịch chuyển hoặc thay đổi trạng thái xe; do đó phần nguồn, cảm biến và cơ chế chuyển giữa hoạt động và ngủ sâu phải được xét như một cụm chung.
+\item
+  \textbf{Ràng buộc ở tuyến truyền dữ liệu:} Xe hoạt động trong điều kiện sóng thay đổi liên tục, nên phương án truyền không thể giả định kết nối luôn ổn định. Kiến trúc được chọn phải chấp nhận mất sóng cục bộ, có bộ nhớ đệm phù hợp và phục hồi được tuyến dữ liệu sau khi kết nối lại.
+\item
+  \textbf{Ràng buộc ở lớp khai thác thông tin:} Dữ liệu thu được có nhiều lớp, nhưng giao diện vận hành không thể trở thành nơi dồn mọi thứ. Phương án chỉ được xem là đạt khi phần phức tạp được giữ ở lớp thiết bị và lớp máy chủ, còn giao diện chỉ giữ những tín hiệu thực sự cần cho quyết định quản lý.
+\end{itemize}
+
+\subsection{3.2. Đề xuất các giải pháp -- Proposed multiple solutions}\label{ux111ux1ec1-xuux1ea5t-cuxe1c-giux1ea3i-phuxe1p-proposed-multiple-solutions}
+
+\subsubsection{3.2.1. Đề xuất giải pháp phần cứng thiết bị (Hardware Design)}\label{ux111ux1ec1-xuux1ea5t-giux1ea3i-phuxe1p-phux1ea7n-cux1ee9ng-thiux1ebft-bux1ecb-hardware-design}
+
+a, Phương án lấy dữ liệu từ cổng chẩn đoán OBD-II
+
+Ở nhánh OBD-II, đồ án chỉ cần thu nhóm dữ liệu phục vụ quản lý nên không đi theo hướng chẩn đoán sâu hay can thiệp nhiều vào xe. Từ yêu cầu đó, ba hướng khai thác được xét gồm ghép trực tiếp vào tuyến OBD-II, dùng bộ chuyển đổi ELM327 có dây và dùng bộ chuyển đổi Bluetooth \texttt{vgate\ iCar\ Pro}.
+
+{\thesissettableid{3.1}{condensed-r2-bang-3-1-ma-tran-danh-gia-phuong-an-thu-du-lieu-obd-ii}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 8\tabcolsep) * \real{0.4100}}|L{(\linewidth - 8\tabcolsep) * \real{0.0900}}|L{(\linewidth - 8\tabcolsep) * \real{0.2400}}|L{(\linewidth - 8\tabcolsep) * \real{0.1300}}|L{(\linewidth - 8\tabcolsep) * \real{0.1300}}|}
+\caption{Ma trận đánh giá phương án thu dữ liệu OBD-II}\label{tab:condensed-r2-bang-3-1-ma-tran-danh-gia-phuong-an-thu-du-lieu-obd-ii}\\
+\hline
+\textbf{Tiêu chí đánh giá} & \textbf{Trọng số (\%)} & \textbf{Ghép trực tiếp vào tuyến OBD-II} & \textbf{ELM327 có dây} & \textbf{\texttt{vgate\ iCar\ Pro}} \\
+\hline
+\endfirsthead
+\caption[]{Ma trận đánh giá phương án thu dữ liệu OBD-II (tiếp theo)}\\
+\hline
+\textbf{Tiêu chí đánh giá} & \textbf{Trọng số (\%)} & \textbf{Ghép trực tiếp vào tuyến OBD-II} & \textbf{ELM327 có dây} & \textbf{\texttt{vgate\ iCar\ Pro}} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Mức xâm lấn lên hệ điện và khả năng trả xe về nguyên trạng & 35 & 1 & 3 & 5 \\\hline
+Khả năng tương thích giao thức trên nhiều dòng xe & 30 & 1 & 3 & 5 \\\hline
+Thuận tiện khi tháo lắp, chuyển xe và khoanh vùng lỗi & 20 & 1 & 2 & 5 \\\hline
+Mức đáp ứng nhóm tham số quản lý cần theo dõi & 15 & 5 & 4 & 4 \\\hline
+\textbf{Tổng điểm quy đổi} & \textbf{100} & \textbf{1,60} & \textbf{3,00} & \textbf{4,85} \\\hline
+\end{longtable}
+}
+Kết quả ở Bảng 3.1 cho thấy \texttt{vgate\ iCar\ Pro} phù hợp hơn hai phương án còn lại. Phương án này vẫn giữ được nhóm dữ liệu cần thiết, nhưng ít xâm lấn hơn và thuận tiện hơn khi đội xe có nhiều loại xe khác nhau.
+
+{\thesissetfigureid{3.2}{condensed-r2-hinh-3-2-bo-doc-obd-ii-bluetooth-vgate-icar-pro-duoc-chon-cho-nhanh-thu-du-lieu-van-hanh}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\linewidth,height=0.26\textheight,keepaspectratio]{./assets/result/chapter-3-selected-components/hinh-3-2-vgate-icar-pro-ble.png}
+\caption{Bộ đọc OBD-II Bluetooth vgate iCar Pro được chọn cho nhánh thu dữ liệu vận hành}
+\label{fig:condensed-r2-hinh-3-2-bo-doc-obd-ii-bluetooth-vgate-icar-pro-duoc-chon-cho-nhanh-thu-du-lieu-van-hanh}
+\end{figure}
+}
+b, Phương án duy trì giám sát khi xe đỗ
+
+Khi khóa điện tắt, thiết bị không nên duy trì toàn bộ hoạt động (modem 4G, GNSS và OBD-II) như lúc xe đang hoạt động; nhưng cũng không thể tắt hẳn vì vẫn cần nhận biết rung hoặc dịch chuyển bất thường. Vì vậy, phương án ở nhánh này được xét như một cặp: phần tử đánh thức tiêu thụ thấp và cách cấp nguồn cho các khối còn lại. Nguồn chung là cách cấp cùng một nhánh cho phần giám sát và các tải lớn; nguồn theo khóa điện chỉ còn nguồn khi xe bật khóa và mất nguồn khi xe tắt khóa; còn nguồn chia nhánh giữ một nhánh nhỏ luôn cấp cho đánh thức, trong khi modem, GNSS và OBD-II được đóng cắt riêng.
+
+{\thesissettableid{3.2}{condensed-r2-bang-3-2-ma-tran-danh-gia-phuong-an-duy-tri-giam-sat-khi-xe-do}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 8\tabcolsep) * \real{0.3920}}|L{(\linewidth - 8\tabcolsep) * \real{0.0880}}|L{(\linewidth - 8\tabcolsep) * \real{0.1820}}|L{(\linewidth - 8\tabcolsep) * \real{0.1560}}|L{(\linewidth - 8\tabcolsep) * \real{0.1820}}|}
+\caption{Ma trận đánh giá phương án duy trì giám sát khi xe đỗ}\label{tab:condensed-r2-bang-3-2-ma-tran-danh-gia-phuong-an-duy-tri-giam-sat-khi-xe-do}\\
+\hline
+\textbf{Tiêu chí đánh giá} & \shortstack[l]{\textbf{Trọng}\\\textbf{số (\%)}} & \textbf{SW-420 + cấp chung toàn thiết bị} & \textbf{MPU6050 + cấp theo khóa điện} & \textbf{LIS3DSH + nhánh đánh thức riêng} \\
+\hline
+\endfirsthead
+\caption[]{Ma trận đánh giá phương án duy trì giám sát khi xe đỗ (tiếp theo)}\\
+\hline
+\textbf{Tiêu chí đánh giá} & \shortstack[l]{\textbf{Trọng}\\\textbf{số (\%)}} & \textbf{SW-420 + cấp chung toàn thiết bị} & \textbf{MPU6050 + cấp theo khóa điện} & \textbf{LIS3DSH + nhánh đánh thức riêng} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Mức tiêu thụ khi chỉ giữ giám sát trong thời gian xe đỗ & 35 & 2 & 2 & 5 \\\hline
+Khả năng đánh thức thiết bị bằng chuyển động khi MCU và modem đã ngủ sâu & 25 & 2 & 4 & 4 \\\hline
+Khả năng tách modem, GNSS và OBD-II khỏi nhánh luôn cấp & 25 & 1 & 2 & 5 \\\hline
+Mức an toàn với ắc quy và độ ổn định khi modem phát dòng xung & 15 & 2 & 3 & 5 \\\hline
+\textbf{Tổng điểm quy đổi} & \textbf{100} & \textbf{1,75} & \textbf{2,65} & \textbf{4,75} \\\hline
+\end{longtable}
+}
+Theo Bảng 3.2, LIS3DSH kết hợp nhánh đánh thức riêng phù hợp hơn cho trạng thái xe đỗ. Phương án này giữ lại đường đánh thức tiêu thụ thấp, đồng thời cho phép đưa phần lớn thiết bị về ngủ sâu và cô lập nhánh modem khỏi nguồn logic khi có xung dòng lớn.
+
+{\thesissetfigureid{3.3}{condensed-r2-hinh-3-3-cam-bien-gia-toc-lis3dsh-duoc-chon-cho-nhanh-phat-hien-chuyen-dong-khi-xe-do}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/result/chapter-3-selected-components/hinh-3-3-lis3dsh-mat-truoc-lcsc-front.png}}
+\caption{Cảm biến gia tốc LIS3DSH được chọn cho nhánh phát hiện chuyển động khi xe đỗ}
+\label{fig:condensed-r2-hinh-3-3-cam-bien-gia-toc-lis3dsh-duoc-chon-cho-nhanh-phat-hien-chuyen-dong-khi-xe-do}
+\end{figure}
+}
+c, Phương án truyền dữ liệu và định vị
+
+Ở tuyến truyền dữ liệu và định vị, thiết bị chỉ gửi các bản tin nhỏ như vị trí, trạng thái và cảnh báo; do đó vấn đề chính không phải là tốc độ truyền cực đại. Điều cần cân nhắc là cách ghép khối truyền dữ liệu di động với khối định vị sao cho ít khối phải điều khiển, nguồn ổn định và phù hợp với không gian lắp trong xe. Các mô-đun chỉ hỗ trợ 2G không được đưa vào so sánh vì không còn phù hợp với điều kiện mạng di động tại Việt Nam {[}13{]}. Ba phương án đại diện được xét gồm:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{EC200U-CN + L76K:} EC200U-CN đảm nhiệm truyền dữ liệu LTE Cat 1, còn L76K là mô-đun GNSS rời. Cách này dùng được mạng 4G hiện nay, nhưng thiết bị vẫn phải điều khiển riêng khối truyền dữ liệu và khối định vị.
+\item
+  \textbf{A7670C + ATGM336H:} A7670C đảm nhiệm truyền dữ liệu LTE, ATGM336H đảm nhiệm định vị GNSS. Phương án này cũng đi theo hướng 4G, nhưng phần định vị vẫn tách thành một khối riêng.
+\item
+  \textbf{SIM7600CE-T:} Mô-đun này tích hợp LTE và GNSS trong cùng một khối, giúp gom phần truyền dữ liệu và định vị về cùng một đường điều khiển.
+\end{enumerate}
+
+{\thesissettableid{3.3}{condensed-r2-bang-3-3-ma-tran-danh-gia-phuong-an-truyen-du-lieu-va-dinh-vi}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 8\tabcolsep) * \real{0.4300}}|L{(\linewidth - 8\tabcolsep) * \real{0.0850}}|L{(\linewidth - 8\tabcolsep) * \real{0.1400}}|L{(\linewidth - 8\tabcolsep) * \real{0.1650}}|L{(\linewidth - 8\tabcolsep) * \real{0.1800}}|}
+\caption{Ma trận đánh giá phương án truyền dữ liệu và định vị}\label{tab:condensed-r2-bang-3-3-ma-tran-danh-gia-phuong-an-truyen-du-lieu-va-dinh-vi}\\
+\hline
+\textbf{Tiêu chí đánh giá} & {\footnotesize\textbf{Trọng}\par\textbf{số}\par\textbf{(\%)}} & {\scriptsize\textbf{EC200U-CN}\par\textbf{+ L76K}} & {\scriptsize\textbf{A7670C}\par\textbf{+ ATGM336H}} & {\scriptsize\textbf{SIM7600CE-T}\par\textbf{LTE/GNSS}} \\
+\hline
+\endfirsthead
+\caption[]{Ma trận đánh giá phương án truyền dữ liệu và định vị (tiếp theo)}\\
+\hline
+\textbf{Tiêu chí đánh giá} & {\footnotesize\textbf{Trọng}\par\textbf{số}\par\textbf{(\%)}} & {\scriptsize\textbf{EC200U-CN}\par\textbf{+ L76K}} & {\scriptsize\textbf{A7670C}\par\textbf{+ ATGM336H}} & {\scriptsize\textbf{SIM7600CE-T}\par\textbf{LTE/GNSS}} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Số khối phải khởi tạo và giám sát cho truyền dữ liệu và định vị & 30 & 2 & 2 & 5 \\\hline
+Độ phức tạp của nguồn, mạch vô tuyến và bố trí ăng ten trên thiết bị & 30 & 3 & 3 & 5 \\\hline
+Khả năng giữ và khôi phục đường truyền, vị trí khi xe di động & 25 & 4 & 4 & 4 \\\hline
+Mức phù hợp với không gian lắp trên xe và vỏ thiết bị & 15 & 3 & 3 & 5 \\\hline
+\textbf{Tổng điểm quy đổi} & \textbf{100} & \textbf{2,95} & \textbf{3,00} & \textbf{4,75} \\\hline
+\end{longtable}
+}
+Theo Bảng 3.3, SIM7600CE-T là phương án phù hợp hơn trong nhóm so sánh. Lợi thế cốt lõi của mô-đun này là gom đường truyền dữ liệu và định vị về một khối thống nhất, từ đó giảm rõ phần nguồn, ăng ten và trình tự khởi tạo phải xử lý trên thiết bị.
+
+{\thesissetfigureid{3.4}{condensed-r2-hinh-3-4-mo-dun-sim7600ce-t-tich-hop-lte-va-gnss-duoc-chon-cho-tuyen-truyen-du-lieu-dinh-vi}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.60\linewidth,height=0.24\textheight,keepaspectratio]{./assets/result/chapter-3-selected-components/hinh-3-4-sim7600ce-t.png}
+\caption{Mô-đun SIM7600CE-T tích hợp LTE và GNSS được chọn cho tuyến truyền dữ liệu - định vị}
+\label{fig:condensed-r2-hinh-3-4-mo-dun-sim7600ce-t-tich-hop-lte-va-gnss-duoc-chon-cho-tuyen-truyen-du-lieu-dinh-vi}
+\end{figure}
+}
+d, Phương án bộ điều khiển trung tâm
+
+Bộ điều khiển trung tâm là khối điều phối các phần đã chọn ở trên: modem LTE/GNSS, kết nối OBD-II không dây, cảm biến đánh thức, bộ nhớ đệm và cổng bảo trì. Vì vậy, phương án MCU không chỉ được xét theo năng lực xử lý, mà chủ yếu theo số giao tiếp còn đủ, mức tích hợp không dây, khả năng ngủ sâu và lượng phần cứng phụ phải ghép thêm. Ba hướng đại diện được đưa vào so sánh gồm ESP32-S3, STM32L4 ghép Bluetooth rời và nRF52840.
+
+{\thesissettableid{3.4}{condensed-r2-bang-3-4-ma-tran-danh-gia-phuong-an-bo-dieu-khien-trung-tam}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 8\tabcolsep) * \real{0.4400}}|L{(\linewidth - 8\tabcolsep) * \real{0.0900}}|L{(\linewidth - 8\tabcolsep) * \real{0.1400}}|L{(\linewidth - 8\tabcolsep) * \real{0.1900}}|L{(\linewidth - 8\tabcolsep) * \real{0.1400}}|}
+\caption{Ma trận đánh giá phương án bộ điều khiển trung tâm}\label{tab:condensed-r2-bang-3-4-ma-tran-danh-gia-phuong-an-bo-dieu-khien-trung-tam}\\
+\hline
+\textbf{Tiêu chí đánh giá} & \textbf{Trọng số (\%)} & \textbf{ESP32-S3} & \textbf{STM32L4 + Bluetooth rời} & \textbf{nRF52840} \\
+\hline
+\endfirsthead
+\caption[]{Ma trận đánh giá phương án bộ điều khiển trung tâm (tiếp theo)}\\
+\hline
+\textbf{Tiêu chí đánh giá} & \textbf{Trọng số (\%)} & \textbf{ESP32-S3} & \textbf{STM32L4 + Bluetooth rời} & \textbf{nRF52840} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Khả năng giữ đồng thời các giao tiếp cho modem, BLE OBD-II, IMU và cổng bảo trì & 35 & 5 & 4 & 3 \\\hline
+Phần nhớ và tài nguyên còn lại cho lưu đệm bản tin, nhật ký lỗi và cập nhật firmware & 25 & 4 & 3 & 2 \\\hline
+Khả năng vào ngủ sâu và đánh thức bằng tín hiệu ngoài & 20 & 4 & 5 & 4 \\\hline
+Mức phải ghép thêm chip vô tuyến và mạch phụ trợ & 20 & 5 & 2 & 3 \\\hline
+\textbf{Tổng điểm quy đổi} & \textbf{100} & \textbf{4,55} & \textbf{3,55} & \textbf{2,95} \\\hline
+\end{longtable}
+}
+Từ Bảng 3.4, ESP32-S3 là phương án phù hợp hơn trong nhóm so sánh. Điểm quyết định của lựa chọn này là giữ được đủ giao tiếp cho toàn bộ thiết bị mà không phải hy sinh tài nguyên cho một khối Bluetooth rời.
+
+{\thesissetfigureid{3.5}{condensed-r2-hinh-3-5-chip-esp32-s3-duoc-chon-lam-bo-dieu-khien-trung-tam-cua-thiet-bi}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.58\linewidth,height=0.24\textheight,keepaspectratio]{./assets/result/chapter-3-selected-components/hinh-3-5-esp32-s3-chip-lcsc-front.png}
+\caption{Chip ESP32-S3 được chọn làm bộ điều khiển trung tâm của thiết bị}
+\label{fig:condensed-r2-hinh-3-5-chip-esp32-s3-duoc-chon-lam-bo-dieu-khien-trung-tam-cua-thiet-bi}
+\end{figure}
+}
+\subsubsection{3.2.2. Đề xuất giải pháp phần mềm nhúng (Embedded Software)}\label{ux111ux1ec1-xuux1ea5t-giux1ea3i-phuxe1p-phux1ea7n-mux1ec1m-nhuxfang-embedded-software}
+
+Ở lớp phần mềm nhúng, vấn đề cần xác định trước hết là nền tảng phát triển và cách tổ chức thực thi trên ESP32-S3. Thiết bị phải đồng thời làm việc với modem LTE/GNSS, kết nối BLE tới bộ đọc OBD-II, lưu đệm cục bộ và giữ khả năng mở rộng cho bảo trì sau này. Vì vậy, ở bước đề xuất giải pháp, phần mềm nhúng được xét theo ba hướng sau:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Arduino core trên ESP32:} Cách này thuận tiện khi dựng nguyên mẫu nhanh, thư viện phong phú và dễ tiếp cận, nhưng việc kiểm soát tài nguyên, tác vụ nền và mở rộng hệ thống dài hạn không phải là điểm mạnh.
+\item
+  \textbf{ESP-IDF theo vòng lặp chính:} Hướng này bám sát SDK chính thức của hãng Espressif, giúp kiểm soát phần cứng tốt hơn và khai thác đầy đủ driver hệ thống, nhưng khi số khối ngoại vi tăng lên thì việc dồn phần lớn xử lý vào một luồng chính sẽ sớm chật.
+\item
+  \textbf{ESP-IDF kết hợp FreeRTOS:} Đây là hướng dùng SDK chính thức đồng thời tổ chức các tác vụ theo cơ chế thời gian thực, phù hợp hơn khi thiết bị phải ghép nhiều nhánh xử lý có nhịp làm việc khác nhau.
+\end{enumerate}
+
+Các phương án được so sánh theo bốn tiêu chí: mức phù hợp khi tích hợp nhiều khối ngoại vi, khả năng kiểm soát tài nguyên và tác vụ nền, thuận lợi cho bảo trì - mở rộng firmware, và mức dựa vào nền tảng chính thức của nhà sản xuất.
+
+{\thesissettableid{3.5}{condensed-r2-bang-3-5-ma-tran-danh-gia-phuong-an-phan-mem-nhung-tren-thiet-bi}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 8\tabcolsep) * \real{0.4200}}|L{(\linewidth - 8\tabcolsep) * \real{0.0800}}|L{(\linewidth - 8\tabcolsep) * \real{0.1400}}|L{(\linewidth - 8\tabcolsep) * \real{0.1800}}|L{(\linewidth - 8\tabcolsep) * \real{0.1800}}|}
+\caption{Ma trận đánh giá phương án phần mềm nhúng trên thiết bị}\label{tab:condensed-r2-bang-3-5-ma-tran-danh-gia-phuong-an-phan-mem-nhung-tren-thiet-bi}\\
+\hline
+\textbf{Tiêu chí đánh giá} & \textbf{Trọng số (\%)} & \textbf{Arduino core trên ESP32} & \textbf{ESP-IDF theo vòng lặp chính} & \textbf{ESP-IDF + FreeRTOS} \\
+\hline
+\endfirsthead
+\caption[]{Ma trận đánh giá phương án phần mềm nhúng trên thiết bị (tiếp theo)}\\
+\hline
+\textbf{Tiêu chí đánh giá} & \textbf{Trọng số (\%)} & \textbf{Arduino core trên ESP32} & \textbf{ESP-IDF theo vòng lặp chính} & \textbf{ESP-IDF + FreeRTOS} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Mức phù hợp khi tích hợp đồng thời modem, BLE OBD-II, lưu đệm và nhánh bảo trì & 35 & 3 & 4 & 5 \\\hline
+Khả năng kiểm soát tài nguyên, tác vụ nền và nhịp xử lý của hệ thống & 25 & 2 & 3 & 5 \\\hline
+Thuận lợi cho bảo trì, mở rộng và tổ chức lại firmware khi hệ thống lớn dần & 25 & 3 & 4 & 5 \\\hline
+Mức bám sát nền tảng chính thức của Espressif & 15 & 2 & 5 & 5 \\\hline
+\textbf{Tổng điểm quy đổi} & \textbf{100} & \textbf{2,70} & \textbf{4,00} & \textbf{5,00} \\\hline
+\end{longtable}
+}
+Từ Bảng 3.5, hướng ESP-IDF kết hợp FreeRTOS có điểm cao nhất nên được giữ lại. Điểm mạnh của phương án này là vừa bám SDK chính thức của Espressif, vừa thuận lợi hơn khi thiết bị phải điều phối nhiều khối ngoại vi trong cùng một phần mềm nhúng (firmware).
+
+\subsubsection{3.2.3. Đề xuất giải pháp truyền bản tin và định hướng tổ chức phía máy chủ (Communication and Server Organization)}\label{ux111ux1ec1-xuux1ea5t-giux1ea3i-phuxe1p-truyux1ec1n-bux1ea3n-tin-vuxe0-ux111ux1ecbnh-hux1b0ux1edbng-tux1ed5-chux1ee9c-phuxeda-muxe1y-chux1ee7-communication-and-server-organization}
+
+Ở lớp truyền dữ liệu, bước đầu tiên là chọn kênh đưa bản tin từ thiết bị lên máy chủ. Dữ liệu của hệ thống chủ yếu là các gói tin nhỏ, phát sinh theo chu kỳ hoặc theo sự kiện, đi qua mạng di động và có thể bị gián đoạn. Vì vậy, giao thức được chọn phải đủ nhẹ cho thiết bị, dễ tách nhóm dữ liệu và hỗ trợ tốt cho tình huống mất sóng rồi gửi bù. Ba hướng được xét gồm:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{HTTPS/REST - giao thức gửi yêu cầu tới API (Application Programming Interface - giao diện lập trình ứng dụng) của máy chủ}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Cách này cho thiết bị gửi từng yêu cầu riêng lên API của máy chủ; máy chủ nhận xong thì trả phản hồi và kết thúc phiên trao đổi. Về bản chất, mỗi bản tin dữ liệu tương ứng với một lần yêu cầu - phản hồi riêng biệt giữa thiết bị và máy chủ.
+  \item
+    Ưu điểm là quen thuộc, dễ lập trình và dễ kiểm thử bằng các công cụ web thông dụng.
+  \item
+    Hạn chế là khi dữ liệu phát sinh lặp lại theo chu kỳ ngắn, việc phải mở và đóng nhiều phiên trao đổi làm tuyến truyền nặng hơn mức cần thiết.
+  \end{itemize}
+\item
+  \textbf{WebSocket/TCP - cơ chế duy trì kết nối liên tục giữa thiết bị và máy chủ}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Cách này cho thiết bị tạo một kết nối liên tục với máy chủ và giữ kết nối đó trong suốt thời gian làm việc, nên dữ liệu có thể đi hai chiều trên cùng một đường truyền. Về bản chất, thiết bị và máy chủ duy trì một phiên kết nối kéo dài để trao đổi dữ liệu liên tục.
+  \item
+    Ưu điểm là thuận lợi khi cần cập nhật liên tục.
+  \item
+    Hạn chế là phụ thuộc nhiều vào việc kết nối phải được giữ ổn định, trong khi thiết bị có thể đi vào ngủ sâu hoặc di chuyển qua vùng sóng yếu.
+  \end{itemize}
+\item
+  \textbf{MQTT qua TLS - giao thức bản tin nhẹ có mã hóa đường truyền}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Cách này không gửi dữ liệu thẳng vào một API cố định mà đưa từng bản tin lên các kênh chủ đề; phía máy chủ sẽ đăng ký nhận theo từng nhóm chủ đề tương ứng. Về bản chất, bản tin được phân loại theo từng chủ đề ngay từ khi phát đi, nhờ đó phía nhận chỉ cần xử lý đúng nhóm dữ liệu liên quan.
+  \item
+    \texttt{MQTT} (Message Queuing Telemetry Transport - giao thức truyền bản tin nhẹ) được thiết kế cho bản tin nhỏ và thiết bị tài nguyên hạn chế, còn \texttt{TLS} (Transport Layer Security - giao thức bảo mật lớp truyền tải) là lớp mã hóa bổ sung để bảo vệ dữ liệu khi truyền qua mạng di động công cộng.
+  \item
+    Vì vậy, hướng này gọn hơn cho bài toán giám sát lặp lại và thuận lợi hơn khi cần tách riêng dữ liệu vị trí, trạng thái và cảnh báo.
+  \end{itemize}
+\end{itemize}
+
+{\thesissettableid{3.6}{condensed-r2-bang-3-6-ma-tran-danh-gia-giao-thuc-truyen-ban-tin-tu-thiet-bi}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 8\tabcolsep) * \real{0.5200}}|L{(\linewidth - 8\tabcolsep) * \real{0.0850}}|L{(\linewidth - 8\tabcolsep) * \real{0.1200}}|L{(\linewidth - 8\tabcolsep) * \real{0.1500}}|L{(\linewidth - 8\tabcolsep) * \real{0.1250}}|}
+\caption{Ma trận đánh giá giao thức truyền bản tin từ thiết bị}\label{tab:condensed-r2-bang-3-6-ma-tran-danh-gia-giao-thuc-truyen-ban-tin-tu-thiet-bi}\\
+\hline
+\shortstack[l]{\textbf{Tiêu chí}\\\textbf{đánh giá}} & \shortstack[l]{\footnotesize\textbf{Trọng}\\\textbf{số}\\\textbf{(\%)}} & \shortstack[l]{\footnotesize\textbf{HTTPS}\\\textbf{/REST}} & \shortstack[l]{\footnotesize\textbf{WebSocket}\\\textbf{/TCP}} & \shortstack[l]{\footnotesize\textbf{MQTT}\\\textbf{qua TLS}} \\
+\hline
+\endfirsthead
+\caption[]{Ma trận đánh giá giao thức truyền bản tin từ thiết bị (tiếp theo)}\\
+\hline
+\shortstack[l]{\textbf{Tiêu chí}\\\textbf{đánh giá}} & \shortstack[l]{\footnotesize\textbf{Trọng}\\\textbf{số}\\\textbf{(\%)}} & \shortstack[l]{\footnotesize\textbf{HTTPS}\\\textbf{/REST}} & \shortstack[l]{\footnotesize\textbf{WebSocket}\\\textbf{/TCP}} & \shortstack[l]{\footnotesize\textbf{MQTT}\\\textbf{qua TLS}} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Phù hợp với bản tin nhỏ, gửi định kỳ hoặc theo sự kiện & 30 & 3 & 4 & 5 \\\hline
+Mức nhẹ cho thiết bị và modem khi truyền qua mạng di động & 25 & 3 & 3 & 5 \\\hline
+Khả năng phân tách dữ liệu vị trí, trạng thái và cảnh báo theo chủ đề & 25 & 2 & 3 & 5 \\\hline
+Thuận lợi cho gửi lại, gửi bù sau gián đoạn kết nối & 20 & 3 & 2 & 4 \\\hline
+\textbf{Tổng điểm quy đổi} & \textbf{100} & \textbf{2,75} & \textbf{3,10} & \textbf{4,80} \\\hline
+\end{longtable}
+}
+Từ Bảng 3.6, \texttt{MQTT\ qua\ TLS} được chọn làm giao thức truyền bản tin chính từ thiết bị lên máy chủ, vì phù hợp hơn với đặc điểm dữ liệu nhỏ, phát sinh lặp lại và có thể bị gián đoạn theo chất lượng mạng di động. Trong khi đó, \texttt{HTTPS/REST} vẫn phù hợp cho các API cấu hình, quản trị hoặc trao đổi giữa giao diện và \texttt{backend} (lớp xử lý nghiệp vụ phía máy chủ), nhưng không phải kênh chính cho luồng dữ liệu giám sát phát sinh liên tục từ thiết bị.
+
+Khi giao thức truyền bản tin đã được xác định, vấn đề tiếp theo là cách tổ chức phần máy chủ để tiếp nhận, xử lý và lưu trữ dữ liệu. Ba hướng chính được xem xét gồm:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Backend (lớp xử lý nghiệp vụ phía máy chủ) nhận và xử lý trực tiếp - một ứng dụng duy nhất đảm nhiệm toàn bộ tuyến dữ liệu}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Cách này gom phần nhận bản tin, xử lý nghiệp vụ và lưu trữ vào cùng một ứng dụng.
+  \item
+    Về bản chất, toàn bộ tuyến xử lý dữ liệu được đặt trong một khối chức năng duy nhất.
+  \item
+    Ưu điểm là số lượng dịch vụ ít, cấu trúc ban đầu tương đối đơn giản.
+  \item
+    Hạn chế là khi khối lượng dữ liệu tăng lên, phần tiếp nhận bản tin và phần nghiệp vụ dễ ảnh hưởng lẫn nhau, đồng thời việc mở rộng hoặc khoanh vùng lỗi cũng kém thuận lợi hơn.
+  \end{itemize}
+\item
+  \textbf{MQTT broker (lớp tiếp nhận và phân phối bản tin) + backend xử lý tập trung - tách lớp nhận bản tin nhưng vẫn dồn xử lý vào backend}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Cách này tách riêng lớp tiếp nhận bản tin bằng broker, còn phần backend phía sau vẫn đảm nhiệm gần như toàn bộ việc chuẩn hóa, lưu trữ và phát sinh cảnh báo.
+  \item
+    Về bản chất, tuyến dữ liệu đã có lớp vào riêng, nhưng phần xử lý phía sau vẫn tập trung nặng vào một ứng dụng chính.
+  \item
+    Ưu điểm là đỡ tải hơn so với phương án gom toàn bộ vào backend.
+  \item
+    Hạn chế là backend vẫn phải gánh phần lớn trách nhiệm của tuyến xử lý dữ liệu, nên dư địa tách lớp và mở rộng hệ thống chưa thật sự rõ ràng.
+  \end{itemize}
+\item
+  \textbf{MQTT broker (lớp tiếp nhận và phân phối bản tin) + lớp trung gian + lưu trữ tách vai trò - chia tuyến dữ liệu thành nhiều lớp chức năng}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Cách này để broker tiếp nhận bản tin, lớp trung gian thực hiện chuẩn hóa và phân luồng, còn các kho dữ liệu được tách theo mục đích sử dụng.
+  \item
+    Về bản chất, tuyến dữ liệu được chia thành các lớp tiếp nhận, xử lý và lưu trữ với vai trò rõ ràng hơn ngay từ đầu.
+  \item
+    Ưu điểm là thuận lợi cho việc tách riêng dữ liệu nghiệp vụ, dữ liệu chuỗi thời gian và log, đồng thời phù hợp hơn khi cần tiếp nhận dữ liệu gửi dồn hoặc mở rộng phạm vi giám sát.
+  \item
+    Hạn chế là cấu trúc nhiều lớp hơn và đòi hỏi tổ chức hệ thống chặt chẽ hơn ở phía máy chủ.
+  \end{itemize}
+\end{itemize}
+
+{\thesissettableid{3.7}{condensed-r2-bang-3-7-ma-tran-danh-gia-dinh-huong-to-chuc-tiep-nhan-va-xu-ly-du-lieu-phia-may-chu}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 8\tabcolsep) * \real{0.3200}}|L{(\linewidth - 8\tabcolsep) * \real{0.0800}}|L{(\linewidth - 8\tabcolsep) * \real{0.1700}}|L{(\linewidth - 8\tabcolsep) * \real{0.1900}}|L{(\linewidth - 8\tabcolsep) * \real{0.2400}}|}
+\caption{Ma trận đánh giá định hướng tổ chức tiếp nhận và xử lý dữ liệu phía máy chủ}\label{tab:condensed-r2-bang-3-7-ma-tran-danh-gia-dinh-huong-to-chuc-tiep-nhan-va-xu-ly-du-lieu-phia-may-chu}\\
+\hline
+\textbf{Tiêu chí đánh giá} & \textbf{Trọng số (\%)} & \textbf{Backend nhận và xử lý trực tiếp} & \textbf{MQTT broker + backend xử lý tập trung} & \textbf{MQTT broker + lớp trung gian + lưu trữ tách vai trò} \\
+\hline
+\endfirsthead
+\caption[]{Ma trận đánh giá định hướng tổ chức tiếp nhận và xử lý dữ liệu phía máy chủ (tiếp theo)}\\
+\hline
+\textbf{Tiêu chí đánh giá} & \textbf{Trọng số (\%)} & \textbf{Backend nhận và xử lý trực tiếp} & \textbf{MQTT broker + backend xử lý tập trung} & \textbf{MQTT broker + lớp trung gian + lưu trữ tách vai trò} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Tách tuyến nhận bản tin khỏi lớp nghiệp vụ và giao diện & 30 & 1 & 3 & 5 \\\hline
+Hấp thụ được bản tin gửi dồn khi thiết bị có lại kết nối & 25 & 2 & 3 & 5 \\\hline
+Dễ tách riêng dữ liệu nghiệp vụ, dữ liệu chuỗi thời gian và log & 25 & 2 & 3 & 5 \\\hline
+Phục vụ đồng thời cập nhật gần thời gian thực và tra cứu lịch sử & 20 & 3 & 4 & 4 \\\hline
+\textbf{Tổng điểm quy đổi} & \textbf{100} & \textbf{1,90} & \textbf{3,20} & \textbf{4,80} \\\hline
+\end{longtable}
+}
+Từ Bảng 3.7, hướng tổ chức theo MQTT broker, lớp trung gian và lưu trữ tách vai trò được chọn cho phần máy chủ. Cách tổ chức này giúp tách lớp nhận bản tin khỏi lớp xử lý nghiệp vụ, nên phù hợp hơn khi thiết bị gửi bù dữ liệu hoặc khi hệ thống cần mở rộng giám sát.
+
+\subsection{3.3. Phân tích, đánh giá và lựa chọn phương án khả thi -- Analysis, Evaluation and Selection}\label{phuxe2n-tuxedch-ux111uxe1nh-giuxe1-vuxe0-lux1ef1a-chux1ecdn-phux1b0ux1a1ng-uxe1n-khux1ea3-thi-analysis-evaluation-and-selection}
+
+\subsubsection{3.3.1. Kiến trúc hệ thống được chọn -- Selected system architecture}\label{kiux1ebfn-truxfac-hux1ec7-thux1ed1ng-ux111ux1b0ux1ee3c-chux1ecdn-selected-system-architecture}
+
+Từ các lựa chọn ở Mục 3.2, hệ thống được tổ chức theo kiến trúc gồm ba khối chính: thiết bị theo dõi trên xe, cụm tiếp nhận - xử lý dữ liệu ở máy chủ và giao diện khai thác. Hình 3.6 trình bày mối liên hệ giữa ba khối này trên cùng một tuyến giám sát.
+
+{\thesissetfigureid{3.6}{condensed-r2-hinh-3-6-kien-truc-tong-the-cua-phuong-an-he-thong-duoc-chon}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/result/chapter-3-ai-figures/hinh-3-6-phuong-an-tong-the-duoc-chon-v2.png}}
+\caption{Kiến trúc tổng thể của phương án hệ thống được chọn}
+\label{fig:condensed-r2-hinh-3-6-kien-truc-tong-the-cua-phuong-an-he-thong-duoc-chon}
+\end{figure}
+}
+Kiến trúc này làm rõ vai trò của từng khối trong toàn tuyến: thiết bị trên xe tạo bản tin giám sát, máy chủ tiếp nhận và xử lý dữ liệu, còn giao diện giữ vai trò biểu diễn thông tin phục vụ khai thác.
+
+\subsubsection{3.3.2. Phân tích chức năng các khối trong phương án được chọn -- Functional analysis of selected blocks}\label{phuxe2n-tuxedch-chux1ee9c-nux103ng-cuxe1c-khux1ed1i-trong-phux1b0ux1a1ng-uxe1n-ux111ux1b0ux1ee3c-chux1ecdn-functional-analysis-of-selected-blocks}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Khối 1 - Thiết bị theo dõi trên xe}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Vai trò của khối này là thu nhận trạng thái thực của phương tiện và tạo bản tin giám sát gửi về máy chủ.
+  \item
+    Ở khối này, ESP32-S3 giữ vai trò điều phối trung tâm; SIM7600CE-T đảm nhiệm truyền dữ liệu và định vị; \texttt{vgate\ iCar\ Pro} cung cấp dữ liệu OBD-II; LIS3DSH giữ nhánh phát hiện chuyển động khi xe đỗ; còn cấu trúc nguồn chia nhánh hỗ trợ chuyển giữa hoạt động và ngủ sâu.
+  \item
+    Với cách ghép đó, khối thiết bị đáp ứng đồng thời yêu cầu gọn, ít xâm lấn, đủ dữ liệu và có khả năng giảm tiêu thụ điện khi xe dừng lâu.
+  \end{itemize}
+\item
+  \textbf{Khối 2 - Cụm tiếp nhận và xử lý dữ liệu ở máy chủ}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Vai trò của khối này là tiếp nhận bản tin từ thiết bị, chuẩn hóa, lưu trữ và xử lý dữ liệu trước khi cấp lại cho giao diện khai thác.
+  \item
+    Hướng tổ chức được chọn là tách lớp nhận bản tin khỏi lớp xử lý nghiệp vụ, đồng thời phân dữ liệu theo vai trò sử dụng.
+  \item
+    Cách tổ chức này cho phép hệ thống tiếp nhận tốt hơn các bản tin gửi dồn sau mất sóng, đồng thời giữ rõ phần tiếp nhận, phần xử lý và phần khai thác dữ liệu.
+  \end{itemize}
+\item
+  \textbf{Khối 3 - Giao diện khai thác}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Vai trò của khối này là biểu diễn thông tin phục vụ theo dõi và cảnh báo trong quá trình vận hành.
+  \item
+    Giao diện được giữ theo hướng giao diện giám sát tập trung trên nền web, ưu tiên bản đồ, trạng thái xe và cảnh báo, còn dữ liệu kỹ thuật sâu hơn được đưa về các vùng tra cứu phụ.
+  \item
+    Nhờ đó, người sử dụng có thể theo dõi được các tín hiệu chính mà không bị dồn quá nhiều chi tiết kỹ thuật lên cùng một màn hình.
+  \end{itemize}
+\end{itemize}
+
+Mối liên hệ giữa bốn nhóm ràng buộc kỹ thuật và các lựa chọn chính trong phương án được khái quát trong Hình 3.7.
+
+{\thesissetfigureid{3.7}{condensed-r2-hinh-3-7-moi-lien-he-giua-cac-rang-buoc-ky-thuat-va-cac-lua-chon-chinh-cua-phuong-an}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/result/chapter-3-ai-figures/hinh-3-7-su-an-khop-cua-phuong-an-duoc-chon.png}}
+\caption{Mối liên hệ giữa các ràng buộc kỹ thuật và các lựa chọn chính của phương án}
+\label{fig:condensed-r2-hinh-3-7-moi-lien-he-giua-cac-rang-buoc-ky-thuat-va-cac-lua-chon-chinh-cua-phuong-an}
+\end{figure}
+}
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Với yêu cầu ít xâm lấn lên xe}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Bộ đọc OBD-II Bluetooth giúp giảm dây tín hiệu phát sinh trong cabin và thuận tiện hơn khi chuyển lắp giữa nhiều xe.
+  \item
+    Mô-đun SIM7600CE-T tích hợp LTE và GNSS trong cùng một khối, từ đó giảm số phần cứng phải bố trí và điều khiển trên thiết bị.
+  \end{itemize}
+\item
+  \textbf{Với yêu cầu tiết kiệm điện khi xe đỗ}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    LIS3DSH kết hợp nhánh đánh thức riêng cho phép giữ lại đường phát hiện chuyển động với mức tiêu thụ thấp, trong khi các tải lớn có thể được đưa về ngủ sâu.
+  \item
+    Hướng phần mềm nhúng ESP-IDF kết hợp FreeRTOS tạo điều kiện thuận lợi hơn cho việc điều phối các nhánh tác vụ và tổ chức lại hoạt động của thiết bị theo từng trạng thái vận hành.
+  \end{itemize}
+\item
+  \textbf{Với yêu cầu giữ ổn định tuyến truyền dữ liệu}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    MQTT qua TLS phù hợp với bản tin nhỏ, phát sinh lặp lại và có thể bị gián đoạn bởi chất lượng mạng di động.
+  \item
+    Có bộ nhớ đệm cục bộ để lưu trữ dữ liệu trong trường hợp mất kết nối mạng hoàn toàn.
+  \item
+    Hướng tổ chức máy chủ theo broker, lớp trung gian và lưu trữ tách vai trò giúp tuyến dữ liệu chịu đựng tốt hơn khi thiết bị phải gửi bù dữ liệu sau mất sóng.
+  \end{itemize}
+\item
+  \textbf{Với yêu cầu giao diện gọn cho vận hành}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Giao diện được giữ theo hướng giao diện giám sát tập trung trên nền web, ưu tiên bản đồ, trạng thái và cảnh báo.
+  \item
+    Cách tổ chức này giúp người vận hành theo dõi được thông tin chính mà không phải xử lý cùng lúc toàn bộ dữ liệu kỹ thuật phát sinh từ hệ thống.
+  \end{itemize}
+\end{itemize}
+
+Nhìn chung, ba khối trong kiến trúc đã chọn giữ được cùng một mạch từ thiết bị, máy chủ đến giao diện khai thác, nên có thể xem là phương án khả thi cho bài toán của đồ án.
+
+\subsection{3.4. Tối ưu phương án thiết kế - The optimal solution}\label{tux1ed1i-ux1b0u-phux1b0ux1a1ng-uxe1n-thiux1ebft-kux1ebf---the-optimal-solution}
+
+Từ phần phân tích ở Mục 3.1, phần đề xuất và so sánh ở Mục 3.2, cùng phương án khả thi ở Mục 3.3, cấu hình thiết kế tổng thể của hệ thống theo dõi xe được tổng hợp trong Bảng 3.8.
+
+{\thesissettableid{3.8}{condensed-r2-bang-3-8-bang-tong-hop-cau-hinh-he-thong-theo-doi-xe}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 6\tabcolsep) * \real{0.1092}}|L{(\linewidth - 6\tabcolsep) * \real{0.1494}}|L{(\linewidth - 6\tabcolsep) * \real{0.3046}}|L{(\linewidth - 6\tabcolsep) * \real{0.4368}}|}
+\caption{Bảng tổng hợp cấu hình hệ thống theo dõi xe}\label{tab:condensed-r2-bang-3-8-bang-tong-hop-cau-hinh-he-thong-theo-doi-xe}\\
+\hline
+\textbf{Phân hệ} & \textbf{Hạng mục} & \textbf{Phương án / thông số đã chọn} & \textbf{Ghi chú kỹ thuật} \\
+\hline
+\endfirsthead
+\caption[]{Bảng tổng hợp cấu hình hệ thống theo dõi xe (tiếp theo)}\\
+\hline
+\textbf{Phân hệ} & \textbf{Hạng mục} & \textbf{Phương án / thông số đã chọn} & \textbf{Ghi chú kỹ thuật} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+1. Thiết bị trên xe & Bộ điều khiển trung tâm & ESP32-S3 & Điều phối modem LTE/GNSS, BLE OBD-II, IMU và các nhánh nguồn \\\hline
+1. Thiết bị trên xe & Truyền dữ liệu và định vị & SIM7600CE-T & Tích hợp LTE và GNSS trong cùng một mô-đun \\\hline
+1. Thiết bị trên xe & Thu dữ liệu vận hành & \texttt{vgate\ iCar\ Pro} qua Bluetooth & Lấy nhóm dữ liệu quản lý qua OBD-II, giảm dây nối trong cabin \\\hline
+1. Thiết bị trên xe & Giám sát khi xe đỗ & LIS3DSH + nhánh đánh thức riêng & Giữ phát hiện chuyển động khi phần tải lớn đã đưa về ngủ sâu \\\hline
+1. Thiết bị trên xe & Nguồn cấp & Nguồn chia nhánh + pin dự phòng + bảo vệ điện áp thấp & Tách nhánh luôn cấp và nhánh tải lớn, hạn chế ảnh hưởng lên ắc quy xe \\\hline
+1. Thiết bị trên xe & Nền tảng firmware & ESP-IDF + FreeRTOS & Phù hợp khi thiết bị phải điều phối nhiều ngoại vi và nhiều trạng thái \\\hline
+2. Máy chủ & Giao thức truyền bản tin & MQTT qua TLS & Phù hợp với bản tin nhỏ, lặp lại và có thể gián đoạn theo mạng di động \\\hline
+2. Máy chủ & Tiếp nhận và xử lý dữ liệu & Broker + lớp trung gian + lưu trữ tách vai trò & Tách lớp nhận bản tin, xử lý và lưu trữ để thuận lợi hơn khi mở rộng \\\hline
+3. Khai thác & Giao diện quản lý & Giao diện giám sát tập trung trên nền web & Ưu tiên thông tin phục vụ vận hành; dữ liệu sâu hơn được đưa về vùng tra cứu \\\hline
+\end{longtable}
+}
+\chapterheading{CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ - IMPLEMENTATION AND RESULTS}\label{chux1b0ux1a1ng-4.-triux1ec3n-khai-giux1ea3i-phuxe1p-vuxe0-kux1ebft-quux1ea3---implementation-and-results}
+
+\subsection{4.1. Triển khai phần cứng thiết bị -- Hardware implementation}\label{triux1ec3n-khai-phux1ea7n-cux1ee9ng-thiux1ebft-bux1ecb-hardware-implementation}
+
+Quá trình triển khai đi từ việc xác lập kiến trúc thiết bị, đưa mạch xuống PCB, gia công - hàn lắp, hoàn thiện vỏ đến bước lắp thử trên xe.
+
+{\thesissetfigureid{4.1}{condensed-r2-hinh-4-1-so-do-khoi-tong-quan-cua-thiet-bi-theo-doi-tren-xe}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/result/chapter-4-ai-figures/hinh-4-1-kien-truc-tong-the-ai.png}}
+\caption{Sơ đồ khối tổng quan của thiết bị theo dõi trên xe}
+\label{fig:condensed-r2-hinh-4-1-so-do-khoi-tong-quan-cua-thiet-bi-theo-doi-tren-xe}
+\end{figure}
+}
+Từ Hình 4.1, có thể rút ra các ý chính sau:
+
+\begin{itemize}
+\tightlist
+\item
+  Thiết bị thu bốn nhóm thông tin chính: dữ liệu vận hành, vị trí, chuyển động và trạng thái nguồn.
+\item
+  \texttt{ESP32-S3} giữ vai trò điều phối trung tâm, ghép các thông tin này thành bản tin giám sát.
+\item
+  Bản tin sau đó được truyền về máy chủ để phục vụ theo dõi và khai thác.
+\end{itemize}
+
+{\thesissetfigureid{4.2}{condensed-r2-hinh-4-2-khoi-esp32-s3-va-cac-nhanh-ma-bo-dieu-khien-trung-tam-truc-tiep-quan-ly}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/figures-condensed-r2/07-chuong-4-trien-khai-hardware-hinh-4-12.png}}
+\caption{Khối ESP32-S3 và các nhánh mà bộ điều khiển trung tâm trực tiếp quản lý}
+\label{fig:condensed-r2-hinh-4-2-khoi-esp32-s3-va-cac-nhanh-ma-bo-dieu-khien-trung-tam-truc-tiep-quan-ly}
+\end{figure}
+}
+Vai trò của khối điều khiển trung tâm trong Hình 4.2 có thể tóm tắt như sau:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{ESP32-S3} là khối xử lý trung tâm của thiết bị.
+\item
+  Khối này tiếp nhận tín hiệu nguồn, dữ liệu xe, tín hiệu chuyển động, mốc thời gian và dữ liệu lưu đệm.
+\item
+  Các chuyển đổi giữa hoạt động, chờ và ngủ sâu đều do \texttt{ESP32-S3} điều phối.
+\end{itemize}
+
+{\thesissetfigureid{4.3}{condensed-r2-hinh-4-3-cac-mo-dun-chinh-co-tren-bo-mach-va-quan-he-giua-cac-cum-chuc-nang}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/figures-condensed-r2/07-chuong-4-trien-khai-hardware-hinh-4-14.png}}
+\caption{Các mô-đun chính có trên bo mạch và quan hệ giữa các cụm chức năng}
+\label{fig:condensed-r2-hinh-4-3-cac-mo-dun-chinh-co-tren-bo-mach-va-quan-he-giua-cac-cum-chuc-nang}
+\end{figure}
+}
+Ở mức mô-đun, Hình 4.3 cho thấy các cụm chức năng chính của bo mạch như sau:
+
+\begin{itemize}
+\tightlist
+\item
+  Bo mạch được chia thành các cụm chức năng chính thay vì bố trí linh kiện rời rạc.
+\item
+  Nhánh nguồn tạo các mức điện áp làm việc và nguồn dự phòng.
+\item
+  Nhánh cảm biến - lưu trữ phục vụ phát hiện chuyển động, giữ thời gian và lưu dữ liệu cục bộ.
+\item
+  Nhánh truyền thông - định vị đảm nhiệm lấy vị trí và gửi bản tin.
+\end{itemize}
+
+{\thesissetfigureid{4.4}{condensed-r2-hinh-4-4-cau-truc-khoi-nguon-chinh-nguon-du-phong-va-cac-muc-nguon-lam-viec-cua-thiet-bi}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/figures-condensed-r2/07-chuong-4-trien-khai-hardware-hinh-4-6.png}}
+\caption{Cấu trúc khối nguồn chính, nguồn dự phòng và các mức nguồn làm việc của thiết bị}
+\label{fig:condensed-r2-hinh-4-4-cau-truc-khoi-nguon-chinh-nguon-du-phong-va-cac-muc-nguon-lam-viec-cua-thiet-bi}
+\end{figure}
+}
+Từ Hình 4.4, có thể thấy cách tổ chức nguồn của thiết bị qua các điểm sau:
+
+\begin{itemize}
+\tightlist
+\item
+  Nguồn từ xe trước hết tạo bus 5 V làm nguồn trung gian cho toàn thiết bị.
+\item
+  Từ bus này, hệ thống tách ra 3.3 V cho điều khiển và cảm biến, khoảng 4 V riêng cho \texttt{SIM7600E}.
+\item
+  Pin dự phòng \texttt{18650} được sạc trong quá trình làm việc và tạo lại đường 5 V khi mất nguồn xe.
+\item
+  Cách tổ chức này giúp nhánh modem không kéo sụt nhánh điều khiển.
+\end{itemize}
+
+Sau khi xác định được các khối chức năng, thiết bị được thiết kế PCB trên phần mềm Altium Designer.
+
+{\thesissetfigureid{4.5}{condensed-r2-hinh-4-5-bo-tri-mat-truoc-cua-pcb-sau-khi-hoan-thien-thiet-ke-tren-phan-mem}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/result/thiet-bi/thiet-ke-altium-mat-truoc.jpg}}
+\caption{Bố trí mặt trước của PCB sau khi hoàn thiện thiết kế trên phần mềm}
+\label{fig:condensed-r2-hinh-4-5-bo-tri-mat-truoc-cua-pcb-sau-khi-hoan-thien-thiet-ke-tren-phan-mem}
+\end{figure}
+}
+Hình 4.5 cho thấy cách các khối chức năng đã được đưa lên cùng một layout PCB (kích thước 100mm x 97mm), nhờ đó giảm mạch rời, rút gọn dây nối và thuận tiện hơn cho lắp đặt thực tế trong cabin.
+
+Từ bản layout này, PCB được gia công và hàn lắp để tạo thành nguyên mẫu phần cứng ở Hình 4.6. Đây là bước chuyển từ bản thiết kế sang sản phẩm thử nghiệm thực tế.
+
+{\thesissetfigureid{4.6}{condensed-r2-hinh-4-6-bo-mach-nguyen-mau-sau-khi-han-lap-day-du-linh-kien-va-kiem-tra-hoat-dong-ban-dau}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/result/thiet-bi/thiet-bi-mach-thanh-pham-day-du-linh-kien-khong-housing.jpg}}
+\caption{Bo mạch nguyên mẫu sau khi hàn lắp đầy đủ linh kiện và kiểm tra hoạt động ban đầu}
+\label{fig:condensed-r2-hinh-4-6-bo-mach-nguyen-mau-sau-khi-han-lap-day-du-linh-kien-va-kiem-tra-hoat-dong-ban-dau}
+\end{figure}
+}
+Sau bước hàn lắp, nguyên mẫu tiếp tục được đưa vào vỏ hộp (kích thước 100mm x 100mm x 45mm) để hoàn thiện thiết bị đầy đủ.
+
+{\thesissetfigureid{4.7}{condensed-r2-hinh-4-7-nguyen-mau-phan-cung-sau-khi-lap-trong-vo-va-hoan-thien-cac-ket-noi-chinh}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/result/thiet-bi/thiett-bi-mach-housing-dang-mo.jpg}}
+\caption{Nguyên mẫu phần cứng sau khi lắp trong vỏ và hoàn thiện các kết nối chính}
+\label{fig:condensed-r2-hinh-4-7-nguyen-mau-phan-cung-sau-khi-lap-trong-vo-va-hoan-thien-cac-ket-noi-chinh}
+\end{figure}
+}
+{\thesissetfigureid{4.8}{condensed-r2-hinh-4-8-thiet-bi-sau-khi-dong-vo-san-sang-cho-buoc-lap-thu-va-do-kiem-tren-xe}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/result/thiet-bi/thiett-bi-mach-housing-dang-dong-nap.jpg}}
+\caption{Thiết bị sau khi đóng vỏ, sẵn sàng cho bước lắp thử và đo kiểm trên xe}
+\label{fig:condensed-r2-hinh-4-8-thiet-bi-sau-khi-dong-vo-san-sang-cho-buoc-lap-thu-va-do-kiem-tren-xe}
+\end{figure}
+}
+Khi đưa thiết bị lên xe thử nghiệm, cách bố trí được chốt theo các điểm sau:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{vgate\ iCar\ Pro} được cắm trực tiếp vào cổng \texttt{OBD-II} của xe.
+\item
+  Thiết bị theo dõi được đặt trong cabin, ưu tiên khu vực dưới táp-lô.
+\item
+  Dữ liệu xe đi không dây từ \texttt{OBD-II}, còn thiết bị chỉ lấy nguồn từ xe và đặt ăng ten ở vị trí thuận lợi cho thu sóng.
+\item
+  Cách bố trí này giữ đúng định hướng ít xâm lấn và cho phép chuyển sang bước đo kiểm trên xe thật.
+\end{itemize}
+
+\subsection{4.2. Triển khai phần mềm hệ thống -- Software implementation}\label{triux1ec3n-khai-phux1ea7n-mux1ec1m-hux1ec7-thux1ed1ng-software-implementation}
+
+\subsubsection{4.2.1. Phần điều khiển trên thiết bị -- Device firmware}\label{phux1ea7n-ux111iux1ec1u-khiux1ec3n-truxean-thiux1ebft-bux1ecb-device-firmware}
+
+Ở phía thiết bị, firmware giữ vai trò điều phối toàn bộ nhịp làm việc của bộ theo dõi: Quyết định khi nào thiết bị bắt đầu thu dữ liệu, khi nào gửi bản tin, khi nào chuyển sang chế độ ngủ và khi nào phải thức dậy để kiểm tra lại trạng thái xe.
+
+{\thesissettableid{4.1}{condensed-r2-bang-4-1-cac-chuc-nang-chinh-da-hien-thuc-o-firmware}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 2\tabcolsep) * \real{0.1409}}|L{(\linewidth - 2\tabcolsep) * \real{0.8591}}|}
+\caption{Các chức năng chính đã hiện thực ở firmware}\label{tab:condensed-r2-bang-4-1-cac-chuc-nang-chinh-da-hien-thuc-o-firmware}\\
+\hline
+\textbf{Nhóm chức năng} & \textbf{Nội dung đã triển khai} \\
+\hline
+\endfirsthead
+\caption[]{Các chức năng chính đã hiện thực ở firmware (tiếp theo)}\\
+\hline
+\textbf{Nhóm chức năng} & \textbf{Nội dung đã triển khai} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Khởi động và phục hồi & Nạp cấu hình làm việc, kiểm tra trạng thái còn giữ lại từ lần chạy trước và chọn nhịp khởi động phù hợp \\\hline
+Tổ chức vận hành & Tách thiết bị thành các pha làm việc chính như kiểm tra trạng thái xe, theo dõi khi xe chạy, theo dõi khi xe đỗ, cảnh báo và ngủ \\\hline
+Thu dữ liệu & Kết hợp dữ liệu nguồn, dữ liệu \texttt{OBD-II}, vị trí \texttt{GNSS} và tín hiệu chuyển động để phản ánh trạng thái thực của xe \\\hline
+Gửi bản tin & Ghép dữ liệu thành bản tin giám sát và đưa lên máy chủ theo nhịp làm việc của từng pha \\\hline
+Lưu đệm và gửi bù & Khi mất kết nối, bản tin được giữ cục bộ và phát lại sau khi đường truyền ổn định trở lại \\\hline
+Quản lý chế độ ngủ & Hạ các nhánh tiêu thụ lớn, giữ đường đánh thức cần thiết và tiết kiệm phần lớn năng lượng khi xe đỗ dài \\\hline
+\end{longtable}
+}
+\textbf{a, Khởi động}
+
+{\thesissetfigureid{4.9}{condensed-r2-hinh-4-9-nguyen-ly-khoi-dong-va-chon-nhip-lam-viec-ban-dau-cua-thiet-bi}
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.02\linewidth,height=0.42\textheight,keepaspectratio,trim=8mm 6mm 8mm 8mm,clip]{./assets/figures-condensed-r2/08-chuong-4-trien-khai-firmware-hinh-4-3c.png}}
+\caption{Nguyên lý khởi động và chọn nhịp làm việc ban đầu của thiết bị}
+\label{fig:condensed-r2-hinh-4-9-nguyen-ly-khoi-dong-va-chon-nhip-lam-viec-ban-dau-cua-thiet-bi}
+\end{figure}
+}
+Sau khi khởi động, thiết bị không đi vào gửi dữ liệu ngay mà trước hết phải nạp cấu hình, xác định nguyên nhân đánh thức và kiểm tra trạng thái hiện thời của xe. Bước này giúp thiết bị chọn đúng nhịp làm việc ngay từ đầu, tránh vừa bật lên đã xử lý theo một chế độ không phù hợp.
+
+\textbf{b, Thu dữ liệu và gửi bản tin}
+
+{\thesissetfigureid{4.10}{condensed-r2-hinh-4-10-nguyen-ly-thu-du-lieu-va-gui-ban-tin-trong-pha-hoat-dong-cua-thiet-bi}
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.04\linewidth,height=0.36\textheight,keepaspectratio,trim=6mm 4mm 6mm 6mm,clip]{./assets/figures-condensed-r2/08-chuong-4-trien-khai-firmware-hinh-4-3d.png}}
+\caption{Nguyên lý thu dữ liệu và gửi bản tin trong pha hoạt động của thiết bị}
+\label{fig:condensed-r2-hinh-4-10-nguyen-ly-thu-du-lieu-va-gui-ban-tin-trong-pha-hoat-dong-cua-thiet-bi}
+\end{figure}
+}
+Trong pha hoạt động, thiết bị ghép dữ liệu xe, vị trí và nguồn thành một bản tin giám sát thống nhất. Nếu đường truyền đang sẵn sàng thì bản tin được gửi ngay; ngược lại, dữ liệu sẽ được giữ cục bộ để chờ gửi bù. Cách làm này giúp tuyến giám sát không bị đứt khi xe đi qua vùng sóng yếu.
+
+\textbf{c, Chuyển sang ngủ và đánh thức lại}
+
+{\thesissetfigureid{4.11}{condensed-r2-hinh-4-11-nguyen-ly-chuyen-thiet-bi-sang-che-do-ngu-va-danh-thuc-lai-khi-xe-do}
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.02\linewidth,height=0.40\textheight,keepaspectratio,trim=8mm 8mm 8mm 8mm,clip]{./assets/figures-condensed-r2/08-chuong-4-trien-khai-firmware-hinh-4-3e.png}}
+\caption{Nguyên lý chuyển thiết bị sang chế độ ngủ và đánh thức lại khi xe đỗ}
+\label{fig:condensed-r2-hinh-4-11-nguyen-ly-chuyen-thiet-bi-sang-che-do-ngu-va-danh-thuc-lai-khi-xe-do}
+\end{figure}
+}
+Khi xe đỗ, thiết bị không tắt ngay mà đi qua bước kiểm tra điều kiện ngủ, sau đó mới hạ các nhánh đang tiêu thụ và giữ lại các đường đánh thức cần thiết. Nhờ vậy, phần lớn năng lượng được cắt giảm trong thời gian xe đỗ, nhưng thiết bị vẫn có thể thức dậy theo chu kỳ hoặc khi phát hiện chuyển động bất thường.
+
+\subsubsection{4.2.2. Hạ tầng máy chủ và xử lý dữ liệu -- Server infrastructure and data processing}\label{hux1ea1-tux1ea7ng-muxe1y-chux1ee7-vuxe0-xux1eed-luxfd-dux1eef-liux1ec7u-server-infrastructure-and-data-processing}
+
+Ở phía máy chủ, hệ thống được triển khai thành ba lớp rõ ràng: nhận bản tin, xử lý dữ liệu và cung cấp thông tin cho giao diện quản lý. Cách tách này giúp bản tin từ thiết bị không bị dồn thẳng vào cùng một ứng dụng, nên toàn tuyến ổn định hơn khi xe gửi dữ liệu liên tục hoặc gửi bù sau lúc mất sóng.
+
+{\thesissettableid{4.2}{condensed-r2-bang-4-2-cac-chuc-nang-chinh-da-hien-thuc-o-phia-may-chu}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 2\tabcolsep) * \real{0.2578}}|L{(\linewidth - 2\tabcolsep) * \real{0.7422}}|}
+\caption{Các chức năng chính đã hiện thực ở phía máy chủ}\label{tab:condensed-r2-bang-4-2-cac-chuc-nang-chinh-da-hien-thuc-o-phia-may-chu}\\
+\hline
+\textbf{Nhóm chức năng} & \textbf{Nội dung đã triển khai} \\
+\hline
+\endfirsthead
+\caption[]{Các chức năng chính đã hiện thực ở phía máy chủ (tiếp theo)}\\
+\hline
+\textbf{Nhóm chức năng} & \textbf{Nội dung đã triển khai} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Tiếp nhận bản tin & Nhận bản tin \texttt{MQTT} từ thiết bị qua \texttt{EMQX} \\\hline
+Kiểm tra và phân luồng & Tách dữ liệu vị trí, dữ liệu vận hành, sự kiện và phản hồi thiết bị để đưa vào đúng tuyến xử lý \\\hline
+Lưu trữ nghiệp vụ & Ghi thông tin thiết bị, phương tiện, cảnh báo và dữ liệu quản lý vào \texttt{PostgreSQL} \\\hline
+Lưu trữ theo thời gian và nhật ký & Ghi dữ liệu đo theo thời gian vào \texttt{VictoriaMetrics} và nhật ký vận hành vào \texttt{VictoriaLogs} \\\hline
+Cung cấp thông tin cho giao diện & Lớp xử lý phía máy chủ truy vấn dữ liệu, trả kết quả cho giao diện và đẩy cập nhật mới khi cần \\\hline
+\end{longtable}
+}
+\textbf{a, Tuyến tiếp nhận và xử lý dữ liệu}
+
+{\thesissetfigureid{4.12}{condensed-r2-hinh-4-12-tuyen-tiep-nhan-xu-ly-luu-tru-va-khai-thac-du-lieu-phia-may-chu}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/figures-condensed-r2/09-chuong-4-trien-khai-cloud-hinh-4-15.png}}
+\caption{Tuyến tiếp nhận, xử lý, lưu trữ và khai thác dữ liệu phía máy chủ}
+\label{fig:condensed-r2-hinh-4-12-tuyen-tiep-nhan-xu-ly-luu-tru-va-khai-thac-du-lieu-phia-may-chu}
+\end{figure}
+}
+Hình 4.12 thể hiện đường đi chính của dữ liệu từ thiết bị đến giao diện. Bản tin từ xe được đưa vào \texttt{EMQX}; sau đó \texttt{MQTT\ Bridge} nhận bản tin, kiểm tra cấu trúc, tách phần cần lưu và chuyển tiếp thông tin cần thiết sang các lớp lưu trữ và xử lý tiếp theo. Nhờ vậy, tuyến nhận dữ liệu được giữ gọn và tách khỏi phần phục vụ tra cứu, hiển thị.
+
+\textbf{b, Tổ chức các dịch vụ triển khai}
+
+{\thesissetfigureid{4.13}{condensed-r2-hinh-4-13-cac-nhom-chuc-nang-chinh-trong-khong-gian-trien-khai-phia-may-chu}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/figures-condensed-r2/09-chuong-4-trien-khai-cloud-hinh-4-16.png}}
+\caption{Các nhóm chức năng chính trong không gian triển khai phía máy chủ}
+\label{fig:condensed-r2-hinh-4-13-cac-nhom-chuc-nang-chinh-trong-khong-gian-trien-khai-phia-may-chu}
+\end{figure}
+}
+Ở mức triển khai thực tế, các dịch vụ được chia thành ba nhóm:
+
+\begin{itemize}
+\tightlist
+\item
+  Nhóm nhận dữ liệu MQTT: \texttt{EMQX} và \texttt{MQTT\ Bridge}.
+\item
+  Nhóm lưu trữ: \texttt{PostgreSQL}, \texttt{VictoriaMetrics} và \texttt{VictoriaLogs}.
+\item
+  Nhóm xử lý và cung cấp dữ liệu: backend viết bằng \texttt{Express} và \texttt{TypeScript}.
+\end{itemize}
+
+Các dịch vụ này được đóng gói riêng bằng \texttt{Docker} (công nghệ đóng gói ứng dụng cùng môi trường chạy) và tổ chức khởi động theo từng nhóm bằng \texttt{Docker\ Compose} (công cụ khai báo và chạy nhiều dịch vụ liên quan trong cùng một cấu hình). Theo cách này, mỗi thành phần như backend, cầu nối \texttt{MQTT} hay giao diện web đều có thể cập nhật, khởi động lại và theo dõi trạng thái tương đối độc lập, nên việc khoanh vùng lỗi trong quá trình vận hành thuận tiện hơn.
+
+Ở mức triển khai, đồ án cũng đã xây dựng tuyến \texttt{CI/CD} (chuỗi tự động kiểm tra, đóng gói và đưa phiên bản mới lên môi trường chạy). Cụ thể, \texttt{GitHub\ Actions} (dịch vụ tự động hóa đi kèm kho mã nguồn GitHub) được dùng để chạy các bước kiểm tra, dựng gói triển khai \texttt{Docker} cho từng dịch vụ và đẩy các gói này lên \texttt{Docker\ Hub} (kho lưu trữ gói triển khai Docker dùng để phát hành và lấy lại phiên bản triển khai). Từ đó, máy chủ có thể lấy đúng gói dịch vụ tương ứng để cập nhật hệ thống mà không cần thao tác dựng lại thủ công trên máy triển khai.
+
+\subsubsection{4.2.3. Giao diện quản lý -- Management interface}\label{giao-diux1ec7n-quux1ea3n-luxfd-management-interface}
+
+Ở phía giao diện quản lý, dữ liệu từ máy chủ được đưa lên giao diện web theo đúng các thao tác mà người quản lý thường dùng. Thay vì dồn toàn bộ thông tin kỹ thuật lên một trang, giao diện được tách thành các màn hình riêng. Giao diện được xây dựng theo dạng trang quản lý trên web; vị trí xe được hiển thị trên nền bản đồ số, còn các trạng thái mới được cập nhật liên tục lên màn hình khi hệ thống nhận thêm dữ liệu từ thiết bị.
+
+\textbf{a, Màn hình danh sách thiết bị}
+
+{\thesissetfigureid{4.14}{condensed-r2-hinh-4-14-man-hinh-danh-sach-thiet-bi-voi-the-tong-quan-bo-loc-va-bang-tra-cuu-nhanh}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/result/anh-bien-tap-tu-nguon-that-r2/giao-dien-danh-sach-thiet-bi-thuc-te.png}}
+\caption{Màn hình danh sách thiết bị với thẻ tổng quan, bộ lọc và bảng tra cứu nhanh}
+\label{fig:condensed-r2-hinh-4-14-man-hinh-danh-sach-thiet-bi-voi-the-tong-quan-bo-loc-va-bang-tra-cuu-nhanh}
+\end{figure}
+}
+Màn hình này dùng để nhìn nhanh tình trạng toàn bộ thiết bị đang quản lý. Các thẻ tổng hợp ở phía trên cho biết số thiết bị còn kết nối, chậm nhịp hoặc mất kết nối; phía dưới là bảng danh sách để tìm theo mã thiết bị, lọc theo trạng thái và mở chi tiết đúng xe cần kiểm tra. Cách tổ chức này phù hợp với thao tác hằng ngày, khi nhu cầu trước hết là biết thiết bị nào đang ổn định và thiết bị nào cần chú ý.
+
+\textbf{b, Màn hình bản đồ theo dõi}
+
+{\thesissetfigureid{4.15}{condensed-r2-hinh-4-15-man-hinh-ban-do-theo-doi-voi-vi-tri-xe-bang-tom-tat-o-ben-trai-va-dai-thong-tin-nhanh-o-ben-phai}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/result/anh-bien-tap-tu-nguon-that-r2/giao-dien-ban-do-theo-doi-xe-thuc-te.png}}
+\caption{Màn hình bản đồ theo dõi với vị trí xe, bảng tóm tắt ở bên trái và dải thông tin nhanh ở bên phải}
+\label{fig:condensed-r2-hinh-4-15-man-hinh-ban-do-theo-doi-voi-vi-tri-xe-bang-tom-tat-o-ben-trai-va-dai-thong-tin-nhanh-o-ben-phai}
+\end{figure}
+}
+Màn hình bản đồ là nơi theo dõi trực tiếp quá trình vận hành. Vị trí xe được đặt trên cùng một nền bản đồ; vùng bên trái giúp rà nhanh tình trạng toàn đội, còn dải thông tin bên phải cho biết ngay trạng thái xe, trạng thái thiết bị, kết nối và các thông số nhanh của xe đang chọn. Nhờ đó, người quản lý có thể đối chiếu vị trí với trạng thái vận hành mà không phải mở sâu từng trang.
+
+\textbf{c, Màn hình chi tiết thiết bị}
+
+{\thesissetfigureid{4.16}{condensed-r2-hinh-4-16-man-hinh-chi-tiet-thiet-bi-voi-trang-thai-xe-du-lieu-van-hanh-va-tinh-trang-obd}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/result/anh-bien-tap-tu-nguon-that-r2/giao-dien-chi-tiet-thiet-bi-thuc-te.png}}
+\caption{Màn hình chi tiết thiết bị với trạng thái xe, dữ liệu vận hành và tình trạng OBD}
+\label{fig:condensed-r2-hinh-4-16-man-hinh-chi-tiet-thiet-bi-voi-trang-thai-xe-du-lieu-van-hanh-va-tinh-trang-obd}
+\end{figure}
+}
+Khi cần xem kỹ một xe cụ thể, giao diện chuyển sang trang chi tiết. Tại đây, thông tin được gom theo từng nhóm như xe - thiết bị - kết nối, telemetry và trạng thái \texttt{OBD}, nên thuận tiện cho việc đối chiếu khi có bất thường. Màn hình này không nhằm theo dõi toàn đội, mà phục vụ bước kiểm tra sâu trên một thiết bị.
+
+\textbf{d, Màn hình hàng đợi cảnh báo}
+
+{\thesissetfigureid{4.17}{condensed-r2-hinh-4-17-man-hinh-hang-doi-canh-bao-voi-bo-loc-muc-do-va-trang-thai-xu-ly}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/result/anh-bien-tap-tu-nguon-that-r2/giao-dien-hang-doi-canh-bao-thuc-te.png}}
+\caption{Màn hình hàng đợi cảnh báo với bộ lọc, mức độ và trạng thái xử lý}
+\label{fig:condensed-r2-hinh-4-17-man-hinh-hang-doi-canh-bao-voi-bo-loc-muc-do-va-trang-thai-xu-ly}
+\end{figure}
+}
+Với các sự kiện cần xử lý, giao diện đưa về một hàng đợi riêng thay vì trộn lẫn với trang theo dõi. Người vận hành có thể lọc theo mức độ, trạng thái và nguồn cảnh báo, sau đó mở chi tiết, xác nhận hoặc đánh dấu đã giải quyết. Cách tách riêng màn hình cảnh báo giúp việc theo dõi vận hành và việc xử lý sự cố không chồng lấn lên nhau.
+
+\subsection{4.3. Kết quả kiểm thử và đo lường -- Measurement and Result}\label{kux1ebft-quux1ea3-kiux1ec3m-thux1eed-vuxe0-ux111o-lux1b0ux1eddng-measurement-and-result}
+
+Sau khi hoàn thiện nguyên mẫu, phần đo kiểm được thực hiện để kiểm tra năm nội dung chính: mức tiêu thụ điện khi xe đỗ, khả năng lên dữ liệu ở đầu chuyến, độ bám hành trình của vị trí, thời gian xuất hiện cảnh báo và độ ổn định của toàn tuyến từ thiết bị đến giao diện. Các phép đo được thực hiện trên bàn thử và trên xe, tùy theo từng nhóm chỉ tiêu cần quan sát.
+
+{\thesissettableid{4.3}{condensed-r2-bang-4-3-co-so-cac-phep-do-chinh}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 4\tabcolsep) * \real{0.1561}}|L{(\linewidth - 4\tabcolsep) * \real{0.4393}}|L{(\linewidth - 4\tabcolsep) * \real{0.4046}}|}
+\caption{Cơ sở các phép đo chính}\label{tab:condensed-r2-bang-4-3-co-so-cac-phep-do-chinh}\\
+\hline
+\textbf{Nhóm đo} & \textbf{Điều kiện đo} & \textbf{Căn cứ đánh giá} \\
+\hline
+\endfirsthead
+\caption[]{Cơ sở các phép đo chính (tiếp theo)}\\
+\hline
+\textbf{Nhóm đo} & \textbf{Điều kiện đo} & \textbf{Căn cứ đánh giá} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Nguồn và tiêu thụ điện & Cấp nguồn DC mô phỏng nguồn xe, theo dõi dòng ở các pha hoạt động và ngủ sâu & Kiểm tra mức ảnh hưởng lên ắc quy và hiệu quả tiết kiệm điện khi xe đỗ \\\hline
+Lấy dữ liệu xe & Ghép bộ đọc dữ liệu xe, đọc lặp các tham số vận hành cơ bản & Kiểm tra thời gian nối lại và khả năng duy trì dữ liệu OBD-II \\\hline
+Định vị và hành trình & Lắp trên xe, chạy ngoài trời và đối chiếu trên bản đồ & Kiểm tra thời gian lên vị trí và khả năng bám hành trình thực tế \\\hline
+Truyền dữ liệu và giao diện & So sánh thời điểm thiết bị gửi dữ liệu với thời điểm giao diện cập nhật & Kiểm tra độ trễ của toàn tuyến từ thiết bị đến màn hình quản lý \\\hline
+Cảnh báo và xử lý sự kiện & Tạo vùng thử, trạng thái đỗ và các kịch bản mất mạng ngắn & Kiểm tra khả năng phát hiện sự kiện và đưa cảnh báo ra giao diện \\\hline
+\end{longtable}
+}
+Từ các phép đo trên, có thể đối chiếu mức đáp ứng của hệ thống theo các mục tiêu vận hành chính như trong Bảng 4.4.
+
+{\thesissettableid{4.4}{condensed-r2-bang-4-4-doi-chieu-ket-qua-kiem-thu-voi-muc-tieu-van-hanh}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 4\tabcolsep) * \real{0.3600}}|L{(\linewidth - 4\tabcolsep) * \real{0.5000}}|L{(\linewidth - 4\tabcolsep) * \real{0.1400}}|}
+\caption{Đối chiếu kết quả kiểm thử với mục tiêu vận hành}\label{tab:condensed-r2-bang-4-4-doi-chieu-ket-qua-kiem-thu-voi-muc-tieu-van-hanh}\\
+\hline
+\textbf{Mục tiêu vận hành} & \textbf{Kết quả quan sát chính} & \textbf{Đánh giá} \\
+\hline
+\endfirsthead
+\caption[]{Đối chiếu kết quả kiểm thử với mục tiêu vận hành (tiếp theo)}\\
+\hline
+\textbf{Mục tiêu vận hành} & \textbf{Kết quả quan sát chính} & \textbf{Đánh giá} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Thiết bị phải trở lại trạng thái làm việc đủ sớm ở đầu chuyến & Thiết bị khởi tạo nhanh, dữ liệu xe và vị trí đều xuất hiện ngay từ giai đoạn đầu chuyến & Đạt \\\hline
+Dữ liệu vị trí phải bám được hành trình thực tế & Quỹ đạo hiển thị liên tục trên bản đồ và bám đúng hướng di chuyển của xe & Đạt \\\hline
+Dữ liệu giám sát phải lên giao diện gần thời gian thực & Giao diện cập nhật nhanh, đủ để theo dõi trạng thái xe trong quá trình vận hành & Đạt \\\hline
+Khi mất kết nối ngắn, dữ liệu không được mất hẳn & Thiết bị giữ dữ liệu cục bộ và gửi bù sau khi kết nối di động được khôi phục & Đạt \\\hline
+Cảnh báo phải xuất hiện đủ sớm để người quản lý xử lý & Cảnh báo được đưa lên giao diện khi xe vừa vượt ra khỏi vùng thử & Đạt \\\hline
+Toàn tuyến phải giữ được ổn định khi nhiều thiết bị cùng làm việc & Hệ thống vẫn duy trì tiếp nhận, xử lý và hiển thị ổn định ở quy mô thử nghiệm & Đạt \\\hline
+\end{longtable}
+}
+Nhìn chung, các mục tiêu vận hành chính đều đã được đáp ứng. Thiết bị trở lại trạng thái làm việc trong thời gian ngắn, dữ liệu xe và vị trí xuất hiện ngay từ đầu chuyến, giao diện theo kịp diễn biến trên xe và cảnh báo vẫn được đưa ra đủ sớm để phục vụ xử lý.
+
+Các đồ thị từ Hình 4.18 đến Hình 4.22 làm rõ hơn đặc điểm vận hành của nguyên mẫu theo từng nhóm chỉ tiêu.
+
+{\thesissetfigureid{4.18}{condensed-r2-hinh-4-18-dong-tieu-thu-thay-doi-ro-theo-tung-pha-van-hanh-trong-do-muc-ngu-sau-giam-rat-manh}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-23.png}}
+\caption{Dòng tiêu thụ thay đổi rõ theo từng pha vận hành, trong đó mức ngủ sâu giảm rất mạnh}
+\label{fig:condensed-r2-hinh-4-18-dong-tieu-thu-thay-doi-ro-theo-tung-pha-van-hanh-trong-do-muc-ngu-sau-giam-rat-manh}
+\end{figure}
+}
+{\thesissetfigureid{4.19}{condensed-r2-hinh-4-19-phan-lon-cac-lan-noi-lai-bo-doc-du-lieu-xe-hoan-thanh-trong-khoang-3-5-giay}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-26.png}}
+\caption{Phần lớn các lần nối lại bộ đọc dữ liệu xe hoàn thành trong khoảng 3-5 giây}
+\label{fig:condensed-r2-hinh-4-19-phan-lon-cac-lan-noi-lai-bo-doc-du-lieu-xe-hoan-thanh-trong-khoang-3-5-giay}
+\end{figure}
+}
+{\thesissetfigureid{4.20}{condensed-r2-hinh-4-20-o-trang-thai-texttt-warm-start}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-27.png}}
+\caption{Ở trạng thái Warm Start hoặc Hot Start, thời gian lấy lại vị trí ngắn hơn rõ rệt so với Cold Start}
+\label{fig:condensed-r2-hinh-4-20-o-trang-thai-texttt-warm-start}
+\end{figure}
+}
+
+{\thesissetfigureid{4.21}{condensed-r2-hinh-4-21-phan-lon-do-tre-toan-tuyen-nam-o-nhanh-truyen-qua-mang-di-dong}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-30.png}}
+\caption{Phần lớn độ trễ toàn tuyến nằm ở nhánh truyền qua mạng di động}
+\label{fig:condensed-r2-hinh-4-21-phan-lon-do-tre-toan-tuyen-nam-o-nhanh-truyen-qua-mang-di-dong}
+\end{figure}
+}
+{\thesissetfigureid{4.22}{condensed-r2-hinh-4-22-muc-dap-ung-cua-cac-chi-tieu-chinh-deu-giu-gan-sat-muc-tieu-thiet-ke-ban-dau}
+\begin{figure}[H]
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-38.png}}
+\caption{Mức đáp ứng của các chỉ tiêu chính đều giữ gần sát mục tiêu thiết kế ban đầu}
+\label{fig:condensed-r2-hinh-4-22-muc-dap-ung-cua-cac-chi-tieu-chinh-deu-giu-gan-sat-muc-tieu-thiet-ke-ban-dau}
+\end{figure}
+}
+Nhìn chung, các đồ thị cho thấy thiết bị giảm mạnh tiêu thụ điện khi vào ngủ sâu, các nhánh dữ liệu và định vị phục hồi đủ nhanh khi xe bắt đầu hoạt động trở lại, còn độ trễ lớn nhất vẫn nằm ở tuyến truyền qua mạng di động.
+
+Các số liệu cụ thể của quá trình đo kiểm được tổng hợp lại trong Bảng 4.5.
+
+{\thesissettableid{4.5}{condensed-r2-bang-4-5-cac-so-lieu-do-kiem-chinh}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 2\tabcolsep) * \real{0.5641}}|L{(\linewidth - 2\tabcolsep) * \real{0.4359}}|}
+\caption{Các số liệu đo kiểm chính}\label{tab:condensed-r2-bang-4-5-cac-so-lieu-do-kiem-chinh}\\
+\hline
+\textbf{Hạng mục} & \textbf{Kết quả đạt được} \\
+\hline
+\endfirsthead
+\caption[]{Các số liệu đo kiểm chính (tiếp theo)}\\
+\hline
+\textbf{Hạng mục} & \textbf{Kết quả đạt được} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Dòng ngủ sâu & \textasciitilde500 µA (\textasciitilde0,5 mA) \\\hline
+Dòng hoạt động trung bình & \textasciitilde180-220 mA \\\hline
+Thời lượng pin dự phòng & \textasciitilde2,6-3,0 giờ \\\hline
+Độ chính xác vị trí ngoài trời & \textasciitilde2-3 m \\\hline
+Thời gian nối lại bộ đọc dữ liệu xe & \textasciitilde4 s \\\hline
+Thời gian phản hồi dữ liệu xe & \textasciitilde60-75 ms \\\hline
+Độ trễ truyền dữ liệu qua mạng di động & \textasciitilde120-180 ms \\\hline
+Thời gian khôi phục kết nối & \textasciitilde15-30 s \\\hline
+Thời gian cập nhật bản đồ gần thời gian thực & \textasciitilde1-2 s \\\hline
+Thời gian xuất hiện cảnh báo vượt vùng & \textasciitilde5-7 s \\\hline
+Thời gian phản hồi máy chủ & \textasciitilde95-200 ms \\\hline
+Mức tải đồng thời đã kiểm tra & 50 thiết bị, tải hệ thống dưới 45\% \\\hline
+\end{longtable}
+}
+\subsection{4.4. Đối chiếu với mục tiêu của đồ án -- Comparison against project objectives}\label{ux111ux1ed1i-chiux1ebfu-vux1edbi-mux1ee5c-tiuxeau-cux1ee7a-ux111ux1ed3-uxe1n-comparison-against-project-objectives}
+
+Trước hết là nhóm chỉ tiêu thiết kế. nguyên mẫu đã đáp ứng đầy đủ các yêu cầu cốt lõi về nguồn cấp, nền điều khiển, cách lấy dữ liệu từ xe, nhóm tham số cần theo dõi và các chức năng chính của hệ thống.
+
+{\thesissettableid{4.6}{condensed-r2-bang-4-6-doi-chieu-cac-chi-tieu-thiet-ke-theo-phu-luc-i}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 6\tabcolsep) * \real{0.1500}}|L{(\linewidth - 6\tabcolsep) * \real{0.2700}}|L{(\linewidth - 6\tabcolsep) * \real{0.4400}}|L{(\linewidth - 6\tabcolsep) * \real{0.1400}}|}
+\caption{Đối chiếu các chỉ tiêu thiết kế theo Phụ lục I}\label{tab:condensed-r2-bang-4-6-doi-chieu-cac-chi-tieu-thiet-ke-theo-phu-luc-i}\\
+\hline
+\textbf{Chỉ tiêu thiết kế} & \textbf{Mức đặt ra trong phụ lục} & \textbf{Kết quả của nguyên mẫu hiện tại} & \textbf{Mức đáp ứng} \\
+\hline
+\endfirsthead
+\caption[]{Đối chiếu các chỉ tiêu thiết kế theo Phụ lục I (tiếp theo)}\\
+\hline
+\textbf{Chỉ tiêu thiết kế} & \textbf{Mức đặt ra trong phụ lục} & \textbf{Kết quả của nguyên mẫu hiện tại} & \textbf{Mức đáp ứng} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Nguồn cấp & 12-24 VDC & Thiết bị làm việc ổn định trên nguồn xe 12-24 VDC, có nguồn dự phòng và dòng ngủ sâu khoảng 0,5 mA & Đạt \\\hline
+MCU điều khiển chính & Nền điều khiển họ ESP & Nguyên mẫu được triển khai trên \texttt{ESP32-S3} và đã điều phối ổn định các nhánh thu dữ liệu, truyền bản tin và quản lý năng lượng & Đạt \\\hline
+Giao tiếp với phương tiện giao thông & Chuẩn \texttt{OBD-II} & Đọc được dữ liệu xe qua bộ đọc \texttt{OBD-II} không dây; thời gian nối lại ở mức khoảng 4 s & Đạt \\\hline
+Tham số quản lý & Tọa độ \texttt{GPS}, tốc độ hoạt động & Theo dõi được vị trí, tốc độ và nhóm dữ liệu vận hành cơ bản của xe trên giao diện & Đạt \\\hline
+Tính năng chính & Quãng đường, thời gian sử dụng, ước tính chi phí; cảnh báo sự kiện cơ bản & Đã tổng hợp được quãng đường, thời gian sử dụng và các cảnh báo cơ bản, ước tính chi phí & Đạt \\\hline
+\end{longtable}
+}
+Tiếp theo là nhóm ràng buộc thiết kế. Phần này tập trung vào mức phù hợp của nguyên mẫu với chi phí, điều kiện kiểm chứng, khả năng gia công và các chuẩn được dùng làm cơ sở thiết kế.
+
+{\thesissettableid{4.7}{condensed-r2-bang-4-7-doi-chieu-cac-rang-buoc-thiet-ke-theo-phu-luc-i}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 6\tabcolsep) * \real{0.1534}}|L{(\linewidth - 6\tabcolsep) * \real{0.1640}}|L{(\linewidth - 6\tabcolsep) * \real{0.6243}}|L{(\linewidth - 6\tabcolsep) * \real{0.0582}}|}
+\caption{Đối chiếu các ràng buộc thiết kế theo Phụ lục I}\label{tab:condensed-r2-bang-4-7-doi-chieu-cac-rang-buoc-thiet-ke-theo-phu-luc-i}\\
+\hline
+\textbf{Ràng buộc thiết kế} & \textbf{Mức đặt ra trong phụ lục} & \textbf{Kết quả của nguyên mẫu hiện tại} & \textbf{Mức đáp ứng} \\
+\hline
+\endfirsthead
+\caption[]{Đối chiếu các ràng buộc thiết kế theo Phụ lục I (tiếp theo)}\\
+\hline
+\textbf{Ràng buộc thiết kế} & \textbf{Mức đặt ra trong phụ lục} & \textbf{Kết quả của nguyên mẫu hiện tại} & \textbf{Mức đáp ứng} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Chi phí giải pháp & Không vượt 20.000.000 VND & Chi phí đầu tư ban đầu của nguyên mẫu khoảng 2.214.000 VND; nếu tính thêm một tháng cước mạng thì khoảng 2.222.000 VND & Đạt \\\hline
+Điều kiện hoạt động phần cứng & Thử nghiệm tại phòng thí nghiệm & Đã đo kiểm trên bàn thử trong phòng thí nghiệm và lắp thử trên xe thật & Đạt \\\hline
+Khả năng gia công & \texttt{PCB}, vỏ in 3D & Đã thiết kế và chế tạo \texttt{PCB} chuyên dụng, hoàn thiện vỏ in 3D và lắp thành thiết bị hoàn chỉnh & Đạt \\\hline
+Chuẩn tham chiếu & \texttt{IPC-2221}, \texttt{IEC\ 60664-1} & Đã dùng làm cơ sở cho bố trí mạch nguồn và khoảng cách cách điện cơ bản & Đạt \\\hline
+\end{longtable}
+}
+Nhìn theo các chỉ tiêu đã đặt ra trong phụ lục, nguyên mẫu hiện tại đã đạt phần cốt lõi của đồ án: lắp được trên xe thật, làm việc trên nguồn 12-24 VDC, thu được dữ liệu vị trí và dữ liệu vận hành cơ bản, truyền dữ liệu về máy chủ và đưa lên giao diện quản lý. Những phần còn lại chủ yếu nằm ở kiểm chứng dài hạn và mở rộng trên nhiều dòng xe hơn.
+
+\chapterheading{CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUYẾN NGHỊ - EVALUATION AND RECOMMENDATION}\label{chux1b0ux1a1ng-5.-ux111uxe1nh-giuxe1-vuxe0-khuyux1ebfn-nghux1ecb---evaluation-and-recommendation}
+
+\subsection{5.1. Đánh giá hiệu năng}\label{ux111uxe1nh-giuxe1-hiux1ec7u-nux103ng}
+
+Kết quả ở Chương 4 cho thấy nguyên mẫu đã hình thành đầy đủ tuyến làm việc từ xe đến giao diện quản lý.
+
+{\thesissettableid{5.1}{condensed-r2-bang-5-1-danh-gia-muc-dap-ung-theo-cac-chi-tieu-chinh-cua-do-an}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 6\tabcolsep) * \real{0.1600}}|L{(\linewidth - 6\tabcolsep) * \real{0.2800}}|L{(\linewidth - 6\tabcolsep) * \real{0.4200}}|L{(\linewidth - 6\tabcolsep) * \real{0.1400}}|}
+\caption{Đánh giá mức đáp ứng theo các chỉ tiêu chính của đồ án}\label{tab:condensed-r2-bang-5-1-danh-gia-muc-dap-ung-theo-cac-chi-tieu-chinh-cua-do-an}\\
+\hline
+\textbf{Nhóm chỉ tiêu} & \textbf{Mục tiêu theo đồ án} & \textbf{Kết quả đạt được của nguyên mẫu} & \textbf{Đánh giá} \\
+\hline
+\endfirsthead
+\caption[]{Đánh giá mức đáp ứng theo các chỉ tiêu chính của đồ án (tiếp theo)}\\
+\hline
+\textbf{Nhóm chỉ tiêu} & \textbf{Mục tiêu theo đồ án} & \textbf{Kết quả đạt được của nguyên mẫu} & \textbf{Đánh giá} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Nguồn và lắp đặt & Thiết bị làm việc trên nguồn 12-24 VDC, gọn và lắp được trên xe thật & Thiết bị làm việc ổn định trên nguồn 12-24 VDC, có nguồn dự phòng, đã hoàn thiện PCB và vỏ để lắp thử trên xe & Đạt \\\hline
+Thu nhận dữ liệu từ xe & Lấy được dữ liệu qua OBD-II, theo dõi được vị trí và tốc độ & Đã đọc được dữ liệu xe qua OBD-II không dây, theo dõi được vị trí, tốc độ và dữ liệu vận hành cơ bản & Đạt \\\hline
+Trạng thái năng lượng & Giữ được giám sát nhưng không gây hao điện quá mức khi xe đỗ & Dòng ngủ sâu khoảng 0,5 mA; các nhánh tiêu thụ lớn được hạ xuống khi xe đỗ dài & Đạt \\\hline
+Truyền dữ liệu và cảnh báo & Dữ liệu lên giao diện đủ sớm; cảnh báo xuất hiện còn giá trị sử dụng & Độ trễ toàn tuyến khoảng 120-180 ms; cảnh báo vượt vùng xuất hiện khoảng 5-7 s & Đạt \\\hline
+Chức năng khai thác & Theo dõi quãng đường, thời gian sử dụng, ước tính chi phí và sự kiện vận hành & Đã tổng hợp được quãng đường, thời gian sử dụng, ước tính chi phí và các cảnh báo cơ bản trên giao diện quản lý & Đạt \\\hline
+Mức ổn định toàn tuyến & Thiết bị, máy chủ và giao diện làm việc đồng thời thành một tuyến thống nhất & Tuyến dữ liệu từ xe đến giao diện vận hành ổn định; hệ thống đã kiểm tra ở mức 50 thiết bị, tải hệ thống dưới 45\% & Đạt \\\hline
+\end{longtable}
+}
+Từ Bảng 5.1 có thể thấy các chức năng chính của đồ án đã được hình thành đầy đủ. Thiết bị đặt trên xe đã thu được dữ liệu cần thiết, dữ liệu được truyền về máy chủ, còn phía giao diện đã theo dõi được vị trí, trạng thái, cảnh báo, quãng đường, thời gian sử dụng và ước tính chi phí khai thác.
+
+Tuy vậy, mức đạt hiện tại vẫn là mức nguyên mẫu. Độ bền dài hạn, phạm vi tương thích trên nhiều dòng xe và khả năng vận hành ổn định ở quy mô lớn hơn vẫn cần được kiểm chứng thêm.
+
+\subsection{5.2. Đánh giá kinh tế và môi trường}\label{ux111uxe1nh-giuxe1-kinh-tux1ebf-vuxe0-muxf4i-trux1b0ux1eddng}
+
+Về kinh tế, nguyên mẫu hiện tại thấp hơn khá xa so với giới hạn chi phí của đồ án. Chi phí phần cứng cho một thiết bị khoảng \textbf{1.514.000 VND}; chi phí SIM dữ liệu khoảng \textbf{8.000 VND/tháng/thiết bị}; chi phí \texttt{VPS} (máy chủ ảo) phục vụ giai đoạn thử nghiệm khoảng \textbf{700.000 VND}. Nếu tính theo chi phí đầu tư ban đầu, tổng mức triển khai của nguyên mẫu khoảng \textbf{2.214.000 VND}; nếu tính thêm một tháng cước mạng thì khoảng \textbf{2.222.000 VND}, vẫn thấp hơn nhiều so với mức \textbf{20.000.000 VND} nêu trong Phụ lục I.
+
+Với cấu hình hiện tại, phần chi phí tăng theo số xe chủ yếu nằm ở thiết bị gắn trên xe và SIM dữ liệu, còn \texttt{VPS} và giao diện có thể dùng chung cho nhiều phương tiện. Điều đó cho thấy phương án của đồ án phù hợp hơn với đội xe nhỏ và vừa, nơi chi phí đầu tư ban đầu cần giữ ở mức thấp nhưng vẫn phải bảo đảm đủ dữ liệu để theo dõi và khai thác.
+
+Về môi trường, tác động trực tiếp của nguyên mẫu chủ yếu nằm ở phần linh kiện điện tử, vỏ thiết bị và pin dự phòng. Trong cấu hình hiện tại, thiết bị sử dụng pin sạc \texttt{18650} làm nguồn dự phòng nên có thể nạp lại nhiều lần trong quá trình thử nghiệm, không phát sinh dạng pin dùng một lần.
+
+\subsection{5.3. Đánh giá rủi ro và biện pháp giảm thiểu}\label{ux111uxe1nh-giuxe1-rux1ee7i-ro-vuxe0-biux1ec7n-phuxe1p-giux1ea3m-thiux1ec3u}
+
+Từ quá trình triển khai và đo kiểm, bốn rủi ro kỹ thuật cần quan tâm nhất có thể rút ra như sau:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Biến động của mạng di động:} Khi xe đi qua khu vực sóng yếu, bản tin có thể đến chậm hoặc bị gián đoạn tạm thời. Đồ án đã giảm rủi ro này bằng cách dùng MQTT làm tuyến truyền chính, kết hợp lưu đệm cục bộ và gửi bù sau khi kết nối phục hồi. Tuy nhiên, nếu triển khai rộng hơn, vẫn cần đo thêm trên nhiều vùng sóng để xác định biên độ dao động thực tế của độ trễ.
+\item
+  \textbf{Ảnh hưởng lên ắc quy khi xe đỗ lâu:} Đây là rủi ro gắn trực tiếp với bản chất của thiết bị lắp trên xe. Nếu modem, GNSS và nhánh thu dữ liệu luôn duy trì trạng thái hoạt động, dòng nền sẽ tích lũy theo thời gian và ảnh hưởng đến khả năng khởi động. Đồ án xử lý bằng cách tổ chức các pha vận hành và đưa phần lớn tải lớn về ngủ sâu khi xe đỗ. Kết quả dòng ngủ sâu khoảng 0,5 mA cho thấy hướng xử lý này là phù hợp, nhưng vẫn cần kiểm chứng dài hơn trên nhiều loại ắc quy.
+\item
+  \textbf{Bỏ sót hoặc báo chưa ổn định ở trạng thái xe dừng:} Khi xe đỗ, tín hiệu chuyển động nhỏ, rung nền cơ khí hoặc điều kiện mặt đường có thể làm thay đổi độ nhạy phát hiện. Nguyên mẫu hiện tại đã kết hợp trạng thái đỗ, tín hiệu IMU và mốc thời gian để quyết định đánh thức và phát cảnh báo. Dù vậy, phần ngưỡng và điều kiện kích hoạt vẫn cần hiệu chỉnh thêm trên nhiều tình huống thực tế để giảm nguy cơ báo thiếu ổn định.
+\item
+  \textbf{Khác biệt dữ liệu OBD-II khi mở rộng phạm vi khai thác:} Với nhóm thông số cơ bản mà đồ án đang sử dụng, khác biệt giữa các dòng xe không gặp vấn đề gì. Điểm này chỉ trở nên rõ hơn khi cần đọc thêm các tham số sâu hoặc muốn đồng nhất tập dữ liệu trên nhiều dòng xe. Vì vậy, nếu mở rộng phạm vi khai thác sau này, phần tương thích OBD-II vẫn cần được kiểm tra thêm theo từng nhóm phương tiện.
+\end{itemize}
+
+\subsection{5.4. Khuyến nghị cho tương lai}\label{khuyux1ebfn-nghux1ecb-cho-tux1b0ux1a1ng-lai}
+
+Từ những phần đã đạt và những giới hạn còn lại, các hướng phát triển tiếp theo nên ưu tiên theo bốn nhóm:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Kiểm chứng dài hạn trên xe thật:} Cần mở rộng đo kiểm theo thời gian dài hơn để xác nhận độ ổn định của nguồn, OBD-II, GNSS và luồng cảnh báo trong điều kiện vận hành liên tục.
+\item
+  \textbf{Hoàn thiện lớp đối soát và báo cáo khai thác:} Trên nền quãng đường, thời gian sử dụng và ước tính chi phí đã có, bước tiếp theo là tổ chức thêm các báo cáo theo chuyến, theo ngày và theo xe để phục vụ đối soát và tổng hợp khai thác thuận tiện hơn.
+\item
+  \textbf{Mở rộng phạm vi tương thích:} Cần kiểm tra trên nhiều dòng xe hơn để đánh giá rõ hơn tập dữ liệu OBD-II có thể lấy được, mức ổn định của kết nối và những khác biệt cần xử lý ở từng nhóm phương tiện.
+\item
+  \textbf{Tăng mức hoàn thiện khi triển khai thực tế:} Bao gồm tối ưu thêm chiến lược năng lượng, hoàn thiện phần cứng cho việc lắp lặp lại trên nhiều xe, tăng bảo mật đường truyền và bổ sung quản lý cấu hình từ xa cho thiết bị.
+\end{itemize}
+
+\chapterheading{CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM -- REFLECTION AND CASE-STUDIES}\label{chux1b0ux1a1ng-6.-phux1ea3n-hux1ed3i-vuxe0-buxe0i-hux1ecdc-kinh-nghiux1ec7m-reflection-and-case-studies}
+
+\subsection{6.1. Ứng dụng kiến thức kỹ thuật -- Earlier course work}\label{ux1ee9ng-dux1ee5ng-kiux1ebfn-thux1ee9c-kux1ef9-thuux1eadt-earlier-course-work}
+
+Trong quá trình thực hiện đồ án, sinh viên đã phải vận dụng đồng thời nhiều mảng kiến thức kỹ thuật đã được học để ghép thành một hệ thống làm việc thống nhất. Những phần thể hiện rõ nhất gồm:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Nguồn điện và điện tử ứng dụng:} Kiến thức về nguồn một chiều, ổn áp, bảo vệ điện áp và tổ chức nhánh cấp nguồn được dùng để thiết kế thiết bị làm việc trên dải 12-24 VDC của xe, đồng thời giữ được chế độ ngủ sâu khi xe đỗ.
+\item
+  \textbf{Vi điều khiển và lập trình nhúng:} Kiến thức về họ \texttt{ESP}, giao tiếp nối tiếp, quản lý ngắt và tổ chức tác vụ được dùng để điều phối mô-đun định vị - truyền dữ liệu, bộ đọc \texttt{OBD-II}, cảm biến chuyển động và bộ nhớ đệm cục bộ trên cùng một thiết bị.
+\item
+  \textbf{Cảm biến và đo lường:} Kiến thức về cảm biến quán tính, đo điện áp và đọc dữ liệu trạng thái giúp thiết bị nhận biết chuyển động, theo dõi nguồn xe và giữ được các mốc cần thiết khi chuyển giữa hoạt động và ngủ sâu.
+\item
+  \textbf{Truyền thông dữ liệu và mạng:} Kiến thức về giao thức truyền bản tin, máy chủ tiếp nhận và tổ chức luồng dữ liệu được dùng để xây dựng tuyến truyền từ thiết bị về máy chủ, sau đó đưa dữ liệu ra giao diện theo dõi tập trung.
+\item
+  \textbf{Thiết kế hệ thống và tích hợp:} Kiến thức về phân rã chức năng, ghép mô-đun và kiểm chứng nguyên mẫu được dùng để nối ba phần thiết bị trên xe, máy chủ và giao diện thành một chuỗi làm việc liên tục.
+\end{itemize}
+
+Điều có ý nghĩa nhất từ quá trình này là kiến thức chỉ thật sự có giá trị khi đưa được vào một bài toán có ràng buộc cụ thể. Trong đồ án này, mỗi quyết định kỹ thuật đều phải đi kèm câu hỏi rất rõ: có lắp được trên xe thật hay không, có giữ được tiêu thụ điện thấp khi xe đỗ hay không, và dữ liệu có lên đủ sớm để còn giá trị khai thác hay không.
+
+\subsection{6.2. Giải quyết các vấn đề kỹ thuật phức tạp -- Complex engineering problems}\label{giux1ea3i-quyux1ebft-cuxe1c-vux1ea5n-ux111ux1ec1-kux1ef9-thuux1eadt-phux1ee9c-tux1ea1p-complex-engineering-problems}
+
+Trong quá trình thiết kế và triển khai, ba vấn đề kỹ thuật khó nhất của đồ án có thể tóm lại như sau:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Giữ được giám sát khi xe đỗ nhưng không làm hao điện quá mức}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Vấn đề:} Nếu vẫn giữ modem, định vị và nhánh xử lý chính hoạt động như lúc xe chạy, dòng tiêu thụ sẽ tích lũy theo thời gian và ảnh hưởng đến ắc quy xe.
+  \item
+    \textbf{Cách xử lý:} Đồ án tách thiết bị thành các pha vận hành khác nhau, chỉ giữ lại nhánh cần thiết khi xe đỗ và đưa phần lớn tải lớn về ngủ sâu. Kết quả đo cho thấy dòng ở trạng thái này còn khoảng 0,5 mA.
+  \end{itemize}
+\item
+  \textbf{Giữ được độ liên tục của dữ liệu khi mạng di động thay đổi}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Vấn đề:} Khi xe đi qua vùng sóng yếu hoặc mất kết nối ngắn, bản tin có thể lên chậm hoặc bị ngắt quãng nếu thiết bị chỉ gửi trực tiếp từng gói một.
+  \item
+    \textbf{Cách xử lý:} Đồ án tổ chức tách bước thu dữ liệu, bước lưu đệm và bước gửi bản tin. Nhờ đó, dữ liệu không mất hẳn khi mạng chập chờn và có thể gửi bù trở lại sau khi kết nối phục hồi.
+  \end{itemize}
+\item
+  \textbf{Lấy được dữ liệu từ xe nhưng vẫn giữ cách lắp đặt gọn và ít xâm lấn}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Vấn đề:} Nếu can thiệp sâu vào hệ điện hoặc bóc tách nhiều đường tín hiệu trên xe, thiết bị sẽ khó lắp lại, khó chuyển xe và khó phù hợp với bối cảnh khai thác thực tế.
+  \item
+    \textbf{Cách xử lý:} Đồ án chọn hướng lấy dữ liệu cơ bản qua \texttt{OBD-II} không dây, dùng nguồn lấy trực tiếp từ xe và giữ cấu hình phần cứng ở dạng gọn. Cách này không đi theo hướng đọc quá sâu, nhưng phù hợp hơn với mục tiêu quản lý và triển khai nguyên mẫu.
+  \end{itemize}
+\end{itemize}
+
+Nhìn lại quá trình xử lý ba điểm khó trên, có thể thấy giá trị của đồ án không theo đuổi một thiết bị thật nhiều tính năng, mà giữ được một thiết bị vận hành ổn định trong điều kiện thực tế.
+
+\subsection{6.3. Tác động đạo đức và xã hội -- Ethical and Social impacts}\label{tuxe1c-ux111ux1ed9ng-ux111ux1ea1o-ux111ux1ee9c-vuxe0-xuxe3-hux1ed9i-ethical-and-social-impacts}
+
+Đối với bài toán quản lý xe cho thuê tự lái, hệ thống của đồ án không chỉ dừng ở ý nghĩa kỹ thuật mà còn gắn trực tiếp với cách theo dõi phương tiện, cách sử dụng dữ liệu và trách nhiệm của đơn vị khai thác. Các tác động chính có thể nhìn theo ba mặt:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Tác động xã hội}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Thiết bị giúp người quản lý nắm được vị trí, trạng thái và cảnh báo của xe trên cùng một giao diện, nhờ đó việc theo dõi phương tiện bớt rời rạc hơn so với cách kiểm tra thủ công.
+  \item
+    Dữ liệu chuyến đi, thời gian sử dụng và cảnh báo cơ bản cũng giúp việc đối chiếu sau khai thác rõ ràng hơn giữa đơn vị cho thuê và người sử dụng xe.
+  \end{itemize}
+\item
+  \textbf{Tác động kinh tế}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Phương án nguyên mẫu có mức chi phí thấp hơn nhiều so với giới hạn 20.000.000 VND đã đặt ra, nên phù hợp hơn với đội xe nhỏ và vừa.
+  \item
+    Cách tổ chức theo ba lớp thiết bị, máy chủ và giao diện cũng cho phép dùng chung hạ tầng xử lý cho nhiều xe, nhờ đó chi phí tăng theo số lượng phương tiện chủ yếu nằm ở thiết bị và cước dữ liệu.
+  \end{itemize}
+\item
+  \textbf{Đạo đức nghề nghiệp và an toàn}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Dữ liệu vị trí và dữ liệu vận hành của xe là dữ liệu nhạy cảm trong khai thác thực tế, vì vậy việc sử dụng phải gắn với đúng mục đích quản lý, đúng thẩm quyền truy cập và phạm vi lưu trữ phù hợp.
+  \item
+    Về an toàn kỹ thuật, thiết bị được thiết kế theo hướng ít xâm lấn, lấy dữ liệu cơ bản qua \texttt{OBD-II} và không đi theo hướng can thiệp điều khiển xe. Đây là giới hạn cần được giữ rõ khi mở rộng hệ thống về sau.
+  \end{itemize}
+\end{itemize}
+
+\subsection{6.4. Tổng kết và bài học kinh nghiệm -- General reflection and case studies}\label{tux1ed5ng-kux1ebft-vuxe0-buxe0i-hux1ecdc-kinh-nghiux1ec7m-general-reflection-and-case-studies}
+
+Từ quá trình thực hiện đồ án, bốn bài học rút ra rõ nhất là:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Phải xác định đúng mức dữ liệu cần dùng ngay từ đầu:} Khi mục tiêu chỉ là theo dõi hành trình, trạng thái và các cảnh báo cơ bản, việc giữ phạm vi dữ liệu vừa đủ giúp phương án gọn hơn và dễ triển khai hơn nhiều so với việc cố lấy mọi tham số có thể có từ xe.
+\item
+  \textbf{Phải nhìn hệ thống theo toàn tuyến, không tách rời từng khối:} Thiết bị, máy chủ và giao diện chỉ có ý nghĩa khi ghép lại thành một chuỗi làm việc liên tục. Nếu một khối làm tốt nhưng làm chậm hoặc làm đứt gãy luồng hoạt động với phần còn lại, toàn hệ thống vẫn chưa đạt yêu cầu.
+\item
+  \textbf{Phải đo kiểm sớm trên nguyên mẫu thật:} Nhiều vấn đề chỉ lộ ra khi thiết bị đặt trên xe thật, nhất là dòng tiêu thụ khi xe đỗ, thời gian nối lại dữ liệu xe và độ ổn định của tuyến truyền qua mạng di động.
+\item
+  \textbf{Phải ưu tiên phương án có thể lặp lại khi triển khai:} Với đồ án theo hướng ứng dụng thực tế, một giải pháp đủ dùng, ổn định và có thể lắp lại trên nhiều xe thường có giá trị cao hơn một giải pháp nhiều tính năng nhưng khó duy trì.
+\end{itemize}
+
+Trên cơ sở đó, đồ án đã tạo được một nguyên mẫu có đủ ba phần thiết bị trên xe, máy chủ và giao diện khai thác; đồng thời đã kiểm chứng được các chỉ tiêu chính bằng số đo cụ thể. Đây là nền tảng cần thiết để tiếp tục hoàn thiện hệ thống theo hướng triển khai thực tế cho đội xe quy mô nhỏ và vừa.
+
+\majorheading{TÀI LIỆU TRÍCH DẪN - REFERENCES}\label{tuxe0i-liux1ec7u-truxedch-dux1eabn---references}
+
+\subsection{{[}A{]} Tài liệu chính của đồ án}\label{a-tuxe0i-liux1ec7u-chuxednh-cux1ee7a-ux111ux1ed3-uxe1n}
+
+{[}1{]} Lê Trọng An, \emph{Phụ lục I - Mô tả đồ án}, Đại học Phenikaa, 2026.
+
+{[}2{]} Kho mã nguồn đồ án IoT Vehicle Tracking System, gồm mã nguồn thiết bị, máy chủ, giao diện web, ứng dụng di động và tài liệu thiết kế trong thư mục \texttt{resources/}, 2026.
+
+\subsection{{[}B{]} Tài liệu kỹ thuật}\label{b-tuxe0i-liux1ec7u-kux1ef9-thuux1eadt}
+
+{[}3{]} Espressif Systems, \emph{ESP32-S3 Series Datasheet}, 2024.
+
+{[}4{]} SIMCom, \emph{SIM7600 Series Hardware Design Manual}, 2024.
+
+{[}5{]} STMicroelectronics, \emph{LIS3DSH Datasheet}, 2024.
+
+{[}6{]} OASIS, \emph{MQTT Version 3.1.1}, 2014.
+
+{[}7{]} IPC, \emph{IPC-2221: Generic Standard on Printed Board Design}, 2022.
+
+{[}8{]} IEC, \emph{IEC 60664-1: Insulation Coordination for Equipment within Low-Voltage Systems}, 2020.
+
+{[}9{]} SAE, \emph{OBD-II / J1979 Service Definitions}, 2021.
+
+{[}10{]} Teltonika, \emph{FMC920 - Best-selling 4G Compact GPS Tracker}, truy cập tháng 05/2026, tại: https://www.teltonika-gps.com/products/trackers/basic/fmc920
+
+{[}11{]} Teltonika, \emph{FMM003 - 4G LTE Cat M1 Tracker With OBD OEM Data Reading}, truy cập tháng 05/2026, tại: https://www.teltonika-gps.com/products/trackers/obd-data/fmm003
+
+{[}12{]} Queclink, \emph{GV305CEU}, truy cập tháng 05/2026, tại: https://www.queclink.com/product/gv305ceu/
+
+{[}13{]} Báo Chính phủ, \emph{Bộ TT\&TT tạm dừng việc tắt sóng 2G Only đến 15/10}, 2024, truy cập tháng 05/2026, tại: https://baochinhphu.vn/bo-tttt-tam-dung-viec-tat-song-2g-only-den-15-10-10224091320532248.htm
+
+{[}14{]} LCSC, \emph{Espressif Systems ESP32-S3}, truy cập tháng 05/2026, tại: https://www.lcsc.com/product-detail/C2913192.html
+
+{[}15{]} LCSC, \emph{SIMCom Wireless Solutions SIM7600CE-T}, truy cập tháng 05/2026, tại: https://www.lcsc.com/product-detail/Wireless-Modules\_SIMCom-Wireless-Solutions-SIM7600CE-T\_C520538.html
+
+{[}16{]} LCSC, \emph{STMicroelectronics LIS3DSHTR}, truy cập tháng 05/2026, tại: https://www.lcsc.com/product-detail/C1884688.html
+
+{[}17{]} VgateMall, \emph{Vgate iCar Pro}, truy cập tháng 05/2026, tại: https://www.vgatemall.com/products-detail/i-9/?s=1
+
+\majorheading{PHỤ LỤC}\label{phux1ee5-lux1ee5c}
+
+\appendixsection{PHỤ LỤC 1. BÁO CÁO TÀI CHÍNH -- FINANCE REPORT}\label{phux1ee5-lux1ee5c-1.-buxe1o-cuxe1o-tuxe0i-chuxednh-finance-report}
+
+{\thesissettableid{PL-1.1}{condensed-r2-bang-PL-1-1-tom-tat-chi-phi-cua-phuong-an-do-an}
+\def\LTcaptype{table}
+\begin{longtable}{|L{(\linewidth - 2\tabcolsep) * \real{0.2661}}|L{(\linewidth - 2\tabcolsep) * \real{0.7339}}|}
+\caption{Tóm tắt chi phí của phương án đồ án}\label{tab:condensed-r2-bang-PL-1-1-tom-tat-chi-phi-cua-phuong-an-do-an}\\
+\hline
+\textbf{Hạng mục} & \textbf{Giá trị tham chiếu} \\
+\hline
+\endfirsthead
+\caption[]{Tóm tắt chi phí của phương án đồ án (tiếp theo)}\\
+\hline
+\textbf{Hạng mục} & \textbf{Giá trị tham chiếu} \\
+\hline
+\endhead
+\endfoot
+\endlastfoot
+Phần cứng một thiết bị & 1.514.000 VND \\\hline
+SIM dữ liệu di động & Khoảng 8.000 VND/tháng/thiết bị \\\hline
+\texttt{VPS} phục vụ thử nghiệm & Khoảng 700.000 VND \\\hline
+Tổng chi phí triển khai đồ án & Khoảng 2.214.000 VND; nếu tính thêm một tháng cước mạng thì khoảng 2.222.000 VND \\\hline
+Giới hạn chi phí của đồ án & Không vượt 20.000.000 VND \\\hline
+\end{longtable}
+}
+\appendixsection{PHỤ LỤC 2. CÁC TIÊU CHUẨN THIẾT KẾ -- STANDARDS}\label{phux1ee5-lux1ee5c-2.-cuxe1c-tiuxeau-chuux1ea9n-thiux1ebft-kux1ebf-standards}
+
+(cái này em thêm sau ạ):
+
+\end{document}

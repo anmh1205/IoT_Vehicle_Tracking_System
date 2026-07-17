@@ -1,9 +1,21 @@
 flowchart TB
-    Device["Tracker Device"] --> EMQX["EMQX Broker"]
-    EMQX --> Bridge["MQTT Bridge"]
-    Bridge --> API["Backend API"]
-    Bridge --> VM["VictoriaMetrics"]
-    Bridge --> VL["VictoriaLogs"]
-    API --> PG["PostgreSQL"]
-    API --> Socket["Socket.IO"]
-    Socket --> Dashboard["Web Dashboard"]
+    Device["Thiết bị theo dõi"]
+    Broker["EMQX"]
+    Bridge["MQTT Bridge"]
+    Events["internal/events/#"]
+    Listener["Realtime listener"]
+    API["Backend API"]
+
+    subgraph Storage["Lớp lưu trữ"]
+        direction LR
+        PG["PostgreSQL / PostGIS"]
+        Metrics["VictoriaMetrics"]
+        Logs["VictoriaLogs"]
+    end
+
+    Device --> Broker --> Bridge
+    Bridge --> Events --> Listener --> API
+    Bridge --> PG
+    Bridge --> Metrics
+    Bridge --> Logs
+

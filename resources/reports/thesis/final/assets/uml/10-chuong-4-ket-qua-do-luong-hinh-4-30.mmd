@@ -1,6 +1,14 @@
+---
+config:
+  xyChart:
+    showDataLabel: true
+    showDataLabelOutsideBar: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: "#FFA07A"
+---
 xychart-beta
-    title "Độ trễ end-to-end"
-    x-axis ["Uplink", "EMQX-Bridge", "Bridge-VM", "Bridge-API", "WebSocket", "Total"]
-    y-axis "ms" 0 --> 420
+    title "Các phần tạo nên độ trễ toàn tuyến"
+    x-axis ["Mạng", "Tiếp nhận", "Lưu trữ", "Cảnh báo", "Màn hình", "Toàn tuyến"]
+    y-axis "ms" 0 --> 220
     bar [150, 5, 10, 5, 15, 185]
-    bar [300, 15, 30, 12, 40, 400]

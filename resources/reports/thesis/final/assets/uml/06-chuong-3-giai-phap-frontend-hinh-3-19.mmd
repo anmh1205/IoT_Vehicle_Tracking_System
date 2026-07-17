@@ -1,7 +1,18 @@
-flowchart LR
-    API["Backend API"] --> Socket["Socket.IO"]
-    Socket --> Store["Zustand Realtime Store"]
-    Store --> Map["React Leaflet"]
-    Store --> Sidebar["Sidebar thông tin xe"]
-    Map --> Marker["Marker + Route"]
-    Sidebar --> Marker
+flowchart TB
+    API["API phía máy chủ"] -->|Socket events| Socket["Socket.IO"]
+    Socket -->|Telemetry / status| Store["Kho trạng thái thời gian thực"]
+
+    subgraph RealtimeView["Giao diện thời gian thực"]
+        direction LR
+        Map["React Leaflet"]
+        Sidebar["Thanh bên thông tin xe"]
+    end
+
+    Marker["Marker + Route"]
+
+    Map -->|Device:join / device:leave| Socket
+    Sidebar -->|Device:join / device:leave| Socket
+    Store --> Map
+    Store --> Sidebar
+    Store --> Marker
+    Map --> Marker

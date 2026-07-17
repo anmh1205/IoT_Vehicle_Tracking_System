@@ -4,7 +4,14 @@ on:
   push:
     branches: [uat]
     paths:
-      - 'iot-vehicle-tracking-system/Tracking_EMQX/**'
+      - 'iot-vehicle-tracking-system-cloud/Tracking_EMQX/**'
+      - 'scripts/deploy/**'
+      - '.github/workflows/emqx-uat.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: emqx-uat-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy-uat:
@@ -19,9 +26,49 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "iot-vehicle-tracking-system/Tracking_EMQX/"
+          source: "iot-vehicle-tracking-system-cloud/Tracking_EMQX/"
           target: /opt/tracking/
           strip_components: 1
+
+      - name: Validate required deploy secrets
+        env:
+          SSH_DEPLOY_IP: ${{ secrets.SSH_DEPLOY_IP }}
+          SSH_DEPLOY_PORT: ${{ secrets.SSH_DEPLOY_PORT }}
+          SSH_DEPLOY_USER: ${{ secrets.SSH_DEPLOY_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          required_vars=(
+            SSH_DEPLOY_IP
+            SSH_DEPLOY_PORT
+            SSH_DEPLOY_USER
+            SSH_PRIVATE_KEY
+          )
+          for var in "${required_vars[@]}"; do
+            if [ -z "${!var}" ]; then
+              echo "::error::Missing required secret: $var"
+              exit 1
+            fi
+          done
+
+      - name: Build service env payload
+        env:
+          BASE_ENV_CONTENT: ${{ secrets.EMQX_UAT_ENV_FILE || secrets.BACKEND_UAT_ENV_FILE }}
+        run: |
+          {
+            printf '%s\n' "$BASE_ENV_CONTENT"
+            cat iot-vehicle-tracking-system-cloud/Tracking_EMQX/.env.example
+          } > /tmp/emqx-env-raw
+
+          awk -F= '
+            /^[[:space:]]*#/ || /^[[:space:]]*$/ {next}
+            !seen[$1]++ {print}
+          ' /tmp/emqx-env-raw > /tmp/emqx-env-merged
+
+          {
+            echo "SERVICE_ENV_CONTENT<<EOF"
+            cat /tmp/emqx-env-merged
+            echo "EOF"
+          } >> "$GITHUB_ENV"
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -30,15 +77,106 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: SERVICE_ENV_CONTENT,SERVICE_DIR,COMPOSE_FILE,MQTT_TLS_DOMAIN
           script: |
-            cd /opt/tracking/Tracking_EMQX
+            chmod +x /opt/tracking/scripts/deploy/bootstrap-vps.sh
+            export SERVICE_ENV_CONTENT="$SERVICE_ENV_CONTENT"
+            /opt/tracking/scripts/deploy/bootstrap-vps.sh "$SERVICE_DIR" "$COMPOSE_FILE"
+            cd "$SERVICE_DIR"
             docker compose pull
             docker compose up -d
 
+            if docker ps --format '{{.Names}}' | grep -q '^tracking-npm$'; then
+              echo "Sync Let's Encrypt cert from tracking-npm -> tracking-emqx"
+              WORKDIR="$(mktemp -d)"
+              trap 'rm -rf "$WORKDIR"' EXIT
+
+              MATCHED_FULLCHAIN=""
+              MATCHED_PRIVKEY=""
+              MATCHED_CHAIN=""
+
+              while IFS= read -r CERT_ARCHIVE_DIR; do
+                [ -n "$CERT_ARCHIVE_DIR" ] || continue
+                FULLCHAIN_PATH="$(docker exec tracking-npm sh -lc "ls -1v ${CERT_ARCHIVE_DIR}/fullchain*.pem 2>/dev/null | tail -n1")"
+                PRIVKEY_PATH="$(docker exec tracking-npm sh -lc "ls -1v ${CERT_ARCHIVE_DIR}/privkey*.pem 2>/dev/null | tail -n1")"
+                CHAIN_PATH="$(docker exec tracking-npm sh -lc "ls -1v ${CERT_ARCHIVE_DIR}/chain*.pem 2>/dev/null | tail -n1")"
+
+                if [ -z "$FULLCHAIN_PATH" ] || [ -z "$PRIVKEY_PATH" ] || [ -z "$CHAIN_PATH" ]; then
+                  continue
+                fi
+
+                docker cp "tracking-npm:${FULLCHAIN_PATH}" "$WORKDIR/candidate-fullchain.pem"
+                if openssl x509 -in "$WORKDIR/candidate-fullchain.pem" -noout -checkhost "$MQTT_TLS_DOMAIN" >/dev/null 2>&1; then
+                  MATCHED_FULLCHAIN="$FULLCHAIN_PATH"
+                  MATCHED_PRIVKEY="$PRIVKEY_PATH"
+                  MATCHED_CHAIN="$CHAIN_PATH"
+                  break
+                fi
+              done < <(docker exec tracking-npm sh -lc "ls -1d /etc/letsencrypt/archive/npm-* 2>/dev/null | sort -V")
+
+              if [ -n "$MATCHED_FULLCHAIN" ] && [ -n "$MATCHED_PRIVKEY" ] && [ -n "$MATCHED_CHAIN" ]; then
+                docker cp "tracking-npm:${MATCHED_FULLCHAIN}" "$WORKDIR/emqx-fullchain.pem"
+                docker cp "tracking-npm:${MATCHED_PRIVKEY}" "$WORKDIR/emqx-privkey.pem"
+                docker cp "tracking-npm:${MATCHED_CHAIN}" "$WORKDIR/emqx-chain.pem"
+
+                CURRENT_FP="$(docker exec tracking-emqx sh -lc "openssl x509 -in /opt/emqx/etc/certs/cert.pem -noout -fingerprint -sha256 2>/dev/null | cut -d= -f2" || true)"
+                NEW_FP="$(openssl x509 -in "$WORKDIR/emqx-fullchain.pem" -noout -fingerprint -sha256 | cut -d= -f2)"
+
+                if [ "$CURRENT_FP" != "$NEW_FP" ]; then
+                  docker cp "$WORKDIR/emqx-fullchain.pem" tracking-emqx:/opt/emqx/etc/certs/cert.pem
+                  docker cp "$WORKDIR/emqx-privkey.pem" tracking-emqx:/opt/emqx/etc/certs/key.pem
+                  docker cp "$WORKDIR/emqx-chain.pem" tracking-emqx:/opt/emqx/etc/certs/cacert.pem
+
+                  docker exec -u 0 tracking-emqx sh -lc 'chown emqx:emqx /opt/emqx/etc/certs/cert.pem /opt/emqx/etc/certs/key.pem /opt/emqx/etc/certs/cacert.pem && chmod 644 /opt/emqx/etc/certs/cert.pem /opt/emqx/etc/certs/cacert.pem && chmod 600 /opt/emqx/etc/certs/key.pem'
+                  docker restart tracking-emqx >/dev/null
+                  sleep 3
+                else
+                  echo "EMQX cert unchanged for ${MQTT_TLS_DOMAIN}; skip restart"
+                fi
+              else
+                echo "No Let's Encrypt cert matching ${MQTT_TLS_DOMAIN}; keeping existing EMQX certs"
+              fi
+            else
+              echo "tracking-npm container not found; keeping existing EMQX certs"
+            fi
+
+            docker compose ps emqx
+            for _ in {1..20}; do
+              BROKER_OK=0
+              TLS_OK=0
+
+              if docker exec tracking-emqx emqx ctl status >/dev/null 2>&1; then
+                BROKER_OK=1
+              fi
+
+              rm -f "$WORKDIR/current-cert.pem"
+              docker cp tracking-emqx:/opt/emqx/etc/certs/cert.pem "$WORKDIR/current-cert.pem" >/dev/null 2>&1 || true
+              if [ -s "$WORKDIR/current-cert.pem" ] && openssl x509 -in "$WORKDIR/current-cert.pem" -noout -checkhost "$MQTT_TLS_DOMAIN" >/dev/null 2>&1; then
+                TLS_OK=1
+              fi
+
+              if [ "$BROKER_OK" -eq 1 ] && [ "$TLS_OK" -eq 1 ]; then
+                exit 0
+              fi
+
+              sleep 3
+            done
+            docker compose logs --tail=100 emqx || true
+            docker exec tracking-emqx emqx ctl listeners || true
+            exit 1
+        env:
+          SERVICE_ENV_CONTENT: ${{ env.SERVICE_ENV_CONTENT }}
+          SERVICE_DIR: /opt/tracking/Tracking_EMQX
+          COMPOSE_FILE: docker-compose.yml
+          MQTT_TLS_DOMAIN: mqtt.thingdock.dev
+
       - name: Discord Notification
-        if: always()
+        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        continue-on-error: true
         uses: sarisia/actions-status-discord@v1
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          webhook: ${{ env.DISCORD_WEBHOOK_URL }}
           title: "EMQX UAT Deploy"
           status: ${{ job.status }}

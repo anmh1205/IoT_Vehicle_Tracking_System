@@ -4,13 +4,42 @@ on:
   push:
     branches: [uat]
     paths:
-      - 'iot-vehicle-tracking-system/Tracking_NPM/**'
+      - 'iot-vehicle-tracking-system-cloud/Tracking_NPM/**'
+      - '.github/workflows/npm-uat.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: npm-uat-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   deploy-uat:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Validate required deploy secrets
+        env:
+          SSH_DEPLOY_IP: ${{ secrets.SSH_DEPLOY_IP }}
+          SSH_DEPLOY_PORT: ${{ secrets.SSH_DEPLOY_PORT }}
+          SSH_DEPLOY_USER: ${{ secrets.SSH_DEPLOY_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          required_vars=(
+            SSH_DEPLOY_IP
+            SSH_DEPLOY_PORT
+            SSH_DEPLOY_USER
+            SSH_PRIVATE_KEY
+          )
+          for var in "${required_vars[@]}"; do
+            if [ -z "${!var}" ]; then
+              echo "::error::Missing required secret: $var"
+              exit 1
+            fi
+          done
 
       - name: SCP config files to server
         uses: appleboy/scp-action@v0.1.7
@@ -19,7 +48,7 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "iot-vehicle-tracking-system/Tracking_NPM/"
+          source: "iot-vehicle-tracking-system-cloud/Tracking_NPM/"
           target: /opt/tracking/
           strip_components: 1
 
@@ -30,15 +59,397 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: NPM_ADMIN_EMAIL,NPM_ADMIN_PASSWORD
           script: |
-            cd /opt/tracking/Tracking_NPM
-            docker compose pull
-            docker compose up -d
+            NPM_ADMIN_EMAIL="${NPM_ADMIN_EMAIL:-}"
+            NPM_ADMIN_PASSWORD="${NPM_ADMIN_PASSWORD:-}"
+            set -eu
+
+            NPM_DIR="/opt/tracking/Tracking_NPM"
+            NPM_DATA_DIR="/opt/tracking/Tracking_Data/Tracking_NPM"
+            export TRACKING_DATA_ROOT="/opt/tracking/Tracking_Data"
+
+            TRAEFIK_RUNNING="$(docker ps --filter name='^/traefik$' --format '{{.Names}}')"
+            if [ -n "$TRAEFIK_RUNNING" ]; then
+              echo "Stopping traefik to release host ports 80/443 for tracking-npm..."
+              docker stop traefik
+            fi
+
+            CONFLICTS="$(
+              {
+                docker ps --filter publish=80 --format '{{.Names}}\t{{.Ports}}'
+                docker ps --filter publish=443 --format '{{.Names}}\t{{.Ports}}'
+              } | awk -F'\t' '$1 != "tracking-npm" && !seen[$1]++ {print $0}'
+            )"
+            if [ -n "$CONFLICTS" ]; then
+              echo "Port conflict detected on host ports 80/443 (not tracking-npm):" >&2
+              printf '%s\n' "$CONFLICTS" >&2
+              exit 1
+            fi
+
+            mkdir -p "$NPM_DATA_DIR/data" "$NPM_DATA_DIR/letsencrypt"
+            for name in data letsencrypt; do
+              legacy_path="$NPM_DIR/$name"
+              target_path="$NPM_DATA_DIR/$name"
+              if [ -d "$legacy_path" ] && [ -n "$(find "$legacy_path" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
+                if [ -z "$(find "$target_path" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
+                  echo "Migrating legacy NPM $name data into $target_path"
+                  cp -a "$legacy_path/." "$target_path/"
+                else
+                  echo "Legacy NPM $name data exists but centralized target is non-empty; keeping centralized Tracking_Data copy"
+                fi
+              fi
+            done
+            chmod -R u+rwX,go-rwx "$NPM_DATA_DIR"
+
+            cd "$NPM_DIR"
+            docker compose --profile production pull npm
+            if ! docker compose --profile production up -d npm; then
+              docker compose --profile production ps npm || true
+              docker compose --profile production logs --tail=100 npm || true
+              exit 1
+            fi
+            docker compose --profile production ps npm
+
+            NPM_MOUNTS="$(docker inspect tracking-npm --format '{{range .Mounts}}{{println .Source "->" .Destination}}{{end}}')"
+            printf '%s\n' "$NPM_MOUNTS"
+            if ! printf '%s\n' "$NPM_MOUNTS" | grep -F "$NPM_DATA_DIR/data -> /data" >/dev/null; then
+              echo "tracking-npm /data is not mounted from centralized Tracking_Data path: $NPM_DATA_DIR/data" >&2
+              exit 1
+            fi
+            if ! printf '%s\n' "$NPM_MOUNTS" | grep -F "$NPM_DATA_DIR/letsencrypt -> /etc/letsencrypt" >/dev/null; then
+              echo "tracking-npm /etc/letsencrypt is not mounted from centralized Tracking_Data path: $NPM_DATA_DIR/letsencrypt" >&2
+              exit 1
+            fi
+
+            if ! docker port tracking-npm 81/tcp >/dev/null 2>&1; then
+              echo "tracking-npm is running but host port mapping for container port 81/tcp was not found." >&2
+              docker ps --filter name='^/tracking-npm$' --format 'table {{.Names}}\t{{.Ports}}'
+              docker compose --profile production logs --tail=100 npm || true
+              exit 1
+            fi
+
+            npm_ready=0
+            i=1
+            while [ "$i" -le 40 ]; do
+              if curl --connect-timeout 2 --max-time 5 -sS http://127.0.0.1:81 >/dev/null; then
+                npm_ready=1
+                break
+              fi
+              sleep 3
+              i=$((i + 1))
+            done
+
+            if [ "$npm_ready" -ne 1 ]; then
+              docker compose --profile production logs --tail=100 npm || true
+              exit 1
+            fi
+
+            NPM_ADMIN_EMAIL="${NPM_ADMIN_EMAIL:-admin@example.com}"
+
+            if ! docker exec tracking-npm node --version >/dev/null 2>&1; then
+              echo "Node runtime is unavailable inside tracking-npm container; cannot run NPM API bootstrap." >&2
+              exit 1
+            fi
+
+            docker exec \
+              -e NPM_ADMIN_EMAIL="$NPM_ADMIN_EMAIL" \
+              tracking-npm \
+              node - <<'NODE'
+            const http = require('http');
+            const userModel = require('/app/models/user');
+            const internalToken = require('/app/internal/token');
+
+            const baseHost = '127.0.0.1';
+            const basePort = 81;
+            const adminEmail = process.env.NPM_ADMIN_EMAIL || 'admin@example.com';
+
+            const desiredHosts = [
+              {
+                primaryDomain: 'thingdock.dev',
+                domainNames: ['thingdock.dev'],
+                forwardHost: 'tracking-frontend',
+                forwardPort: 4001,
+                http2Support: true
+              },
+              {
+                primaryDomain: 'api.thingdock.dev',
+                domainNames: ['api.thingdock.dev'],
+                forwardHost: 'tracking-backend',
+                forwardPort: 4000,
+                http2Support: true
+              },
+              {
+                primaryDomain: 'grafana.thingdock.dev',
+                domainNames: ['grafana.thingdock.dev'],
+                forwardHost: 'tracking-grafana',
+                forwardPort: 4002,
+                http2Support: true
+              },
+              {
+                primaryDomain: 'emqx.thingdock.dev',
+                domainNames: ['emqx.thingdock.dev'],
+                forwardHost: 'tracking-emqx',
+                forwardPort: 18083,
+                http2Support: true
+              },
+              {
+                primaryDomain: 'npm.thingdock.dev',
+                domainNames: ['npm.thingdock.dev'],
+                forwardHost: 'tracking-npm',
+                forwardPort: 81,
+                http2Support: true
+              }
+            ];
+            const desiredCertificateDomains = [
+              'thingdock.dev',
+              'api.thingdock.dev',
+              'mqtt.thingdock.dev',
+              'grafana.thingdock.dev',
+              'emqx.thingdock.dev',
+              'npm.thingdock.dev'
+            ];
+            const obsoleteProxyDomains = ['be.thingdock.dev', 'mqtt.thingdock.dev'];
+            const desiredStream = {
+              incoming_port: 8883,
+              forwarding_host: 'tracking-emqx',
+              forwarding_port: 8883,
+              tcp_forwarding: true,
+              udp_forwarding: false,
+              meta: {}
+            };
+
+            function apiRequest(path, { method = 'GET', token, body } = {}) {
+              return new Promise((resolve, reject) => {
+                const payload = body == null ? null : JSON.stringify(body);
+                const headers = {
+                  Accept: 'application/json'
+                };
+                if (payload != null) {
+                  headers['Content-Type'] = 'application/json';
+                  headers['Content-Length'] = Buffer.byteLength(payload);
+                }
+                if (token) {
+                  headers.Authorization = `Bearer ${token}`;
+                }
+
+                const req = http.request(
+                  {
+                    host: baseHost,
+                    port: basePort,
+                    path: `/api${path}`,
+                    method,
+                    headers
+                  },
+                  (res) => {
+                    let raw = '';
+                    res.on('data', (chunk) => {
+                      raw += chunk;
+                    });
+                    res.on('end', () => {
+                      let parsed = raw;
+                      if (raw) {
+                        try {
+                          parsed = JSON.parse(raw);
+                        } catch (_) {
+                          parsed = raw;
+                        }
+                      }
+
+                      if (res.statusCode < 200 || res.statusCode >= 300) {
+                        return reject(
+                          new Error(
+                            `NPM API ${method} ${path} failed (${res.statusCode}): ${typeof parsed === 'string' ? parsed : JSON.stringify(parsed)}`
+                          )
+                        );
+                      }
+
+                      resolve(parsed);
+                    });
+                  }
+                );
+
+                req.on('error', reject);
+                if (payload != null) req.write(payload);
+                req.end();
+              });
+            }
+
+            function sortDomains(domains) {
+              return [...new Set((Array.isArray(domains) ? domains : []).map(String))].sort();
+            }
+
+            function sameDomains(left, right) {
+              const a = sortDomains(left);
+              const b = sortDomains(right);
+              return a.length === b.length && a.every((value, index) => value === b[index]);
+            }
+
+            function buildProxyPayload(spec, certificateId) {
+              return {
+                domain_names: spec.domainNames,
+                forward_scheme: 'http',
+                forward_host: spec.forwardHost,
+                forward_port: spec.forwardPort,
+                certificate_id: certificateId,
+                ssl_forced: true,
+                hsts_enabled: true,
+                hsts_subdomains: true,
+                trust_forwarded_proto: true,
+                http2_support: !!spec.http2Support,
+                block_exploits: true,
+                caching_enabled: false,
+                allow_websocket_upgrade: true,
+                advanced_config: '',
+                enabled: true,
+                meta: {
+                  dns_challenge: false
+                },
+                locations: []
+              };
+            }
+
+            async function getAdminToken() {
+              const user = await userModel.query().findOne({ email: adminEmail });
+              if (!user) {
+                throw new Error(`NPM admin user not found for email: ${adminEmail}`);
+              }
+              const auth = await internalToken.getTokenFromUser(user);
+              if (!auth?.token) {
+                throw new Error('Failed to mint NPM admin API token');
+              }
+              return auth.token;
+            }
+
+            async function ensureCertificate(token) {
+              const certificates = await apiRequest('/nginx/certificates', { token });
+              const certificateList = Array.isArray(certificates) ? certificates : [];
+              const existing = certificateList.find(
+                (item) => item.provider === 'letsencrypt' && sameDomains(item.domain_names, desiredCertificateDomains)
+              );
+
+              if (existing?.id) {
+                console.log(`Reusing certificate ${existing.id} for ${desiredCertificateDomains.join(', ')}`);
+                return existing;
+              }
+
+              const letsencryptEmail =
+                certificateList.find((item) => item.provider === 'letsencrypt' && item.meta?.letsencrypt_email)
+                  ?.meta?.letsencrypt_email || 'admin@thingdock.dev';
+
+              const created = await apiRequest('/nginx/certificates', {
+                method: 'POST',
+                token,
+                body: {
+                  provider: 'letsencrypt',
+                  domain_names: desiredCertificateDomains,
+                  meta: {
+                    letsencrypt_email: letsencryptEmail,
+                    letsencrypt_agree: true,
+                    dns_challenge: false
+                  }
+                }
+              });
+
+              console.log(`Created certificate ${created.id} for ${desiredCertificateDomains.join(', ')}`);
+              return created;
+            }
+
+            async function upsertProxyHosts(token, certificateId) {
+              const existingHosts = await apiRequest('/nginx/proxy-hosts', { token });
+              const hostList = Array.isArray(existingHosts) ? existingHosts : [];
+
+              for (const spec of desiredHosts) {
+                const existing = hostList.find(
+                  (item) => Array.isArray(item.domain_names) && item.domain_names.includes(spec.primaryDomain)
+                );
+                const payload = buildProxyPayload(spec, certificateId);
+
+                if (existing?.id) {
+                  await apiRequest(`/nginx/proxy-hosts/${existing.id}`, {
+                    method: 'PUT',
+                    token,
+                    body: payload
+                  });
+                  console.log(`Updated proxy host: ${spec.primaryDomain} -> ${spec.forwardHost}:${spec.forwardPort}`);
+                } else {
+                  await apiRequest('/nginx/proxy-hosts', {
+                    method: 'POST',
+                    token,
+                    body: payload
+                  });
+                  console.log(`Created proxy host: ${spec.primaryDomain} -> ${spec.forwardHost}:${spec.forwardPort}`);
+                }
+              }
+
+              for (const host of hostList) {
+                const domains = Array.isArray(host.domain_names) ? host.domain_names : [];
+                const shouldDelete = domains.some((domain) => obsoleteProxyDomains.includes(domain));
+                if (host.id && shouldDelete) {
+                  await apiRequest(`/nginx/proxy-hosts/${host.id}`, {
+                    method: 'DELETE',
+                    token
+                  });
+                  console.log(`Deleted obsolete proxy host: ${domains.join(', ')}`);
+                }
+              }
+            }
+
+            async function ensureStream(token) {
+              const existingStreams = await apiRequest('/nginx/streams', { token });
+              const streamList = Array.isArray(existingStreams) ? existingStreams : [];
+              const current = streamList.find(
+                (item) => Number(item.incoming_port) === desiredStream.incoming_port
+              );
+
+              const hasSameTarget =
+                current &&
+                current.forwarding_host === desiredStream.forwarding_host &&
+                Number(current.forwarding_port) === desiredStream.forwarding_port &&
+                Boolean(current.tcp_forwarding) === Boolean(desiredStream.tcp_forwarding) &&
+                Boolean(current.udp_forwarding) === Boolean(desiredStream.udp_forwarding);
+
+              if (current?.id && hasSameTarget) {
+                console.log(`Stream ${desiredStream.incoming_port} already points to ${desiredStream.forwarding_host}:${desiredStream.forwarding_port}`);
+                return;
+              }
+
+              if (current?.id) {
+                await apiRequest(`/nginx/streams/${current.id}`, {
+                  method: 'PUT',
+                  token,
+                  body: desiredStream
+                });
+                console.log(`Updated stream ${desiredStream.incoming_port} -> ${desiredStream.forwarding_host}:${desiredStream.forwarding_port}`);
+                return;
+              }
+
+              await apiRequest('/nginx/streams', {
+                method: 'POST',
+                token,
+                body: desiredStream
+              });
+              console.log(`Created stream ${desiredStream.incoming_port} -> ${desiredStream.forwarding_host}:${desiredStream.forwarding_port}`);
+            }
+
+            (async () => {
+              const token = await getAdminToken();
+              const certificate = await ensureCertificate(token);
+              await upsertProxyHosts(token, certificate.id);
+              await ensureStream(token);
+            })().catch((error) => {
+              console.error(error.message || error);
+              process.exit(1);
+            });
+            NODE
 
       - name: Discord Notification
-        if: always()
+        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        continue-on-error: true
         uses: sarisia/actions-status-discord@v1
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          webhook: ${{ env.DISCORD_WEBHOOK_URL }}
           title: "NPM UAT Deploy"
           status: ${{ job.status }}

@@ -1,15 +1,13 @@
-stateDiagram-v2
-    direction LR
-    [*] --> Parking
-    state "Parking
-Deep sleep" as Parking
-    state "Driving
-4G + GNSS + OBD2" as Driving
-    state "Alert
-Đánh thức modem" as Alert
+%%{init: {'flowchart': {'nodeSpacing': 80, 'rankSpacing': 100}} }%%
+flowchart TB
+    Parking["Xe đỗ<br/>Giám sát tiết kiệm"]
+    Move["Có dấu hiệu xe chạy"]
+    Driving["Xe vận hành<br/>Theo dõi định kỳ"]
+    Stop["Xe dừng hoặc tắt máy"]
+    AlertSignal["Phát hiện bất thường"]
+    Alert["Sự kiện bất thường<br/>Ưu tiên cảnh báo"]
+    Done["Xử lý xong"]
 
-    Parking --> Driving: Bật IGN
-    Driving --> Parking: Tắt IGN
-    Parking --> Alert: IMU rung
-    Alert --> Parking: Hoàn tất
-    Alert --> Driving: Xe tiếp tục chạy
+    Parking --> Move --> Driving
+    Driving --> Stop --> Parking
+    Parking --> AlertSignal --> Alert --> Done --> Parking

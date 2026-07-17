@@ -1,13 +1,20 @@
-flowchart LR
-    S["Khởi động dự án"] --> P1["Giai đoạn 1
-Phân tích yêu cầu"]
-    P1 --> P2["Giai đoạn 2
-Thiết kế phần cứng"]
-    P2 --> P3["Giai đoạn 3
-Phát triển firmware"]
-    P3 --> P4["Giai đoạn 4
-Triển khai cloud"]
-    P4 --> P5["Giai đoạn 5
-Xây dựng frontend"]
-    P5 --> P6["Giai đoạn 6
-Tích hợp và kiểm thử"]
+%%{init: {'flowchart': {'nodeSpacing': 90, 'rankSpacing': 110}} }%%
+flowchart TB
+    A["Yêu cầu khai thác<br>và tiêu chí kỹ thuật"] --> B["Lựa chọn kiến trúc<br>và giải pháp kỹ thuật"]
+
+    subgraph C["Ba khối kỹ thuật của hệ thống"]
+        direction LR
+        D["Thiết bị trên xe"]
+        E["Máy chủ xử lý dữ liệu"]
+        F["Giao diện quản trị"]
+        D --> E --> F
+    end
+
+    B --> D
+    F --> G["Tích hợp nguyên mẫu thực"]
+    G --> H["Đo kiểm và đối chiếu<br>với tiêu chí đặt ra"]
+
+    I["Ưu tiên xử lý sớm ở lớp thiết bị<br>nguồn cấp - truyền dữ liệu - năng lượng"]:::note
+    I -.-> D
+
+    classDef note fill:#eef2ff,stroke:#2563eb,color:#1e3a8a,stroke-dasharray: 6 4;

@@ -1,17 +1,19 @@
 sequenceDiagram
-    actor Admin as Dashboard Admin
-    participant API as Backend API
+    participant Admin as Quản trị viên hệ thống
+    participant API as API phía máy chủ
     participant DB as PostgreSQL
-    participant Bridge as MQTT Bridge
     participant Broker as EMQX
-    participant Device as Tracker
+    participant Device as Thiết bị theo dõi
+    participant Bridge as MQTT Bridge
 
-    Admin->>API: POST /devices/:id/ota
-    API->>DB: Create OTA assignment
-    API->>Bridge: Publish ota.assign
-    Bridge->>Broker: devices/{id}/ota/assign
-    Broker-->>Device: Deliver command
-    Device->>Broker: ota.progress
-    Broker->>Bridge: Forward progress
-    Bridge->>DB: Persist status
-    API-->>Admin: Push realtime status
+    Admin->>API: 1. Tạo phiên OTA
+    API->>DB: 2. Tạo deployment + job
+    API->>Broker: 3. Publish ota_update vào topic commands của thiết bị
+    Broker-->>Device: 4. Chuyển lệnh OTA
+    Device->>Broker: 5. Gửi tiến trình vào v1/{device_id}/firmware
+    Broker->>Bridge: 6. Chuyển tiếp trạng thái firmware
+    Bridge->>DB: 7. Cập nhật firmware_update_log
+    Bridge->>Broker: 8. Publish internal/events/# khi cần realtime
+    Broker->>API: 9. Backend listener nhận sự kiện
+    API-->>Admin: 10. Cập nhật giao diện /ws
+

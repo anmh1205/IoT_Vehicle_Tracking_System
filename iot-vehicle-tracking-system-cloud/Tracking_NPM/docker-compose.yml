@@ -1,0 +1,21 @@
+services:
+  npm:
+    image: jc21/nginx-proxy-manager:2.11.3
+    container_name: tracking-npm
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"
+      - "8883:8883"
+    volumes:
+      - ${TRACKING_DATA_ROOT:-../Tracking_Data}/Tracking_NPM/data:/data
+      - ${TRACKING_DATA_ROOT:-../Tracking_Data}/Tracking_NPM/letsencrypt:/etc/letsencrypt
+    restart: unless-stopped
+    networks:
+      - tracking-network
+    profiles:
+      - production
+
+networks:
+  tracking-network:
+    external: true

@@ -1,0 +1,194 @@
+{
+  "page_id": "357df50b-1fcd-813b-a487-e193fde78544",
+  "title": "02. Hiện tại đơn",
+  "intro": [
+    {"text": "Bài 02 — Hiện tại đơn (Present Simple). Đọc lý thuyết từng phần → làm câu hỏi ngay → tự chọn đáp án → rồi mở toggle. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 & 6 hỏi chia động từ ngôi thứ 3 số ít (thêm -s/-es), thể phủ định/nghi vấn với do/does, và hòa hợp chủ ngữ - động từ.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & bản chất"},
+    {"type": "p", "text": "Hiện tại đơn (Present Simple) diễn tả sự thật hiển nhiên, thói quen, lịch trình cố định và tình trạng kéo dài ở hiện tại. Đây là thì 'mặc định' khi nói về điều luôn đúng hoặc lặp lại đều đặn — rất phổ biến trong nội quy, mô tả công việc, lịch họp ở TOEIC."},
+
+    {"type": "h3", "text": "2. Cách dùng (đầy đủ)"},
+    {"type": "ul", "items": [
+      "Sự thật/chân lý: Water boils at 100°C. The office opens at 8 a.m.",
+      "Thói quen, hành động lặp lại: She checks her emails every morning.",
+      "Lịch trình cố định (tàu, máy bay, sự kiện) — kể cả tương lai: The train leaves at 6 p.m. tomorrow.",
+      "Hướng dẫn, quy trình: First, you log in; then you submit the form.",
+      "Trạng thái/cảm xúc với động từ trạng thái: The manager wants a report. I understand the policy."
+    ]},
+
+    {"type": "h3", "text": "3. Công thức"},
+    {"type": "table", "headers": ["Thể", "Động từ thường", "Động từ to be"], "rows": [
+      ["Khẳng định", "S + V(s/es với he/she/it)", "S + am/is/are"],
+      ["Phủ định", "S + do/does + not + V", "S + am/is/are + not"],
+      ["Nghi vấn", "(Wh-) Do/Does + S + V?", "(Wh-) Am/Is/Are + S …?"]
+    ]},
+    {"type": "key", "text": "Ngôi thứ 3 số ít (he/she/it, danh từ số ít) → động từ thêm -s/-es. Sau 'does/doesn't' động từ về NGUYÊN THỂ: She doesn't work (không 'doesn't works')."},
+
+    {"type": "h3", "text": "4. Quy tắc thêm -s/-es cho ngôi thứ 3 số ít"},
+    {"type": "table", "headers": ["Trường hợp", "Quy tắc", "Ví dụ"], "rows": [
+      ["Thông thường", "+ s", "work → works"],
+      ["Tận cùng -o, -s, -x, -z, -ch, -sh", "+ es", "go → goes, watch → watches"],
+      ["Phụ âm + y", "đổi y → ies", "study → studies"],
+      ["Nguyên âm + y", "+ s", "play → plays"],
+      ["Bất quy tắc", "have → has", "have → has"]
+    ]},
+
+    {"type": "h3", "text": "5. Phát âm đuôi -s/-es"},
+    {"type": "table", "headers": ["Đọc là", "Khi nào", "Ví dụ"], "rows": [
+      ["/ɪz/", "sau âm /s, z, ʃ, tʃ, dʒ/", "watches, uses, manages"],
+      ["/s/", "sau âm vô thanh /p, t, k, f/", "works, stops"],
+      ["/z/", "sau âm hữu thanh & nguyên âm", "plays, runs, goes"]
+    ]},
+
+    {"type": "h3", "text": "6. Trạng từ tần suất & dấu hiệu thời gian"},
+    {"type": "ul", "items": [
+      "Tần suất: always (100%), usually, often, frequently, sometimes, occasionally, rarely/seldom, never (0%).",
+      "Vị trí: TRƯỚC động từ thường (She always arrives early.), SAU động từ to be (He is always punctual.).",
+      "Cụm tần suất đứng đầu/cuối câu: every day, every week, once/twice a week, on Mondays, daily, monthly."
+    ]},
+
+    {"type": "h3", "text": "7. Động từ trạng thái (stative verbs)"},
+    {"type": "p", "text": "Các động từ chỉ trạng thái thường KHÔNG chia tiếp diễn mà dùng hiện tại đơn: like, love, hate, want, need, prefer, know, understand, believe, remember, mean, belong, own, contain, cost, seem, appear. Ví dụ: I need the report now (không 'I am needing')."},
+
+    {"type": "h3", "text": "8. Hiện tại đơn vs Hiện tại tiếp diễn"},
+    {"type": "table", "headers": ["", "Hiện tại đơn", "Hiện tại tiếp diễn"], "rows": [
+      ["Ý nghĩa", "thói quen, sự thật", "đang xảy ra lúc nói / tạm thời"],
+      ["Dấu hiệu", "always, usually, every day, on Mondays", "now, at the moment, currently, right now"],
+      ["Ví dụ", "He works in Hanoi.", "He is working from home this week."]
+    ]},
+
+    {"type": "h3", "text": "9. Hiện tại đơn diễn tả tương lai"},
+    {"type": "ul", "items": [
+      "Lịch trình/thời gian biểu cố định: The meeting starts at 9 a.m. next Monday.",
+      "Sau when/if/as soon as/until/before/after (mệnh đề thời gian–điều kiện) dùng HIỆN TẠI ĐƠN, vế chính dùng tương lai: When the report is ready, I will send it. (không 'will be ready')."
+    ]},
+
+    {"type": "h3", "text": "10. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Quên -s/-es ở ngôi thứ 3 số ít (The system require → requires). (2) Sau do/does + V nguyên thể (doesn't works → doesn't work). (3) Chủ ngữ số nhiều/each/every: 'Each employee receives' (each + số ít). (4) Dùng 'will' sau when/if (sai → hiện tại đơn)."}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Cách dùng và dấu hiệu",
+      "theory": ["Hiện tại đơn diễn tả sự thật hiển nhiên, thói quen lặp lại, và lịch trình cố định. Trạng từ tần suất (always, usually, often) đứng TRƯỚC động từ thường."],
+      "keys": ["Dấu hiệu: always, usually, often, sometimes, every (day/week), generally, normally, on Mondays."],
+      "traps": ["Chủ ngữ số ít ngôi thứ 3 (he, she, it, the company, the system) → động từ thêm -s/-es."],
+      "examples": [
+        "The store opens at 9 a.m. every day. — every day → hiện tại đơn.",
+        "She always arrives early for meetings. — always đứng trước động từ."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The store ___ at 9 a.m. every weekday.\nA. open    B. opens    C. opened    D. opening", "a": "Đáp án: B (opens). ||'every weekday' → hiện tại đơn; chủ ngữ 'the store' số ít → thêm -s."},
+        {"q": "Ms. Lee ___ the marketing department.\nA. lead    B. leads    C. leading    D. led", "a": "Đáp án: B (leads). ||Ngôi thứ 3 số ít (Ms. Lee) → leads."},
+        {"q": "The airport shuttle ___ every 30 minutes.\nA. leave    B. leaves    C. left    D. leaving", "a": "Đáp án: B (leaves). ||Lịch trình cố định → hiện tại đơn; chủ ngữ số ít."},
+        {"q": "The main factory ___ about 500 units per day.\nA. produce    B. produces    C. produced    D. producing", "a": "Đáp án: B (produces). ||Sự thật/thói quen + chủ ngữ số ít → produces."},
+        {"q": "Chọn câu ĐÚNG:\nA. The board meet every quarter.\nB. The board meets every quarter.\nC. The board meeting every quarter.\nD. The board met every quarter every time.", "a": "Đáp án: B. ||Trong TOEIC, 'the board' xem là số ít → meets; 'every quarter' → hiện tại đơn."},
+        {"q": "Ms. Pham ___ arrives early to prepare the meeting room.\nA. always    B. is always    C. always is    D. alwayses", "a": "Đáp án: A (always). ||Trạng từ tần suất 'always' đứng trước động từ thường (arrives)."},
+        {"q": "Tìm và sửa lỗi:\n\"The company provide excellent after-sales service.\"", "a": "Lỗi: \"provide\" → \"provides\". ||'The company' số ít → động từ thêm -s."},
+        {"q": "Điền vào bài viết (Part 6):\n\"Our customer service team ___ to all inquiries within 24 hours.\"\nA. respond    B. responds    C. responded    D. responding", "a": "Đáp án: B (responds). ||'team' xem là số ít → responds; sự việc thường lệ → hiện tại đơn."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Quy tắc thêm -s/-es ở ngôi thứ 3 số ít",
+      "theory": ["Đa số động từ thêm -s. Động từ tận cùng -s, -sh, -ch, -x, -o → thêm -es. Phụ âm + y → đổi y thành -ies. have → has."],
+      "keys": ["finish → finishes; go → goes; study → studies; fly → flies; have → has; do → does; pass → passes."],
+      "traps": ["have đổi thành has (The system has..., không phải have)."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "He ___ the weekly report every Friday afternoon.\nA. finish    B. finishs    C. finishes    D. finishing", "a": "Đáp án: C (finishes). ||Tận cùng -sh → thêm -es."},
+        {"q": "She ___ to the head office twice a week.\nA. go    B. gos    C. goes    D. going", "a": "Đáp án: C (goes). ||Tận cùng -o → thêm -es."},
+        {"q": "The company ___ three branches nationwide.\nA. have    B. has    C. having    D. had", "a": "Đáp án: B (has). ||have → has ở ngôi thứ 3 số ít."},
+        {"q": "The technician ___ the equipment at the start of every shift.\nA. check    B. checkes    C. checks    D. checking", "a": "Đáp án: C (checks). ||Thêm -s bình thường."},
+        {"q": "Tìm và sửa lỗi:\n\"The system have several useful features.\"", "a": "Lỗi: \"have\" → \"has\". ||'The system' số ít → has."},
+        {"q": "The CEO ___ to Tokyo for meetings every month.\nA. fly    B. flys    C. flies    D. flying", "a": "Đáp án: C (flies). ||Phụ âm + y (fly) → đổi thành -ies."},
+        {"q": "Chọn câu ĐÚNG:\nA. Each report contain a summary page.\nB. Each report contains a summary page.\nC. Each report containing a summary.\nD. Each report contained always.", "a": "Đáp án: B. ||'Each + danh từ số ít' → động từ số ít (contains)."},
+        {"q": "Điền vào mô tả (Part 6):\n\"The mobile app ___ users to track their orders in real time.\"\nA. allow    B. allows    C. allowed    D. allowing", "a": "Đáp án: B (allows). ||'The app' số ít → allows."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Thể phủ định và nghi vấn",
+      "theory": ["Phủ định: do/does + not + V nguyên thể. Nghi vấn: Do/Does + S + V nguyên thể? Dùng does với ngôi thứ 3 số ít, do với các chủ ngữ còn lại."],
+      "keys": ["He/She/It/danh từ số ít → does not + V / Does + S + V. I/You/We/They/danh từ số nhiều → do not + V / Do + S + V."],
+      "traps": ["Sau does/doesn't, động từ ở NGUYÊN THỂ: doesn't like (không phải doesn't likes); Does it work? (không phải Does it works?)."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "The office ___ not open on Sundays.\nA. do    B. does    C. is    D. has", "a": "Đáp án: B (does). ||'The office' số ít → does not open."},
+        {"q": "___ the system require a password to log in?\nA. Do    B. Does    C. Is    D. Has", "a": "Đáp án: B (Does). ||'the system' số ít → Does + S + V nguyên thể."},
+        {"q": "The employees ___ not work on public holidays.\nA. do    B. does    C. is    D. has", "a": "Đáp án: A (do). ||'employees' số nhiều → do not work."},
+        {"q": "Chọn câu ĐÚNG:\nA. Does the printer works properly?\nB. Does the printer work properly?\nC. Do the printer work properly?\nD. Does the printer working?", "a": "Đáp án: B. ||Sau Does dùng V nguyên thể (work)."},
+        {"q": "Tìm và sửa lỗi:\n\"She doesn't likes the new office layout.\"", "a": "Lỗi: \"doesn't likes\" → \"doesn't like\". ||Sau doesn't dùng V nguyên thể."},
+        {"q": "___ you ___ the sales report every week?\nA. Do / prepare    B. Does / prepare    C. Do / prepares    D. Are / prepare", "a": "Đáp án: A (Do / prepare). ||'you' → Do + S + V nguyên thể."},
+        {"q": "The senior manager ___ not attend the daily stand-up meeting.\nA. do    B. does    C. is    D. have", "a": "Đáp án: B (does). ||'manager' số ít → does not attend."},
+        {"q": "Điền vào câu hỏi chính sách (Part 6):\n\"___ the warranty cover accidental damage? Please review the terms.\"\nA. Do    B. Does    C. Is    D. Has", "a": "Đáp án: B (Does). ||'the warranty' số ít → Does + S + V."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Hòa hợp chủ ngữ - động từ (cơ bản)",
+      "theory": ["Động từ chia theo CHỦ NGỮ CHÍNH, không theo danh từ trong cụm bổ nghĩa. Một số chủ ngữ luôn số ít."],
+      "keys": ["each / every / everyone / everybody / neither / either + động từ số ít. Danh từ không đếm (information, news, data, equipment) → số ít. Môn học -ics (mathematics) → số ít."],
+      "traps": ["Bỏ qua cụm 'of + danh từ' khi chia động từ: The list of items IS... (chủ ngữ là 'the list')."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "Each of the employees ___ a security badge.\nA. receive    B. receives    C. receiving    D. received", "a": "Đáp án: B (receives). ||'Each of ...' luôn chia động từ số ít."},
+        {"q": "Everyone in the department ___ the new policy.\nA. support    B. supports    C. supporting    D. supported", "a": "Đáp án: B (supports). ||'everyone' luôn số ít → supports."},
+        {"q": "The information in this file ___ highly confidential.\nA. are    B. is    C. were    D. have", "a": "Đáp án: B (is). ||'information' là danh từ không đếm → số ít."},
+        {"q": "The latest news about the merger ___ surprising.\nA. are    B. is    C. were    D. have", "a": "Đáp án: B (is). ||'news' tuy có -s nhưng là danh từ không đếm, số ít."},
+        {"q": "Neither of the two proposals ___ acceptable to the board.\nA. are    B. is    C. were    D. have", "a": "Đáp án: B (is). ||'Neither of ...' chia động từ số ít."},
+        {"q": "Tìm và sửa lỗi:\n\"The list of approved items are on the manager's desk.\"", "a": "Lỗi: \"are\" → \"is\". ||Chủ ngữ chính là 'The list' (số ít); 'of approved items' chỉ là cụm bổ nghĩa."},
+        {"q": "Mathematics ___ a required subject for the finance program.\nA. are    B. is    C. were    D. have", "a": "Đáp án: B (is). ||Môn học tận cùng -ics → số ít."},
+        {"q": "Điền vào hướng dẫn (Part 6):\n\"Every applicant ___ to submit two professional references.\"\nA. need    B. needs    C. needing    D. needed", "a": "Đáp án: B (needs). ||'Every + danh từ số ít' → động từ số ít."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn chia -s/-es, phủ định/nghi vấn và hòa hợp chủ ngữ - động từ."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "The receptionist ___ visitors at the front desk.\nA. greet    B. greets    C. greeting    D. greeted", "a": "Đáp án: B (greets). ||Chủ ngữ số ít → greets."},
+        {"q": "___ the cafeteria serve breakfast before 8 a.m.?\nA. Do    B. Does    C. Is    D. Has", "a": "Đáp án: B (Does). ||'the cafeteria' số ít → Does + V nguyên thể."},
+        {"q": "The branch managers ___ not approve requests after 5 p.m.\nA. do    B. does    C. is    D. has", "a": "Đáp án: A (do). ||'managers' số nhiều → do not."},
+        {"q": "The accounting software ___ automatically every night.\nA. update    B. updates    C. updating    D. updated", "a": "Đáp án: B (updates). ||'software' số ít → updates."},
+        {"q": "Tìm và sửa lỗi:\n\"He go to the gym before work every morning.\"", "a": "Lỗi: \"go\" → \"goes\". ||Ngôi thứ 3 số ít → goes."},
+        {"q": "Each department ___ its own annual budget.\nA. manage    B. manages    C. managing    D. managed", "a": "Đáp án: B (manages). ||'Each + danh từ số ít' → manages."},
+        {"q": "Chọn câu ĐÚNG:\nA. The data are not accurate.\nB. The data is not accurate.\nC. The data not is accurate.\nD. The data am not accurate.", "a": "Đáp án: B. ||Trong văn phong TOEIC hiện đại, 'data' thường được xem là số ít → is."},
+        {"q": "Ms. Tran usually ___ the morning shift at the front desk.\nA. supervise    B. supervises    C. supervising    D. supervised", "a": "Đáp án: B (supervises). ||Ngôi thứ 3 số ít → supervises."},
+        {"q": "___ the report include an executive summary?\nA. Do    B. Does    C. Is    D. Has", "a": "Đáp án: B (Does). ||'the report' số ít → Does + V nguyên thể."},
+        {"q": "Điền vào chính sách (Part 6):\n\"Our return policy ___ that all refunds be processed within five business days.\"\nA. state    B. states    C. stating    D. stated", "a": "Đáp án: B (states). ||'policy' số ít → states."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "The library ___ at 8 p.m. on weekdays.\nA. close    B. closes    C. closed    D. closing", "a": "B (closes). ||Chủ ngữ số ít + lịch trình → closes."},
+      {"q": "___ the company offer flexible remote-work options?\nA. Do    B. Does    C. Is    D. Has", "a": "B (Does). ||'the company' số ít → Does + V nguyên thể."},
+      {"q": "The interns ___ not have access to the server room.\nA. do    B. does    C. is    D. has", "a": "A (do). ||'interns' số nhiều → do not."},
+      {"q": "Each invoice ___ a unique reference number.\nA. carry    B. carries    C. carrying    D. carried", "a": "B (carries). ||'Each + N số ít' → carries (phụ âm + y → -ies)."},
+      {"q": "Tìm và sửa lỗi:\n\"The project team meet every Monday morning.\"", "a": "Lỗi: \"meet\" → \"meets\". ||Trong TOEIC 'the team' xem là số ít → meets."},
+      {"q": "Everyone ___ responsible for maintaining workplace safety.\nA. are    B. is    C. were    D. have", "a": "B (is). ||'Everyone' luôn số ít → is."},
+      {"q": "The flight to Seoul ___ at 6 a.m. daily.\nA. depart    B. departs    C. departing    D. departed", "a": "B (departs). ||Lịch trình + chủ ngữ số ít → departs."},
+      {"q": "___ you usually ___ the night shift?\nA. Do / work    B. Does / work    C. Do / works    D. Are / work", "a": "A (Do / work). ||'you' → Do + S + V nguyên thể."},
+      {"q": "The director ___ not respond to emails on weekends.\nA. do    B. does    C. is    D. has", "a": "B (does). ||'director' số ít → does not respond."},
+      {"q": "Chọn câu ĐÚNG:\nA. The information are confidential.\nB. The information is confidential.\nC. The information are being confidential.\nD. The information have confidential.", "a": "B. ||'information' không đếm → is."},
+      {"q": "The main plant ___ over a thousand units a day.\nA. produce    B. produces    C. producing    D. produced", "a": "B (produces). ||Chủ ngữ số ít → produces."},
+      {"q": "Tìm và sửa lỗi:\n\"She don't attend the daily briefing.\"", "a": "Lỗi: \"don't\" → \"doesn't\". ||Ngôi thứ 3 số ít → doesn't."},
+      {"q": "Every new employee ___ a one-day orientation session.\nA. attend    B. attends    C. attending    D. attended", "a": "B (attends). ||'Every + N số ít' → attends."},
+      {"q": "The review committee ___ once a month.\nA. meet    B. meets    C. meeting    D. met", "a": "B (meets). ||'committee' xem là số ít → meets."},
+      {"q": "Neither option ___ within our current budget.\nA. are    B. is    C. were    D. have", "a": "B (is). ||'Neither + danh từ số ít' → is."},
+      {"q": "Điền vào mô tả (Part 6):\n\"The mobile app ___ users a notification when their order ships.\"\nA. send    B. sends    C. sending    D. sent", "a": "B (sends). ||'the app' số ít → sends."}
+    ]
+  },
+  "summary": [
+    "Hiện tại đơn: sự thật, thói quen, lịch trình. Dấu hiệu: always, usually, often, every, generally, normally.",
+    "Ngôi 3 số ít thêm -s/-es; -s/-sh/-ch/-x/-o → -es; phụ âm + y → -ies; have → has.",
+    "Phủ định/nghi vấn: do/does not + V nguyên thể; Do/Does + S + V nguyên thể.",
+    "Hòa hợp: each/every/everyone/neither + V số ít; danh từ không đếm (information, news, data) → số ít; chia theo chủ ngữ chính, bỏ qua cụm 'of + ...'."
+  ],
+  "summary_callouts": [
+    {"text": "Hai lỗi kinh điển: (1) sau does/doesn't vẫn thêm -s (doesn't likes — sai); (2) bị cụm 'of items / of the proposals' đánh lừa khi chia động từ.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 4 (hòa hợp chủ ngữ - động từ) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

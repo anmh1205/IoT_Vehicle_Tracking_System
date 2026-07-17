@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="800" viewBox="0 0 1360 800" font-family="Times New Roman, serif">
+  <rect width="1360" height="800" fill="#ffffff"/>
+
+  <!-- 4 future direction cards in 2x2 grid -->
+  <!-- Each card: number + title + 1-line description -->
+
+  <!-- Card 1: Kiểm chứng dài hạn -->
+  <g transform="translate(20, 20)">
+    <rect width="650" height="370" rx="10" fill="#ffffff" stroke="#1a5276" stroke-width="3"/>
+    <rect width="650" height="80" rx="10" fill="#1a5276"/>
+    <rect y="50" width="650" height="30" fill="#1a5276"/>
+    <circle cx="50" cy="40" r="28" fill="#ffffff"/>
+    <text x="50" y="52" text-anchor="middle" font-size="32" font-weight="bold" fill="#1a5276">1</text>
+    <text x="100" y="50" font-size="26" font-weight="bold" fill="#ffffff">KIỂM CHỨNG DÀI HẠN</text>
+
+    <text x="30" y="135" font-size="22" font-weight="bold" fill="#000">Mục tiêu</text>
+    <text x="30" y="170" font-size="20" fill="#000">Xác nhận độ ổn định của:</text>
+    <text x="50" y="205" font-size="20" fill="#000">• Nguồn và quản lý năng lượng</text>
+    <text x="50" y="235" font-size="20" fill="#000">• Cổng OBD-II và GNSS</text>
+    <text x="50" y="265" font-size="20" fill="#000">• Cảnh báo trong vận hành thực tế</text>
+    <line x1="30" y1="290" x2="620" y2="290" stroke="#cccccc" stroke-width="1" stroke-dasharray="4 4"/>
+    <text x="30" y="325" font-size="20" font-style="italic" fill="#1a5276">Chạy nhiều tháng liên tục trên xe thật</text>
+    <text x="30" y="355" font-size="20" font-style="italic" fill="#1a5276">để có dữ liệu khách quan về độ tin cậy.</text>
+  </g>
+
+  <!-- Card 2: Hoàn thiện đối soát -->
+  <g transform="translate(690, 20)">
+    <rect width="650" height="370" rx="10" fill="#ffffff" stroke="#1a5276" stroke-width="3"/>
+    <rect width="650" height="80" rx="10" fill="#1a5276"/>
+    <rect y="50" width="650" height="30" fill="#1a5276"/>
+    <circle cx="50" cy="40" r="28" fill="#ffffff"/>
+    <text x="50" y="52" text-anchor="middle" font-size="32" font-weight="bold" fill="#1a5276">2</text>
+    <text x="100" y="50" font-size="26" font-weight="bold" fill="#ffffff">ĐỐI SOÁT &amp; BÁO CÁO</text>
+
+    <text x="30" y="135" font-size="22" font-weight="bold" fill="#000">Mục tiêu</text>
+    <text x="30" y="170" font-size="20" fill="#000">Hoàn thiện báo cáo khai thác:</text>
+    <text x="50" y="205" font-size="20" fill="#000">• Theo chuyến (hành trình, OBD)</text>
+    <text x="50" y="235" font-size="20" fill="#000">• Theo ngày (cảnh báo, sự kiện)</text>
+    <text x="50" y="265" font-size="20" fill="#000">• Theo xe (lịch sử khai thác)</text>
+    <line x1="30" y1="290" x2="620" y2="290" stroke="#cccccc" stroke-width="1" stroke-dasharray="4 4"/>
+    <text x="30" y="325" font-size="20" font-style="italic" fill="#1a5276">Hỗ trợ đối chiếu khi có sự cố</text>
+    <text x="30" y="355" font-size="20" font-style="italic" fill="#1a5276">hoặc tranh chấp với khách thuê.</text>
+  </g>
+
+  <!-- Card 3: Mở rộng tương thích -->
+  <g transform="translate(20, 410)">
+    <rect width="650" height="370" rx="10" fill="#ffffff" stroke="#1a5276" stroke-width="3"/>
+    <rect width="650" height="80" rx="10" fill="#1a5276"/>
+    <rect y="50" width="650" height="30" fill="#1a5276"/>
+    <circle cx="50" cy="40" r="28" fill="#ffffff"/>
+    <text x="50" y="52" text-anchor="middle" font-size="32" font-weight="bold" fill="#1a5276">3</text>
+    <text x="100" y="50" font-size="26" font-weight="bold" fill="#ffffff">MỞ RỘNG TƯƠNG THÍCH</text>
+
+    <text x="30" y="135" font-size="22" font-weight="bold" fill="#000">Mục tiêu</text>
+    <text x="30" y="170" font-size="20" fill="#000">Kiểm tra trên nhiều dòng xe:</text>
+    <text x="50" y="205" font-size="20" fill="#000">• Sedan, SUV, MPV, xe tải nhẹ</text>
+    <text x="50" y="235" font-size="20" fill="#000">• Đánh giá tập dữ liệu OBD-II khả dụng</text>
+    <text x="50" y="265" font-size="20" fill="#000">• Tinh chỉnh PID theo từng nhóm xe</text>
+    <line x1="30" y1="290" x2="620" y2="290" stroke="#cccccc" stroke-width="1" stroke-dasharray="4 4"/>
+    <text x="30" y="325" font-size="20" font-style="italic" fill="#1a5276">Đảm bảo thiết bị hoạt động ổn định</text>
+    <text x="30" y="355" font-size="20" font-style="italic" fill="#1a5276">trên đa dạng dòng xe cho thuê.</text>
+  </g>
+
+  <!-- Card 4: Hoàn thiện triển khai -->
+  <g transform="translate(690, 410)">
+    <rect width="650" height="370" rx="10" fill="#ffffff" stroke="#1a5276" stroke-width="3"/>
+    <rect width="650" height="80" rx="10" fill="#1a5276"/>
+    <rect y="50" width="650" height="30" fill="#1a5276"/>
+    <circle cx="50" cy="40" r="28" fill="#ffffff"/>
+    <text x="50" y="52" text-anchor="middle" font-size="32" font-weight="bold" fill="#1a5276">4</text>
+    <text x="100" y="50" font-size="26" font-weight="bold" fill="#ffffff">HOÀN THIỆN TRIỂN KHAI</text>
+
+    <text x="30" y="135" font-size="22" font-weight="bold" fill="#000">Mục tiêu</text>
+    <text x="30" y="170" font-size="20" fill="#000">Tăng mức hoàn thiện sản phẩm:</text>
+    <text x="50" y="205" font-size="20" fill="#000">• Bảo mật đường truyền (TLS, mã hóa)</text>
+    <text x="50" y="235" font-size="20" fill="#000">• Quản lý cấu hình thiết bị từ xa</text>
+    <text x="50" y="265" font-size="20" fill="#000">• Tối ưu năng lượng thêm một bậc</text>
+    <line x1="30" y1="290" x2="620" y2="290" stroke="#cccccc" stroke-width="1" stroke-dasharray="4 4"/>
+    <text x="30" y="325" font-size="20" font-style="italic" fill="#1a5276">Đưa hệ thống đến mức sẵn sàng</text>
+    <text x="30" y="355" font-size="20" font-style="italic" fill="#1a5276">cho triển khai thương mại.</text>
+  </g>
+</svg>

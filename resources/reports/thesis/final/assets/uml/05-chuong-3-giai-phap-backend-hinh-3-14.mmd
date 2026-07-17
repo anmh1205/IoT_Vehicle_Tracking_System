@@ -1,23 +1,19 @@
-erDiagram
-    USERS ||--o{ VEHICLES : quản_lý
-    VEHICLES ||--o{ DEVICES : gắn
-    VEHICLES ||--o{ TRIPS : phát_sinh
-    TRIPS ||--o{ TRIP_EVENTS : gồm
-    VEHICLES ||--o{ ALERTS : tạo_ra
-    DEVICES ||--o{ COMMANDS : nhận
+flowchart TB
+    subgraph PostgreSQL["PostgreSQL nghiệp vụ đang triển khai"]
+        Auth["Người dùng và phiên đăng nhập<br/>users<br/>user_sessions<br/>user_device_access"]
+        DeviceOps["Thiết bị và phiên thiết bị<br/>devices<br/>device_sessions<br/>device_commands"]
+        Fleet["Khách hàng và đội xe<br/>customers<br/>vehicles<br/>drivers<br/>trips<br/>maintenance"]
+        Alerts["Cảnh báo, lỗi và vi phạm<br/>alerts<br/>violations<br/>event_logs<br/>error_code_definitions<br/>validation_errors"]
+        GeoPolicy["Vùng giám sát và chính sách<br/>geofences<br/>geofence_vehicles<br/>vehicle_policies<br/>vehicle_allowed_zones<br/>policy_audit_logs"]
+        Admin["Firmware và quản trị hệ thống<br/>firmware<br/>firmware_update_log<br/>system_settings<br/>system_admin_setting_revisions"]
+        OpsLog["Nhật ký, thông báo và xuất dữ liệu<br/>audit_logs<br/>user_audit_logs<br/>notification_states<br/>fcm_tokens<br/>export_jobs"]
+    end
 
-    USERS {
-      uuid id
-      string email
-      string role
-    }
-    VEHICLES {
-      uuid id
-      string license_plate
-      string status
-    }
-    DEVICES {
-      uuid id
-      string serial
-      string imei
-    }
+    Auth --> DeviceOps
+    Fleet --> DeviceOps
+    DeviceOps --> Alerts
+    Fleet --> Alerts
+    Fleet --> GeoPolicy
+    Alerts --> OpsLog
+    Admin --> DeviceOps
+    Admin --> OpsLog

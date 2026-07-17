@@ -1,0 +1,195 @@
+{
+  "page_id": "357df50b-1fcd-8163-8348-eb760e87e7c3",
+  "title": "07. Liên từ",
+  "intro": [
+    {"text": "Bài 07 — Liên từ (Conjunctions). Cách học: đọc lý thuyết từng phần → làm ngay câu hỏi bên dưới → tự chọn đáp án → rồi mới mở toggle Đáp án & giải thích. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 & 6 cực hay bẫy giữa LIÊN TỪ (nối 2 mệnh đề, theo sau là S + V), GIỚI TỪ (theo sau là danh từ), và TRẠNG TỪ NỐI (đứng giữa 2 câu riêng, có dấu chấm hoặc chấm phẩy).", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & phân loại"},
+    {"type": "p", "text": "Liên từ (conjunction) nối từ, cụm từ hoặc mệnh đề. Ba nhóm: kết hợp (coordinating – FANBOYS), tương quan (correlative), và phụ thuộc (subordinating). Phân biệt với GIỚI TỪ (đi với danh từ) và TRẠNG TỪ NỐI (đứng giữa hai câu) là điểm TOEIC hay hỏi."},
+
+    {"type": "h3", "text": "2. Liên từ kết hợp — FANBOYS"},
+    {"type": "ul", "items": [
+      "for (vì), and (và), nor (cũng không), but (nhưng), or (hoặc), yet (tuy nhiên), so (vì vậy).",
+      "Nối hai mệnh đề độc lập → thêm DẤU PHẨY trước liên từ: The price rose, so demand fell.",
+      "Nối hai từ/cụm cùng loại (song song): efficient and reliable; by phone or by email."
+    ]},
+
+    {"type": "h3", "text": "3. Liên từ tương quan (correlative)"},
+    {"type": "table", "headers": ["Cặp", "Nghĩa", "Hòa hợp chủ-vị"], "rows": [
+      ["both … and", "cả … và", "động từ số nhiều"],
+      ["either … or", "hoặc … hoặc", "chia theo chủ ngữ GẦN"],
+      ["neither … nor", "không … cũng không", "chia theo chủ ngữ GẦN"],
+      ["not only … but also", "không những … mà còn", "chia theo chủ ngữ GẦN"],
+      ["whether … or", "liệu … hay", "—"]
+    ]},
+    {"type": "key", "text": "Hai vế của cặp tương quan phải SONG SONG về loại từ: 'not only fast but also reliable' (adj–adj), 'either by email or by phone' (cụm giới từ–cụm giới từ)."},
+
+    {"type": "h3", "text": "4. Liên từ phụ thuộc (subordinating)"},
+    {"type": "ul", "items": [
+      "Nguyên nhân: because, since, as. Kết quả/mục đích: so that, in order that.",
+      "Nhượng bộ: although, though, even though, while, whereas.",
+      "Thời gian: when, while, before, after, until, as soon as, by the time.",
+      "Điều kiện: if, unless, provided that, as long as.",
+      "Mệnh đề phụ + dấu phẩy nếu đứng đầu: Although it rained, the event continued."
+    ]},
+
+    {"type": "h3", "text": "5. Liên từ vs Giới từ vs Trạng từ nối (rất hay bẫy)"},
+    {"type": "table", "headers": ["Ý nghĩa", "Liên từ + MỆNH ĐỀ", "Giới từ + DANH TỪ", "Trạng từ nối"], "rows": [
+      ["Nguyên nhân", "because / since", "because of / due to", "therefore"],
+      ["Nhượng bộ", "although / though", "despite / in spite of", "however / nevertheless"],
+      ["Thêm ý", "—", "in addition to / besides", "in addition / moreover"]
+    ]},
+    {"type": "p", "text": "Trạng từ nối (however, therefore, moreover, nevertheless) KHÔNG nối được hai mệnh đề bằng dấu phẩy — phải dùng dấu chấm hoặc chấm phẩy: Sales fell; however, profit rose."},
+
+    {"type": "h3", "text": "6. Cấu trúc song song (parallelism)"},
+    {"type": "p", "text": "Các thành phần nối bởi and/or/but phải cùng dạng ngữ pháp: 'The job requires planning, organizing, and reporting' (cùng V-ing). Sai khi trộn: 'planning, to organize, and reports'."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Although + mệnh đề / Despite + danh từ — đừng lẫn (Despite the rain, KHÔNG 'Despite it rained'). (2) Because + mệnh đề vs Because of + N. (3) Không dùng 'Although … but …' trong cùng câu (chỉ chọn 1). (4) However/Therefore là TRẠNG TỪ, cần dấu chấm/chấm phẩy, không phải liên từ. (5) neither…nor / either…or chia động từ theo chủ ngữ gần."}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Liên từ chỉ lý do và kết quả",
+      "theory": ["Liên từ phụ thuộc nối mệnh đề lý do/kết quả với mệnh đề chính. Theo sau liên từ luôn là một mệnh đề đầy đủ (S + V)."],
+      "keys": [
+        "Lý do: because, since, as, now that + S + V.",
+        "Kết quả/mục đích: so that, in order that + S + V. Mức độ: so + adj/adv + that...; such + (a/an) + adj + noun + that..."
+      ],
+      "traps": ["because (liên từ, + mệnh đề) ≠ because of / due to (giới từ, + danh từ). therefore / thus / as a result là TRẠNG TỪ nối, không nối 2 mệnh đề bằng dấu phẩy."],
+      "examples": [
+        "The flight was delayed because the weather was bad. — because + S + V.",
+        "Sales rose so quickly that we hired more staff. — so + adv + that."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The shipment was delayed ___ the weather was severe.\nA. because    B. because of    C. due to    D. therefore", "a": "Đáp án: A (because). ||because + mệnh đề (the weather was severe). because of/due to đi với danh từ; therefore là trạng từ nối."},
+        {"q": "___ the new policy took effect, the number of complaints has dropped.\nA. Because of    B. Now that    C. Despite    D. During", "a": "Đáp án: B (Now that). ||Now that + S + V = vì giờ đây. Theo sau là mệnh đề 'the new policy took effect'."},
+        {"q": "The store extended its hours ___ it could serve more customers.\nA. so that    B. because    C. due to    D. in spite of", "a": "Đáp án: A (so that). ||so that + S + V chỉ mục đích/kết quả. because chỉ lý do (không hợp), due to/in spite of là giới từ."},
+        {"q": "Demand was ___ high that the factory added a night shift.\nA. so    B. such    C. very    D. too", "a": "Đáp án: A (so). ||so + adj (high) + that. 'such' cần theo sau là (a) + adj + noun; very/too không tạo cấu trúc with that."},
+        {"q": "It was ___ a successful launch that sales doubled within a month.\nA. so    B. such    C. very    D. too", "a": "Đáp án: B (such). ||such + a + adj + noun (a successful launch) + that. Phân biệt với 'so + adj + that'."},
+        {"q": "Chọn câu ĐÚNG:\nA. Because of the rain was heavy, the game stopped.\nB. Because the rain was heavy, the game stopped.\nC. Due to the rain was heavy, the game stopped.\nD. Therefore the rain was heavy, the game stopped.", "a": "Đáp án: B. ||because + mệnh đề. because of/due to phải đi với danh từ, không đi với mệnh đề; therefore là trạng từ."},
+        {"q": "Tìm và sửa lỗi:\n\"The road was closed because of an accident happened.\"", "a": "Lỗi: \"because of ... happened\". ||Sau because of phải là danh từ, không phải mệnh đề. Sửa: \"because an accident happened\" (liên từ + mệnh đề) hoặc \"because of an accident\" (giới từ + danh từ)."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"Attendance was lower than expected, ___ the organizers decided to shorten the program.\"\nA. because    B. so    C. due to    D. despite", "a": "Đáp án: B (so). ||so nối hai mệnh đề chỉ kết quả: số người dự thấp → quyết định rút ngắn chương trình."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Liên từ tương phản",
+      "theory": ["Diễn đạt sự trái ngược giữa hai ý. Cần chọn đúng loại từ tùy theo sau là mệnh đề, danh từ hay câu riêng."],
+      "keys": [
+        "Liên từ (+ mệnh đề): although, though, even though, while, whereas.",
+        "Giới từ (+ danh từ/V-ing): despite, in spite of. Trạng từ nối: however, nevertheless, nonetheless, on the other hand."
+      ],
+      "traps": ["despite / in spite of + danh từ. KHÔNG có 'of' sau despite. Sai: despite of the rain. Đúng: despite the rain / in spite of the rain / although it rained."],
+      "examples": [
+        "Although the budget was tight, the project succeeded. — Although + S + V.",
+        "Despite the heavy rain, the event continued. — Despite + danh từ."
+      ],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "___ the budget was limited, the team completed the project on schedule.\nA. Although    B. Despite    C. However    D. Because", "a": "Đáp án: A (Although). ||Although + S + V (the budget was limited). Despite + danh từ; However là trạng từ; Because sai nghĩa."},
+        {"q": "___ the heavy traffic, she arrived at the meeting on time.\nA. Although    B. Despite    C. Even though    D. While", "a": "Đáp án: B (Despite). ||Theo sau là cụm danh từ 'the heavy traffic' → giới từ Despite. Các phương án còn lại là liên từ, cần mệnh đề."},
+        {"q": "The proposal was rejected; ___, the team remained motivated.\nA. although    B. despite    C. however    D. because", "a": "Đáp án: C (however). ||Sau dấu chấm phẩy là vị trí của trạng từ nối → however."},
+        {"q": "___ sales increased, profits actually fell last quarter.\nA. While    B. Despite    C. Because of    D. During", "a": "Đáp án: A (While). ||While (= trong khi/whereas) + S + V chỉ tương phản giữa hai mệnh đề."},
+        {"q": "Tìm và sửa lỗi:\n\"Despite of the delay, the goods arrived intact.\"", "a": "Lỗi: \"Despite of\". ||despite KHÔNG đi với 'of'. Sửa: \"Despite the delay\" hoặc \"In spite of the delay\"."},
+        {"q": "Chọn câu ĐÚNG:\nA. Although the rain, the match continued.\nB. Although it was raining, the match continued.\nC. Despite it was raining, the match continued.\nD. However it was raining, the match continued.", "a": "Đáp án: B. ||Although + mệnh đề (it was raining). A thiếu động từ; C dùng despite + mệnh đề (sai); D dùng however như liên từ (sai)."},
+        {"q": "The software is powerful; ___, it remains easy to use.\nA. even though    B. despite    C. however    D. while", "a": "Đáp án: C (however). ||Vị trí sau dấu chấm phẩy cần trạng từ nối → however. even though/while là liên từ; despite là giới từ."},
+        {"q": "Điền vào bài viết (Part 6):\n\"___ the company faced strong competition, it managed to grow its market share.\"\nA. Despite    B. Although    C. However    D. Because of", "a": "Đáp án: B (Although). ||Đầu câu + mệnh đề (the company faced...) → Although. Despite/Because of + danh từ; However là trạng từ."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Liên từ điều kiện và thời gian",
+      "theory": ["Nối mệnh đề điều kiện hoặc thời gian với mệnh đề chính. Mệnh đề điều kiện/thời gian dùng thì hiện tại để chỉ tương lai."],
+      "keys": [
+        "Điều kiện: if, unless (= if not), as long as, provided (that), in case.",
+        "Thời gian: when, while, before, after, until, as soon as, once."
+      ],
+      "traps": ["unless đã mang nghĩa phủ định nên KHÔNG dùng 'unless ... not'. Mệnh đề thời gian/điều kiện dùng hiện tại đơn để chỉ tương lai: When the report is ready, we WILL send it."],
+      "examples": [
+        "You may enter once you show your badge. — once + S + V.",
+        "Unless you confirm by Friday, the booking will be canceled. — Unless = nếu không."
+      ],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "___ you confirm by Friday, the reservation will be canceled.\nA. If    B. Unless    C. As long as    D. Provided", "a": "Đáp án: B (Unless). ||Unless = nếu không. 'Nếu bạn KHÔNG xác nhận trước thứ Sáu...' hợp với việc bị hủy. If/As long as/Provided cho nghĩa ngược lại."},
+        {"q": "We will start the meeting ___ everyone has arrived.\nA. once    B. unless    C. despite    D. during", "a": "Đáp án: A (once). ||once + S + V = ngay khi. unless sai nghĩa; despite/during là giới từ."},
+        {"q": "___ the report is ready, we will email it to all members.\nA. When    B. During    C. Despite    D. Because of", "a": "Đáp án: A (When). ||When + S + V; mệnh đề thời gian dùng hiện tại (is ready) để chỉ tương lai (will email)."},
+        {"q": "You can use the executive lounge ___ you hold a valid membership.\nA. as long as    B. unless    C. in case of    D. despite", "a": "Đáp án: A (as long as). ||as long as + S + V = miễn là. unless sai nghĩa; in case of/despite là giới từ."},
+        {"q": "Tìm và sửa lỗi:\n\"Unless you don't register, you cannot attend the workshop.\"", "a": "Lỗi: \"Unless ... don't\". ||unless đã có nghĩa phủ định, không thêm 'not'. Sửa: \"Unless you register, you cannot attend.\""},
+        {"q": "Please wait in the lobby ___ your name is called.\nA. until    B. during    C. despite    D. because of", "a": "Đáp án: A (until). ||until + S + V = cho đến khi. Các phương án còn lại là giới từ, cần danh từ."},
+        {"q": "Check all the fields carefully ___ you submit the form.\nA. before    B. during    C. despite    D. because of", "a": "Đáp án: A (before). ||before + S + V (you submit). during/because of đi với danh từ."},
+        {"q": "Điền vào email (Part 6):\n\"Customers will receive a confirmation email ___ their payment is processed.\"\nA. as soon as    B. during    C. despite    D. in case of", "a": "Đáp án: A (as soon as). ||as soon as + S + V = ngay khi. Mệnh đề thời gian dùng hiện tại (is processed) chỉ tương lai."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Phân biệt liên từ / giới từ / trạng từ nối (bẫy lớn)",
+      "theory": ["Nhóm bẫy nặng nhất Part 5/6. Cùng một ý (lý do / tương phản / thời gian) nhưng phải chọn đúng LOẠI từ tùy theo sau là mệnh đề, danh từ, hay là câu riêng."],
+      "keys": [
+        "Lý do — liên từ: because/since (+S+V); giới từ: because of/due to (+N); trạng từ: therefore/thus.",
+        "Tương phản — liên từ: although/though/even though (+S+V); giới từ: despite/in spite of (+N); trạng từ: however/nevertheless. Thời gian — liên từ: while/when (+S+V); giới từ: during (+N)."
+      ],
+      "traps": ["Nhìn cái đứng NGAY SAU chỗ trống: S + V → chọn liên từ; danh từ/cụm danh từ → chọn giới từ; một câu hoàn chỉnh đứng riêng (có dấu chấm hoặc chấm phẩy trước đó) → chọn trạng từ nối."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "___ the rising costs, the company kept its prices unchanged.\nA. Although    B. Despite    C. Because    D. Therefore", "a": "Đáp án: B (Despite). ||Theo sau là cụm danh từ 'the rising costs' → giới từ Despite. Although/Because là liên từ; Therefore là trạng từ."},
+        {"q": "The factory closed early ___ a sudden power outage.\nA. because    B. because of    C. although    D. however", "a": "Đáp án: B (because of). ||Theo sau là danh từ 'a sudden power outage' → because of (giới từ chỉ lý do)."},
+        {"q": "Sales were strong in Q1; ___, they declined sharply in Q2.\nA. although    B. despite    C. however    D. while", "a": "Đáp án: C (however). ||Hai câu riêng ngăn bởi dấu chấm phẩy → trạng từ nối → however."},
+        {"q": "___ the negotiations were difficult, both sides reached an agreement.\nA. Despite    B. Although    C. Because of    D. During", "a": "Đáp án: B (Although). ||Theo sau là mệnh đề (the negotiations were difficult) → liên từ → Although."},
+        {"q": "The museum stays open late ___ the summer months.\nA. while    B. during    C. although    D. because", "a": "Đáp án: B (during). ||Theo sau là cụm danh từ 'the summer months' → giới từ thời gian → during. while/although/because là liên từ."},
+        {"q": "The presentation was canceled ___ the keynote speaker was ill.\nA. due to    B. because    C. despite    D. during", "a": "Đáp án: B (because). ||Theo sau là mệnh đề 'the speaker was ill' → liên từ → because. due to + danh từ."},
+        {"q": "___ its higher price, the premium model sold out quickly.\nA. Although    B. Even though    C. Despite    D. However", "a": "Đáp án: C (Despite). ||Theo sau là cụm danh từ 'its higher price' → giới từ → Despite."},
+        {"q": "The team met the deadline; ___, the client was very satisfied.\nA. because    B. so    C. therefore    D. although", "a": "Đáp án: C (therefore). ||Hai câu ngăn bởi dấu chấm phẩy, chỉ kết quả → trạng từ nối → therefore."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn tất cả: lý do, tương phản, điều kiện, thời gian. Mỗi câu hãy nhìn từ đứng ngay sau chỗ trống để quyết định loại từ."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "The order was canceled ___ the customer changed her mind.\nA. because    B. because of    C. despite    D. during", "a": "Đáp án: A (because). ||Theo sau là mệnh đề (the customer changed her mind) → liên từ chỉ lý do."},
+        {"q": "___ heavy snowfall, all morning flights were grounded.\nA. Because    B. Although    C. Due to    D. While", "a": "Đáp án: C (Due to). ||Theo sau là cụm danh từ 'heavy snowfall' → giới từ chỉ lý do Due to."},
+        {"q": "The store offers free delivery ___ the order exceeds 50 dollars.\nA. as long as    B. despite    C. during    D. because of", "a": "Đáp án: A (as long as). ||as long as + S + V = miễn là (điều kiện)."},
+        {"q": "___ being new to the role, the intern handled the task confidently.\nA. Although    B. Despite    C. Because    D. However", "a": "Đáp án: B (Despite). ||Despite + V-ing/danh từ (being new). Although cần theo sau là mệnh đề có S + V."},
+        {"q": "We postponed the company picnic ___ it was raining heavily.\nA. because    B. because of    C. despite    D. during", "a": "Đáp án: A (because). ||Theo sau là mệnh đề (it was raining heavily) → liên từ."},
+        {"q": "The meeting ran long; ___, we still finished the entire agenda.\nA. although    B. despite    C. nevertheless    D. while", "a": "Đáp án: C (nevertheless). ||Sau dấu chấm phẩy → trạng từ nối chỉ tương phản → nevertheless."},
+        {"q": "___ you need any assistance, please contact the front desk.\nA. If    B. Despite    C. During    D. Because of", "a": "Đáp án: A (If). ||If + S + V chỉ điều kiện. Các phương án còn lại là giới từ."},
+        {"q": "The product remains popular ___ its relatively high price.\nA. although    B. despite    C. because    D. while", "a": "Đáp án: B (despite). ||despite + cụm danh từ (its relatively high price). although/because/while là liên từ."},
+        {"q": "Chọn câu ĐÚNG:\nA. Because of the system was down, we lost data.\nB. Because the system was down, we lost data.\nC. Due to the system was down, we lost data.\nD. Despite the system was down, we lost data.", "a": "Đáp án: B. ||because + mệnh đề. because of/due to/despite phải đi với danh từ, không đi với mệnh đề."},
+        {"q": "Điền vào thông báo (Part 6):\n\"The launch was a great success. ___, the whole team celebrated with a dinner.\"\nA. Although    B. Despite    C. Therefore    D. Because", "a": "Đáp án: C (Therefore). ||Đầu câu mới sau dấu chấm → trạng từ nối chỉ kết quả → Therefore."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Làm xong hết mới dò. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "___ the contract was signed, work began immediately.\nA. Once    B. Despite    C. During    D. Because of", "a": "A (Once). ||once + S + V = ngay khi/sau khi."},
+      {"q": "The outdoor event was rescheduled ___ low attendance.\nA. because    B. because of    C. although    D. however", "a": "B (because of). ||Theo sau là danh từ 'low attendance' → giới từ chỉ lý do."},
+      {"q": "___ the instructions were unclear, the team finished on time.\nA. Although    B. Despite    C. Due to    D. During", "a": "A (Although). ||Theo sau là mệnh đề → liên từ tương phản Although."},
+      {"q": "Profits grew steadily; ___, the company expanded overseas.\nA. although    B. despite    C. therefore    D. while", "a": "C (therefore). ||Sau dấu chấm phẩy → trạng từ nối chỉ kết quả."},
+      {"q": "Please do not leave the building ___ the manager approves your request.\nA. until    B. during    C. despite    D. because of", "a": "A (until). ||until + S + V = cho đến khi."},
+      {"q": "___ the high demand, the bakery sold out by noon.\nA. Although    B. Because of    C. Even though    D. While", "a": "B (Because of). ||Theo sau là cụm danh từ 'the high demand' → giới từ chỉ lý do."},
+      {"q": "Tìm và sửa lỗi:\n\"Despite of the delay, the customers stayed patient.\"", "a": "Lỗi: \"Despite of\" → \"Despite\" (hoặc \"In spite of\"). ||despite không đi với 'of'."},
+      {"q": "The road was closed ___ repairs were being carried out.\nA. while    B. during    C. despite    D. because of", "a": "A (while). ||while + S + V (repairs were being carried out). during đi với danh từ."},
+      {"q": "___ you register early, you will receive a 10 percent discount.\nA. If    B. Despite    C. During    D. Because of", "a": "A (If). ||If + S + V chỉ điều kiện."},
+      {"q": "The flight was smooth ___ the bad weather forecast.\nA. although    B. despite    C. because    D. while", "a": "B (despite). ||despite + cụm danh từ (the bad weather forecast)."},
+      {"q": "Chọn câu ĐÚNG:\nA. Although the noise, she concentrated.\nB. Despite the noise, she concentrated.\nC. However the noise, she concentrated.\nD. Because of the noise was loud, she concentrated.", "a": "B. ||Despite + danh từ (the noise). A thiếu mệnh đề sau Although; C dùng however như liên từ; D dùng because of + mệnh đề."},
+      {"q": "The system will reboot automatically ___ the update finishes.\nA. as soon as    B. during    C. despite    D. because of", "a": "A (as soon as). ||as soon as + S + V = ngay khi."},
+      {"q": "___ sales were strong, the company narrowly missed its annual target.\nA. Even though    B. Despite    C. Due to    D. During", "a": "A (Even though). ||Theo sau là mệnh đề (sales were strong) → liên từ tương phản."},
+      {"q": "The shipment arrived two days late ___ a customs delay.\nA. because    B. because of    C. although    D. while", "a": "B (because of). ||Theo sau là danh từ 'a customs delay' → giới từ chỉ lý do."},
+      {"q": "The proposal was bold; ___, the board approved it unanimously.\nA. although    B. despite    C. nonetheless    D. while", "a": "C (nonetheless). ||Sau dấu chấm phẩy → trạng từ nối chỉ tương phản (dù vậy)."},
+      {"q": "Điền vào email (Part 6):\n\"___ the equipment is properly maintained, it will last for many years.\"\nA. As long as    B. Despite    C. During    D. Because of", "a": "A (As long as). ||As long as + S + V = miễn là (điều kiện). Mệnh đề điều kiện dùng hiện tại (is maintained) chỉ tương lai."}
+    ]
+  },
+  "summary": [
+    "Nhìn từ đứng NGAY SAU chỗ trống: S + V → liên từ; danh từ/cụm danh từ → giới từ; câu riêng (sau dấu chấm/chấm phẩy) → trạng từ nối.",
+    "Lý do: because/since (+mệnh đề) ↔ because of/due to (+danh từ) ↔ therefore/thus (trạng từ).",
+    "Tương phản: although/though/even though/while (+mệnh đề) ↔ despite/in spite of (+danh từ) ↔ however/nevertheless/nonetheless (trạng từ).",
+    "Điều kiện/thời gian: if/unless/as long as/when/while/until/as soon as (+mệnh đề); mệnh đề thời gian-điều kiện dùng hiện tại để chỉ tương lai."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy hay gặp: despite KHÔNG có 'of' (despite the rain, không phải 'despite of'); unless đã mang nghĩa phủ định nên không thêm 'not'.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16 câu Mini Test, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 4 (bẫy liên từ/giới từ/trạng từ) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

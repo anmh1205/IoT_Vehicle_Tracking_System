@@ -1,0 +1,167 @@
+{
+  "page_id": "357df50b-1fcd-81a5-ab1d-e1e223fc0155",
+  "title": "15. Can và Could",
+  "intro": [
+    {"text": "Bài 15 — Động từ khuyết thiếu Can và Could. Làm câu hỏi ngay sau mỗi phần, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 hỏi can/could chỉ khả năng, xin phép, đề nghị, suy đoán; và phân biệt 'could' với 'was able to / managed to' cho thành công cụ thể trong quá khứ.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & bản chất"},
+    {"type": "p", "text": "can và could là động từ khuyết thiếu (modal). Sau modal luôn là động từ NGUYÊN THỂ không 'to' (can go, could send). can dùng cho hiện tại/khả năng chung; could dùng cho quá khứ, lời đề nghị lịch sự, và khả năng/giả định."},
+
+    {"type": "h3", "text": "2. Cách dùng của can"},
+    {"type": "ul", "items": [
+      "Khả năng hiện tại: She can speak three languages.",
+      "Xin phép / cho phép: Can I use this room? You can leave early today.",
+      "Đề nghị giúp đỡ / yêu cầu: Can you send me the file? Can I help you?",
+      "Khả năng chung (sự thật): Stress can affect productivity."
+    ]},
+
+    {"type": "h3", "text": "3. Cách dùng của could"},
+    {"type": "ul", "items": [
+      "Khả năng trong quá khứ: When I was younger, I could work all night.",
+      "Xin phép / yêu cầu LỊCH SỰ hơn can: Could you review this report?",
+      "Khả năng/giả định ở hiện tại–tương lai: This plan could save costs.",
+      "could have + V3: lẽ ra đã có thể (nhưng không xảy ra): We could have won the contract."
+    ]},
+
+    {"type": "h3", "text": "4. Công thức"},
+    {"type": "table", "headers": ["Thể", "Cấu trúc", "Ví dụ"], "rows": [
+      ["Khẳng định", "S + can/could + V", "He can attend."],
+      ["Phủ định", "S + cannot (can't) / could not (couldn't) + V", "She can't join today."],
+      ["Nghi vấn", "Can/Could + S + V?", "Could you confirm the time?"]
+    ]},
+
+    {"type": "h3", "text": "5. be able to (thay thế can)"},
+    {"type": "p", "text": "be able to + V cũng diễn tả khả năng và dùng được ở MỌI thì mà can/could không có dạng: tương lai will be able to, hiện tại hoàn thành has been able to, sau modal khác (might be able to). Ví dụ: We will be able to deliver next week. (không 'will can')."},
+
+    {"type": "h3", "text": "6. Suy đoán: can't vs could"},
+    {"type": "p", "text": "can't = chắc chắn KHÔNG (suy đoán phủ định mạnh): He can't be the manager — he's too young. could = có thể (khả năng): The delay could be due to weather."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Sau can/could dùng V NGUYÊN THỂ, không thêm to/-s/-ed (can sends → can send). (2) Thì tương lai/hoàn thành phải dùng be able to (will be able to, không 'will can'). (3) couldn't = không thể (quá khứ); can't = chắc chắn không (suy đoán). (4) 'could have + V3' = lẽ ra đã có thể."}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Diễn tả khả năng (ability)",
+      "theory": ["can = khả năng ở hiện tại; could = khả năng chung trong quá khứ. Sau can/could luôn là động từ NGUYÊN THỂ (không 'to')."],
+      "keys": ["can + V (hiện tại). could + V (quá khứ/giả định). be able to + V (thay thế khi cần chia thì)."],
+      "traps": ["KHÔNG có 'to' sau can/could: 'can drive' (không phải 'can to drive')."],
+      "examples": [
+        "She can speak three languages fluently.",
+        "When he was young, he could run very fast."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "The new sales manager ___ speak three languages fluently.\nA. can    B. could    C. cans    D. to can", "a": "Đáp án: A (can). ||Khả năng ở hiện tại → can + V nguyên thể."},
+        {"q": "When he first joined, he ___ barely use the accounting software.\nA. can    B. could    C. cans    D. can to", "a": "Đáp án: B (could). ||Khả năng trong quá khứ → could."},
+        {"q": "With additional funding, we ___ complete the project sooner.\nA. can    B. cans    C. canning    D. can to", "a": "Đáp án: A (can). ||can + V nguyên thể (khả năng)."},
+        {"q": "Unfortunately, the team was not ___ to meet the original deadline.\nA. can    B. could    C. able    D. ability", "a": "Đáp án: C (able). ||be able to + V (was not able to)."},
+        {"q": "Tìm và sửa lỗi:\n\"He can to operate a forklift safely.\"", "a": "Lỗi: \"can to operate\" → \"can operate\". ||Sau can không có 'to'."},
+        {"q": "After the training, employees ___ operate the new machine confidently.\nA. can    B. could    C. cans    D. can to", "a": "Đáp án: A (can). ||Khả năng hiện tại → can + V."},
+        {"q": "I ___ understand the report yesterday; it was too technical.\nA. can't    B. couldn't    C. can    D. cans", "a": "Đáp án: B (couldn't). ||Quá khứ phủ định → couldn't."},
+        {"q": "Điền vào mô tả (Part 6):\n\"With the new software, staff ___ process customer orders much faster.\"\nA. can    B. could    C. cans    D. canning", "a": "Đáp án: A (can). ||Khả năng hiện tại → can."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Xin phép và lời đề nghị",
+      "theory": ["Can/Could I...? = xin phép. Can/Could you...? = nhờ vả. could lịch sự và trang trọng hơn can. cannot/can't = không được phép."],
+      "keys": ["Can/Could I + V? (xin phép). Can/Could you + V? (nhờ). You can + V (cho phép). Visitors cannot + V (cấm)."],
+      "traps": ["Sau Could you vẫn là V nguyên thể: 'Could you send...' (không 'Could you to send')."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "___ I leave the office a little early today?\nA. Can    B. Do    C. Am    D. Will", "a": "Đáp án: A (Can). ||Xin phép → Can I + V."},
+        {"q": "___ you help me prepare the quarterly report, please?\nA. Could    B. Do    C. Are    D. Have", "a": "Đáp án: A (Could). ||Nhờ vả lịch sự → Could you + V."},
+        {"q": "You ___ use the conference room until noon.\nA. can    B. could    C. are    D. do", "a": "Đáp án: A (can). ||Cho phép → You can + V."},
+        {"q": "___ I ask you a quick question before the meeting?\nA. Can    B. Do    C. Am    D. Have", "a": "Đáp án: A (Can). ||Xin phép → Can I + V."},
+        {"q": "Tìm và sửa lỗi:\n\"Could you to send me the signed contract?\"", "a": "Lỗi: \"Could you to send\" → \"Could you send\". ||Sau Could you dùng V nguyên thể."},
+        {"q": "Visitors ___ not enter the laboratory without a security badge.\nA. can    B. cannot    C. could    D. able", "a": "Đáp án: B (cannot). ||Không được phép → cannot + V."},
+        {"q": "Chọn câu lịch sự hơn:\n\"___ you possibly review my draft this afternoon?\"\nA. Can    B. Could    C. Do    D. Will", "a": "Đáp án: B (Could). ||could lịch sự/trang trọng hơn can."},
+        {"q": "Điền vào hướng dẫn (Part 6):\n\"Guests ___ access the Wi-Fi using the password printed at reception.\"\nA. can    B. could    C. cans    D. canning", "a": "Đáp án: A (can). ||Cho phép/khả năng hiện tại → can."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Diễn tả khả năng xảy ra (possibility)",
+      "theory": ["can = khả năng chung (điều thường có thể xảy ra). could = khả năng cụ thể, có thể xảy ra trong tình huống này. can't = chắc chắn không/không thể."],
+      "keys": ["can cause (chung). could be postponed (cụ thể). That can't be... = chắc chắn không phải."],
+      "traps": ["Khả năng tương lai cụ thể dùng could/might, không dùng 'can be V-ing'."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "The meeting ___ be postponed if the client arrives late.\nA. can    B. could    C. cans    D. able", "a": "Đáp án: B (could). ||Khả năng cụ thể trong tình huống → could."},
+        {"q": "Heavy rain ___ cause delays in the delivery schedule.\nA. can    B. could    C. cans    D. able", "a": "Đáp án: A (can). ||Khả năng chung (điều thường xảy ra) → can."},
+        {"q": "That ___ be the manager; she is on leave all week.\nA. can't    B. could    C. can    D. couldn't", "a": "Đáp án: A (can't). ||Chắc chắn không phải → can't be."},
+        {"q": "The reported error ___ be due to a minor software bug.\nA. can    B. could    C. cans    D. able", "a": "Đáp án: B (could). ||Suy đoán khả năng → could be."},
+        {"q": "Tìm và sửa lỗi:\n\"It can be raining later this afternoon, so bring an umbrella.\"", "a": "Lỗi: \"can be raining\" → \"could be raining\" (hoặc 'might'). ||Khả năng cụ thể trong tương lai dùng could/might."},
+        {"q": "According to analysts, prices ___ rise sharply next quarter.\nA. can    B. could    C. cans    D. able", "a": "Đáp án: B (could). ||Dự đoán khả năng cụ thể → could."},
+        {"q": "Chọn câu ĐÚNG:\nA. This can not be the final version; it has errors.\nB. This cannot be the final version; it has errors.\nC. This could not the final version.\nD. This able not be the final version.", "a": "Đáp án: B. ||cannot be = chắc chắn không phải (viết liền 'cannot')."},
+        {"q": "Điền vào cảnh báo (Part 6):\n\"Without regular maintenance, the equipment ___ break down unexpectedly.\"\nA. can    B. could    C. cans    D. canning", "a": "Đáp án: A (can). ||Khả năng chung → can."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · was/were able to, managed to, could have",
+      "theory": ["Thành công CỤ THỂ trong quá khứ: dùng was/were able to hoặc managed to (KHÔNG dùng 'could' khẳng định cho một lần cụ thể). could have + V3 = suy đoán/tiếc nuối về quá khứ."],
+      "keys": ["was/were able to + V; managed to + V (một lần thành công). couldn't dùng được cho phủ định quá khứ. could have + V3 = lẽ ra đã có thể."],
+      "traps": ["'Yesterday I could finish' (sai cho một thành tựu cụ thể) → 'was able to/managed to finish'."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "After hours of effort, we ___ to fix the critical bug.\nA. could    B. were able    C. can    D. able", "a": "Đáp án: B (were able). ||Thành công cụ thể trong quá khứ → were able to."},
+        {"q": "Despite tough competition, the firm ___ to secure the contract.\nA. could    B. managed    C. can    D. able", "a": "Đáp án: B (managed). ||managed to + V = xoay xở thành công (một lần cụ thể)."},
+        {"q": "We ___ have finished earlier if we had started on time.\nA. can    B. could    C. can't    D. couldn't", "a": "Đáp án: B (could). ||could have + V3 = lẽ ra đã có thể (suy đoán/tiếc nuối)."},
+        {"q": "She ___ to attend the conference because of a scheduling conflict.\nA. wasn't able    B. couldn't able    C. can't    D. didn't able", "a": "Đáp án: A (wasn't able). ||be able to dạng phủ định quá khứ: wasn't able to."},
+        {"q": "Tìm và sửa lỗi:\n\"Yesterday, I could finish all my assigned tasks.\"", "a": "Lỗi: \"could finish\" cho một lần cụ thể. ||Sửa: \"was able to finish\" hoặc \"managed to finish\"."},
+        {"q": "After the negotiation, both sides ___ to reach an agreement.\nA. could    B. were able    C. can    D. able", "a": "Đáp án: B (were able). ||Thành công cụ thể → were able to."},
+        {"q": "Chọn câu ĐÚNG:\nA. He can have left already; his car is gone.\nB. He could have left already; his car is gone.\nC. He could left already.\nD. He can left already.", "a": "Đáp án: B. ||could have + V3 = suy đoán về quá khứ."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"Thanks to the upgrade, the team is now ___ to handle twice as many requests.\"\nA. could    B. able    C. can    D. abled", "a": "Đáp án: B (able). ||is able to + V (khả năng hiện tại)."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn khả năng, xin phép, suy đoán và be able to/managed to."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "___ you send me the updated invoice by tomorrow morning?\nA. Could    B. Do    C. Are    D. Have", "a": "Đáp án: A (Could). ||Nhờ vả lịch sự → Could you + V."},
+        {"q": "The new hire ___ already use all the main reporting tools.\nA. can    B. could    C. cans    D. able", "a": "Đáp án: A (can). ||Khả năng hiện tại → can."},
+        {"q": "This industrial coating ___ withstand very high temperatures.\nA. can    B. could    C. cans    D. able", "a": "Đáp án: A (can). ||Khả năng chung → can."},
+        {"q": "We weren't ___ to reach the supplier yesterday afternoon.\nA. can    B. could    C. able    D. ability", "a": "Đáp án: C (able). ||be able to dạng phủ định quá khứ: weren't able to."},
+        {"q": "Tìm và sửa lỗi:\n\"Can you to open the side window, please?\"", "a": "Lỗi: \"Can you to open\" → \"Can you open\". ||Sau Can you dùng V nguyên thể."},
+        {"q": "The shipment delay ___ be caused by a customs issue.\nA. can    B. could    C. cans    D. able", "a": "Đáp án: B (could). ||Suy đoán nguyên nhân → could be."},
+        {"q": "Employees ___ not park in the spaces reserved for visitors.\nA. can    B. cannot    C. could    D. able", "a": "Đáp án: B (cannot). ||Cấm/không được phép → cannot."},
+        {"q": "With more staff, we ___ handle a larger number of clients.\nA. cans    B. could    C. able    D. canning", "a": "Đáp án: B (could). ||Khả năng giả định (với điều kiện) → could."},
+        {"q": "Chọn câu lịch sự:\n\"___ I have your full name, please?\"\nA. Can    B. Could    C. Do    D. Will", "a": "Đáp án: B (Could). ||could lịch sự hơn khi đề nghị."},
+        {"q": "Điền vào hướng dẫn (Part 6):\n\"Members ___ download the full report directly from the portal.\"\nA. can    B. could    C. cans    D. canning", "a": "Đáp án: A (can). ||Khả năng/cho phép hiện tại → can."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "She ___ operate the new machine after completing the training.\nA. can    B. could    C. cans    D. able", "a": "A (can). ||Khả năng hiện tại → can."},
+      {"q": "___ you please forward me the meeting agenda?\nA. Could    B. Do    C. Are    D. Have", "a": "A (Could). ||Nhờ vả lịch sự → Could you + V."},
+      {"q": "When I was an intern, I ___ only handle simple administrative tasks.\nA. can    B. could    C. cans    D. able", "a": "B (could). ||Khả năng trong quá khứ → could."},
+      {"q": "Visitors ___ not use the staff-only elevator.\nA. can    B. cannot    C. could    D. able", "a": "B (cannot). ||Không được phép → cannot."},
+      {"q": "Tìm và sửa lỗi:\n\"He can to operate the overhead crane.\"", "a": "Lỗi: \"can to operate\" → \"can operate\". ||Sau can không có 'to'."},
+      {"q": "Due to the storm, the shipment ___ arrive a day late.\nA. can    B. could    C. cans    D. able", "a": "B (could). ||Khả năng cụ thể → could."},
+      {"q": "After much effort, the team ___ to win the major contract.\nA. could    B. were able    C. can    D. able", "a": "B (were able). ||Thành công cụ thể trong quá khứ → were able to."},
+      {"q": "That ___ be John on the phone; he is abroad this week.\nA. can't    B. could    C. can    D. couldn't", "a": "A (can't). ||Chắc chắn không phải → can't be."},
+      {"q": "___ I take a short break now that the report is done?\nA. Can    B. Do    C. Am    D. Have", "a": "A (Can). ||Xin phép → Can I + V."},
+      {"q": "Tìm và sửa lỗi:\n\"Yesterday we could complete the entire audit.\"", "a": "Lỗi: \"could complete\" cho một lần cụ thể. ||Sửa: \"were able to complete\" / \"managed to complete\"."},
+      {"q": "With additional funding, the project ___ expand into new markets.\nA. cans    B. could    C. able    D. canning", "a": "B (could). ||Khả năng giả định → could."},
+      {"q": "Chọn câu ĐÚNG:\nA. This can not be the correct file; the date is wrong.\nB. This cannot be the correct file; the date is wrong.\nC. This could not the correct file.\nD. This able not be the correct file.", "a": "B. ||cannot be = chắc chắn không phải."},
+      {"q": "The team ___ have avoided the error with better planning.\nA. can    B. could    C. can't    D. couldn't", "a": "B (could). ||could have + V3 = lẽ ra đã có thể (tiếc nuối)."},
+      {"q": "New employees ___ access the training portal from day one.\nA. can    B. could    C. cans    D. canning", "a": "A (can). ||Khả năng/cho phép hiện tại → can."},
+      {"q": "We weren't ___ to finish on time because of the power outage.\nA. can    B. could    C. able    D. ability", "a": "C (able). ||weren't able to + V."},
+      {"q": "Điền vào báo cáo (Part 6):\n\"Thanks to automation, staff ___ now complete the task in half the time.\"\nA. can    B. could    C. cans    D. canning", "a": "A (can). ||Khả năng hiện tại → can."}
+    ]
+  },
+  "summary": [
+    "can: khả năng/cho phép/khả năng chung ở hiện tại. could: quá khứ của can, lời đề nghị lịch sự, và khả năng/suy đoán. Sau can/could luôn là V nguyên thể.",
+    "Xin phép/nhờ vả: Can/Could I...?, Can/Could you...? (could lịch sự hơn). cannot = không được phép/không thể.",
+    "Khả năng: can (chung), could (cụ thể/có thể xảy ra), can't (chắc chắn không).",
+    "Thành công cụ thể trong quá khứ: was/were able to hoặc managed to (không dùng 'could' khẳng định cho một lần). could have + V3 = suy đoán/tiếc nuối về quá khứ."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy: 'Yesterday I could finish' (sai cho một lần thành công cụ thể) → 'was able to/managed to finish'. Sau can/could KHÔNG có 'to'.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 4 (was able to vs could) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

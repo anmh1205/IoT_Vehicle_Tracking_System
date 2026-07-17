@@ -1,6 +1,7 @@
-flowchart LR
-    A["Prototype"] --> B["Pilot trên xe thật"]
-    B --> C["Ổn định cloud + dashboard"]
-    C --> D["Mở rộng mobile + cảnh báo đẩy"]
-    D --> E["PCB chuyên dụng"]
-    E --> F["Scale-out + bảo mật nâng cao"]
+%%{init: {'flowchart': {'nodeSpacing': 70, 'rankSpacing': 90}} }%%
+flowchart TB
+    A["Mẫu thử"] --> B["Chạy thử trên xe"]
+    B --> C["Ổn định máy chủ + giao diện web"]
+    C --> D["Thêm ứng dụng di động + cảnh báo đẩy"]
+    D --> E["Tối ưu PCB cho sản xuất"]
+    E --> F["Mở rộng + tăng bảo mật"]

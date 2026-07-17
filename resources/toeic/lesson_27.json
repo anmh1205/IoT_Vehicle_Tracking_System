@@ -1,0 +1,165 @@
+{
+  "page_id": "357df50b-1fcd-819b-b40d-c42ca637c003",
+  "title": "27. Câu điều kiện loại 2",
+  "intro": [
+    {"text": "Bài 27 — Câu điều kiện loại 2 (giả định không/khó có thật ở hiện tại - tương lai). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 — If + quá khứ đơn, ... would/could/might + V. Bẫy: dùng 'were' cho mọi ngôi; mệnh đề chính dùng would.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Câu điều kiện loại 2 (second conditional) diễn tả giả định KHÔNG có thật hoặc khó xảy ra ở HIỆN TẠI/tương lai, và kết quả tưởng tượng. Dùng để bàn giả thuyết, đưa lời khuyên, hình dung tình huống."},
+
+    {"type": "h3", "text": "2. Công thức"},
+    {"type": "table", "headers": ["Mệnh đề If", "Mệnh đề chính", "Ví dụ"], "rows": [
+      ["If + quá khứ đơn", "would / could / might + V", "If we had more staff, we would finish sooner."]
+    ]},
+    {"type": "key", "text": "Mệnh đề If dùng QUÁ KHỨ ĐƠN (nhưng mang nghĩa hiện tại/giả định, KHÔNG phải quá khứ thật); vế chính dùng would/could/might + V nguyên thể."},
+
+    {"type": "h3", "text": "3. 'were' cho mọi ngôi"},
+    {"type": "p", "text": "Trong điều kiện loại 2, động từ 'to be' dùng 'were' cho TẤT CẢ các ngôi (kể cả I/he/she/it) trong văn chuẩn: If I were the manager, I would change the policy. If the price were lower, more people would buy."},
+
+    {"type": "h3", "text": "4. Lời khuyên 'If I were you'"},
+    {"type": "p", "text": "Cấu trúc đưa lời khuyên rất thông dụng: If I were you, I would negotiate the terms. (Nếu tôi là bạn, tôi sẽ…)."},
+
+    {"type": "h3", "text": "5. could / might trong vế chính"},
+    {"type": "ul", "items": [
+      "would: kết quả chắc chắn (trong giả định).",
+      "could: khả năng / năng lực (có thể).",
+      "might: khả năng không chắc chắn.",
+      "Ví dụ: If we lowered prices, we might attract more clients."
+    ]},
+
+    {"type": "h3", "text": "6. Phân biệt loại 1 và loại 2"},
+    {"type": "table", "headers": ["", "Loại 1 (có thật)", "Loại 2 (giả định)"], "rows": [
+      ["Mệnh đề If", "hiện tại đơn", "quá khứ đơn"],
+      ["Vế chính", "will + V", "would + V"],
+      ["Ý nghĩa", "có khả năng xảy ra", "không/khó xảy ra ở hiện tại"]
+    ]},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) If + QUÁ KHỨ ĐƠN, vế chính WOULD + V (không 'will'). (2) Dùng 'were' cho mọi ngôi (If I were…, không 'If I was' trong văn chuẩn). (3) Vế chính: would/could/might + V nguyên thể (không 'would to V', không 'would V-ed'). (4) Phân biệt với loại 1 (hiện tại + will)."}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Cấu trúc cơ bản",
+      "theory": ["Loại 2 diễn tả tình huống không có thật/khó xảy ra ở hiện tại hoặc tương lai: If + quá khứ đơn, S + would + V nguyên thể."],
+      "keys": ["If + S + V-ed/V2, S + would + V. Cũng dùng could/might thay would."],
+      "traps": ["Mệnh đề if dùng QUÁ KHỨ ĐƠN (không phải hiện tại, không phải would)."],
+      "examples": [
+        "If we had more staff, we would finish faster.",
+        "If the price were lower, more people would buy it."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "If we ___ more staff, we would complete the project sooner.\nA. have    B. had    C. will have    D. having", "a": "Đáp án: B (had). ||Loại 2: mệnh đề if dùng quá khứ đơn."},
+        {"q": "If the company invested more in R&D, it ___ more innovative.\nA. is    B. would be    C. will be    D. was", "a": "Đáp án: B (would be). ||Mệnh đề chính loại 2 → would + V."},
+        {"q": "We would expand overseas if we ___ enough capital.\nA. have    B. had    C. will have    D. having", "a": "Đáp án: B (had). ||Mệnh đề if dùng quá khứ đơn."},
+        {"q": "If prices ___ lower, demand would rise significantly.\nA. are    B. were    C. will be    D. being", "a": "Đáp án: B (were). ||Loại 2 dùng 'were' cho mọi ngôi (quá khứ giả định)."},
+        {"q": "Tìm và sửa lỗi:\n\"If I would have more time, I would help you.\"", "a": "Lỗi: \"If I would have\" → \"If I had\". ||Mệnh đề if loại 2 dùng quá khứ đơn, không 'would'."},
+        {"q": "If the manager ___ here, she would approve it instantly.\nA. is    B. were    C. will be    D. being", "a": "Đáp án: B (were). ||Loại 2: were cho mọi ngôi."},
+        {"q": "Chọn câu ĐÚNG:\nA. If we had a bigger budget, we would hire more staff.\nB. If we have a bigger budget, we would hire more staff.\nC. If we would have a bigger budget, we hire more staff.\nD. If we had a bigger budget, we will hire more staff.", "a": "Đáp án: A. ||If + quá khứ đơn, mệnh đề chính + would + V."},
+        {"q": "Điền vào nhận định (Part 6):\n\"If the market ___ more stable, the company would invest more.\"\nA. is    B. were    C. will be    D. being", "a": "Đáp án: B (were). ||Loại 2: were (giả định không có thật)."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · would / could / might trong mệnh đề chính",
+      "theory": ["Mệnh đề chính loại 2 dùng would (chắc chắn giả định), could (có thể/khả năng), might (có lẽ)."],
+      "keys": ["would + V (kết quả giả định); could + V (khả năng); might + V (có lẽ)."],
+      "traps": ["Sau would/could/might luôn là V nguyên thể."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "If we had more time, we ___ run additional tests.\nA. will    B. could    C. can    D. could to", "a": "Đáp án: B (could). ||Loại 2: could + V (khả năng giả định)."},
+        {"q": "If sales improved, the company ___ hire new staff.\nA. might    B. might to    C. will    D. can", "a": "Đáp án: A (might). ||Loại 2: might + V (có lẽ)."},
+        {"q": "If the office were closer, I ___ walk to work.\nA. will    B. would    C. can    D. would to", "a": "Đáp án: B (would). ||Loại 2: would + V nguyên thể."},
+        {"q": "If we automated the process, we ___ save thousands of hours.\nA. will    B. could    C. can    D. could to", "a": "Đáp án: B (could). ||Loại 2: could + V."},
+        {"q": "Tìm và sửa lỗi:\n\"If the budget were larger, we would to launch two products.\"", "a": "Lỗi: \"would to launch\" → \"would launch\". ||Sau would dùng V nguyên thể."},
+        {"q": "If the deadline were later, the team ___ produce better work.\nA. might    B. might to    C. will    D. can", "a": "Đáp án: A (might). ||Loại 2: might + V."},
+        {"q": "Chọn câu ĐÚNG:\nA. If we hired more engineers, we could meet the deadline.\nB. If we hired more engineers, we could to meet the deadline.\nC. If we hire more engineers, we could meet the deadline.\nD. If we would hire more engineers, we could meet.", "a": "Đáp án: A. ||If + quá khứ, mệnh đề chính could + V."},
+        {"q": "Điền vào báo cáo (Part 6):\n\"If the company expanded, it ___ create hundreds of new jobs.\"\nA. would    B. would to    C. will    D. can", "a": "Đáp án: A (would). ||Loại 2: would + V."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · were to, If I were you (lời khuyên)",
+      "theory": ["'If I were you, I would...' = lời khuyên. 'If + S + were to + V' nhấn mạnh giả định ít khả năng xảy ra."],
+      "keys": ["If I were you, I would accept the offer. If the deal were to fail, we would lose a lot."],
+      "traps": ["Dùng 'were' (không 'was') trong giả định: 'If I were you'."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "If I ___ you, I would negotiate a better price.\nA. was    B. were    C. am    D. will be", "a": "Đáp án: B (were). ||'If I were you' (lời khuyên) dùng were."},
+        {"q": "If I were the manager, I ___ change the schedule.\nA. will    B. would    C. can    D. would to", "a": "Đáp án: B (would). ||Loại 2: would + V."},
+        {"q": "If the company ___ to relocate, many staff would resign.\nA. were    B. was    C. is    D. will be", "a": "Đáp án: A (were). ||'were to + V' nhấn mạnh giả định ít khả năng."},
+        {"q": "If I were in charge, I ___ invest in training.\nA. will    B. would    C. can    D. would to", "a": "Đáp án: B (would). ||Loại 2: would + V."},
+        {"q": "Tìm và sửa lỗi:\n\"If I was you, I would take the job offer.\"", "a": "Lỗi: \"If I was you\" → \"If I were you\". ||Giả định dùng 'were' cho mọi ngôi."},
+        {"q": "If the system ___ to fail, we would lose all the data.\nA. were    B. was    C. is    D. will be", "a": "Đáp án: A (were). ||'were to + V' (giả định ít khả năng)."},
+        {"q": "Chọn câu lời khuyên ĐÚNG:\nA. If I were you, I would apply for the position.\nB. If I was you, I would apply for the position.\nC. If I am you, I would apply for the position.\nD. If I were you, I will apply for the position.", "a": "Đáp án: A. ||'If I were you, I would + V'."},
+        {"q": "Điền vào lời khuyên (Part 6):\n\"If I ___ in your position, I would request more time.\"\nA. was    B. were    C. am    D. will be", "a": "Đáp án: B (were). ||Giả định dùng were."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Phân biệt loại 1 và loại 2",
+      "theory": ["Loại 1: tình huống TƯƠNG LAI có thật/có khả năng → if + hiện tại, will. Loại 2: giả định KHÔNG/khó có thật → if + quá khứ, would."],
+      "keys": ["Loại 1: If it rains, we will cancel. Loại 2: If I won the lottery, I would travel."],
+      "traps": ["Chọn loại 2 khi tình huống không có thật/ít khả năng (giả sử, tưởng tượng)."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "(Có khả năng) If the supplier delivers late, we ___ a backup vendor.\nA. would use    B. will use    C. used    D. would used", "a": "Đáp án: B (will use). ||Tình huống có khả năng → loại 1 (will)."},
+        {"q": "(Giả định) If I ___ the CEO, I would restructure the company.\nA. am    B. were    C. will be    D. would be", "a": "Đáp án: B (were). ||Giả định không có thật → loại 2 (were)."},
+        {"q": "(Có khả năng) If you finish early, you ___ leave.\nA. would    B. can    C. could    D. would have", "a": "Đáp án: B (can). ||Tình huống thực tế → loại 1 (can/will)."},
+        {"q": "(Giả định) If we had unlimited funding, we ___ open ten new branches.\nA. will    B. would    C. can    D. will be", "a": "Đáp án: B (would). ||Giả định khó có thật → loại 2 (would)."},
+        {"q": "Tìm và sửa lỗi:\n\"If I would be rich, I would donate to charity.\"", "a": "Lỗi: \"If I would be\" → \"If I were\". ||Mệnh đề if loại 2 dùng quá khứ giả định (were)."},
+        {"q": "(Có khả năng) If the client approves, we ___ start next week.\nA. would    B. will    C. would have    D. could have", "a": "Đáp án: B (will). ||Tình huống có khả năng → loại 1 (will)."},
+        {"q": "Chọn câu loại 2 ĐÚNG:\nA. If I had more experience, I would apply for the manager role.\nB. If I have more experience, I would apply for the manager role.\nC. If I would have more experience, I apply for the role.\nD. If I had more experience, I will apply for the role.", "a": "Đáp án: A. ||Loại 2: if + quá khứ, mệnh đề chính + would."},
+        {"q": "Điền vào nhận định (Part 6):\n\"If our product ___ cheaper, we would dominate the market.\"\nA. is    B. were    C. will be    D. being", "a": "Đáp án: B (were). ||Giả định không có thật hiện tại → loại 2 (were)."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn cấu trúc loại 2, would/could/might, If I were you, và phân biệt loại 1/loại 2."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "If we ___ a larger office, we would hire more staff.\nA. have    B. had    C. will have    D. having", "a": "Đáp án: B (had). ||Loại 2: if + quá khứ đơn."},
+        {"q": "If the product were cheaper, customers ___ buy more.\nA. will    B. would    C. can    D. would to", "a": "Đáp án: B (would). ||Loại 2: would + V."},
+        {"q": "If I ___ you, I would accept the new position.\nA. was    B. were    C. am    D. will be", "a": "Đáp án: B (were). ||'If I were you' (lời khuyên)."},
+        {"q": "(Có khả năng) If the shipment arrives today, we ___ start production.\nA. would    B. will    C. would have    D. could have", "a": "Đáp án: B (will). ||Tình huống có khả năng → loại 1 (will)."},
+        {"q": "Tìm và sửa lỗi:\n\"If we would have more time, we would test it again.\"", "a": "Lỗi: \"If we would have\" → \"If we had\". ||Mệnh đề if loại 2 dùng quá khứ đơn."},
+        {"q": "If the deadline were extended, the team ___ deliver higher quality.\nA. might    B. might to    C. will    D. can", "a": "Đáp án: A (might). ||Loại 2: might + V."},
+        {"q": "If automation ___ introduced, the firm could cut costs sharply.\nA. is    B. were    C. will be    D. being", "a": "Đáp án: B (were). ||Loại 2 giả định → were (bị động giả định)."},
+        {"q": "Chọn câu loại 2 ĐÚNG:\nA. If sales doubled, we would open a new factory.\nB. If sales double, we would open a new factory.\nC. If sales would double, we open a new factory.\nD. If sales doubled, we will open a new factory.", "a": "Đáp án: A. ||Loại 2: if + quá khứ, mệnh đề chính + would."},
+        {"q": "If I were the project lead, I ___ change the timeline.\nA. will    B. would    C. can    D. would to", "a": "Đáp án: B (would). ||Loại 2: would + V."},
+        {"q": "Điền vào nhận định (Part 6):\n\"If the company ___ more agile, it would respond faster to market changes.\"\nA. is    B. were    C. will be    D. being", "a": "Đáp án: B (were). ||Giả định không có thật → loại 2 (were)."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "If we ___ more resources, we would launch two products at once.\nA. have    B. had    C. will have    D. having", "a": "B (had). ||Loại 2: if + quá khứ đơn."},
+      {"q": "If the office were larger, it ___ accommodate more staff.\nA. will    B. would    C. can    D. would to", "a": "B (would). ||Loại 2: would + V."},
+      {"q": "If I ___ you, I would renegotiate the contract.\nA. was    B. were    C. am    D. will be", "a": "B (were). ||'If I were you' (lời khuyên)."},
+      {"q": "If the company invested in training, productivity ___ improve.\nA. will    B. would    C. can    D. would to", "a": "B (would). ||Loại 2: would + V."},
+      {"q": "Tìm và sửa lỗi:\n\"If I would have more staff, I would delegate more tasks.\"", "a": "Lỗi: \"If I would have\" → \"If I had\". ||Mệnh đề if loại 2 dùng quá khứ đơn."},
+      {"q": "(Có khả năng) If the client signs today, we ___ begin immediately.\nA. would    B. will    C. would have    D. could have", "a": "B (will). ||Tình huống có khả năng → loại 1 (will)."},
+      {"q": "If the price were lower, we ___ sell far more units.\nA. might    B. might to    C. will    D. can", "a": "A (might). ||Loại 2: might + V."},
+      {"q": "If I were the manager, I ___ approve the budget.\nA. will    B. would    C. can    D. would to", "a": "B (would). ||Loại 2: would + V."},
+      {"q": "Chọn câu loại 2 ĐÚNG:\nA. If we had a bigger team, we would finish faster.\nB. If we have a bigger team, we would finish faster.\nC. If we would have a bigger team, we finish faster.\nD. If we had a bigger team, we will finish faster.", "a": "A. ||Loại 2: if + quá khứ, mệnh đề chính + would."},
+      {"q": "If the system ___ to crash, we would lose critical data.\nA. were    B. was    C. is    D. will be", "a": "A (were). ||'were to + V' (giả định ít khả năng)."},
+      {"q": "Tìm và sửa lỗi:\n\"If I was the CEO, I would expand internationally.\"", "a": "Lỗi: \"If I was\" → \"If I were\". ||Giả định dùng 'were' cho mọi ngôi."},
+      {"q": "(Giả định) If we ___ unlimited time, we would redesign the whole system.\nA. have    B. had    C. will have    D. having", "a": "B (had). ||Giả định không có thật → loại 2 (had)."},
+      {"q": "If demand were higher, the factory ___ run a night shift.\nA. could    B. could to    C. will    D. can", "a": "A (could). ||Loại 2: could + V."},
+      {"q": "(Có khả năng) If you submit the form today, it ___ processed tomorrow.\nA. would be    B. will be    C. was    D. would have been", "a": "B (will be). ||Tình huống có khả năng → loại 1 (will be)."},
+      {"q": "If our brand ___ better known, we would attract more partners.\nA. is    B. were    C. will be    D. being", "a": "B (were). ||Giả định không có thật → loại 2 (were)."},
+      {"q": "Điền vào nhận định (Part 6):\n\"If the company ___ in a bigger market, its revenue would be much higher.\"\nA. operates    B. operated    C. will operate    D. would operate", "a": "B (operated). ||Loại 2: mệnh đề if dùng quá khứ đơn."}
+    ]
+  },
+  "summary": [
+    "Điều kiện loại 2 (giả định không/khó có thật hiện tại - tương lai): If + quá khứ đơn, S + would + V.",
+    "Mệnh đề chính có thể dùng would / could / might + V nguyên thể.",
+    "Dùng 'were' cho mọi ngôi trong giả định (If I were you, If it were...). 'were to + V' nhấn mạnh giả định ít khả năng.",
+    "Phân biệt loại 1 (tương lai có thật → if + hiện tại, will) với loại 2 (giả định → if + quá khứ, would)."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy lớn: mệnh đề if loại 2 dùng QUÁ KHỨ ĐƠN, KHÔNG 'would' ('If I had', không 'If I would have'). Dùng 'were' cho mọi ngôi (If I were you).", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 4 (loại 1 vs loại 2) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

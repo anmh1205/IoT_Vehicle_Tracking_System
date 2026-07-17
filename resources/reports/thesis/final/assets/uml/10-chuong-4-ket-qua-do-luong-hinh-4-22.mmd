@@ -1,6 +1,21 @@
 flowchart LR
-    Bench["Bench test phần cứng"] --> Network["4G/Wi-Fi test network"]
-    Vehicle["Xe thử nghiệm"] --> Network
-    Network --> Cloud["EMQX + Bridge + Backend"]
-    Cloud --> Dashboard["Dashboard + Grafana"]
-    Dashboard --> Report["Kết quả đo + log"]
+    subgraph Inputs["Hai bối cảnh kiểm thử"]
+        direction TB
+        Bench["Bàn thử trong phòng thí nghiệm"]
+        Vehicle["Xe thử ngoài thực địa"]
+    end
+
+    Network["Mạng di động"]
+    Cloud["Khối tiếp nhận và xử lý"]
+
+    subgraph Outputs["Kênh quan sát kết quả"]
+        direction TB
+        Dashboard["Giao diện quản lý"]
+        Report["Đồ thị đo và nhật ký vận hành"]
+    end
+
+    Bench --> Network
+    Vehicle --> Network
+    Network --> Cloud
+    Cloud --> Dashboard
+    Cloud --> Report

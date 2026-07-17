@@ -1,9 +1,23 @@
 flowchart LR
-    ADC["Voltage divider -> GPIO4"] --> MCU["ESP32-S3"]
-    PWR["GPIO5/18/19"] --> MCU
-    MCU --> Modem["SIM7600CE-T
-UART1"]
-    MCU --> IMU["LIS3DH
-I2C"]
-    MCU --> OBD["BLE OBD2"]
-    MCU --> Logic["State machine"]
+    Vehicle["Nguồn và trạng thái từ xe"]
+    OBD["vgate iCar Pro<br/>Bộ đọc dữ liệu OBD-II"]
+    Cloud["Máy chủ xử lý<br/>và giao diện quản lý"]
+
+    subgraph Device["Thiết bị theo dõi trên xe"]
+        direction TB
+        Power["Khối nguồn<br/>MP2482, AP2112,<br/>TPS54231, TP5100, SX1308"]
+        MCU["ESP32-S3<br/>Điều phối dữ liệu và trạng thái"]
+        Motion["LIS3DSH<br/>Phát hiện chuyển động"]
+        Keep["DS3231M, W25Q128, microSD<br/>Giữ thời gian, lưu đệm dữ liệu"]
+        Modem["SIM7600E + khe microSIM<br/>Lấy vị trí GNSS, gửi dữ liệu 4G"]
+
+        Power --> MCU
+        Power --> Modem
+        Motion --> MCU
+        Keep --> MCU
+        MCU <--> Modem
+    end
+
+    Vehicle --> Power
+    OBD -. BLE .-> MCU
+    Modem --> Cloud

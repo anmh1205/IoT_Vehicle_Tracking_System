@@ -1,0 +1,146 @@
+===== PAGE 59 =====
+33 
+ 
+ 
+Hình 4.8: Thiết bị sau khi đóng vỏ, sẵn sàng cho bước lắp thử và đo kiểm trên xe 
+Một số điểm lưu ý khi lắp đặt thiết bị lên phương tiện: 
+- vgate iCar Pro được cắm trực tiếp vào cổng OBD-II của xe. 
+- Thiết bị theo dõi được đặt trong cabin, ưu tiên khu vực dưới táp-lô. 
+- Dữ liệu xe đi không dây từ OBD-II, còn thiết bị chỉ lấy nguồn từ xe và đặt ăng ten 
+ở vị trí thuận lợi cho thu sóng. 
+4.2. Triển khai phần mềm hệ thống – Software implementation 
+4.2.1. Phần điều khiển trên thiết bị – Device firmware 
+Ở phía thiết bị, firmware giữ vai trò điều phối toàn bộ nhịp làm việc của bộ theo 
+dõi: Quyết định khi nào thiết bị bắt đầu thu dữ liệu, khi nào gửi bản tin, khi nào chuyển 
+sang chế độ ngủ và khi nào phải thức dậy để kiểm tra lại trạng thái xe. 
+Bảng 4.1: Các chức năng chính đã hoàn thiện 
+STT Nhóm chức năng Nội dung đã triển khai 
+1 Khởi động và phục hồi 
+Nạp cấu hình làm việc, kiểm tra trạng thái còn 
+giữ lại từ lần chạy trước và chọn nhịp khởi 
+động phù hợp 
+
+===== PAGE 60 =====
+34 
+ 
+2 Tổ chức vận hành 
+Tách thiết bị thành các pha làm việc chính 
+như kiểm tra trạng thái xe, theo dõi khi xe 
+chạy, theo dõi khi xe đỗ, cảnh báo và ngủ 
+3 Thu dữ liệu 
+Kết hợp dữ liệu nguồn, dữ liệu OBD-II, vị trí 
+GNSS và tín hiệu chuyển động để phản ánh 
+trạng thái thực của xe 
+4 Gửi bản tin 
+Ghép dữ liệu thành bản tin giám sát và đưa lên 
+máy chủ theo nhịp làm việc của từng pha 
+5 Lưu đệm và gửi bù 
+Khi mất kết nối, bản tin được giữ cục bộ và 
+phát lại sau khi đường truyền ổn định trở lại 
+6 Quản lý chế độ ngủ 
+Hạ các nhánh tiêu thụ lớn, giữ đường đánh 
+thức cần thiết và tiết kiệm phần lớn năng 
+lượng khi xe đỗ dài 
+ 
+ 
+a, Khởi động 
+===== PAGE 61 =====
+35 
+ 
+ 
+Hình 4.9: Trình tự khởi động và chọn nhịp làm việc ban đầu của thiết bị 
+Sau khi khởi động, thiết bị được nạp cấu hình, xác định nguyên nhân đánh thức 
+và kiểm tra trạng thái hiện thời của xe. Bước này giúp thiết bị chọn đúng nhịp làm việc 
+ngay từ đầu, tránh vừa bật lên đã xử lý theo một chế độ không phù hợp. 
+b, Thu dữ liệu và gửi bản tin 
+
+===== PAGE 62 =====
+36 
+ 
+ 
+Hình 4.10: Nguyên lý thu dữ liệu và gửi bản tin trong pha hoạt động của thiết bị 
+Trong pha hoạt động, thiết bị ghép dữ liệu xe, vị trí và nguồn thành một bản tin 
+giám sát thống nhất. Nếu đường truyền đang sẵn sàng thì bản tin được gửi ngay; ngược 
+lại, dữ liệu sẽ được giữ cục bộ để chờ gửi bù. Cách làm này giúp tuyến giám sát không 
+bị đứt khi xe đi qua vùng sóng yếu. 
+c, Chuyển sang ngủ và đánh thức lại 
+
+===== PAGE 63 =====
+37 
+ 
+ 
+Hình 4.11: Nguyên lý chuyển thiết bị sang chế độ ngủ và đánh thức lại khi xe đỗ 
+Khi xe đỗ, thiết bị không tắt ngay mà đi qua bước kiểm tra điều kiện ngủ, sau đó 
+mới hạ các nhánh đang tiêu thụ và giữ lại các đường đánh thức cần thiết. Nhờ vậy, phần 
+lớn năng lượng được cắt giảm trong thời gian xe đỗ, nhưng thiết bị vẫn có thể thức dậy 
+theo chu kỳ hoặc khi phát hiện chuyển động bất thường. 
+
+===== PAGE 64 =====
+38 
+ 
+4.2.2. Hạ tầng máy chủ và xử lý dữ liệu – Server infrastructure and data 
+processing 
+Ở phía máy chủ, hệ thống được triển khai thành ba lớp rõ ràng: nhận bản tin, xử 
+lý dữ liệu và cung cấp thông tin cho giao diện quản lý. Cách tách này giúp bản tin từ 
+thiết bị không bị dồn thẳng vào cùng một ứng dụng, nên toàn tuyến ổn định hơn khi xe 
+gửi dữ liệu liên tục hoặc gửi bù sau lúc mất sóng. 
+ 
+Bảng 4.2: Các chức năng chính đã hoàn thiện 
+STT Nhóm chức năng Nội dung đã triển khai 
+1 Tiếp nhận bản tin 
+Nhận bản tin từ thiết bị qua lớp tiếp nhận bản 
+tin 
+2 Kiểm tra và phân luồng 
+Tách dữ liệu vị trí, dữ liệu vận hành, sự kiện 
+và phản hồi thiết bị để đưa vào đúng tuyến xử 
+lý 
+3 Lưu trữ nghiệp vụ 
+Ghi thông tin thiết bị, phương tiện, cảnh báo 
+và dữ liệu quản lý vào cơ sở dữ liệu 
+4 
+Lưu trữ theo thời gian và 
+nhật ký 
+Ghi dữ liệu đo theo thời gian và nhật ký vận 
+hành vào các kho dữ liệu riêng 
+5 
+Cung cấp thông tin cho 
+giao diện 
+Lớp xử lý phía máy chủ truy vấn dữ liệu, trả 
+kết quả cho giao diện và đẩy cập nhật mới khi 
+cần 
+a, Tuyến tiếp nhận và xử lý dữ liệu 
+===== PAGE 65 =====
+39 
+ 
+ 
+Hình 4.12: Tuyến tiếp nhận, xử lý, lưu trữ và khai thác dữ liệu phía máy chủ 
+Hình 4.12 thể hiện đường đi chính của dữ liệu từ thiết bị đến giao diện. Bản tin 
+từ xe được đưa vào EMQX (broker MQTT, tức lớp tiếp nhận và phân phối bản tin); sau 
+đó MQTT Bridge (dịch vụ cầu nối) kiểm tra cấu trúc, tách phần cần lưu và chuyển tiếp 
+dữ liệu sang các lớp xử lý tiếp theo. Cách tổ chức này giữ tuyến nhận bản tin tách khỏi 
+phần tra cứu và hiển thị. 
+b, Tổ chức các dịch vụ triển khai 
+
+===== PAGE 66 =====
+40 
+ 
+ 
+ Hình 4.13: Các nhóm chức năng chính trong không gian triển khai phía máy chủ 
+Ở mức triển khai thực tế, các dịch vụ được chia thành ba nhóm: 
+- Nhóm nhận dữ liệu: broker MQTT và dịch vụ cầu nối bản tin. 
+- Nhóm lưu trữ: cơ sở dữ liệu nghiệp vụ, kho dữ liệu theo thời gian và kho nhật ký 
+vận hành. 
+- Nhóm xử lý và cung cấp dữ liệu: lớp xử lý phía máy chủ và giao diện quản lý. 
+Các dịch vụ này được đóng gói riêng bằng Docker (công ngh ệ đóng gói ứng dụng 
+cùng môi trường chạy) và tổ chức khởi động theo từng nhóm bằng Docker Compose 
+(công cụ khai báo và chạy nhiều dịch vụ liên quan trong cùng một cấu hình). Cách chia 
+này giúp backend, c ầu nối bản tin và giao di ện web có th ể cập nhật, khởi động lại và 
+theo dõi trạng thái tương đối độc lập. 
+Đồ án cũng triển khai tuyến CI/CD (chuỗi tự động kiểm tra và đóng gói phiên bản) 
+bằng GitHub Actions (dịch vụ tự động hóa đi kèm kho mã nguồn GitHub). Mỗi dịch vụ 
+được kiểm tra, d ựng gói Docker và đẩy lên Docker Hub (kho lưu tr ữ gói triển khai 
+Docker); máy chủ sau đó kéo đúng gói cần cập nhật. 
+4.2.3. Giao diện quản lý – Management interface 
+Giao diện quản lý được tổ chức theo bốn thao tác chính: xem nhanh toàn đội, 
+theo dõi trên bản đồ, kiểm tra một thiết bị cụ thể và xử lý cảnh báo. Mỗi thao tác có 
+màn hình riêng để tránh dồn toàn bộ thông tin kỹ thuật vào một trang. 

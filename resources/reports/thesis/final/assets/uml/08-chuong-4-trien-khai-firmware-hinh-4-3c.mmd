@@ -1,0 +1,36 @@
+---
+config:
+  theme: base
+  sequence:
+    mirrorActors: false
+    actorMargin: 170
+    messageMargin: 55
+    noteMargin: 28
+    diagramMarginX: 40
+    diagramMarginY: 20
+    boxMargin: 12
+    boxTextMargin: 8
+    actorFontSize: 14
+    messageFontSize: 14
+    noteFontSize: 13
+---
+sequenceDiagram
+    autonumber
+    participant CTRL as Bộ điều khiển
+    participant CFG as Bộ nhớ cấu hình
+    participant NET as Mạng và định vị
+    participant BUF as Bộ nhớ tạm
+
+    CTRL->>CFG: Đọc cấu hình làm việc
+    CFG-->>CTRL: Trả tham số vận hành
+    CTRL->>NET: Chuẩn bị kết nối mạng<br/>và định vị
+    CTRL->>BUF: Chuẩn bị bộ nhớ tạm
+    CTRL->>CTRL: Xác định nguyên nhân<br/>đánh thức
+    alt Bật nguồn hoặc<br/>khởi động lại
+        CTRL->>CTRL: Khởi động theo<br/>quy trình đầy đủ
+    else Đánh thức theo<br/>bộ hẹn giờ
+        CTRL->>CTRL: Chuyển sang<br/>kiểm tra định kỳ
+    else Đánh thức do<br/>chuyển động
+        CTRL->>CTRL: Chuyển sang<br/>kiểm tra cảnh báo
+    end
+    CTRL->>CTRL: Xác định chế độ<br/>làm việc ban đầu

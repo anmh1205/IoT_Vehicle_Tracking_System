@@ -1,5 +1,15 @@
 flowchart TB
-    Map["Leaflet map"] --> Fence["Geofence polygon"]
-    Vehicle["Vehicle marker"] --> Fence
-    Fence --> Alert["Alert trigger"]
-    Alert --> List["Danh sách cảnh báo"]
+    Page["Màn hình cảnh báo vùng"]
+    Header["Vùng thiết lập"]
+
+    subgraph Screen["Vùng hiển thị chính"]
+        direction LR
+        Map["Bản đồ và ranh giới vùng"]
+        Alert["Thông tin cảnh báo"]
+    end
+
+    History["Danh sách cảnh báo và lịch sử xử lý"]
+
+    Page --> Header
+    Page --> Screen
+    Page --> History

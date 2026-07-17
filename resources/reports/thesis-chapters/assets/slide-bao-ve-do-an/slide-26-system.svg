@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="800" viewBox="0 0 1360 800" font-family="Times New Roman, serif">
+  <rect width="1360" height="800" fill="#ffffff"/>
+
+  <!-- 5 KPI cards arranged in 2 rows: 3 + 2 -->
+  <!-- Row 1: 3 cards x 415 wide each + gap 20, total 1305 -->
+  <!-- Row 2: 2 cards x 645 wide each + gap 20 -->
+
+  <!-- Card 1: Độ trễ mạng -->
+  <g transform="translate(20, 20)">
+    <rect width="425" height="220" rx="8" fill="#f5f9fc" stroke="#1a5276" stroke-width="3"/>
+    <rect width="425" height="55" rx="8" fill="#1a5276"/>
+    <rect y="30" width="425" height="25" fill="#1a5276"/>
+    <text x="20" y="38" font-size="22" font-weight="bold" fill="#ffffff">Độ trễ mạng di động</text>
+    <text x="212" y="115" text-anchor="middle" font-size="48" font-weight="bold" fill="#1a5276">120 – 180</text>
+    <text x="212" y="145" text-anchor="middle" font-size="24" fill="#000">milisecond</text>
+    <text x="212" y="195" text-anchor="middle" font-size="18" font-style="italic" fill="#475569">thành phần chi phối độ trễ</text>
+  </g>
+
+  <!-- Card 2: Phản hồi máy chủ -->
+  <g transform="translate(465, 20)">
+    <rect width="425" height="220" rx="8" fill="#f5f9fc" stroke="#1a5276" stroke-width="3"/>
+    <rect width="425" height="55" rx="8" fill="#1a5276"/>
+    <rect y="30" width="425" height="25" fill="#1a5276"/>
+    <text x="20" y="38" font-size="22" font-weight="bold" fill="#ffffff">Phản hồi máy chủ</text>
+    <text x="212" y="115" text-anchor="middle" font-size="48" font-weight="bold" fill="#1a5276">95 – 200</text>
+    <text x="212" y="145" text-anchor="middle" font-size="24" fill="#000">milisecond</text>
+    <text x="212" y="195" text-anchor="middle" font-size="18" font-style="italic" fill="#475569">đáp ứng tra cứu và cập nhật</text>
+  </g>
+
+  <!-- Card 3: Cập nhật bản đồ -->
+  <g transform="translate(910, 20)">
+    <rect width="425" height="220" rx="8" fill="#f5f9fc" stroke="#1a5276" stroke-width="3"/>
+    <rect width="425" height="55" rx="8" fill="#1a5276"/>
+    <rect y="30" width="425" height="25" fill="#1a5276"/>
+    <text x="20" y="38" font-size="22" font-weight="bold" fill="#ffffff">Cập nhật bản đồ</text>
+    <text x="212" y="115" text-anchor="middle" font-size="48" font-weight="bold" fill="#1a5276">1 – 2</text>
+    <text x="212" y="145" text-anchor="middle" font-size="24" fill="#000">giây</text>
+    <text x="212" y="195" text-anchor="middle" font-size="18" font-style="italic" fill="#475569">phù hợp theo dõi hành trình</text>
+  </g>
+
+  <!-- Row 2: 2 large cards -->
+  <!-- Card 4: Cảnh báo vượt vùng -->
+  <g transform="translate(20, 260)">
+    <rect width="650" height="220" rx="8" fill="#f5f9fc" stroke="#1a5276" stroke-width="3"/>
+    <rect width="650" height="55" rx="8" fill="#1a5276"/>
+    <rect y="30" width="650" height="25" fill="#1a5276"/>
+    <text x="20" y="38" font-size="22" font-weight="bold" fill="#ffffff">Cảnh báo vượt vùng (geofence)</text>
+    <text x="325" y="115" text-anchor="middle" font-size="56" font-weight="bold" fill="#1a5276">2 – 3</text>
+    <text x="325" y="148" text-anchor="middle" font-size="26" fill="#000">giây</text>
+    <text x="325" y="195" text-anchor="middle" font-size="20" font-style="italic" fill="#475569">đủ sớm cho giám sát vận hành</text>
+  </g>
+
+  <!-- Card 5: Tải đồng thời -->
+  <g transform="translate(690, 260)">
+    <rect width="645" height="220" rx="8" fill="#fefce8" stroke="#1a5276" stroke-width="4"/>
+    <rect width="645" height="55" rx="8" fill="#1a5276"/>
+    <rect y="30" width="645" height="25" fill="#1a5276"/>
+    <text x="20" y="38" font-size="22" font-weight="bold" fill="#ffffff">Tải đồng thời 50 thiết bị</text>
+    <text x="322" y="120" text-anchor="middle" font-size="56" font-weight="bold" fill="#1a5276">~20 – 25%</text>
+    <text x="322" y="155" text-anchor="middle" font-size="22" fill="#000">tải hệ thống</text>
+    <text x="322" y="200" text-anchor="middle" font-size="20" font-weight="bold" fill="#16a34a">✓ còn dư khả năng mở rộng</text>
+  </g>
+
+  <!-- Conclusion bar -->
+  <rect x="20" y="510" width="1320" height="80" rx="8" fill="#1a5276"/>
+  <text x="680" y="545" text-anchor="middle" font-size="24" font-weight="bold" fill="#ffffff">
+    → Độ trễ phù hợp cho theo dõi hành trình
+  </text>
+  <text x="680" y="578" text-anchor="middle" font-size="24" font-weight="bold" fill="#ffffff">
+    và cảnh báo gần thời gian thực
+  </text>
+</svg>

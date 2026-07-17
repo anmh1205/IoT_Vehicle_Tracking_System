@@ -1,0 +1,162 @@
+{
+  "page_id": "357df50b-1fcd-8179-9139-ee10814f7954",
+  "title": "34. Đảo ngữ điều kiện",
+  "intro": [
+    {"text": "Bài 34 — Đảo ngữ trong câu điều kiện (lược bỏ 'if', đưa trợ động từ lên đầu). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 nâng cao — Should + S + V (loại 1), Were + S (loại 2), Had + S + V3 (loại 3). Trang trọng, bỏ 'if'.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Đảo ngữ điều kiện là cách viết câu điều kiện TRANG TRỌNG bằng cách BỎ 'if' và đưa trợ động từ (Should/Were/Had) lên trước chủ ngữ. Nghĩa không đổi, chỉ trang trọng hơn — hay gặp trong văn bản, email công sở ở TOEIC."},
+
+    {"type": "h3", "text": "2. Bảng đảo ngữ theo loại điều kiện"},
+    {"type": "table", "headers": ["Loại", "Câu thường (if)", "Đảo ngữ (bỏ if)"], "rows": [
+      ["1", "If you need help, …", "Should you need help, …"],
+      ["2 (be)", "If I were you, …", "Were I you, …"],
+      ["2 (động từ thường)", "If the company expanded, …", "Were the company to expand, …"],
+      ["3", "If we had known, …", "Had we known, …"]
+    ]},
+
+    {"type": "h3", "text": "3. Loại 1 — Should + S + V"},
+    {"type": "p", "text": "Should + S + V (nguyên thể), vế chính dùng will/imperative: Should you have any questions, please contact us. (= If you should have / If you have any questions). Diễn tả khả năng ở tương lai."},
+
+    {"type": "h3", "text": "4. Loại 2 — Were + S (+ to V)"},
+    {"type": "p", "text": "Dùng 'Were' cho MỌI ngôi: Were I in your position, I would accept. Với động từ thường dùng 'Were + S + to + V': Were the deal to fall through, we would lose a client."},
+
+    {"type": "h3", "text": "5. Loại 3 — Had + S + V3"},
+    {"type": "p", "text": "Had + S + V3, vế chính would have + V3: Had we acted sooner, we would have avoided the loss. (= If we had acted sooner)."},
+
+    {"type": "h3", "text": "6. Cách chọn nhanh"},
+    {"type": "ul", "items": [
+      "Khả năng tương lai → Should + S + V (loại 1).",
+      "Giả định hiện tại → Were + S (loại 2).",
+      "Trái với quá khứ → Had + S + V3 (loại 3)."
+    ]},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) KHÔNG dùng cả 'if' và đảo ngữ ('If had we known' SAI → 'Had we known'). (2) Loại 2 dùng 'Were' cho mọi ngôi (không 'Was I'). (3) Sau Should + S dùng V NGUYÊN THỂ (không 'will'). (4) Had + S + V3 (cột 3), vế chính would have + V3."}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Đảo ngữ điều kiện loại 1 (Should)",
+      "theory": ["Loại 1 đảo ngữ: bỏ 'if', đưa 'should' lên đầu: Should + S + V, S + will/imperative... Diễn tả khả năng (nếu chẳng may/nếu có)."],
+      "keys": ["If you should need help → Should you need help, please call us."],
+      "traps": ["Đảo ngữ loại 1 dùng 'Should + S + V nguyên thể'; bỏ 'if'."],
+      "examples": [
+        "Should you have any questions, please contact us.",
+        "Should the order arrive late, we will issue a refund."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "___ you have any questions, please contact our support team.\nA. Should    B. If should    C. Would    D. Had", "a": "Đáp án: A (Should). ||Đảo ngữ loại 1: Should + S + V (= If you should have...)."},
+        {"q": "___ the shipment arrive late, we will offer a discount.\nA. Should    B. Would    C. Had    D. Were", "a": "Đáp án: A (Should). ||Đảo ngữ loại 1: Should + S + V nguyên thể."},
+        {"q": "Should you ___ assistance, our staff are available 24/7.\nA. need    B. needs    C. needed    D. to need", "a": "Đáp án: A (need). ||Sau 'Should + S' dùng V nguyên thể."},
+        {"q": "___ any problem occur, notify the manager immediately.\nA. Should    B. If should    C. Would    D. Were", "a": "Đáp án: A (Should). ||Đảo ngữ loại 1; mệnh đề chính là mệnh lệnh."},
+        {"q": "Tìm và sửa lỗi:\n\"Should you will need help, please call.\"", "a": "Lỗi: \"Should you will need\" → \"Should you need\". ||Sau Should + S dùng V nguyên thể, không 'will'."},
+        {"q": "___ the system fail, a backup will activate automatically.\nA. Should    B. Would    C. Had    D. Were", "a": "Đáp án: A (Should). ||Đảo ngữ loại 1: Should + S + V."},
+        {"q": "Chọn câu ĐÚNG:\nA. Should you require a refund, please keep your receipt.\nB. Should you to require a refund, please keep your receipt.\nC. Should you required a refund, please keep your receipt.\nD. If should you require a refund, keep your receipt.", "a": "Đáp án: A. ||Should + S + V nguyên thể; bỏ 'if'."},
+        {"q": "Điền vào email (Part 6):\n\"___ you wish to cancel, please notify us 48 hours in advance.\"\nA. Should    B. Would    C. Had    D. Were", "a": "Đáp án: A (Should). ||Đảo ngữ loại 1: Should + S + V."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Đảo ngữ điều kiện loại 2 (Were)",
+      "theory": ["Loại 2 đảo ngữ: bỏ 'if', đưa 'were' lên đầu: Were + S (+ to + V), S + would + V."],
+      "keys": ["If I were you → Were I you... If the company were to expand → Were the company to expand..."],
+      "traps": ["Đảo ngữ loại 2 dùng 'Were' cho mọi ngôi; với động từ thường dùng 'Were + S + to + V'."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "___ I in your position, I would accept the offer.\nA. Were    B. Was    C. Should    D. Had", "a": "Đáp án: A (Were). ||Đảo ngữ loại 2: Were + S (= If I were)."},
+        {"q": "___ the company to relocate, many staff would resign.\nA. Were    B. Was    C. Should    D. Had", "a": "Đáp án: A (Were). ||Đảo ngữ loại 2 với động từ thường: Were + S + to + V."},
+        {"q": "Were the budget larger, we ___ hire more staff.\nA. will    B. would    C. had    D. were", "a": "Đáp án: B (would). ||Mệnh đề chính loại 2 → would + V."},
+        {"q": "___ prices lower, demand would increase significantly.\nA. Were    B. Was    C. Should    D. Had", "a": "Đáp án: A (Were). ||Đảo ngữ loại 2: Were + S."},
+        {"q": "Tìm và sửa lỗi:\n\"Was I the manager, I would change the policy.\"", "a": "Lỗi: \"Was I\" → \"Were I\". ||Đảo ngữ loại 2 dùng 'Were' cho mọi ngôi."},
+        {"q": "___ the deal to fall through, we would lose a major client.\nA. Were    B. Was    C. Should    D. Had", "a": "Đáp án: A (Were). ||Were + S + to + V (giả định ít khả năng)."},
+        {"q": "Chọn câu ĐÚNG:\nA. Were I you, I would negotiate harder.\nB. Was I you, I would negotiate harder.\nC. Were I you, I will negotiate harder.\nD. If were I you, I would negotiate harder.", "a": "Đáp án: A. ||Were + S, mệnh đề chính would + V."},
+        {"q": "Điền vào nhận định (Part 6):\n\"___ the market more stable, the company would invest more aggressively.\"\nA. Were    B. Was    C. Should    D. Had", "a": "Đáp án: A (Were). ||Đảo ngữ loại 2: Were + S."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · Đảo ngữ điều kiện loại 3 (Had)",
+      "theory": ["Loại 3 đảo ngữ: bỏ 'if', đưa 'had' lên đầu: Had + S + V3, S + would have + V3."],
+      "keys": ["If we had known → Had we known... If they had prepared → Had they prepared..."],
+      "traps": ["Đảo ngữ loại 3 dùng 'Had + S + V3'; bỏ 'if'."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "___ we known about the issue, we would have fixed it sooner.\nA. Had    B. If had    C. Were    D. Should", "a": "Đáp án: A (Had). ||Đảo ngữ loại 3: Had + S + V3 (= If we had known)."},
+        {"q": "Had the team tested it, they ___ the bug.\nA. would catch    B. would have caught    C. caught    D. had caught", "a": "Đáp án: B (would have caught). ||Mệnh đề chính loại 3 → would have + V3."},
+        {"q": "___ the company invested earlier, it would have led the market.\nA. Had    B. If had    C. Were    D. Should", "a": "Đáp án: A (Had). ||Đảo ngữ loại 3: Had + S + V3."},
+        {"q": "Had they reviewed the contract, they ___ the error.\nA. would notice    B. would have noticed    C. noticed    D. had noticed", "a": "Đáp án: B (would have noticed). ||Mệnh đề chính → would have + V3."},
+        {"q": "Tìm và sửa lỗi:\n\"If had we known, we would have prepared more.\"", "a": "Lỗi: dùng cả 'If' và đảo ngữ. ||Sửa: \"Had we known...\" hoặc \"If we had known...\""},
+        {"q": "___ the data been backed up, nothing would have been lost.\nA. Had    B. If had    C. Were    D. Should", "a": "Đáp án: A (Had). ||Đảo ngữ loại 3 bị động: Had + S + been + V3."},
+        {"q": "Chọn câu ĐÚNG:\nA. Had we left earlier, we would have caught the train.\nB. Had we left earlier, we would catch the train.\nC. If had we left earlier, we would have caught the train.\nD. Had we left earlier, we caught the train.", "a": "Đáp án: A. ||Had + S + V3, would have + V3."},
+        {"q": "Điền vào đánh giá (Part 6):\n\"___ the team followed the checklist, the defect would have been prevented.\"\nA. Had    B. If had    C. Were    D. Should", "a": "Đáp án: A (Had). ||Đảo ngữ loại 3: Had + S + V3."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Phân biệt Should / Were / Had",
+      "theory": ["Should + S + V → loại 1 (khả năng tương lai). Were + S (+ to V) → loại 2 (giả định hiện tại). Had + S + V3 → loại 3 (trái với quá khứ)."],
+      "keys": ["Should you need..., Were I you..., Had we known..."],
+      "traps": ["Chọn theo thời gian/tính chất: tương lai có thể (Should), giả định hiện tại (Were), trái quá khứ (Had)."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "(Tương lai có thể) ___ you require further details, please email us.\nA. Should    B. Were    C. Had    D. Would", "a": "Đáp án: A (Should). ||Khả năng tương lai → đảo ngữ loại 1 (Should)."},
+        {"q": "(Giả định hiện tại) ___ I in charge, I would streamline the process.\nA. Should    B. Were    C. Had    D. Would", "a": "Đáp án: B (Were). ||Giả định hiện tại → đảo ngữ loại 2 (Were)."},
+        {"q": "(Trái quá khứ) ___ we acted sooner, we would have avoided the loss.\nA. Should    B. Were    C. Had    D. Would", "a": "Đáp án: C (Had). ||Trái với quá khứ → đảo ngữ loại 3 (Had)."},
+        {"q": "Were the deadline more flexible, the team ___ produce better work.\nA. will    B. would    C. had    D. were", "a": "Đáp án: B (would). ||Loại 2: mệnh đề chính would + V."},
+        {"q": "Tìm và sửa lỗi:\n\"Had I were you, I would take the offer.\"", "a": "Lỗi: trộn 'Had' và 'were'. ||Sửa: \"Were I you, I would take the offer.\" (loại 2)."},
+        {"q": "Should the client ___, we will prepare a new proposal.\nA. request    B. requests    C. requested    D. to request", "a": "Đáp án: A (request). ||Should + S + V nguyên thể (loại 1)."},
+        {"q": "Chọn câu loại 3 ĐÚNG:\nA. Had they prepared, they would have passed the audit.\nB. Should they prepared, they would have passed.\nC. Were they prepared, they would have passed.\nD. Had they prepared, they would pass the audit.", "a": "Đáp án: A. ||Loại 3 đảo ngữ: Had + S + V3, would have + V3."},
+        {"q": "Điền vào email (Part 6):\n\"___ you need to reschedule, kindly inform us in advance.\"\nA. Should    B. Were    C. Had    D. Would", "a": "Đáp án: A (Should). ||Khả năng tương lai → Should + S + V."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn đảo ngữ loại 1/2/3 và phân biệt với câu điều kiện thường."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "___ you have any concerns, please reach out to HR.\nA. Should    B. Were    C. Had    D. Would", "a": "Đáp án: A (Should). ||Khả năng tương lai → loại 1 (Should)."},
+        {"q": "___ we known the risks, we would have acted differently.\nA. Had    B. Should    C. Were    D. Would", "a": "Đáp án: A (Had). ||Trái với quá khứ → loại 3 (Had)."},
+        {"q": "___ I the manager, I would revise the schedule.\nA. Were    B. Was    C. Should    D. Had", "a": "Đáp án: A (Were). ||Giả định hiện tại → loại 2 (Were)."},
+        {"q": "Should the product ___ faulty, we will replace it free of charge.\nA. be    B. is    C. was    D. been", "a": "Đáp án: A (be). ||Should + S + V nguyên thể (be)."},
+        {"q": "Tìm và sửa lỗi:\n\"Was I you, I would accept the proposal.\"", "a": "Lỗi: \"Was I\" → \"Were I\". ||Đảo ngữ loại 2 dùng 'Were'."},
+        {"q": "Had the supplier delivered on time, we ___ the deadline.\nA. would meet    B. would have met    C. met    D. had met", "a": "Đáp án: B (would have met). ||Loại 3: would have + V3."},
+        {"q": "___ the company to merge, hundreds of jobs would be affected.\nA. Were    B. Was    C. Should    D. Had", "a": "Đáp án: A (Were). ||Were + S + to + V (loại 2 giả định)."},
+        {"q": "___ any issue arise during installation, contact technical support.\nA. Should    B. Were    C. Had    D. Would", "a": "Đáp án: A (Should). ||Khả năng → loại 1 (Should)."},
+        {"q": "Chọn câu ĐÚNG:\nA. Had we invested earlier, we would have higher returns now.\nB. Had we invested earlier, we would had higher returns.\nC. If had we invested earlier, we would have higher returns.\nD. Have we invested earlier, we would have higher returns.", "a": "Đáp án: A. ||Đảo ngữ loại 3 (hỗn hợp): Had + S + V3, would have ... now."},
+        {"q": "Điền vào email (Part 6):\n\"___ you require an invoice, please let us know your billing details.\"\nA. Should    B. Were    C. Had    D. Would", "a": "Đáp án: A (Should). ||Đảo ngữ loại 1: Should + S + V."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "___ you have any questions, please contact us at any time.\nA. Should    B. Were    C. Had    D. Would", "a": "A (Should). ||Đảo ngữ loại 1: Should + S + V."},
+      {"q": "___ I in your position, I would renegotiate the terms.\nA. Were    B. Was    C. Should    D. Had", "a": "A (Were). ||Đảo ngữ loại 2: Were + S."},
+      {"q": "___ we known earlier, we would have changed the plan.\nA. Had    B. If had    C. Were    D. Should", "a": "A (Had). ||Đảo ngữ loại 3: Had + S + V3."},
+      {"q": "Should you ___ assistance, our team is available around the clock.\nA. need    B. needs    C. needed    D. to need", "a": "A (need). ||Sau Should + S dùng V nguyên thể."},
+      {"q": "Tìm và sửa lỗi:\n\"Should you will need help, please call us.\"", "a": "Lỗi: \"Should you will need\" → \"Should you need\". ||Sau Should + S dùng V nguyên thể, không 'will'."},
+      {"q": "Were the budget larger, the team ___ hire more engineers.\nA. will    B. would    C. had    D. were", "a": "B (would). ||Loại 2: mệnh đề chính would + V."},
+      {"q": "Had the team tested the system, they ___ the defect.\nA. would catch    B. would have caught    C. caught    D. had caught", "a": "B (would have caught). ||Loại 3: would have + V3."},
+      {"q": "___ the company to expand overseas, it would need more capital.\nA. Were    B. Was    C. Should    D. Had", "a": "A (Were). ||Were + S + to + V (loại 2)."},
+      {"q": "Chọn câu ĐÚNG:\nA. Had we left earlier, we would have caught the flight.\nB. If had we left earlier, we would have caught the flight.\nC. Had we left earlier, we would catch the flight.\nD. Have we left earlier, we would have caught the flight.", "a": "A. ||Had + S + V3, would have + V3."},
+      {"q": "Tìm và sửa lỗi:\n\"Was I the director, I would invest in training.\"", "a": "Lỗi: \"Was I\" → \"Were I\". ||Đảo ngữ loại 2 dùng 'Were'."},
+      {"q": "___ any problem occur, notify your supervisor immediately.\nA. Should    B. Were    C. Had    D. Would", "a": "A (Should). ||Đảo ngữ loại 1: Should + S + V."},
+      {"q": "Had the data been backed up, nothing ___ lost.\nA. would be    B. would have been    C. was    D. had been", "a": "B (would have been). ||Loại 3 bị động → would have been + V3."},
+      {"q": "___ prices lower, sales would rise sharply.\nA. Were    B. Was    C. Should    D. Had", "a": "A (Were). ||Đảo ngữ loại 2: Were + S."},
+      {"q": "Should the order ___ delayed, a discount will be applied.\nA. be    B. is    C. was    D. been", "a": "A (be). ||Should + S + be (V nguyên thể)."},
+      {"q": "___ the company acted sooner, the crisis would have been avoided.\nA. Had    B. Should    C. Were    D. Would", "a": "A (Had). ||Trái với quá khứ → loại 3 (Had)."},
+      {"q": "Điền vào email (Part 6):\n\"___ you wish to upgrade your plan, simply reply to this email.\"\nA. Should    B. Were    C. Had    D. Would", "a": "A (Should). ||Đảo ngữ loại 1: Should + S + V."}
+    ]
+  },
+  "summary": [
+    "Đảo ngữ điều kiện = bỏ 'if', đưa trợ động từ lên đầu (trang trọng).",
+    "Loại 1: Should + S + V nguyên thể, ... (khả năng tương lai).",
+    "Loại 2: Were + S (+ to + V), ... would + V (giả định hiện tại); dùng 'Were' cho mọi ngôi.",
+    "Loại 3: Had + S + V3, ... would have + V3 (trái với quá khứ)."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy: KHÔNG dùng cả 'if' và đảo ngữ ('If had we known' SAI). Loại 2 dùng 'Were' (không 'Was'). Sau Should + S dùng V nguyên thể.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 4 (Should/Were/Had) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

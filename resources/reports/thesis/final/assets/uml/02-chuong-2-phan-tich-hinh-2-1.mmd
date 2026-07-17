@@ -1,13 +1,26 @@
-flowchart LR
-    Device["Tracker"] --> Bridge["MQTT Bridge"]
-    Bridge --> PG["PostgreSQL
-Nghiệp vụ"]
-    Bridge --> VM["VictoriaMetrics
-Telemetry"]
-    Bridge --> VL["VictoriaLogs
-Audit log"]
-    API["Backend API"] --> PG
-    API --> VM
-    Dashboard["Dashboard"] --> API
-    Dashboard --> Socket["Socket.IO"]
-    Socket --> Bridge
+flowchart TB
+    Vehicle["Nguồn dữ liệu trên xe<br/>vị trí, trạng thái, sự kiện"]
+    Channel["Kênh truyền dữ liệu<br/>bản tin định kỳ và cảnh báo"]
+    Ingestion["Lớp tiếp nhận<br/>kiểm tra và phân loại"]
+
+    subgraph DataLayer["Lớp dữ liệu cần có"]
+        direction LR
+        Business["Dữ liệu nghiệp vụ<br/>xe, thiết bị, người dùng"]
+        Timeline["Dữ liệu theo thời gian<br/>vị trí, tốc độ, nguồn"]
+        Logs["Nhật ký vận hành<br/>lỗi, cảnh báo, truy vết"]
+    end
+
+    Service["Lớp dịch vụ khai thác<br/>truy vấn, cảnh báo, cấu hình"]
+    Interface["Giao diện quản lý<br/>bản đồ, lịch sử, trạng thái"]
+    Operator["Người quản lý"]
+
+    Vehicle --> Channel --> Ingestion
+    Ingestion --> Business
+    Ingestion --> Timeline
+    Ingestion --> Logs
+    Business --> Service
+    Timeline --> Service
+    Logs --> Service
+    Service --> Interface --> Operator
+    Operator -. yêu cầu tra cứu / cấu hình .-> Interface
+    Service -. cấu hình theo dõi .-> Ingestion

@@ -1,34 +1,9 @@
+%%{init: {'flowchart': {'nodeSpacing': 90, 'rankSpacing': 110}} }%%
 flowchart TB
-    subgraph Vehicle["Thiết bị trên xe"]
-        OBD["OBD2 BLE Adapter"]
-        Tracker["Tracker
-ESP32-S3 + SIM7600CE-T"]
-        OBD --> Tracker
-    end
+    Vehicle["Phương tiện cần giám sát"]
+    Device["Lớp trên xe<br/>Thu thập dữ liệu và nhận biết sự kiện"]
+    Server["Lớp máy chủ<br/>Tiếp nhận, phân loại, lưu trữ và cảnh báo"]
+    App["Lớp ứng dụng<br/>Bản đồ, trạng thái, lịch sử và báo cáo"]
+    Operator["Người quản lý đội xe"]
 
-    subgraph Cloud["Tầng cloud"]
-        EMQX["EMQX Broker"]
-        Bridge["MQTT Bridge"]
-        API["Backend API
-Socket.IO"]
-        PG["PostgreSQL"]
-        VM["VictoriaMetrics"]
-        VL["VictoriaLogs"]
-        EMQX --> Bridge
-        Bridge --> API
-        Bridge --> VM
-        Bridge --> VL
-        API --> PG
-    end
-
-    subgraph Client["Tầng hiển thị"]
-        Web["Dashboard Next.js"]
-        Mobile["Mobile Shell"]
-        Grafana["Grafana"]
-    end
-
-    Tracker ----> EMQX
-    API ----> Web
-    API ----> Mobile
-    VM ----> Grafana
-    VL ----> Grafana
+    Vehicle --> Device --> Server --> App --> Operator

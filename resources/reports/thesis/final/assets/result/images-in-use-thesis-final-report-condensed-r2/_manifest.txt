@@ -1,0 +1,36 @@
+Report: E:\anmh1205\IoT_Vehicle_Tracking_System\resources\reports\thesis\final\thesis-final-report-condensed-r2.md
+Created: 2026-05-11T19:56:44.045Z
+Destination: E:\anmh1205\IoT_Vehicle_Tracking_System\resources\reports\thesis\final\assets\result\images-in-use-thesis-final-report-condensed-r2
+Count: 29
+
+Status	Reference	Output	Mode	InputSize	OutputSize
+OK	./assets/brand/phenikaa-university-logo.jpeg	bia-logo-phenikaa.jpeg	upscale+sharpen	960x960	3200x3200
+SKIP	./assets/brand/phenikaa-university-logo.jpeg	bia-logo-phenikaa.jpeg	already-copied
+OK	./assets/result/market-devices/fmc920.png	bang-2-2-phuong-an-1-fmc920.png	upscale+sharpen	1126x751	3200x2134
+OK	./assets/result/market-devices/vcar-viettel-obd.png	bang-2-2-phuong-an-2-vcar-viettel-obd.png	upscale+sharpen	440x440	1760x1760
+OK	./assets/result/market-devices/gv305ceu.png	bang-2-2-phuong-an-3-gv305ceu.png	upscale+sharpen	500x485	2000x1940
+OK	./assets/figures-condensed-r2/chapter-3-sticker-text-hinh-3-1-system-flow-r11.png	hinh-3-1.png	copy	6300x1290	6300x1290
+OK	./assets/figures-condensed-r2/chapter-3-sticker-text-hinh-3-2-obd-ii-ble-r11.png	hinh-3-2.png	copy	6150x1290	6150x1290
+OK	./assets/figures-condensed-r2/chapter-3-sequence-uml-hinh-3-3-lis3dsh-wake-r1.png	hinh-3-3.png	copy	7080x4860	7080x4860
+OK	./assets/figures-condensed-r2/chapter-3-sticker-text-hinh-3-4-lte-gnss-r11.png	hinh-3-4.png	copy	6150x2700	6150x2700
+OK	./assets/figures-condensed-r2/chapter-3-sticker-text-hinh-3-5-esp32-role-r11.png	hinh-3-5.png	copy	6720x2940	6720x2940
+OK	./assets/figures-condensed-r2/chapter-3-sticker-text-hinh-3-6-selected-architecture-r11.png	hinh-3-6.png	copy	5430x2580	5430x2580
+OK	./assets/figures-condensed-r2/chapter-3-sticker-text-hinh-3-7-constraints-r11.png	hinh-3-7.png	upscale+sharpen	2880x2580	3200x2867
+OK	./assets/result/chapter-4-ai-figures/hinh-4-1-kien-truc-tong-the-ai.png	hinh-4-1.png	upscale+sharpen	1774x887	3200x1600
+OK	./assets/figures-condensed-r2/07-chuong-4-trien-khai-hardware-hinh-4-12.png	hinh-4-2.png	copy	3570x2634	3570x2634
+OK	./assets/figures-condensed-r2/07-chuong-4-trien-khai-hardware-hinh-4-14.png	hinh-4-3.png	copy	6108x1989	6108x1989
+OK	./assets/figures-condensed-r2/07-chuong-4-trien-khai-hardware-hinh-4-6.png	hinh-4-4.png	copy	3828x4893	3828x4893
+OK	./assets/result/thiet-bi/thiet-ke-altium-mat-truoc-board-annotated.jpg	hinh-4-5.jpg	upscale+sharpen	965x660	3200x2189
+OK	./assets/result/thiet-bi/thiet-bi-mach-thanh-pham-day-du-linh-kien-khong-housing.jpg	hinh-4-6.jpg	upscale+sharpen	722x1280	1805x3200
+OK	./assets/result/thiet-bi/thiett-bi-mach-housing-dang-mo.jpg	hinh-4-7.jpg	upscale+sharpen	722x1280	1805x3200
+OK	./assets/result/thiet-bi/thiett-bi-mach-housing-dang-dong-nap.jpg	hinh-4-8.jpg	upscale+sharpen	722x1280	1805x3200
+OK	./assets/figures-condensed-r2/08-chuong-4-trien-khai-firmware-hinh-4-9-sequence-r2.png	hinh-4-9.png	copy	4566x3891	4566x3891
+OK	./assets/figures-condensed-r2/08-chuong-4-trien-khai-firmware-hinh-4-3d.png	hinh-4-10.png	copy	4668x3234	4668x3234
+OK	./assets/figures-condensed-r2/08-chuong-4-trien-khai-firmware-hinh-4-3e.png	hinh-4-11.png	upscale+sharpen	2637x2877	2933x3200
+OK	./assets/figures-condensed-r2/09-chuong-4-trien-khai-cloud-hinh-4-15.png	hinh-4-12.png	copy	3507x3414	3507x3414
+OK	./assets/figures-condensed-r2/09-chuong-4-trien-khai-cloud-hinh-4-16.png	hinh-4-13.png	copy	6003x1440	6003x1440
+OK	./assets/result/he-thong-that/03-devices-page.png	hinh-4-14.png	upscale+sharpen	1600x1000	3200x2000
+OK	./assets/result/anh-da-chon-bao-cao/giao-dien-ban-do-live.png	hinh-4-15.png	upscale+sharpen	1600x1000	3200x2000
+OK	./assets/result/anh-bien-tap-tu-nguon-that-r2/giao-dien-chi-tiet-thiet-bi-thuc-te.png	hinh-4-16.png	upscale+sharpen	1920x1032	3200x1720
+OK	./assets/result/anh-bien-tap-tu-nguon-that-r2/giao-dien-hang-doi-canh-bao-thuc-te.png	hinh-4-17.png	upscale+sharpen	1920x1032	3200x1720
+OK	./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-23.png	hinh-4-18.png	upscale+sharpen	2100x1500	3200x2286

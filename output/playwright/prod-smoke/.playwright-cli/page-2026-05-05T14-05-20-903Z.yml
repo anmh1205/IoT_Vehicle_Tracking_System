@@ -1,0 +1,106 @@
+- generic [active] [ref=e1]:
+  - link "Bỏ qua đến nội dung chính" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e3]:
+    - generic [ref=e6]:
+      - list [ref=e8]:
+        - listitem [ref=e9]:
+          - link "Hệ thống theo dõi phương tiện IoT IVTS V1" [ref=e10] [cursor=pointer]:
+            - /url: /dashboard/command
+            - generic [ref=e11]:
+              - img "Hệ thống theo dõi phương tiện IoT" [ref=e13]
+              - generic [ref=e14]:
+                - generic [ref=e15]: IVTS
+                - generic [ref=e16]: V1
+      - generic [ref=e18]:
+        - generic [ref=e19]: Hệ thống
+        - list [ref=e20]:
+          - listitem [ref=e21]:
+            - link "Điều hành" [ref=e22] [cursor=pointer]:
+              - /url: /dashboard/command
+              - img [ref=e23]
+              - generic [ref=e25]: Điều hành
+          - listitem [ref=e26]:
+            - button "Vận hành" [ref=e27]:
+              - img [ref=e28]
+              - generic [ref=e30]: Vận hành
+              - img [ref=e31]
+          - listitem [ref=e33]:
+            - button "Đội xe" [expanded] [ref=e34]:
+              - img [ref=e35]
+              - generic [ref=e45]: Đội xe
+              - img [ref=e46]
+            - list [ref=e49]:
+              - listitem [ref=e50]:
+                - link "Thiết bị" [ref=e51] [cursor=pointer]:
+                  - /url: /dashboard/fleet/devices
+                  - generic [ref=e52]: Thiết bị
+              - listitem [ref=e53]:
+                - link "Phương tiện" [ref=e54] [cursor=pointer]:
+                  - /url: /dashboard/fleet/vehicles
+                  - generic [ref=e55]: Phương tiện
+              - listitem [ref=e56]:
+                - link "Tài xế" [ref=e57] [cursor=pointer]:
+                  - /url: /dashboard/fleet/drivers
+                  - generic [ref=e58]: Tài xế
+              - listitem [ref=e59]:
+                - link "Khách hàng" [ref=e60] [cursor=pointer]:
+                  - /url: /dashboard/fleet/customers
+                  - generic [ref=e61]: Khách hàng
+          - listitem [ref=e62]:
+            - button "Cảnh báo" [ref=e63]:
+              - img [ref=e64]
+              - generic [ref=e67]: Cảnh báo
+              - img [ref=e68]
+          - listitem [ref=e70]:
+            - button "Nền tảng" [ref=e71]:
+              - img [ref=e72]
+              - generic [ref=e76]: Nền tảng
+              - img [ref=e77]
+      - list [ref=e80]:
+        - listitem [ref=e81]:
+          - button "System Administrator System Administrator admin@tracking.local" [ref=e82]:
+            - generic [ref=e85]: System Administrator
+            - generic [ref=e87]:
+              - generic [ref=e88]: System Administrator
+              - generic [ref=e89]: admin@tracking.local
+            - img [ref=e90]
+      - button "Bật/tắt thanh bên" [ref=e92]
+    - main [ref=e93]:
+      - generic [ref=e94]:
+        - generic [ref=e95]:
+          - button "Bật/tắt thanh bên" [ref=e96]:
+            - img
+            - generic [ref=e97]: Bật/tắt thanh bên
+          - navigation "breadcrumb" [ref=e98]:
+            - list [ref=e99]:
+              - listitem [ref=e100]:
+                - link "Đội xe" [ref=e101] [cursor=pointer]:
+                  - /url: /dashboard/fleet
+              - listitem [ref=e102]:
+                - img [ref=e103]
+              - link "Tài xế" [disabled] [ref=e105]
+        - generic [ref=e106]:
+          - button "Mở thông báo" [ref=e108]:
+            - img
+          - generic [ref=e110]:
+            - generic [ref=e111]: Giao diện
+            - combobox "Giao diện" [ref=e112]:
+              - generic [ref=e113]: "Chọn giao diện:"
+              - generic: Mặc định
+              - img
+          - button "Chuyển giao diện" [ref=e114]:
+            - img
+            - generic [ref=e115]: Chuyển giao diện
+      - generic [ref=e120]:
+        - generic [ref=e121]:
+          - generic [ref=e122]:
+            - heading "Tài xế" [level=2] [ref=e123]
+            - paragraph [ref=e124]: Quản lý hồ sơ tài xế và trạng thái vận hành theo từng nhóm lái xe
+          - button "Thêm tài xế" [ref=e126]:
+            - img
+            - text: Thêm tài xế
+        - status "Đang tải dữ liệu bảng" [ref=e156]:
+          - paragraph [ref=e162]: Đang tải dữ liệu...
+  - region "Notifications alt+T"
+  - alert [ref=e163]

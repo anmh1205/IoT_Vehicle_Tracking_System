@@ -23,3 +23,50 @@
 - Keep Vietnamese UI strings in feature modules consistent (UI copy should match locale style used in parent feature).
 - Keep accessibility changes minimal and local to impacted components to reduce regression risk.
 - Update project docs (`docs/development-roadmap.md`, `docs/project-changelog.md`, `docs/system-architecture.md`, `docs/codebase-summary.md`) whenever accessibility standards change or are adopted.
+
+## API Response Contract Standards
+- Success responses must use the shared envelope shape `{ data, requestId, meta? }`.
+- Error responses must serialize to RFC7807 problem details and include `requestId` plus `errors[]` for validation detail.
+- Frontend API clients should unwrap the success envelope before data reaches feature code.
+- Error parsers should treat problem-details responses as the canonical server failure shape.
+- Keep request-scoped identifiers and response contract fields consistent across middleware, health, metrics, policy, and rate-limit paths.
+
+## Cloud Policy Standards
+- Policy types must remain explicit and limited to the supported backend contract: `ADMIN_BOUNDARY`, `RADIUS`, and `DISTANCE_QUOTA`.
+- Geofence boundary checks should keep strict boundary semantics unless the policy contract is updated.
+- Distance quota evaluation must preserve cycle-based accumulation and reset behavior.
+- Policy mutation and evaluation paths should keep validation local to the affected controller or service and avoid ad hoc request parsing.
+- Metrics labels for policy evaluation must stay low-cardinality and use policy type / result / severity / cycle only.
+
+## Thesis Asset Readability Standards
+- Keep thesis final markdown and Mermaid labels short, self-standing, and glossary-aligned.
+- Preserve technical names, protocol names, and library names exactly when they are load-bearing.
+- Prefer Vietnamese descriptive prose for explanatory copy; keep English only for canonical product/tool names.
+- Keep thesis final asset basenames canonical so the figure generator resolves outputs deterministically after filename normalization.
+- Update the related thesis assets and docs together so captions, labels, and summaries do not drift.
+
+## MQTT and Realtime Contract Standards
+- Treat MQTT as the canonical ingest path for both real devices and simulator flows.
+- Remove legacy runtime exposure such as `/iot/data` rather than keeping parallel entry points.
+- Use colon-style realtime event names as the canonical contract and update consumers in lockstep when names change.
+- Keep realtime namespace access explicit: admin-only channels such as firmware and system-admin settings must enforce role checks, and device/user delivery must stay room-scoped.
+- Prefer event-driven cache patching or invalidation over periodic polling in realtime consumers; use fetches only for initial snapshot, reconnect fallback, or manual retry boundaries.
+- Treat simulator token handling as security-sensitive; do not rely on stored token hashes as replayable bearer material.
+- Apply rollback/race mitigations around simulator publish flows when state transitions can overlap.
+- Keep deterministic simulator artifacts, fault catalogs, checkpoint thresholds, and stop conditions in `resources/mock-data/simulator-specs/` so ops automation stays reproducible.
+- Keep VPS fix-loop restarts allowlisted and targeted to one service per remediation attempt; avoid broad restarts that hide the failing boundary.
+- If a fix-loop uses replay inputs, support both NDJSON and array-form outputs when the same toolchain can emit both.
+
+## Firmware GNSS Reliability Standards
+- GNSS polling should keep retry and self-heal behavior bounded with explicit cooldowns to prevent modem thrash.
+- Log GNSS transport failures, parse failures, no-fix streaks, and fix-success streaks separately so recovery behavior stays observable.
+- Re-arm GNSS from the tracker state machine after LTE recovery or repeated GNSS poll failures, not from ad hoc caller loops.
+- Keep GNSS power-cycle recovery localized to the modem/GNSS layer and state machine lifecycle, not spread across unrelated subsystems.
+
+## Firmware Logging Governance Standards
+- Use structured key-value logs for new or changed firmware lifecycle events, especially `from`, `to`, `reason`, `err`, `stage`, `seq`, `dwell_ms`, `topic_class`, `suppressed`, and stable boot/message/job IDs.
+- Keep high-rate success metadata at DEBUG or counters; keep INFO for low-rate lifecycle, transition, recovery, OTA stage, and diagnostic health snapshot events.
+- Use local per-module gates/counters for repeated warnings instead of adding a shared logging framework unless duplication becomes harmful.
+- Treat UART logs as leakable: do not log MQTT credentials/endpoints, APNs, auth tokens, secrets, OTA URLs, raw payloads, raw AT bodies, full GNSS coordinates, IMEI, or IMSI.
+- Prefer redacted summaries such as `response_len`, `has_ok`, `has_fix`, `topic_class`, `apn_configured`, `endpoint_configured`, and `fix_valid` when protocol data may contain sensitive values.
+- Keep tracked diagnostic/test logs sanitized before committing; archived logs must not contain credentials, endpoints, raw AT bodies, payloads, or full coordinates.

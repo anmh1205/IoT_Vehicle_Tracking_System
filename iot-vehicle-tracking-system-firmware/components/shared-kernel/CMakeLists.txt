@@ -1,0 +1,12 @@
+idf_component_register(
+    SRCS
+        "src/app_config_defaults.c"
+        "src/retry_manager.c"
+        "src/util_core.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        esp_hw_support
+        esp_timer
+        log
+)

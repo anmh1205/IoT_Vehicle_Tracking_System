@@ -1,0 +1,29 @@
+{
+  "d2DockerImage": "terrastruct/d2:v0.7.1",
+  "entries": [
+    {
+      "figure": "04-chuong-3-giai-phap-firmware-hinh-3-7.svg",
+      "source": "d2/04-chuong-3-giai-phap-firmware-hinh-3-7.d2",
+      "output": "figures/04-chuong-3-giai-phap-firmware-hinh-3-7.svg",
+      "canonical": "../figures/04-chuong-3-giai-phap-firmware-hinh-3-7.svg"
+    },
+    {
+      "figure": "05-chuong-3-giai-phap-backend-hinh-3-14.svg",
+      "source": "d2/05-chuong-3-giai-phap-backend-hinh-3-14.d2",
+      "output": "figures/05-chuong-3-giai-phap-backend-hinh-3-14.svg",
+      "canonical": "../figures/05-chuong-3-giai-phap-backend-hinh-3-14.svg"
+    },
+    {
+      "figure": "06-chuong-3-giai-phap-frontend-hinh-3-16.svg",
+      "source": "d2/06-chuong-3-giai-phap-frontend-hinh-3-16.d2",
+      "output": "figures/06-chuong-3-giai-phap-frontend-hinh-3-16.svg",
+      "canonical": "../figures/06-chuong-3-giai-phap-frontend-hinh-3-16.svg"
+    },
+    {
+      "figure": "09-chuong-4-trien-khai-cloud-hinh-4-20.svg",
+      "source": "d2/09-chuong-4-trien-khai-cloud-hinh-4-20.d2",
+      "output": "figures/09-chuong-4-trien-khai-cloud-hinh-4-20.svg",
+      "canonical": "../figures/09-chuong-4-trien-khai-cloud-hinh-4-20.svg"
+    }
+  ]
+}

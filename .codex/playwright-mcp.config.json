@@ -1,0 +1,26 @@
+{
+  "browser": {
+    "browserName": "chromium",
+    "isolated": true,
+    "launchOptions": {
+      "headless": true
+    },
+    "contextOptions": {
+      "ignoreHTTPSErrors": true
+    }
+  },
+  "capabilities": ["core", "network", "storage", "testing", "devtools"],
+  "outputDir": ".playwright-mcp",
+  "snapshot": {
+    "mode": "full"
+  },
+  "imageResponses": "omit",
+  "console": {
+    "level": "info"
+  },
+  "timeouts": {
+    "action": 8000,
+    "navigation": 60000,
+    "expect": 8000
+  }
+}

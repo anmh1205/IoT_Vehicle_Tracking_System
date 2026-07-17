@@ -1,3 +1,26 @@
 {
-  "cmake.sourceDirectory": "E:/1. Phenikaa University/AML/0. Project/12. DATN/IoT_Vehicle_Tracking_System/Example/esp32-obd2-meter"
+  "cmake.sourceDirectory": "${workspaceFolder}/iot-vehicle-tracking-system-firmware",
+  "latex-workshop.latex.tools": [
+    {
+      "name": "texify",
+      "command": "C:/Users/Admin/AppData/Local/Programs/MiKTeX/miktex/bin/x64/texify.exe",
+      "args": [
+        "--pdf",
+        "--batch",
+        "--synctex=1",
+        "--tex-option=--interaction=nonstopmode",
+        "--tex-option=--file-line-error",
+        "%DOC_EXT%"
+      ]
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "texify (MiKTeX)",
+      "tools": [
+        "texify"
+      ]
+    }
+  ],
+  "latex-workshop.latex.recipe.default": "first"
 }

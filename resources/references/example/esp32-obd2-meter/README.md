@@ -110,9 +110,9 @@ sudo apt install python3-dbus
 
 virtualenv --system-site-packages .venv
 source .venv/bin/activate
-pip install sim/requirements.txt
+pip install ../../../mock-data/scripts/esp32-obd2-meter-sim/requirements.txt
 
-python3 sim/adv_gatt.py
+python3 ../../../mock-data/scripts/esp32-obd2-meter-sim/adv_gatt.py
 ```
 
 ### Docker

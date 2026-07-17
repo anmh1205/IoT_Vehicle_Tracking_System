@@ -1,8 +1,25 @@
-stateDiagram-v2
-    [*] --> Boot
-    Boot --> Driving: Bật IGN
-    Boot --> Parking: Tắt IGN
-    Parking --> Alert: IMU rung
-    Alert --> Parking: Xử lý xong
-    Alert --> Driving: Xe tiếp tục chạy
-    Driving --> Parking: Tắt máy
+flowchart TB
+    Check{"Ignition?"}
+    Drive["DRIVING"]
+    Park["PARKED"]
+    Beat["HEARTBEAT"]
+    Sleep["SLEEP"]
+    Alarm["ALARM"]
+
+    Check -->|ON| Drive
+    Check -->|OFF| Park
+
+    Drive -->|OFF| Park
+    Park -->|ON| Drive
+
+    Park -->|timer| Beat
+    Beat -->|theo dõi nền| Park
+    Beat -->|sleep OK| Sleep
+
+    Park -. IMU .-> Alarm
+    Sleep -->|RTC| Beat
+    Sleep -. IMU .-> Alarm
+    Sleep -->|ON| Drive
+
+    Alarm -->|xử lý xong| Park
+    Alarm -->|ON| Drive

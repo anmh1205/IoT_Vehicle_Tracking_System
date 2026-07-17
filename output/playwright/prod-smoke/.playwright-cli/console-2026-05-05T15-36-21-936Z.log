@@ -1,0 +1,5 @@
+[ 2597650ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ https://thingdock.dev/api/v1/devices/positions:0
+[ 3204232ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ https://thingdock.dev/api/v1/notifications?limit=8:0
+[ 3421575ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ https://thingdock.dev/api/v1/devices/positions:0
+[ 3565309ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ https://thingdock.dev/api/v1/devices/3/telemetry?metric=deviceBattery&from=2026-05-04T15:36:22.394Z&to=2026-05-05T15:36:22.394Z:0
+[ 3865339ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ https://thingdock.dev/api/v1/devices/positions:0

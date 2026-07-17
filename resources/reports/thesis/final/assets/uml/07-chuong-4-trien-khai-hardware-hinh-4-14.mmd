@@ -1,4 +1,24 @@
-flowchart TB
-    Port["Cổng OBD2 dưới taplo"] --> Dongle["vgate iCar Pro"]
-    Dongle -.->|BLE| Tracker["Tracker trong cabin"]
-    Tracker --> Note["Không cần cắm tracker trực tiếp OBD2"]
+flowchart LR
+    subgraph Board["Các mô-đun chính có trên bo mạch"]
+        direction LR
+
+        Power["Khối nguồn<br/>Chức năng: Tạo nguồn 5 V, 4 V,<br/>3.3 V và nguồn dự phòng<br/>(Module: MP2482, AP2112,<br/>TPS54231, TP5100,<br/>SX1308, pin 18650)"]
+
+        Control["Khối điều khiển<br/>Chức năng: Điều phối toàn bộ thiết bị<br/>(Module: ESP32-S3, USB-C,<br/>đầu nạp, nút nhấn,<br/>đèn báo, anten BLE)"]
+
+        Data["Khối cảm biến và lưu trữ<br/>Chức năng: Phát hiện chuyển động,<br/>giữ thời gian, lưu đệm<br/>(Module: LIS3DSH, DS3231M,<br/>W25Q128, khe microSD)"]
+
+        Comm["Khối truyền thông - định vị<br/>Chức năng: Lấy vị trí, gửi bản tin<br/>(Module: SIM7600CE-T, khe microSIM,<br/>anten 4G/GNSS)"]
+    end
+
+    Power --> Control
+    Power --> Data
+    Power --> Comm
+    Data <--> Control
+    Control <--> Comm
+
+    style Board fill:#ffffff,stroke:#94a3b8,stroke-width:1px,color:#111827
+    style Power fill:#ffffff,stroke:#64748b,color:#111827
+    style Control fill:#ffffff,stroke:#64748b,color:#111827
+    style Data fill:#ffffff,stroke:#64748b,color:#111827
+    style Comm fill:#ffffff,stroke:#64748b,color:#111827

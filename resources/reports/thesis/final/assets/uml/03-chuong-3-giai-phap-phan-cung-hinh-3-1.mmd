@@ -1,26 +1,9 @@
-flowchart LR
-    subgraph Input["Nguồn vào"]
-        Batt["Ắc quy 12V/24V"]
-        Buck["Buck 5V"]
-        Backup["Pin dự phòng + Boost"]
-        Batt --> Buck
-        Batt --> Backup
-    end
+flowchart TB
+    Vehicle["Phương tiện<br>vị trí, vận hành, chuyển động"]
+    Acquire["Thu nhận tín hiệu<br>GNSS, OBD-II, IMU"]
+    Packet["Tiền xử lý và đóng gói<br>bản tin giám sát"]
+    Server["Máy chủ<br>tiếp nhận, chuẩn hóa,<br>lưu trữ và phát cảnh báo"]
+    Interface["Giao diện khai thác<br>bản đồ, trạng thái,<br>dữ liệu chi tiết"]
+    Manager["Người quản lý"]
 
-    subgraph Core["Khối điều khiển"]
-        MCU["ESP32-S3"]
-        PM["Power FSM"]
-        PM --> MCU
-    end
-
-    subgraph IO["Ngoại vi"]
-        Modem["SIM7600CE-T"]
-        IMU["LIS3DH"]
-        OBD["BLE OBD2"]
-    end
-
-    Buck ----> MCU
-    Backup ----> MCU
-    MCU ----> Modem
-    MCU ----> IMU
-    MCU ----> OBD
+    Vehicle --> Acquire --> Packet --> Server --> Interface --> Manager

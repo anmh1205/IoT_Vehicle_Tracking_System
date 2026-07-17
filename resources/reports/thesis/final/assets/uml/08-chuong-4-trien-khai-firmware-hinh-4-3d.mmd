@@ -1,0 +1,47 @@
+---
+config:
+  theme: base
+  sequence:
+    mirrorActors: false
+    actorMargin: 155
+    messageMargin: 55
+    noteMargin: 24
+    diagramMarginX: 36
+    diagramMarginY: 20
+    boxMargin: 12
+    boxTextMargin: 8
+    actorFontSize: 14
+    messageFontSize: 14
+  themeCSS: |
+    .messageText, .messageText tspan, .loopText, .loopText tspan {
+      paint-order: stroke;
+      stroke: #ffffff;
+      stroke-width: 10px;
+      stroke-linejoin: round;
+    }
+---
+sequenceDiagram
+    autonumber
+    participant CTRL as Bộ điều khiển
+    participant OBD as Bộ đọc OBD BLE
+    participant POS as SIM7600CE-T
+    participant NET as Máy chủ tiếp nhận
+    participant BUF as Bộ nhớ tạm
+
+    CTRL->>OBD: Nhận dữ liệu vận hành<br/>từ xe
+    OBD-->>CTRL: Trả tốc độ, vòng tua<br/>và trạng thái khóa điện
+    CTRL->>POS: Lấy vị trí và trạng thái mạng
+    POS-->>CTRL: Trả tọa độ và tín hiệu định vị
+    CTRL->>CTRL: Ghép dữ liệu xe,<br/>vị trí và nguồn
+    alt Kết nối đang ổn định
+        CTRL->>NET: Gửi bản tin giám sát
+        NET-->>CTRL: Xác nhận đã nhận
+        opt Còn bản tin lưu cục bộ
+            CTRL->>BUF: Đọc bản tin chờ gửi bù
+            BUF-->>CTRL: Trả dữ liệu còn lưu
+            CTRL->>NET: Gửi bù bản tin đã lưu
+            NET-->>CTRL: Xác nhận đã nhận
+        end
+    else Mất mạng<br/>hoặc gửi lỗi
+        CTRL->>BUF: Lưu bản tin vào<br/>bộ nhớ tạm
+    end

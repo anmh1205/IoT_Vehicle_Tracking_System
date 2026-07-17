@@ -1,7 +1,7 @@
 ## Code Review Summary
 
 ### Scope
-- Files: Frontend scope `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/**`
+- Files: Frontend scope `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/**`
 - LOC: large (multi-module), sampled trọng tâm auth, routing, API client, admin pages, realtime
 - Focus: deep review frontend hiện trạng (không sửa code)
 - Scout findings: có rủi ro kiểm soát truy cập theo UI-only, redirect boundary, type-safety rộng (`any`), và state realtime có thể phình
@@ -17,56 +17,56 @@
 1) Thiếu chặn quyền ở page-level cho route nhạy cảm (chỉ ẩn ở navigation)
 - Impact: user có thể truy cập trực tiếp URL nhạy cảm; nếu backend guard thiếu/không đồng bộ sẽ thành lộ chức năng quản trị.
 - Evidence:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/app/dashboard/users/page.tsx:165`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/app/dashboard/firmware/page.tsx:95`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/app/dashboard/exports/page.tsx:129`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/dashboard/users/page.tsx:165`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/dashboard/firmware/page.tsx:95`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/dashboard/exports/page.tsx:129`
   - So sánh với page có guard đúng:
-    - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/app/dashboard/system-admin/page.tsx:15`
-    - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/app/dashboard/system-status/page.tsx:12`
+    - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/dashboard/system-admin/page.tsx:15`
+    - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/dashboard/system-status/page.tsx:12`
 
 2) Redirect sau login chưa ràng buộc internal path
 - Impact: nguy cơ open-redirect/phishing flow nếu attacker mồi URL `/login?redirect=...`.
 - Evidence:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/features/auth/components/login-form.tsx:19`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/features/auth/components/login-form.tsx:46`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/auth/components/login-form.tsx:19`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/auth/components/login-form.tsx:46`
 
 3) Token auth được giữ trong global client store
 - Impact: tăng blast-radius khi có XSS (token đọc được từ JS runtime), trong khi app đã dùng cookie session (`withCredentials`).
 - Evidence:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/lib/stores/auth-store.ts:15`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/lib/stores/auth-store.ts:29`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/lib/api/client.ts:12`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/stores/auth-store.ts:15`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/stores/auth-store.ts:29`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/api/client.ts:12`
 
 ### Medium Priority
 1) Cấu hình ảnh remote quá rộng (`hostname: '**'`)
 - Impact: mở rộng bề mặt tấn công và khó kiểm soát nguồn ảnh.
 - Evidence:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/next.config.ts:6`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/next.config.ts:6`
 
 2) Type-safety yếu do `any` xuất hiện ở service + page quan trọng
 - Impact: giảm khả năng bắt lỗi compile-time, tăng bug runtime khi backend thay đổi schema.
 - Evidence (mẫu):
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/app/dashboard/users/page.tsx:45`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/app/dashboard/users/page.tsx:181`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/lib/api/users.ts:5`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/lib/api/customers.ts:5`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/lib/api/system-status.ts:4`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/lib/api/export.ts:26`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/types/index.ts:4`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/config/nav-config.ts:26`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/dashboard/users/page.tsx:45`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/dashboard/users/page.tsx:181`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/api/users.ts:5`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/api/customers.ts:5`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/api/system-status.ts:4`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/api/export.ts:26`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/types/index.ts:4`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/config/nav-config.ts:26`
 
 3) State tiến độ export có thể tăng không giới hạn theo thời gian
 - Impact: phiên dài + nhiều job sẽ tăng memory footprint trên client.
 - Evidence:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/app/dashboard/exports/page.tsx:131`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/app/dashboard/exports/page.tsx:142`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/dashboard/exports/page.tsx:131`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/dashboard/exports/page.tsx:142`
 
 ### Low Priority
 1) Inconsistency quyền giữa nav filter và page guard
 - Impact: UX không nhất quán (mục thấy nhưng vào bị chặn, hoặc ngược lại).
 - Evidence:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/hooks/use-nav.ts:6`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/app/dashboard/simulator/page.tsx:13`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/hooks/use-nav.ts:6`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/dashboard/simulator/page.tsx:13`
 
 2) Kiểm chứng chất lượng chưa chạy được trong môi trường hiện tại (thiếu deps cài đặt)
 - Impact: chưa có bằng chứng lint/build pass cho phiên review này.

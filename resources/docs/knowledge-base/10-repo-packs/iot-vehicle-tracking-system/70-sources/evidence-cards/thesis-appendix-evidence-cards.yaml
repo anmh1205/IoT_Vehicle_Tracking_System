@@ -1,0 +1,52 @@
+- type: evidence_card
+  id: thesis-appendix-supporting-materials-index
+  domain: deployment
+  subdomain: supporting-materials
+  source_kind: thesis_toc
+  source_path: resources/reports/thesis/final/thesis-final-report.toc
+  source_anchor: "Appendix 4 / source-db-api-env-run sections"
+  statement: "The thesis appendix explicitly exposes source tree, database references, API docs, environment configuration, and install/run instructions as operational support material."
+  evidence_excerpt: "Appendix 4 is split into source repo, database schema, API docs, environment config, and installation/run sections."
+  status: validated
+  confidence: high
+  validated_against:
+    - README.md
+    - resources/docs/knowledge-base/10-repo-packs/iot-vehicle-tracking-system/70-sources/source-registry.md
+  reviewer_agent: coordinator
+  last_reviewed: 2026-04-24
+
+- type: evidence_card
+  id: thesis-appendix-api-docs-surface
+  domain: backend-cloud-processing
+  subdomain: api-surface
+  source_kind: thesis_md
+  source_path: resources/reports/thesis/final/thesis-final-report.md
+  source_anchor: "Appendix 4.3 API documentation"
+  statement: "The thesis expects Swagger/OpenAPI at `/api-docs` and a REST API rooted under `/api/v1`."
+  evidence_excerpt: "Appendix API material lists `/api-docs` and core `/api/v1/...` endpoints."
+  status: validated
+  confidence: high
+  validated_against:
+    - iot-vehicle-tracking-system-cloud/Tracking_Backend/src/index.ts
+    - iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/openapi/spec.ts
+  reviewer_agent: coordinator
+  last_reviewed: 2026-04-24
+
+- type: evidence_card
+  id: thesis-appendix-env-contract-shape
+  domain: deployment
+  subdomain: env-contract
+  source_kind: thesis_md
+  source_path: resources/reports/thesis/final/thesis-final-report.md
+  source_anchor: "Appendix 4.4 environment configuration"
+  statement: "The thesis appendix documents a URL-style broker variable `MQTT_BROKER_URL` and assumes template env files exist for every app service."
+  evidence_excerpt: "The env table uses `MQTT_BROKER_URL` for Backend and MqttBridge and the install guide copies `.env.example` into each service folder."
+  status: conflict
+  confidence: high
+  validated_against:
+    - iot-vehicle-tracking-system-cloud/Tracking_Backend/.env.example
+    - iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/.env.example
+    - iot-vehicle-tracking-system-cloud/Tracking_Frontend/next.config.ts
+  reviewer_agent: coordinator
+  last_reviewed: 2026-04-24
+

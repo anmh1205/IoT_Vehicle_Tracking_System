@@ -1,13 +1,14 @@
 flowchart TB
-    A["Application Layer
-Policy + State machine"]
-    B["Domain Layer
-Telemetry + Alert + OBD2"]
-    C["Runtime Layer
-FreeRTOS Task/Queue/Timer"]
-    D["HAL Layer
-GPIO/UART/I2C/ADC"]
-    E["Hardware
+    A["Tầng ứng dụng
+Chính sách + trạng thái"]
+    B["Tầng miền
+Dữ liệu vận hành + cảnh báo + OBD2"]
+    C["Tầng chạy
+Task / Queue / Timer FreeRTOS"]
+    D["Tầng HAL
+GPIO / UART / I2C / ADC"]
+    E["Phần cứng
 ESP32-S3 + SIM7600 + LIS3DH"]
 
     A --> B --> C --> D --> E
+

@@ -1,0 +1,17 @@
+flowchart LR
+    Vin["Nguồn xe 12V/24V"]
+    Power["Khối nguồn trên PCB<br/>MP2482 + TP5100 + SX1308 + power path"]
+    MCU["Khối xử lý trung tâm<br/>ESP32-S3-WROOM-1 + W25Q128"]
+    Sense["Khối cảm biến và giám sát<br/>LIS3DH + DS3231M + ADC/LVD"]
+    Modem["Khối truyền thông chính<br/>SIM7600CE-T + GNSS + anten"]
+    Storage["Giao diện lưu trữ cục bộ<br/>MicroSD / SDMMC"]
+    OBD["Ngoại vi OBD2 BLE<br/>Vgate iCar Pro (ngoài PCB)"]
+
+    Vin --> Power
+    Power --> MCU
+    Power --> Modem
+    MCU --> Sense
+    Sense --> MCU
+    MCU --> Storage
+    MCU --> Modem
+    MCU -. BLE .-> OBD

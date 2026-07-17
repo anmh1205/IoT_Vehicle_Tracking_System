@@ -1,0 +1,17 @@
+flowchart LR
+    Bridge["MQTT Bridge"]
+
+    subgraph Hot["Luồng nóng - thời gian thực"]
+        VictoriaMetricsNode["VictoriaMetrics"]
+        WS["Socket.IO"]
+    end
+
+    subgraph Durable["Luồng bền - nghiệp vụ"]
+        PostgreSQLNode["PostgreSQL"]
+        API["API phía máy chủ"]
+    end
+
+    Bridge ----> VictoriaMetricsNode
+    Bridge ----> WS
+    Bridge ----> PostgreSQLNode
+    API ----> PostgreSQLNode

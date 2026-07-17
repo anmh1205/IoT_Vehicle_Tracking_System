@@ -1,24 +1,27 @@
-flowchart LR
-    subgraph PowerZone["Khoang nguồn"]
+flowchart TB
+    subgraph Box["Bên trong vỏ hộp bảo vệ"]
         direction TB
-        POWER["Buck / Boost / Charge"]
-        CELL["Pin 18650"]
-        POWER ----> CELL
+
+        subgraph CoreZone["Khoang xử lý + RF"]
+            direction TB
+            MCU["ESP32-S3"]
+            MODEM["SIM7600 + ăng-ten"]
+        end
+
+        subgraph PowerZone["Khoang nguồn"]
+            direction TB
+            POWER["Buck / Boost / sạc"]
+            CELL["Pin 18650"]
+        end
+
+        subgraph IOZone["Khoang cổng kết nối"]
+            direction TB
+            OBD["OBD2 / BLE"]
+            PORT["USB debug"]
+        end
     end
 
-    subgraph CoreZone["Khoang xử lý + RF"]
-        direction TB
-        MCU["ESP32-S3"]
-        MODEM["SIM7600 + anten"]
-    end
-
-    subgraph IOZone["Khoang cổng kết nối"]
-        direction TB
-        OBD["OBD2 / BLE"]
-        PORT["USB debug"]
-    end
-
-    POWER ----> MCU
-    POWER ----> MODEM
-    MCU ----> OBD
-    MCU ----> PORT
+    POWER --> MCU
+    POWER --> MODEM
+    MCU --> OBD
+    MCU --> PORT

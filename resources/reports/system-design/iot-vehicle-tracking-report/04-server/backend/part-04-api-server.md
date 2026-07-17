@@ -440,7 +440,7 @@ export async function queryDeviceLocation(deviceId: string, range: string) {
 > **📌 Cập nhật:** MQTT Bridge đã được tách thành service **hoàn toàn độc lập** `Tracking_MqttBridge/` với `package.json`, `docker-compose.yml`, logger, pool, và config riêng. Không còn nằm trong `Tracking_Backend/`.
 
 ```
-iot-vehicle-tracking-system/
+iot-vehicle-tracking-system-cloud/
 ├── Tracking_Backend/        # API Server (Express)
 ├── Tracking_MqttBridge/     # MQTT Bridge (standalone)
 │   ├── src/

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="800" viewBox="0 0 1360 800" font-family="Times New Roman, serif">
+  <rect width="1360" height="800" fill="#ffffff"/>
+
+  <!-- 4 risk → mitigation pairs as horizontal flow -->
+  <!-- Each: Risk card (left, red accent) → arrow → Mitigation card (right, blue accent) -->
+
+  <!-- Header strip -->
+  <g transform="translate(20, 20)">
+    <rect width="630" height="50" rx="6" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+    <text x="315" y="34" text-anchor="middle" font-size="22" font-weight="bold" fill="#dc2626">RỦI RO KỸ THUẬT</text>
+  </g>
+  <g transform="translate(710, 20)">
+    <rect width="630" height="50" rx="6" fill="#dbeafe" stroke="#1a5276" stroke-width="2"/>
+    <text x="315" y="34" text-anchor="middle" font-size="22" font-weight="bold" fill="#1a5276">BIỆN PHÁP ĐÃ ÁP DỤNG</text>
+  </g>
+
+  <!-- Row 1: Mất sóng / trễ mạng -->
+  <g transform="translate(20, 90)">
+    <rect width="630" height="150" rx="8" fill="#ffffff" stroke="#dc2626" stroke-width="2"/>
+    <text x="20" y="40" font-size="22" font-weight="bold" fill="#000">1. Mất sóng, trễ mạng</text>
+    <text x="20" y="80" font-size="20" fill="#475569">Bản tin có thể không đến được</text>
+    <text x="20" y="110" font-size="20" fill="#475569">máy chủ trong thời gian chờ kết nối</text>
+  </g>
+  <text x="668" y="170" text-anchor="middle" font-size="32" fill="#1a5276">→</text>
+  <g transform="translate(710, 90)">
+    <rect width="630" height="150" rx="8" fill="#f5f9fc" stroke="#1a5276" stroke-width="2"/>
+    <text x="20" y="40" font-size="22" font-weight="bold" fill="#1a5276">MQTT + lưu đệm SD + gửi bù tự động</text>
+    <text x="20" y="80" font-size="20" fill="#000">Bản tin được lưu lên SD nội bộ,</text>
+    <text x="20" y="110" font-size="20" fill="#000">tự gửi bù khi có lại sóng → không mất dữ liệu</text>
+  </g>
+
+  <!-- Row 2: Hao ắc quy khi đỗ lâu -->
+  <g transform="translate(20, 260)">
+    <rect width="630" height="150" rx="8" fill="#ffffff" stroke="#dc2626" stroke-width="2"/>
+    <text x="20" y="40" font-size="22" font-weight="bold" fill="#000">2. Hao ắc quy khi đỗ lâu</text>
+    <text x="20" y="80" font-size="20" fill="#475569">Thiết bị luôn cấp điện có thể</text>
+    <text x="20" y="110" font-size="20" fill="#475569">làm xe không khởi động được</text>
+  </g>
+  <text x="668" y="340" text-anchor="middle" font-size="32" fill="#1a5276">→</text>
+  <g transform="translate(710, 260)">
+    <rect width="630" height="150" rx="8" fill="#f5f9fc" stroke="#1a5276" stroke-width="2"/>
+    <text x="20" y="40" font-size="22" font-weight="bold" fill="#1a5276">Ngủ sâu 0,5 mA + chia nhánh nguồn + chu kỳ 10s/120s</text>
+    <text x="20" y="80" font-size="20" fill="#000">Pin riêng giữ giám sát, ắc quy chỉ cấp khi cần</text>
+    <text x="20" y="110" font-size="20" fill="#000">→ kéo dài giám sát đến 237 ngày khi đỗ</text>
+  </g>
+
+  <!-- Row 3: Báo chưa ổn định khi dừng -->
+  <g transform="translate(20, 430)">
+    <rect width="630" height="150" rx="8" fill="#ffffff" stroke="#dc2626" stroke-width="2"/>
+    <text x="20" y="40" font-size="22" font-weight="bold" fill="#000">3. Báo trạng thái chưa ổn định khi dừng</text>
+    <text x="20" y="80" font-size="20" fill="#475569">Khi dừng đèn đỏ ngắn, GNSS</text>
+    <text x="20" y="110" font-size="20" fill="#475569">có thể nhầm là xe đã đỗ</text>
+  </g>
+  <text x="668" y="510" text-anchor="middle" font-size="32" fill="#1a5276">→</text>
+  <g transform="translate(710, 430)">
+    <rect width="630" height="150" rx="8" fill="#f5f9fc" stroke="#1a5276" stroke-width="2"/>
+    <text x="20" y="40" font-size="22" font-weight="bold" fill="#1a5276">Kết hợp trạng thái đỗ + IMU + mốc thời gian</text>
+    <text x="20" y="80" font-size="20" fill="#000">Yêu cầu cả 3 điều kiện đồng thời</text>
+    <text x="20" y="110" font-size="20" fill="#000">→ giảm cảnh báo giả; vẫn cần hiệu chỉnh thêm</text>
+  </g>
+
+  <!-- Row 4: Khác biệt OBD-II giữa các xe -->
+  <g transform="translate(20, 600)">
+    <rect width="630" height="150" rx="8" fill="#ffffff" stroke="#dc2626" stroke-width="2"/>
+    <text x="20" y="40" font-size="22" font-weight="bold" fill="#000">4. Khác biệt OBD-II giữa các dòng xe</text>
+    <text x="20" y="80" font-size="20" fill="#475569">Dữ liệu mở rộng (PID nâng cao)</text>
+    <text x="20" y="110" font-size="20" fill="#475569">không đồng nhất trên tất cả xe</text>
+  </g>
+  <text x="668" y="680" text-anchor="middle" font-size="32" fill="#1a5276">→</text>
+  <g transform="translate(710, 600)">
+    <rect width="630" height="150" rx="8" fill="#f5f9fc" stroke="#1a5276" stroke-width="2"/>
+    <text x="20" y="40" font-size="22" font-weight="bold" fill="#1a5276">Tham số cơ bản hoạt động ổn trên mọi xe đã thử</text>
+    <text x="20" y="80" font-size="20" fill="#000">Mở rộng sâu cần kiểm thử theo nhóm xe</text>
+    <text x="20" y="110" font-size="20" fill="#000">→ làm trong giai đoạn triển khai diện rộng</text>
+  </g>
+</svg>

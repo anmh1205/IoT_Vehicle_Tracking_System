@@ -1,4 +1,12 @@
 {
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allow": [],
+    "deny": []
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "includeCoAuthoredBy": false,
   "statusLine": {
     "type": "command",

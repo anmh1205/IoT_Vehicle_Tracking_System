@@ -1,6 +1,11 @@
-flowchart LR
-    A["B1: Kiểm tra linh kiện"] --> B["B2: Lắp nhánh nguồn"]
-    B --> C["B3: Gắn ESP32-S3"]
-    C --> D["B4: Đấu modem + IMU + ADC"]
-    D --> E["B5: Nạp firmware test"]
-    E --> F["B6: Đóng vỏ"]
+flowchart TB
+    Input["Khối tín hiệu đầu vào<br/>- Điện áp nguồn từ xe qua ADC<br/>- Dữ liệu OBD-II qua vgate iCar Pro<br/>- Chuyển động từ LIS3DSH"]
+    Storage["Khối nhớ và thời gian<br/>- DS3231M<br/>- W25Q128<br/>- Khe microSD"]
+    Service["Khối thao tác và bảo trì<br/>- USB-C và đầu nạp<br/>- Nút nhấn, đèn báo"]
+    MCU["ESP32-S3<br/>Khối điều khiển trung tâm<br/>- Quản lý trạng thái<br/>- Tạo bản tin"]
+    Modem["SIM7600CE-T<br/>- Lấy vị trí GNSS<br/>- Duy trì kết nối 4G"]
+
+    Input --> MCU
+    Storage <--> MCU
+    Service <--> MCU
+    MCU <--> Modem

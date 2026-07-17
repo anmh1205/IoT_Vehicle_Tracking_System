@@ -1,0 +1,180 @@
+menu "Tracker Firmware"
+
+config TRACKER_DEFAULT_DEVICE_ID
+    string "Default device ID"
+    default "TRACKER_001"
+
+config TRACKER_DEFAULT_AUTH_TOKEN
+    string "Default auth token"
+    default "provisioning-required"
+
+config TRACKER_DEFAULT_MQTT_HOST
+    string "Default MQTT host"
+    default "mqtt.thingdock.dev"
+
+config TRACKER_DEFAULT_MQTT_PORT
+    int "Default MQTT port"
+    range 1 65535
+    default 1883
+
+config TRACKER_MQTT_DNS_FALLBACK_IPV4
+    string "Fallback MQTT IPv4 when modem DNS resolution fails"
+    default ""
+    help
+        Optional broker IPv4 literal used only when the SIM7600 cannot resolve
+        the configured MQTT hostname. Primary MQTT connect still uses the
+        configured hostname first; this value is a resilience fallback for
+        field networks where modem DNS intermittently fails.
+
+config TRACKER_TLS_VERIFY_SERVER
+    bool "Verify TLS server certificate"
+    default y
+    help
+        Enable SIM7600 server-certificate verification for MQTT TLS and OTA HTTPS.
+
+config TRACKER_TLS_CA_CERT_NAME
+    string "SIM7600 CA certificate file name"
+    default "isrgrootx1.pem"
+    depends on TRACKER_TLS_VERIFY_SERVER
+    help
+        CA certificate file expected to exist in the modem certificate store.
+
+config TRACKER_TLS_IGNORE_LOCAL_TIME
+    bool "Ignore TLS certificate validity time"
+    default n
+    help
+        Leave disabled for production. Enable only when bench devices have no
+        trusted RTC/network time and TLS date validation blocks test traffic.
+
+config TRACKER_DEFAULT_HEARTBEAT_INTERVAL_S
+    int "Heartbeat interval (seconds)"
+    range 60 86400
+    default 900
+
+config TRACKER_DEFAULT_TRACKING_INTERVAL_S
+    int "Tracking interval (seconds)"
+    range 1 3600
+    default 10
+
+config TRACKER_DEFAULT_IGNITION_OFF_HOLD_MS
+    int "Ignition OFF hold window (milliseconds)"
+    range 1000 60000
+    default 15000
+    help
+        Minimum sustained OFF evidence before a running trip session can close.
+        Keep this above short ECU idle/deceleration gaps so RPM=0 chatter does
+        not split one drive into many tiny sessions.
+
+config TRACKER_ENABLE_COMMAND_SUBSCRIBE
+    bool "Subscribe command topic"
+    default y
+
+config TRACKER_PARKED_KEEP_MODEM_GNSS_WARM
+    bool "Keep modem and GNSS warm while parked"
+    default y
+    help
+        Leave SIM7600/GNSS powered across parked light-sleep heartbeat windows
+        so OFF-state tracking keeps a warm fix and the next ignition ON edge is
+        not delayed by a full modem/GNSS cold start.
+
+config TRACKER_FAKE_SLEEP_ENABLED
+    bool "Use fake parked sleep loop instead of real sleep entry"
+    default y if TRACKER_FIELD_VALIDATION_MODE
+    default n
+
+config TRACKER_MODEM_APN
+    string "Cellular APN"
+    default "internet"
+
+config TRACKER_SD_LOG_ENABLE
+    bool "Enable SD logging"
+    default y
+
+config TRACKER_SD_REPLAY_ENABLE
+    bool "Enable SD replay"
+    default y
+
+config TRACKER_SD_DIAG_ENABLE
+    bool "Enable SD diagnostics counters"
+    default y
+
+config TRACKER_SD_LOG_QUOTA_BYTES
+    int "SD queue quota bytes"
+    range 131072 134217728
+    default 4194304
+
+config TRACKER_SD_LOG_SOFT_QUOTA_PERCENT
+    int "SD queue soft quota percent"
+    range 50 95
+    default 80
+
+config TRACKER_SD_LOG_HARD_QUOTA_PERCENT
+    int "SD queue hard quota percent"
+    range 60 99
+    default 95
+
+config TRACKER_SD_RETRY_BASE_MS
+    int "Replay retry base backoff ms"
+    range 200 10000
+    default 1000
+
+config TRACKER_SD_RETRY_MAX_MS
+    int "Replay retry max backoff ms"
+    range 1000 120000
+    default 30000
+
+config TRACKER_IGNITION_DEBOUNCE_MS
+    int "Ignition debounce window ms"
+    range 100 10000
+    default 1500
+
+config TRACKER_IGNITION_OFF_DRAIN_MS
+    int "Ignition OFF drain timeout ms"
+    range 500 30000
+    default 3000
+
+config TRACKER_FIELD_VALIDATION_MODE
+    bool "Enable field-validation override profile"
+    default n
+
+if TRACKER_FIELD_VALIDATION_MODE
+
+config TRACKER_FIELD_VALIDATION_KEEP_AWAKE
+    bool "Disable sleep in field-validation mode"
+    default n
+
+config TRACKER_FIELD_VALIDATION_FORCE_IMU_WAKE
+    bool "Force IMU wake enabled in field-validation mode"
+    default y
+
+config TRACKER_FIELD_VALIDATION_MQTT_HOST
+    string "Field-validation MQTT host override"
+    default "mqtt.thingdock.dev"
+
+config TRACKER_FIELD_VALIDATION_MQTT_USERNAME
+    string "Field-validation MQTT username override"
+    default ""
+
+config TRACKER_FIELD_VALIDATION_MQTT_PASSWORD
+    string "Field-validation MQTT password override"
+    default ""
+
+config TRACKER_FIELD_VALIDATION_AUTH_TOKEN
+    string "Field-validation payload auth token override"
+    default ""
+
+config TRACKER_FIELD_VALIDATION_DISABLE_COMMAND_SUBSCRIBE
+    bool "Disable command subscribe in field-validation mode"
+    default y
+
+config TRACKER_FIELD_VALIDATION_SKIP_OBD_AUTODISCOVER
+    bool "Skip OBD BLE auto-discover in field-validation mode when preferred MAC is missing"
+    default y
+    help
+        Keeps publish-path validation stable on field devices that do not have a
+        provisioned OBD adapter MAC yet. BLE OBD still works when an explicit
+        preferred MAC is configured.
+
+endif
+
+endmenu

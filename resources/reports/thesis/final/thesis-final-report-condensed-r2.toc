@@ -1,0 +1,58 @@
+\contentsline {section}{NHẬN XÉT CỦA GIẢNG VIÊN HƯỚNG DẪN}{i}{section*.1}%
+\contentsline {section}{NHẬN XÉT CỦA GIẢNG VIÊN PHẢN BIỆN}{ii}{section*.2}%
+\contentsline {section}{BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP}{iii}{section*.3}%
+\contentsline {section}{GIẢI TRÌNH CÁC CHỈNH SỬA}{iv}{section*.4}%
+\contentsline {section}{LỜI CAM ĐOAN}{v}{section*.5}%
+\contentsline {section}{TÓM TẮT ĐỒ ÁN TỐT NGHIỆP - ABSTRACT}{vi}{section*.6}%
+\contentsline {section}{LỜI CẢM ƠN - ACKNOWLEDGEMENTS}{viii}{section*.7}%
+\contentsline {section}{MỤC LỤC - TABLE OF CONTENTS}{ix}{section*.8}%
+\contentsline {section}{DANH MỤC BẢNG - LIST OF TABLES}{xii}{section*.9}%
+\contentsline {section}{DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ - LIST OF FIGURES}{xiii}{section*.10}%
+\contentsline {section}{DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATIONS}{xv}{section*.11}%
+\contentsline {section}{CHƯƠNG 1. GIỚI THIỆU DỰ ÁN - SUMMARY}{1}{section*.12}%
+\contentsline {subsection}{1.1. Đặt vấn đề/ Bối cảnh của dự án -- Problem definition and Background}{1}{subsection*.13}%
+\contentsline {subsection}{1.2. Mục tiêu và phạm vi của dự án}{1}{subsection*.14}%
+\contentsline {subsection}{1.3. Các tiêu chí cần đạt được của dự án}{2}{subsection*.15}%
+\contentsline {subsection}{1.4. Phương pháp tiếp cận thiết kế kỹ thuật -- Engineering design approach}{2}{subsection*.16}%
+\contentsline {subsection}{1.5. Đầu ra hướng tới và định hướng sử dụng -- Expected outputs and intended use}{3}{subsection*.17}%
+\contentsline {section}{CHƯƠNG 2. PHÂN TÍCH VẤN ĐỀ KỸ THUẬT - PROBLEM ANALYSIS}{4}{section*.18}%
+\contentsline {subsection}{2.1. Mô tả vấn đề - Problem statement}{4}{subsection*.19}%
+\contentsline {subsection}{2.2. Bối cảnh và cơ sở kỹ thuật -- Background and Technical reviews}{5}{subsection*.20}%
+\contentsline {subsection}{2.3. Yêu cầu kỹ thuật và các tiêu chuẩn thiết kế - Design criteria and Constraints}{7}{subsection*.21}%
+\contentsline {subsection}{2.4. Yêu cầu từ các bên liên quan -- Constituent's requirements}{8}{subsection*.22}%
+\contentsline {section}{CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ - DESIGN SOLUTIONS}{9}{section*.23}%
+\contentsline {subsection}{3.1. Phân tích tổng hợp -- General analysis}{9}{subsection*.24}%
+\contentsline {subsubsection}{3.1.1. Nguyên lý hoạt động}{9}{subsubsection*.25}%
+\contentsline {subsubsection}{3.1.2. Các ràng buộc kỹ thuật chi phối phương án -- Governing technical constraints}{10}{subsubsection*.27}%
+\contentsline {subsection}{3.2. Đề xuất các giải pháp -- Proposed multiple solutions}{10}{subsection*.28}%
+\contentsline {subsubsection}{3.2.1. Đề xuất giải pháp phần cứng thiết bị (Hardware Design)}{10}{subsubsection*.29}%
+\contentsline {subsubsection}{3.2.2. Đề xuất giải pháp phần mềm nhúng (Embedded Software)}{15}{subsubsection*.34}%
+\contentsline {subsubsection}{3.2.3. Đề xuất giải pháp truyền bản tin và định hướng tổ chức phía máy chủ (Communication and Server Organization)}{17}{subsubsection*.35}%
+\contentsline {subsection}{3.3. Phân tích, đánh giá và lựa chọn phương án khả thi -- Analysis, Evaluation and Selection}{20}{subsection*.36}%
+\contentsline {subsubsection}{3.3.1. Kiến trúc hệ thống được chọn -- Selected system architecture}{20}{subsubsection*.37}%
+\contentsline {subsubsection}{3.3.2. Phân tích chức năng các khối trong phương án được chọn -- Functional analysis of selected blocks}{20}{subsubsection*.39}%
+\contentsline {subsection}{3.4. Tối ưu phương án thiết kế - The optimal solution}{22}{subsection*.41}%
+\contentsline {section}{CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ - IMPLEMENTATION AND RESULTS}{24}{section*.42}%
+\contentsline {subsection}{4.1. Triển khai phần cứng thiết bị -- Hardware implementation}{24}{subsection*.43}%
+\contentsline {subsection}{4.2. Triển khai phần mềm hệ thống -- Software implementation}{32}{subsection*.52}%
+\contentsline {subsubsection}{4.2.1. Phần điều khiển trên thiết bị -- Device firmware}{32}{subsubsection*.53}%
+\contentsline {subsubsection}{4.2.2. Hạ tầng máy chủ và xử lý dữ liệu -- Server infrastructure and data processing}{35}{subsubsection*.57}%
+\contentsline {subsubsection}{4.2.3. Giao diện quản lý -- Management interface}{37}{subsubsection*.60}%
+\contentsline {subsection}{4.3. Kết quả kiểm thử và đo lường -- Measurement and Result}{41}{subsection*.65}%
+\contentsline {subsection}{4.4. Đối chiếu với mục tiêu của đồ án -- Comparison against project objectives}{48}{subsection*.71}%
+\contentsline {section}{CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUYẾN NGHỊ - EVALUATION AND RECOMMENDATION}{50}{section*.72}%
+\contentsline {subsection}{5.1. Đánh giá hiệu năng}{50}{subsection*.73}%
+\contentsline {subsection}{5.2. Đánh giá kinh tế và môi trường}{51}{subsection*.74}%
+\contentsline {subsection}{5.3. Đánh giá rủi ro và biện pháp giảm thiểu}{51}{subsection*.75}%
+\contentsline {subsection}{5.4. Khuyến nghị cho tương lai}{52}{subsection*.76}%
+\contentsline {section}{CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM -- REFLECTION AND CASE-STUDIES}{53}{section*.77}%
+\contentsline {subsection}{6.1. Ứng dụng kiến thức kỹ thuật -- Earlier course work}{53}{subsection*.78}%
+\contentsline {subsection}{6.2. Giải quyết các vấn đề kỹ thuật phức tạp -- Complex engineering problems}{53}{subsection*.79}%
+\contentsline {subsection}{6.3. Tác động đạo đức và xã hội -- Ethical and Social impacts}{54}{subsection*.80}%
+\contentsline {subsection}{6.4. Tổng kết và bài học kinh nghiệm -- General reflection and case studies}{55}{subsection*.81}%
+\contentsline {section}{TÀI LIỆU TRÍCH DẪN - REFERENCES}{56}{section*.82}%
+\contentsline {subsection}{{[}A{]} Tài liệu chính của đồ án}{56}{subsection*.83}%
+\contentsline {subsection}{{[}B{]} Tài liệu kỹ thuật}{56}{subsection*.84}%
+\contentsline {section}{PHỤ LỤC}{57}{section*.85}%
+\contentsline {section}{PHỤ LỤC 1. BÁO CÁO TÀI CHÍNH -- FINANCE REPORT}{58}{section*.86}%
+\contentsline {section}{PHỤ LỤC 2. CÁC TIÊU CHUẨN THIẾT KẾ -- STANDARDS}{59}{section*.87}%

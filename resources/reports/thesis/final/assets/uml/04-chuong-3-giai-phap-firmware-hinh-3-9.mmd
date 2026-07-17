@@ -1,16 +1,16 @@
 sequenceDiagram
-    participant FW as Modem task
+    participant FW as Task modem
     participant SIM as SIM7600CE-T
 
-    FW->>SIM: Wake modem
+    FW->>SIM: Đánh thức modem
     FW->>SIM: AT + CPIN + CEREG + CSQ
 
     alt Không phản hồi
-        FW->>SIM: Reset PWRKEY và thử lại
+        FW->>SIM: Reset PWR-KEY và thử lại
     else Chưa vào mạng
-        FW->>SIM: Retry đăng ký mạng
+        FW->>SIM: Thử lại đăng ký mạng
     else Driving
-        FW->>SIM: Bật LTE/GNSS + gửi telemetry
+        FW->>SIM: Bật LTE/GNSS, gửi dữ liệu
     else Parking
-        FW->>SIM: Giảm công suất + sleep
+        FW->>SIM: Giảm công suất + ngủ
     end

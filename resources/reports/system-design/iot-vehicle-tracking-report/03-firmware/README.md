@@ -31,8 +31,8 @@ Sau khi đã chốt phần cứng (folder `02-hardware/`), thiết kế firmware
 - Firmware cố định Auto mode `AT+CNMP=2` và giữ pin mapping hiện tại, không thêm UART GNSS riêng
 
 ### Current firmware baseline (code reality)
-- `iot-vehicle-tracking-system/Tracking_Firmware/main/src/modem_gnss.c`: vẫn dùng `AT+CGNSPWR` và `AT+CGNSINF` (mô hình GNSS tích hợp modem)
-- `iot-vehicle-tracking-system/Tracking_Firmware/main/inc/pin_map.h`: chưa định nghĩa UART riêng cho GNSS module
-- `iot-vehicle-tracking-system/Tracking_Firmware/main/src/state_machine.c`: còn coupling LTE connect/disconnect với lifecycle GNSS theo cùng modem stack
+- `iot-vehicle-tracking-system-firmware/main/src/modem_gnss.c`: vẫn dùng `AT+CGNSPWR` và `AT+CGNSINF` (mô hình GNSS tích hợp modem)
+- `iot-vehicle-tracking-system-firmware/main/inc/pin_map.h`: chưa định nghĩa UART riêng cho GNSS module
+- `iot-vehicle-tracking-system-firmware/main/src/state_machine.c`: còn coupling LTE connect/disconnect với lifecycle GNSS theo cùng modem stack
 
 > Tài liệu firmware trong folder này mô tả hướng thiết kế mục tiêu. Source firmware thực tế sẽ được refactor ở đợt riêng.

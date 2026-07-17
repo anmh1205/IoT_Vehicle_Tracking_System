@@ -1,0 +1,88 @@
+\contentsline {figure}{\numberline {1.1}{\ignorespaces So d? t?ng quan v?n d? v� gi?i ph�p d? xu?t}}{2}{figure.caption.16}%
+\contentsline {figure}{\numberline {1.2}{\ignorespaces Quy tr�nh ph�t tri?n d? �n theo c�c giai do?n}}{9}{figure.caption.28}%
+\contentsline {figure}{\numberline {1.3}{\ignorespaces Ki?n tr�c t?ng th? h? th?ng IoT Vehicle Tracking}}{10}{figure.caption.30}%
+\contentsline {figure}{\numberline {1.4}{\ignorespaces So d? chuy?n d?i gi?a c�c ch? d? nang lu?ng}}{14}{figure.caption.32}%
+\contentsline {figure}{\numberline {1.5}{\ignorespaces L? tr�nh ph�t tri?n d? �n theo c�c giai do?n (Roadmap)}}{16}{figure.caption.37}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces So d? ki?n tr�c d? li?u c?a h? th?ng - Data Architecture Diagram}}{25}{figure.caption.50}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces So d? kh?i t?ng th? h? th?ng tracker}}{33}{figure.caption.66}%
+\contentsline {figure}{\numberline {3.1a}{\ignorespaces Ph�n r� chi ti?t c�c kh?i ch?c nang c?a tracker}}{34}{figure.caption.67}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces So d? k?t n?i BLE gi?a ESP32-S3 v� vgate iCar Pro}}{44}{figure.caption.81}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces So d? k?t n?i LIS3DSH v?i ESP32-S3 qua I2C}}{46}{figure.caption.87}%
+\contentsline {figure}{\numberline {3.3a}{\ignorespaces So d? chi ti?t ch�n k?t n?i LIS3DSH v?i ESP32-S3}}{47}{figure.caption.88}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces So d? kh?i h? th?ng qu?n l� ngu?n}}{48}{figure.caption.91}%
+\contentsline {figure}{\numberline {3.4a}{\ignorespaces Ki?n tr�c ngu?n v� ph�n ph?i di?n �p trong h? th?ng}}{49}{figure.caption.92}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces So d? ki?n tr�c ph�n l?p c?a firmware}}{58}{figure.caption.109}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces So d? tuong t�c gi?a c�c FreeRTOS task}}{59}{figure.caption.111}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Luu d? thu?t to�n lu?ng ho?t d?ng ch�nh c?a firmware}}{60}{figure.caption.113}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Luu d? thu?t to�n quy tr�nh k?t n?i v� d?c d? li?u BLE OBD2}}{63}{figure.caption.117}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Luu d? di?u ph?i modem SIM7600CE-T theo tr?ng th�i m?ng v� ch? d? v?n h�nh}}{68}{figure.caption.125}%
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Luu d? thu?t to�n di?u khi?n power path}}{69}{figure.caption.129}%
+\contentsline {figure}{\numberline {3.11}{\ignorespaces So d? m�y tr?ng th�i c?a thi?t b? theo d�i}}{75}{figure.caption.138}%
+\contentsline {figure}{\numberline {3.12}{\ignorespaces So d? ki?n tr�c t?ng quan h? th?ng Cloud}}{82}{figure.caption.151}%
+\contentsline {figure}{\numberline {3.12a}{\ignorespaces Lu?ng d? li?u chi ti?t t? thi?t b? d?n dashboard}}{83}{figure.caption.152}%
+\contentsline {figure}{\numberline {3.13}{\ignorespaces So d? chi?n lu?c luu tr? k�p}}{88}{figure.caption.161}%
+\contentsline {figure}{\numberline {3.14}{\ignorespaces So d? quan h? co s? d? li?u (ER Diagram)}}{90}{figure.caption.163}%
+\contentsline {figure}{\numberline {3.14a}{\ignorespaces Lu?ng di?u ph?i OTA gi?a Backend, EMQX, thi?t b? v� MQTT Bridge}}{94}{figure.caption.173}%
+\contentsline {figure}{\numberline {3.15}{\ignorespaces So d? ki?n tr�c Feature-Sliced Design c?a ?ng d?ng Frontend}}{100}{figure.caption.193}%
+\contentsline {figure}{\numberline {3.15a}{\ignorespaces Lu?ng d? li?u m?t chi?u gi?a Next.js, Query, Zustand v� Backend}}{101}{figure.caption.195}%
+\contentsline {figure}{\numberline {3.16}{\ignorespaces Bi?u d? tr�nh t? (Sequence Diagram) lu?ng x�c th?c ngu?i d�ng}}{103}{figure.caption.197}%
+\contentsline {figure}{\numberline {3.17}{\ignorespaces Giao di?n trang Dashboard t?ng quan}}{104}{figure.caption.200}%
+\contentsline {figure}{\numberline {3.18}{\ignorespaces Giao di?n trang qu?n l� phuong ti?n}}{105}{figure.caption.202}%
+\contentsline {figure}{\numberline {3.19a}{\ignorespaces Ph�n r� l?p b?n d? React Leaflet v� k�nh Socket.IO}}{107}{figure.caption.206}%
+\contentsline {figure}{\numberline {3.19}{\ignorespaces Ki?n tr�c t�ch h?p b?n d? th?i gian th?c}}{109}{figure.caption.207}%
+\contentsline {figure}{\numberline {3.20}{\ignorespaces Giao di?n trang b?n d? th?i gian th?c v?i c�c marker xe}}{110}{figure.caption.210}%
+\contentsline {figure}{\numberline {3.21}{\ignorespaces Wireframe b? c?c giao di?n Dashboard}}{111}{figure.caption.214}%
+\contentsline {figure}{\numberline {3.22}{\ignorespaces C�c m?u thi?t k? UI c?a h? th?ng - Data Table, Form, Charts}}{112}{figure.caption.217}%
+\contentsline {figure}{\numberline {3.23}{\ignorespaces So d? ki?n tr�c t?ng th? phuong �n t?i uu}}{114}{figure.caption.221}%
+\contentsline {figure}{\numberline {4.1a}{\ignorespaces B? tr� chi ti?t c�c kh?i ph?n c?ng trong tracker}}{117}{figure.caption.227}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces So d? kh?i t?ng th? h? th?ng tracker IoT}}{118}{figure.caption.228}%
+\contentsline {figure}{\numberline {4.2a}{\ignorespaces So d? ch�n k?t n?i SIM7600CE-T v?i ESP32-S3}}{119}{figure.caption.230}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces So d? k?t n?i gi?a ESP32-S3 v� modem SIM7600CE-T qua UART}}{120}{figure.caption.231}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces So d? m?ch do di?n �p ?c quy b?ng voltage divider v� ADC ESP32-S3}}{122}{figure.caption.233}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces So d? nguy�n l� m?ch di?n t?ng h?p c?a h? th?ng tracker}}{123}{figure.caption.235}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces So d? d?u n?i t?ng th? gi?a ESP32-S3 v� c�c kh?i ph?n c?ng t�ch h?p}}{125}{figure.caption.240}%
+\contentsline {figure}{\numberline {4.6a}{\ignorespaces Ki?n tr�c power path gi?a ngu?n xe v� pin d? ph�ng}}{126}{figure.caption.243}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Ki?n tr�c t?ng th? m?ch qu?n l� ngu?n}}{127}{figure.caption.244}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Ki?n tr�c nh�nh buck 5V ch�nh d�ng MP2482}}{128}{figure.caption.247}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Ki?n tr�c nh�nh ngu?n d? ph�ng 5V t? pin 18650 qua SX1308}}{129}{figure.caption.250}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces So d? power path runtime gi?a nh�nh ch�nh v� nh�nh backup}}{131}{figure.caption.251}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Ki?n tr�c s?c pin TP4056 v� du?ng c?p ngu?n d? ph�ng}}{133}{figure.caption.253}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces So d? b? c?c b�n trong v? h?p b?o v?}}{134}{figure.caption.258}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces Quy tr�nh l?p r�p ph?n c?ng tr�n PCB}}{139}{figure.caption.265}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces So d? b? tr� linh ki?n sau khi l?p r�p}}{140}{figure.caption.266}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces Minh h?a v? tr� c?ng OBD2 tr�n xe v� c�ch k?t n?i}}{142}{figure.caption.271}%
+\contentsline {figure}{\numberline {4.15}{\ignorespaces Minh h?a l?p d?t thi?t b? tracker trong xe v� di d�y}}{143}{figure.caption.274}%
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Checklist ki?m tra h? th?ng sau khi l?p d?t trong xe}}{144}{figure.caption.276}%
+\contentsline {figure}{\numberline {4.16a}{\ignorespaces Chu?i bu?c OTA tr�n firmware t? nh?n l?nh d?n x�c nh?n sau reboot}}{158}{figure.caption.299}%
+\contentsline {figure}{\numberline {4.17}{\ignorespaces Luu d? thu?t to�n ch�nh c?a firmware thi?t b? theo d�i xe}}{164}{figure.caption.307}%
+\contentsline {figure}{\numberline {4.18}{\ignorespaces Ki?n tr�c t?ng th? h? th?ng Cloud v� lu?ng d? li?u}}{166}{figure.caption.310}%
+\contentsline {figure}{\numberline {4.19}{\ignorespaces C?u tr�c thu m?c h? th?ng theo quy u?c IVM26}}{167}{figure.caption.313}%
+\contentsline {figure}{\numberline {4.20}{\ignorespaces Lu?ng x? l� d? li?u c?a MQTT Bridge}}{172}{figure.caption.320}%
+\contentsline {figure}{\numberline {4.21}{\ignorespaces C?u tr�c thu m?c Backend theo ki?n tr�c DDD}}{177}{figure.caption.329}%
+\contentsline {figure}{\numberline {4.22}{\ignorespaces C?u tr�c thu m?c Frontend theo ki?n tr�c Feature-Sliced}}{184}{figure.caption.339}%
+\contentsline {figure}{\numberline {4.23}{\ignorespaces Giao di?n trang Dashboard t?ng quan}}{185}{figure.caption.341}%
+\contentsline {figure}{\numberline {4.24}{\ignorespaces Giao di?n trang qu?n l� xe}}{185}{figure.caption.342}%
+\contentsline {figure}{\numberline {4.25}{\ignorespaces Giao di?n b?n d? th?i gian th?c v?i v? tr� c�c xe}}{186}{figure.caption.343}%
+\contentsline {figure}{\numberline {4.26}{\ignorespaces Giao di?n trang qu?n l� c?nh b�o}}{186}{figure.caption.344}%
+\contentsline {figure}{\numberline {4.27}{\ignorespaces Grafana dashboard hi?n th? t?ng quan hi?u nang h? th?ng}}{191}{figure.caption.353}%
+\contentsline {figure}{\numberline {4.28}{\ignorespaces EMQX Dashboard hi?n th? tr?ng th�i k?t n?i thi?t b?}}{192}{figure.caption.355}%
+\contentsline {figure}{\numberline {4.29}{\ignorespaces B? tr� thi?t b? do lu?ng trong ph�ng th� nghi?m}}{196}{figure.caption.363}%
+\contentsline {figure}{\numberline {4.30}{\ignorespaces Thi?t b? tracker du?c l?p d?t tr�n xe th? nghi?m}}{198}{figure.caption.364}%
+\contentsline {figure}{\numberline {4.31}{\ignorespaces So d? m�i tru?ng th? nghi?m t?ng th?}}{199}{figure.caption.366}%
+\contentsline {figure}{\numberline {4.32}{\ignorespaces �? th? d�ng ti�u th? theo th?i gian trong m?t chu k? ho?t d?ng ho�n ch?nh (Driving -\textgreater {} Parking -\textgreater {} Alert -\textgreater {} Parking)}}{201}{figure.caption.370}%
+\contentsline {figure}{\numberline {4.33}{\ignorespaces �? th? di?n �p pin d? ph�ng theo th?i gian theo baseline 18650 trong k?ch b?n tracking li�n t?c}}{203}{figure.caption.372}%
+\contentsline {figure}{\numberline {4.34}{\ignorespaces �? th? d�ng ti�u th? theo nhi?t d? m�i tru?ng}}{205}{figure.caption.374}%
+\contentsline {figure}{\numberline {4.35}{\ignorespaces Bi?u d? ph�n b? th?i gian k?t n?i BLE OBD2 (20 l?n do)}}{207}{figure.caption.379}%
+\contentsline {figure}{\numberline {4.36}{\ignorespaces �? th? th?i gian b?t v? tinh GPS trong c�c k?ch b?n (Cold/Warm/Hot Start)}}{208}{figure.caption.382}%
+\contentsline {figure}{\numberline {4.37}{\ignorespaces Bi?u d? ph�n b? d? tr? MQTT trong di?u ki?n m?ng 4G ?n d?nh}}{210}{figure.caption.384}%
+\contentsline {figure}{\numberline {4.38}{\ignorespaces Bi?u d? th?i gian ph?n h?i API (P50, P95, P99) cho c�c endpoint ch�nh}}{214}{figure.caption.390}%
+\contentsline {figure}{\numberline {4.39}{\ignorespaces �? th? ph�n b? d? tr? end-to-end (1000 b?n tin m?u)}}{215}{figure.caption.392}%
+\contentsline {figure}{\numberline {4.40}{\ignorespaces �? th? hi?u su?t h? th?ng theo s? lu?ng thi?t b? d?ng th?i}}{217}{figure.caption.395}%
+\contentsline {figure}{\numberline {4.41}{\ignorespaces K?t qu? Lighthouse Performance Audit c?a trang Dashboard}}{219}{figure.caption.397}%
+\contentsline {figure}{\numberline {4.42}{\ignorespaces Screenshot giao di?n Dashboard hi?n th? v? tr� xe dang di chuy?n tr�n b?n d? (Leaflet)}}{220}{figure.caption.400}%
+\contentsline {figure}{\numberline {4.43}{\ignorespaces Screenshot bi?u d? d? li?u OBD2 th?i gian th?c (ECharts) --- RPM, Speed, Coolant Temp}}{221}{figure.caption.401}%
+\contentsline {figure}{\numberline {4.44}{\ignorespaces Screenshot c?nh b�o Geofence tr�n giao di?n Dashboard v?i b?n d? hi?n th? v�ng c?nh b�o}}{223}{figure.caption.403}%
+\contentsline {figure}{\numberline {4.45}{\ignorespaces Screenshot giao di?n g?i l?nh di?u khi?n t? Dashboard v� k?t qu? ph?n h?i t? thi?t b?}}{224}{figure.caption.405}%
+\contentsline {figure}{\numberline {4.46}{\ignorespaces Screenshot h�nh tr�nh tr�n b?n d?, th? hi?n giai do?n gi�n do?n v� ti?p t?c c?p nh?t sau khi ph?c h?i k?t n?i}}{226}{figure.caption.407}%
+\contentsline {figure}{\numberline {4.47}{\ignorespaces Bi?u d? so s�nh ch? ti�u thi?t k? v� k?t qu? d?t du?c}}{231}{figure.caption.414}%
+\contentsline {figure}{\numberline {PL-3.1}{\ignorespaces K? ho?ch th?c hi?n d? �n theo giai do?n (24 tu?n)}}{277}{figure.caption.486}%

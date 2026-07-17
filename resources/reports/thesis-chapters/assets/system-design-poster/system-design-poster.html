@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện giao thông</title>
+    <link rel="stylesheet" href="./system-design-poster.css" />
+  </head>
+  <body>
+    <main class="poster" aria-label="Poster thiết kế hệ thống IoT quản lý phương tiện giao thông">
+      <header class="poster-header">
+        <div class="sprite phenikaa-logo" aria-label="Phenikaa University"></div>
+        <div class="title-wrap">
+          <h1>THIẾT KẾ HỆ THỐNG IoT CHO ỨNG DỤNG<br />QUẢN LÝ PHƯƠNG TIỆN GIAO THÔNG<br />TRONG LĨNH VỰC CHO THUÊ XE TỰ LÁI</h1>
+          <p>Nguyên mẫu end-to-end từ thiết bị trên xe đến nền tảng cloud và giao diện khai thác</p>
+        </div>
+        <dl class="student-info">
+          <dt>Sinh viên:</dt><dd>Lê Trọng An</dd>
+          <dt>MSSV:</dt><dd>21010389</dd>
+          <dt>Lớp:</dt><dd>K15-KTCDT2</dd>
+          <dt>GVHD:</dt><dd>TS. Nguyễn Đức Nam</dd>
+        </dl>
+      </header>
+
+      <section class="block intro-block">
+        <h2 class="block-title">1. Giới thiệu</h2>
+        <p class="intro-copy">Dịch vụ cho thuê xe tự lái cần theo dõi phương tiện sau khi bàn giao cho khách thuê. Bài toán không chỉ là biết vị trí xe, mà còn cần theo dõi trạng thái vận hành, cảnh báo sự kiện và dữ liệu đo để tối ưu vận hành và bảo vệ tài sản.</p>
+        <ol class="process-row">
+          <li><span>1</span><svg><use href="./poster-icons.svg#car" /></svg><b>Xe cho thuê</b></li>
+          <li class="flow-arrow" aria-hidden="true"></li>
+          <li><span>2</span><svg><use href="./poster-icons.svg#tracker" /></svg><b>Thiết bị IoT<br />trên xe</b></li>
+          <li class="flow-arrow" aria-hidden="true"></li>
+          <li><span>3</span><svg><use href="./poster-icons.svg#tower" /></svg><b>4G/LTE<br />+ MQTT</b></li>
+          <li class="flow-arrow" aria-hidden="true"></li>
+          <li><span>4</span><svg><use href="./poster-icons.svg#cloud-server" /></svg><b>Máy chủ<br />xử lý</b></li>
+          <li class="flow-arrow" aria-hidden="true"></li>
+          <li><span>5</span><svg><use href="./poster-icons.svg#monitor" /></svg><b>Dashboard<br />quản lý</b></li>
+        </ol>
+      </section>
+
+      <section class="block goal-block">
+        <h2 class="block-title">2. Mục tiêu</h2>
+        <div class="goal-grid">
+          <article><svg><use href="./poster-icons.svg#chip" /></svg><p>Thiết kế và chế tạo<br />thiết bị IoT<br />gắn trên xe.</p></article>
+          <article><svg><use href="./poster-icons.svg#location" /></svg><p>Thu dữ liệu vị trí,<br />trạng thái thiết bị và<br />dữ liệu OBD-II cơ bản.</p></article>
+          <article><svg><use href="./poster-icons.svg#tower" /></svg><p>Truyền dữ liệu qua<br />4G/LTE bằng<br />MQTT.</p></article>
+          <article><svg><use href="./poster-icons.svg#cloud-upload" /></svg><p>Xây dựng máy chủ tiếp nhận,<br />lưu trữ, xử lý và<br />phát cảnh báo.</p></article>
+          <article><svg><use href="./poster-icons.svg#monitor" /></svg><p>Xây dựng dashboard để theo dõi<br />bản đồ, trạng thái xe, lịch sử<br />và cảnh báo.</p></article>
+        </div>
+      </section>
+
+      <section class="block architecture-block">
+        <h2 class="block-title wide">3. Kiến trúc hệ thống từ thiết bị đến dashboard</h2>
+        <div class="architecture-grid">
+          <article class="panel device-panel">
+            <h3>1. Thiết bị trên xe</h3>
+            <div class="sprite arch-device-photo"></div>
+            <ul>
+              <li>ESP32-S3</li><li>SIM7600CE-T (4G/LTE + GNSS)</li><li>OBD-II BLE (Vgate iCar Pro)</li>
+              <li>LIS3DH (cảm biến gia tốc)</li><li>MicroSD (lưu đệm dữ liệu)</li><li>Pin 18650</li><li>Nguồn 12-24 VDC</li>
+            </ul>
+          </article>
+          <article class="panel firmware-panel">
+            <h3>2. Firmware thiết bị</h3>
+            <ul>
+              <li>Đọc GNSS / OBD-II / IMU</li><li>Chế độ chạy - đỗ - cảnh báo</li><li>Ngủ sâu, tiết kiệm năng lượng</li>
+              <li>Lưu đệm dữ liệu vào SD</li><li>Gửi bù khi có kết nối lại</li><li>Cập nhật firmware từ xa (OTA)</li>
+            </ul>
+            <svg class="panel-icon"><use href="./poster-icons.svg#chip" /></svg>
+          </article>
+          <article class="panel data-panel">
+            <h3>3. Truyền dữ liệu</h3>
+            <svg class="panel-icon tower-icon"><use href="./poster-icons.svg#tower" /></svg>
+            <ul>
+              <li>MQTT 3.1.1 qua 4G/LTE</li><li>TLS</li><li>rawdata / telemetry</li><li>status / heartbeat</li>
+              <li>events / alerts</li><li>firmware / OTA</li><li>commands</li>
+            </ul>
+          </article>
+          <article class="panel server-panel">
+            <h3>4. Máy chủ xử lý</h3>
+            <div class="server-diagram">
+              <div class="node device">Thiết bị<br /><small>tracker</small></div>
+              <div class="node">EMQX<br /><small>Broker</small></div>
+              <div class="node">MQTT Bridge<br /><small>kiểm tra &amp; phân luồng</small></div>
+              <div class="node db">PostgreSQL<br /><small>thiết bị, phương tiện, dữ liệu</small></div>
+              <div class="node metric">VictoriaMetrics<br /><small>số liệu vận hành</small></div>
+              <div class="node log">VictoriaLogs<br /><small>sự kiện &amp; nhật ký</small></div>
+              <div class="node api">Backend API<br /><small>Express.js + Socket.IO</small></div>
+              <div class="node web">Frontend Web<br /><small>Next.js + React</small></div>
+              <div class="node nginx">Nginx + TLS<br /><small>Reverse Proxy / HTTPS</small></div>
+              <div class="node client">Client / Người dùng<br /><small>HTTPS Web</small></div>
+            </div>
+          </article>
+          <article class="panel dashboard-panel">
+            <h3>5. Dashboard quản lý</h3>
+            <div class="sprite arch-dashboard"></div>
+            <ul>
+              <li>Bản đồ, vị trí theo thời gian</li><li>Trạng thái thiết bị và xe</li><li>Lịch sử hành trình, sự kiện</li>
+              <li>Cảnh báo &amp; sự kiện</li><li>Theo dõi, truy vết, báo cáo</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="block hardware-block">
+        <h2 class="block-title">4. Thiết kế và chế tạo thiết bị</h2>
+        <div class="photo-grid">
+          <figure><figcaption>Bo mạch và các khối chức năng</figcaption><div class="sprite board-function"></div></figure>
+          <figure><figcaption>Bo mạch sau lắp ráp</figcaption><div class="sprite board-assembled"></div></figure>
+          <figure><figcaption>Thiết bị sau khi đóng vỏ</figcaption><div class="sprite device-boxed"></div></figure>
+        </div>
+      </section>
+
+      <section class="block deploy-block">
+        <h2 class="block-title">5. Triển khai phần mềm và máy chủ</h2>
+        <div class="deploy-grid">
+          <article><h3>1. Pipeline CI/CD</h3><div class="pipeline"><div><b>GitHub<br />Actions</b></div><span></span><div><b>Docker<br />Images</b></div><span></span><div><b>VPS / Production<br />(Docker)</b></div></div></article>
+          <article><h3>2. Dịch vụ trong VPS / Docker</h3><div class="service-grid"><b>EMQX<br /><small>MQTT Bridge</small></b><b>Express<br /><small>Backend API</small></b><b>NEXT.js<br /><small>Frontend</small></b><b>PostgreSQL</b><b>VictoriaMetrics</b><b>VictoriaLogs</b><b>Redis</b><b>Grafana</b><b>Sentry</b></div></article>
+          <article><h3>3. Truy cập an toàn (Reverse Proxy)</h3><div class="proxy-card">Nginx + TLS<br /><small>(Reverse Proxy)</small><strong>N</strong></div><p>HTTPS (Web)<br />HTTPS (API)</p></article>
+          <article><h3>4. Công nghệ giao diện</h3><div class="tech-row"><b>NEXT.js</b><b>React</b></div><div class="tech-row"><b>Leaflet</b><b>ECharts</b></div><p>Bản đồ, biểu đồ, chi tiết thiết bị,<br />cảnh báo và báo cáo.</p></article>
+        </div>
+      </section>
+
+      <section class="block result-block">
+        <h2 class="block-title">6. Kết quả triển khai và kiểm thử</h2>
+        <div class="metric-grid">
+          <article><svg><use href="./poster-icons.svg#battery" /></svg><div><h3>Năng lượng</h3><p>~ 1 W hoạt động đầy đủ<br />0,5 mA @ 12 V<br />ngủ sâu</p></div></article>
+          <article><svg><use href="./poster-icons.svg#sd-card" /></svg><div><h3>Lưu đệm dữ liệu</h3><p>SD 1 GB ≈<br />2.097.152<br />bản tin</p></div></article>
+          <article><svg><use href="./poster-icons.svg#cloud-upload" /></svg><div><h3>Cập nhật từ xa (OTA)</h3><p>Kích thước gói KB 7KB<br />Thời gian cập nhật<br />18 - 20 s</p></div></article>
+          <article><svg class="orange-icon"><use href="./poster-icons.svg#users" /></svg><div><h3>Kiểm thử hệ thống</h3><p>50 thiết bị đồng thời<br />Tỉ lệ ổn định<br />20 - 25%</p></div></article>
+          <article><svg><use href="./poster-icons.svg#monitor" /></svg><div><h3>Giao diện khai thác</h3><p>Bản đồ, chi tiết thiết bị,<br />trạng thái, lịch sử<br />và cảnh báo</p></div></article>
+        </div>
+      </section>
+
+      <section class="block value-block">
+        <h2 class="block-title">7. Giá trị và khả năng mở rộng</h2>
+        <div class="value-grid">
+          <article><svg><use href="./poster-icons.svg#puzzle" /></svg><p>Nguyên mẫu end-to-end<br />từ phần cứng đến<br />dashboard.</p></article>
+          <article><svg><use href="./poster-icons.svg#chip" /></svg><p>Giải pháp ít xâm lấn,<br />dễ OBD-II<br />qua BLE.</p></article>
+          <article><svg><use href="./poster-icons.svg#battery" /></svg><p>Vận hành bền: ngủ sâu,<br />lưu đệm khi mất sóng,<br />OTA từ xa.</p></article>
+          <article><svg><use href="./poster-icons.svg#bars" /></svg><p>Có thể mở rộng cho đội xe<br />nhỏ và nhiều loại thiết bị<br />phần mềm.</p></article>
+        </div>
+      </section>
+
+      <footer class="poster-footer">Từ thiết bị trên xe đến dashboard quản lý, toàn bộ chuỗi được thiết kế và triển khai đồng bộ.</footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,71 @@
+- generic [active] [ref=e1]:
+  - link "Bỏ qua đến nội dung chính" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - main [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - img "Hệ thống theo dõi phương tiện IoT" [ref=e9]
+            - generic [ref=e10]:
+              - generic [ref=e11]: IVTS
+              - generic [ref=e12]: IoT Vehicle Tracking System
+          - generic [ref=e13]:
+            - img [ref=e14]
+            - text: Điều hành đội xe
+          - heading "Đăng nhập để giám sát đội xe và xử lý cảnh báo." [level=1] [ref=e17]
+          - paragraph [ref=e18]: Một màn hình cho map, trạng thái thiết bị, cảnh báo và nhật ký vận hành.
+        - generic [ref=e19]:
+          - article [ref=e20]:
+            - generic [ref=e21]:
+              - img [ref=e23]
+              - generic [ref=e25]:
+                - heading "Map và cảnh báo" [level=2] [ref=e26]
+                - paragraph [ref=e27]: Ưu tiên xe cần xử lý ngay ở đầu ca trực.
+          - article [ref=e28]:
+            - generic [ref=e29]:
+              - img [ref=e31]
+              - generic [ref=e38]:
+                - heading "Thiết bị và chuyến đi" [level=2] [ref=e39]
+                - paragraph [ref=e40]: Theo dõi đầy đủ xe-thiết bị-chuyến đi.
+          - article [ref=e41]:
+            - generic [ref=e42]:
+              - img [ref=e44]
+              - generic [ref=e47]:
+                - heading "Phân quyền rõ ràng" [level=2] [ref=e48]
+                - paragraph [ref=e49]: Mỗi vai trò vào đúng phạm vi thao tác.
+        - generic [ref=e50]:
+          - generic [ref=e51]: Map realtime
+          - generic [ref=e52]: Cảnh báo
+          - generic [ref=e53]: Chuyến đi
+          - generic [ref=e54]: Trạng thái hệ thống
+          - generic [ref=e55]: Quản lý quyền
+      - complementary "Khu vực đăng nhập hệ thống" [ref=e56]:
+        - generic [ref=e57]:
+          - heading "Khu vực đăng nhập hệ thống" [level=2] [ref=e58]
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - generic [ref=e61]: Đăng nhập hệ thống
+              - generic [ref=e62]: Nhập tài khoản để tiếp tục điều phối và giám sát đội xe.
+            - generic [ref=e64]:
+              - generic [ref=e65]:
+                - generic [ref=e66]: Tên đăng nhập
+                - textbox "Tên đăng nhập" [ref=e67]:
+                  - /placeholder: Nhập tên đăng nhập
+                  - text: admin
+              - generic [ref=e68]:
+                - generic [ref=e69]: Mật khẩu
+                - generic [ref=e70]:
+                  - textbox "Mật khẩu" [ref=e71]:
+                    - /placeholder: Nhập mật khẩu
+                    - text: Admin@2026
+                  - button "Hiện mật khẩu" [ref=e72]:
+                    - img [ref=e73]
+              - generic [ref=e77]:
+                - checkbox "Ghi nhớ đăng nhập" [ref=e78]
+                - checkbox
+                - generic [ref=e79]: Ghi nhớ đăng nhập
+              - button "Đăng nhập" [ref=e80]
+          - paragraph [ref=e81]: Đăng nhập để tiếp tục ca trực.
+  - region "Notifications alt+T"
+  - alert [ref=e82]

@@ -1,13 +1,21 @@
 stateDiagram-v2
-    direction LR
+    direction TB
+    state "Lấy mẫu" as Sample
+    state "Kiểm tra IGN" as IgnCheck
+    state "Nguồn chính" as Main
+    state "Kiểm tra điện áp" as VoltCheck
+    state "Nguồn dự phòng" as Backup
+    state "Phục hồi nguồn" as Recover
+    state "Giữ trạng thái" as Hold
+
     [*] --> Sample
     Sample --> IgnCheck
     IgnCheck --> Main: Bật IGN
     IgnCheck --> VoltCheck: Tắt IGN
-    VoltCheck --> Backup: U_batt thấp
-    VoltCheck --> Recover: U_batt đủ
-    Recover --> Main: Đạt ngưỡng bật lại
-    Recover --> Hold: Chưa đổi ngưỡng
+    VoltCheck --> Backup: Điện áp thấp
+    VoltCheck --> Recover: Điện áp đủ
+    Recover --> Main: Đủ ngưỡng bật
+    Recover --> Hold: Chưa đủ ngưỡng
     Main --> Sample
     Backup --> Sample
     Hold --> Sample

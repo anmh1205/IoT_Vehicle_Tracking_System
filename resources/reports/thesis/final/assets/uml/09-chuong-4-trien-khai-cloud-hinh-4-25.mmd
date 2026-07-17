@@ -1,8 +1,19 @@
-flowchart LR
-    Device["Device clients"] --> EMQX["EMQX Broker"]
-    EMQX --> Metric["Connection metrics"]
-    EMQX --> Topic["Topic throughput"]
-    EMQX --> Health["Broker health"]
-    Metric --> UI["EMQX Dashboard"]
+flowchart TB
+    Device["Thiết bị đầu cuối"] --> EMQX["EMQX (broker MQTT)"]
+
+    subgraph BrokerView["Chỉ số theo dõi"]
+        direction LR
+        Metric["Số liệu kết nối"]
+        Topic["Lưu lượng bản tin"]
+        Health["Tình trạng broker"]
+    end
+
+    UI["Bảng điều khiển EMQX"]
+
+    EMQX --> Metric
+    EMQX --> Topic
+    EMQX --> Health
+    Metric --> UI
     Topic --> UI
     Health --> UI
+

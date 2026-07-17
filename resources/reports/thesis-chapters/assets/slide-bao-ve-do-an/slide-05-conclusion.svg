@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="800" viewBox="0 0 1360 800" font-family="Times New Roman, serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a5276"/>
+    </marker>
+  </defs>
+
+  <rect width="1360" height="800" fill="#ffffff"/>
+
+  <!-- Hàng trên: 3 hạn chế + khoảng trống -->
+  <g transform="translate(40, 30)">
+    <rect width="280" height="170" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="3"/>
+    <rect width="280" height="55" rx="6" fill="#dc2626"/>
+    <rect y="35" width="280" height="20" fill="#dc2626"/>
+    <text x="140" y="38" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">
+      Teltonika FMC920
+    </text>
+    <text x="140" y="100" text-anchor="middle" font-size="22" font-weight="bold" fill="#000000">Chưa khai thác</text>
+    <text x="140" y="135" text-anchor="middle" font-size="22" font-weight="bold" fill="#000000">OBD-II</text>
+  </g>
+
+  <g transform="translate(340, 30)">
+    <rect width="280" height="170" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="3"/>
+    <rect width="280" height="55" rx="6" fill="#dc2626"/>
+    <rect y="35" width="280" height="20" fill="#dc2626"/>
+    <text x="140" y="38" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">
+      OBD Vcar (Viettel)
+    </text>
+    <text x="140" y="100" text-anchor="middle" font-size="22" font-weight="bold" fill="#000000">Phụ thuộc</text>
+    <text x="140" y="135" text-anchor="middle" font-size="22" font-weight="bold" fill="#000000">nhà cung cấp</text>
+  </g>
+
+  <g transform="translate(640, 30)">
+    <rect width="280" height="170" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="3"/>
+    <rect width="280" height="55" rx="6" fill="#dc2626"/>
+    <rect y="35" width="280" height="20" fill="#dc2626"/>
+    <text x="140" y="38" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">
+      Queclink GV305CEU
+    </text>
+    <text x="140" y="100" text-anchor="middle" font-size="22" font-weight="bold" fill="#000000">Chi phí cao,</text>
+    <text x="140" y="135" text-anchor="middle" font-size="22" font-weight="bold" fill="#000000">vượt nhu cầu</text>
+  </g>
+
+  <!-- KHOẢNG TRỐNG CHUNG -->
+  <g transform="translate(940, 30)">
+    <rect width="380" height="170" rx="6" fill="#fefce8" stroke="#ca8a04" stroke-width="4"/>
+    <rect width="380" height="55" rx="6" fill="#ca8a04"/>
+    <rect y="35" width="380" height="20" fill="#ca8a04"/>
+    <text x="190" y="38" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">
+      KHOẢNG TRỐNG
+    </text>
+    <text x="190" y="95" text-anchor="middle" font-size="20" font-weight="bold" fill="#78350f">Chưa có thiết bị vừa</text>
+    <text x="190" y="125" text-anchor="middle" font-size="20" font-weight="bold" fill="#78350f">khai thác OBD-II, vừa tự chủ,</text>
+    <text x="190" y="155" text-anchor="middle" font-size="20" font-weight="bold" fill="#78350f">vừa phù hợp đội xe nhỏ</text>
+  </g>
+
+  <!-- Arrow xuống ĐỀ TÀI -->
+  <line x1="680" y1="220" x2="680" y2="290" stroke="#1a5276" stroke-width="6" marker-end="url(#arrow)"/>
+  <text x="730" y="265" text-anchor="start" font-size="24" fill="#1a5276" font-weight="bold" font-style="italic">đề xuất</text>
+
+  <!-- ĐỀ TÀI box - lớn ở dưới -->
+  <g transform="translate(40, 310)">
+    <rect width="1280" height="450" rx="6" fill="#f0f6fb" stroke="#1a5276" stroke-width="4"/>
+    <rect width="1280" height="80" rx="6" fill="#1a5276"/>
+    <rect y="55" width="1280" height="25" fill="#1a5276"/>
+    <text x="640" y="55" text-anchor="middle" font-size="36" font-weight="bold" fill="#ffffff">
+      ĐỀ TÀI
+    </text>
+
+    <text x="640" y="135" text-anchor="middle" font-size="28" font-weight="bold" fill="#1a5276">
+      Hệ thống IoT giám sát phương tiện cho đội xe cho thuê tự lái
+    </text>
+
+    <line x1="80" y1="170" x2="1200" y2="170" stroke="#1a5276" stroke-width="2"/>
+
+    <!-- 3 ưu thế -->
+    <g transform="translate(70, 200)">
+      <!-- Ưu thế 1 -->
+      <rect x="0" y="0" width="370" height="220" rx="6" fill="#ffffff" stroke="#1a5276" stroke-width="2"/>
+      <text x="185" y="50" text-anchor="middle" font-size="28" font-weight="bold" fill="#1a5276">
+        ① Khai thác OBD-II
+      </text>
+      <line x1="40" y1="75" x2="330" y2="75" stroke="#1a5276" stroke-width="1"/>
+      <text x="185" y="115" text-anchor="middle" font-size="22" fill="#000000">Đọc dữ liệu vận hành</text>
+      <text x="185" y="150" text-anchor="middle" font-size="22" fill="#000000">qua chuẩn OBD-II</text>
+      <text x="185" y="195" text-anchor="middle" font-size="20" fill="#1a5276" font-style="italic">khắc phục Teltonika</text>
+
+      <!-- Ưu thế 2 -->
+      <rect x="385" y="0" width="370" height="220" rx="6" fill="#ffffff" stroke="#1a5276" stroke-width="2"/>
+      <text x="570" y="50" text-anchor="middle" font-size="28" font-weight="bold" fill="#1a5276">
+        ② Tự chủ phần mềm
+      </text>
+      <line x1="425" y1="75" x2="715" y2="75" stroke="#1a5276" stroke-width="1"/>
+      <text x="570" y="115" text-anchor="middle" font-size="22" fill="#000000">Tự xây máy chủ</text>
+      <text x="570" y="150" text-anchor="middle" font-size="22" fill="#000000">+ giao diện quản lý</text>
+      <text x="570" y="195" text-anchor="middle" font-size="20" fill="#1a5276" font-style="italic">khắc phục Vcar</text>
+
+      <!-- Ưu thế 3 -->
+      <rect x="770" y="0" width="370" height="220" rx="6" fill="#ffffff" stroke="#1a5276" stroke-width="2"/>
+      <text x="955" y="50" text-anchor="middle" font-size="28" font-weight="bold" fill="#1a5276">
+        ③ Chi phí phù hợp
+      </text>
+      <line x1="810" y1="75" x2="1100" y2="75" stroke="#1a5276" stroke-width="1"/>
+      <text x="955" y="115" text-anchor="middle" font-size="22" fill="#000000">Mục tiêu &lt; 20 triệu VND</text>
+      <text x="955" y="150" text-anchor="middle" font-size="22" fill="#000000">cho đội xe nhỏ và vừa</text>
+      <text x="955" y="195" text-anchor="middle" font-size="20" fill="#1a5276" font-style="italic">khắc phục Queclink</text>
+    </g>
+  </g>
+</svg>

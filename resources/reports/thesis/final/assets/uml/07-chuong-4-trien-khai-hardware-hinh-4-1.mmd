@@ -1,26 +1,16 @@
-flowchart LR
-    subgraph Input["Nguồn vào"]
-        Batt["Ắc quy 12V/24V"]
-        Buck["Buck 5V"]
-        Backup["Pin dự phòng + Boost"]
-        Batt --> Buck
-        Batt --> Backup
-    end
+flowchart TB
+    Vehicle["Xe thử nghiệm<br/>Nguồn 12V/24V + cổng OBD2"]
+    Power["Khối nguồn triển khai<br/>MP2482 + AP2112 + TPS54231 + SX1308 + TP5100"]
+    Controller["Bo mạch chính<br/>ESP32-S3 + LIS3DH + ADC/LVD"]
+    Modem["SIM7600CE-T<br/>4G + GNSS"]
+    OBD["Vgate iCar Pro<br/>BLE OBD2 (ngoài PCB)"]
+    Storage["W25Q128 + DS3231M"]
+    Cloud["EMQX + MQTT Bridge + Backend"]
 
-    subgraph Core["Khối điều khiển"]
-        MCU["ESP32-S3"]
-        PM["Power FSM"]
-        PM --> MCU
-    end
-
-    subgraph IO["Ngoại vi"]
-        Modem["SIM7600CE-T"]
-        IMU["LIS3DH"]
-        OBD["BLE OBD2"]
-    end
-
-    Buck ----> MCU
-    Backup ----> MCU
-    MCU ----> Modem
-    MCU ----> IMU
-    MCU ----> OBD
+    Vehicle --> Power --> Controller
+    Vehicle -. lấy nguồn qua OBD2 .-> Power
+    OBD -. BLE .-> Controller
+    Controller --> Modem
+    Modem -->|Uplink telemetry| Cloud
+    Cloud -->|Downlink commands / OTA| Modem
+    Controller --> Storage

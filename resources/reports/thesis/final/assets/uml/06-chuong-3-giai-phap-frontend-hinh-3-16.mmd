@@ -1,13 +1,9 @@
-sequenceDiagram
-    actor User
-    participant FE as Frontend
-    participant BE as Backend API
-    participant DB as PostgreSQL
-    participant Store as Zustand
+flowchart TB
+    User["Người dùng<br/>Nhập email + mật khẩu"]
+    Front["Giao diện web<br/>Gửi POST /auth/login"]
+    Auth["API phía máy chủ<br/>Xác thực + tra cứu vai trò"]
+    Token["API phía máy chủ<br/>Phát mã truy cập (access token)"]
+    Session["Giao diện web<br/>Lưu phiên đăng nhập + mở giao diện"]
 
-    User->>FE: Nhập email + mật khẩu
-    FE->>BE: POST /auth/login
-    BE->>DB: Kiểm tra tài khoản
-    DB-->>BE: User + role
-    BE-->>FE: Access token
-    FE->>Store: Lưu session
+    User --> Front --> Auth --> Token --> Session
+

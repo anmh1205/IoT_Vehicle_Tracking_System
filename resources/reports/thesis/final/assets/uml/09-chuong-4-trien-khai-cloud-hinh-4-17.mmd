@@ -1,14 +1,15 @@
-sequenceDiagram
-    participant EMQX
-    participant Bridge
-    participant PG as PostgreSQL
-    participant VM as VictoriaMetrics
-    participant VL as VictoriaLogs
-    participant WS as Socket.IO
+flowchart LR
+    EMQX["EMQX<br/>v1/{device_id}/*"] --> Bridge["MQTT Bridge<br/>Kiểm tra + chuẩn hóa"]
 
-    EMQX->>Bridge: telemetry/alert topic
-    Bridge->>Bridge: validate + normalize payload
-    Bridge->>PG: write business event
-    Bridge->>VM: write telemetry metric
-    Bridge->>VL: write audit log
-    Bridge->>WS: push realtime event
+    subgraph Outputs["Dịch vụ nhận dữ liệu"]
+        direction TB
+        PostgreSQLNode["PostgreSQL<br/>Sự kiện nghiệp vụ"]
+        VictoriaMetricsNode["VictoriaMetrics<br/>Dữ liệu đo theo thời gian"]
+        VictoriaLogsNode["VictoriaLogs<br/>Nhật ký truy vết"]
+        Internal["internal/events/#<br/>Cho Backend listener"]
+    end
+
+    Bridge --> PostgreSQLNode
+    Bridge --> VictoriaMetricsNode
+    Bridge --> VictoriaLogsNode
+    Bridge --> Internal

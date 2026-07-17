@@ -1,0 +1,16 @@
+idf_component_register(
+    SRCS
+        "src/util_ota_http.c"
+        "src/util_ota_rollback.c"
+        "src/util_ota_update.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        adapter-modem-sim7600-at
+        app_update
+        contracts-device-cloud
+        domain-telemetry
+        log
+        mbedtls
+        shared-kernel
+)

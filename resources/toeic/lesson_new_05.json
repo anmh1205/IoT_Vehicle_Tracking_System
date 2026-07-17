@@ -1,0 +1,128 @@
+{
+  "page_id": "37adf50b-1fcd-81f8-842c-e61a605e50c5",
+  "title": "05. Hiện tại hoàn thành tiếp diễn",
+  "intro": [
+    {"text": "Bài 05 — Hiện tại hoàn thành tiếp diễn (Present Perfect Continuous). Học theo thứ tự: đọc kỹ 📚 Kiến thức đầy đủ → làm câu hỏi từng phần → mở đáp án. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5/6 — nhấn mạnh tính LIÊN TỤC/kéo dài của hành động đến hiện tại; phân biệt với hiện tại hoàn thành (nhấn kết quả).", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa & bản chất"},
+    {"type": "p", "text": "Hiện tại hoàn thành tiếp diễn (have/has been + V-ing) nhấn mạnh hành động bắt đầu trong quá khứ và CÒN ĐANG TIẾP DIỄN đến hiện tại, hoặc vừa mới kết thúc nhưng có dấu vết/kết quả rõ ràng. Khác hiện tại hoàn thành (nhấn vào kết quả đã hoàn tất)."},
+
+    {"type": "h3", "text": "2. Cách dùng"},
+    {"type": "ul", "items": [
+      "Hành động bắt đầu QK, vẫn ĐANG tiếp diễn (thường có since/for): She has been working on this report since Monday.",
+      "Hành động vừa kết thúc, để lại DẤU VẾT ở hiện tại: He looks tired — he has been running. (vừa chạy xong, còn mệt)",
+      "Nhấn THỜI LƯỢNG của hành động liên tục: They have been negotiating for three hours."
+    ]},
+
+    {"type": "h3", "text": "3. Công thức"},
+    {"type": "table", "headers": ["Thể", "Cấu trúc", "Ví dụ"], "rows": [
+      ["Khẳng định", "S + have/has been + V-ing", "We have been upgrading the system."],
+      ["Phủ định", "S + have/has not been + V-ing", "He hasn't been attending meetings."],
+      ["Nghi vấn", "Have/Has + S + been + V-ing?", "How long have you been waiting?"]
+    ]},
+
+    {"type": "h3", "text": "4. HTTHT vs Hiện tại hoàn thành (nhấn gì?)"},
+    {"type": "table", "headers": ["", "Hiện tại hoàn thành (HT HT)", "HT hoàn thành tiếp diễn"], "rows": [
+      ["Nhấn vào", "KẾT QUẢ đã hoàn thành", "QUÁ TRÌNH liên tục"],
+      ["Câu hỏi", "What has been done?", "How long / Since when?"],
+      ["Ví dụ", "She has written three reports. (xong rồi)", "She has been writing reports all day. (vẫn đang/vừa xong)"]
+    ]},
+
+    {"type": "h3", "text": "5. Dấu hiệu: since, for, how long, all day/morning"},
+    {"type": "p", "text": "since + mốc; for + khoảng thời gian; How long have you been…?; all day/morning/week. Ví dụ: I have been waiting for 30 minutes. How long has she been working here?"},
+
+    {"type": "h3", "text": "6. Động từ trạng thái không dùng tiếp diễn"},
+    {"type": "p", "text": "Stative verbs (know, want, like, believe…) không dùng dạng tiếp diễn. Thay vào đó dùng hiện tại hoàn thành: I have known him for years. (không 'have been knowing')."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Nếu nhấn THỜI LƯỢNG liên tục → have been + V-ing. (2) Nếu nhấn KẾT QUẢ/số lần → have + V3. (3) Stative verbs không dùng dạng -ing. (4) Chia has (số ít) / have (số nhiều)."}
+  ],
+  "parts": [
+    {"heading": "Phần 1 · Cấu tạo và nhận biết", "practice_heading": "Luyện tập Phần 1 (8 câu)", "questions": [
+      {"q": "She ___ on this project for six months and it's nearly done.\nA. works    B. has been working    C. worked    D. is working", "a": "B (has been working). ||for six months + vẫn đang làm → HTTHT."},
+      {"q": "The team ___ overtime all week to meet the deadline.\nA. has been working    B. worked    C. works    D. is worked", "a": "A (has been working). ||all week + kéo dài liên tục → HTTHT."},
+      {"q": "How long ___ the CEO ___ the company?\nA. has / been leading    B. did / lead    C. has / led    D. is / leading", "a": "A (has / been leading). ||how long + còn đang → HTTHT."},
+      {"q": "Tìm và sửa lỗi:\n\"They have been knowing each other for ten years.\"", "a": "Lỗi: 'have been knowing' → 'have known'. ||know = stative verb."},
+      {"q": "We ___ to reach a deal for three weeks now.\nA. tried    B. have been trying    C. try    D. are trying", "a": "B (have been trying). ||for three weeks now + đang cố → HTTHT."},
+      {"q": "He looks exhausted. He ___ since 6 a.m.\nA. works    B. has worked    C. has been working    D. worked", "a": "C (has been working). ||since + dấu vết mệt mỏi → nhấn quá trình."},
+      {"q": "Chọn câu phù hợp nhất để hỏi về thời lượng:\nA. How long has she worked here?\nB. How long has she been working here?\nC. Both are acceptable.\nD. Neither is correct.", "a": "C. ||Cả hai đúng; B nhấn tính liên tục hơn."},
+      {"q": "Điền vào báo cáo (Part 6):\n\"Our engineers ___ on the upgrade for the past two weeks.\"\nA. worked    B. have been working    C. are working    D. work", "a": "B (have been working). ||for the past two weeks → HTTHT."}
+    ]},
+    {"heading": "Phần 2 · HTTHT vs Hiện tại hoàn thành", "practice_heading": "Luyện tập Phần 2 (8 câu)", "questions": [
+      {"q": "She ___ five reports this month. (nhấn kết quả)\nA. has been writing    B. has written    C. wrote    D. writes", "a": "B (has written). ||số lần/kết quả → hiện tại hoàn thành."},
+      {"q": "He ___ all morning and his eyes are tired. (nhấn quá trình)\nA. read    B. has read    C. has been reading    D. reads", "a": "C (has been reading). ||all morning + dấu vết mệt mỏi → HTTHT."},
+      {"q": "They ___ three offices since 2020. (kết quả số lượng)\nA. have opened    B. have been opening    C. opened    D. open", "a": "A (have opened). ||số lượng hoàn tất → hiện tại hoàn thành."},
+      {"q": "I ___ for your call for over an hour! (thời lượng chờ)\nA. waited    B. have waited    C. have been waiting    D. wait", "a": "C (have been waiting). ||for over an hour + đang chờ → HTTHT."},
+      {"q": "Tìm và sửa lỗi:\n\"The company has been expanded its operations recently.\"", "a": "Lỗi: 'has been expanded' → 'has expanded'. ||expand là chủ động, không phải tiếp diễn bị động; hoặc bị động thì 'have been expanded' (không thêm -ed khi đã có been)."},
+      {"q": "We ___ the data twice already but still found errors. (kiểm tra xong)\nA. have been checking    B. have checked    C. checked    D. are checking", "a": "B (have checked). ||twice = số lần → hiện tại hoàn thành."},
+      {"q": "Chọn câu ĐÚNG:\nA. She has been submitting the report. (kết quả đã xong)\nB. She has submitted the report. (kết quả đã xong)\nC. Both convey completion equally.\nD. Neither is correct.", "a": "B. ||hoàn tất = hiện tại hoàn thành; A nhấn quá trình (không phù hợp với ý 'đã xong')."},
+      {"q": "Điền vào email (Part 6):\n\"Our team ___ the issue you reported and will send a fix shortly.\"\nA. has been investigating    B. has investigated    C. investigated    D. investigates", "a": "B (has investigated). ||đã điều tra xong, sắp có giải pháp → kết quả → hiện tại hoàn thành."}
+    ]},
+    {"heading": "Phần 3 · Luyện trộn cả nhóm thì hoàn thành", "practice_heading": "Luyện tập Phần 3 (8 câu)", "questions": [
+      {"q": "How long ___ he ___ the department?\nA. has / been managing    B. has / managed    C. did / manage    D. is / managing", "a": "A (has / been managing). ||how long + còn quản lý → HTTHT."},
+      {"q": "The project ___ just ___. We can submit it now.\nA. has / been completing    B. has / completed    C. is / completed    D. had / completed", "a": "B (has / completed). ||vừa xong (just) + kết quả → hiện tại hoàn thành."},
+      {"q": "Sales ___ since the new CEO took over three months ago.\nA. improved    B. have improved    C. have been improving    D. improve", "a": "C (have been improving). ||since + cải thiện liên tục → HTTHT."},
+      {"q": "They ___ a new vendor since last year. (có/dùng)", "a": "Câu chưa đủ. Nếu ý là 'đang dùng vendor mới từ năm ngoái (còn tiếp)': have been using. Nếu 'đã tìm được vendor mới': have found. Cần ngữ cảnh."},
+      {"q": "___ you ever ___ a business proposal before this job?\nA. Have / been writing    B. Have / written    C. Did / write    D. Are / writing", "a": "B (Have / written). ||ever + kinh nghiệm → hiện tại hoàn thành."},
+      {"q": "Tìm và sửa lỗi:\n\"I have been worked here for two years.\"", "a": "Lỗi: 'have been worked' → 'have been working'. ||HTTHT = have/has been + V-ING."},
+      {"q": "Chọn câu ĐÚNG:\nA. She has been writing the report — it's done now.\nB. She has written the report — it's done now.\nC. She has been written the report — it's done now.\nD. She wrote the report — it's done still.", "a": "B. ||kết quả hoàn tất → hiện tại hoàn thành."},
+      {"q": "Điền vào thông báo (Part 6):\n\"Our engineers ___ on this update for several weeks and it is now ready.\"\nA. have worked    B. have been working    C. worked    D. work", "a": "B (have been working). ||for several weeks + quá trình liên tục → HTTHT."}
+    ]},
+    {"heading": "Phần 4 · Phủ định, nghi vấn và dấu hiệu", "practice_heading": "Luyện tập Phần 4 (8 câu)", "questions": [
+      {"q": "___ the team ___ any progress since yesterday?\nA. Has / been making    B. Have / made    C. Has / made    D. Did / make", "a": "A (Has / been making). ||'the team' số ít + since → HTTHT."},
+      {"q": "He ___ to team meetings all month — we need to address this.\nA. has not been coming    B. didn't come    C. hasn't come    D. not comes", "a": "A (has not been coming). ||all month + hành vi lặp lại → HTTHT phủ định."},
+      {"q": "For how long ___ the two companies ___?\nA. have / been partnering    B. did / partner    C. are / partnering    D. have / partnered", "a": "A (have / been partnering). ||how long + còn đang → HTTHT."},
+      {"q": "Tìm và sửa lỗi:\n\"She hasn't been knowing about the change until today.\"", "a": "Lỗi: 'hasn't been knowing' → 'didn't know / wasn't aware'. ||know = stative."},
+      {"q": "I ___ this kind of software before.\nA. have never been using    B. have never used    C. never used    D. am never using", "a": "B (have never used). ||never + kinh nghiệm → hiện tại hoàn thành."},
+      {"q": "The staff ___ the new scheduling tool recently.\nA. have been adopting    B. have adopted    C. Both A and B    D. adopted", "a": "C (Both A and B). ||A nhấn quá trình; B nhấn kết quả — cả hai đúng với ngữ cảnh khác nhau."},
+      {"q": "Chọn câu dùng đúng HTTHT:\nA. They have been sent 50 emails today.\nB. They have been sending emails all day.\nC. They have sent emails all day.\nD. They have been send emails all day.", "a": "B. ||A = bị động tiếp diễn (cần been + V3); C = đơn (số lượng); D = sai."},
+      {"q": "Điền vào báo cáo (Part 6):\n\"We ___ ways to improve efficiency ever since the review last quarter.\"\nA. have been exploring    B. explored    C. explore    D. have explored", "a": "A (have been exploring). ||ever since + quá trình liên tục → HTTHT."}
+    ]},
+    {"heading": "Phần 5 · Luyện trộn nhanh (10 câu)", "practice_heading": "", "questions": [
+      {"q": "The engineers ___ the prototype for three months and expect to finish soon.\nA. test    B. have been testing    C. tested    D. have tested", "a": "B (have been testing). ||for three months + chưa xong → HTTHT."},
+      {"q": "She ___ already ___ the analysis, so we can move on.\nA. has / completed    B. has / been completing    C. had / completed    D. is / completing", "a": "A (has / completed). ||already + kết quả → hiện tại hoàn thành."},
+      {"q": "How long ___ you ___ in this industry?\nA. have / worked    B. have / been working    C. Both A and B    D. did / work", "a": "C (Both A and B). ||how long + còn → cả hai đúng."},
+      {"q": "The factory ___ continuously for 48 hours to fulfill the order.\nA. operated    B. has been operating    C. has operated    D. operates", "a": "B (has been operating). ||continuously → nhấn quá trình."},
+      {"q": "Tìm và sửa lỗi:\n\"We have been made significant progress this year.\"", "a": "Lỗi: 'have been made' → 'have made'. ||progress là tân ngữ, câu chủ động → hiện tại hoàn thành."},
+      {"q": "Attendance at our webinars ___ since we changed the schedule.\nA. has been improving    B. improved    C. has improved    D. A or C", "a": "D (A or C). ||cả hai đúng; A nhấn quá trình; C nhấn kết quả."},
+      {"q": "She ___ been waiting for a response for two weeks.\nA. had    B. has    C. is    D. was", "a": "B (has). ||for two weeks + vẫn đang chờ → have/HAS been waiting."},
+      {"q": "The team ___ the problem all afternoon without success.\nA. has been trying to solve    B. tried to solve    C. has tried to solve    D. is trying to solve", "a": "A (has been trying to solve). ||all afternoon + chưa giải được → HTTHT."},
+      {"q": "Chọn câu ĐÚNG:\nA. He has been written the proposal since 9 a.m.\nB. He has been writing the proposal since 9 a.m.\nC. He have been writing the proposal since 9 a.m.\nD. He has wrote the proposal since 9 a.m.", "a": "B. ||has been + V-ING; he → has (không 'have')."},
+      {"q": "Điền vào email (Part 6):\n\"I ___ your account for the past hour and believe the issue is now resolved.\"\nA. have been monitoring    B. monitored    C. monitor    D. have monitored", "a": "A (have been monitoring). ||for the past hour + quá trình liên tục → HTTHT."}
+    ]}
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "The sales team ___ leads for a month and has enough prospects.\nA. has been collecting    B. has collected    C. collected    D. collects", "a": "A or B. ||A nhấn quá trình; B nhấn kết quả — cả hai có thể đúng; B nếu nhấn 'đủ rồi'."},
+      {"q": "How long ___ the negotiations ___?\nA. have / been going on    B. did / go on    C. are / going on    D. have / gone on", "a": "A (have / been going on). ||how long + còn đang → HTTHT."},
+      {"q": "She ___ the system since morning and finally found the bug.\nA. has debugged    B. has been debugging    C. debugged    D. is debugging", "a": "B (has been debugging). ||since morning + quá trình → HTTHT."},
+      {"q": "We ___ a reliable vendor for months. (vẫn đang tìm)\nA. searched    B. have been searching    C. have searched    D. search", "a": "B (have been searching). ||for months + chưa tìm được → HTTHT."},
+      {"q": "Tìm và sửa lỗi:\n\"He has been wanting to expand for years.\"", "a": "Lỗi: 'has been wanting' → 'has wanted'. ||want = stative verb."},
+      {"q": "She ___ just ___ the report — we can review it now.\nA. has / finished    B. has / been finishing    C. is / finishing    D. had / finished", "a": "A (has / finished). ||just + kết quả → hiện tại hoàn thành."},
+      {"q": "They ___ overtime every night this week to catch up.\nA. have been working    B. worked    C. work    D. have worked", "a": "A (have been working). ||every night this week (liên tục) → HTTHT."},
+      {"q": "The company ___ its energy costs for the past three years.\nA. reduced    B. has been reducing    C. reduces    D. is reducing", "a": "B (has been reducing). ||for the past three years + liên tục → HTTHT."},
+      {"q": "Chọn câu ĐÚNG:\nA. She has been known him for a decade.\nB. She has known him for a decade.\nC. She is knowing him for a decade.\nD. She knew him for a decade.", "a": "B. ||know = stative → hiện tại hoàn thành (không HTTHT)."},
+      {"q": "The CEO ___ for a flight to Singapore since early morning.\nA. waits    B. has been waiting    C. waited    D. have been waiting", "a": "B (has been waiting). ||since + còn đang → HTTHT."},
+      {"q": "I ___ the quarterly report — it's ready on your desk.\nA. have finished    B. have been finishing    C. finished    D. am finishing", "a": "A (have finished). ||xong rồi (kết quả) → hiện tại hoàn thành."},
+      {"q": "Tìm và sửa lỗi:\n\"We have been complete the onboarding process.\"", "a": "Lỗi: 'have been complete' → 'have been completing' (HTTHT) hoặc 'have completed' (HTHT)."},
+      {"q": "The researchers ___ on this study for two years.\nA. worked    B. have been working    C. have worked    D. work", "a": "B (have been working). ||for two years + vẫn đang → HTTHT."},
+      {"q": "___ he ___ the same supplier for long?\nA. Has / been using    B. Did / use    C. Has / used    D. Is / using", "a": "A (Has / been using). ||how long context + còn → HTTHT."},
+      {"q": "The laptop ___ strange noises. You should have it checked.\nA. has made    B. has been making    C. makes    D. made", "a": "B (has been making). ||tiếng kêu lặp đi lặp lại, dấu vết còn đó → HTTHT."},
+      {"q": "Điền vào báo cáo (Part 6):\n\"Our team ___ new ways to serve customers better over the past quarter.\"\nA. explored    B. explores    C. has been exploring    D. has explored", "a": "C (has been exploring). ||over the past quarter + quá trình liên tục → HTTHT."}
+    ]
+  },
+  "summary": [
+    "Hiện tại hoàn thành tiếp diễn = have/has been + V-ing: nhấn THỜI LƯỢNG liên tục (since/for/all day/how long).",
+    "Dùng khi hành động bắt đầu QK và vẫn đang tiếp diễn, hoặc vừa kết thúc còn dấu vết.",
+    "Hiện tại hoàn thành (have + V3) nhấn KẾT QUẢ/số lần; HTTHT nhấn QUÁ TRÌNH.",
+    "Stative verbs (know/want/like…) không dùng -ing kể cả dạng này."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy: 'for + khoảng' + còn đang → have been + V-ing; nếu nhấn số lần/kết quả → have + V3. Stative verbs luôn dùng have + V3.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái thành 'Cần ôn', ôn lại bảng so sánh HTTHT vs HTHT sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

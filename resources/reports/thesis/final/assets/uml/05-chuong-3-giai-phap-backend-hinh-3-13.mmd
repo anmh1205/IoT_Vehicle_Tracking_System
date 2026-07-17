@@ -1,17 +1,22 @@
-flowchart LR
+flowchart TB
     Bridge["MQTT Bridge"]
 
-    subgraph Hot["Hot Path - realtime"]
-        VM["VictoriaMetrics"]
-        WS["Socket.IO"]
+    subgraph Durable["Luồng lưu trữ bền vững"]
+        direction LR
+        VictoriaMetricsNode["VictoriaMetrics"]
+        VictoriaLogsNode["VictoriaLogs"]
+        PostgreSQLNode["PostgreSQL"]
     end
 
-    subgraph Durable["Durable Path - nghiệp vụ"]
-        PG["PostgreSQL"]
-        API["Backend API"]
+    subgraph Realtime["Luồng thời gian thực"]
+        direction LR
+        Internal["internal/events/#"]
+        BackendRt["Backend realtime listener"]
+        Socket["Socket.IO /ws"]
+        Internal --> BackendRt --> Socket
     end
 
-    Bridge ----> VM
-    Bridge ----> WS
-    Bridge ----> PG
-    API ----> PG
+    Bridge --> VictoriaMetricsNode
+    Bridge --> VictoriaLogsNode
+    Bridge --> PostgreSQLNode
+    Bridge --> Internal

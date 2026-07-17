@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" font-family="Times New Roman, serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a5276"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="640" fill="#ffffff"/>
+
+  <!-- Card 1: BỐI CẢNH THỊ TRƯỜNG -->
+  <g transform="translate(60, 50)">
+    <rect width="500" height="540" rx="4" fill="#ffffff" stroke="#1a5276" stroke-width="2"/>
+    <rect width="500" height="60" rx="4" fill="#1a5276"/>
+    <rect y="40" width="500" height="20" fill="#1a5276"/>
+    <text x="250" y="40" text-anchor="middle" font-size="24" font-weight="bold" fill="#ffffff">
+      DỊCH VỤ CHO THUÊ XE TỰ LÁI
+    </text>
+
+    <!-- Cars row -->
+    <g transform="translate(155, 90)">
+      <g transform="translate(0,0)">
+        <rect x="0" y="35" width="50" height="20" rx="4" fill="#1a5276"/>
+        <rect x="6" y="22" width="38" height="16" rx="3" fill="#3b82f6"/>
+        <circle cx="12" cy="58" r="6" fill="#1e293b"/>
+        <circle cx="38" cy="58" r="6" fill="#1e293b"/>
+      </g>
+      <g transform="translate(70,0)">
+        <rect x="0" y="35" width="50" height="20" rx="4" fill="#1a5276"/>
+        <rect x="6" y="22" width="38" height="16" rx="3" fill="#3b82f6"/>
+        <circle cx="12" cy="58" r="6" fill="#1e293b"/>
+        <circle cx="38" cy="58" r="6" fill="#1e293b"/>
+      </g>
+      <g transform="translate(140,0)">
+        <rect x="0" y="35" width="50" height="20" rx="4" fill="#1a5276"/>
+        <rect x="6" y="22" width="38" height="16" rx="3" fill="#3b82f6"/>
+        <circle cx="12" cy="58" r="6" fill="#1e293b"/>
+        <circle cx="38" cy="58" r="6" fill="#1e293b"/>
+      </g>
+      <text x="200" y="50" font-size="36" fill="#94a3b8">...</text>
+    </g>
+
+    <line x1="40" y1="195" x2="460" y2="195" stroke="#1a5276" stroke-width="1"/>
+
+    <text x="250" y="232" text-anchor="middle" font-size="19" font-weight="bold" fill="#1a5276">
+      Phát triển nhanh tại Việt Nam
+    </text>
+
+    <g font-size="18" fill="#000000">
+      <text x="50" y="282">• Đội xe nhỏ và vừa, vốn lớn trên mỗi xe</text>
+      <text x="50" y="318">• Xe rời tay chủ trong nhiều ngày</text>
+      <text x="50" y="354">• Khách thuê đa dạng, tài xế khác nhau</text>
+      <text x="50" y="390">• Phạm vi sử dụng khó kiểm soát trước</text>
+    </g>
+
+    <line x1="40" y1="430" x2="460" y2="430" stroke="#1a5276" stroke-width="1"/>
+
+    <text x="250" y="475" text-anchor="middle" font-size="18" fill="#1a5276" font-style="italic" font-weight="bold">
+      Chủ xe không thể có mặt
+    </text>
+    <text x="250" y="503" text-anchor="middle" font-size="18" fill="#1a5276" font-style="italic" font-weight="bold">
+      tại mọi thời điểm trên xe
+    </text>
+  </g>
+
+  <!-- Arrow -->
+  <line x1="580" y1="320" x2="700" y2="320" stroke="#1a5276" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="640" y="295" text-anchor="middle" font-size="16" fill="#1a5276" font-weight="bold">phát sinh</text>
+
+  <!-- Card 2: NHU CẦU QUẢN LÝ -->
+  <g transform="translate(720, 50)">
+    <rect width="500" height="540" rx="4" fill="#f0f6fb" stroke="#1a5276" stroke-width="3"/>
+    <rect width="500" height="60" rx="4" fill="#1a5276"/>
+    <rect y="40" width="500" height="20" fill="#1a5276"/>
+    <text x="250" y="40" text-anchor="middle" font-size="24" font-weight="bold" fill="#ffffff">
+      NHU CẦU QUẢN LÝ TỪ XA
+    </text>
+
+    <text x="250" y="105" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a5276">
+      Chủ xe cần biết:
+    </text>
+
+    <g font-size="20" fill="#000000">
+      <!-- Q1 -->
+      <text x="50" y="160" font-weight="bold" fill="#1a5276">1.</text>
+      <text x="80" y="160">Xe đang ở đâu?</text>
+
+      <!-- Q2 -->
+      <text x="50" y="210" font-weight="bold" fill="#1a5276">2.</text>
+      <text x="80" y="210">Xe có được dùng đúng</text>
+      <text x="80" y="237">cách hay không?</text>
+
+      <!-- Q3 -->
+      <text x="50" y="287" font-weight="bold" fill="#1a5276">3.</text>
+      <text x="80" y="287">Có sự cố bất thường</text>
+      <text x="80" y="314">nào xảy ra không?</text>
+
+      <!-- Q4 -->
+      <text x="50" y="364" font-weight="bold" fill="#1a5276">4.</text>
+      <text x="80" y="364">Khi trả xe có khớp với</text>
+      <text x="80" y="391">cam kết ban đầu?</text>
+    </g>
+
+    <line x1="40" y1="430" x2="460" y2="430" stroke="#1a5276" stroke-width="1"/>
+
+    <text x="250" y="475" text-anchor="middle" font-size="18" fill="#1a5276" font-style="italic" font-weight="bold">
+      Cần một hệ thống giám sát
+    </text>
+    <text x="250" y="503" text-anchor="middle" font-size="18" fill="#1a5276" font-style="italic" font-weight="bold">
+      thay cho việc kiểm soát thủ công
+    </text>
+  </g>
+</svg>

@@ -1,0 +1,72 @@
+[
+  {
+    "name": "real-map-with-selection",
+    "route": "/dashboard/map",
+    "finalUrl": "https://thingdock.dev/dashboard/map",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\interaction-audit-round4\\real-map-with-selection.png",
+    "actionError": null,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/settings?_rsc=1idy5",
+        "method": "GET",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/settings?_rsc=1146w",
+        "method": "GET",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard?_rsc=1146w",
+        "method": "GET",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "name": "mock-device-detail-modal-rich",
+    "route": "/dashboard/devices",
+    "finalUrl": "https://thingdock.dev/dashboard/devices",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\interaction-audit-round4\\mock-device-detail-modal-rich.png",
+    "actionError": null,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/settings?_rsc=1ypm1",
+        "method": "GET",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/system-admin?_rsc=1513o",
+        "method": "GET",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/users?_rsc=1513o",
+        "method": "GET",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/drivers?_rsc=1513o",
+        "method": "GET",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "name": "mock-trip-detail-rich",
+    "route": "/dashboard/trips/88",
+    "finalUrl": "https://thingdock.dev/dashboard/trips/88",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\interaction-audit-round4\\mock-trip-detail-rich.png",
+    "actionError": null,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  }
+]

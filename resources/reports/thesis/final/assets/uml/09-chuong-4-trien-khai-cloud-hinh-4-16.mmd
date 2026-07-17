@@ -1,17 +1,64 @@
-mindmap
-  root((iot-vehicle-tracking-system))
-    backend
-      api
-      modules
-      middleware
-    frontend
-      app
-      features
-      components
-    mqtt-bridge
-      parser
-      publisher
-    infra
-      emqx
-      postgres
-      grafana
+---
+config:
+  theme: base
+  look: classic
+  fontFamily: Noto Sans, Segoe UI, Arial, sans-serif
+  flowchart:
+    htmlLabels: true
+    nodeSpacing: 42
+    rankSpacing: 58
+  themeCSS: |
+    .cluster rect {
+      fill: #ffffff !important;
+      stroke: #cbd5e1 !important;
+      stroke-width: 1px !important;
+    }
+    .cluster text,
+    .cluster tspan {
+      fill: #475569 !important;
+    }
+---
+flowchart LR
+    subgraph A["Nhóm tiếp nhận bản tin"]
+        direction TB
+        EMQX["EMQX<br/>Nhận kết nối và bản tin MQTT"]
+        Bridge["MQTT Bridge<br/>Kiểm tra và phân luồng"]
+        EMQX --> Bridge
+    end
+
+    subgraph B["Nhóm lưu trữ"]
+        direction TB
+        PostgreSQLNode["PostgreSQL<br/>Dữ liệu quản lý"]
+        VictoriaMetricsNode["VictoriaMetrics<br/>Dữ liệu theo thời gian"]
+        VictoriaLogsNode["VictoriaLogs<br/>Sự kiện và nhật ký"]
+    end
+
+    subgraph C["Nhóm xử lý nghiệp vụ"]
+        direction TB
+        Backend["Backend<br/>Tra cứu, cảnh báo và API"]
+    end
+
+    subgraph D["Nhóm khai thác"]
+        direction TB
+        Frontend["Giao diện web<br/>Theo dõi và tra cứu"]
+    end
+
+    Bridge --> PostgreSQLNode
+    Bridge --> VictoriaMetricsNode
+    Bridge --> VictoriaLogsNode
+
+    PostgreSQLNode --> Backend
+    VictoriaMetricsNode --> Backend
+    VictoriaLogsNode --> Backend
+
+    Backend --> Frontend
+
+    classDef intake fill:#e0f2fe,stroke:#334155,color:#0f172a,stroke-width:1.2px;
+    classDef storage fill:#fff7ed,stroke:#334155,color:#0f172a,stroke-width:1.2px;
+    classDef process fill:#ecfccb,stroke:#334155,color:#0f172a,stroke-width:1.2px;
+    classDef output fill:#f5f3ff,stroke:#334155,color:#0f172a,stroke-width:1.2px;
+
+    class EMQX,Bridge intake;
+    class PostgreSQLNode,VictoriaMetricsNode,VictoriaLogsNode storage;
+    class Backend process;
+    class Frontend output;

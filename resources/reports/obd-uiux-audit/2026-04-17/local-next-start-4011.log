@@ -1,0 +1,23 @@
+▲ Next.js 16.1.6
+- Local:         http://localhost:4011
+- Network:       http://26.35.111.111:4011
+
+✓ Starting...
+⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+✓ Ready in 2s
+(node:26748) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Failed to proxy http://tracking-backend:4000/api/v1/auth/login Error: getaddrinfo ENOTFOUND tracking-backend
+    at ignore-listed frames {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'tracking-backend'
+}
+Error: getaddrinfo ENOTFOUND tracking-backend
+    at ignore-listed frames {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'tracking-backend'
+}

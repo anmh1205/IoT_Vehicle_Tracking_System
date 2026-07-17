@@ -1,6 +1,7 @@
-flowchart LR
-    C1["Kiểm tra nguồn 12V/24V"] --> C2["Kiểm tra BLE OBD2"]
-    C2 --> C3["Kiểm tra GNSS fix"]
-    C3 --> C4["Kiểm tra LTE/MQTT"]
-    C4 --> C5["Kiểm tra power path"]
-    C5 --> C6["Kiểm tra IMU wake/sleep"]
+flowchart TB
+    C1["Nguồn và kết nối<br/>12V/24V + OBD2 BLE"]
+    C2["Định vị và truyền thông<br/>Bắt được tín hiệu GNSS + LTE / MQTT"]
+    C3["Vận hành hệ thống<br/>Mạch chuyển nguồn + IMU đánh thức / ngủ"]
+
+    C1 --> C2 --> C3
+

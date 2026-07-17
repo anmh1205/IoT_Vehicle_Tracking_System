@@ -15,7 +15,7 @@ Mục tiêu baseline kiểm chứng trong repo này:
 ## 1) Inventory + Verification Status
 | Part | Category | Baseline status | Verification status | Notes |
 | --- | --- | --- | --- | --- |
-| ESP32-S3 | MCU | Target | Verified (vendor PDF) | Pin map trong `iot-vehicle-tracking-firmware/main/inc/pin_map.h` + các driver power/modem |
+| ESP32-S3 | MCU | Target | Verified (vendor PDF) | Pin map trong `iot-vehicle-tracking-system-firmware/main/inc/pin_map.h` + các driver power/modem |
 | LIS3DH | IMU | Target | Partially verified (trusted-mirror HTML) | Có mapping I2C/INT trong firmware; chưa có official ST PDF mirror trong repo |
 | SIM7600CE-T | LTE/GNSS modem | Target | Verified (trusted-mirror PDF + schematic nets) | Firmware chỉ dùng SIM7600CE-T; UART1 = GPIO16/17, PWRKEY = GPIO25 |
 | MP2482 | Buck converter | Target | Partially verified (artifact mirror 1-page) | 12/24V → 5V @ 5A, cung cấp bus 5V chính; cần full datasheet PDF nhiều trang để hoàn tất đối chiếu |
@@ -46,7 +46,7 @@ Mục tiêu baseline kiểm chứng trong repo này:
 ---
 
 ## 3) Pinout / Interface Verification (firmware vs docs vs schematic extraction)
-Nguồn firmware: `iot-vehicle-tracking-firmware/main/inc/pin_map.h`, `main/src/modem_at.c`, `main/src/power_mgr.c`, `main/src/adc_reader.c`.
+Nguồn firmware: `iot-vehicle-tracking-system-firmware/main/inc/pin_map.h`, `main/src/modem_at.c`, `main/src/power_mgr.c`, `main/src/adc_reader.c`.
 
 ### 3.1 Verified firmware mapping
 | Signal | Firmware mapping | Evidence |

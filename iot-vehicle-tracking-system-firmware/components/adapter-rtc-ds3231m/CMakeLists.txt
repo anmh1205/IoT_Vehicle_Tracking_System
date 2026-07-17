@@ -1,0 +1,11 @@
+idf_component_register(
+    SRCS
+        "src/rtc_ds3231m.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        driver
+        log
+        platform-board-esp32s3
+        shared-kernel
+)

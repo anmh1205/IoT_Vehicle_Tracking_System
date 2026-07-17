@@ -1,0 +1,12 @@
+%%{init: {'flowchart': {'nodeSpacing': 90, 'rankSpacing': 110}} }%%
+flowchart TB
+    MCU["ESP32-S3<br/>Khối điều khiển trung tâm"]
+    Power["Khối nguồn<br/>nguồn xe, nguồn dự phòng, giám sát điện áp"]
+    Comm["Khối truyền dữ liệu và định vị<br/>giao tiếp điều khiển qua UART"]
+    VehicleData["Khối đọc dữ liệu xe<br/>kết nối ít xâm lấn"]
+    Motion["Khối phát hiện chuyển động<br/>ngắt đánh thức khi xe đỗ"]
+
+    Power --> MCU
+    MCU --> Comm
+    MCU --> VehicleData
+    MCU --> Motion

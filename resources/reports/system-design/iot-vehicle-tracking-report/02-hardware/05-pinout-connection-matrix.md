@@ -3,7 +3,7 @@
 > Matrix này tổng hợp mapping kết nối cuối cùng cho baseline runtime hiện tại: **ESP32-S3 + SIM7600CE-T + LIS3DH + power path 21700 1S**.
 >
 > Nguồn đối soát:
-> - Firmware source-of-truth: `iot-vehicle-tracking-firmware/main/inc/pin_map.h`, `main/src/modem_at.c`, `main/src/power_mgr.c`, `main/src/adc_reader.c`
+> - Firmware source-of-truth: `iot-vehicle-tracking-system-firmware/main/inc/pin_map.h`, `main/src/modem_at.c`, `main/src/power_mgr.c`, `main/src/adc_reader.c`
 > - Schematic assets: `resources/reports/thesis-chapters/assets/schematic/esp32.png`, `simcom.png`, `block-diagram.png`
 > - Datasheet: ESP32-S3 v2.1, SIM7600CE Hardware Design v1.04, LM393 datasheet, TP4056 datasheet
 

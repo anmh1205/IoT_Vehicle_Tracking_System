@@ -1,0 +1,160 @@
+{
+  "page_id": "357df50b-1fcd-81be-b66a-c5cc94d1da05",
+  "title": "25. Câu điều kiện loại 1",
+  "intro": [
+    {"text": "Bài 25 — Câu điều kiện loại 1 (điều kiện có thật ở hiện tại/tương lai). Làm câu hỏi ngay, mở toggle để kiểm tra. Cuối bài có Mini Test 16 câu.", "emoji": "📘", "color": "blue_background"},
+    {"text": "Trọng tâm TOEIC: Part 5 & 6 — If + hiện tại đơn, ... will + V. Bẫy: KHÔNG dùng will trong mệnh đề if.", "emoji": "🎯", "color": "gray_background"}
+  ],
+  "knowledge": [
+    {"type": "h3", "text": "1. Định nghĩa"},
+    {"type": "p", "text": "Câu điều kiện loại 1 (first conditional) diễn tả điều kiện CÓ THẬT, có khả năng xảy ra ở hiện tại hoặc tương lai và kết quả nếu điều kiện được thỏa. Rất hay gặp trong email, điều khoản, hướng dẫn TOEIC."},
+
+    {"type": "h3", "text": "2. Công thức"},
+    {"type": "table", "headers": ["Mệnh đề If", "Mệnh đề chính", "Ví dụ"], "rows": [
+      ["If + hiện tại đơn", "will + V (nguyên thể)", "If you order today, we will ship tomorrow."]
+    ]},
+    {"type": "key", "text": "Mệnh đề If dùng HIỆN TẠI ĐƠN (dù nói về tương lai) — KHÔNG dùng 'will' trong mệnh đề If. Hai vế đổi chỗ được; nếu If đứng đầu thì có dấu phẩy."},
+
+    {"type": "h3", "text": "3. Biến thể vế chính"},
+    {"type": "ul", "items": [
+      "Thay 'will' bằng can/may/should/might để đổi sắc thái: If you finish early, you can leave.",
+      "Mệnh lệnh (imperative): If you have questions, contact HR.",
+      "Khả năng: If the file is too large, it may not upload."
+    ]},
+
+    {"type": "h3", "text": "4. unless = if … not"},
+    {"type": "p", "text": "unless mang nghĩa 'nếu… không / trừ khi': We will miss the deadline unless we start now. (= if we do not start now). Sau unless dùng động từ KHẲNG ĐỊNH (vì 'unless' đã chứa nghĩa phủ định)."},
+
+    {"type": "h3", "text": "5. if vs when"},
+    {"type": "p", "text": "if = điều kiện CÓ THỂ xảy ra (không chắc); when = điều CHẮC CHẮN sẽ xảy ra, chỉ là vấn đề thời gian. If it rains, we will postpone (có thể mưa). When the shipment arrives, we will notify you (chắc chắn sẽ tới)."},
+
+    {"type": "h3", "text": "6. Liên từ điều kiện khác"},
+    {"type": "p", "text": "as long as, provided (that), in case, on condition that + hiện tại đơn: You can use the lounge as long as you have a pass. Take an umbrella in case it rains."},
+
+    {"type": "h3", "text": "7. Bẫy TOEIC hay gặp"},
+    {"type": "warn", "text": "(1) Mệnh đề If KHÔNG dùng 'will' → hiện tại đơn (If it will rain → If it rains). (2) Vế chính dùng will + V nguyên thể. (3) unless = if not, theo sau là động từ khẳng định. (4) Phân biệt loại 1 (if + hiện tại, will) với loại 2 (if + quá khứ, would)."}
+  ],
+  "parts": [
+    {
+      "heading": "Phần 1 · Cấu trúc cơ bản",
+      "theory": ["Điều kiện loại 1 nói về điều có khả năng xảy ra trong tương lai: If + hiện tại đơn, S + will + V nguyên thể."],
+      "keys": ["If + S + V(s/es), S + will + V. Có thể đảo vế: S + will + V if + S + V(s/es)."],
+      "traps": ["Mệnh đề if dùng HIỆN TẠI, mệnh đề chính dùng will. KHÔNG dùng will trong mệnh đề if."],
+      "examples": [
+        "If the client accepts, we will sign tomorrow.",
+        "We will start if the budget is approved."
+      ],
+      "practice_heading": "Luyện tập Phần 1 (8 câu)",
+      "questions": [
+        {"q": "If the client ___ the offer, we will sign the contract.\nA. will accept    B. accepts    C. accepted    D. accepting", "a": "Đáp án: B (accepts). ||Mệnh đề if dùng hiện tại đơn."},
+        {"q": "If the budget is approved, the project ___ next month.\nA. start    B. will start    C. started    D. starting", "a": "Đáp án: B (will start). ||Mệnh đề chính dùng will + V."},
+        {"q": "We will ship the order today if you ___ before noon.\nA. will pay    B. pay    C. paid    D. paying", "a": "Đáp án: B (pay). ||Mệnh đề if dùng hiện tại."},
+        {"q": "If demand increases, the factory ___ more staff.\nA. hire    B. will hire    C. hired    D. hiring", "a": "Đáp án: B (will hire). ||Mệnh đề chính → will + V."},
+        {"q": "Tìm và sửa lỗi:\n\"If it will rain tomorrow, we will postpone the event.\"", "a": "Lỗi: \"If it will rain\" → \"If it rains\". ||Mệnh đề if dùng hiện tại."},
+        {"q": "If you ___ the form correctly, processing will be faster.\nA. will complete    B. complete    C. completed    D. completing", "a": "Đáp án: B (complete). ||Mệnh đề if dùng hiện tại đơn."},
+        {"q": "Chọn câu ĐÚNG:\nA. If it rains, we will cancel the picnic.\nB. If it will rain, we will cancel the picnic.\nC. If it rains, we cancel the picnic.\nD. If it will rain, we cancel the picnic.", "a": "Đáp án: A. ||If + hiện tại, mệnh đề chính + will."},
+        {"q": "Điền vào email (Part 6):\n\"If the supplier ___ on time, we will meet the production target.\"\nA. will deliver    B. delivers    C. delivered    D. delivering", "a": "Đáp án: B (delivers). ||Mệnh đề if dùng hiện tại."}
+      ]
+    },
+    {
+      "heading": "Phần 2 · Biến thể của mệnh đề chính",
+      "theory": ["Mệnh đề chính có thể dùng will, can, may, should, must, hoặc mệnh lệnh (imperative) thay cho will."],
+      "keys": ["If..., S can/may/should/must + V. If..., (mệnh lệnh) + V. (Ví dụ: If you have questions, contact us.)"],
+      "traps": ["Mệnh đề if vẫn dùng hiện tại đơn dù mệnh đề chính dùng modal hay mệnh lệnh."],
+      "practice_heading": "Luyện tập Phần 2 (8 câu)",
+      "questions": [
+        {"q": "If you have any questions, you ___ contact our support team.\nA. can    B. will to    C. canning    D. could to", "a": "Đáp án: A (can). ||Mệnh đề chính có thể dùng modal (can + V)."},
+        {"q": "If the package is damaged, you ___ request a replacement.\nA. may    B. may to    C. maying    D. will may", "a": "Đáp án: A (may). ||modal may + V."},
+        {"q": "If you ___ help, please call the front desk.\nA. will need    B. need    C. needed    D. needing", "a": "Đáp án: B (need). ||Mệnh đề if dùng hiện tại; mệnh đề chính là mệnh lệnh."},
+        {"q": "If sales drop, the company ___ reduce costs.\nA. must    B. must to    C. musting    D. will must", "a": "Đáp án: A (must). ||modal must + V."},
+        {"q": "Tìm và sửa lỗi:\n\"If you will finish early, please notify your manager.\"", "a": "Lỗi: \"If you will finish\" → \"If you finish\". ||Mệnh đề if dùng hiện tại."},
+        {"q": "If the system fails, ___ the IT department immediately.\nA. contact    B. contacting    C. to contact    D. contacted", "a": "Đáp án: A (contact). ||Mệnh đề chính dùng mệnh lệnh (V nguyên thể)."},
+        {"q": "Chọn câu ĐÚNG:\nA. If you are unsure, you should ask your supervisor.\nB. If you will be unsure, you should ask your supervisor.\nC. If you are unsure, you should to ask your supervisor.\nD. If you unsure, you should ask your supervisor.", "a": "Đáp án: A. ||If + hiện tại, mệnh đề chính should + V."},
+        {"q": "Điền vào hướng dẫn (Part 6):\n\"If you ___ a discount, enter the code at checkout.\"\nA. will want    B. want    C. wanted    D. wanting", "a": "Đáp án: B (want). ||Mệnh đề if dùng hiện tại; mệnh đề chính là mệnh lệnh."}
+      ]
+    },
+    {
+      "heading": "Phần 3 · unless, as long as, provided that, in case",
+      "theory": ["Các liên từ điều kiện khác: unless (= if not), as long as / provided (that) (= miễn là), in case (phòng khi)."],
+      "keys": ["Unless + hiện tại (mang nghĩa phủ định). As long as / Provided that + hiện tại. In case + hiện tại."],
+      "traps": ["unless đã mang nghĩa phủ định, không thêm 'not'."],
+      "practice_heading": "Luyện tập Phần 3 (8 câu)",
+      "questions": [
+        {"q": "___ you confirm by Friday, the booking will be cancelled.\nA. If    B. Unless    C. As long as    D. Provided", "a": "Đáp án: B (Unless). ||'Nếu bạn KHÔNG xác nhận...' → Unless = if not."},
+        {"q": "You can use the lounge ___ you have a valid pass.\nA. unless    B. as long as    C. in case of    D. despite", "a": "Đáp án: B (as long as). ||as long as = miễn là."},
+        {"q": "Bring an umbrella ___ it rains during the tour.\nA. unless    B. in case    C. as long as    D. provided", "a": "Đáp án: B (in case). ||in case = phòng khi."},
+        {"q": "The warranty is valid ___ the product is used correctly.\nA. unless    B. provided that    C. in case    D. despite", "a": "Đáp án: B (provided that). ||provided that = miễn là/với điều kiện."},
+        {"q": "Tìm và sửa lỗi:\n\"Unless you don't register, you cannot attend.\"", "a": "Lỗi: \"Unless ... don't\". ||unless đã phủ định. Sửa: \"Unless you register, you cannot attend.\""},
+        {"q": "We will refund the fee ___ the order is cancelled within 24 hours.\nA. unless    B. if    C. despite    D. in case of", "a": "Đáp án: B (if). ||Điều kiện thông thường → if."},
+        {"q": "Chọn câu ĐÚNG:\nA. As long as you will follow the rules, you can stay.\nB. As long as you follow the rules, you can stay.\nC. As long as you followed the rules, you can stay.\nD. As long as you following the rules, you can stay.", "a": "Đáp án: B. ||as long as + hiện tại đơn."},
+        {"q": "Điền vào chính sách (Part 6):\n\"___ you keep your receipt, you can return the item within 30 days.\"\nA. Unless    B. As long as    C. In case of    D. Despite", "a": "Đáp án: B (As long as). ||as long as = miễn là."}
+      ]
+    },
+    {
+      "heading": "Phần 4 · Đảo vế, dấu phẩy và bị động trong điều kiện loại 1",
+      "theory": ["Khi mệnh đề if đứng đầu, có dấu phẩy ngăn cách; khi đứng sau, không cần dấu phẩy. Mệnh đề có thể ở dạng bị động."],
+      "keys": ["If + S + is/are + V3 (bị động), S + will + V. Ví dụ: If the form is submitted late, it will not be processed."],
+      "traps": ["If đứng đầu → có dấu phẩy; If đứng sau → không có dấu phẩy."],
+      "practice_heading": "Luyện tập Phần 4 (8 câu)",
+      "questions": [
+        {"q": "If the report ___ late, it will not be reviewed.\nA. is submitted    B. will submit    C. submits    D. submitting", "a": "Đáp án: A (is submitted). ||Bị động hiện tại trong mệnh đề if."},
+        {"q": "The discount will apply ___ the code is entered at checkout.\nA. if    B. unless    C. despite    D. in case of", "a": "Đáp án: A (if). ||Điều kiện → if; if đứng sau, không dấu phẩy."},
+        {"q": "If the goods ___ damaged, a refund will be issued.\nA. are    B. will be    C. being    D. been", "a": "Đáp án: A (are). ||Bị động hiện tại (are damaged) trong mệnh đề if."},
+        {"q": "Chọn câu có dấu phẩy ĐÚNG:\nA. If the test passes the system will go live.\nB. If the test passes, the system will go live.\nC. The system, will go live if the test passes.\nD. If the test passes the system, will go live.", "a": "Đáp án: B. ||If đứng đầu → dấu phẩy sau mệnh đề if."},
+        {"q": "Tìm và sửa lỗi:\n\"If the application will be approved, you will receive an email.\"", "a": "Lỗi: \"will be approved\" trong mệnh đề if. ||Sửa: \"If the application is approved, you will receive an email.\""},
+        {"q": "We will proceed ___ the contract is signed by both parties.\nA. if    B. unless    C. despite    D. in case of", "a": "Đáp án: A (if). ||Điều kiện bị động → if + is signed."},
+        {"q": "If payment ___ received by Friday, the order will ship Monday.\nA. is    B. will be    C. being    D. been", "a": "Đáp án: A (is). ||Bị động hiện tại (is received) trong mệnh đề if."},
+        {"q": "Điền vào thông báo (Part 6):\n\"If any defect ___ found, the unit will be replaced free of charge.\"\nA. is    B. will be    C. being    D. been", "a": "Đáp án: A (is). ||Bị động hiện tại (is found) trong mệnh đề if."}
+      ]
+    },
+    {
+      "heading": "Phần 5 · Luyện trộn nhanh (10 câu)",
+      "theory": ["Trộn cấu trúc cơ bản, modal/mệnh lệnh, unless/as long as, và bị động."],
+      "practice_heading": "",
+      "questions": [
+        {"q": "If the weather ___ good, the event will be held outdoors.\nA. will be    B. is    C. was    D. being", "a": "Đáp án: B (is). ||Mệnh đề if dùng hiện tại."},
+        {"q": "If you complete the survey, you ___ a free voucher.\nA. receive    B. will receive    C. received    D. receiving", "a": "Đáp án: B (will receive). ||Mệnh đề chính → will + V."},
+        {"q": "___ you pay in advance, you will get a 5 percent discount.\nA. Unless    B. If    C. Despite    D. In case of", "a": "Đáp án: B (If). ||Điều kiện có thật → if."},
+        {"q": "The machine will stop ___ the safety guard is removed.\nA. if    B. unless    C. despite    D. as long as", "a": "Đáp án: A (if). ||Điều kiện bị động → if + is removed."},
+        {"q": "Tìm và sửa lỗi:\n\"If the client will call, please transfer them to sales.\"", "a": "Lỗi: \"If the client will call\" → \"If the client calls\". ||Mệnh đề if dùng hiện tại."},
+        {"q": "___ you register today, you can attend all sessions.\nA. As long as    B. Unless    C. Despite    D. In case of", "a": "Đáp án: A (As long as). ||as long as = miễn là."},
+        {"q": "If the system fails, ___ the help desk immediately.\nA. contact    B. contacting    C. to contact    D. contacted", "a": "Đáp án: A (contact). ||Mệnh đề chính dùng mệnh lệnh."},
+        {"q": "Bring extra copies ___ more people attend than expected.\nA. unless    B. in case    C. as long as    D. provided", "a": "Đáp án: B (in case). ||in case = phòng khi."},
+        {"q": "Chọn câu ĐÚNG:\nA. If the report is approved, it will be published.\nB. If the report will be approved, it will be published.\nC. If the report is approved, it published.\nD. If the report approve, it will be published.", "a": "Đáp án: A. ||If + bị động hiện tại, mệnh đề chính + will."},
+        {"q": "Điền vào chính sách (Part 6):\n\"If your payment ___ declined, please update your billing details.\"\nA. is    B. will be    C. being    D. been", "a": "Đáp án: A (is). ||Bị động hiện tại (is declined) trong mệnh đề if."}
+      ]
+    }
+  ],
+  "minitest": {
+    "heading": "🏋️ Bài luyện tập tổng hợp (Mini Test · 16 câu)",
+    "note": "Làm liên tục 16 câu, gợi ý 8–10 phút, KHÔNG mở đáp án giữa chừng. Mục tiêu: đúng từ 13/16 trở lên.",
+    "questions": [
+      {"q": "If the supplier ___ on time, production will stay on schedule.\nA. will deliver    B. delivers    C. delivered    D. delivering", "a": "B (delivers). ||Mệnh đề if dùng hiện tại."},
+      {"q": "If demand rises, the company ___ a second shift.\nA. add    B. will add    C. added    D. adding", "a": "B (will add). ||Mệnh đề chính → will + V."},
+      {"q": "___ you confirm by Friday, the reservation will be released.\nA. If    B. Unless    C. As long as    D. Provided", "a": "B (Unless). ||'Nếu KHÔNG xác nhận' → Unless."},
+      {"q": "You can join the program ___ you meet the requirements.\nA. unless    B. as long as    C. in case of    D. despite", "a": "B (as long as). ||as long as = miễn là."},
+      {"q": "Tìm và sửa lỗi:\n\"If it will snow tomorrow, the office will close early.\"", "a": "Lỗi: \"If it will snow\" → \"If it snows\". ||Mệnh đề if dùng hiện tại."},
+      {"q": "If you have any concerns, you ___ contact HR directly.\nA. can    B. will to    C. canning    D. could to", "a": "A (can). ||Mệnh đề chính dùng modal can + V."},
+      {"q": "If the form ___ incorrectly, it will be returned.\nA. is completed    B. will complete    C. completes    D. completing", "a": "A (is completed). ||Bị động hiện tại trong mệnh đề if."},
+      {"q": "Chọn câu ĐÚNG:\nA. If it rains, we will move the event indoors.\nB. If it will rain, we will move the event indoors.\nC. If it rains, we move the event indoors.\nD. If it will rain, we move the event indoors.", "a": "A. ||If + hiện tại, mệnh đề chính + will."},
+      {"q": "If the system fails, ___ the IT team right away.\nA. notify    B. notifying    C. to notify    D. notified", "a": "A (notify). ||Mệnh đề chính dùng mệnh lệnh."},
+      {"q": "Bring a backup copy ___ the file gets corrupted.\nA. unless    B. in case    C. as long as    D. provided", "a": "B (in case). ||in case = phòng khi."},
+      {"q": "Tìm và sửa lỗi:\n\"Unless you don't sign the form, we cannot proceed.\"", "a": "Lỗi: \"Unless ... don't\". ||Sửa: \"Unless you sign the form, we cannot proceed.\""},
+      {"q": "We will issue a refund ___ the item is returned unused.\nA. if    B. unless    C. despite    D. in case of", "a": "A (if). ||Điều kiện bị động → if + is returned."},
+      {"q": "If you ___ early, you will get the best seats.\nA. will arrive    B. arrive    C. arrived    D. arriving", "a": "B (arrive). ||Mệnh đề if dùng hiện tại."},
+      {"q": "The warranty applies ___ the product is registered online.\nA. provided that    B. unless    C. despite    D. in case of", "a": "A (provided that). ||provided that = với điều kiện."},
+      {"q": "Chọn câu có dấu phẩy ĐÚNG:\nA. If the test passes the system will go live.\nB. If the test passes, the system will go live.\nC. If the test passes the system, will go live.\nD. If the test, passes the system will go live.", "a": "B. ||If đứng đầu → dấu phẩy sau mệnh đề if."},
+      {"q": "Điền vào thông báo (Part 6):\n\"If any error ___ detected, the report will be sent back for revision.\"\nA. is    B. will be    C. being    D. been", "a": "A (is). ||Bị động hiện tại (is detected) trong mệnh đề if."}
+    ]
+  },
+  "summary": [
+    "Điều kiện loại 1 (có thật, tương lai): If + hiện tại đơn, S + will + V.",
+    "Mệnh đề chính có thể dùng will/can/may/should/must hoặc mệnh lệnh; mệnh đề if luôn dùng hiện tại.",
+    "Liên từ điều kiện khác: unless (= if not), as long as / provided that (= miễn là), in case (phòng khi).",
+    "If đứng đầu → có dấu phẩy. Mệnh đề if có thể ở dạng bị động (is/are + V3)."
+  ],
+  "summary_callouts": [
+    {"text": "Bẫy lớn: KHÔNG dùng will trong mệnh đề if ('If it rains', không 'If it will rain'). unless đã phủ định, không thêm 'not'.", "emoji": "⚠️", "color": "yellow_background"},
+    {"text": "Sau khi làm xong: nếu đúng dưới 13/16, đổi Trạng thái bài thành \"Cần ôn\" và làm lại Phần 1 (cấu trúc cơ bản) sau 1 ngày.", "emoji": "📝", "color": "gray_background"}
+  ]
+}

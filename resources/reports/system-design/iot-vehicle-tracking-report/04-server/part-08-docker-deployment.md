@@ -17,14 +17,14 @@
 
 ### Root Structure
 
-**Lưu ý:** Toàn bộ project code sẽ được tạo trong folder `iot-vehicle-tracking-system/` riêng biệt, không trộn lẫn với SystemDesign.
+**Lưu ý:** Toàn bộ project code sẽ được tạo trong folder `iot-vehicle-tracking-system-cloud/` riêng biệt, không trộn lẫn với SystemDesign.
 
 ```
 IoT_Vehicle_Tracking_System/                    # Root của toàn bộ project
 ├── SystemDesign/                                # System Design Documents (hiện tại)
 │   └── iot-vehicle-tracking-report/
 │
-└── iot-vehicle-tracking-system/                 # ⭐ PROJECT CODE FOLDER (mới tạo)
+└── iot-vehicle-tracking-system-cloud/                 # ⭐ PROJECT CODE FOLDER (mới tạo)
     ├── backend/                                 # Backend API Server (NestJS)
     │   ├── src/
     │   ├── test/
@@ -840,7 +840,7 @@ export async function GET() {
 
 ```bash
 # Di chuyển vào folder project code
-cd iot-vehicle-tracking-system
+cd iot-vehicle-tracking-system-cloud
 
 # Copy environment file
 cp .env.example .env

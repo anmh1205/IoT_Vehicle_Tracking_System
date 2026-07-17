@@ -19,7 +19,7 @@
 
 ```bash
 # Create new NestJS project
-cd iot-vehicle-tracking-system/backend
+cd iot-vehicle-tracking-system-cloud/backend
 npx @nestjs/cli new . --skip-git --package-manager npm
 
 # Or if project already exists, install dependencies
@@ -1731,7 +1731,7 @@ export class CreateVehiclesTable1234567890123 implements MigrationInterface {
 
 ```bash
 # Create new Next.js project with TypeScript
-cd iot-vehicle-tracking-system/frontend
+cd iot-vehicle-tracking-system-cloud/frontend
 npx create-next-app@latest . --typescript --tailwind --app --no-src-dir --import-alias "@/*"
 
 # Or if project already exists
@@ -3840,7 +3840,7 @@ describe("AppController (e2e)", () => {
 1. **Initialize Project:**
 
    ```bash
-   cd iot-vehicle-tracking-system/backend
+   cd iot-vehicle-tracking-system-cloud/backend
    npm install
    ```
 

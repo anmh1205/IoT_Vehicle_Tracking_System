@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="800" viewBox="0 0 1360 800" font-family="Times New Roman, serif">
+  <rect width="1360" height="800" fill="#ffffff"/>
+
+  <!-- LEFT: cost breakdown bars -->
+  <text x="40" y="40" font-size="28" font-weight="bold" fill="#1a5276">Cấu thành chi phí (VND)</text>
+
+  <!-- 6 cost bars; max value 2.114.000 = full bar width 700 -->
+  <g transform="translate(40, 70)">
+    <!-- Điện tử & truyền thông: 1.760.000 -->
+    <text x="0" y="20" font-size="20" fill="#000">Điện tử &amp; truyền thông</text>
+    <rect x="320" y="5" width="583" height="22" rx="3" fill="#1a5276"/>
+    <text x="910" y="22" font-size="20" font-weight="bold" fill="#000">1.760.000</text>
+
+    <!-- Nguồn & bảo vệ: 204.000 -->
+    <text x="0" y="60" font-size="20" fill="#000">Nguồn &amp; bảo vệ</text>
+    <rect x="320" y="45" width="68" height="22" rx="3" fill="#1a5276"/>
+    <text x="395" y="62" font-size="20" font-weight="bold" fill="#000">204.000</text>
+
+    <!-- PCB, vỏ & phụ kiện: 150.000 -->
+    <text x="0" y="100" font-size="20" fill="#000">PCB, vỏ &amp; phụ kiện</text>
+    <rect x="320" y="85" width="50" height="22" rx="3" fill="#1a5276"/>
+    <text x="376" y="102" font-size="20" font-weight="bold" fill="#000">150.000</text>
+
+    <!-- Chế tạo thiết bị: 2.114.000 -->
+    <text x="0" y="140" font-size="20" font-weight="bold" fill="#000">Chế tạo thiết bị (cộng dồn)</text>
+    <rect x="320" y="125" width="700" height="22" rx="3" fill="#475569"/>
+    <text x="1027" y="142" font-size="20" font-weight="bold" fill="#000">2.114.000</text>
+
+    <!-- VPS 6 tháng: 720.000 -->
+    <text x="0" y="180" font-size="20" fill="#000">VPS 6 tháng</text>
+    <rect x="320" y="165" width="238" height="22" rx="3" fill="#94a3b8"/>
+    <text x="565" y="182" font-size="20" font-weight="bold" fill="#000">720.000</text>
+
+    <!-- SIM dữ liệu 6 tháng: 48.000 -->
+    <text x="0" y="220" font-size="20" fill="#000">SIM dữ liệu 6 tháng</text>
+    <rect x="320" y="205" width="16" height="22" rx="3" fill="#94a3b8"/>
+    <text x="343" y="222" font-size="20" font-weight="bold" fill="#000">48.000</text>
+  </g>
+
+  <!-- TOTAL highlight box -->
+  <g transform="translate(40, 360)">
+    <rect width="600" height="180" rx="12" fill="#fefce8" stroke="#1a5276" stroke-width="4"/>
+    <text x="300" y="50" text-anchor="middle" font-size="24" font-weight="bold" fill="#1a5276">TỔNG CHI PHÍ</text>
+    <text x="300" y="125" text-anchor="middle" font-size="64" font-weight="bold" fill="#1a5276">2.882.000</text>
+    <text x="300" y="160" text-anchor="middle" font-size="22" fill="#000">VND</text>
+  </g>
+
+  <!-- Comparison vs target -->
+  <g transform="translate(700, 360)">
+    <rect width="620" height="180" rx="12" fill="#ffffff" stroke="#1a5276" stroke-width="3"/>
+    <text x="20" y="40" font-size="22" font-weight="bold" fill="#000">So với mục tiêu thiết kế:</text>
+    <text x="20" y="80" font-size="20" fill="#000">Mục tiêu</text>
+    <text x="600" y="80" text-anchor="end" font-size="22" font-weight="bold" fill="#475569">≤ 20.000.000 VND</text>
+    <text x="20" y="115" font-size="20" fill="#000">Thực tế</text>
+    <text x="600" y="115" text-anchor="end" font-size="22" font-weight="bold" fill="#1a5276">2.882.000 VND</text>
+    <line x1="20" y1="130" x2="600" y2="130" stroke="#cccccc" stroke-width="1"/>
+    <text x="310" y="165" text-anchor="middle" font-size="22" font-weight="bold" fill="#16a34a">✓ Chỉ ~14% so với ngân sách</text>
+  </g>
+
+  <!-- Bottom note -->
+  <text x="680" y="600" text-anchor="middle" font-size="22" font-style="italic" fill="#1a5276">
+    Khi sản xuất số lượng → chi phí điện tử có thể giảm tiếp nhờ mua linh kiện gốc và làm PCB lô lớn
+  </text>
+</svg>

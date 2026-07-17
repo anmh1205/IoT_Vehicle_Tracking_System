@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="800" viewBox="0 0 1360 800" font-family="Times New Roman, serif">
+<rect width="1360" height="800" fill="#ffffff"/>
+<rect x="20" y="20" width="1320" height="50" rx="6" fill="#d6e4f0" stroke="#1a5276" stroke-width="1"/>
+<text x="680" y="52" text-anchor="middle" font-size="22" font-style="italic" fill="#1a5276">Vấn đề: thu dữ liệu vận hành (RPM, tốc độ, mã lỗi…) qua cổng OBD-II — chọn cách ít can thiệp xe nhất</text>
+<rect x="20" y="95" width="592.7272727272726" height="470" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+<rect x="20" y="95" width="592.7272727272726" height="70" rx="8" fill="#475569"/>
+<rect x="20" y="135" width="592.7272727272726" height="30" fill="#475569"/>
+<text x="316.3636363636363" y="139" text-anchor="middle" font-size="24" font-weight="bold" fill="#ffffff">ELM327</text>
+<text x="38" y="187" font-size="18" fill="#000">Can thiệp điện (35%)</text>
+<rect x="38" y="197" width="526.7272727272726" height="14" rx="2" fill="#e5e7eb"/><rect x="38" y="197" width="316.0" height="14" rx="2" fill="#1a5276"/><text x="572.7272727272726" y="209" font-size="16" font-weight="bold" fill="#000">3</text>
+<text x="38" y="247" font-size="18" fill="#000">Tương thích xe (30%)</text>
+<rect x="38" y="257" width="526.7272727272726" height="14" rx="2" fill="#e5e7eb"/><rect x="38" y="257" width="316.0" height="14" rx="2" fill="#1a5276"/><text x="572.7272727272726" y="269" font-size="16" font-weight="bold" fill="#000">3</text>
+<text x="38" y="307" font-size="18" fill="#000">Tháo lắp (20%)</text>
+<rect x="38" y="317" width="526.7272727272726" height="14" rx="2" fill="#e5e7eb"/><rect x="38" y="317" width="210.7" height="14" rx="2" fill="#1a5276"/><text x="572.7272727272726" y="329" font-size="16" font-weight="bold" fill="#000">2</text>
+<text x="38" y="367" font-size="18" fill="#000">Tham số (15%)</text>
+<rect x="38" y="377" width="526.7272727272726" height="14" rx="2" fill="#e5e7eb"/><rect x="38" y="377" width="421.4" height="14" rx="2" fill="#1a5276"/><text x="572.7272727272726" y="389" font-size="16" font-weight="bold" fill="#000">4</text>
+<line x1="38" y1="505" x2="594.7272727272726" y2="505" stroke="#cccccc" stroke-width="1"/>
+<text x="38" y="529" font-size="20" font-weight="bold" fill="#000">Tổng</text>
+<text x="594.7272727272726" y="529" text-anchor="end" font-size="26" font-weight="bold" fill="#475569">3,00</text>
+<rect x="628.7272727272726" y="95" width="711.2727272727271" height="470" rx="8" fill="#fefce8" stroke="#1a5276" stroke-width="4"/>
+<rect x="628.7272727272726" y="95" width="711.2727272727271" height="70" rx="8" fill="#1a5276"/>
+<rect x="628.7272727272726" y="135" width="711.2727272727271" height="30" fill="#1a5276"/>
+<text x="984.3636363636363" y="139" text-anchor="middle" font-size="28" font-weight="bold" fill="#ffffff">★ vgate BLE</text>
+<text x="646.7272727272726" y="187" font-size="18" fill="#000">Can thiệp điện (35%)</text>
+<rect x="646.7272727272726" y="197" width="645.2727272727271" height="14" rx="2" fill="#e5e7eb"/><rect x="646.7272727272726" y="197" width="645.3" height="14" rx="2" fill="#1a5276"/><text x="1299.9999999999998" y="209" font-size="16" font-weight="bold" fill="#000">5</text>
+<text x="646.7272727272726" y="247" font-size="18" fill="#000">Tương thích xe (30%)</text>
+<rect x="646.7272727272726" y="257" width="645.2727272727271" height="14" rx="2" fill="#e5e7eb"/><rect x="646.7272727272726" y="257" width="645.3" height="14" rx="2" fill="#1a5276"/><text x="1299.9999999999998" y="269" font-size="16" font-weight="bold" fill="#000">5</text>
+<text x="646.7272727272726" y="307" font-size="18" fill="#000">Tháo lắp (20%)</text>
+<rect x="646.7272727272726" y="317" width="645.2727272727271" height="14" rx="2" fill="#e5e7eb"/><rect x="646.7272727272726" y="317" width="645.3" height="14" rx="2" fill="#1a5276"/><text x="1299.9999999999998" y="329" font-size="16" font-weight="bold" fill="#000">5</text>
+<text x="646.7272727272726" y="367" font-size="18" fill="#000">Tham số (15%)</text>
+<rect x="646.7272727272726" y="377" width="645.2727272727271" height="14" rx="2" fill="#e5e7eb"/><rect x="646.7272727272726" y="377" width="516.2" height="14" rx="2" fill="#1a5276"/><text x="1299.9999999999998" y="389" font-size="16" font-weight="bold" fill="#000">4</text>
+<line x1="646.7272727272726" y1="505" x2="1321.9999999999998" y2="505" stroke="#cccccc" stroke-width="1"/>
+<text x="646.7272727272726" y="529" font-size="20" font-weight="bold" fill="#000">Tổng</text>
+<text x="1321.9999999999998" y="529" text-anchor="end" font-size="26" font-weight="bold" fill="#1a5276">4,85</text>
+<rect x="20" y="585" width="180" height="195" rx="6" fill="#1a5276"/>
+<text x="110" y="674.5" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">LÝ DO</text>
+<text x="110" y="704.5" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">CHỌN</text>
+<rect x="220" y="585" width="365.3333333333333" height="195" rx="6" fill="#ffffff" stroke="#1a5276" stroke-width="2"/>
+<text x="234" y="613" font-size="18" fill="#000">Ít xâm lấn hệ điện xe — không đấu</text>
+<text x="234" y="637" font-size="18" fill="#000">dây vào ECU</text>
+<rect x="597.3333333333333" y="585" width="365.3333333333333" height="195" rx="6" fill="#ffffff" stroke="#1a5276" stroke-width="2"/>
+<text x="611.3333333333333" y="613" font-size="18" fill="#000">Tương thích nhiều dòng xe — chuẩn</text>
+<text x="611.3333333333333" y="637" font-size="18" fill="#000">BLE phổ biến</text>
+<rect x="974.6666666666665" y="585" width="365.3333333333333" height="195" rx="6" fill="#ffffff" stroke="#1a5276" stroke-width="2"/>
+<text x="988.6666666666665" y="613" font-size="18" fill="#000">Dễ tháo lắp — chuyển giữa nhiều xe</text>
+<text x="988.6666666666665" y="637" font-size="18" fill="#000">trong đội thuận tiện</text>
+</svg>
