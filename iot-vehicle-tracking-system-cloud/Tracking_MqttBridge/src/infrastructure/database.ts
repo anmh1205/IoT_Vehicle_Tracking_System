@@ -614,7 +614,6 @@ export const touchDeviceSession = async (params: {
   updateDeviceState?: boolean;
 }): Promise<void> => {
   const serverOccurredAt = toIsoTimestamp(params.serverTimestampMs ?? Date.now());
-  const deviceOccurredAt = toIsoTimestamp(params.deviceTimestampMs);
   const allowCompleted = params.allowCompleted === true;
   const updateDeviceState = params.updateDeviceState !== false;
   const sessionStatusPredicate = allowCompleted
@@ -627,26 +626,22 @@ export const touchDeviceSession = async (params: {
        SET
          last_update = GREATEST(COALESCE(last_update, $2::timestamptz), $2::timestamptz),
          data_points_count = COALESCE(data_points_count, 0) + 1,
-         server_session_end = CASE
-           WHEN $10::boolean AND status = 'completed'
-             THEN GREATEST(COALESCE(server_session_end, $2::timestamptz), $2::timestamptz)
-           ELSE server_session_end
+         uptime = CASE
+           WHEN status = 'running' THEN GREATEST(
+             COALESCE(uptime, 0),
+             EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
+             0
+           )
+           ELSE uptime
          END,
-         session_end = CASE
-           WHEN $10::boolean AND status = 'completed'
-             THEN GREATEST(COALESCE(session_end, $11::timestamptz), $11::timestamptz)
-           ELSE session_end
+         total_runtime_seconds = CASE
+           WHEN status = 'running' THEN GREATEST(
+             COALESCE(total_runtime_seconds, 0),
+             EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
+             0
+           )
+           ELSE total_runtime_seconds
          END,
-         uptime = GREATEST(
-           COALESCE(uptime, 0),
-           EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
-           0
-         ),
-         total_runtime_seconds = GREATEST(
-           COALESCE(total_runtime_seconds, 0),
-           EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
-           0
-         ),
          avg_imu_accel_delta_mps2 = CASE
            WHEN $3::numeric IS NULL THEN avg_imu_accel_delta_mps2
            WHEN avg_imu_accel_delta_mps2 IS NULL THEN $3::numeric
@@ -678,8 +673,6 @@ export const touchDeviceSession = async (params: {
         params.longitude ?? null,
         params.speed ?? null,
         params.deviceId,
-        allowCompleted,
-        deviceOccurredAt,
       ],
     );
 
@@ -719,21 +712,14 @@ export const touchDeviceSession = async (params: {
          SET
            last_update = GREATEST(COALESCE(last_update, $2::timestamptz), $2::timestamptz),
            data_points_count = COALESCE(data_points_count, 0) + 1,
-           server_session_end = CASE
-             WHEN $10::boolean AND status = 'completed'
-               THEN GREATEST(COALESCE(server_session_end, $2::timestamptz), $2::timestamptz)
-             ELSE server_session_end
+           uptime = CASE
+             WHEN status = 'running' THEN GREATEST(
+               COALESCE(uptime, 0),
+               EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
+               0
+             )
+             ELSE uptime
            END,
-           session_end = CASE
-             WHEN $10::boolean AND status = 'completed'
-               THEN GREATEST(COALESCE(session_end, $11::timestamptz), $11::timestamptz)
-             ELSE session_end
-           END,
-           uptime = GREATEST(
-             COALESCE(uptime, 0),
-             EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
-             0
-           ),
            avg_imu_accel_delta_mps2 = CASE
              WHEN $3::numeric IS NULL THEN avg_imu_accel_delta_mps2
              WHEN avg_imu_accel_delta_mps2 IS NULL THEN $3::numeric
@@ -765,8 +751,6 @@ export const touchDeviceSession = async (params: {
           params.longitude ?? null,
           params.speed ?? null,
           params.deviceId,
-          allowCompleted,
-          deviceOccurredAt,
         ],
       );
 
