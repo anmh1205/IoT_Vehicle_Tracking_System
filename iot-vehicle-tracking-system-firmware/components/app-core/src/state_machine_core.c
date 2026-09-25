@@ -196,10 +196,12 @@ static void state_machine_publish_pending_command_acks(void) {
         int written = snprintf(ack_payload,
                                sizeof(ack_payload),
                                "{\"command_id\":\"%" PRIu64
-                               "\",\"status\":\"%s\",\"response\":\"%s\"}",
+                               "\",\"status\":\"%s\",\"response\":\"%s\","
+                               "\"boot_id\":\"%s\"}",
                                ack.command_id,
                                status,
-                               response);
+                               response,
+                               s_boot_id);
         if (written <= 0 || (size_t)written >= sizeof(ack_payload)) {
             ESP_LOGW(TAG,
                      "event=command_ack_encode_failed command_id=%" PRIu64,
