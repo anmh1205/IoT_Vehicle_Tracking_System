@@ -10,6 +10,7 @@ interface DeviceState {
   localSessionKey: number | null;
   canonicalSessionId: string | null;
   bootId: string | null;
+  runtimeBootId: string | null;
 }
 
 interface DeviceStateUpdate {
@@ -20,6 +21,7 @@ interface DeviceStateUpdate {
   localSessionKey?: number | null;
   canonicalSessionId?: string | null;
   bootId?: string | null;
+  runtimeBootId?: string | null;
 }
 
 const deviceStates = new Map<string, DeviceState>();
@@ -81,6 +83,10 @@ export const setStatus = (
         ? normalizeCanonicalSessionId(update.canonicalSessionId)
         : (existing?.canonicalSessionId ?? null),
     bootId: update.bootId !== undefined ? update.bootId : (existing?.bootId ?? null),
+    runtimeBootId:
+      update.runtimeBootId !== undefined
+        ? update.runtimeBootId
+        : (existing?.runtimeBootId ?? null),
   });
 };
 

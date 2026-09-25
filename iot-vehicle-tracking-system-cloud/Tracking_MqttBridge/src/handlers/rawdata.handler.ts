@@ -897,11 +897,13 @@ export const handleRawData = async (
   const liveMutationDecision = shouldAcceptLiveMutation({
     incomingTimestampMs: timestampMs,
     incomingSeqNo: seqNo,
-    incomingBootId: sessionBootId,
+    incomingRuntimeBootId: metadataBootId ?? sessionBootId,
+    incomingSessionBootId: sessionBootId,
     incomingLocalSessionKey: localSessionKey,
     cachedLastPayloadTimestampMs: previousState?.lastPayloadTimestampMs ?? null,
     cachedLastSeqNo: previousState?.lastSeqNo ?? null,
-    cachedBootId: previousState?.bootId ?? null,
+    cachedRuntimeBootId: previousState?.runtimeBootId ?? previousState?.bootId ?? null,
+    cachedSessionBootId: previousState?.bootId ?? null,
     cachedLocalSessionKey: previousState?.localSessionKey ?? null,
     persistedWatermarkMs,
   });
@@ -1234,6 +1236,7 @@ export const handleRawData = async (
       localSessionKey,
       canonicalSessionId,
       bootId: sessionBootId,
+      runtimeBootId: metadataBootId ?? sessionBootId,
     });
   }
 

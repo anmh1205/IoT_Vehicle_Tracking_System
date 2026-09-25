@@ -22,3 +22,17 @@ test('setStatus keeps runtime state and session for running status updates', () 
   assert.equal(state?.runtimeState?.ignition_state, 'ON');
   assert.equal(state?.runtimeState?.motion_state, 'MOVING');
 });
+
+test('setStatus keeps runtime boot separate from session boot identity', () => {
+  const deviceId = 'runtime-cache-boot-lineage';
+  setStatus(deviceId, 'running', {
+    sessionId: 42,
+    bootId: 'session-boot-a',
+    runtimeBootId: 'runtime-boot-b',
+    lastSeqNo: 1,
+  });
+
+  const state = getStatus(deviceId);
+  assert.equal(state?.bootId, 'session-boot-a');
+  assert.equal(state?.runtimeBootId, 'runtime-boot-b');
+});
