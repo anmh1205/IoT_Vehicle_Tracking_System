@@ -115,6 +115,8 @@ typedef struct {
 #define TRACKER_COMMAND_ACK_PUBLISH_BUDGET 4U
 
 static QueueHandle_t s_command_ack_queue = NULL;
+/* Fresh local sessions retain their authoritative start marker until durable publish acceptance. */
+static bool s_session_start_boundary_pending = false;
 
 static const char *state_machine_command_ack_response(esp_err_t result, bool execution_result) {
     switch (result) {
@@ -794,6 +796,7 @@ static void state_machine_reset_session_runtime(void) {
     s_canonical_session_id = 0;
     util_copy_string(s_session_boot_id, sizeof(s_session_boot_id), s_boot_id);
     s_session_restore_pending = false;
+    s_session_start_boundary_pending = false;
 }
 
 /**
@@ -867,6 +870,7 @@ static void state_machine_start_new_session(void) {
     s_canonical_session_id = 0;
     util_copy_string(s_session_boot_id, sizeof(s_session_boot_id), s_boot_id);
     s_session_restore_pending = false;
+    s_session_start_boundary_pending = true;
     offline_queue_set_session(s_session_id);
     state_machine_persist_active_session();
 }
@@ -882,6 +886,8 @@ static void state_machine_resume_active_session(void) {
     session_mgr_restore_active(s_session_id);
     offline_queue_set_session(s_session_id);
     s_session_restore_pending = false;
+    // A reboot-resumed drive already had its original start boundary.
+    s_session_start_boundary_pending = false;
     ESP_LOGI(TAG,
              "event=session_resumed local=%lu canonical=%llu boot_id=%s",
              (unsigned long)s_session_id,
@@ -1036,8 +1042,20 @@ static void state_machine_resume_restored_session_if_needed(bool ignition_on) {
  */
 static void state_machine_publish_running_status_if_needed(bool started_session) {
     if (started_session) {
-        state_machine_publish_status("running", "started");
-        s_publish_status = TRACKER_PUBLISH_STATUS_RUNNING;
+        s_session_start_boundary_pending = true;
+    }
+
+    if (s_session_start_boundary_pending) {
+        if (state_machine_publish_status("running", "started")) {
+            s_session_start_boundary_pending = false;
+            s_publish_status = TRACKER_PUBLISH_STATUS_RUNNING;
+        } else {
+            ESP_LOGW(TAG,
+                     "event=session_start_deferred local=%lu canonical=%llu boot_id=%s reason=publish_not_durable",
+                     (unsigned long)s_session_id,
+                     (unsigned long long)s_canonical_session_id,
+                     s_session_boot_id);
+        }
         return;
     }
 
@@ -1045,8 +1063,9 @@ static void state_machine_publish_running_status_if_needed(bool started_session)
         return;
     }
 
-    state_machine_publish_status("running", "none");
-    s_publish_status = TRACKER_PUBLISH_STATUS_RUNNING;
+    if (state_machine_publish_status("running", "none")) {
+        s_publish_status = TRACKER_PUBLISH_STATUS_RUNNING;
+    }
 }
 
 /**
@@ -1385,6 +1404,7 @@ esp_err_t state_machine_core_init(const config_t *config) {
 
     // Reset every shared runtime singleton before adapters start filling live state back in.
     state_runtime_context_reset(config);
+    s_session_start_boundary_pending = false;
     util_copy_string(s_telemetry.obd_ecu_state, sizeof(s_telemetry.obd_ecu_state), "unknown");
     ESP_LOGI(TAG,
              "event=runtime_config device=%s mqtt_configured=%d mqtt_port=%u apn_configured=%d tracking=%us heartbeat=%us parked_wake=%us alarm=%us ign_hold_ms=%u sleep=%d imu_wake=%d ota_min_mv=%u",
