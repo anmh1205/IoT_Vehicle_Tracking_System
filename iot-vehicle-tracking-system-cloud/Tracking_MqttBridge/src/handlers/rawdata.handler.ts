@@ -201,6 +201,14 @@ const normalizeGnssLocation = (
   longitude: number | undefined;
   speedAllowed: boolean;
 } => {
+  if (fixValid === false) {
+    return {
+      latitude: undefined,
+      longitude: undefined,
+      speedAllowed: false,
+    };
+  }
+
   if (latitude === undefined || longitude === undefined) {
     return {
       latitude,
