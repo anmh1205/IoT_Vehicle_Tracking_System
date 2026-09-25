@@ -73,7 +73,9 @@ static const char *TAG = "PUBLISH_PIPE";
  */
 static bool state_publish_should_emit_session_identity(void) {
     // A restored session stays provisional until ignition confirms it; do not leak old identifiers before that point.
-    return !s_session_restore_pending && s_session_id != 0U;
+    return !s_session_restore_pending &&
+           s_session_identity_persisted &&
+           s_session_id != 0U;
 }
 
 /**
