@@ -80,8 +80,18 @@ export const updateCommandStatus = async (
 ): Promise<DeviceCommandRecord | null> => {
   const result = await pool.query<DeviceCommandRow>(
     `UPDATE device_commands
-     SET status = $2::varchar,
-         response = COALESCE($3, response),
+     SET status = CASE
+           WHEN status IN ('acknowledged', 'failed') THEN status
+           WHEN status = 'accepted' AND $2::varchar IN ('pending', 'sent') THEN status
+           WHEN status = 'sent' AND $2::varchar = 'pending' THEN status
+           ELSE $2::varchar
+         END,
+         response = CASE
+           WHEN status IN ('acknowledged', 'failed') THEN response
+           WHEN status = 'accepted' AND $2::varchar IN ('pending', 'sent') THEN response
+           WHEN status = 'sent' AND $2::varchar = 'pending' THEN response
+           ELSE COALESCE($3, response)
+         END,
          sent_at = CASE
             WHEN $2::varchar = 'sent' AND sent_at IS NULL THEN NOW()
             ELSE sent_at
