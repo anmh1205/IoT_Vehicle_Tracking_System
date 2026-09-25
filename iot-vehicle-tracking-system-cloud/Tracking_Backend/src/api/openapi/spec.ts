@@ -359,6 +359,14 @@ export const spec = {
         responses: ok(),
       },
     },
+    '/devices/{id}/event-logs': {
+      get: {
+        tags: ['Devices'],
+        summary: 'Get device event logs ordered by effective device time',
+        parameters: [idParam, ...paginationParams.slice(0, 2)],
+        responses: ok(),
+      },
+    },
     '/devices/{id}/command': {
       post: {
         tags: ['Devices'],
