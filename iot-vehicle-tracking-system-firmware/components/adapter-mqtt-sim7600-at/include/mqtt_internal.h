@@ -141,6 +141,7 @@ extern char s_topic_status[MQTT_TOPIC_MAX_LEN];   // v1/{device}/status
 extern char s_topic_events[MQTT_TOPIC_MAX_LEN];   // v1/{device}/events
 extern char s_topic_firmware[MQTT_TOPIC_MAX_LEN]; // v1/{device}/firmware
 extern char s_topic_commands[MQTT_TOPIC_MAX_LEN]; // v1/{device}/commands
+extern char s_topic_command_ack[MQTT_TOPIC_MAX_LEN]; // v1/{device}/commands/ack
 extern char s_server_addr_primary[MQTT_SERVER_ADDR_MAX_LEN];  // primary broker endpoint URL
 extern char s_server_addr_fallback[MQTT_SERVER_ADDR_MAX_LEN]; // fallback endpoint (TLS host only)
 extern bool s_server_addr_has_fallback;      // a fallback endpoint string is available
