@@ -196,4 +196,10 @@ export const useDeviceRealtime = (
     event: 'device:session_end',
     handler: refreshDeviceLists,
   });
+
+  useRealtimeSubscription({
+    namespace: 'devices',
+    event: 'device:session_discarded',
+    handler: refreshDeviceLists,
+  });
 };
