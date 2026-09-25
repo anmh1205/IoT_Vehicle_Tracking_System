@@ -21,9 +21,17 @@ const idParam = {
   description: 'Resource ID',
 };
 
-const jsonBody = (props: Record<string, any>) => ({
+const jsonBody = (props: Record<string, any>, requiredFields: string[] = []) => ({
   required: true,
-  content: { 'application/json': { schema: { type: 'object', properties: props } } },
+  content: {
+    'application/json': {
+      schema: {
+        type: 'object',
+        properties: props,
+        ...(requiredFields.length > 0 ? { required: requiredFields } : {}),
+      },
+    },
+  },
 });
 
 const ok = (desc = 'Success') => ({
@@ -262,10 +270,14 @@ export const spec = {
         tags: ['Devices'],
         summary: 'Create a device',
         requestBody: jsonBody({
-          serialNumber: { type: 'string' },
-          model: { type: 'string' },
-          firmwareVersion: { type: 'string' },
-        }),
+          deviceId: { type: 'string', minLength: 3, maxLength: 50, pattern: '^[a-zA-Z0-9_-]+$' },
+          deviceName: { type: 'string', minLength: 3, maxLength: 100 },
+          imei: { type: 'string', maxLength: 20 },
+          imuAccelDeltaThresholdMps2: { type: 'number', minimum: 0, maximum: 100 },
+          vibrationThreshold: { type: 'number', minimum: 0, maximum: 100 },
+          requestInterval: { type: 'integer', minimum: 1, maximum: 3600 },
+          config: { type: 'object', additionalProperties: true },
+        }, ['deviceId', 'deviceName']),
         responses: crud('Device created'),
       },
     },
@@ -275,8 +287,22 @@ export const spec = {
     '/devices/import': {
       post: {
         tags: ['Devices'],
-        summary: 'Import devices from CSV/Excel',
-        requestBody: { required: true, content: { 'multipart/form-data': { schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } } } },
+        summary: 'Import devices from JSON rows',
+        requestBody: jsonBody({
+          devices: {
+            type: 'array',
+            minItems: 1,
+            items: {
+              type: 'object',
+              required: ['deviceId', 'deviceName'],
+              properties: {
+                deviceId: { type: 'string', minLength: 3, maxLength: 50, pattern: '^[a-zA-Z0-9_-]+$' },
+                deviceName: { type: 'string', minLength: 3, maxLength: 100 },
+                imei: { type: 'string', maxLength: 20 },
+              },
+            },
+          },
+        }, ['devices']),
         responses: crud('Import result'),
       },
     },
@@ -291,7 +317,15 @@ export const spec = {
         tags: ['Devices'],
         summary: 'Update device',
         parameters: [idParam],
-        requestBody: jsonBody({ model: { type: 'string' }, firmwareVersion: { type: 'string' } }),
+        requestBody: jsonBody({
+          deviceName: { type: 'string', minLength: 3, maxLength: 100 },
+          imei: { type: 'string', maxLength: 20, nullable: true },
+          imuAccelDeltaThresholdMps2: { type: 'number', minimum: 0, maximum: 100 },
+          vibrationThreshold: { type: 'number', minimum: 0, maximum: 100 },
+          requestInterval: { type: 'integer', minimum: 1, maximum: 3600 },
+          targetFirmwareVersion: { type: 'string', maxLength: 50, nullable: true },
+          config: { type: 'object', nullable: true, additionalProperties: true },
+        }),
         responses: crud(),
       },
       delete: {
@@ -330,7 +364,10 @@ export const spec = {
         tags: ['Devices'],
         summary: 'Send command to device',
         parameters: [idParam],
-        requestBody: jsonBody({ command: { type: 'string' }, payload: { type: 'object' } }),
+        requestBody: jsonBody({
+          command: { type: 'string', minLength: 1 },
+          params: { type: 'object', additionalProperties: true },
+        }, ['command']),
         responses: crud(),
       },
     },
@@ -393,20 +430,53 @@ export const spec = {
         tags: ['Vehicles'],
         summary: 'Create a vehicle',
         requestBody: jsonBody({
-          licensePlate: { type: 'string' },
-          make: { type: 'string' },
-          model: { type: 'string' },
-          year: { type: 'integer' },
-          customerId: { type: 'string' },
-        }),
+          vehicleId: { type: 'string', minLength: 2, maxLength: 50, pattern: '^[a-zA-Z0-9_-]+$' },
+          plateNumber: { type: 'string', maxLength: 20 },
+          deviceId: { type: 'string', maxLength: 50 },
+          customerId: { type: 'integer', minimum: 1 },
+          vehicleType: { type: 'string', maxLength: 50 },
+          brand: { type: 'string', maxLength: 100 },
+          model: { type: 'string', maxLength: 100 },
+          year: { type: 'integer', minimum: 1900, maximum: 2100 },
+          color: { type: 'string', maxLength: 50 },
+          vin: { type: 'string', maxLength: 50 },
+          seats: { type: 'integer', minimum: 1, maximum: 100 },
+          transmission: { type: 'string', enum: ['manual', 'automatic', 'cvt'] },
+          fuelType: { type: 'string', enum: ['gasoline', 'diesel', 'electric', 'hybrid', 'lpg'] },
+          mileageKm: { type: 'number', minimum: 0 },
+          registrationNumber: { type: 'string', maxLength: 50 },
+          insuranceExpiry: { type: 'string', format: 'date-time' },
+          iconType: { type: 'string', maxLength: 50 },
+          colorHex: { type: 'string', pattern: '^#[0-9A-Fa-f]{6}$' },
+          notes: { type: 'string', maxLength: 500 },
+        }, ['vehicleId']),
         responses: crud('Vehicle created'),
       },
     },
     '/vehicles/import': {
       post: {
         tags: ['Vehicles'],
-        summary: 'Import vehicles from CSV/Excel',
-        requestBody: { required: true, content: { 'multipart/form-data': { schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } } } },
+        summary: 'Import vehicles from JSON rows',
+        requestBody: jsonBody({
+          vehicles: {
+            type: 'array',
+            minItems: 1,
+            items: {
+              type: 'object',
+              required: ['vehicleId'],
+              properties: {
+                vehicleId: { type: 'string', minLength: 2, maxLength: 50, pattern: '^[a-zA-Z0-9_-]+$' },
+                plateNumber: { type: 'string', maxLength: 20 },
+                brand: { type: 'string', maxLength: 100 },
+                model: { type: 'string', maxLength: 100 },
+                year: { type: 'integer', minimum: 1900, maximum: 2100 },
+                customerId: { type: 'integer', minimum: 1 },
+                deviceId: { type: 'string', maxLength: 50 },
+                notes: { type: 'string', maxLength: 500 },
+              },
+            },
+          },
+        }, ['vehicles']),
         responses: crud('Import result'),
       },
     },
@@ -421,7 +491,27 @@ export const spec = {
         tags: ['Vehicles'],
         summary: 'Update vehicle',
         parameters: [idParam],
-        requestBody: jsonBody({ licensePlate: { type: 'string' }, make: { type: 'string' } }),
+        requestBody: jsonBody({
+          vehicleId: { type: 'string', minLength: 2, maxLength: 50, pattern: '^[a-zA-Z0-9_-]+$' },
+          plateNumber: { type: 'string', maxLength: 20, nullable: true },
+          deviceId: { type: 'string', maxLength: 50 },
+          customerId: { type: 'integer', minimum: 1, nullable: true },
+          vehicleType: { type: 'string', maxLength: 50 },
+          brand: { type: 'string', maxLength: 100, nullable: true },
+          model: { type: 'string', maxLength: 100, nullable: true },
+          year: { type: 'integer', minimum: 1900, maximum: 2100, nullable: true },
+          color: { type: 'string', maxLength: 50 },
+          vin: { type: 'string', maxLength: 50 },
+          seats: { type: 'integer', minimum: 1, maximum: 100 },
+          transmission: { type: 'string', enum: ['manual', 'automatic', 'cvt'] },
+          fuelType: { type: 'string', enum: ['gasoline', 'diesel', 'electric', 'hybrid', 'lpg'] },
+          mileageKm: { type: 'number', minimum: 0 },
+          registrationNumber: { type: 'string', maxLength: 50 },
+          insuranceExpiry: { type: 'string', format: 'date-time' },
+          iconType: { type: 'string', maxLength: 50 },
+          colorHex: { type: 'string', pattern: '^#[0-9A-Fa-f]{6}$' },
+          notes: { type: 'string', maxLength: 500 },
+        }),
         responses: crud(),
       },
       delete: {
