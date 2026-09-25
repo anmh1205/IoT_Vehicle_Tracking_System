@@ -41,7 +41,7 @@ describe('device-command.service', () => {
     vi.useRealTimers();
   });
 
-  it('replays pre-start pending commands with their original command id after MQTT connects', async () => {
+  it('replays sufficiently-old pending commands with their original command id after MQTT connects', async () => {
     const handlers = new Map<string, (...args: any[]) => void>();
     const client = {
       connected: true,
@@ -65,7 +65,7 @@ describe('device-command.service', () => {
       sentAt: null,
       ackedAt: null,
       response: null,
-      createdAt: new Date(Date.now() - 30_000).toISOString(),
+      createdAt: new Date(Date.now() - 60_000).toISOString(),
     }]);
     vi.mocked(deviceCommandRepo.updateCommandStatus).mockResolvedValue(null);
 
@@ -280,6 +280,83 @@ describe('device-command.service', () => {
     const options = client.publish.mock.calls[0]?.[2];
     expect(options).toMatchObject({ qos: 1, retain: false });
     expect(options.properties).toBeUndefined();
+  });
+
+  it('does not mark a successfully published command failed when sent-status persistence throws', async () => {
+    const client = {
+      connected: true,
+      on: vi.fn(() => client),
+      publish: vi.fn((_topic: string, _message: string, _options: unknown, callback: (err?: Error) => void) => {
+        callback();
+        return client;
+      }),
+      end: vi.fn((_force: boolean, _options: unknown, callback: () => void) => callback()),
+    } as any;
+    vi.mocked(mqtt.connect).mockReturnValue(client);
+    vi.mocked(deviceCommandRepo.createCommand).mockResolvedValue({
+      id: 53,
+      deviceId: 'TRACKER_001',
+      command: 'update_config',
+      params: { tracking_interval_s: 15 },
+      status: 'pending',
+      sentAt: null,
+      ackedAt: null,
+      response: null,
+    });
+    vi.mocked(deviceCommandRepo.updateCommandStatus).mockRejectedValueOnce(
+      new Error('database unavailable after publish'),
+    );
+
+    const result = await sendCommand('TRACKER_001', {
+      command: 'update_config',
+      params: { tracking_interval_s: 15 },
+    });
+
+    expect(client.publish).toHaveBeenCalledTimes(1);
+    expect(result.status).toBe('sent');
+    expect(deviceCommandRepo.updateCommandStatus).toHaveBeenCalledTimes(1);
+    expect(deviceCommandRepo.updateCommandStatus).toHaveBeenCalledWith(53, 'sent');
+    expect(deviceCommandRepo.updateCommandStatus).not.toHaveBeenCalledWith(
+      53,
+      'failed',
+      expect.anything(),
+    );
+  });
+
+  it('uses a rolling pending recovery cutoff instead of the backend startup instant', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-26T00:00:00.000Z'));
+
+    const handlers = new Map<string, (...args: any[]) => void>();
+    const client = {
+      connected: true,
+      on: vi.fn((event: string, handler: (...args: any[]) => void) => {
+        handlers.set(event, handler);
+        return client;
+      }),
+      publish: vi.fn(),
+      end: vi.fn((_force: boolean, _options: unknown, callback: () => void) => callback()),
+    } as any;
+    vi.mocked(mqtt.connect).mockReturnValue(client);
+    vi.mocked(deviceCommandRepo.listPendingCommandsBefore).mockResolvedValue([]);
+
+    initDeviceCommandDispatcher();
+    handlers.get('connect')?.();
+    await vi.waitFor(() => {
+      expect(deviceCommandRepo.listPendingCommandsBefore).toHaveBeenCalledTimes(1);
+    });
+
+    const firstCutoff = vi.mocked(deviceCommandRepo.listPendingCommandsBefore).mock.calls[0]?.[0] as Date;
+    expect(firstCutoff.toISOString()).toBe('2026-09-25T23:59:30.000Z');
+
+    await vi.advanceTimersByTimeAsync(30_000);
+    await vi.waitFor(() => {
+      expect(deviceCommandRepo.listPendingCommandsBefore).toHaveBeenCalledTimes(2);
+    });
+
+    const secondCutoff = vi.mocked(deviceCommandRepo.listPendingCommandsBefore).mock.calls[1]?.[0] as Date;
+    expect(secondCutoff.toISOString()).toBe('2026-09-26T00:00:00.000Z');
+    expect(secondCutoff.getTime()).toBeGreaterThan(firstCutoff.getTime());
   });
 
   it('returns conflict before MQTT publish when per-device command capacity is exhausted', async () => {
