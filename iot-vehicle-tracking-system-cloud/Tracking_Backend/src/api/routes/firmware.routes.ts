@@ -5,7 +5,7 @@ import multer from 'multer';
 import { Router } from 'express';
 import * as firmwareController from '@/api/controllers/firmware.controller';
 import { firmwareConfig } from '@/config/env';
-import { requireAuth, attachUserIfAvailable } from '@/middleware/auth.middleware';
+import { requireAuth, requireAdminRole, attachUserIfAvailable } from '@/middleware/auth.middleware';
 
 const router = Router();
 
@@ -42,14 +42,14 @@ router.use(requireAuth);
 router.get('/', firmwareController.listFirmware);
 router.get('/:id', firmwareController.getFirmware);
 router.get('/:id/devices', firmwareController.getAssignedDevices);
-router.post('/', firmwareController.createFirmware);
-router.post('/upload', firmwareUpload.single('file'), firmwareController.uploadFirmware);
-router.delete('/:id', firmwareController.deleteFirmware);
-router.post('/:id/activate', firmwareController.activateFirmware);
-router.put('/:id/activate', firmwareController.activateFirmware);
-router.post('/:id/deactivate', firmwareController.deactivateFirmware);
-router.post('/:id/deploy', firmwareController.deployFirmware);
-router.post('/:id/assign', firmwareController.assignFirmware);
+router.post('/', requireAdminRole, firmwareController.createFirmware);
+router.post('/upload', requireAdminRole, firmwareUpload.single('file'), firmwareController.uploadFirmware);
+router.delete('/:id', requireAdminRole, firmwareController.deleteFirmware);
+router.post('/:id/activate', requireAdminRole, firmwareController.activateFirmware);
+router.put('/:id/activate', requireAdminRole, firmwareController.activateFirmware);
+router.post('/:id/deactivate', requireAdminRole, firmwareController.deactivateFirmware);
+router.post('/:id/deploy', requireAdminRole, firmwareController.deployFirmware);
+router.post('/:id/assign', requireAdminRole, firmwareController.assignFirmware);
 router.get('/:id/deployments', firmwareController.getDeployments);
 
 export default router;
