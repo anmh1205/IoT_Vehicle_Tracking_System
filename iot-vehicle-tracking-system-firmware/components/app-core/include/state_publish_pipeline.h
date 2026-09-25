@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include "ota_contract.h"
 
 /**
@@ -18,7 +19,7 @@
  * Rawdata carries the current telemetry snapshot plus session/boot metadata and
  * becomes the point where the IMU peak delta window is reset after success.
  */
-void state_machine_publish_rawdata(void);
+bool state_machine_publish_rawdata(void);
 /**
  * @brief Publish a status payload and optional authoritative boundary marker.
  *

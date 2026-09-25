@@ -26,6 +26,8 @@ typedef enum {
     COMMAND_ACTION_NONE = 0,
     /** Apply a queued runtime configuration update on the FSM task. */
     COMMAND_ACTION_APPLY_CONFIG,
+    /** Publish one immediate location/rawdata snapshot. */
+    COMMAND_ACTION_REQUEST_LOCATION,
     /** Reboot command requested by cloud. */
     COMMAND_ACTION_REBOOT,
     /** OTA update command accepted and queued. */
@@ -75,13 +77,6 @@ esp_err_t command_handler_init(config_t *config);
 esp_err_t command_handler_process(const char *command_json,
                                   uint64_t *out_command_id,
                                   bool *out_deferred);
-
-/**
- * @brief Consume one-shot location-request flag.
- *
- * @return true if a location request was pending, otherwise false.
- */
-bool command_handler_consume_location_request(void);
 
 /**
  * @brief Read current tracking enabled/disabled state.

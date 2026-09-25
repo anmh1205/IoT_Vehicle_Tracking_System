@@ -168,6 +168,8 @@ void state_machine_handle_pending_action(void) {
 
     if (action == COMMAND_ACTION_APPLY_CONFIG) {
         execution_result = command_handler_apply_pending_config();
+    } else if (action == COMMAND_ACTION_REQUEST_LOCATION) {
+        execution_result = state_machine_publish_rawdata() ? ESP_OK : ESP_FAIL;
     } else if (action == COMMAND_ACTION_REBOOT) {
         restart_required = true;
     } else if (action == COMMAND_ACTION_ASSIGN_SESSION) {
