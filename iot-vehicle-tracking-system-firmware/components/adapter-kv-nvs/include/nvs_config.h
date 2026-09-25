@@ -42,6 +42,26 @@ esp_err_t nvs_config_load(config_t *config);
 esp_err_t nvs_config_save(const config_t *config);
 
 /**
+ * @brief Persist the cloud-controlled tracking-enabled desired state.
+ *
+ * @param enabled Desired tracking state.
+ * @return ESP_OK on committed persistence, otherwise an NVS error.
+ */
+esp_err_t nvs_config_save_tracking_enabled(bool enabled);
+
+/**
+ * @brief Load the persisted tracking-enabled desired state.
+ *
+ * Missing key is a clean not-found result so legacy devices retain the
+ * historical default of tracking enabled.
+ *
+ * @param out_enabled Output state (defaults true when not found).
+ * @param out_found Set true only when a persisted value exists.
+ * @return ESP_OK on success/not-found, otherwise an NVS error.
+ */
+esp_err_t nvs_config_load_tracking_enabled(bool *out_enabled, bool *out_found);
+
+/**
  * @brief OTA confirm context persisted in NVS across reboot.
  *
  * Captures everything the post-reboot OTA state machine needs to decide whether
