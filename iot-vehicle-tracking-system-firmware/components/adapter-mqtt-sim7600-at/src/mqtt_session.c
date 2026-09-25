@@ -91,16 +91,15 @@ static const char *tracker_mqtt_endpoint_class(const char *server_addr) {
         const char *scheme = "tcp://";
         size_t scheme_len = strlen(scheme);
         if (strncmp(server_addr, scheme, scheme_len) == 0) {
-            // Extract the host portion between "tcp://" and the optional ":port".
             char host[TRACKER_HOST_MAX_LEN] = {0};
+            char resolved[TRACKER_HOST_MAX_LEN] = {0};
             const char *host_start = server_addr + scheme_len;
             const char *host_end = strchr(host_start, ':');
             size_t host_len = host_end != NULL ? (size_t)(host_end - host_start) : strlen(host_start);
             if (host_len > 0U && host_len < sizeof(host)) {
                 memcpy(host, host_start, host_len);
                 host[host_len] = '\0';
-                // A pure IPv4 literal means this endpoint was rewritten after DNS resolution.
-                if (tracker_mqtt_parse_ipv4_literal(host, host, sizeof(host))) {
+                if (tracker_mqtt_parse_ipv4_literal(host, resolved, sizeof(resolved))) {
                     return "resolved_ip";
                 }
             }
@@ -649,18 +648,25 @@ esp_err_t tracker_mqtt_configure_tls(void) {
     }
 
     char cmd[96] = {0};
-    // sslversion=4 pins TLS 1.2, the version the broker accepts.
-    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"sslversion\",%d,4\r", MQTT_SSL_CTX_INDEX);
+    int n = snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"sslversion\",%d,4\r", MQTT_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        TRACKER_MQTT_TAG,
+                        "CSSLCFG sslversion cmd truncated");
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", MQTT_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         TRACKER_MQTT_TAG,
                         "CSSLCFG sslversion failed");
 
-    (void)snprintf(cmd,
-                   sizeof(cmd),
-                   "AT+CSSLCFG=\"authmode\",%d,%d\r",
-                   MQTT_SSL_CTX_INDEX,
-                   CONFIG_TRACKER_TLS_VERIFY_SERVER ? 1 : 0);
+    n = snprintf(cmd,
+                 sizeof(cmd),
+                 "AT+CSSLCFG=\"authmode\",%d,%d\r",
+                 MQTT_SSL_CTX_INDEX,
+                 CONFIG_TRACKER_TLS_VERIFY_SERVER ? 1 : 0);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        TRACKER_MQTT_TAG,
+                        "CSSLCFG authmode cmd truncated");
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", MQTT_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         TRACKER_MQTT_TAG,
@@ -671,29 +677,45 @@ esp_err_t tracker_mqtt_configure_tls(void) {
                         TRACKER_MQTT_TAG,
                         "CSSLCFG certificate failed");
 
-    (void)snprintf(cmd,
-                   sizeof(cmd),
-                   "AT+CSSLCFG=\"ignorelocaltime\",%d,%d\r",
-                   MQTT_SSL_CTX_INDEX,
-                   CONFIG_TRACKER_TLS_IGNORE_LOCAL_TIME ? 1 : 0);
+    n = snprintf(cmd,
+                 sizeof(cmd),
+                 "AT+CSSLCFG=\"ignorelocaltime\",%d,%d\r",
+                 MQTT_SSL_CTX_INDEX,
+                 CONFIG_TRACKER_TLS_IGNORE_LOCAL_TIME ? 1 : 0);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        TRACKER_MQTT_TAG,
+                        "CSSLCFG ignorelocaltime cmd truncated");
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", MQTT_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         TRACKER_MQTT_TAG,
                         "CSSLCFG ignorelocaltime failed");
 
-    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"negotiatetime\",%d,300\r", MQTT_SSL_CTX_INDEX);
+    n = snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"negotiatetime\",%d,300\r", MQTT_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        TRACKER_MQTT_TAG,
+                        "CSSLCFG negotiatetime cmd truncated");
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", MQTT_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         TRACKER_MQTT_TAG,
                         "CSSLCFG negotiatetime failed");
 
-    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"enableSNI\",%d,1\r", MQTT_SSL_CTX_INDEX);
+    n = snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"enableSNI\",%d,1\r", MQTT_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        TRACKER_MQTT_TAG,
+                        "CSSLCFG enableSNI cmd truncated");
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", MQTT_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         TRACKER_MQTT_TAG,
                         "CSSLCFG enableSNI failed");
 
-    (void)snprintf(cmd, sizeof(cmd), "AT+CMQTTSSLCFG=%d,%d\r", MQTT_CLIENT_INDEX, MQTT_SSL_CTX_INDEX);
+    n = snprintf(cmd, sizeof(cmd), "AT+CMQTTSSLCFG=%d,%d\r", MQTT_CLIENT_INDEX, MQTT_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        TRACKER_MQTT_TAG,
+                        "CMQTTSSLCFG cmd truncated");
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", MQTT_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         TRACKER_MQTT_TAG,
@@ -1162,11 +1184,15 @@ esp_err_t tracker_mqtt_send_disconnect(void) {
     // Accept 0 (disconnected), 9 (network not opened), 11 (no connection): all mean "link is down".
     static const int accepted[] = {0, 9, 11};
     char cmd[64] = {0};
-    (void)snprintf(cmd,
-                   sizeof(cmd),
-                   "AT+CMQTTDISC=%d,%u\r",
-                   MQTT_CLIENT_INDEX,
-                   (unsigned int)MQTT_DEFAULT_DISCONNECT_TIMEOUT_S);
+    int n = snprintf(cmd,
+                     sizeof(cmd),
+                     "AT+CMQTTDISC=%d,%u\r",
+                     MQTT_CLIENT_INDEX,
+                     (unsigned int)MQTT_DEFAULT_DISCONNECT_TIMEOUT_S);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        TRACKER_MQTT_TAG,
+                        "CMQTTDISC cmd truncated");
 
     esp_err_t err = tracker_mqtt_send_lifecycle_cmd(cmd,
                                                     MQTT_CONNECT_TIMEOUT_MS,

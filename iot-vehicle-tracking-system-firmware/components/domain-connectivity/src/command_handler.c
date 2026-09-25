@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <stdatomic.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,7 +68,7 @@ static bool s_tracking_enabled = true;
 /* Counts queued one-shot location requests so bursts are not collapsed into one bit. */
 static uint8_t s_location_request_count = 0U;
 /* Tracks command drops without expanding the cloud command contract. */
-static uint32_t s_dropped_command_count = 0U;
+static atomic_uint s_dropped_command_count = 0U;
 
 /** @brief Canonical command names from cloud payload. */
 static const char *const COMMAND_NAME_UPDATE_CONFIG = "update_config";
@@ -220,11 +221,11 @@ static bool command_handler_take_lock_for(const char *operation) {
         return true;
     }
 
-    s_dropped_command_count += 1U;
+    atomic_fetch_add(&s_dropped_command_count, 1U);
     ESP_LOGW(TAG,
              "event=command_dropped operation=%s reason=lock_busy dropped_count=%lu",
              operation != NULL ? operation : "unknown",
-             (unsigned long)s_dropped_command_count);
+             (unsigned long)atomic_load(&s_dropped_command_count));
     return false;
 }
 
@@ -687,11 +688,11 @@ static esp_err_t command_handler_enqueue_action(const command_action_item_t *ite
      * drain the queue under burst command traffic.
      */
     if (xQueueSendToBack(s_action_queue, item, COMMAND_HANDLER_QUEUE_SEND_TIMEOUT_TICKS) != pdTRUE) {
-        s_dropped_command_count += 1U;
+        atomic_fetch_add(&s_dropped_command_count, 1U);
         ESP_LOGW(TAG,
                  "event=command_dropped action=%s reason=queue_full dropped_count=%lu",
                  command_action_label(item->action),
-                 (unsigned long)s_dropped_command_count);
+                 (unsigned long)atomic_load(&s_dropped_command_count));
         return ESP_ERR_NO_MEM;
     }
 
@@ -721,7 +722,7 @@ esp_err_t command_handler_init(config_t *config) {
     s_config = config;
     s_tracking_enabled = true;
     s_location_request_count = 0U;
-    s_dropped_command_count = 0U;
+    atomic_store(&s_dropped_command_count, 0U);
     command_handler_reset_consumed_payloads();
     xQueueReset(s_action_queue);
 
@@ -901,7 +902,7 @@ void command_handler_process(const char *command_json) {
             if (s_location_request_count < COMMAND_HANDLER_MAX_LOCATION_REQUESTS) {
                 s_location_request_count += 1U;
             } else {
-                s_dropped_command_count += 1U;
+                atomic_fetch_add(&s_dropped_command_count, 1U);
                 ESP_LOGW(TAG, "event=command_dropped operation=request_location reason=pending_counter_saturated");
             }
             command_handler_give_lock();

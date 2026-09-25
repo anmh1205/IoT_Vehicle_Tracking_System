@@ -114,8 +114,11 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
                         (unsigned)payload_len);
 
     char cmd[96] = {0};
-    // Topic bytes are staged first because the modem expects the publish envelope in distinct topic/payload phases.
-    (void)snprintf(cmd, sizeof(cmd), "AT+CMQTTTOPIC=%d,%u\r", MQTT_CLIENT_INDEX, (unsigned int)topic_len);
+    int n = snprintf(cmd, sizeof(cmd), "AT+CMQTTTOPIC=%d,%u\r", MQTT_CLIENT_INDEX, (unsigned int)topic_len);
+    if (n < 0 || (size_t)n >= sizeof(cmd)) {
+        ESP_LOGW(TRACKER_MQTT_TAG, "publish cmd truncated stage=topic");
+        return -1;
+    }
     if (tracker_mqtt_input_data(cmd, topic, "+CMQTTTOPIC:", true) != ESP_OK) {
         ESP_LOGW(TRACKER_MQTT_TAG,
                  "publish failed stage=topic topic_class=%s topic_len=%u",
@@ -124,8 +127,11 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
         return -1;
     }
 
-    // Only after the topic is accepted do we stream the JSON payload into the modem's publish buffer.
-    (void)snprintf(cmd, sizeof(cmd), "AT+CMQTTPAYLOAD=%d,%u\r", MQTT_CLIENT_INDEX, (unsigned int)payload_len);
+    n = snprintf(cmd, sizeof(cmd), "AT+CMQTTPAYLOAD=%d,%u\r", MQTT_CLIENT_INDEX, (unsigned int)payload_len);
+    if (n < 0 || (size_t)n >= sizeof(cmd)) {
+        ESP_LOGW(TRACKER_MQTT_TAG, "publish cmd truncated stage=payload");
+        return -1;
+    }
     if (tracker_mqtt_input_data(cmd, payload, "+CMQTTPAYLOAD:", true) != ESP_OK) {
         ESP_LOGW(TRACKER_MQTT_TAG,
                  "publish failed stage=payload topic_class=%s payload_len=%u",
@@ -134,12 +140,16 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
         return -1;
     }
 
-    (void)snprintf(cmd,
-                   sizeof(cmd),
-                   "AT+CMQTTPUB=%d,%d,%u,0,0\r",
-                   MQTT_CLIENT_INDEX,
-                   qos,
-                   (unsigned int)MQTT_DEFAULT_PUBLISH_TIMEOUT_S);
+    n = snprintf(cmd,
+                 sizeof(cmd),
+                 "AT+CMQTTPUB=%d,%d,%u,0,0\r",
+                 MQTT_CLIENT_INDEX,
+                 qos,
+                 (unsigned int)MQTT_DEFAULT_PUBLISH_TIMEOUT_S);
+    if (n < 0 || (size_t)n >= sizeof(cmd)) {
+        ESP_LOGW(TRACKER_MQTT_TAG, "publish cmd truncated stage=pub");
+        return -1;
+    }
 
     // Arm publish-result tracking before sending PUB so synchronous and asynchronous completion paths share one state machine.
     tracker_mqtt_begin_publish_wait();
@@ -228,8 +238,11 @@ esp_err_t tracker_mqtt_subscribe_commands_internal(void) {
                         "invalid commands topic");
 
     char cmd[96] = {0};
-    // QoS 1 (trailing ,1) ensures the broker re-delivers commands until acknowledged.
-    (void)snprintf(cmd, sizeof(cmd), "AT+CMQTTSUB=%d,%u,1\r", MQTT_CLIENT_INDEX, (unsigned int)topic_len);
+    int n = snprintf(cmd, sizeof(cmd), "AT+CMQTTSUB=%d,%u,1\r", MQTT_CLIENT_INDEX, (unsigned int)topic_len);
+    if (n < 0 || (size_t)n >= sizeof(cmd)) {
+        ESP_LOGW(TRACKER_MQTT_TAG, "subscribe cmd truncated");
+        return ESP_FAIL;
+    }
     if (tracker_mqtt_input_data(cmd, s_topic_commands, "+CMQTTSUB:", true) != ESP_OK) {
         if (!s_connected) {
             // The data-entry helper flips s_connected on a disconnect code; this is a deferrable failure.
