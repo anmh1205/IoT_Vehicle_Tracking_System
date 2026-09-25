@@ -922,11 +922,8 @@ esp_err_t command_handler_process(const char *command_json,
                 .config_update = update,
             };
             result = command_handler_enqueue_action(&item);
-
             if (result == ESP_OK && out_deferred != NULL) {
-
                 *out_deferred = true;
-
             }
         } else {
             result = ESP_ERR_INVALID_ARG;
@@ -965,11 +962,8 @@ esp_err_t command_handler_process(const char *command_json,
             .action = COMMAND_ACTION_REBOOT,
         };
         result = command_handler_enqueue_action(&item);
-
         if (result == ESP_OK && out_deferred != NULL) {
-
             *out_deferred = true;
-
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_OTA_UPDATE) == 0) {
         // OTA commands are fully validated and copied now because the original JSON buffer disappears after this callback.
@@ -986,11 +980,8 @@ esp_err_t command_handler_process(const char *command_json,
                 .ota_command = parsed,
             };
             result = command_handler_enqueue_action(&item);
-
             if (result == ESP_OK && out_deferred != NULL) {
-
                 *out_deferred = true;
-
             }
         } else {
             ESP_LOGW(TAG, "event=ota_update_rejected reason=invalid_params");
@@ -1005,11 +996,8 @@ esp_err_t command_handler_process(const char *command_json,
         };
         item.ota_command.rollback_pending = true;
         result = command_handler_enqueue_action(&item);
-
         if (result == ESP_OK && out_deferred != NULL) {
-
             *out_deferred = true;
-
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_ASSIGN_SESSION) == 0) {
         // Session assignments are staged so the FSM can atomically align local and canonical session identifiers.
@@ -1021,11 +1009,8 @@ esp_err_t command_handler_process(const char *command_json,
                 .session_assignment = assignment,
             };
             result = command_handler_enqueue_action(&item);
-
             if (result == ESP_OK && out_deferred != NULL) {
-
                 *out_deferred = true;
-
             }
         } else {
             ESP_LOGW(TAG, "event=assign_session_rejected reason=invalid_params");
