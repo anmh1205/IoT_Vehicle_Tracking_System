@@ -1324,16 +1324,16 @@ esp_err_t command_handler_apply_pending_tracking_enabled(void) {
     }
 
     const bool enabled = s_consumed_tracking_enabled;
-    s_consumed_tracking_enabled_valid = false;
-    command_handler_give_lock();
 
     /*
-     * enable_tracking is a cloud desired-state operation. Commit the desired
-     * value first so an acknowledged command cannot be undone silently by the
-     * next reboot or OTA restart.
+     * enable_tracking is a cloud desired-state operation. Keep the FSM-owned
+     * state lock across this rare NVS write so durable state and RAM state have
+     * one outcome: commit succeeds -> both change; commit fails -> neither does.
      */
     esp_err_t persist_err = nvs_config_save_tracking_enabled(enabled);
+    s_consumed_tracking_enabled_valid = false;
     if (persist_err != ESP_OK) {
+        command_handler_give_lock();
         ESP_LOGW(TAG,
                  "event=enable_tracking_persist_failed enabled=%d err=%s",
                  enabled ? 1 : 0,
@@ -1341,11 +1341,6 @@ esp_err_t command_handler_apply_pending_tracking_enabled(void) {
         return persist_err;
     }
 
-    if (!command_handler_take_lock()) {
-        ESP_LOGW(TAG,
-                 "event=enable_tracking_apply_skipped reason=lock_busy_after_persist");
-        return ESP_ERR_TIMEOUT;
-    }
     s_tracking_enabled = enabled;
     command_handler_give_lock();
 
