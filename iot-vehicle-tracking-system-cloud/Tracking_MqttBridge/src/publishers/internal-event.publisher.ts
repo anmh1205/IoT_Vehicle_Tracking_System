@@ -23,18 +23,33 @@ export const publishInternalEvent = (
   eventType: InternalEventType,
   payload: Record<string, unknown>,
 ): void => {
+  const topic = TOPIC_MAP[eventType];
+  const qosKey = `device/${eventType}`;
+  const qos = INTERNAL_QOS[qosKey] ?? 0;
   const client = getClient();
-  if (!client?.connected) {
+
+  if (!client) {
     logger.warn(
-      { eventType, event: 'internal_event_publish_skipped', reason: 'mqtt_not_connected' },
+      { eventType, topic, qos, event: 'internal_event_publish_skipped', reason: 'client_missing' },
       'Internal event publish skipped',
     );
     return;
   }
 
-  const topic = TOPIC_MAP[eventType];
-  const qosKey = `device/${eventType}`;
-  const qos = INTERNAL_QOS[qosKey] ?? 0;
+  if (!client.connected && qos === 0) {
+    logger.warn(
+      { eventType, topic, qos, event: 'internal_event_publish_skipped', reason: 'qos0_offline_drop' },
+      'Internal QoS0 event dropped while MQTT is offline',
+    );
+    return;
+  }
+
+  if (!client.connected) {
+    logger.info(
+      { eventType, topic, qos, event: 'internal_event_publish_queued', reason: 'mqtt_reconnecting' },
+      'Critical internal event queued for MQTT reconnect',
+    );
+  }
 
   const envelope = {
     correlation_id: generateCorrelationId(),
