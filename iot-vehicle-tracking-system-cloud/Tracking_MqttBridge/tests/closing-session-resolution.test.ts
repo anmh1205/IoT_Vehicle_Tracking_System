@@ -326,8 +326,12 @@ test('ensureDeviceSession returns sessions atomically retired by a replacement i
       }
 
       if (/UPDATE device_sessions[\s\S]+end_reason = COALESCE\(end_reason, 'superseded'\)/.test(sql)) {
-        assert.match(sql, /RETURNING id/);
-        return { rows: [{ id: 321 }], rowCount: 1 };
+        assert.match(sql, /RETURNING id, COALESCE\(total_runtime_seconds, uptime, 0\)::text AS runtime_seconds/);
+        return { rows: [{ id: 321, runtime_seconds: '123' }], rowCount: 1 };
+      }
+
+      if (/UPDATE devices[\s\S]+total_runtime_seconds/.test(sql)) {
+        return { rows: [], rowCount: 1 };
       }
 
       if (/INSERT INTO device_sessions/.test(sql)) {
@@ -367,4 +371,9 @@ test('ensureDeviceSession returns sessions atomically retired by a replacement i
         && /RETURNING id/.test(sql),
     ),
   );
+
+  const runtimeUpdateIndex = statements.findIndex(
+    (sql) => /UPDATE devices[\s\S]+total_runtime_seconds/.test(sql),
+  );
+  assert.ok(runtimeUpdateIndex >= 0);
 });
