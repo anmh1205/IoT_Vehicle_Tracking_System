@@ -199,12 +199,14 @@ const normalizeGnssLocation = (
 ): {
   latitude: number | undefined;
   longitude: number | undefined;
+  satellites: number | undefined;
   speedAllowed: boolean;
 } => {
   if (fixValid === false) {
     return {
       latitude: undefined,
       longitude: undefined,
+      satellites: undefined,
       speedAllowed: false,
     };
   }
@@ -213,6 +215,7 @@ const normalizeGnssLocation = (
     return {
       latitude,
       longitude,
+      satellites,
       speedAllowed: false,
     };
   }
@@ -226,6 +229,7 @@ const normalizeGnssLocation = (
     return {
       latitude: undefined,
       longitude: undefined,
+      satellites: undefined,
       speedAllowed: false,
     };
   }
@@ -233,6 +237,7 @@ const normalizeGnssLocation = (
   return {
     latitude,
     longitude,
+    satellites,
     speedAllowed: true,
   };
 };
@@ -1086,7 +1091,7 @@ export const handleRawData = async (
     longitude: effectiveLongitude,
     speed: effectiveSpeed,
     course: effectiveCourse,
-    satellites: payload.data.satellites,
+    satellites: normalizedGnss.satellites,
     ignition: payload.data.ignition !== undefined
       ? (payload.data.ignition ? 1 : 0)
       : undefined,
@@ -1258,7 +1263,7 @@ export const handleRawData = async (
       longitude: effectiveLongitude,
       speed: effectiveSpeed,
       course: effectiveCourse,
-      satellites: payload.data.satellites,
+      satellites: normalizedGnss.satellites,
       vehicle_battery: payload.data.vehicle_battery,
       device_battery: payload.data.device_battery,
       imu_accel_delta_mps2: imuAccelDeltaMps2,
