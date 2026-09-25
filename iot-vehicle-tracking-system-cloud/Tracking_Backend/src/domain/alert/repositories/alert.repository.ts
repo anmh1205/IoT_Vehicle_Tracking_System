@@ -141,28 +141,74 @@ export const findById = async (id: number): Promise<Alert | null> =>
     [id],
   );
 
-export const create = async (input: CreateAlertInput): Promise<Alert> =>
-  insertOne<Alert>(
-    `INSERT INTO alerts (vehicle_id, device_id, trip_id, geofence_id, alert_type, source, severity, title, message, latitude, longitude, speed, threshold_value, actual_value, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
-     RETURNING *`,
-    [
-      input.vehicleId ?? null,
-      input.deviceId ?? null,
-      input.tripId ?? null,
-      input.geofenceId ?? null,
-      input.alertType,
-      input.source ?? 'device',
-      input.severity,
-      input.title,
-      input.message ?? null,
-      input.latitude ?? null,
-      input.longitude ?? null,
-      input.speed ?? null,
-      input.thresholdValue ?? null,
-      input.actualValue ?? null,
-    ],
-  );
+export const create = async (
+  input: CreateAlertInput,
+): Promise<{ alert: Alert; created: boolean }> => {
+  const client = await pool.connect();
+  const sourceMessageId = input.sourceMessageId?.trim() || null;
+
+  try {
+    await client.query('BEGIN');
+    const inserted = await client.query<Alert>(
+      `INSERT INTO alerts (
+         vehicle_id, device_id, trip_id, geofence_id, alert_type, source, severity,
+         title, message, latitude, longitude, speed, threshold_value, actual_value,
+         source_message_id, created_at, updated_at
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
+       ON CONFLICT (device_id, source_message_id, alert_type, title) WHERE source_message_id IS NOT NULL DO NOTHING
+       RETURNING *`,
+      [
+        input.vehicleId ?? null,
+        input.deviceId ?? null,
+        input.tripId ?? null,
+        input.geofenceId ?? null,
+        input.alertType,
+        input.source ?? 'device',
+        input.severity,
+        input.title,
+        input.message ?? null,
+        input.latitude ?? null,
+        input.longitude ?? null,
+        input.speed ?? null,
+        input.thresholdValue ?? null,
+        input.actualValue ?? null,
+        sourceMessageId,
+      ],
+    );
+
+    if (inserted.rows[0]) {
+      await client.query('COMMIT');
+      return { alert: inserted.rows[0], created: true };
+    }
+
+    if (sourceMessageId === null) {
+      throw new Error('Alert insert returned no row without a source message identity');
+    }
+
+    const existing = await client.query<Alert>(
+      `SELECT *
+       FROM alerts
+       WHERE device_id IS NOT DISTINCT FROM $1
+         AND source_message_id = $2
+         AND alert_type = $3
+         AND title = $4
+       LIMIT 1`,
+      [input.deviceId ?? null, sourceMessageId, input.alertType, input.title],
+    );
+    if (!existing.rows[0]) {
+      throw new Error(`Alert source message ${sourceMessageId} conflicted but existing row was not found`);
+    }
+
+    await client.query('COMMIT');
+    return { alert: existing.rows[0], created: false };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
 
 export const acknowledge = async (id: number, userId: number): Promise<Alert | null> =>
   updateOne<Alert>(
