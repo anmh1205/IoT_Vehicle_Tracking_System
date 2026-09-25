@@ -1212,6 +1212,7 @@ export const handleRawData = async (
       sessionId,
       deviceTimestampMs: timestampMs,
       serverTimestampMs: receivedAtMs,
+      messageId,
       imuAccelDeltaMps2,
       vehicleBattery: payload.data.vehicle_battery,
       deviceBattery: payload.data.device_battery,
