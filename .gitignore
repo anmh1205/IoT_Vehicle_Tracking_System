@@ -68,3 +68,14 @@ resources/reports/db-sync/**/*.sql
 /iot-vehicle-tracking-system-cloud/Tracking_Backend/coverage
 /.playwright-cli
 
+# Private keys committed by accident — untracked, keep local (rotate on server)
+.claude/skills/esp32-loop-coding/remote/key/id_ed25519_anmh1
+.claude/skills/vps-control/keys/id_ed25519_vps_control
+.codex/skills/esp32-loop-coding/remote/key/id_ed25519_anmh1
+.codex/skills/vps-control/keys/id_ed25519_vps_control
+.codex/vps-control/keys/id_ed25519_vps_control
+
+# ESP-IDF generated sdkconfig with device secrets — untracked, keep local
+iot-vehicle-tracking-system-firmware/sdkconfig
+iot-vehicle-tracking-system-firmware/sdkconfig.old
+
