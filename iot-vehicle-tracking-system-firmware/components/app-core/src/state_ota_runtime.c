@@ -31,7 +31,7 @@ static uint64_t s_ota_confirm_retry_after_ms = 0;
  * confirm context lets the next boot continue the authoritative confirm/timeout
  * flow even after crashes or watchdog resets.
  */
-static void state_machine_persist_ota_context(void) {
+static esp_err_t state_machine_persist_ota_context(void) {
     ota_persist_context_t persisted = {0};
     persisted.pending_confirm = g_rtc_context.ota_pending_confirm;
     persisted.confirm_timeout_sec = g_rtc_context.ota_confirm_timeout_sec;
@@ -49,6 +49,7 @@ static void state_machine_persist_ota_context(void) {
     if (err != ESP_OK) {
         ESP_LOGW(TAG, "event=ota_context_persist_failed err=%s", esp_err_to_name(err));
     }
+    return err;
 }
 
 /**
@@ -136,6 +137,44 @@ esp_err_t state_machine_restore_ota_context_from_nvs(void) {
 static void state_machine_ota_status_callback(const firmware_status_t *firmware, void *user_ctx) {
     (void)user_ctx;
     state_machine_publish_firmware_payload(firmware);
+}
+
+
+/**
+ * @brief Persist the exact confirm contract before the OTA slot becomes bootable.
+ */
+static esp_err_t state_machine_ota_preboot_commit_callback(const ota_command_t *cmd,
+                                                           const firmware_status_t *firmware,
+                                                           void *user_ctx) {
+    (void)user_ctx;
+    if (cmd == NULL || firmware == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    util_copy_string(g_rtc_context.ota_job_id,
+                     sizeof(g_rtc_context.ota_job_id),
+                     cmd->job_id);
+    util_copy_string(g_rtc_context.ota_target_version,
+                     sizeof(g_rtc_context.ota_target_version),
+                     cmd->version);
+    util_copy_string(g_rtc_context.ota_previous_version,
+                     sizeof(g_rtc_context.ota_previous_version),
+                     s_current_version);
+    util_copy_string(g_rtc_context.ota_partition,
+                     sizeof(g_rtc_context.ota_partition),
+                     firmware->partition);
+    g_rtc_context.ota_pending_confirm = true;
+    g_rtc_context.ota_confirm_timeout_sec = cmd->confirm_timeout_sec;
+
+    state_machine_update_time_source();
+    if (s_time_trusted) {
+        g_rtc_context.ota_confirm_deadline_ms =
+            s_event_timestamp_ms + ((uint64_t)cmd->confirm_timeout_sec * 1000ULL);
+    } else {
+        g_rtc_context.ota_confirm_deadline_ms = 0;
+    }
+
+    return state_machine_persist_ota_context();
 }
 
 /**
@@ -384,39 +423,31 @@ esp_err_t state_machine_process_ota_command(command_action_t action, bool *out_r
                               &cmd,
                               &report,
                               state_machine_ota_status_callback,
+                              NULL,
+                              state_machine_ota_preboot_commit_callback,
                               NULL);
     if (apply_err == ESP_OK) {
-        // A successful flash write persists enough context for the rebooted firmware to confirm or reject itself later.
         /*
-         * Persist all fields required to resume confirmation after reboot. The
-         * cloud-facing canonical outcome still comes from the next boot.
+         * The preboot commit hook already persisted every field needed by the
+         * next image. Only now, after boot promotion also succeeded, may the
+         * command request a restart.
          */
-        util_copy_string(g_rtc_context.ota_job_id, sizeof(g_rtc_context.ota_job_id), cmd.job_id);
-        util_copy_string(g_rtc_context.ota_target_version,
-                         sizeof(g_rtc_context.ota_target_version),
-                         cmd.version);
-        util_copy_string(g_rtc_context.ota_previous_version,
-                         sizeof(g_rtc_context.ota_previous_version),
-                         s_current_version);
-        util_copy_string(g_rtc_context.ota_partition,
-                         sizeof(g_rtc_context.ota_partition),
-                         report.partition);
-        g_rtc_context.ota_pending_confirm = true;
-        g_rtc_context.ota_confirm_timeout_sec = cmd.confirm_timeout_sec;
-        state_machine_update_time_source();
-        if (s_time_trusted) {
-            g_rtc_context.ota_confirm_deadline_ms =
-                s_event_timestamp_ms + ((uint64_t)cmd.confirm_timeout_sec * 1000ULL);
-        } else {
-            g_rtc_context.ota_confirm_deadline_ms = 0;
-        }
-        state_machine_persist_ota_context();
         if (out_restart_required != NULL) {
             *out_restart_required = true;
         }
     } else {
-        // Flash/apply failures clear the in-progress flag locally so the FSM can accept or report later work again.
+        /*
+         * The preboot hook can succeed and a later esp_ota_set_boot_partition()
+         * can still fail. Remove that now-stale pending context on every failed
+         * apply so the current image is never mistaken for an unconfirmed OTA
+         * image on a later reboot.
+         */
+        bool had_pending_confirm = g_rtc_context.ota_pending_confirm;
+        g_rtc_context.ota_pending_confirm = false;
         g_rtc_context.ota_confirm_deadline_ms = 0;
+        if (had_pending_confirm) {
+            state_machine_clear_persisted_ota_context();
+        }
         s_ota_in_progress = false;
     }
     return apply_err;
