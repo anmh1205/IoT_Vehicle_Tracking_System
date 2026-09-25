@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:tracking_mobile/core/services/notification_service.dart';
 import 'package:tracking_mobile/core/services/storage_service.dart';
@@ -17,6 +19,11 @@ class FCMHandler {
   const FCMHandler._();
 
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  static final StreamController<String> _tokenChanges =
+      StreamController<String>.broadcast();
+
+  /// Emits FCM registration token rotations while the app is running.
+  static Stream<String> get tokenChanges => _tokenChanges.stream;
 
   /// Initialize FCM: request permission, get token, set up listeners.
   static Future<void> init() async {
@@ -49,7 +56,7 @@ class FCMHandler {
       _messaging.onTokenRefresh.listen((newToken) async {
         await StorageService.instance.saveFcmToken(newToken);
         Log.info('FCM token refreshed');
-        // TODO: Re-register with backend API when token changes
+        _tokenChanges.add(newToken);
       });
 
       // Background handler (must be top-level)
