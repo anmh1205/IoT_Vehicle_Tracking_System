@@ -70,7 +70,9 @@ esp_err_t command_handler_init(config_t *config);
  * @return ESP_ERR_NO_MEM when bounded command staging is full.
  * @return ESP_ERR_TIMEOUT when command state cannot be acquired in time.
  */
-esp_err_t command_handler_process(const char *command_json, uint64_t *out_command_id);
+esp_err_t command_handler_process(const char *command_json,
+                                  uint64_t *out_command_id,
+                                  bool *out_deferred);
 
 /**
  * @brief Consume one-shot location-request flag.
@@ -91,7 +93,7 @@ bool command_handler_is_tracking_enabled(void);
  *
  * @return Consumed action value.
  */
-command_action_t command_handler_consume_action(void);
+command_action_t command_handler_consume_action(uint64_t *out_command_id);
 
 /**
  * @brief Apply the queued `update_config` payload consumed as current action.
