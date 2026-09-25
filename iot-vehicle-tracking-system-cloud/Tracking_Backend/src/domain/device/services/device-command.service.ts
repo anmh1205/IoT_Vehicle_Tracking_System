@@ -100,16 +100,17 @@ const recoverPendingCommandsWithClient = async (client: mqtt.MqttClient): Promis
   for (const command of pending) {
     const remainingExpirySeconds = getRemainingCommandExpirySeconds(command);
     if (remainingExpirySeconds === 0) {
-      await deviceCommandRepo.updateCommandStatus(
+      const expired = await deviceCommandRepo.failPendingCommandBeforeDispatch(
         command.id,
-        'failed',
         'command_expired_before_dispatch',
       );
-      logger.warn('Expired pending device command without replaying stale intent', {
-        commandId: command.id,
-        deviceId: command.deviceId,
-        command: command.command,
-      });
+      if (expired) {
+        logger.warn('Expired pending device command without replaying stale intent', {
+          commandId: command.id,
+          deviceId: command.deviceId,
+          command: command.command,
+        });
+      }
       continue;
     }
 
