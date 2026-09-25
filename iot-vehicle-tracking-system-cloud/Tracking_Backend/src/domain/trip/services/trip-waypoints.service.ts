@@ -252,7 +252,7 @@ export const computeRouteSummary = (
     }
   }
 
-  const durationMinutes = Math.max(0, (endTime.getTime() - startTime.getTime()) / 60000);
+  const durationMinutes = (endTime.getTime() - startTime.getTime()) / 60000;
 
   return {
     distanceKm: Math.round(distanceKm * 100) / 100,
