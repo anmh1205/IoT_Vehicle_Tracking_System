@@ -59,34 +59,156 @@ const flush = async (): Promise<void> => {
         await client.query(
           `UPDATE devices
            SET current_status = CASE
-                 WHEN $7::bigint IS NULL THEN $2
-                 WHEN EXISTS (
-                   SELECT 1
-                   FROM device_sessions s
-                   WHERE s.id = $7 AND s.status = 'running'
+                 WHEN (
+                 to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                 AND (
+                   $7::bigint IS NULL
+                   OR EXISTS (
+                     SELECT 1
+                     FROM device_sessions s
+                     WHERE s.id = $7 AND s.status = 'running'
+                   )
+                 )
                ) THEN $2
                  ELSE current_status
                END,
-               ignition_state = COALESCE($8, ignition_state),
-               motion_state = COALESCE($9, motion_state),
-               vehicle_state = COALESCE($10, vehicle_state),
-               device_state = COALESCE($11, device_state),
-               sleep_mode = COALESCE($12, sleep_mode),
+               ignition_state = CASE
+                 WHEN (
+                 to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                 AND (
+                   $7::bigint IS NULL
+                   OR EXISTS (
+                     SELECT 1
+                     FROM device_sessions s
+                     WHERE s.id = $7 AND s.status = 'running'
+                   )
+                 )
+               ) THEN COALESCE($8, ignition_state)
+                 ELSE ignition_state
+               END,
+               motion_state = CASE
+                 WHEN (
+                 to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                 AND (
+                   $7::bigint IS NULL
+                   OR EXISTS (
+                     SELECT 1
+                     FROM device_sessions s
+                     WHERE s.id = $7 AND s.status = 'running'
+                   )
+                 )
+               ) THEN COALESCE($9, motion_state)
+                 ELSE motion_state
+               END,
+               vehicle_state = CASE
+                 WHEN (
+                 to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                 AND (
+                   $7::bigint IS NULL
+                   OR EXISTS (
+                     SELECT 1
+                     FROM device_sessions s
+                     WHERE s.id = $7 AND s.status = 'running'
+                   )
+                 )
+               ) THEN COALESCE($10, vehicle_state)
+                 ELSE vehicle_state
+               END,
+               device_state = CASE
+                 WHEN (
+                 to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                 AND (
+                   $7::bigint IS NULL
+                   OR EXISTS (
+                     SELECT 1
+                     FROM device_sessions s
+                     WHERE s.id = $7 AND s.status = 'running'
+                   )
+                 )
+               ) THEN COALESCE($11, device_state)
+                 ELSE device_state
+               END,
+               sleep_mode = CASE
+                 WHEN (
+                 to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                 AND (
+                   $7::bigint IS NULL
+                   OR EXISTS (
+                     SELECT 1
+                     FROM device_sessions s
+                     WHERE s.id = $7 AND s.status = 'running'
+                   )
+                 )
+               ) THEN COALESCE($12, sleep_mode)
+                 ELSE sleep_mode
+               END,
                state_updated_at = CASE
-                 WHEN $8::text IS NOT NULL
-                   OR $9::text IS NOT NULL
-                   OR $10::text IS NOT NULL
-                   OR $11::text IS NOT NULL
-                   OR $12::text IS NOT NULL
+                 WHEN (
+                 to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                 AND (
+                   $7::bigint IS NULL
+                   OR EXISTS (
+                     SELECT 1
+                     FROM device_sessions s
+                     WHERE s.id = $7 AND s.status = 'running'
+                   )
+                 )
+               )
+                  AND (
+                    $8::text IS NOT NULL
+                    OR $9::text IS NOT NULL
+                    OR $10::text IS NOT NULL
+                    OR $11::text IS NOT NULL
+                    OR $12::text IS NOT NULL
+                  )
                  THEN GREATEST(
                    COALESCE(state_updated_at, to_timestamp($6 / 1000.0)),
                    to_timestamp($6 / 1000.0)
                  )
                  ELSE state_updated_at
                END,
-               last_latitude = COALESCE($3, last_latitude),
-               last_longitude = COALESCE($4, last_longitude),
-               last_speed = COALESCE($5, last_speed),
+               last_latitude = CASE
+                 WHEN (
+                 to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                 AND (
+                   $7::bigint IS NULL
+                   OR EXISTS (
+                     SELECT 1
+                     FROM device_sessions s
+                     WHERE s.id = $7 AND s.status = 'running'
+                   )
+                 )
+               ) THEN COALESCE($3, last_latitude)
+                 ELSE last_latitude
+               END,
+               last_longitude = CASE
+                 WHEN (
+                 to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                 AND (
+                   $7::bigint IS NULL
+                   OR EXISTS (
+                     SELECT 1
+                     FROM device_sessions s
+                     WHERE s.id = $7 AND s.status = 'running'
+                   )
+                 )
+               ) THEN COALESCE($4, last_longitude)
+                 ELSE last_longitude
+               END,
+               last_speed = CASE
+                 WHEN (
+                 to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                 AND (
+                   $7::bigint IS NULL
+                   OR EXISTS (
+                     SELECT 1
+                     FROM device_sessions s
+                     WHERE s.id = $7 AND s.status = 'running'
+                   )
+                 )
+               ) THEN COALESCE($5, last_speed)
+                 ELSE last_speed
+               END,
                last_seen_at = GREATEST(
                  COALESCE(last_seen_at, to_timestamp($6 / 1000.0)),
                  to_timestamp($6 / 1000.0)
