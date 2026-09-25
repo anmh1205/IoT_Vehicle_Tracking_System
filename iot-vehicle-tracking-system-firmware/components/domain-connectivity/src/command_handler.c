@@ -77,6 +77,12 @@ static atomic_uint s_dropped_command_count = 0U;
 static uint64_t s_recent_command_ids[COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN] = {0};
 static size_t s_recent_command_cursor = 0U;
 static bool s_recent_command_persist_dirty = false;
+/*
+ * Fail-safe latch for the extremely rare case where the MQTT callback cannot
+ * acquire the command lock after an action was already staged. Do not execute
+ * staged side effects with an uncertain dedupe record in that boot.
+ */
+static bool s_recent_command_persist_blocked = false;
 
 static bool command_handler_is_recent_command_id_locked(uint64_t command_id) {
     if (command_id == 0U) {
@@ -112,8 +118,9 @@ static void command_handler_remember_command_id(uint64_t command_id) {
     }
     if (!command_handler_take_lock()) {
         s_recent_command_persist_dirty = true;
-        ESP_LOGW(TAG,
-                 "event=command_dedupe_persist_deferred command_id=%llu reason=lock_busy",
+        s_recent_command_persist_blocked = true;
+        ESP_LOGE(TAG,
+                 "event=command_dedupe_execution_blocked command_id=%llu reason=lock_busy",
                  (unsigned long long)command_id);
         return;
     }
@@ -814,6 +821,7 @@ esp_err_t command_handler_init(config_t *config) {
             persisted_dedupe.cursor % COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN;
     }
     s_recent_command_persist_dirty = false;
+    s_recent_command_persist_blocked = false;
     command_handler_reset_consumed_payloads();
     xQueueReset(s_action_queue);
 
@@ -1168,6 +1176,11 @@ command_action_t command_handler_consume_action(uint64_t *out_command_id) {
         *out_command_id = 0U;
     }
     if (!command_handler_take_lock()) {
+        return COMMAND_ACTION_NONE;
+    }
+
+    if (s_recent_command_persist_blocked) {
+        command_handler_give_lock();
         return COMMAND_ACTION_NONE;
     }
 
