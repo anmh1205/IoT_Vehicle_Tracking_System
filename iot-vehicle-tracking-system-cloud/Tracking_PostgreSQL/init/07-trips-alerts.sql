@@ -78,7 +78,7 @@ CREATE INDEX IF NOT EXISTS idx_alerts_source ON alerts(source);
 CREATE INDEX IF NOT EXISTS idx_alerts_severity ON alerts(severity);
 CREATE INDEX IF NOT EXISTS idx_alerts_created ON alerts(created_at DESC);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_alerts_source_message_id
-    ON alerts(source_message_id)
+    ON alerts(device_id, source_message_id, alert_type, title)
     WHERE source_message_id IS NOT NULL;
 
 CREATE TRIGGER trigger_alerts_updated_at
