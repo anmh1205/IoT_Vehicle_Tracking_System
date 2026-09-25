@@ -21,6 +21,8 @@
 
 static const char *TAG = "OTA_RUNTIME";
 static bool s_restart_after_command_ack = false;
+static uint64_t s_ota_confirm_retry_after_ms = 0;
+#define OTA_CONFIRM_RESTORE_RETRY_MS 1000ULL
 
 /**
  * @brief Persist the current OTA confirm context to NVS.
@@ -82,9 +84,9 @@ static void state_machine_clear_persisted_ota_context(void) {
  *
  * @note If NVS load fails or context invalid, operation is skipped silently.
  */
-void state_machine_restore_ota_context_from_nvs(void) {
+esp_err_t state_machine_restore_ota_context_from_nvs(void) {
     if (g_rtc_context.ota_pending_confirm) {
-        return;
+        return ESP_OK;
     }
 
     ota_persist_context_t persisted = {0};
@@ -92,15 +94,15 @@ void state_machine_restore_ota_context_from_nvs(void) {
     esp_err_t err = nvs_config_load_ota_context(&persisted, &found);
     if (err != ESP_OK) {
         ESP_LOGW(TAG, "event=ota_context_load_failed err=%s", esp_err_to_name(err));
-        return;
+        return err;
     }
     if (!found) {
-        return;
+        return ESP_OK;
     }
     if (!persisted.pending_confirm || util_string_empty(persisted.job_id) ||
         util_string_empty(persisted.target_version)) {
         state_machine_clear_persisted_ota_context();
-        return;
+        return ESP_OK;
     }
 
     g_rtc_context.ota_pending_confirm = true;
@@ -122,6 +124,7 @@ void state_machine_restore_ota_context_from_nvs(void) {
              g_rtc_context.ota_job_id,
              g_rtc_context.ota_target_version,
              g_rtc_context.ota_pending_confirm ? 1 : 0);
+    return ESP_OK;
 }
 
 /**
@@ -214,8 +217,11 @@ void state_machine_try_confirm_running_firmware(void) {
         return;
     }
 
-    // Confirmation should only execute once per boot, even if the FSM loops repeatedly before the cloud comes back.
-    s_ota_confirm_checked = true;
+    uint64_t now_ms = util_uptime_ms();
+    if (s_ota_confirm_retry_after_ms != 0 && now_ms < s_ota_confirm_retry_after_ms) {
+        return;
+    }
+
     const esp_partition_t *running = esp_ota_get_running_partition();
     if (running != NULL && !util_string_empty(running->label)) {
         util_copy_string(g_rtc_context.ota_partition,
@@ -223,8 +229,27 @@ void state_machine_try_confirm_running_firmware(void) {
                          running->label);
     }
 
-    state_machine_restore_ota_context_from_nvs();
+    esp_err_t restore_err = state_machine_restore_ota_context_from_nvs();
+    if (restore_err != ESP_OK) {
+        s_ota_confirm_retry_after_ms = now_ms + OTA_CONFIRM_RESTORE_RETRY_MS;
+        ESP_LOGW(TAG,
+                 "event=ota_confirm_deferred reason=context_restore_failed err=%s retry_ms=%u",
+                 esp_err_to_name(restore_err),
+                 (unsigned)OTA_CONFIRM_RESTORE_RETRY_MS);
+        return;
+    }
+
+    s_ota_confirm_retry_after_ms = 0;
+    s_ota_confirm_checked = true;
     if (!g_rtc_context.ota_pending_confirm) {
+        // Only now is it safe to describe this as a normal fresh boot: persisted
+        // OTA state was read successfully and proved no confirmation is pending.
+        (void)state_machine_publish_firmware_status(TRACKER_OTA_STATUS_SUCCESS,
+                                                    TRACKER_OTA_PROGRESS_DONE,
+                                                    s_current_version,
+                                                    "",
+                                                    "",
+                                                    "");
         return;
     }
 

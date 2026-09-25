@@ -26,8 +26,9 @@ void state_machine_handle_pending_action(void);
  * Lets the firmware resume the authoritative confirm/timeout flow after a crash
  * or watchdog reset where RTC memory alone is not sufficient. No-op when a
  * confirm is already pending or no valid context is stored.
+ * @return ESP_OK when persisted state was read or no context exists; otherwise the NVS error.
  */
-void state_machine_restore_ota_context_from_nvs(void);
+esp_err_t state_machine_restore_ota_context_from_nvs(void);
 /**
  * @brief Confirm (or reject) the running firmware once per boot after OTA.
  *
