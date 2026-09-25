@@ -58,6 +58,20 @@ describe('device-command.repository', () => {
     expect(params).toEqual([12, 'accepted', 'accepted', true, 'TRACKER_001']);
   });
 
+  it('keeps command lifecycle monotonic when older ACKs are replayed', async () => {
+    vi.mocked(pool.query).mockResolvedValue({ rows: [] } as any);
+
+    await updateCommandStatus(12, 'accepted', 'accepted', {
+      markAcknowledged: true,
+      expectedDeviceId: 'TRACKER_001',
+    });
+
+    const [sql] = vi.mocked(pool.query).mock.calls[0] ?? [];
+    expect(sql).toContain("status IN ('acknowledged', 'failed')");
+    expect(sql).toContain("status = 'accepted' AND $2::varchar IN ('pending', 'sent')");
+    expect(sql).toContain("status = 'sent' AND $2::varchar = 'pending'");
+  });
+
   it('can mark failed device ACKs as acknowledged without treating publish failures as ACKs', async () => {
     vi.mocked(pool.query).mockResolvedValue({
       rows: [{
