@@ -42,6 +42,7 @@ export const mqttConfig = {
   rejectUnauthorized: fromEnv('MQTT_REJECT_UNAUTHORIZED') !== 'false',
   username: fromEnv('MQTT_USERNAME') ?? 'backend',
   password: requireEnv('MQTT_PASSWORD', fromEnv('MQTT_PASSWORD')),
+  listenerClientId: fromEnv('MQTT_LISTENER_CLIENT_ID')?.trim() || undefined,
 } as const;
 
 export const victoriaMetricsConfig = {
