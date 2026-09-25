@@ -128,10 +128,7 @@ export const handleStatus = async (
     payload.timestamp,
     payload.metadata?.sent_at,
   );
-  const persistedWatermarkMs = maxTimestampMs(
-    parseIsoTimestampMs(device.last_seen_at),
-    parseIsoTimestampMs(device.state_updated_at),
-  );
+  const persistedWatermarkMs = parseIsoTimestampMs(device.payload_updated_at);
   const liveMutationDecision = shouldAcceptLiveMutation({
     incomingTimestampMs: timestampMs,
     incomingSeqNo: seqNo,
