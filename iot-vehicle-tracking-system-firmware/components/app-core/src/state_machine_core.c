@@ -117,6 +117,8 @@ typedef struct {
 static QueueHandle_t s_command_ack_queue = NULL;
 /* Fresh local sessions retain their authoritative start marker until durable publish acceptance. */
 static bool s_session_start_boundary_pending = false;
+/* True once the current active-session identity has a durable NVS recovery record. */
+static bool s_session_identity_persisted = false;
 
 static const char *state_machine_command_ack_response(esp_err_t result, bool execution_result) {
     switch (result) {
@@ -797,12 +799,13 @@ static void state_machine_reset_session_runtime(void) {
     util_copy_string(s_session_boot_id, sizeof(s_session_boot_id), s_boot_id);
     s_session_restore_pending = false;
     s_session_start_boundary_pending = false;
+    s_session_identity_persisted = false;
 }
 
 /**
  * @brief Persist the active session identity for reboot-in-place recovery.
  */
-static void state_machine_persist_active_session(void) {
+static bool state_machine_persist_active_session(void) {
     session_persist_context_t context = {
         .active = true,
         .local_session_key = s_session_id,
@@ -817,7 +820,11 @@ static void state_machine_persist_active_session(void) {
                  (unsigned long)s_session_id,
                  (unsigned long long)s_canonical_session_id,
                  esp_err_to_name(err));
+        return false;
     }
+
+    s_session_identity_persisted = true;
+    return true;
 }
 
 /**
@@ -855,6 +862,7 @@ static void state_machine_restore_session_context_from_nvs(void) {
     }
     s_session_restore_pending = true;
     s_session_start_boundary_pending = context.start_boundary_pending;
+    s_session_identity_persisted = true;
     ESP_LOGI(TAG,
              "event=session_candidate_restored local=%lu canonical=%llu boot_id=%s start_pending=%d",
              (unsigned long)s_session_id,
@@ -875,7 +883,7 @@ static void state_machine_start_new_session(void) {
     s_session_restore_pending = false;
     s_session_start_boundary_pending = true;
     offline_queue_set_session(s_session_id);
-    state_machine_persist_active_session();
+    (void)state_machine_persist_active_session();
 }
 
 /**
@@ -1015,7 +1023,7 @@ esp_err_t state_machine_apply_session_assignment(uint32_t local_session_key,
     }
 
     s_canonical_session_id = canonical_session_id;
-    state_machine_persist_active_session();
+    (void)state_machine_persist_active_session();
     ESP_LOGI(TAG,
              "event=session_canonical_assigned local=%lu canonical=%llu boot_id=%s",
              (unsigned long)s_session_id,
@@ -1052,6 +1060,20 @@ static void state_machine_publish_running_status_if_needed(bool started_session)
     }
 
     if (s_session_start_boundary_pending) {
+        /*
+         * Never make the cloud start boundary more durable than the local
+         * recovery identity. If NVS is temporarily unavailable, keep the
+         * boundary pending and retry persistence on a later FSM iteration.
+         */
+        if (!s_session_identity_persisted && !state_machine_persist_active_session()) {
+            ESP_LOGW(TAG,
+                     "event=session_start_deferred local=%lu canonical=%llu boot_id=%s reason=session_identity_not_durable",
+                     (unsigned long)s_session_id,
+                     (unsigned long long)s_canonical_session_id,
+                     s_session_boot_id);
+            return;
+        }
+
         if (state_machine_publish_status("running", "started")) {
             s_session_start_boundary_pending = false;
             /*
@@ -1059,7 +1081,7 @@ static void state_machine_publish_running_status_if_needed(bool started_session)
              * this NVS write fails, reboot recovery conservatively retries the
              * idempotent start boundary rather than losing it.
              */
-            state_machine_persist_active_session();
+            (void)state_machine_persist_active_session();
             s_publish_status = TRACKER_PUBLISH_STATUS_RUNNING;
         } else {
             ESP_LOGW(TAG,
@@ -1417,6 +1439,7 @@ esp_err_t state_machine_core_init(const config_t *config) {
     // Reset every shared runtime singleton before adapters start filling live state back in.
     state_runtime_context_reset(config);
     s_session_start_boundary_pending = false;
+    s_session_identity_persisted = false;
     util_copy_string(s_telemetry.obd_ecu_state, sizeof(s_telemetry.obd_ecu_state), "unknown");
     ESP_LOGI(TAG,
              "event=runtime_config device=%s mqtt_configured=%d mqtt_port=%u apn_configured=%d tracking=%us heartbeat=%us parked_wake=%us alarm=%us ign_hold_ms=%u sleep=%d imu_wake=%d ota_min_mv=%u",
