@@ -396,7 +396,7 @@ export const handleStatus = async (
       });
       await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
 
-      if (sessionId && completedSession.completedNow && !completedSession.discarded) {
+      if (sessionId && completedSession.completedNow) {
         publishInternalEvent('session', {
           device_id: payload.device_id,
           session_id: sessionId,
@@ -487,7 +487,7 @@ export const handleStatus = async (
     });
     await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
 
-    if (sessionId && completedSession.completedNow && !completedSession.discarded) {
+    if (sessionId && completedSession.completedNow) {
       publishInternalEvent('session', {
         device_id: payload.device_id,
         session_id: sessionId,
