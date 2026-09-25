@@ -92,7 +92,11 @@ export const requireAuth = async (
     };
 
     // Sliding window: extend session
-    await extendSession(session.id, sessionConfig.extensionHours);
+    await extendSession(
+      session.id,
+      sessionConfig.extensionHours,
+      sessionConfig.maxLifetimeHours,
+    );
 
     next();
   } catch (err) {
@@ -128,7 +132,11 @@ export const attachUserIfAvailable = async (
         role: user.role,
         deviceAccessMode: user.device_access_mode,
       };
-      await extendSession(session.id, sessionConfig.extensionHours);
+      await extendSession(
+        session.id,
+        sessionConfig.extensionHours,
+        sessionConfig.maxLifetimeHours,
+      );
     }
 
     next();
