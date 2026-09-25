@@ -8,6 +8,8 @@ services:
     ports:
       - '0.0.0.0:4000:4000'
     env_file: .env
+    environment:
+      MQTT_LISTENER_CLIENT_ID: backend-listener-tracking-backend
     restart: unless-stopped
     volumes:
       - ../Tracking_Data/Tracking_Backend/firmware:/app/firmware
