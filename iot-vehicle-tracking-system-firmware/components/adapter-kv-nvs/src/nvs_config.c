@@ -303,11 +303,16 @@ esp_err_t nvs_config_load_command_dedupe_context(command_dedupe_context_t *out_c
     }
     if (stored_size != sizeof(*out_context)) {
         nvs_close(handle);
+        /*
+         * Treat an older/future blob layout as an empty dedupe window rather
+         * than preventing firmware startup. The next accepted command will
+         * overwrite the key with the current layout.
+         */
         ESP_LOGW(TAG,
-                 "Command dedupe context size mismatch stored=%lu expected=%lu",
+                 "Command dedupe context size mismatch stored=%lu expected=%lu; ignoring legacy blob",
                  (unsigned long)stored_size,
                  (unsigned long)sizeof(*out_context));
-        return ESP_ERR_INVALID_SIZE;
+        return ESP_OK;
     }
 
     size_t required_size = sizeof(*out_context);
