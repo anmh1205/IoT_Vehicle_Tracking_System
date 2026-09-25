@@ -19,7 +19,7 @@ import { addUpdate } from '../services/batch-writer.service';
 import { publishSupersededSessionEnds } from '../services/session-lifecycle.service';
 import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
-import { maxTimestampMs, normalizePayloadTimestamp, parseIsoTimestampMs } from '../utils/timestamp.util';
+import { normalizePayloadTimestamp, parseIsoTimestampMs } from '../utils/timestamp.util';
 import { resolveLocalSessionKey } from '../utils/session-identity.util';
 import { normalizeRuntimeState, type RuntimeStateSnapshot } from '../types/device-state.types';
 import {
@@ -867,10 +867,7 @@ export const handleRawData = async (
     payload.timestamp,
     payload.metadata?.sent_at,
   );
-  const persistedWatermarkMs = maxTimestampMs(
-    parseIsoTimestampMs(device.last_seen_at),
-    parseIsoTimestampMs(device.state_updated_at),
-  );
+  const persistedWatermarkMs = parseIsoTimestampMs(device.payload_updated_at);
 
   if (timestampSource !== 'payload') {
     logger.warn(
@@ -1212,6 +1209,7 @@ export const handleRawData = async (
       speed: effectiveSpeed,
       sessionId: sessionId ?? undefined,
       serverTimestamp: receivedAtMs,
+      payloadTimestamp: timestampMs,
       runtimeState,
     });
   }
