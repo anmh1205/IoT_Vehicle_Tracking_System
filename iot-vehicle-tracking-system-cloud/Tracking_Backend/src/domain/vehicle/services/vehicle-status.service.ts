@@ -1,7 +1,9 @@
 import { pool } from '@/infrastructure/database/pool';
 import {
+  eventLogLiveMutationSql,
   eventLogPositionExistsSql,
   eventLogPositionValueSql,
+  eventLogTelemetryTimestampSql,
 } from '@/shared/utils/event-log-telemetry-sql.util';
 import { findOne, findMany } from '@/infrastructure/database/queries';
 import { createNotFoundError } from '@/shared/utils/errors.util';
@@ -38,6 +40,7 @@ interface TelemetryRow {
   longitude: number | null;
   speed: number | null;
   course: number | null;
+  telemetry_timestamp: Date | null;
   server_timestamp: Date | null;
   device_battery: number | null;
 }
@@ -103,9 +106,11 @@ export const getVehicleStatus = async (id: number): Promise<VehicleStatusPublic>
            (${eventLogPositionValueSql('speed')})::float8 AS speed,
            (${eventLogPositionValueSql('course')})::float8 AS course,
            COALESCE(NULLIF(context#>>'{raw_payload,data,device_battery}', '')::float8, NULLIF(context->>'device_battery', '')::float8) AS device_battery,
+           ${eventLogTelemetryTimestampSql()} AS telemetry_timestamp,
            server_timestamp
          FROM event_logs
          WHERE device_id = $1
+           AND ${eventLogLiveMutationSql()}
            AND (
              ${eventLogPositionExistsSql('latitude')}
              OR (context#>>'{raw_payload,data,device_battery}') IS NOT NULL
@@ -113,7 +118,7 @@ export const getVehicleStatus = async (id: number): Promise<VehicleStatusPublic>
              OR (context#>>'{raw_payload,data,course}') IS NOT NULL
              OR context ? 'course'
            )
-         ORDER BY server_timestamp DESC
+         ORDER BY ${eventLogTelemetryTimestampSql()} DESC, server_timestamp DESC, id DESC
          LIMIT 1`,
         [vehicle.device_id],
       );
@@ -133,7 +138,7 @@ export const getVehicleStatus = async (id: number): Promise<VehicleStatusPublic>
           speed: telemetry?.speed ?? device.last_speed ?? 0,
           course: telemetry?.course ?? 0,
           timestamp:
-            telemetry?.server_timestamp?.toISOString()
+            telemetry?.telemetry_timestamp?.toISOString()
             ?? device.last_seen_at?.toISOString()
             ?? new Date().toISOString(),
         };
