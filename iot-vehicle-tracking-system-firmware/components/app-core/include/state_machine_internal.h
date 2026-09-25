@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "esp_err.h"
 #include "state_runtime_context.h"
 
 /**
@@ -48,10 +49,14 @@ uint32_t state_machine_next_seq_no(void);
 void state_machine_fill_message_id(char *out, size_t out_size);
 /** @brief Refresh boot/session metadata derived from RTC-retained state. */
 void state_machine_init_boot_metadata(void);
+/** @brief Return true while a correlated command ACK is waiting for MQTT delivery. */
+bool state_machine_has_pending_command_acks(void);
+/** @brief Queue the final execution result for a correlated cloud command. */
+bool state_machine_queue_command_execution_ack(uint64_t command_id, esp_err_t result);
 /** @brief Apply cloud-assigned canonical session mapping to the active local session. */
-void state_machine_apply_session_assignment(uint32_t local_session_key,
-                                           uint64_t canonical_session_id,
-                                           const char *session_boot_id);
+esp_err_t state_machine_apply_session_assignment(uint32_t local_session_key,
+                                                 uint64_t canonical_session_id,
+                                                 const char *session_boot_id);
 /** @brief Force the user LED on regardless of the normal state pattern. */
 void state_machine_force_user_led_on(void);
 /** @brief Force the user LED off regardless of the normal state pattern. */

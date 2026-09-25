@@ -65,10 +65,19 @@ const handleCommandAck = (deviceId: string, message: Buffer): void => {
     return;
   }
 
+  const status = String(parsed.status ?? '').trim().toLowerCase();
+  if (!['accepted', 'acknowledged', 'failed'].includes(status)) {
+    logger.warn(
+      { deviceId, commandId: String(commandId), status, event: 'command_ack_invalid_status' },
+      'Command ack has invalid status',
+    );
+    return;
+  }
+
   publishInternalEvent('command', {
     device_id: deviceId,
     command_id: String(commandId),
-    status: String(parsed.status ?? 'acknowledged'),
+    status,
     response: parsed.response ?? parsed.error ?? null,
   });
 };

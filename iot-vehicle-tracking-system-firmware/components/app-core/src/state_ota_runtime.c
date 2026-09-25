@@ -20,6 +20,7 @@
 
 
 static const char *TAG = "OTA_RUNTIME";
+static bool s_restart_after_command_ack = false;
 
 /**
  * @brief Persist the current OTA confirm context to NVS.
@@ -141,38 +142,59 @@ static void state_machine_ota_status_callback(const firmware_status_t *firmware,
  * traffic cannot starve telemetry, retry, or sleep logic in the main FSM loop.
  */
 void state_machine_handle_pending_action(void) {
-    // Bounded drain: process at most a fixed number of queued actions per loop pass.
-    for (uint32_t i = 0; i < TRACKER_PENDING_ACTION_DRAIN_LIMIT; ++i) {
-        command_action_t action = command_handler_consume_action();
-        if (action == COMMAND_ACTION_NONE) {
-            // Queue empty for this pass; nothing more to do.
-            return;
-        }
-        if (action == COMMAND_ACTION_APPLY_CONFIG) {
-            // Apply a staged config change, then keep draining remaining actions.
-            (void)command_handler_apply_pending_config();
-            continue;
-        }
-        if (action == COMMAND_ACTION_REBOOT) {
-            // Reboot is terminal: control never returns past this call.
-            esp_restart();
-        }
-        if (action == COMMAND_ACTION_ASSIGN_SESSION) {
-            /* Session assignment must land in firmware state before the next publish. */
-            command_session_assignment_t assignment = {0};
-            if (command_handler_take_session_assignment(&assignment)) {
-                state_machine_apply_session_assignment(assignment.local_session_key,
-                                                       assignment.canonical_session_id,
-                                                       assignment.boot_id);
-            }
-            continue;
-        }
+    /*
+     * Deferred command side effects are serialized behind ACK transport.
+     * If MQTT is down, the accepted/result ACK remains queued and the action
+     * waits rather than becoming an unobservable state change.
+     */
+    if (state_machine_has_pending_command_acks()) {
+        return;
+    }
 
-        state_machine_process_ota_command(action);
-        if (s_ota_in_progress) {
-            // OTA started flashing; stop draining so the FSM can enter the OTA-safe path immediately.
-            return;
+    if (s_restart_after_command_ack) {
+        s_restart_after_command_ack = false;
+        esp_restart();
+        return;
+    }
+
+    uint64_t command_id = 0U;
+    command_action_t action = command_handler_consume_action(&command_id);
+    if (action == COMMAND_ACTION_NONE) {
+        return;
+    }
+
+    esp_err_t execution_result = ESP_OK;
+    bool restart_required = false;
+
+    if (action == COMMAND_ACTION_APPLY_CONFIG) {
+        execution_result = command_handler_apply_pending_config();
+    } else if (action == COMMAND_ACTION_REBOOT) {
+        restart_required = true;
+    } else if (action == COMMAND_ACTION_ASSIGN_SESSION) {
+        command_session_assignment_t assignment = {0};
+        if (!command_handler_take_session_assignment(&assignment)) {
+            execution_result = ESP_ERR_INVALID_STATE;
+        } else {
+            execution_result = state_machine_apply_session_assignment(
+                assignment.local_session_key,
+                assignment.canonical_session_id,
+                assignment.boot_id);
         }
+    } else {
+        execution_result = state_machine_process_ota_command(action, &restart_required);
+    }
+
+    if (!state_machine_queue_command_execution_ack(command_id, execution_result)) {
+        ESP_LOGW(TAG,
+                 "event=command_execution_result_not_queued command_id=%llu action=%d err=%s",
+                 (unsigned long long)command_id,
+                 (int)action,
+                 esp_err_to_name(execution_result));
+        return;
+    }
+
+    if (restart_required && execution_result == ESP_OK) {
+        s_restart_after_command_ack = true;
     }
 }
 
@@ -259,15 +281,19 @@ void state_machine_try_confirm_running_firmware(void) {
  *
  * @param[in] action OTA-related command action to process.
  */
-void state_machine_process_ota_command(command_action_t action) {
+esp_err_t state_machine_process_ota_command(command_action_t action, bool *out_restart_required) {
+    if (out_restart_required != NULL) {
+        *out_restart_required = false;
+    }
+
     // Centralize OTA update and rollback execution here so publish side effects and persisted confirm state stay aligned.
     if (action != COMMAND_ACTION_OTA_UPDATE && action != COMMAND_ACTION_OTA_ROLLBACK) {
-        return;
+        return ESP_ERR_INVALID_ARG;
     }
 
     ota_command_t cmd = {0};
     if (!command_handler_take_ota_command(&cmd)) {
-        return;
+        return ESP_ERR_INVALID_STATE;
     }
 
     if (action == COMMAND_ACTION_OTA_ROLLBACK || cmd.rollback_pending) {
@@ -278,12 +304,15 @@ void state_machine_process_ota_command(command_action_t action) {
         util_copy_string(rollback.target_version, sizeof(rollback.target_version), g_rtc_context.ota_previous_version);
         util_copy_string(rollback.current_version, sizeof(rollback.current_version), s_current_version);
 
-        if (util_ota_trigger_manual_rollback(&rollback) == ESP_OK) {
+        esp_err_t rollback_err = util_ota_trigger_manual_rollback(&rollback);
+        if (rollback_err == ESP_OK) {
             g_rtc_context.ota_pending_confirm = false;
             g_rtc_context.ota_confirm_deadline_ms = 0;
             state_machine_clear_persisted_ota_context();
             state_machine_publish_firmware_payload(&rollback);
-            esp_restart();
+            if (out_restart_required != NULL) {
+                *out_restart_required = true;
+            }
         } else {
             g_rtc_context.ota_confirm_deadline_ms = 0;
             state_machine_publish_firmware_status(TRACKER_OTA_STATUS_FAILED,
@@ -293,7 +322,7 @@ void state_machine_process_ota_command(command_action_t action) {
                                                   g_rtc_context.ota_partition,
                                                   TRACKER_OTA_ERROR_MANUAL_ROLLBACK_FAILED);
         }
-        return;
+        return rollback_err;
     }
 
     firmware_status_t report = {0};
@@ -317,16 +346,17 @@ void state_machine_process_ota_command(command_action_t action) {
                                               cmd.job_id,
                                               "",
                                               TRACKER_OTA_ERROR_UNSAFE_RUNTIME_WINDOW);
-        return;
+        return ESP_ERR_INVALID_STATE;
     }
 
     s_ota_in_progress = true;
-    if (util_ota_apply_update(&s_config,
+    esp_err_t apply_err = util_ota_apply_update(&s_config,
                               s_current_version,
                               &cmd,
                               &report,
                               state_machine_ota_status_callback,
-                              NULL) == ESP_OK) {
+                              NULL);
+    if (apply_err == ESP_OK) {
         // A successful flash write persists enough context for the rebooted firmware to confirm or reject itself later.
         /*
          * Persist all fields required to resume confirmation after reboot. The
@@ -352,10 +382,13 @@ void state_machine_process_ota_command(command_action_t action) {
             g_rtc_context.ota_confirm_deadline_ms = 0;
         }
         state_machine_persist_ota_context();
-        esp_restart();
+        if (out_restart_required != NULL) {
+            *out_restart_required = true;
+        }
     } else {
         // Flash/apply failures clear the in-progress flag locally so the FSM can accept or report later work again.
         g_rtc_context.ota_confirm_deadline_ms = 0;
         s_ota_in_progress = false;
     }
+    return apply_err;
 }

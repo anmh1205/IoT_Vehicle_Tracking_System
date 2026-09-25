@@ -110,6 +110,8 @@ typedef struct {
 } command_config_update_t;
 
 typedef struct {
+    /** Cloud command correlation ID; zero for legacy/local commands. */
+    uint64_t command_id;
     /** Runtime action consumed by the FSM task. */
     command_action_t action;
     /** OTA payload captured at MQTT callback time and later consumed by FSM. */
@@ -863,10 +865,15 @@ static bool command_parse_session_assignment(const cJSON *params,
  *
  * @param command_json Raw command JSON string.
  */
-esp_err_t command_handler_process(const char *command_json, uint64_t *out_command_id) {
+esp_err_t command_handler_process(const char *command_json,
+                                  uint64_t *out_command_id,
+                                  bool *out_deferred) {
     // Parse the cloud command once here, then fan out into the staged action path that the FSM consumes safely later.
     if (out_command_id != NULL) {
         *out_command_id = 0U;
+    }
+    if (out_deferred != NULL) {
+        *out_deferred = false;
     }
     if (util_string_empty(command_json)) {
         return ESP_ERR_INVALID_ARG;
@@ -910,10 +917,14 @@ esp_err_t command_handler_process(const char *command_json, uint64_t *out_comman
         command_config_update_t update = {0};
         if (command_parse_config_update(params, &update)) {
             command_action_item_t item = {
+                .command_id = parsed_command_id,
                 .action = COMMAND_ACTION_APPLY_CONFIG,
                 .config_update = update,
             };
             result = command_handler_enqueue_action(&item);
+            if (result == ESP_OK && out_deferred != NULL) {
+                *out_deferred = true;
+            }
         } else {
             result = ESP_ERR_INVALID_ARG;
         }
@@ -947,9 +958,13 @@ esp_err_t command_handler_process(const char *command_json, uint64_t *out_comman
     } else if (strcmp(command->valuestring, COMMAND_NAME_REBOOT) == 0) {
         // Reboot is intentionally deferred into the FSM thread so shutdown side effects stay single-writer.
         command_action_item_t item = {
+            .command_id = parsed_command_id,
             .action = COMMAND_ACTION_REBOOT,
         };
         result = command_handler_enqueue_action(&item);
+        if (result == ESP_OK && out_deferred != NULL) {
+            *out_deferred = true;
+        }
     } else if (strcmp(command->valuestring, COMMAND_NAME_OTA_UPDATE) == 0) {
         // OTA commands are fully validated and copied now because the original JSON buffer disappears after this callback.
         ota_command_t parsed = {0};
@@ -960,10 +975,14 @@ esp_err_t command_handler_process(const char *command_json, uint64_t *out_comman
                      (unsigned)parsed.size,
                      (unsigned)strlen(parsed.url));
             command_action_item_t item = {
+                .command_id = parsed_command_id,
                 .action = COMMAND_ACTION_OTA_UPDATE,
                 .ota_command = parsed,
             };
             result = command_handler_enqueue_action(&item);
+            if (result == ESP_OK && out_deferred != NULL) {
+                *out_deferred = true;
+            }
         } else {
             ESP_LOGW(TAG, "event=ota_update_rejected reason=invalid_params");
             result = ESP_ERR_INVALID_ARG;
@@ -972,19 +991,27 @@ esp_err_t command_handler_process(const char *command_json, uint64_t *out_comman
                strcmp(command->valuestring, COMMAND_NAME_OTA_ROLLBACK) == 0) {
         // Manual and explicit rollback commands converge into the same staged OTA rollback action.
         command_action_item_t item = {
+            .command_id = parsed_command_id,
             .action = COMMAND_ACTION_OTA_ROLLBACK,
         };
         item.ota_command.rollback_pending = true;
         result = command_handler_enqueue_action(&item);
+        if (result == ESP_OK && out_deferred != NULL) {
+            *out_deferred = true;
+        }
     } else if (strcmp(command->valuestring, COMMAND_NAME_ASSIGN_SESSION) == 0) {
         // Session assignments are staged so the FSM can atomically align local and canonical session identifiers.
         command_session_assignment_t assignment = {0};
         if (command_parse_session_assignment(params, &assignment)) {
             command_action_item_t item = {
+                .command_id = parsed_command_id,
                 .action = COMMAND_ACTION_ASSIGN_SESSION,
                 .session_assignment = assignment,
             };
             result = command_handler_enqueue_action(&item);
+            if (result == ESP_OK && out_deferred != NULL) {
+                *out_deferred = true;
+            }
         } else {
             ESP_LOGW(TAG, "event=assign_session_rejected reason=invalid_params");
             result = ESP_ERR_INVALID_ARG;
@@ -1036,7 +1063,10 @@ bool command_handler_is_tracking_enabled(void) {
  *
  * @return Action value (or NONE).
  */
-command_action_t command_handler_consume_action(void) {
+command_action_t command_handler_consume_action(uint64_t *out_command_id) {
+    if (out_command_id != NULL) {
+        *out_command_id = 0U;
+    }
     if (!command_handler_take_lock()) {
         return COMMAND_ACTION_NONE;
     }
@@ -1048,6 +1078,9 @@ command_action_t command_handler_consume_action(void) {
     }
 
     command_handler_stage_consumed_action_payloads(&item);
+    if (out_command_id != NULL) {
+        *out_command_id = item.command_id;
+    }
 
     command_handler_give_lock();
     return item.action;

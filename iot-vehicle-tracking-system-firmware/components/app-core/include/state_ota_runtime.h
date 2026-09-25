@@ -45,4 +45,4 @@ void state_machine_try_confirm_running_firmware(void);
  *
  * @param action OTA-related command action to process.
  */
-void state_machine_process_ota_command(command_action_t action);
+esp_err_t state_machine_process_ota_command(command_action_t action, bool *out_restart_required);
