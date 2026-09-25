@@ -138,25 +138,34 @@ esp_err_t nvs_config_load_command_dedupe_context(command_dedupe_context_t *out_c
     }
     ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to open NVS namespace");
 
-    size_t stored_size = sizeof(*out_context);
-    err = nvs_get_blob(handle, TRACKER_NVS_COMMAND_DEDUPE_KEY, out_context, &stored_size);
-    nvs_close(handle);
-
+    size_t stored_size = 0;
+    err = nvs_get_blob(handle, TRACKER_NVS_COMMAND_DEDUPE_KEY, NULL, &stored_size);
     if (err == ESP_ERR_NVS_NOT_FOUND) {
-        memset(out_context, 0, sizeof(*out_context));
+        nvs_close(handle);
         return ESP_OK;
     }
     if (err != ESP_OK) {
-        memset(out_context, 0, sizeof(*out_context));
+        nvs_close(handle);
         return err;
     }
     if (stored_size != sizeof(*out_context)) {
+        nvs_close(handle);
         ESP_LOGW(TAG,
                  "Command dedupe context size mismatch stored=%lu expected=%lu; ignoring",
                  (unsigned long)stored_size,
                  (unsigned long)sizeof(*out_context));
-        memset(out_context, 0, sizeof(*out_context));
         return ESP_OK;
+    }
+
+    size_t required_size = sizeof(*out_context);
+    err = nvs_get_blob(handle,
+                       TRACKER_NVS_COMMAND_DEDUPE_KEY,
+                       out_context,
+                       &required_size);
+    nvs_close(handle);
+    if (err != ESP_OK) {
+        memset(out_context, 0, sizeof(*out_context));
+        return err;
     }
 
     out_context->cursor %= TRACKER_COMMAND_DEDUPE_CACHE_LEN;
