@@ -1,0 +1,23 @@
+iter	timestamp	metric	delta	kept	description
+0	2026-07-24T02:59:00	58	0	baseline	V4: abstract 290w (>250), Farahpoor wrong pages, [15] placeholder, no Algorithm, related-work thin on ESP32+SIM7600 peers
+1	2026-07-24T03:05:00	68	+10	yes	Rewrite abstract to IEEE Access 150-250w single paragraph, no citations; add Index Terms
+2	2026-07-24T03:06:00	76	+8	yes	Fix Farahpoor pages 193429-193444; replace [15] placeholder with Metvaei et al. Buildings 2025 DOI
+3	2026-07-24T03:07:00	82	+6	yes	Add Algorithm 1 (byte-identical publish/offline fallback); add Sec 6.5 generalizability
+4	2026-07-24T03:08:00	88	+6	yes	Add peer [18] Arshad-Zayed Sensors 2024 (ESP32+SIM7600+SD); update Table I gap framing
+5	2026-07-24T03:10:00	92	+4	yes	Trim abstract 280->~230 words to satisfy IEEE Access 150-250 limit
+6	2026-07-24T12:20:00	n/a	n/a	yes	V6 narrative rebalance: expand co-design/fusion/ingest ideas; demote BOM/part-numbers/file-lines/hexagonal from body
+7	2026-07-24T12:30:00	n/a	n/a	yes	V7 Rocha-style rewrite: modular platform + data path first; showcase offline/fusion/ingest/power/OTA from codebase
+8	2026-07-24T13:25:00	n/a	n/a	yes	V8 rental-ops rewrite
+9	2026-07-24T19:45:00	n/a	n/a	yes	Real manuscript: fat Arch+Design+Eval; no draft chrome; IEEE Access voice
+13	2026-07-25T15:25:00	n/a	n/a	yes	V4 outline: full Rocha-pattern mapping (Methods/Architecture/Implementation/Tests per subsystem); dropped claim-first framing
+14	2026-07-25T15:40:00	n/a	n/a	yes	V5 outline: re-audited codebase; replaced heuristic 'methods' with system pillars (energy FSM, 3-radio/1-AT-bus, hot/control split, hybrid stores, session protocol, OTA lifecycle, HIL methods)
+15	2026-07-25T15:50:00	n/a	n/a	yes	V5.1: restored Rocha comparison table (0.1) alongside pillar table (0.2); moved honesty caveats to honesty-fix-notes.md, outline treats them as cleared
+16	2026-07-25T17:20:00	n/a	n/a	yes	V5.2: mined product+hardware layers; added pillars 9-13 (custom board/power path, trusted time, LTE recovery ladder, command ledger, ops console+trips); honesty notes 8-14
+17	2026-07-25T22:45:00	n/a	n/a	yes	V5.3: rebuilt VI Tests around practical campaigns matching pillars (offline curves, AT contention, session fault-injection, trusted-time, OTA, command ledger, honest load); flagged thesis numbers as provisional/unbacked
+18	2026-07-25T22:55:00	n/a	n/a	yes	Fixed power-path truth: remove LM393 LVD; rails MP2482/TPS54231/AP2112K/TP5100/SX1308; noted Altium still lists TP4056; DTR=NC so warm-modem claim cannot rely on DTR
+19	2026-07-25T23:05:00	n/a	n/a	yes	Aligned HW names to thesis figs 4-5/4-6/4-12/4-14: TPS54231=4V, AP2112, TP5100+18650, SIM7600CE-T, vgate iCar Pro; removed 3.8V/LM393/ELM327-dongle wording
+20	2026-07-25T23:15:00	n/a	n/a	yes	HW names locked to hardware-specs netlist: TP5100 U3, SIM7600E U9 (not CE-T), W25Q128, DS3231M, LIS3DSH, AP2112K-3.3, 18650; Altium discarded as drifted
+21	2026-07-25T23:18:00	n/a	n/a	yes	Modem locked to SIM7600CE-T (physical board); netlist SIM7600E flagged as label drift
+22	2026-07-26T15:45:00	n/a	n/a	yes	V6 outline rewrite: TOC, prose pillars, readable I-VII sections, test table with priority; same technical truth
+23	2026-07-26T15:50:00	n/a	n/a	yes	Full EN manuscript paper-en-v2.md: Rocha-style sections, Mermaid figs 2-7, photo/plot/table placeholders III-XII
+24	2026-07-26T23:55:00	n/a	n/a	yes	V2.1 prose rewrite: rental-fleet title; 230w abstract with bracketed results slot; 4-constraint intro + single contribution para; Related Work rebuilt on 15 DOI refs (Farahpoor pp.193429-193444 + Arshad-Zayed s24154900 web-verified); rationale sentences added per architecture subsection; fixed fig09-11 filename drift + grammar; honesty constraints preserved (no DTR/LM393/k6/CI claims, Results still TBD)
