@@ -25,8 +25,9 @@ bool state_machine_publish_rawdata(void);
  *
  * @param status Runtime status string such as `running`, `stopped`, or `heartbeat`.
  * @param boundary_event Authoritative boundary marker: `started`, `ended`, or `none`.
+ * @return true when MQTT or durable offline storage accepted the status payload.
  */
-void state_machine_publish_status(const char *status, const char *boundary_event);
+bool state_machine_publish_status(const char *status, const char *boundary_event);
 /**
  * @brief Publish a device event payload through the shared pipeline.
  *

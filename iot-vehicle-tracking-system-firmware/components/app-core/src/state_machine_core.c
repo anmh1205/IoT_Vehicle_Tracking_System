@@ -879,19 +879,46 @@ static void state_machine_resume_active_session(void) {
 /**
  * @brief Drop a restored session candidate that no longer matches live ignition.
  */
-static void state_machine_drop_stale_restored_session(void) {
-    if (s_session_id == 0U && !s_session_restore_pending) {
-        return;
+static bool state_machine_reconcile_stale_restored_session(void) {
+    if (!s_session_restore_pending || s_session_id == 0U) {
+        return true;
     }
 
     ESP_LOGI(TAG,
-             "event=session_candidate_dropped local=%lu canonical=%llu boot_id=%s reason=stale_restore",
+             "event=session_restore_reconcile_attempt local=%lu canonical=%llu boot_id=%s outcome=ended",
              (unsigned long)s_session_id,
              (unsigned long long)s_canonical_session_id,
              s_session_boot_id);
+
+    /*
+     * The persisted identity is historical truth for the interrupted drive.
+     * Expose it only for this authoritative closing boundary. If neither MQTT
+     * nor durable SD fallback accepts the payload, restore the provisional flag
+     * and leave NVS untouched so a later wake can retry.
+     */
+    offline_queue_set_session(s_session_id);
+    s_session_restore_pending = false;
+    bool accepted = state_machine_publish_status("stopped", "ended");
+    if (!accepted) {
+        s_session_restore_pending = true;
+        offline_queue_set_session(0);
+        ESP_LOGW(TAG,
+                 "event=session_restore_reconcile_deferred local=%lu canonical=%llu boot_id=%s reason=publish_not_durable",
+                 (unsigned long)s_session_id,
+                 (unsigned long long)s_canonical_session_id,
+                 s_session_boot_id);
+        return false;
+    }
+
+    offline_queue_stop_session(true);
     offline_queue_set_session(0);
+    session_mgr_mark_stopped();
     state_machine_clear_persisted_session();
     state_machine_reset_session_runtime();
+    s_publish_status = TRACKER_PUBLISH_STATUS_STOPPED;
+
+    ESP_LOGI(TAG, "event=session_restore_reconciled outcome=ended");
+    return true;
 }
 
 /**
@@ -1256,9 +1283,15 @@ static app_state_t state_machine_handle_heartbeat_state(void) {
     }
 
     if (s_heartbeat_raw_published || heartbeat_timeout) {
-        // Any restored session that never revalidated during this window is dropped as stale.
+        /*
+         * A restored session that did not revalidate as ignition-ON still
+         * represents a drive the cloud may know as running. Reconcile it with
+         * an authoritative end boundary before forgetting the persisted
+         * identity. Failed delivery keeps NVS intact and sleep is still allowed;
+         * the next wake will retry without burning parked power continuously.
+         */
         if (s_session_restore_pending) {
-            state_machine_drop_stale_restored_session();
+            (void)state_machine_reconcile_stale_restored_session();
         }
         state_machine_reset_heartbeat_window();
         return APP_STATE_SLEEP;
