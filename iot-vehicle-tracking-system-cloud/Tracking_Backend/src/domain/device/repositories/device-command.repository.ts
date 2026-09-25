@@ -1,6 +1,6 @@
 import { pool } from '@/infrastructure/database/pool';
 
-export type DeviceCommandStatus = 'pending' | 'sent' | 'acknowledged' | 'failed';
+export type DeviceCommandStatus = 'pending' | 'sent' | 'accepted' | 'acknowledged' | 'failed';
 
 export interface DeviceCommandRecord {
   id: number;
