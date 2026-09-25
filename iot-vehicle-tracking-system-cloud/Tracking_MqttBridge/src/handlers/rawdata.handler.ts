@@ -195,6 +195,7 @@ const normalizeGnssLocation = (
   latitude: number | undefined,
   longitude: number | undefined,
   satellites: number | undefined,
+  fixValid: boolean | undefined,
 ): {
   latitude: number | undefined;
   longitude: number | undefined;
@@ -208,7 +209,12 @@ const normalizeGnssLocation = (
     };
   }
 
-  if (latitude === 0 && longitude === 0 && (satellites ?? 0) === 0) {
+  if (
+    latitude === 0 &&
+    longitude === 0 &&
+    fixValid !== true &&
+    (satellites ?? 0) === 0
+  ) {
     return {
       latitude: undefined,
       longitude: undefined,
@@ -818,6 +824,7 @@ export const handleRawData = async (
     payload.data.latitude,
     payload.data.longitude,
     payload.data.satellites,
+    diagnostics?.gnss?.fix_valid,
   );
   const imuAccelDeltaMps2 = resolveImuAccelDeltaMps2(payload.data);
   const effectiveLatitude = normalizedGnss.latitude;
