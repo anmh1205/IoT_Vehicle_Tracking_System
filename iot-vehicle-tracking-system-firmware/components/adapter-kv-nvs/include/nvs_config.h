@@ -74,6 +74,14 @@ typedef struct {
     bool start_boundary_pending;              /**< True until running/started is durably accepted. */
 } session_persist_context_t;
 
+/** @brief Bounded cloud-command idempotency window persisted across reboot. */
+#define TRACKER_COMMAND_DEDUPE_CACHE_LEN 32U
+
+typedef struct {
+    uint64_t command_ids[TRACKER_COMMAND_DEDUPE_CACHE_LEN];
+    uint32_t cursor;
+} command_dedupe_context_t;
+
 /**
  * @brief Persist OTA confirmation context for post-reboot reconciliation.
  *
@@ -125,3 +133,9 @@ esp_err_t nvs_config_load_session_context(session_persist_context_t *out_context
  * @return ESP_OK on success, otherwise NVS error.
  */
 esp_err_t nvs_config_clear_session_context(void);
+
+/** Persist the recent accepted cloud-command ID window. */
+esp_err_t nvs_config_save_command_dedupe_context(const command_dedupe_context_t *context);
+
+/** Load the recent accepted cloud-command ID window. Missing state is not an error. */
+esp_err_t nvs_config_load_command_dedupe_context(command_dedupe_context_t *out_context, bool *out_found);
