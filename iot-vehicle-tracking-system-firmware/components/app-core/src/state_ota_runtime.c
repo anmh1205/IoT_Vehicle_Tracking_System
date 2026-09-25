@@ -292,6 +292,45 @@ void state_machine_try_confirm_running_firmware(void) {
         return;
     }
 
+    /*
+     * The confirm context is committed before the OTA slot is promoted. A
+     * power loss or esp_ota_set_boot_partition() failure between those two
+     * durable writes can therefore leave a valid context while the old image
+     * still boots. Never confirm unless the running partition is exactly the
+     * partition recorded by the preboot commit.
+     */
+    if (running != NULL &&
+        !util_string_empty(running->label) &&
+        !util_string_empty(g_rtc_context.ota_partition) &&
+        strcmp(running->label, g_rtc_context.ota_partition) != 0) {
+        char failed_job_id[sizeof(g_rtc_context.ota_job_id)] = {0};
+        char failed_target_version[sizeof(g_rtc_context.ota_target_version)] = {0};
+        char expected_partition[sizeof(g_rtc_context.ota_partition)] = {0};
+        util_copy_string(failed_job_id, sizeof(failed_job_id), g_rtc_context.ota_job_id);
+        util_copy_string(failed_target_version,
+                         sizeof(failed_target_version),
+                         g_rtc_context.ota_target_version);
+        util_copy_string(expected_partition,
+                         sizeof(expected_partition),
+                         g_rtc_context.ota_partition);
+
+        g_rtc_context.ota_pending_confirm = false;
+        g_rtc_context.ota_confirm_deadline_ms = 0;
+        state_machine_clear_persisted_ota_context();
+        state_machine_publish_or_stage_firmware_status(
+            TRACKER_OTA_STATUS_FAILED,
+            TRACKER_OTA_PROGRESS_DONE,
+            failed_target_version,
+            failed_job_id,
+            expected_partition,
+            TRACKER_OTA_ERROR_CONFIRM_PARTITION_MISMATCH);
+        ESP_LOGW(TAG,
+                 "event=ota_confirm_rejected reason=partition_mismatch running=%s expected=%s",
+                 running->label,
+                 expected_partition);
+        return;
+    }
+
     // Trusted wall-clock time turns the confirm deadline into an enforceable timeout instead of a best-effort hint.
     state_machine_update_time_source();
     if (g_rtc_context.ota_confirm_deadline_ms > 0 &&
