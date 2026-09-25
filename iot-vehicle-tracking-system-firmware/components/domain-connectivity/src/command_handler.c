@@ -53,6 +53,7 @@ static const TickType_t COMMAND_HANDLER_LOCK_TIMEOUT_TICKS = pdMS_TO_TICKS(250);
 static const TickType_t COMMAND_HANDLER_QUEUE_SEND_TIMEOUT_TICKS = pdMS_TO_TICKS(100);
 
 #define COMMAND_HANDLER_ACTION_QUEUE_LEN 16U
+#define COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN 32U
 #define COMMAND_HANDLER_U16_RULE_COUNT 7U
 #define COMMAND_HANDLER_BOOL_RULE_COUNT 2U
 
@@ -66,6 +67,37 @@ static QueueHandle_t s_action_queue = NULL;
 static bool s_tracking_enabled = true;
 /* Tracks command drops without expanding the cloud command contract. */
 static atomic_uint s_dropped_command_count = 0U;
+/*
+ * Recent accepted cloud command IDs. The MQTT connection uses clean-session=1,
+ * so this bounded RAM window only needs to absorb QoS1 DUP delivery inside the
+ * active broker session. It deliberately exceeds the backend's 8-command
+ * outstanding window.
+ */
+static uint64_t s_recent_command_ids[COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN] = {0};
+static size_t s_recent_command_cursor = 0U;
+
+static bool command_handler_is_recent_command_id(uint64_t command_id) {
+    if (command_id == 0U) {
+        return false;
+    }
+
+    for (size_t i = 0; i < COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN; ++i) {
+        if (s_recent_command_ids[i] == command_id) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static void command_handler_remember_command_id(uint64_t command_id) {
+    if (command_id == 0U) {
+        return;
+    }
+
+    s_recent_command_ids[s_recent_command_cursor] = command_id;
+    s_recent_command_cursor =
+        (s_recent_command_cursor + 1U) % COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN;
+}
 
 /** @brief Canonical command names from cloud payload. */
 static const char *const COMMAND_NAME_UPDATE_CONFIG = "update_config";
@@ -735,6 +767,8 @@ esp_err_t command_handler_init(config_t *config) {
     s_config = config;
     s_tracking_enabled = true;
     atomic_store(&s_dropped_command_count, 0U);
+    memset(s_recent_command_ids, 0, sizeof(s_recent_command_ids));
+    s_recent_command_cursor = 0U;
     command_handler_reset_consumed_payloads();
     xQueueReset(s_action_queue);
 
@@ -877,13 +911,17 @@ static bool command_parse_session_assignment(const cJSON *params,
  */
 esp_err_t command_handler_process(const char *command_json,
                                   uint64_t *out_command_id,
-                                  bool *out_deferred) {
+                                  bool *out_deferred,
+                                  bool *out_duplicate) {
     // Parse the cloud command once here, then fan out into the staged action path that the FSM consumes safely later.
     if (out_command_id != NULL) {
         *out_command_id = 0U;
     }
     if (out_deferred != NULL) {
         *out_deferred = false;
+    }
+    if (out_duplicate != NULL) {
+        *out_duplicate = false;
     }
     if (util_string_empty(command_json)) {
         return ESP_ERR_INVALID_ARG;
@@ -907,6 +945,17 @@ esp_err_t command_handler_process(const char *command_json,
     uint64_t parsed_command_id = 0U;
     if (command_parse_u64_positive(command_id, &parsed_command_id) && out_command_id != NULL) {
         *out_command_id = parsed_command_id;
+    }
+
+    if (command_handler_is_recent_command_id(parsed_command_id)) {
+        if (out_duplicate != NULL) {
+            *out_duplicate = true;
+        }
+        ESP_LOGI(TAG,
+                 "event=command_duplicate_ignored command_id=%llu",
+                 (unsigned long long)parsed_command_id);
+        cJSON_Delete(root);
+        return ESP_OK;
     }
 
     // Extract the command verb first; every later branch depends on it being a non-empty string.
@@ -1029,6 +1078,14 @@ esp_err_t command_handler_process(const char *command_json,
     } else {
         ESP_LOGW(TAG, "event=command_rejected reason=unsupported command=%s", command->valuestring);
         result = ESP_ERR_NOT_SUPPORTED;
+    }
+
+    if (result == ESP_OK && parsed_command_id != 0U) {
+        /*
+         * Remember only accepted/staged commands. A transient queue-full or
+         * lock/state rejection must remain retryable with the same command ID.
+         */
+        command_handler_remember_command_id(parsed_command_id);
     }
 
     cJSON_Delete(root);

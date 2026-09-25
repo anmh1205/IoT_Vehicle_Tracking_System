@@ -158,7 +158,20 @@ static void state_machine_command_callback(const char *topic, const char *payloa
 
     uint64_t command_id = 0U;
     bool deferred = false;
-    esp_err_t process_result = command_handler_process(payload, &command_id, &deferred);
+    bool duplicate = false;
+    esp_err_t process_result =
+        command_handler_process(payload, &command_id, &deferred, &duplicate);
+    if (duplicate) {
+        /*
+         * The original accepted/final ACK remains authoritative and already has
+         * its own retry path. Do not enqueue another side effect or manufacture
+         * a new execution result for a QoS1 DUP delivery.
+         */
+        ESP_LOGI(TAG,
+                 "event=command_duplicate_delivery_ignored command_id=%llu",
+                 (unsigned long long)command_id);
+        return;
+    }
     if (command_id == 0U) {
         /*
          * Legacy/local commands can still execute, but without a cloud-issued
