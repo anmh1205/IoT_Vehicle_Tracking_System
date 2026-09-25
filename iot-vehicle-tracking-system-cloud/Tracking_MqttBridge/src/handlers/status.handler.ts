@@ -3,6 +3,7 @@ import { statusSchema } from '../validators/payload.validator';
 import {
   completeDeviceSession,
   ensureDeviceSession,
+  ensureHistoricalDeviceSession,
   findDeviceSessionIdByIdentity,
   updateDeviceStatus,
 } from '../infrastructure/database';
@@ -178,27 +179,25 @@ export const handleStatus = async (
     // against the identified session using device time for both historical
     // boundaries so replay receive-time cannot inflate runtime.
     if (hasAuthoritativeIdentity && boundaryEvent === 'started') {
-      const historicalSession = await ensureDeviceSession(
+      const historicalSession = await ensureHistoricalDeviceSession(
         payload.device_id,
-        timestampMs,
         timestampMs,
         {
           localSessionKey,
+          canonicalSessionId: payloadCanonicalSessionId,
           bootId: sessionBootId,
-          canonicalSource: 'server',
-          boundarySource: 'firmware',
-          startReason: 'historical_replay_ignition_on',
         },
       );
 
-      if (historicalSession.isNew) {
+      if (historicalSession.isNew && historicalSession.sessionId !== null) {
         publishInternalEvent('session', {
           device_id: payload.device_id,
           session_id: historicalSession.sessionId,
           action: 'started',
           boundary_source: 'firmware',
           local_session_key: localSessionKey,
-          canonical_session_id: String(historicalSession.sessionId),
+          canonical_session_id:
+            payloadCanonicalSessionId ?? String(historicalSession.sessionId),
           boot_id: sessionBootId,
           message_id: messageId,
           schema_version: schemaVersion,
