@@ -5,11 +5,44 @@ vi.mock('@/infrastructure/database/pool', () => ({
 }));
 
 import { pool } from '@/infrastructure/database/pool';
-import { updateCommandStatus } from './device-command.repository';
+import { createCommand, updateCommandStatus } from './device-command.repository';
 
 describe('device-command.repository', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+  });
+
+  it('keeps sent_at null while a command is only pending', async () => {
+    vi.mocked(pool.query).mockResolvedValue({
+      rows: [{
+        id: 11,
+        device_id: 'TRACKER_001',
+        command: 'reboot',
+        params: {},
+        status: 'pending',
+        sent_at: null,
+        acked_at: null,
+        response: null,
+      }],
+    } as any);
+
+    const result = await createCommand({
+      deviceId: 'TRACKER_001',
+      command: 'reboot',
+    });
+
+    const [sql] = vi.mocked(pool.query).mock.calls[0] ?? [];
+    expect(sql).not.toContain("NOW(), $4, $5");
+    expect(result.sentAt).toBeNull();
+  });
+
+  it('sets sent_at only when publish transitions the command to sent', async () => {
+    vi.mocked(pool.query).mockResolvedValue({ rows: [] } as any);
+
+    await updateCommandStatus(12, 'sent');
+
+    const [sql] = vi.mocked(pool.query).mock.calls[0] ?? [];
+    expect(sql).toContain("WHEN $2::varchar = 'sent' AND sent_at IS NULL THEN NOW()");
   });
 
   it('can mark failed device ACKs as acknowledged without treating publish failures as ACKs', async () => {
