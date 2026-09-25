@@ -410,19 +410,27 @@ bool util_is_hex_ascii_bytes(const uint8_t *data, size_t len) {
 esp_err_t util_ota_configure_https_ssl_context(void) {
     char cmd[96] = {0};
 
-    // Pin the modem SSL context to a modern TLS profile before loading any verification settings.
-    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"sslversion\",%d,4\r", OTA_HTTP_SSL_CTX_INDEX);
+    int n = snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"sslversion\",%d,4\r", OTA_HTTP_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        UTIL_TAG,
+                        "CSSLCFG sslversion cmd truncated");
+
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         UTIL_TAG,
                         "HTTP CSSLCFG sslversion failed");
 
-    // Auth mode follows build-time policy so field validation can temporarily relax server verification if required.
-    (void)snprintf(cmd,
-                   sizeof(cmd),
-                   "AT+CSSLCFG=\"authmode\",%d,%d\r",
-                   OTA_HTTP_SSL_CTX_INDEX,
-                   CONFIG_TRACKER_TLS_VERIFY_SERVER ? 1 : 0);
+    n = snprintf(cmd,
+                 sizeof(cmd),
+                 "AT+CSSLCFG=\"authmode\",%d,%d\r",
+                 OTA_HTTP_SSL_CTX_INDEX,
+                 CONFIG_TRACKER_TLS_VERIFY_SERVER ? 1 : 0);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        UTIL_TAG,
+                        "CSSLCFG authmode cmd truncated");
+
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         UTIL_TAG,
@@ -433,32 +441,49 @@ esp_err_t util_ota_configure_https_ssl_context(void) {
                         UTIL_TAG,
                         "HTTP CSSLCFG certificate failed");
 
-    // Local-time policy matters for certificate validation on devices that may boot before RTC trust is restored.
-    (void)snprintf(cmd,
-                   sizeof(cmd),
-                   "AT+CSSLCFG=\"ignorelocaltime\",%d,%d\r",
-                   OTA_HTTP_SSL_CTX_INDEX,
-                   CONFIG_TRACKER_TLS_IGNORE_LOCAL_TIME ? 1 : 0);
+    n = snprintf(cmd,
+                 sizeof(cmd),
+                 "AT+CSSLCFG=\"ignorelocaltime\",%d,%d\r",
+                 OTA_HTTP_SSL_CTX_INDEX,
+                 CONFIG_TRACKER_TLS_IGNORE_LOCAL_TIME ? 1 : 0);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        UTIL_TAG,
+                        "CSSLCFG ignorelocaltime cmd truncated");
+
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         UTIL_TAG,
                         "HTTP CSSLCFG ignorelocaltime failed");
 
-    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"negotiatetime\",%d,300\r", OTA_HTTP_SSL_CTX_INDEX);
+    n = snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"negotiatetime\",%d,300\r", OTA_HTTP_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        UTIL_TAG,
+                        "CSSLCFG negotiatetime cmd truncated");
+
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         UTIL_TAG,
                         "HTTP CSSLCFG negotiatetime failed");
 
-    // SNI stays enabled so shared-hostname firmware CDNs present the correct leaf certificate.
-    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"enableSNI\",%d,1\r", OTA_HTTP_SSL_CTX_INDEX);
+    n = snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"enableSNI\",%d,1\r", OTA_HTTP_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        UTIL_TAG,
+                        "CSSLCFG enableSNI cmd truncated");
+
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         UTIL_TAG,
                         "HTTP CSSLCFG enableSNI failed");
 
-    // Finally bind the prepared SSL context to the modem HTTP client profile that subsequent OTA requests use.
-    (void)snprintf(cmd, sizeof(cmd), "AT+HTTPPARA=\"SSLCFG\",%d\r", OTA_HTTP_SSL_CTX_INDEX);
+    n = snprintf(cmd, sizeof(cmd), "AT+HTTPPARA=\"SSLCFG\",%d\r", OTA_HTTP_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        ESP_ERR_INVALID_SIZE,
+                        UTIL_TAG,
+                        "HTTPPARA SSLCFG cmd truncated");
+
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         UTIL_TAG,

@@ -697,6 +697,7 @@ void offline_queue_replay_tick(void) {
             return;
         }
         telemetry_counters_inc_replay_retry();
+        return;
     }
 
     if (offline_queue_publish_record(&rec) == ESP_OK) {
