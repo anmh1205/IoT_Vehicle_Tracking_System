@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { systemAdminServices } from '@/lib/api/system-admin';
+import { deviceServices } from '@/lib/api/devices';
 
 interface EventLogsResult {
   items: Record<string, unknown>[];
@@ -22,23 +22,19 @@ const normalizeEventLogs = (payload: any): EventLogsResult => {
 };
 
 export const useDeviceEventLogs = (
-  devicePublicId: string | null,
+  deviceId: number | string | null,
   options: { enabled?: boolean; limit?: number } = {},
 ) => {
   const enabled = options.enabled ?? true;
   const limit = options.limit ?? 20;
 
   const query = useQuery({
-    queryKey: ['device-event-logs', devicePublicId, limit],
+    queryKey: ['device-event-logs', deviceId, limit],
     queryFn: () =>
-      systemAdminServices
-        .queryTable('event_logs', {
-          page: 1,
-          limit,
-          search: devicePublicId ?? undefined,
-        })
+      deviceServices
+        .getEventLogs(deviceId!, { page: 1, limit })
         .then((payload) => normalizeEventLogs(payload)),
-    enabled: enabled && !!devicePublicId,
+    enabled: enabled && deviceId !== null,
   });
 
   return {
