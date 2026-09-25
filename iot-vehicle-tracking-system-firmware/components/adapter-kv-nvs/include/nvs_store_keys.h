@@ -24,3 +24,6 @@
 
 /** @brief Key for active session recovery context. */
 #define TRACKER_NVS_SESSION_CONTEXT_KEY "session_ctx_v1"
+
+/** @brief Key for the persistent recent cloud-command dedupe window. */
+#define TRACKER_NVS_COMMAND_DEDUPE_KEY "cmd_dedupe_v1"
