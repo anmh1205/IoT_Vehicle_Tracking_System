@@ -111,9 +111,14 @@ const publishStatsUpdate = (
   });
 };
 
-const normalizeCommandStatus = (value: unknown): deviceCommandRepo.DeviceCommandStatus => {
-  const status = String(value ?? '').toLowerCase();
-  return status === 'failed' ? 'failed' : 'acknowledged';
+const normalizeCommandStatus = (
+  value: unknown,
+): deviceCommandRepo.DeviceCommandStatus | null => {
+  const status = String(value ?? '').trim().toLowerCase();
+  if (status === 'accepted') return 'accepted';
+  if (status === 'acknowledged') return 'acknowledged';
+  if (status === 'failed') return 'failed';
+  return null;
 };
 
 const processCommandAck = async (
@@ -128,6 +133,15 @@ const processCommandAck = async (
       : String(payload.response ?? payload.error);
 
   const deviceId = String(payload.device_id ?? '').trim();
+  if (!status) {
+    log.warn('Ignoring command ACK with unsupported status', {
+      commandId,
+      deviceId,
+      rawStatus: payload.status,
+    });
+    return;
+  }
+
   if (!commandId || !deviceId) {
     log.warn('Ignoring command ACK without a complete correlation key', {
       commandId,

@@ -181,7 +181,7 @@ static void state_machine_publish_pending_command_acks(void) {
             return;
         }
 
-        const char *status = ack.process_result == ESP_OK ? "acknowledged" : "failed";
+        const char *status = ack.process_result == ESP_OK ? "accepted" : "failed";
         const char *response = state_machine_command_ack_response(ack.process_result);
         char ack_payload[192] = {0};
         int written = snprintf(ack_payload,

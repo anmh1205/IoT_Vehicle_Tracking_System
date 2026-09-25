@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS device_commands (
     command VARCHAR(100) NOT NULL,
     params JSONB NOT NULL DEFAULT '{}'::jsonb,
     status VARCHAR(20) NOT NULL DEFAULT 'pending'
-        CHECK (status IN ('pending', 'sent', 'acknowledged', 'failed')),
+        CHECK (status IN ('pending', 'sent', 'accepted', 'acknowledged', 'failed')),
     sent_at TIMESTAMPTZ,
     acked_at TIMESTAMPTZ,
     response TEXT,

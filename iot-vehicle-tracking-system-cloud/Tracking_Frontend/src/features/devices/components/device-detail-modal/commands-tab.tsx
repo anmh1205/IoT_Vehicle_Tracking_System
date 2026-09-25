@@ -14,9 +14,18 @@ import { useDeviceDetailModal } from './modal-context';
 
 const statusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
   if (status === 'failed') return 'destructive';
-  if (status === 'sent' || status === 'acknowledged') return 'default';
+  if (status === 'sent' || status === 'accepted' || status === 'acknowledged') return 'default';
   if (status === 'pending') return 'secondary';
   return 'outline';
+};
+
+const statusLabel = (status: string) => {
+  if (status === 'pending') return 'Đang chờ gửi';
+  if (status === 'sent') return 'Đã gửi';
+  if (status === 'accepted') return 'Thiết bị đã nhận';
+  if (status === 'acknowledged') return 'Đã xác nhận';
+  if (status === 'failed') return 'Thất bại';
+  return status;
 };
 
 const formatParams = (params: Record<string, unknown>) => {
@@ -66,7 +75,7 @@ export const CommandsTab = () => {
                 <TableCell className="font-medium">{command.command || '-'}</TableCell>
                 <TableCell className="max-w-[280px] truncate">{formatParams(command.params)}</TableCell>
                 <TableCell>
-                  <Badge variant={statusVariant(command.status)}>{command.status}</Badge>
+                  <Badge variant={statusVariant(command.status)}>{statusLabel(command.status)}</Badge>
                 </TableCell>
                 <TableCell className="max-w-[320px] truncate">{command.response || '-'}</TableCell>
               </TableRow>
