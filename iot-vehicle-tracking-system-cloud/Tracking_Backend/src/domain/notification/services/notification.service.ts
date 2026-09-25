@@ -6,6 +6,8 @@ import {
   markNotificationRead,
 } from '@/domain/notification/repositories/notification.repository';
 import { publishEvent } from '@/infrastructure/realtime';
+import * as pushTokenRepo from '@/domain/notification/repositories/push-token.repository';
+import type { PushTokenDeviceInfo } from '@/domain/notification/repositories/push-token.repository';
 
 interface NotificationItem {
   id: number;
@@ -156,3 +158,17 @@ export const getNotificationStats = async (
     byType,
   };
 };
+
+
+export const registerPushToken = async (
+  userId: number,
+  token: string,
+  deviceInfo?: PushTokenDeviceInfo,
+): Promise<void> => {
+  await pushTokenRepo.registerPushToken(userId, token, deviceInfo);
+};
+
+export const unregisterPushToken = async (
+  userId: number,
+  token: string,
+): Promise<boolean> => pushTokenRepo.unregisterPushToken(userId, token);
