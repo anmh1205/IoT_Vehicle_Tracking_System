@@ -1,6 +1,6 @@
 import { pool } from '@/infrastructure/database/pool';
 
-export type DeviceCommandStatus = 'pending' | 'sent' | 'accepted' | 'acknowledged' | 'failed';
+export type DeviceCommandStatus = 'pending' | 'sent' | 'accepted' | 'indeterminate' | 'acknowledged' | 'failed';
 
 export const MAX_OUTSTANDING_DEVICE_COMMANDS = 8;
 
@@ -120,12 +120,16 @@ export const updateCommandStatus = async (
     `UPDATE device_commands
      SET status = CASE
            WHEN status IN ('acknowledged', 'failed') THEN status
+           WHEN status = 'indeterminate'
+             AND $2::varchar NOT IN ('acknowledged', 'failed') THEN status
            WHEN status = 'accepted' AND $2::varchar IN ('pending', 'sent') THEN status
            WHEN status = 'sent' AND $2::varchar = 'pending' THEN status
            ELSE $2::varchar
          END,
          response = CASE
            WHEN status IN ('acknowledged', 'failed') THEN response
+           WHEN status = 'indeterminate'
+             AND $2::varchar NOT IN ('acknowledged', 'failed') THEN response
            WHEN status = 'accepted' AND $2::varchar IN ('pending', 'sent') THEN response
            WHEN status = 'sent' AND $2::varchar = 'pending' THEN response
            ELSE COALESCE($3, response)
@@ -159,7 +163,7 @@ export const updateCommandStatus = async (
   return result.rows[0] ? mapRow(result.rows[0]) : null;
 };
 
-export const observeRuntimeBootAndFailStaleAccepted = async (
+export const observeRuntimeBootAndMarkStaleAcceptedIndeterminate = async (
   deviceId: string,
   currentBootId: string,
 ): Promise<DeviceCommandRecord[]> => {
@@ -177,8 +181,8 @@ export const observeRuntimeBootAndFailStaleAccepted = async (
        RETURNING device_id
      )
      UPDATE device_commands
-     SET status = 'failed',
-         response = 'device_restarted_before_execution',
+     SET status = 'indeterminate',
+         response = 'execution_outcome_unknown_after_restart',
          updated_at = NOW()
      WHERE device_id = $1
        AND status = 'accepted'
