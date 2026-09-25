@@ -13,6 +13,11 @@ export interface DeviceCommandRecord {
   sentAt: string | null;
   ackedAt: string | null;
   response: string | null;
+  created_at?: Date | null;
+}
+
+export interface PendingDeviceCommandRecord extends DeviceCommandRecord {
+  createdAt: string;
 }
 
 interface DeviceCommandRow {
@@ -199,10 +204,10 @@ export const observeRuntimeBootAndMarkStaleAcceptedIndeterminate = async (
 export const listPendingCommandsBefore = async (
   cutoff: Date,
   limit = 100,
-): Promise<DeviceCommandRecord[]> => {
+): Promise<PendingDeviceCommandRecord[]> => {
   const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 500);
   const result = await pool.query<DeviceCommandRow>(
-    `SELECT id, device_id, command, params, status, sent_at, acked_at, response
+    `SELECT id, device_id, command, params, status, sent_at, acked_at, response, created_at
      FROM device_commands
      WHERE status = 'pending'
        AND created_at <= $1
@@ -211,7 +216,10 @@ export const listPendingCommandsBefore = async (
     [cutoff.toISOString(), safeLimit],
   );
 
-  return result.rows.map(mapRow);
+  return result.rows.map((row) => ({
+    ...mapRow(row),
+    createdAt: row.created_at?.toISOString() ?? cutoff.toISOString(),
+  }));
 };
 
 export const listDeviceCommands = async (deviceId: string, page: number, limit: number) => {
