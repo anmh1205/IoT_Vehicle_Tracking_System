@@ -213,6 +213,7 @@ export const handleFirmware = async (
       );
     } else {
       const shouldMarkStarted = payload.status !== 'assigned';
+      const resetSequenceWatermark = updateDecision.reason === 'boot_seq_reset';
       await pool.query(
         `UPDATE firmware_update_log
          SET status = $2::firmware_status_enum,
@@ -230,6 +231,7 @@ export const handleFirmware = async (
              last_seen_at = NOW(),
              last_message_id = COALESCE($10, last_message_id),
              last_seq_no = CASE
+               WHEN $14::boolean AND $11::BIGINT IS NOT NULL THEN $11::BIGINT
                WHEN $11::BIGINT IS NULL THEN last_seq_no
                ELSE GREATEST(COALESCE(last_seq_no, -1::BIGINT), $11::BIGINT)
              END,
@@ -250,6 +252,7 @@ export const handleFirmware = async (
           seqNo ?? null,
           bootId ?? null,
           shouldMarkStarted,
+          resetSequenceWatermark,
         ],
       );
     }
