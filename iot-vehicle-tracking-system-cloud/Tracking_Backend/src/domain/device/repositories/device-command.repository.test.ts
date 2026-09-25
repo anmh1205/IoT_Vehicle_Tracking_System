@@ -7,7 +7,7 @@ vi.mock('@/infrastructure/database/pool', () => ({
 import { pool } from '@/infrastructure/database/pool';
 import {
   createCommand,
-  failAcceptedCommandsFromPriorBoot,
+  observeRuntimeBootAndFailStaleAccepted,
   updateCommandStatus,
 } from './device-command.repository';
 
@@ -62,6 +62,21 @@ describe('device-command.repository', () => {
     expect(params).toEqual([12, 'accepted', 'accepted', true, 'TRACKER_001', null]);
   });
 
+  it('turns a delayed accepted ACK from an older boot into failure', async () => {
+    vi.mocked(pool.query).mockResolvedValue({ rows: [] } as any);
+
+    await updateCommandStatus(12, 'accepted', 'accepted', {
+      markAcknowledged: true,
+      expectedDeviceId: 'TRACKER_001',
+      ackBootId: 'boot-17',
+    });
+
+    const [sql] = vi.mocked(pool.query).mock.calls[0] ?? [];
+    expect(sql).toContain("$2::varchar = 'accepted'");
+    expect(sql).toContain('d.runtime_boot_id <> $6::varchar');
+    expect(sql).toContain("THEN 'device_restarted_before_execution'");
+  });
+
   it('keeps command lifecycle monotonic when older ACKs are replayed', async () => {
     vi.mocked(pool.query).mockResolvedValue({ rows: [] } as any);
 
@@ -104,9 +119,11 @@ describe('device-command.repository', () => {
       }],
     } as any);
 
-    const rows = await failAcceptedCommandsFromPriorBoot('TRACKER_001', 'boot-18');
+    const rows = await observeRuntimeBootAndFailStaleAccepted('TRACKER_001', 'boot-18');
 
     const [sql, params] = vi.mocked(pool.query).mock.calls[0] ?? [];
+    expect(sql).toContain('UPDATE devices');
+    expect(sql).toContain('runtime_boot_id = $2');
     expect(sql).toContain("status = 'accepted'");
     expect(sql).toContain('ack_boot_id IS NOT NULL');
     expect(sql).toContain('ack_boot_id <> $2');
