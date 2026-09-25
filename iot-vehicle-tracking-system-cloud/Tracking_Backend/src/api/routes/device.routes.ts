@@ -22,6 +22,7 @@ router.get('/:id/sessions', requireDeviceAccess, deviceController.getDeviceSessi
 router.get('/:id/sessions/:sessionId/telemetry', requireDeviceAccess, deviceController.getSessionTelemetry);
 router.get('/:id/runtime', requireDeviceAccess, deviceController.getRuntimeStats);
 router.get('/:id/telemetry', requireDeviceAccess, deviceController.getTelemetry);
+router.get('/:id/event-logs', requireDeviceAccess, deviceController.getEventLogs);
 router.post('/:id/command', requireDeviceEditor, requireDeviceAccess, deviceController.sendCommand);
 router.post('/:id/ota', requireDeviceAdmin, requireDeviceAccess, deviceController.triggerOta);
 router.post('/:id/ota/rollback', requireDeviceAdmin, requireDeviceAccess, deviceController.rollbackOta);
