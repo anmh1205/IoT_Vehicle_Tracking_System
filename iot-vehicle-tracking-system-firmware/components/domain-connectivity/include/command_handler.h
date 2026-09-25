@@ -63,6 +63,8 @@ esp_err_t command_handler_init(config_t *config);
  * @param command_json Raw JSON command payload.
  * @param out_command_id Optional output for the cloud correlation ID. Set to 0
  *        when the payload is legacy or does not contain a valid command ID.
+ * @param out_deferred Optional output set true only when the command was staged
+ *        for later FSM execution. Immediate commands complete in the parser path.
  *
  * @return ESP_OK when the command was accepted/staged.
  * @return ESP_ERR_INVALID_ARG when the command or params are invalid.
@@ -91,6 +93,7 @@ bool command_handler_is_tracking_enabled(void);
 /**
  * @brief Consume pending action (if any).
  *
+ * @param out_command_id Optional output for the queued cloud correlation ID.
  * @return Consumed action value.
  */
 command_action_t command_handler_consume_action(uint64_t *out_command_id);
