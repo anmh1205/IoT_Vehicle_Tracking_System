@@ -179,11 +179,11 @@ const reconcileAcceptedCommandsForRuntimeBoot = async (
 ): Promise<void> => {
   const deviceId = String(payload.device_id ?? '').trim();
   const runtimeBootId = String(payload.runtime_boot_id ?? '').trim();
-  if (!deviceId || !runtimeBootId) {
+  if (!deviceId || !runtimeBootId || payload.live_mutation === false) {
     return;
   }
 
-  const failed = await deviceCommandRepo.failAcceptedCommandsFromPriorBoot(deviceId, runtimeBootId);
+  const failed = await deviceCommandRepo.observeRuntimeBootAndFailStaleAccepted(deviceId, runtimeBootId);
   failed.forEach((command) => {
     publishEvent('command:ack', {
       device_id: deviceId,
