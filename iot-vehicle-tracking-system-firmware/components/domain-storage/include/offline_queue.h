@@ -53,8 +53,10 @@ void offline_queue_set_online(bool online);
  * @param time_trusted True when timestamp came from trusted wall-clock time.
  * @param timestamp_ms Event timestamp in milliseconds; `0` falls back to uptime.
  *
- * @return ESP_OK on success or when SD logging is disabled/unavailable, otherwise
- *         an error from the backing SD store.
+ * @return ESP_OK only when the record was durably appended to SD.
+ * @return ESP_ERR_NOT_SUPPORTED when offline SD logging is disabled.
+ * @return ESP_ERR_NOT_FOUND when the SD store is unavailable/unmounted.
+ * @return Other backing-store errors when persistence fails.
  */
 esp_err_t offline_queue_enqueue(offline_record_type_t type,
                                 const char *payload,
