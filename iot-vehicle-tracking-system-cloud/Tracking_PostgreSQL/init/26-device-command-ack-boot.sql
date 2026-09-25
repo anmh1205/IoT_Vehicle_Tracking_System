@@ -1,3 +1,6 @@
+ALTER TABLE devices
+  ADD COLUMN IF NOT EXISTS runtime_boot_id VARCHAR(80);
+
 ALTER TABLE device_commands
   ADD COLUMN IF NOT EXISTS ack_boot_id VARCHAR(80);
 
