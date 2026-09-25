@@ -215,7 +215,17 @@ const flush = async (): Promise<void> => {
                  to_timestamp($6 / 1000.0)
                ),
                payload_updated_at = CASE
-                 WHEN to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                 WHEN (
+                   to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                   AND (
+                     $7::bigint IS NULL
+                     OR EXISTS (
+                       SELECT 1
+                       FROM device_sessions s
+                       WHERE s.id = $7 AND s.status = 'running'
+                     )
+                   )
+                 )
                  THEN GREATEST(
                    COALESCE(payload_updated_at, to_timestamp($13 / 1000.0)),
                    to_timestamp($13 / 1000.0)
