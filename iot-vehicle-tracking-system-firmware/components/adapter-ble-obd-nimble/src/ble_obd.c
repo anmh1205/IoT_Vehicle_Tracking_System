@@ -699,7 +699,6 @@ esp_err_t ble_obd_disconnect(ble_obd_ctx_t *ctx) {
     }
 
     free(ctx);
-    ctx = NULL;
     return ESP_OK;
 }
 

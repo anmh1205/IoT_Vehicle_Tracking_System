@@ -40,16 +40,8 @@ static bool s_pwrkey_inverted_stage = MODEM_PWRKEY_INVERTED_STAGE_DEFAULT != 0;
  * @param asserted true to assert modem-side PWRKEY, false to release.
  */
 static void modem_pwrkey_drive(bool asserted) {
-    // Physical GPIO level to write; resolved below based on whether an inverting stage sits in the path.
-    int raw_level = asserted ? 1 : 0;
-    if (s_pwrkey_inverted_stage) {
-        // Inverting transistor stage: GPIO HIGH turns the transistor on and pulls modem PWRKEY active.
-        raw_level = asserted ? 1 : 0;
-    } else {
-        // Direct connection: modem PWRKEY is active-low, so assert means drive GPIO LOW.
-        raw_level = asserted ? 0 : 1;
-    }
-    gpio_set_level(PIN_MODEM_PWRKEY, raw_level);
+    bool inverted = s_pwrkey_inverted_stage;
+    gpio_set_level(PIN_MODEM_PWRKEY, inverted == asserted ? 1 : 0);
 }
 
 /**
