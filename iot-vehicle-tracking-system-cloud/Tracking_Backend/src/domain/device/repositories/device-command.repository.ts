@@ -120,32 +120,12 @@ export const updateCommandStatus = async (
     `UPDATE device_commands
      SET status = CASE
            WHEN status IN ('acknowledged', 'failed') THEN status
-           WHEN $2::varchar = 'accepted'
-             AND $6::varchar IS NOT NULL
-             AND EXISTS (
-               SELECT 1
-               FROM devices d
-               WHERE d.device_id = device_commands.device_id
-                 AND d.runtime_boot_id IS NOT NULL
-                 AND d.runtime_boot_id <> $6::varchar
-             )
-             THEN 'failed'
            WHEN status = 'accepted' AND $2::varchar IN ('pending', 'sent') THEN status
            WHEN status = 'sent' AND $2::varchar = 'pending' THEN status
            ELSE $2::varchar
          END,
          response = CASE
            WHEN status IN ('acknowledged', 'failed') THEN response
-           WHEN $2::varchar = 'accepted'
-             AND $6::varchar IS NOT NULL
-             AND EXISTS (
-               SELECT 1
-               FROM devices d
-               WHERE d.device_id = device_commands.device_id
-                 AND d.runtime_boot_id IS NOT NULL
-                 AND d.runtime_boot_id <> $6::varchar
-             )
-             THEN 'device_restarted_before_execution'
            WHEN status = 'accepted' AND $2::varchar IN ('pending', 'sent') THEN response
            WHEN status = 'sent' AND $2::varchar = 'pending' THEN response
            ELSE COALESCE($3, response)
