@@ -1448,24 +1448,9 @@ esp_err_t state_machine_core_init(const config_t *config) {
     ESP_RETURN_ON_FALSE(command_handler_init(&s_config) == ESP_OK, ESP_FAIL, TAG, "command_handler_init failed");
     tracker_mqtt_set_command_callback(state_machine_command_callback);
 
-    // Restore OTA context before the first firmware-status publish can describe the running image.
-    esp_err_t ota_restore_err = state_machine_restore_ota_context_from_nvs();
-    bool had_pending_confirm =
-        ota_restore_err == ESP_OK && g_rtc_context.ota_pending_confirm;
+    // Confirmation owns persisted-context restore and fresh-boot status.
+    // If NVS is temporarily unreadable, later FSM iterations retry safely.
     state_machine_try_confirm_running_firmware();
-    if (ota_restore_err == ESP_OK && !had_pending_confirm) {
-        // Fresh boots are reported successful only after persisted OTA state was read successfully.
-        state_machine_publish_firmware_status(TRACKER_OTA_STATUS_SUCCESS,
-                                              TRACKER_OTA_PROGRESS_DONE,
-                                              s_current_version,
-                                              "",
-                                              "",
-                                              "");
-    } else if (ota_restore_err != ESP_OK) {
-        ESP_LOGW(TAG,
-                 "event=firmware_boot_status_deferred reason=ota_context_unreadable err=%s",
-                 esp_err_to_name(ota_restore_err));
-    }
     return ESP_OK;
 }
 
