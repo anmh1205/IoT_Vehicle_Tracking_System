@@ -2,7 +2,7 @@ import mqtt from 'mqtt';
 import { mqttConfig } from '@/config/env';
 import { createLogger } from '@/infrastructure/logger';
 import { publishEvent } from './event-bus.util';
-import { handleIgnitionEvent } from '@/domain/trip/services/trip-auto.service';
+import { handleSessionBoundaryEvent } from '@/domain/trip/services/trip-auto.service';
 import * as alertCrudService from '@/domain/alert/services/alert-crud.service';
 import * as deviceCommandRepo from '@/domain/device/repositories/device-command.repository';
 import { pool } from '@/infrastructure/database/pool';
@@ -32,7 +32,6 @@ interface InternalEnvelope {
     | 'data'
     | 'geofence'
     | 'zone'
-    | 'ignition'
     | 'firmware'
     | 'command';
   timestamp: string;
@@ -508,6 +507,14 @@ export const initMqttEventListener = (): void => {
         const action = String(envelopePayload.action ?? '');
         const sessionId = Number(envelopePayload.session_id ?? 0);
         if (action === 'started') {
+          const boundaryTimestamp =
+            envelopePayload.timestamp == null ? data.timestamp : String(envelopePayload.timestamp);
+          void handleSessionBoundaryEvent({
+            device_id: String(envelopePayload.device_id ?? ''),
+            session_id: sessionId,
+            action: 'started',
+            occurred_at: boundaryTimestamp,
+          });
           publishEvent('device:session_start', {
             deviceId: String(envelopePayload.device_id ?? ''),
             sessionId,
@@ -524,6 +531,14 @@ export const initMqttEventListener = (): void => {
           });
           publishStatsUpdate('device:session_start', envelopePayload, data.timestamp);
         } else if (action === 'ended') {
+          const boundaryTimestamp =
+            envelopePayload.timestamp == null ? data.timestamp : String(envelopePayload.timestamp);
+          void handleSessionBoundaryEvent({
+            device_id: String(envelopePayload.device_id ?? ''),
+            session_id: sessionId,
+            action: 'ended',
+            occurred_at: boundaryTimestamp,
+          });
           publishEvent('device:session_end', {
             deviceId: String(envelopePayload.device_id ?? ''),
             sessionId,
@@ -671,19 +686,6 @@ export const initMqttEventListener = (): void => {
               metadata,
             });
           }
-        }
-        break;
-      }
-
-      case 'ignition': {
-        const ignitionState = String(envelopePayload.state ?? '');
-        const vehicleId = envelopePayload.vehicle_id as string | undefined;
-        if (vehicleId && (ignitionState === 'on' || ignitionState === 'off')) {
-          void handleIgnitionEvent({
-            device_id: String(envelopePayload.device_id ?? ''),
-            vehicle_id: vehicleId,
-            state: ignitionState,
-          });
         }
         break;
       }
