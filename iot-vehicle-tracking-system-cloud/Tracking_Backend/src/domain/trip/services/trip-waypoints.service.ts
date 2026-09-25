@@ -1,5 +1,9 @@
 import { queryRange } from '@/domain/system-admin/repositories/victoriametrics.repository';
 import { findMany } from '@/infrastructure/database/queries';
+import {
+  eventLogPositionValueSql,
+  eventLogValidPositionSql,
+} from '@/shared/utils/event-log-telemetry-sql.util';
 
 /** A single GPS waypoint along the trip route */
 export interface TripWaypoint {
@@ -56,15 +60,14 @@ const getEventLogWaypoints = async (
   const rows = await findMany<EventLogWaypointRow>(
     `SELECT
         COALESCE(device_timestamp, server_timestamp) AS telemetry_timestamp,
-        COALESCE(context#>>'{raw_payload,data,latitude}', context->>'latitude', metadata->>'latitude') AS lat,
-        COALESCE(context#>>'{raw_payload,data,longitude}', context->>'longitude', metadata->>'longitude') AS lon,
-        COALESCE(context#>>'{raw_payload,data,speed}', context->>'speed', metadata->>'speed') AS speed,
-        COALESCE(context#>>'{raw_payload,data,course}', context->>'course', metadata->>'course') AS course
+        ${eventLogPositionValueSql('latitude')} AS lat,
+        ${eventLogPositionValueSql('longitude')} AS lon,
+        ${eventLogPositionValueSql('speed')} AS speed,
+        ${eventLogPositionValueSql('course')} AS course
      FROM event_logs
      WHERE device_id = $1
        AND COALESCE(device_timestamp, server_timestamp) BETWEEN $2 AND $3
-       AND ((context#>>'{raw_payload,data,latitude}') IS NOT NULL OR context ? 'latitude' OR metadata ? 'latitude')
-       AND ((context#>>'{raw_payload,data,longitude}') IS NOT NULL OR context ? 'longitude' OR metadata ? 'longitude')
+       AND ${eventLogValidPositionSql()}
      ORDER BY telemetry_timestamp ASC, server_timestamp ASC
      LIMIT 5000`,
     [deviceId, startTime.toISOString(), endTime.toISOString()],
