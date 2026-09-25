@@ -328,7 +328,6 @@ export const handleStatus = async (
       localSessionKey,
       canonicalSessionId,
       bootId: sessionBootId,
-      runtimeBootId: metadataBootId ?? sessionBootId,
     });
 
     if (ensuredSession.isNew) {
@@ -369,6 +368,7 @@ export const handleStatus = async (
         lastPayloadTimestampMs: timestampMs,
         lastSeqNo: seqNo ?? null,
         runtimeState,
+        runtimeBootId: metadataBootId ?? sessionBootId,
       });
       await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
     } else {
@@ -392,6 +392,7 @@ export const handleStatus = async (
         lastPayloadTimestampMs: timestampMs,
         lastSeqNo: seqNo ?? null,
         runtimeState,
+        runtimeBootId: metadataBootId ?? sessionBootId,
       });
       await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
 
@@ -442,7 +443,6 @@ export const handleStatus = async (
       localSessionKey,
       canonicalSessionId,
       bootId: sessionBootId,
-      runtimeBootId: metadataBootId ?? sessionBootId,
     });
 
     if (ensuredSession.isNew) {
@@ -483,6 +483,7 @@ export const handleStatus = async (
       lastPayloadTimestampMs: timestampMs,
       lastSeqNo: seqNo ?? null,
       runtimeState,
+      runtimeBootId: metadataBootId ?? sessionBootId,
     });
     await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
 
