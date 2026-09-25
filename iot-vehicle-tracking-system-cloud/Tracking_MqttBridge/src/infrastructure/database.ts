@@ -227,17 +227,13 @@ export const ensureDeviceSession = async (
            boundary_source = COALESCE(boundary_source, $4),
            last_update = GREATEST(COALESCE(last_update, $2::timestamptz), $2::timestamptz),
            uptime = GREATEST(
-             COALESCE(
-               uptime,
-               EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int
-             ),
+             COALESCE(uptime, 0),
+             EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
              0
            ),
            total_runtime_seconds = GREATEST(
-             COALESCE(
-               total_runtime_seconds,
-               EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int
-             ),
+             COALESCE(total_runtime_seconds, 0),
+             EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
              0
            ),
            updated_at = NOW()

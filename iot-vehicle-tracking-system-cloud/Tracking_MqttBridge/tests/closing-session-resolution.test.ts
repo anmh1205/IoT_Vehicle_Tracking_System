@@ -375,8 +375,16 @@ test('ensureDeviceSession returns sessions atomically retired by a replacement i
       }
 
       if (/UPDATE device_sessions[\s\S]+end_reason = COALESCE\(end_reason, 'superseded'\)/.test(sql)) {
+        assert.match(
+          sql,
+          /total_runtime_seconds = GREATEST\(\s*COALESCE\(total_runtime_seconds, 0\),\s*EXTRACT\(EPOCH FROM \(\$2::timestamptz - COALESCE\(server_session_start, created_at\)\)\)::int,\s*0\s*\)/,
+        );
+        assert.match(
+          sql,
+          /uptime = GREATEST\(\s*COALESCE\(uptime, 0\),\s*EXTRACT\(EPOCH FROM \(\$2::timestamptz - COALESCE\(server_session_start, created_at\)\)\)::int,\s*0\s*\)/,
+        );
         assert.match(sql, /RETURNING id, COALESCE\(total_runtime_seconds, uptime, 0\)::text AS runtime_seconds/);
-        return { rows: [{ id: 321, runtime_seconds: '123' }], rowCount: 1 };
+        return { rows: [{ id: 321, runtime_seconds: '200' }], rowCount: 1 };
       }
 
       if (/UPDATE devices[\s\S]+total_runtime_seconds/.test(sql)) {
@@ -425,5 +433,5 @@ test('ensureDeviceSession returns sessions atomically retired by a replacement i
     (sql) => /UPDATE devices[\s\S]+total_runtime_seconds/.test(sql),
   );
   assert.ok(runtimeUpdateIndex >= 0);
-  assert.deepEqual(paramsSeen[runtimeUpdateIndex], ['TRACKER_001', 123]);
+  assert.deepEqual(paramsSeen[runtimeUpdateIndex], ['TRACKER_001', 200]);
 });
