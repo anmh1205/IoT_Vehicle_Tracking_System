@@ -379,20 +379,20 @@ bool state_machine_publish_rawdata(void) {
  * @param[in] status Status label such as `running`, `stopped`, or `heartbeat`.
  * @param[in] boundary_event Boundary qualifier such as `started`, `ended`, or `none`.
  */
-void state_machine_publish_status(const char *status, const char *boundary_event) {
+bool state_machine_publish_status(const char *status, const char *boundary_event) {
     // Publish status through the shared pipeline so lifecycle boundaries follow the same offline-fallback rules.
     const state_publish_status_args_t args = {
         .status = status,
         .session_id = state_publish_effective_local_session_key(),
         .boundary_event = boundary_event,
     };
-    (void)state_publish_via_pipeline("status",
-                                     OFFLINE_RECORD_STATUS,
-                                     &args,
-                                     state_publish_format_status,
-                                     tracker_mqtt_publish_status,
-                                     true,
-                                     false);
+    return state_publish_via_pipeline("status",
+                                      OFFLINE_RECORD_STATUS,
+                                      &args,
+                                      state_publish_format_status,
+                                      tracker_mqtt_publish_status,
+                                      true,
+                                      false);
 }
 
 /**
