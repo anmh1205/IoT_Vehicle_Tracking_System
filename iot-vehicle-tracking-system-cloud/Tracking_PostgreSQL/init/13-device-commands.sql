@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS device_commands (
         CHECK (status IN ('pending', 'sent', 'accepted', 'acknowledged', 'failed')),
     sent_at TIMESTAMPTZ,
     acked_at TIMESTAMPTZ,
+    ack_boot_id VARCHAR(80),
     response TEXT,
     actor_user_id INT REFERENCES users(id) ON DELETE SET NULL,
     correlation_id VARCHAR(64),
@@ -31,3 +32,7 @@ CREATE INDEX IF NOT EXISTS idx_device_commands_correlation_id
 CREATE TRIGGER trigger_device_commands_updated_at
     BEFORE UPDATE ON device_commands
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE INDEX IF NOT EXISTS idx_device_commands_accepted_boot
+    ON device_commands(device_id, ack_boot_id)
+    WHERE status = 'accepted';

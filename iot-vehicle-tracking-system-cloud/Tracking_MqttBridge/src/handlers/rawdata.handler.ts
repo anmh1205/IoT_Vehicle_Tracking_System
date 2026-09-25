@@ -805,7 +805,8 @@ export const handleRawData = async (
   const messageId = payload.metadata?.message_id;
   const schemaVersion = payload.metadata?.schema_version;
   const seqNo = payload.metadata?.seq_no;
-  const bootId = payload.boot_id ?? payload.metadata?.boot_id;
+  const metadataBootId = payload.metadata?.boot_id;
+  const bootId = payload.boot_id ?? metadataBootId;
   const diagnostics = payload.diagnostics;
   const storedDtcCodes = normalizeDtcCodes(diagnostics?.dtc?.stored);
   const pendingDtcCodes = normalizeDtcCodes(diagnostics?.dtc?.pending);
@@ -1263,6 +1264,7 @@ export const handleRawData = async (
       schema_version: schemaVersion,
       seq_no: seqNo,
       boot_id: bootId,
+      runtime_boot_id: metadataBootId,
       live_mutation: shouldMutateLiveState,
       historical_session_append: shouldAppendHistoricalSessionTelemetry,
       stale_reason: shouldRetainStaleSessionTelemetry ? liveMutationDecision.reason : undefined,

@@ -79,6 +79,7 @@ const handleCommandAck = (deviceId: string, message: Buffer): void => {
     command_id: String(commandId),
     status,
     response: parsed.response ?? parsed.error ?? null,
+    boot_id: parsed.boot_id == null ? undefined : String(parsed.boot_id),
   });
 };
 

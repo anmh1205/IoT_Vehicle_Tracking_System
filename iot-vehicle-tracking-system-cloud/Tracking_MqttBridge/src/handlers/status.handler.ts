@@ -551,5 +551,6 @@ export const handleStatus = async (
     schema_version: schemaVersion,
     seq_no: seqNo,
     boot_id: sessionBootId,
+    runtime_boot_id: metadataBootId,
   });
 };

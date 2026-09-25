@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS devices (
     device_state device_runtime_state_enum,
     sleep_mode sleep_mode_enum,
     state_updated_at TIMESTAMPTZ,
+    runtime_boot_id VARCHAR(80),
     total_runtime_seconds BIGINT DEFAULT 0,
     imei VARCHAR(20),
     imu_accel_delta_threshold_mps2 DECIMAL(8,3) DEFAULT 1.000,

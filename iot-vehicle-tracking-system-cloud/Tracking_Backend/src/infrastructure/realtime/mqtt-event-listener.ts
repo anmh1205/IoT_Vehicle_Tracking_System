@@ -150,9 +150,11 @@ const processCommandAck = async (
     return;
   }
 
+  const ackBootId = payload.boot_id == null ? undefined : String(payload.boot_id).trim() || undefined;
   const updated = await deviceCommandRepo.updateCommandStatus(commandId, status, response, {
     markAcknowledged: true,
     expectedDeviceId: deviceId,
+    ackBootId,
   });
   if (!updated) {
     log.warn('Ignoring unmatched command ACK', {
@@ -165,11 +167,44 @@ const processCommandAck = async (
 
   publishEvent('command:ack', {
     device_id: deviceId,
-    command_id: String(commandId ?? payload.command_id ?? payload.commandId ?? ''),
-    status,
-    response,
+    command_id: String(commandId),
+    status: updated.status,
+    response: updated.response,
   });
-  publishStatsUpdate('command:ack', payload, timestamp);
+  publishStatsUpdate('command:ack', {
+    ...payload,
+    status: updated.status,
+    response: updated.response,
+  }, timestamp);
+};
+
+const reconcileAcceptedCommandsForRuntimeBoot = async (
+  payload: Record<string, unknown>,
+): Promise<void> => {
+  const deviceId = String(payload.device_id ?? '').trim();
+  const runtimeBootId = String(payload.runtime_boot_id ?? '').trim();
+  if (!deviceId || !runtimeBootId || payload.live_mutation === false) {
+    return;
+  }
+
+  const failed = await deviceCommandRepo.observeRuntimeBootAndFailStaleAccepted(deviceId, runtimeBootId);
+  failed.forEach((command) => {
+    publishEvent('command:ack', {
+      device_id: deviceId,
+      command_id: String(command.id),
+      status: 'failed',
+      response: 'device_restarted_before_execution',
+    });
+  });
+
+  if (failed.length > 0) {
+    publishStatsUpdate('command:reboot_reconciled', payload, new Date().toISOString());
+    log.warn('Failed accepted commands left behind by a prior firmware boot', {
+      deviceId,
+      runtimeBootId,
+      commandIds: failed.map((command) => command.id),
+    });
+  }
 };
 
 const asRecord = (value: unknown): Record<string, unknown> | undefined => {
@@ -377,6 +412,12 @@ export const initMqttEventListener = (): void => {
 
     switch (data.event_type) {
       case 'status':
+        void reconcileAcceptedCommandsForRuntimeBoot(envelopePayload).catch((error) => {
+          log.error('Failed to reconcile accepted commands on status boot observation', {
+            error,
+            deviceId: envelopePayload.device_id,
+          });
+        });
         publishEvent('device:status', {
           deviceId: String(envelopePayload.device_id ?? ''),
           status: String(envelopePayload.current_status ?? 'unknown'),
@@ -440,6 +481,12 @@ export const initMqttEventListener = (): void => {
 
       case 'data':
         {
+          void reconcileAcceptedCommandsForRuntimeBoot(envelopePayload).catch((error) => {
+            log.error('Failed to reconcile accepted commands on data boot observation', {
+              error,
+              deviceId: envelopePayload.device_id,
+            });
+          });
           const isLiveMutation = envelopePayload.live_mutation !== false;
           const vehicleBattery = toOptionalNumber(envelopePayload.vehicle_battery);
           const deviceBattery = toOptionalNumber(envelopePayload.device_battery);
