@@ -73,11 +73,13 @@ export const normalizeStatusForSessionRuntime = (params: {
 export const shouldAcceptLiveMutation = (params: {
   incomingTimestampMs: number;
   incomingSeqNo?: number;
-  incomingBootId?: string | null;
+  incomingRuntimeBootId?: string | null;
+  incomingSessionBootId?: string | null;
   incomingLocalSessionKey?: number;
   cachedLastPayloadTimestampMs?: number | null;
   cachedLastSeqNo?: number | null;
-  cachedBootId?: string | null;
+  cachedRuntimeBootId?: string | null;
+  cachedSessionBootId?: string | null;
   cachedLocalSessionKey?: number | null;
   persistedWatermarkMs?: number | null;
 }): { accept: boolean; reason: string; watermarkMs: number | null } => {
@@ -95,9 +97,9 @@ export const shouldAcceptLiveMutation = (params: {
   }
 
   if (
-    params.cachedBootId &&
-    params.incomingBootId &&
-    params.cachedBootId === params.incomingBootId &&
+    params.cachedRuntimeBootId &&
+    params.incomingRuntimeBootId &&
+    params.cachedRuntimeBootId === params.incomingRuntimeBootId &&
     params.cachedLastSeqNo !== null &&
     params.cachedLastSeqNo !== undefined &&
     params.incomingSeqNo !== undefined &&
@@ -108,9 +110,9 @@ export const shouldAcceptLiveMutation = (params: {
 
   if (
     normalizedWatermarkMs !== null &&
-    params.cachedBootId &&
-    params.incomingBootId &&
-    params.cachedBootId !== params.incomingBootId &&
+    params.cachedRuntimeBootId &&
+    params.incomingRuntimeBootId &&
+    params.cachedRuntimeBootId !== params.incomingRuntimeBootId &&
     params.incomingTimestampMs <= normalizedWatermarkMs
   ) {
     return { accept: false, reason: 'stale_boot_identity', watermarkMs: normalizedWatermarkMs };
@@ -121,9 +123,9 @@ export const shouldAcceptLiveMutation = (params: {
     params.cachedLocalSessionKey &&
     params.incomingLocalSessionKey &&
     params.cachedLocalSessionKey !== params.incomingLocalSessionKey &&
-    params.cachedBootId &&
-    params.incomingBootId &&
-    params.cachedBootId === params.incomingBootId &&
+    params.cachedSessionBootId &&
+    params.incomingSessionBootId &&
+    params.cachedSessionBootId === params.incomingSessionBootId &&
     params.incomingTimestampMs <= normalizedWatermarkMs
   ) {
     return { accept: false, reason: 'stale_session_identity', watermarkMs: normalizedWatermarkMs };
