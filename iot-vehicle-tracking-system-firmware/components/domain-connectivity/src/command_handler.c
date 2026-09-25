@@ -53,7 +53,6 @@ static const TickType_t COMMAND_HANDLER_LOCK_TIMEOUT_TICKS = pdMS_TO_TICKS(250);
 static const TickType_t COMMAND_HANDLER_QUEUE_SEND_TIMEOUT_TICKS = pdMS_TO_TICKS(100);
 
 #define COMMAND_HANDLER_ACTION_QUEUE_LEN 16U
-#define COMMAND_HANDLER_MAX_LOCATION_REQUESTS 255U
 #define COMMAND_HANDLER_U16_RULE_COUNT 7U
 #define COMMAND_HANDLER_BOOL_RULE_COUNT 2U
 
@@ -65,8 +64,6 @@ static SemaphoreHandle_t s_lock = NULL;
 static QueueHandle_t s_action_queue = NULL;
 /* Tracking enable flag set by `enable_tracking` command. */
 static bool s_tracking_enabled = true;
-/* Counts queued one-shot location requests so bursts are not collapsed into one bit. */
-static uint8_t s_location_request_count = 0U;
 /* Tracks command drops without expanding the cloud command contract. */
 static atomic_uint s_dropped_command_count = 0U;
 
@@ -723,7 +720,6 @@ esp_err_t command_handler_init(config_t *config) {
 
     s_config = config;
     s_tracking_enabled = true;
-    s_location_request_count = 0U;
     atomic_store(&s_dropped_command_count, 0U);
     command_handler_reset_consumed_payloads();
     xQueueReset(s_action_queue);
@@ -929,18 +925,14 @@ esp_err_t command_handler_process(const char *command_json,
             result = ESP_ERR_INVALID_ARG;
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_REQUEST_LOCATION) == 0) {
-        // Location requests collapse into a bounded counter so bursts do not allocate unbounded queue state.
-        if (!command_handler_take_lock_for(COMMAND_NAME_REQUEST_LOCATION)) {
-            result = ESP_ERR_TIMEOUT;
-        } else if (s_location_request_count < COMMAND_HANDLER_MAX_LOCATION_REQUESTS) {
-            s_location_request_count += 1U;
-            command_handler_give_lock();
-            result = ESP_OK;
-        } else {
-            atomic_fetch_add(&s_dropped_command_count, 1U);
-            ESP_LOGW(TAG, "event=command_dropped operation=request_location reason=pending_counter_saturated");
-            command_handler_give_lock();
-            result = ESP_ERR_NO_MEM;
+        // Keep the cloud correlation ID until the publish pipeline accepts the requested snapshot.
+        command_action_item_t item = {
+            .command_id = parsed_command_id,
+            .action = COMMAND_ACTION_REQUEST_LOCATION,
+        };
+        result = command_handler_enqueue_action(&item);
+        if (result == ESP_OK && out_deferred != NULL) {
+            *out_deferred = true;
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_ENABLE_TRACKING) == 0) {
         // Tracking enable is a small runtime flag, so it can be updated under lock without staging a full queue item.
@@ -1023,24 +1015,6 @@ esp_err_t command_handler_process(const char *command_json,
 
     cJSON_Delete(root);
     return result;
-}
-
-/**
- * @brief Consume one-shot location request flag.
- *
- * @return true when a request existed.
- */
-bool command_handler_consume_location_request(void) {
-    if (!command_handler_take_lock()) {
-        return false;
-    }
-
-    bool current = s_location_request_count > 0U;
-    if (current) {
-        s_location_request_count -= 1U;
-    }
-    command_handler_give_lock();
-    return current;
 }
 
 /**
