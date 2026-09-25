@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include "ota_contract.h"
 
 /**
