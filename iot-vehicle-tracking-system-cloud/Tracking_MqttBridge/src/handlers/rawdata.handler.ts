@@ -16,6 +16,7 @@ import { publishInternalEvent } from '../publishers/internal-event.publisher';
 import { publishSessionAssignment } from '../publishers/session-assignment.publisher';
 import { getStatus, resolveSessionId, setStatus } from '../cache/device-state.cache';
 import { addUpdate } from '../services/batch-writer.service';
+import { publishSupersededSessionEnds } from '../services/session-lifecycle.service';
 import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
 import { maxTimestampMs, normalizePayloadTimestamp, parseIsoTimestampMs } from '../utils/timestamp.util';
@@ -984,6 +985,15 @@ export const handleRawData = async (
       canonicalSource: 'server',
       boundarySource: SESSION_FALLBACK_BOUNDARY_SOURCE,
       startReason: 'telemetry_active',
+    });
+
+    publishSupersededSessionEnds({
+      deviceId: payload.device_id,
+      retiredSessionIds: ensuredSession.retiredSessionIds,
+      timestampMs,
+      messageId,
+      schemaVersion,
+      seqNo,
     });
     sessionId = ensuredSession.sessionId;
     canonicalSessionId = String(ensuredSession.sessionId);

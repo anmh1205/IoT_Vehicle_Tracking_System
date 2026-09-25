@@ -8,6 +8,7 @@ import {
   updateDeviceStatus,
 } from '../infrastructure/database';
 import { verifyDeviceToken } from '../services/device-auth.service';
+import { publishSupersededSessionEnds } from '../services/session-lifecycle.service';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
 import { publishSessionAssignment } from '../publishers/session-assignment.publisher';
@@ -292,6 +293,15 @@ export const handleStatus = async (
       startReason: 'ignition_on',
     });
 
+    publishSupersededSessionEnds({
+      deviceId: payload.device_id,
+      retiredSessionIds: ensuredSession.retiredSessionIds,
+      timestampMs,
+      messageId,
+      schemaVersion,
+      seqNo,
+    });
+
     if (!ensuredSession.isNew && ensuredSession.status !== 'running') {
       logger.warn(
         {
@@ -421,6 +431,15 @@ export const handleStatus = async (
       canonicalSource: 'server',
       boundarySource,
       startReason,
+    });
+
+    publishSupersededSessionEnds({
+      deviceId: payload.device_id,
+      retiredSessionIds: ensuredSession.retiredSessionIds,
+      timestampMs,
+      messageId,
+      schemaVersion,
+      seqNo,
     });
 
     sessionId = ensuredSession.sessionId;

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   closePool,
   completeDeviceSession,
+  ensureDeviceSession,
   ensureHistoricalDeviceSession,
   findClosingDeviceSessionIdByIdentity,
   findDeviceSessionIdByIdentity,
@@ -293,4 +294,89 @@ test('touchDeviceSession ignores a duplicate message without mutating aggregates
   assert.equal(statements.some((sql) => /UPDATE device_sessions/.test(sql)), false);
   assert.equal(statements.some((sql) => /UPDATE devices/.test(sql)), false);
   assert.equal(statements.at(-1), 'COMMIT');
+});
+
+test('ensureDeviceSession returns sessions atomically retired by a replacement identity', async (t) => {
+  const originalConnect = writablePool.connect;
+  const statements: string[] = [];
+  const paramsSeen: Array<unknown[] | undefined> = [];
+
+  writablePool.connect = async () => ({
+    query: async (sql, params) => {
+      statements.push(sql);
+      paramsSeen.push(params);
+
+      if (
+        /FROM device_sessions\s+WHERE device_id = \$1\s+AND firmware_boot_id = \$2\s+AND local_session_key = \$3/.test(sql)
+      ) {
+        return { rows: [], rowCount: 0 };
+      }
+
+      if (
+        /FROM device_sessions\s+WHERE device_id = \$1 AND status = 'running'\s+ORDER BY created_at DESC/.test(sql)
+      ) {
+        return {
+          rows: [{
+            id: 321,
+            status: 'running',
+            local_session_key: '4',
+            firmware_boot_id: 'old-boot',
+            boundary_source: 'firmware',
+          }],
+          rowCount: 1,
+        };
+      }
+
+      if (/UPDATE device_sessions[\s\S]+end_reason = COALESCE\(end_reason, 'superseded'\)/.test(sql)) {
+        assert.match(sql, /RETURNING id, COALESCE\(total_runtime_seconds, uptime, 0\)::text AS runtime_seconds/);
+        return { rows: [{ id: 321, runtime_seconds: '123' }], rowCount: 1 };
+      }
+
+      if (/UPDATE devices[\s\S]+total_runtime_seconds/.test(sql)) {
+        return { rows: [], rowCount: 1 };
+      }
+
+      if (/INSERT INTO device_sessions/.test(sql)) {
+        return { rows: [{ id: 654, status: 'running' }], rowCount: 1 };
+      }
+
+      return { rows: [], rowCount: 0 };
+    },
+    release: () => undefined,
+  });
+
+  t.after(() => {
+    writablePool.connect = originalConnect;
+  });
+
+  const result = await ensureDeviceSession(
+    'TRACKER_001',
+    Date.parse('2026-05-10T10:00:00.000Z'),
+    Date.parse('2026-05-10T10:00:01.000Z'),
+    {
+      localSessionKey: 5,
+      bootId: 'new-boot',
+      canonicalSource: 'server',
+      boundarySource: 'firmware',
+      startReason: 'ignition_on',
+    },
+  );
+
+  assert.equal(result.sessionId, 654);
+  assert.equal(result.isNew, true);
+  assert.deepEqual(result.retiredSessionIds, [321]);
+  assert.ok(
+    statements.some(
+      (sql) =>
+        /UPDATE device_sessions/.test(sql)
+        && /status = 'completed'/.test(sql)
+        && /RETURNING id/.test(sql),
+    ),
+  );
+
+  const runtimeUpdateIndex = statements.findIndex(
+    (sql) => /UPDATE devices[\s\S]+total_runtime_seconds/.test(sql),
+  );
+  assert.ok(runtimeUpdateIndex >= 0);
+  assert.deepEqual(paramsSeen[runtimeUpdateIndex], ['TRACKER_001', 123]);
 });

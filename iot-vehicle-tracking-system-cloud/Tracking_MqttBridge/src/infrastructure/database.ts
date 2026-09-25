@@ -199,7 +199,7 @@ export const ensureDeviceSession = async (
   deviceTimestampMs: number,
   serverTimestampMs = Date.now(),
   sessionIdentity: SessionIdentityInput = {},
-): Promise<{ sessionId: number; isNew: boolean; status: string }> => {
+): Promise<{ sessionId: number; isNew: boolean; status: string; retiredSessionIds: number[] }> => {
   const client = await pool.connect();
   const deviceOccurredAt = toIsoTimestamp(deviceTimestampMs);
   const serverOccurredAt = toIsoTimestamp(serverTimestampMs);
@@ -209,6 +209,7 @@ export const ensureDeviceSession = async (
   const boundarySource = sessionIdentity.boundarySource ?? 'firmware';
   const startReason = sessionIdentity.startReason ?? 'ignition_on';
   const hasAuthoritativeIdentity = localSessionKey !== null && firmwareBootId !== null;
+  const retiredSessionIds = new Set<number>();
 
   try {
     await client.query('BEGIN');
@@ -216,7 +217,7 @@ export const ensureDeviceSession = async (
     const retireStaleRunningSessions = async (
       keepSessionId?: number,
     ): Promise<void> => {
-      await client.query(
+      const retired = await client.query<DeviceSessionRow>(
         `UPDATE device_sessions
          SET
            status = 'completed',
@@ -242,7 +243,8 @@ export const ensureDeviceSession = async (
            updated_at = NOW()
          WHERE device_id = $1
            AND status = 'running'
-           AND ($5::bigint IS NULL OR id <> $5::bigint)`,
+           AND ($5::bigint IS NULL OR id <> $5::bigint)
+         RETURNING id, COALESCE(total_runtime_seconds, uptime, 0)::text AS runtime_seconds`,
         [
           deviceId,
           serverOccurredAt,
@@ -251,6 +253,22 @@ export const ensureDeviceSession = async (
           keepSessionId ?? null,
         ],
       );
+
+      let retiredRuntimeSeconds = 0;
+      retired.rows.forEach((row) => {
+        retiredSessionIds.add(row.id);
+        retiredRuntimeSeconds += Math.max(toInt(row.runtime_seconds), 0);
+      });
+
+      if (retiredRuntimeSeconds > 0) {
+        await client.query(
+          `UPDATE devices
+           SET total_runtime_seconds = COALESCE(total_runtime_seconds, 0) + $2,
+               updated_at = NOW()
+           WHERE device_id = $1`,
+          [deviceId, retiredRuntimeSeconds],
+        );
+      }
     };
 
     if (hasAuthoritativeIdentity) {
@@ -283,6 +301,7 @@ export const ensureDeviceSession = async (
           sessionId: existingByIdentity.id,
           isNew: false,
           status: existingByIdentity.status ?? 'running',
+          retiredSessionIds: Array.from(retiredSessionIds),
         };
       }
 
@@ -346,6 +365,7 @@ export const ensureDeviceSession = async (
           sessionId: existing.id,
           isNew: false,
           status: existing.status ?? 'running',
+          retiredSessionIds: Array.from(retiredSessionIds),
         };
       }
     }
@@ -387,7 +407,12 @@ export const ensureDeviceSession = async (
             [existing.id, canonicalSource, boundarySource, startReason],
           );
           await client.query('COMMIT');
-          return { sessionId: existing.id, isNew: false, status: existing.status ?? 'running' };
+          return {
+            sessionId: existing.id,
+            isNew: false,
+            status: existing.status ?? 'running',
+            retiredSessionIds: Array.from(retiredSessionIds),
+          };
         }
       }
     }
@@ -429,6 +454,7 @@ export const ensureDeviceSession = async (
       sessionId: created.rows[0].id,
       isNew: true,
       status: created.rows[0].status ?? 'running',
+      retiredSessionIds: Array.from(retiredSessionIds),
     };
   } catch (err) {
     await client.query('ROLLBACK');
