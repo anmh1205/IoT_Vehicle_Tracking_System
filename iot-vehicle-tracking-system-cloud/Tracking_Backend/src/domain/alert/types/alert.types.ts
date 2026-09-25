@@ -15,6 +15,7 @@ export interface Alert {
   speed: number | null;
   threshold_value: number | null;
   actual_value: number | null;
+  source_message_id?: string | null;
   acknowledged_by: number | null;
   acknowledged_at: Date | null;
   resolved_by: number | null;
@@ -75,6 +76,7 @@ export interface CreateAlertInput {
   speed?: number;
   thresholdValue?: number;
   actualValue?: number;
+  sourceMessageId?: string;
 }
 
 export interface UpdateAlertInput {
