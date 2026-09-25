@@ -800,7 +800,7 @@ export const completeDeviceSession = async (
   serverTimestampMs?: number,
   completionSource: 'stopped' | 'heartbeat' = 'stopped',
   sessionIdentity: SessionIdentityInput = {},
-): Promise<{ sessionId: number | null; discarded: boolean }> => {
+): Promise<{ sessionId: number | null; discarded: boolean; completedNow: boolean }> => {
   const client = await pool.connect();
   const deviceOccurredAt = toIsoTimestamp(deviceTimestampMs);
   const serverOccurredAt = toIsoTimestamp(serverTimestampMs ?? Date.now());
@@ -835,12 +835,12 @@ export const completeDeviceSession = async (
     const session = active.rows[0];
     if (!session) {
       await client.query('COMMIT');
-      return { sessionId: null, discarded: false };
+      return { sessionId: null, discarded: false, completedNow: false };
     }
 
     if (session.status && session.status !== 'running') {
       await client.query('COMMIT');
-      return { sessionId: session.id, discarded: false };
+      return { sessionId: session.id, discarded: false, completedNow: false };
     }
 
     let runtimeSeconds = 0;
@@ -931,7 +931,7 @@ export const completeDeviceSession = async (
         },
         'Device session discarded',
       );
-      return { sessionId: session.id, discarded: true };
+      return { sessionId: session.id, discarded: true, completedNow: true };
     }
 
     await client.query(
@@ -942,7 +942,7 @@ export const completeDeviceSession = async (
     );
 
     await client.query('COMMIT');
-    return { sessionId: session.id, discarded: false };
+    return { sessionId: session.id, discarded: false, completedNow: true };
   } catch (err) {
     await client.query('ROLLBACK');
     logger.error({ err, deviceId, event: 'complete_device_session_failed' }, 'Complete device session failed');
