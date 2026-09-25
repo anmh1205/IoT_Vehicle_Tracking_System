@@ -286,11 +286,12 @@ static bool state_publish_via_pipeline(const char *log_label,
                  esp_err_to_name(queue_err),
                  (unsigned long)seq_no);
     }
+    bool persisted = queue_err == ESP_OK;
     cJSON_free(payload);
-    if (update_raw_publish_ms) {
+    if (update_raw_publish_ms && persisted) {
         s_last_raw_publish_ms = util_uptime_ms();
     }
-    return queue_err == ESP_OK;
+    return persisted;
 }
 
 /**
