@@ -163,6 +163,8 @@ export const getWaypoints = async (
   return waypoints;
 };
 
+const MAX_PLAUSIBLE_TRIP_SPEED_KPH = 300;
+
 /** Haversine distance between two GPS points in km */
 const haversineKm = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371;
@@ -174,44 +176,92 @@ const haversineKm = (lat1: number, lon1: number, lat2: number, lon2: number): nu
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
+const isCoordinateValid = (waypoint: TripWaypoint): boolean =>
+  Number.isFinite(waypoint.lat) &&
+  Number.isFinite(waypoint.lon) &&
+  waypoint.lat >= -90 &&
+  waypoint.lat <= 90 &&
+  waypoint.lon >= -180 &&
+  waypoint.lon <= 180 &&
+  !(waypoint.lat === 0 && waypoint.lon === 0);
+
+const isPlausibleReportedSpeed = (speed: number | null): speed is number =>
+  speed !== null &&
+  Number.isFinite(speed) &&
+  speed >= 0 &&
+  speed <= MAX_PLAUSIBLE_TRIP_SPEED_KPH;
+
+/**
+ * Keep only points that can be reached from the last accepted point without
+ * exceeding the conservative road-vehicle speed ceiling.
+ *
+ * Raw telemetry is intentionally left untouched; this guard only protects
+ * derived trip statistics from isolated GNSS ghost jumps.
+ */
+const filterSummaryWaypoints = (waypoints: TripWaypoint[]): TripWaypoint[] => {
+  const candidates = waypoints.filter(isCoordinateValid);
+  if (candidates.length <= 1) {
+    return candidates;
+  }
+
+  const accepted: TripWaypoint[] = [candidates[0]];
+  for (let i = 1; i < candidates.length; i++) {
+    const previous = accepted[accepted.length - 1];
+    const current = candidates[i];
+    const elapsedSeconds = current.ts - previous.ts;
+    if (elapsedSeconds <= 0) {
+      continue;
+    }
+
+    const distanceKm = haversineKm(previous.lat, previous.lon, current.lat, current.lon);
+    const impliedSpeedKph = distanceKm / (elapsedSeconds / 3600);
+    if (Number.isFinite(impliedSpeedKph) && impliedSpeedKph <= MAX_PLAUSIBLE_TRIP_SPEED_KPH) {
+      accepted.push(current);
+    }
+  }
+
+  return accepted;
+};
+
 /** Compute route summary from waypoints */
 export const computeRouteSummary = (
   waypoints: TripWaypoint[],
   startTime: Date,
   endTime: Date,
 ): TripRouteSummary => {
+  const summaryWaypoints = filterSummaryWaypoints(waypoints);
   let distanceKm = 0;
   let maxSpeed = 0;
   let totalSpeed = 0;
   let speedCount = 0;
 
-  for (let i = 1; i < waypoints.length; i++) {
+  for (let i = 1; i < summaryWaypoints.length; i++) {
     distanceKm += haversineKm(
-      waypoints[i - 1].lat,
-      waypoints[i - 1].lon,
-      waypoints[i].lat,
-      waypoints[i].lon,
+      summaryWaypoints[i - 1].lat,
+      summaryWaypoints[i - 1].lon,
+      summaryWaypoints[i].lat,
+      summaryWaypoints[i].lon,
     );
   }
 
-  for (const wp of waypoints) {
-    if (wp.speed !== null) {
+  for (const wp of summaryWaypoints) {
+    if (isPlausibleReportedSpeed(wp.speed)) {
       if (wp.speed > maxSpeed) maxSpeed = wp.speed;
       totalSpeed += wp.speed;
       speedCount++;
     }
   }
 
-  const durationMinutes = (endTime.getTime() - startTime.getTime()) / 60000;
+  const durationMinutes = Math.max(0, (endTime.getTime() - startTime.getTime()) / 60000);
 
   return {
     distanceKm: Math.round(distanceKm * 100) / 100,
     durationMinutes: Math.round(durationMinutes),
     maxSpeed: Math.round(maxSpeed * 100) / 100,
     avgSpeed: speedCount > 0 ? Math.round((totalSpeed / speedCount) * 100) / 100 : 0,
-    startLat: waypoints[0]?.lat ?? null,
-    startLon: waypoints[0]?.lon ?? null,
-    endLat: waypoints[waypoints.length - 1]?.lat ?? null,
-    endLon: waypoints[waypoints.length - 1]?.lon ?? null,
+    startLat: summaryWaypoints[0]?.lat ?? null,
+    startLon: summaryWaypoints[0]?.lon ?? null,
+    endLat: summaryWaypoints[summaryWaypoints.length - 1]?.lat ?? null,
+    endLon: summaryWaypoints[summaryWaypoints.length - 1]?.lon ?? null,
   };
 };
