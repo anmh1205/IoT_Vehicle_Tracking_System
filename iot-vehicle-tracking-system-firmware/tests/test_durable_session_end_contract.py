@@ -24,16 +24,21 @@ def test_normal_session_end_keeps_identity_until_boundary_is_durable():
 
     publish = commit.index('state_machine_publish_status("stopped", "ended")')
     failed_return = commit.index("return false;", publish)
+    clear_guard = commit.index("if (!state_machine_clear_persisted_session())")
+    clear_failed_return = commit.index("return false;", clear_guard)
     stop_queue = commit.index("offline_queue_stop_session(true);")
-    clear_nvs = commit.index("state_machine_clear_persisted_session();")
     reset_runtime = commit.index("state_machine_reset_session_runtime();")
 
-    assert publish < failed_return < stop_queue < clear_nvs < reset_runtime
+    assert publish < failed_return < clear_guard < clear_failed_return < stop_queue < reset_runtime
 
-    failure_path = commit[publish:stop_queue]
-    assert "state_machine_clear_persisted_session();" not in failure_path
-    assert "session_mgr_mark_stopped();" not in failure_path
-    assert "offline_queue_set_session(0);" not in failure_path
+    publish_failure_path = commit[publish:clear_guard]
+    assert "session_mgr_mark_stopped();" not in publish_failure_path
+    assert "offline_queue_set_session(0);" not in publish_failure_path
+
+    clear_failure_path = commit[clear_guard:stop_queue]
+    assert "return false;" in clear_failure_path
+    assert "session_mgr_mark_stopped();" not in clear_failure_path
+    assert "state_machine_reset_session_runtime();" not in clear_failure_path
 
 
 def test_failed_end_boundary_retries_after_hold_instead_of_leaving_driving():
@@ -49,3 +54,13 @@ def test_failed_end_boundary_retries_after_hold_instead_of_leaving_driving():
     ]
     assert "s_ignition_off_started_ms = now_ms;" in retry
     assert "return false;" in retry
+
+
+def test_persisted_session_clear_reports_failure_to_teardown_caller():
+    helper = _slice(
+        "static bool state_machine_clear_persisted_session(",
+        "/**\n * @brief Restore a persisted session candidate",
+    )
+    assert "return false;" in helper
+    assert "return true;" in helper
+    assert "nvs_config_clear_session_context()" in helper

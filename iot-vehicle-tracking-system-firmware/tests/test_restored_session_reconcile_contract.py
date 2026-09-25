@@ -38,7 +38,7 @@ def test_restored_off_session_emits_end_before_identity_is_cleared():
 
     expose = reconcile.index("s_session_restore_pending = false;")
     publish = reconcile.index('state_machine_publish_status("stopped", "ended")')
-    clear = reconcile.index("state_machine_clear_persisted_session();")
+    clear = reconcile.index("if (!state_machine_clear_persisted_session())")
     reset = reconcile.index("state_machine_reset_session_runtime();")
 
     assert expose < publish < clear < reset
@@ -53,3 +53,19 @@ def test_restored_off_session_emits_end_before_identity_is_cleared():
 def test_heartbeat_reconciles_instead_of_silently_dropping_restored_session():
     assert "state_machine_reconcile_stale_restored_session();" in CORE
     assert "state_machine_drop_stale_restored_session();" not in CORE
+
+
+def test_restored_session_keeps_identity_when_nvs_clear_fails():
+    reconcile = _function_slice(
+        CORE,
+        "static bool state_machine_reconcile_stale_restored_session(",
+        "/**\n * @brief Emit the final session boundary",
+    )
+    clear_guard = reconcile.index("if (!state_machine_clear_persisted_session())")
+    stop = reconcile.index("offline_queue_stop_session(true)", clear_guard)
+    failure = reconcile[clear_guard:stop]
+    assert "s_session_restore_pending = true;" in failure
+    assert "reason=persist_clear_failed" in failure
+    assert "return false;" in failure
+    assert "session_mgr_mark_stopped();" not in failure
+    assert "state_machine_reset_session_runtime();" not in failure
