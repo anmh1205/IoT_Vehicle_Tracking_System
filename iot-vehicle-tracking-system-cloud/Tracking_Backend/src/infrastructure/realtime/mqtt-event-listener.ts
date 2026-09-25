@@ -842,9 +842,10 @@ export const initMqttEventListener = (): void => {
 
     const packetWork = Promise.all(criticalTasks).then(() => undefined);
     pendingMessageWork.set(packet as object, packetWork);
-    void packetWork.finally(() => {
-      pendingMessageWork.delete(packet as object);
-    });
+    void packetWork.then(
+      () => pendingMessageWork.delete(packet as object),
+      () => pendingMessageWork.delete(packet as object),
+    );
   });
 
   client.on('error', (err) => {
