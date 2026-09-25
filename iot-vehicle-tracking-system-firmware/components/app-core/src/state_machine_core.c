@@ -1021,12 +1021,11 @@ static bool state_machine_publish_session_start_rawdata_if_needed(bool started_s
 /**
  * @brief Check whether driving rawdata should publish in the current loop.
  *
- * A queued one-shot location request bypasses the normal cadence so operators
- * can pull an immediate point without waiting for the next tracking interval.
+ * Cloud-requested one-shot snapshots are executed through the deferred command path;
+ * this helper now represents only the normal driving cadence.
  */
 static bool state_machine_should_publish_driving_rawdata(uint64_t now_ms) {
-    return ((now_ms - s_last_raw_publish_ms) >= state_machine_tracking_interval_ms()) ||
-           command_handler_consume_location_request();
+    return (now_ms - s_last_raw_publish_ms) >= state_machine_tracking_interval_ms();
 }
 
 /**
@@ -1138,8 +1137,8 @@ static app_state_t state_machine_handle_driving_state(void) {
     if (!published_session_start_rawdata &&
         state_machine_should_publish_driving_rawdata(now_ms) &&
         !state_machine_should_throttle_rawdata()) {
-        // Rawdata cadence can be bypassed by a one-shot location request, but quota throttling still wins.
-        state_machine_publish_rawdata();
+        // Normal driving cadence still respects offline-queue throttling.
+        (void)state_machine_publish_rawdata();
     }
 
     if (modem_lte_is_initialized()) {
