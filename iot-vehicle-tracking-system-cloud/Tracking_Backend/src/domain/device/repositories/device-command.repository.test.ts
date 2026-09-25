@@ -26,12 +26,16 @@ describe('device-command.repository', () => {
       }],
     } as any);
 
-    await updateCommandStatus(12, 'failed', 'device rejected command', { markAcknowledged: true });
+    await updateCommandStatus(12, 'failed', 'device rejected command', {
+      markAcknowledged: true,
+      expectedDeviceId: 'TRACKER_001',
+    });
 
     const [sql, params] = vi.mocked(pool.query).mock.calls[0] ?? [];
 
     expect(sql).toContain('$4::boolean = TRUE');
-    expect(params).toEqual([12, 'failed', 'device rejected command', true]);
+    expect(sql).toContain('device_id = $5::varchar');
+    expect(params).toEqual([12, 'failed', 'device rejected command', true, 'TRACKER_001']);
   });
 
   it('leaves publish failures unacknowledged by default', async () => {
@@ -41,6 +45,19 @@ describe('device-command.repository', () => {
 
     const [, params] = vi.mocked(pool.query).mock.calls[0] ?? [];
 
-    expect(params).toEqual([12, 'failed', 'publish_failed', false]);
+    expect(params).toEqual([12, 'failed', 'publish_failed', false, null]);
+  });
+  it('returns null when an ACK does not match the originating device', async () => {
+    vi.mocked(pool.query).mockResolvedValue({ rows: [] } as any);
+
+    const result = await updateCommandStatus(12, 'acknowledged', 'accepted', {
+      markAcknowledged: true,
+      expectedDeviceId: 'TRACKER_WRONG',
+    });
+
+    const [sql, params] = vi.mocked(pool.query).mock.calls[0] ?? [];
+    expect(sql).toContain('device_id = $5::varchar');
+    expect(params).toEqual([12, 'acknowledged', 'accepted', true, 'TRACKER_WRONG']);
+    expect(result).toBeNull();
   });
 });
