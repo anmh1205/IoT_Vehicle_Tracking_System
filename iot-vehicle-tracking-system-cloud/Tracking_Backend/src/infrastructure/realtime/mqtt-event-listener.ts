@@ -385,7 +385,7 @@ export const initMqttEventListener = (): void => {
   client = mqtt.connect(brokerUrl, {
     username: mqttConfig.username,
     password: mqttConfig.password,
-    clientId: createMqttClientId('backend-listener'),
+    clientId: mqttConfig.listenerClientId ?? createMqttClientId('backend-listener'),
     reconnectPeriod: 5000,
     clean: false,
     rejectUnauthorized: mqttConfig.rejectUnauthorized,
