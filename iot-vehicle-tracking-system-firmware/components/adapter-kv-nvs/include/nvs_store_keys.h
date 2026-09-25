@@ -27,3 +27,6 @@
 
 /** @brief Key for the persistent recent cloud-command dedupe window. */
 #define TRACKER_NVS_COMMAND_DEDUPE_KEY "cmd_dedupe_v1"
+
+/** @brief Key for persisted enable_tracking desired state. */
+#define TRACKER_NVS_TRACKING_ENABLED_KEY "track_en_v1"
