@@ -361,7 +361,8 @@ const persistRawDataEventLog = async (
       device_timestamp,
       server_timestamp
     )
-    VALUES ($1, $2, $3, 'status_change', 'mqtt_bridge_rawdata', 'info', $4::jsonb, $5::jsonb, $6, $7, NOW())`,
+    VALUES ($1, $2, $3, 'status_change', 'mqtt_bridge_rawdata', 'info', $4::jsonb, $5::jsonb, $6, $7, NOW())
+    ON CONFLICT DO NOTHING`,
     [
       envelope.correlation_id || `bridge-${Date.now()}`,
       deviceId,
