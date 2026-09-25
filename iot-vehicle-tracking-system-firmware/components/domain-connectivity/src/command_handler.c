@@ -110,8 +110,8 @@ static void command_handler_remember_command_id(uint64_t command_id) {
     s_recent_command_cursor =
         (s_recent_command_cursor + 1U) % COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN;
     atomic_fetch_add(&s_recent_command_generation, 1U);
-    portEXIT_CRITICAL(&s_recent_command_mux);
     atomic_store(&s_recent_command_persist_pending, true);
+    portEXIT_CRITICAL(&s_recent_command_mux);
 }
 
 /**
@@ -130,15 +130,19 @@ static esp_err_t command_handler_persist_recent_command_ids(void) {
     memcpy(context.command_ids, s_recent_command_ids, sizeof(context.command_ids));
     context.cursor = (uint32_t)s_recent_command_cursor;
     snapshot_generation = atomic_load(&s_recent_command_generation);
-    portEXIT_CRITICAL(&s_recent_command_mux);
-
     if (snapshot_generation == atomic_load(&s_recent_command_persisted_generation)) {
         atomic_store(&s_recent_command_persist_pending, false);
+        portEXIT_CRITICAL(&s_recent_command_mux);
         return ESP_OK;
     }
+    portEXIT_CRITICAL(&s_recent_command_mux);
 
     esp_err_t err = nvs_config_save_command_dedupe_context(&context);
     if (err != ESP_OK) {
+        /*
+         * Do not clear pending here. A concurrent receiver may also have moved
+         * the generation forward while this NVS write was failing.
+         */
         atomic_store(&s_recent_command_persist_pending, true);
         ESP_LOGW(TAG,
                  "event=command_dedupe_persist_failed err=%s action_execution=blocked",
@@ -146,16 +150,25 @@ static esp_err_t command_handler_persist_recent_command_ids(void) {
         return err;
     }
 
+    /*
+     * Commit bookkeeping under the same spinlock used by remember(). That
+     * closes the race where a new command could set pending=true between the
+     * generation comparison and an unconditional pending=false store.
+     */
+    portENTER_CRITICAL(&s_recent_command_mux);
     atomic_store(&s_recent_command_persisted_generation, snapshot_generation);
-    if (snapshot_generation != atomic_load(&s_recent_command_generation)) {
-        atomic_store(&s_recent_command_persist_pending, true);
+    bool superseded =
+        snapshot_generation != atomic_load(&s_recent_command_generation);
+    atomic_store(&s_recent_command_persist_pending, superseded);
+    portEXIT_CRITICAL(&s_recent_command_mux);
+
+    if (superseded) {
         ESP_LOGI(TAG,
                  "event=command_dedupe_checkpoint_superseded generation=%lu action_execution=blocked",
                  (unsigned long)snapshot_generation);
         return ESP_ERR_INVALID_STATE;
     }
 
-    atomic_store(&s_recent_command_persist_pending, false);
     return ESP_OK;
 }
 
