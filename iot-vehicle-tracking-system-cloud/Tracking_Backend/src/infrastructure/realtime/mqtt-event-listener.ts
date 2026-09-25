@@ -306,6 +306,9 @@ const persistRawDataEventLog = async (
     return;
   }
 
+  const latitude = toOptionalNumber(payload.latitude);
+  const longitude = toOptionalNumber(payload.longitude);
+  const speed = toOptionalNumber(payload.speed);
   const course = toOptionalNumber(payload.course);
   const satellites = toOptionalInt(payload.satellites);
   const vehicleBattery = toOptionalNumber(payload.vehicle_battery);
@@ -315,9 +318,10 @@ const persistRawDataEventLog = async (
     ?? getDiagnosticsSignal(payload, 'intake_air_temp_c');
 
   const context = {
-    latitude: toOptionalNumber(payload.latitude),
-    longitude: toOptionalNumber(payload.longitude),
-    speed: toOptionalNumber(payload.speed),
+    position_valid: latitude != null && longitude != null,
+    latitude,
+    longitude,
+    speed,
     course,
     satellites,
     vehicle_battery: vehicleBattery,
