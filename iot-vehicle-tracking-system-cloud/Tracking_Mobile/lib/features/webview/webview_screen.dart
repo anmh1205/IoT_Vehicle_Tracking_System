@@ -39,7 +39,10 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
 
   @override
   void dispose() {
-    unawaited(_fcmTokenSubscription?.cancel());
+    final subscription = _fcmTokenSubscription;
+    if (subscription != null) {
+      unawaited(subscription.cancel());
+    }
     super.dispose();
   }
 
