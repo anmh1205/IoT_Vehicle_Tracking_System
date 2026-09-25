@@ -8,7 +8,7 @@ vi.mock('@/infrastructure/database/pool', () => ({
 import { pool } from '@/infrastructure/database/pool';
 import {
   createCommand,
-  observeRuntimeBootAndFailStaleAccepted,
+  observeRuntimeBootAndMarkStaleAcceptedIndeterminate,
   updateCommandStatus,
 } from './device-command.repository';
 
@@ -118,6 +118,8 @@ describe('device-command.repository', () => {
 
     const [sql] = vi.mocked(pool.query).mock.calls[0] ?? [];
     expect(sql).toContain("status IN ('acknowledged', 'failed')");
+    expect(sql).toContain("status = 'indeterminate'");
+    expect(sql).toContain("$2::varchar NOT IN ('acknowledged', 'failed')");
     expect(sql).toContain("status = 'accepted' AND $2::varchar IN ('pending', 'sent')");
     expect(sql).toContain("status = 'sent' AND $2::varchar = 'pending'");
   });
@@ -136,31 +138,48 @@ describe('device-command.repository', () => {
     expect(params).toEqual([12, 'accepted', 'accepted', true, 'TRACKER_001', 'boot-17']);
   });
 
-  it('fails only accepted commands that belong to an older firmware boot', async () => {
+  it('marks only prior-boot accepted commands as indeterminate', async () => {
     vi.mocked(pool.query).mockResolvedValue({
       rows: [{
         id: 12,
         device_id: 'TRACKER_001',
         command: 'update_config',
         params: {},
-        status: 'failed',
+        status: 'indeterminate',
         sent_at: new Date('2026-09-25T01:00:00Z'),
         acked_at: new Date('2026-09-25T01:00:01Z'),
-        response: 'device_restarted_before_execution',
+        response: 'execution_outcome_unknown_after_restart',
       }],
     } as any);
 
-    const rows = await observeRuntimeBootAndFailStaleAccepted('TRACKER_001', 'boot-18');
+    const rows = await observeRuntimeBootAndMarkStaleAcceptedIndeterminate('TRACKER_001', 'boot-18');
 
     const [sql, params] = vi.mocked(pool.query).mock.calls[0] ?? [];
     expect(sql).toContain('UPDATE devices');
     expect(sql).toContain('runtime_boot_id = $2');
+    expect(sql).toContain("SET status = 'indeterminate'");
+    expect(sql).toContain("response = 'execution_outcome_unknown_after_restart'");
     expect(sql).toContain("status = 'accepted'");
     expect(sql).toContain('ack_boot_id IS NOT NULL');
     expect(sql).toContain('ack_boot_id <> $2');
     expect(sql).not.toContain("status IN ('acknowledged', 'failed')");
     expect(params).toEqual(['TRACKER_001', 'boot-18']);
     expect(rows).toHaveLength(1);
+  });
+
+  it('allows a delayed final ACK to resolve an indeterminate command', async () => {
+    vi.mocked(pool.query).mockResolvedValue({ rows: [] } as any);
+
+    await updateCommandStatus(12, 'acknowledged', 'executed', {
+      markAcknowledged: true,
+      expectedDeviceId: 'TRACKER_001',
+      ackBootId: 'boot-17',
+    });
+
+    const [sql] = vi.mocked(pool.query).mock.calls[0] ?? [];
+    expect(sql).toContain("status = 'indeterminate'");
+    expect(sql).toContain("$2::varchar NOT IN ('acknowledged', 'failed')");
+    expect(sql).toContain('ELSE $2::varchar');
   });
 
   it('can mark failed device ACKs as acknowledged without treating publish failures as ACKs', async () => {

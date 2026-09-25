@@ -14,6 +14,7 @@ import { useDeviceDetailModal } from './modal-context';
 
 const statusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
   if (status === 'failed') return 'destructive';
+  if (status === 'indeterminate') return 'outline';
   if (status === 'sent' || status === 'accepted' || status === 'acknowledged') return 'default';
   if (status === 'pending') return 'secondary';
   return 'outline';
@@ -24,6 +25,7 @@ const statusLabel = (status: string) => {
   if (status === 'sent') return 'Đã gửi';
   if (status === 'accepted') return 'Thiết bị đã nhận';
   if (status === 'acknowledged') return 'Đã xác nhận';
+  if (status === 'indeterminate') return 'Chưa rõ kết quả';
   if (status === 'failed') return 'Thất bại';
   return status;
 };

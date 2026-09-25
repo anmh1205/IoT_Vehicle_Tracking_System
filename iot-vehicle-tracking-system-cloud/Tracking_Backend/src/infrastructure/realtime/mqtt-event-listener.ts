@@ -186,22 +186,22 @@ const reconcileAcceptedCommandsForRuntimeBoot = async (
     return;
   }
 
-  const failed = await deviceCommandRepo.observeRuntimeBootAndFailStaleAccepted(deviceId, runtimeBootId);
-  failed.forEach((command) => {
+  const indeterminate = await deviceCommandRepo.observeRuntimeBootAndMarkStaleAcceptedIndeterminate(deviceId, runtimeBootId);
+  indeterminate.forEach((command) => {
     publishEvent('command:ack', {
       device_id: deviceId,
       command_id: String(command.id),
-      status: 'failed',
-      response: 'device_restarted_before_execution',
+      status: 'indeterminate',
+      response: 'execution_outcome_unknown_after_restart',
     });
   });
 
-  if (failed.length > 0) {
+  if (indeterminate.length > 0) {
     publishStatsUpdate('command:reboot_reconciled', payload, new Date().toISOString());
-    log.warn('Failed accepted commands left behind by a prior firmware boot', {
+    log.warn('Accepted commands have unknown execution outcome after firmware reboot', {
       deviceId,
       runtimeBootId,
-      commandIds: failed.map((command) => command.id),
+      commandIds: indeterminate.map((command) => command.id),
     });
   }
 };
