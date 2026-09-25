@@ -2,72 +2,163 @@ import { findOne, insertOne, updateOne } from '@/infrastructure/database/queries
 import { logger } from '@/infrastructure/logger';
 import type { Trip } from '@/domain/trip/types/trip.types';
 
-interface IgnitionPayload {
+interface SessionBoundaryPayload {
   device_id: string;
-  vehicle_id: string;
-  state: 'on' | 'off';
+  session_id: number;
+  action: 'started' | 'ended';
+  occurred_at: string;
 }
 
-/** Find the active (in_progress) trip for a vehicle */
+interface VehicleIdentityRow {
+  vehicle_id: string;
+}
+
+const buildAutoTripCode = (deviceId: string, sessionId: number): string =>
+  `AUTO-${deviceId}-SESSION-${sessionId}`;
+
+const parseOccurredAt = (value: string): Date | null => {
+  const parsed = new Date(value);
+  return Number.isFinite(parsed.getTime()) ? parsed : null;
+};
+
+const findVehicleByDevice = (deviceId: string): Promise<VehicleIdentityRow | null> =>
+  findOne<VehicleIdentityRow>(
+    'SELECT vehicle_id FROM vehicles WHERE device_id = $1 ORDER BY updated_at DESC, id DESC LIMIT 1',
+    [deviceId],
+  );
+
+const findTripByCode = (tripCode: string): Promise<Trip | null> =>
+  findOne<Trip>('SELECT * FROM trips WHERE trip_code = $1 LIMIT 1', [tripCode]);
+
 const findActiveTrip = (vehicleId: string): Promise<Trip | null> =>
   findOne<Trip>(
-    `SELECT * FROM trips WHERE vehicle_id = $1 AND status = 'in_progress' ORDER BY actual_start DESC LIMIT 1`,
+    `SELECT * FROM trips
+     WHERE vehicle_id = $1 AND status = 'in_progress'
+     ORDER BY actual_start DESC, id DESC
+     LIMIT 1`,
     [vehicleId],
   );
 
-/** Auto-start a trip when ignition turns ON */
-const handleIgnitionOn = async (deviceId: string, vehicleId: string): Promise<void> => {
-  // Check if there's already an active trip
-  const existing = await findActiveTrip(vehicleId);
-  if (existing) {
-    logger.info(`Ignition ON: vehicle "${vehicleId}" already has active trip ${existing.id}, skipping`);
+const handleSessionStarted = async (
+  deviceId: string,
+  sessionId: number,
+  occurredAt: Date,
+): Promise<void> => {
+  const vehicle = await findVehicleByDevice(deviceId);
+  if (!vehicle) {
+    logger.debug(
+      `Session ${sessionId} started for device "${deviceId}" without an assigned vehicle; auto-trip skipped`,
+    );
     return;
   }
 
-  // Generate unique trip code from device + timestamp
-  const tripCode = `AUTO-${deviceId}-${Date.now()}`;
+  const tripCode = buildAutoTripCode(deviceId, sessionId);
+  const existingByCode = await findTripByCode(tripCode);
+  if (existingByCode) {
+    logger.debug(`Duplicate session-start for ${tripCode}; auto-trip already exists`);
+    return;
+  }
 
-  const trip = await insertOne<Trip>(
-    `INSERT INTO trips (trip_code, vehicle_id, device_id, status, actual_start, created_at, updated_at)
-     VALUES ($1, $2, $3, 'in_progress', NOW(), NOW(), NOW())
+  const existingActive = await findActiveTrip(vehicle.vehicle_id);
+  if (existingActive) {
+    logger.warn(
+      `Session ${sessionId} started for vehicle "${vehicle.vehicle_id}" while trip "${existingActive.trip_code}" is still active; refusing to create an overlapping auto-trip`,
+    );
+    return;
+  }
+
+  await insertOne<Trip>(
+    `INSERT INTO trips (
+       trip_code,
+       vehicle_id,
+       device_id,
+       status,
+       actual_start,
+       created_at,
+       updated_at
+     )
+     VALUES ($1, $2, $3, 'in_progress', $4, NOW(), NOW())
      RETURNING *`,
-    [tripCode, vehicleId, deviceId],
+    [tripCode, vehicle.vehicle_id, deviceId, occurredAt.toISOString()],
   );
 
-  logger.info(`Ignition ON: auto-started trip "${tripCode}" for vehicle "${vehicleId}" (device: ${deviceId})`);
-  return void trip;
+  logger.info(
+    `Session ${sessionId} auto-started trip "${tripCode}" for vehicle "${vehicle.vehicle_id}" at ${occurredAt.toISOString()}`,
+  );
 };
 
-/** Auto-end the active trip when ignition turns OFF */
-const handleIgnitionOff = async (vehicleId: string): Promise<void> => {
-  const activeTrip = await findActiveTrip(vehicleId);
-  if (!activeTrip) {
-    logger.debug(`Ignition OFF: no active trip found for vehicle "${vehicleId}", skipping`);
+const handleSessionEnded = async (
+  deviceId: string,
+  sessionId: number,
+  occurredAt: Date,
+): Promise<void> => {
+  const tripCode = buildAutoTripCode(deviceId, sessionId);
+  const trip = await findTripByCode(tripCode);
+
+  if (!trip) {
+    logger.debug(`Session-end for ${tripCode} has no matching auto-trip; skipping`);
     return;
   }
 
+  if (trip.status === 'completed') {
+    logger.debug(`Duplicate session-end for ${tripCode}; trip already completed`);
+    return;
+  }
+
+  if (trip.status !== 'in_progress') {
+    logger.warn(
+      `Session-end for ${tripCode} ignored because trip status is "${trip.status}"`,
+    );
+    return;
+  }
+
+  const actualStart = trip.actual_start ? new Date(trip.actual_start) : null;
+  const actualEnd =
+    actualStart && occurredAt.getTime() < actualStart.getTime() ? actualStart : occurredAt;
+
   await updateOne<Trip>(
-    `UPDATE trips SET status = 'completed', actual_end = NOW(), updated_at = NOW() WHERE id = $1 RETURNING *`,
-    [activeTrip.id],
+    `UPDATE trips
+     SET status = 'completed', actual_end = $2, updated_at = NOW()
+     WHERE id = $1 AND status = 'in_progress'
+     RETURNING *`,
+    [trip.id, actualEnd.toISOString()],
   );
 
-  logger.info(`Ignition OFF: auto-ended trip "${activeTrip.trip_code}" for vehicle "${vehicleId}"`);
+  logger.info(
+    `Session ${sessionId} auto-ended trip "${tripCode}" at ${actualEnd.toISOString()}`,
+  );
 };
 
 /**
- * Handle ignition ON/OFF events to auto-manage trips.
- * Called from MQTT event listener when ignition state changes.
+ * Keep automatic trips aligned with the firmware-authoritative device-session lifecycle.
+ * Session ID is embedded in trip_code so QoS replay/duplicate delivery is idempotent.
  */
-export const handleIgnitionEvent = async (payload: IgnitionPayload): Promise<void> => {
-  const { device_id, vehicle_id, state } = payload;
+export const handleSessionBoundaryEvent = async (
+  payload: SessionBoundaryPayload,
+): Promise<void> => {
+  const { device_id: deviceId, session_id: sessionId, action, occurred_at: occurredAtRaw } = payload;
+  const occurredAt = parseOccurredAt(occurredAtRaw);
+
+  if (!deviceId || !Number.isSafeInteger(sessionId) || sessionId <= 0 || !occurredAt) {
+    logger.warn('Invalid session boundary received by auto-trip service', {
+      deviceId,
+      sessionId,
+      action,
+      occurredAt: occurredAtRaw,
+    });
+    return;
+  }
 
   try {
-    if (state === 'on') {
-      await handleIgnitionOn(device_id, vehicle_id);
-    } else {
-      await handleIgnitionOff(vehicle_id);
+    if (action === 'started') {
+      await handleSessionStarted(deviceId, sessionId, occurredAt);
+      return;
     }
+
+    await handleSessionEnded(deviceId, sessionId, occurredAt);
   } catch (err) {
-    logger.error(`Failed to handle ignition ${state} event for vehicle "${vehicle_id}": ${err}`);
+    logger.error(
+      `Failed to handle session ${action} for device "${deviceId}" / session ${sessionId}: ${err}`,
+    );
   }
 };
