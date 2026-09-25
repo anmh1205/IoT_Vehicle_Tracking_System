@@ -29,6 +29,7 @@ import type { DeviceDetailTab } from '@/features/devices/components/device-const
 import type { DeviceDetailModalPresentation, DeviceLinkedVehicle, DeviceWorkspaceActions, DeviceWorkspaceAlert } from './workspace-types';
 import type { MapInspectPanelPayload, MapInspectPanelTarget } from '@/features/map/types';
 import { buildAlertQueueHref } from '@/features/alerts/lib/alert-queue-route';
+import { resolveEventLogTimestamp } from '@/features/devices/lib/event-log-feed';
 
 const resolveTimestamp = (value: unknown): string | null => {
   if (typeof value === 'string' && value.length > 0) {
@@ -112,14 +113,7 @@ const buildRawFeed = (params: {
 
   const eventLogRows = params.eventLogs.map((row, index) => {
     const normalizedRow = toRecord(row) ?? {};
-    const timestamp = resolveTimestamp(
-      normalizedRow.event_timestamp ??
-        normalizedRow.device_timestamp ??
-        normalizedRow.deviceTimestamp ??
-        normalizedRow.server_timestamp ??
-        normalizedRow.created_at ??
-        normalizedRow.createdAt,
-    );
+    const timestamp = resolveEventLogTimestamp(normalizedRow);
     const diagnostics = extractDiagnosticsPayloadFromEventLog(normalizedRow);
     const isDiagnosticsRow = diagnostics !== null;
     const source: DeviceRawFeedRow['source'] = isDiagnosticsRow ? 'obd-diagnostic' : 'event-log';
