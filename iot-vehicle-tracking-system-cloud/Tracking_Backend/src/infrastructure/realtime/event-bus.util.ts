@@ -272,6 +272,9 @@ export interface RealtimeEventMap {
     reason: string | null;
     preview: Array<Record<string, unknown>>;
   };
+  'auth:access-revoked': {
+    userId: number;
+  };
   'system-admin:settings': {
     key: string;
     action: 'create' | 'update' | 'delete' | 'activate' | 'rollback';
