@@ -53,7 +53,7 @@ static const TickType_t COMMAND_HANDLER_LOCK_TIMEOUT_TICKS = pdMS_TO_TICKS(250);
 static const TickType_t COMMAND_HANDLER_QUEUE_SEND_TIMEOUT_TICKS = pdMS_TO_TICKS(100);
 
 #define COMMAND_HANDLER_ACTION_QUEUE_LEN 16U
-#define COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN 32U
+#define COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN TRACKER_COMMAND_DEDUPE_CACHE_LEN
 #define COMMAND_HANDLER_U16_RULE_COUNT 7U
 #define COMMAND_HANDLER_BOOL_RULE_COUNT 2U
 
@@ -75,6 +75,8 @@ static atomic_uint s_dropped_command_count = 0U;
  */
 static uint64_t s_recent_command_ids[COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN] = {0};
 static size_t s_recent_command_cursor = 0U;
+/* Blocks command execution until the latest accepted-ID window is durable in NVS. */
+static atomic_bool s_recent_command_persist_pending = false;
 
 static bool command_handler_is_recent_command_id(uint64_t command_id) {
     if (command_id == 0U) {
@@ -97,6 +99,28 @@ static void command_handler_remember_command_id(uint64_t command_id) {
     s_recent_command_ids[s_recent_command_cursor] = command_id;
     s_recent_command_cursor =
         (s_recent_command_cursor + 1U) % COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN;
+}
+
+/**
+ * @brief Persist the current accepted-command dedupe window.
+ *
+ * The MQTT callback attempts this once after staging a command. If NVS is
+ * temporarily unavailable, the FSM retries before it is allowed to consume any
+ * queued side effect.
+ */
+static esp_err_t command_handler_persist_recent_command_ids(void) {
+    command_dedupe_context_t context = {0};
+    memcpy(context.command_ids, s_recent_command_ids, sizeof(context.command_ids));
+    context.cursor = (uint32_t)s_recent_command_cursor;
+
+    esp_err_t err = nvs_config_save_command_dedupe_context(&context);
+    atomic_store(&s_recent_command_persist_pending, err != ESP_OK);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG,
+                 "event=command_dedupe_persist_failed err=%s action_execution=blocked",
+                 esp_err_to_name(err));
+    }
+    return err;
 }
 
 /** @brief Canonical command names from cloud payload. */
@@ -764,15 +788,39 @@ esp_err_t command_handler_init(config_t *config) {
     ESP_RETURN_ON_FALSE(s_action_queue != NULL, ESP_ERR_NO_MEM, TAG, "command action queue init failed");
     ESP_RETURN_ON_FALSE(command_handler_take_lock(), ESP_ERR_TIMEOUT, TAG, "command lock busy during init");
 
+    command_dedupe_context_t persisted_dedupe = {0};
+    bool dedupe_found = false;
+    esp_err_t dedupe_err =
+        nvs_config_load_command_dedupe_context(&persisted_dedupe, &dedupe_found);
+    if (dedupe_err != ESP_OK) {
+        command_handler_give_lock();
+        ESP_LOGE(TAG,
+                 "event=command_dedupe_restore_failed err=%s",
+                 esp_err_to_name(dedupe_err));
+        return dedupe_err;
+    }
+
     s_config = config;
     s_tracking_enabled = true;
     atomic_store(&s_dropped_command_count, 0U);
     memset(s_recent_command_ids, 0, sizeof(s_recent_command_ids));
     s_recent_command_cursor = 0U;
+    if (dedupe_found) {
+        memcpy(s_recent_command_ids,
+               persisted_dedupe.command_ids,
+               sizeof(s_recent_command_ids));
+        s_recent_command_cursor =
+            (size_t)(persisted_dedupe.cursor % COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN);
+    }
+    atomic_store(&s_recent_command_persist_pending, false);
     command_handler_reset_consumed_payloads();
     xQueueReset(s_action_queue);
 
     command_handler_give_lock();
+    ESP_LOGI(TAG,
+             "event=command_dedupe_restored found=%d cursor=%lu",
+             dedupe_found ? 1 : 0,
+             (unsigned long)s_recent_command_cursor);
     return ESP_OK;
 }
 
@@ -958,6 +1006,19 @@ esp_err_t command_handler_process(const char *command_json,
         return ESP_OK;
     }
 
+    if (atomic_load(&s_recent_command_persist_pending)) {
+        /*
+         * Do not accept more correlated commands while the previous dedupe
+         * checkpoint is still volatile. This keeps the persisted ring and
+         * queued side effects in the same order.
+         */
+        ESP_LOGW(TAG,
+                 "event=command_rejected command_id=%llu reason=dedupe_persist_pending",
+                 (unsigned long long)parsed_command_id);
+        cJSON_Delete(root);
+        return ESP_ERR_TIMEOUT;
+    }
+
     // Extract the command verb first; every later branch depends on it being a non-empty string.
     const cJSON *command = cJSON_GetObjectItemCaseSensitive(root, "command");
     const cJSON *params = cJSON_GetObjectItemCaseSensitive(root, "params");
@@ -1086,6 +1147,13 @@ esp_err_t command_handler_process(const char *command_json,
          * lock/state rejection must remain retryable with the same command ID.
          */
         command_handler_remember_command_id(parsed_command_id);
+        /*
+         * Commands are infrequent and this small blob write makes application
+         * idempotency survive the persistent MQTT session across MCU reboot.
+         * A failed write does not discard the already queued action; execution
+         * remains gated until the FSM can retry the checkpoint successfully.
+         */
+        (void)command_handler_persist_recent_command_ids();
     }
 
     cJSON_Delete(root);
@@ -1116,6 +1184,12 @@ command_action_t command_handler_consume_action(uint64_t *out_command_id) {
     if (out_command_id != NULL) {
         *out_command_id = 0U;
     }
+
+    if (atomic_load(&s_recent_command_persist_pending) &&
+        command_handler_persist_recent_command_ids() != ESP_OK) {
+        return COMMAND_ACTION_NONE;
+    }
+
     if (!command_handler_take_lock()) {
         return COMMAND_ACTION_NONE;
     }
