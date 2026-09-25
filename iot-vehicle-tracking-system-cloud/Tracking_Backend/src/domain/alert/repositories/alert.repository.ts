@@ -156,7 +156,7 @@ export const create = async (
          source_message_id, created_at, updated_at
        )
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
-       ON CONFLICT (source_message_id) WHERE source_message_id IS NOT NULL DO NOTHING
+       ON CONFLICT (device_id, source_message_id, alert_type, title) WHERE source_message_id IS NOT NULL DO NOTHING
        RETURNING *`,
       [
         input.vehicleId ?? null,
@@ -189,9 +189,12 @@ export const create = async (
     const existing = await client.query<Alert>(
       `SELECT *
        FROM alerts
-       WHERE source_message_id = $1
+       WHERE device_id IS NOT DISTINCT FROM $1
+         AND source_message_id = $2
+         AND alert_type = $3
+         AND title = $4
        LIMIT 1`,
-      [sourceMessageId],
+      [input.deviceId ?? null, sourceMessageId, input.alertType, input.title],
     );
     if (!existing.rows[0]) {
       throw new Error(`Alert source message ${sourceMessageId} conflicted but existing row was not found`);
