@@ -135,21 +135,21 @@ describe('trip-waypoints.service', () => {
     it('should use event log waypoints when rawdata GPS exists', async () => {
       vi.mocked(findMany).mockResolvedValue([
         {
-          server_timestamp: new Date('2026-01-15T08:00:00.000Z'),
+          telemetry_timestamp: new Date('2026-01-15T08:00:00.000Z'),
           lat: '10.7769',
           lon: '106.7009',
           speed: '42.5',
           course: '90',
         },
         {
-          server_timestamp: new Date('2026-01-15T08:00:10.000Z'),
+          telemetry_timestamp: new Date('2026-01-15T08:00:10.000Z'),
           lat: '10.7770',
           lon: '106.7010',
           speed: '43.5',
           course: '91',
         },
         {
-          server_timestamp: new Date('2026-01-15T08:00:16.000Z'),
+          telemetry_timestamp: new Date('2026-01-15T08:00:16.000Z'),
           lat: '10.7771',
           lon: '106.7011',
           speed: '44.5',
@@ -177,6 +177,11 @@ describe('trip-waypoints.service', () => {
         speed: 44.5,
         course: 92,
       });
+
+      const [sql] = vi.mocked(findMany).mock.calls[0];
+      expect(sql).toContain('COALESCE(device_timestamp, server_timestamp) AS telemetry_timestamp');
+      expect(sql).toContain('COALESCE(device_timestamp, server_timestamp) BETWEEN $2 AND $3');
+      expect(sql).toContain('ORDER BY telemetry_timestamp ASC, server_timestamp ASC');
     });
 
     it('should merge lat/lon values by timestamp into waypoints', async () => {
