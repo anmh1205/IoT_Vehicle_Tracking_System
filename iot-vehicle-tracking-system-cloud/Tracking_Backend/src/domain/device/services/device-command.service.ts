@@ -4,6 +4,7 @@ import { mqttConfig } from '@/config/env';
 import * as deviceCommandRepo from '@/domain/device/repositories/device-command.repository';
 import { createMqttClientId } from '@/infrastructure/mqtt-client-id.util';
 import { createLogger } from '@/infrastructure/logger';
+import { createConflictError } from '@/shared/utils/errors.util';
 
 const logger = createLogger('device-command-service');
 
@@ -54,6 +55,12 @@ export const sendCommand = async (
     actorUserId: options?.actorUserId,
     correlationId: options?.correlationId,
   });
+
+  if (!command) {
+    throw createConflictError(
+      `Device "${deviceId}" already has ${deviceCommandRepo.MAX_OUTSTANDING_DEVICE_COMMANDS} non-terminal commands; wait for ACKs before sending more`,
+    );
+  }
 
   const topic = `v1/${deviceId}/commands`;
   const message = JSON.stringify({
