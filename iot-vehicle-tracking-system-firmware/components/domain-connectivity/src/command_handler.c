@@ -1145,13 +1145,14 @@ esp_err_t command_handler_apply_pending_tracking_enabled(void) {
         return ESP_ERR_INVALID_STATE;
     }
 
-    s_tracking_enabled = s_consumed_tracking_enabled;
+    const bool enabled = s_consumed_tracking_enabled;
+    s_tracking_enabled = enabled;
     s_consumed_tracking_enabled_valid = false;
     command_handler_give_lock();
 
     ESP_LOGI(TAG,
              "event=enable_tracking_applied enabled=%d",
-             s_tracking_enabled ? 1 : 0);
+             enabled ? 1 : 0);
     return ESP_OK;
 }
 
