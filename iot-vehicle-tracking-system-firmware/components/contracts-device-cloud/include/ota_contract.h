@@ -62,6 +62,7 @@
 #define TRACKER_OTA_ERROR_CONTEXT_PERSIST_FAILED "confirm_context_persist_failed"
 #define TRACKER_OTA_ERROR_CONFIRM_TIMEOUT_EXCEEDED "confirm_timeout_exceeded"
 #define TRACKER_OTA_ERROR_CONFIRM_FAILED "confirm_failed"
+#define TRACKER_OTA_ERROR_CONFIRM_PARTITION_MISMATCH "confirm_partition_mismatch"
 #define TRACKER_OTA_ERROR_MANUAL_ROLLBACK_FAILED "manual_rollback_failed"
 #define TRACKER_OTA_ERROR_UNSAFE_RUNTIME_WINDOW "unsafe_runtime_window"
 
