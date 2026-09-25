@@ -18,6 +18,17 @@ describe('mqtt internal event listener session contract', () => {
     expect(listenerSource).not.toContain('clean: true');
   });
 
+  it('holds QoS1 acknowledgement behind critical application work', () => {
+    expect(listenerSource).toContain('client.handleMessage = (packet, callback) => {');
+    expect(listenerSource).toContain('const work = pendingMessageWork.get(packet as object)');
+    expect(listenerSource).toContain('Promise.all(criticalTasks)');
+    expect(listenerSource).toContain('criticalTasks.push(');
+    expect(listenerSource).toContain('processCommandAck(envelopePayload, data.timestamp)');
+    expect(listenerSource).toContain('handleSessionBoundaryEvent({');
+    expect(listenerSource).toContain('alertCrudService.createAlert({');
+    expect(listenerSource).toContain('throw error;');
+  });
+
   it('provides a stable single-instance default', () => {
     expect(envSource).toContain("fromEnv('MQTT_LISTENER_CLIENT_ID')");
     expect(envSource).toContain("'tracking-backend-listener'");
