@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +8,7 @@ import 'package:tracking_mobile/core/config/app_config.dart';
 import 'package:tracking_mobile/core/services/connectivity_service.dart';
 import 'package:tracking_mobile/core/utils/logger.dart';
 import 'package:tracking_mobile/features/auth/auth_provider.dart';
+import 'package:tracking_mobile/features/notifications/fcm_handler.dart';
 import 'package:tracking_mobile/features/webview/js_bridge.dart';
 import 'package:tracking_mobile/features/webview/webview_controller.dart';
 import 'package:tracking_mobile/widgets/error_view.dart';
@@ -23,6 +27,21 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
   bool _isLoading = true;
   bool _hasError = false;
   String? _errorMessage;
+  StreamSubscription<String>? _fcmTokenSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _fcmTokenSubscription = FCMHandler.tokenChanges.listen((token) {
+      unawaited(_notifyFcmTokenChanged(token));
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_fcmTokenSubscription?.cancel());
+    super.dispose();
+  }
 
   final InAppWebViewSettings _settings = InAppWebViewSettings(
     useShouldOverrideUrlLoading: true,
@@ -174,6 +193,20 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
     // Block external URLs (could open in external browser if needed)
     Log.warn('Blocked external navigation: $url');
     return NavigationActionPolicy.CANCEL;
+  }
+
+  Future<void> _notifyFcmTokenChanged(String token) async {
+    final controller = _controller;
+    if (controller == null) return;
+
+    final encodedToken = jsonEncode(token);
+    await controller.evaluateJavascript(
+      source: '''
+        window.dispatchEvent(new CustomEvent('NativeFcmTokenChanged', {
+          detail: { token: $encodedToken }
+        }));
+      ''',
+    );
   }
 
   void _reload() {
