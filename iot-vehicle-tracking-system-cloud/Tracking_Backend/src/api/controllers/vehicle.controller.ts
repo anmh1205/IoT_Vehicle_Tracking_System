@@ -122,27 +122,43 @@ export const importVehicles = asyncHandler(async (req: AuthenticatedRequest, res
     throw createValidationError('vehicles array is required');
   }
 
+  const optionalString = (value: unknown): string | undefined => {
+    if (value == null) return undefined;
+    const normalized = String(value).trim();
+    return normalized || undefined;
+  };
+  const optionalNumber = (value: unknown): number | undefined => {
+    if (value == null || String(value).trim() === '') return undefined;
+    return Number(value);
+  };
+
   let imported = 0;
   const errors: Array<{ row: number; error: string }> = [];
 
   for (let index = 0; index < rows.length; index += 1) {
     const row = rows[index] as Record<string, unknown>;
     try {
-      const vehicleId = String(row.vehicleId ?? '').trim();
-      if (!vehicleId) {
-        throw new Error('Missing vehicleId');
+      const candidate = {
+        vehicleId: String(row.vehicleId ?? '').trim(),
+        plateNumber: optionalString(row.plateNumber),
+        brand: optionalString(row.brand),
+        model: optionalString(row.model),
+        year: optionalNumber(row.year),
+        customerId: optionalNumber(row.customerId),
+        deviceId: optionalString(row.deviceId),
+        notes: optionalString(row.notes),
+      };
+
+      const parsed = createVehicleSchema.safeParse(candidate);
+      if (!parsed.success) {
+        throw new Error(
+          parsed.error.issues
+            .map((issue) => `${issue.path.join('.') || 'row'}: ${issue.message}`)
+            .join('; '),
+        );
       }
 
-      await vehicleCrudService.createVehicle({
-        vehicleId,
-        plateNumber: row.plateNumber ? String(row.plateNumber) : undefined,
-        brand: row.brand ? String(row.brand) : undefined,
-        model: row.model ? String(row.model) : undefined,
-        year: row.year ? Number(row.year) : undefined,
-        customerId: row.customerId ? Number(row.customerId) : undefined,
-        deviceId: row.deviceId ? String(row.deviceId) : undefined,
-        notes: row.notes ? String(row.notes) : undefined,
-      });
+      await vehicleCrudService.createVehicle(parsed.data);
       imported += 1;
     } catch (error) {
       errors.push({ row: index + 1, error: (error as Error).message });
