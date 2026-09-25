@@ -1,6 +1,7 @@
 vi.mock('@/infrastructure/database/pool', () => ({
   pool: {
     query: vi.fn(),
+    connect: vi.fn(),
   },
 }));
 
@@ -14,7 +15,7 @@ vi.mock('@/infrastructure/database/queries', () => ({
 
 import { pool } from '@/infrastructure/database/pool';
 import { findMany } from '@/infrastructure/database/queries';
-import { findAll } from './alert.repository';
+import { create, findAll } from './alert.repository';
 
 describe('alert.repository', () => {
   beforeEach(() => {
@@ -72,3 +73,37 @@ describe('alert.repository', () => {
     expect(listSql).not.toContain("ILIKE '%maintenance%'");
   });
 });
+
+
+  it('returns the existing alert when source message identity is delivered twice', async () => {
+    const release = vi.fn();
+    const query = vi.fn()
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
+      .mockResolvedValueOnce({ rows: [], rowCount: 0 }) // duplicate insert
+      .mockResolvedValueOnce({
+        rows: [{
+          id: 41,
+          device_id: 'TRACKER_001',
+          alert_type: 'maintenance_due',
+          source_message_id: 'boot-1-event-9',
+        }],
+        rowCount: 1,
+      })
+      .mockResolvedValueOnce({ rows: [] }); // COMMIT
+    vi.mocked(pool.connect).mockResolvedValue({ query, release } as any);
+
+    const result = await create({
+      deviceId: 'TRACKER_001',
+      alertType: 'maintenance_due',
+      severity: 'medium',
+      title: 'Device warning',
+      sourceMessageId: 'boot-1-event-9',
+    });
+
+    expect(result.created).toBe(false);
+    expect(result.alert.id).toBe(41);
+    expect(query.mock.calls[1]?.[0]).toContain('ON CONFLICT (source_message_id)');
+    expect(query.mock.calls[2]?.[0]).toContain('WHERE source_message_id = $1');
+    expect(query.mock.calls[2]?.[1]).toEqual(['boot-1-event-9']);
+    expect(release).toHaveBeenCalledOnce();
+  });
