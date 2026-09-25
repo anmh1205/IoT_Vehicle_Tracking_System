@@ -1,9 +1,0 @@
-%%{init: {'flowchart': {'nodeSpacing': 90, 'rankSpacing': 110}} }%%
-flowchart TB
-    Vehicle["Phương tiện cần giám sát"]
-    Device["Lớp trên xe<br/>Thu thập dữ liệu và nhận biết sự kiện"]
-    Server["Lớp máy chủ<br/>Tiếp nhận, phân loại, lưu trữ và cảnh báo"]
-    App["Lớp ứng dụng<br/>Bản đồ, trạng thái, lịch sử và báo cáo"]
-    Operator["Người quản lý đội xe"]
-
-    Vehicle --> Device --> Server --> App --> Operator

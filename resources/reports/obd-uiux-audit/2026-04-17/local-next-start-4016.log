@@ -1,9 +1,0 @@
-▲ Next.js 16.1.6
-- Local:         http://localhost:4016
-- Network:       http://26.35.111.111:4016
-
-✓ Starting...
-⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
-✓ Ready in 1351ms
-(node:55556) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
-(Use `node --trace-deprecation ...` to show where the warning was created)

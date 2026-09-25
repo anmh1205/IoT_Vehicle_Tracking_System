@@ -1,2 +1,0 @@
-E:/anmh1205/IoT_Vehicle_Tracking_System/build/CMakeFiles/edit_cache.dir
-E:/anmh1205/IoT_Vehicle_Tracking_System/build/CMakeFiles/rebuild_cache.dir

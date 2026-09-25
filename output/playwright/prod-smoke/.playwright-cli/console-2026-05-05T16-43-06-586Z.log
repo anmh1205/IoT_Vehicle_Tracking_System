@@ -1,9 +1,0 @@
-[  464900ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ https://thingdock.dev/api/v1/devices/3:0
-[  464931ms] AxiosError: Request failed with status code 500
-    at ex (https://thingdock.dev/_next/static/chunks/06369da382d98d0b.js:1:40654)
-    at XMLHttpRequest.b (https://thingdock.dev/_next/static/chunks/06369da382d98d0b.js:1:45025)
-    at tt.request (https://thingdock.dev/_next/static/chunks/06369da382d98d0b.js:1:53459)
-[  523514ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://thingdock.dev/dashboard/platform/users:0
-[  544766ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://thingdock.dev/dashboard/platform/my-settings:0
-[  544766ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://thingdock.dev/dashboard/platform/my-settings:0
-[  544767ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://thingdock.dev/dashboard/platform/my-settings:0

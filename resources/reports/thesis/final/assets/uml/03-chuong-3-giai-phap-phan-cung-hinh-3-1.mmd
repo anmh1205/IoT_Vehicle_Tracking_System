@@ -1,9 +1,0 @@
-flowchart TB
-    Vehicle["Phương tiện<br>vị trí, vận hành, chuyển động"]
-    Acquire["Thu nhận tín hiệu<br>GNSS, OBD-II, IMU"]
-    Packet["Tiền xử lý và đóng gói<br>bản tin giám sát"]
-    Server["Máy chủ<br>tiếp nhận, chuẩn hóa,<br>lưu trữ và phát cảnh báo"]
-    Interface["Giao diện khai thác<br>bản đồ, trạng thái,<br>dữ liệu chi tiết"]
-    Manager["Người quản lý"]
-
-    Vehicle --> Acquire --> Packet --> Server --> Interface --> Manager

@@ -1,9 +1,0 @@
-[   62760ms] TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
-    at is (https://thingdock.dev/_next/static/chunks/9c09817456a99b20.js:1:20326)
-    at e._getMapPanePos (https://thingdock.dev/_next/static/chunks/9c09817456a99b20.js:1:42732)
-    at e._getNewPixelOrigin (https://thingdock.dev/_next/static/chunks/9c09817456a99b20.js:1:43089)
-    at e._move (https://thingdock.dev/_next/static/chunks/9c09817456a99b20.js:1:39417)
-    at e._onZoomTransitionEnd (https://thingdock.dev/_next/static/chunks/9c09817456a99b20.js:1:46735)
-[  117023ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://thingdock.dev/dashboard/platform/users:0
-[  119252ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://thingdock.dev/dashboard/platform/users:0
-[  175406ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ https://thingdock.dev/api/v1/auth/me:0

@@ -1,4 +1,0 @@
-[  100669ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://thingdock.dev/dashboard/platform/users:0
-[  123922ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://thingdock.dev/dashboard/platform/my-settings:0
-[  123922ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://thingdock.dev/dashboard/platform/my-settings:0
-[  123923ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://thingdock.dev/dashboard/platform/my-settings:0

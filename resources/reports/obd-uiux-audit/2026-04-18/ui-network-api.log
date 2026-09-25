@@ -1,4 +1,0 @@
-[GET] http://localhost:4000/api/v1/system/health => [200] OK
-[GET] http://localhost:4000/api/v1/system/metrics => [200] OK
-[GET] http://localhost:4000/api/v1/system/metrics => [200] OK
-[GET] http://localhost:4000/api/v1/system/health => [200] OK
