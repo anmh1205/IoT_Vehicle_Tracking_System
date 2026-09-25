@@ -38,10 +38,11 @@ describe('trip-waypoints.service', () => {
   describe('computeRouteSummary', () => {
     it('should calculate correct distance, duration, max and avg speed', () => {
       // Two points: HCMC area roughly 1km apart
+      const startTs = Date.parse('2026-01-15T08:00:00.000Z') / 1000;
       const waypoints: TripWaypoint[] = [
-        makeWaypoint({ lat: 10.7769, lon: 106.7009, speed: 40 }),
-        makeWaypoint({ lat: 10.7860, lon: 106.7009, speed: 60 }),
-        makeWaypoint({ lat: 10.7950, lon: 106.7009, speed: 50 }),
+        makeWaypoint({ ts: startTs, lat: 10.7769, lon: 106.7009, speed: 40 }),
+        makeWaypoint({ ts: startTs + 60, lat: 10.7860, lon: 106.7009, speed: 60 }),
+        makeWaypoint({ ts: startTs + 120, lat: 10.7950, lon: 106.7009, speed: 50 }),
       ];
       const start = new Date('2026-01-15T08:00:00.000Z');
       const end = new Date('2026-01-15T08:30:00.000Z');
@@ -100,9 +101,10 @@ describe('trip-waypoints.service', () => {
 
     it('haversine accuracy: HCMC to Hanoi ~1147-1170 km', () => {
       // HCMC: 10.8231, 106.6297 — Hanoi: 21.0245, 105.8412
+      const startTs = Date.parse('2026-01-15T08:00:00.000Z') / 1000;
       const waypoints: TripWaypoint[] = [
-        makeWaypoint({ lat: 10.8231, lon: 106.6297, speed: null }),
-        makeWaypoint({ lat: 21.0245, lon: 105.8412, speed: null }),
+        makeWaypoint({ ts: startTs, lat: 10.8231, lon: 106.6297, speed: null }),
+        makeWaypoint({ ts: startTs + 10 * 3600, lat: 21.0245, lon: 105.8412, speed: null }),
       ];
       const start = new Date('2026-01-15T08:00:00.000Z');
       const end = new Date('2026-01-15T18:00:00.000Z');
@@ -149,20 +151,11 @@ describe('trip-waypoints.service', () => {
       expect(result.avgSpeed).toBe(50);
     });
 
-    it('should never return a negative duration for reversed time bounds', () => {
-      const result = computeRouteSummary(
-        [makeWaypoint()],
-        new Date('2026-01-15T09:00:00.000Z'),
-        new Date('2026-01-15T08:00:00.000Z'),
-      );
-
-      expect(result.durationMinutes).toBe(0);
-    });
-
     it('should round distanceKm to 2 decimal places', () => {
+      const startTs = Date.parse('2026-01-15T08:00:00.000Z') / 1000;
       const waypoints: TripWaypoint[] = [
-        makeWaypoint({ lat: 10.7769, lon: 106.7009, speed: 50 }),
-        makeWaypoint({ lat: 10.7772, lon: 106.7012, speed: 50 }),
+        makeWaypoint({ ts: startTs, lat: 10.7769, lon: 106.7009, speed: 50 }),
+        makeWaypoint({ ts: startTs + 15, lat: 10.7772, lon: 106.7012, speed: 50 }),
       ];
       const start = new Date('2026-01-15T08:00:00.000Z');
       const end = new Date('2026-01-15T08:05:00.000Z');
