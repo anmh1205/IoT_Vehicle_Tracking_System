@@ -71,7 +71,7 @@ describe('device-command.repository', () => {
     expect(release).toHaveBeenCalledTimes(1);
   });
 
-  it('lists only durable pending commands older than the current process cutoff', async () => {
+  it('lists only durable pending commands at or before the current process cutoff', async () => {
     vi.mocked(pool.query).mockResolvedValue({
       rows: [{
         id: 21,
@@ -90,7 +90,7 @@ describe('device-command.repository', () => {
 
     const [sql, params] = vi.mocked(pool.query).mock.calls[0] ?? [];
     expect(sql).toContain("WHERE status = 'pending'");
-    expect(sql).toContain('created_at < $1');
+    expect(sql).toContain('created_at <= $1');
     expect(sql).toContain('ORDER BY created_at ASC, id ASC');
     expect(params).toEqual([cutoff.toISOString(), 25]);
     expect(rows[0]?.id).toBe(21);
