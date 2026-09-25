@@ -76,7 +76,7 @@ export const updateCommandStatus = async (
   id: number,
   status: DeviceCommandStatus,
   response?: string | null,
-  options?: { markAcknowledged?: boolean; expectedDeviceId?: string },
+  options?: { markAcknowledged?: boolean; expectedDeviceId?: string; ackBootId?: string },
 ): Promise<DeviceCommandRecord | null> => {
   const result = await pool.query<DeviceCommandRow>(
     `UPDATE device_commands
@@ -100,6 +100,10 @@ export const updateCommandStatus = async (
             WHEN ($2::varchar = 'acknowledged' OR $4::boolean = TRUE) AND acked_at IS NULL THEN NOW()
             ELSE acked_at
           END,
+         ack_boot_id = CASE
+           WHEN status IN ('acknowledged', 'failed') THEN ack_boot_id
+           ELSE COALESCE($6::varchar, ack_boot_id)
+         END,
           updated_at = NOW()
       WHERE id = $1
         AND ($5::varchar IS NULL OR device_id = $5::varchar)
@@ -110,10 +114,36 @@ export const updateCommandStatus = async (
       response ?? null,
       options?.markAcknowledged ?? false,
       options?.expectedDeviceId ?? null,
+      options?.ackBootId ?? null,
     ],
   );
 
   return result.rows[0] ? mapRow(result.rows[0]) : null;
+};
+
+export const failAcceptedCommandsFromPriorBoot = async (
+  deviceId: string,
+  currentBootId: string,
+): Promise<DeviceCommandRecord[]> => {
+  const normalizedBootId = currentBootId.trim();
+  if (!deviceId || !normalizedBootId) {
+    return [];
+  }
+
+  const result = await pool.query<DeviceCommandRow>(
+    `UPDATE device_commands
+     SET status = 'failed',
+         response = 'device_restarted_before_execution',
+         updated_at = NOW()
+     WHERE device_id = $1
+       AND status = 'accepted'
+       AND ack_boot_id IS NOT NULL
+       AND ack_boot_id <> $2
+     RETURNING id, device_id, command, params, status, sent_at, acked_at, response`,
+    [deviceId, normalizedBootId],
+  );
+
+  return result.rows.map(mapRow);
 };
 
 export const listDeviceCommands = async (deviceId: string, page: number, limit: number) => {
