@@ -266,6 +266,38 @@ export const findAll = async (
   return { devices, total };
 };
 
+export const hasAssignedAccessByDeviceId = async (
+  userId: number,
+  deviceId: string,
+): Promise<boolean> => {
+  const result = await pool.query(
+    `SELECT 1
+     FROM user_device_access
+     WHERE user_id = $1 AND device_id = $2
+     LIMIT 1`,
+    [userId, deviceId],
+  );
+  return (result.rowCount ?? 0) > 0;
+};
+
+export const hasAssignedAccessByReference = async (
+  userId: number,
+  rawId: string,
+): Promise<boolean> => {
+  const parsedId = Number.parseInt(rawId, 10);
+  const useInternalId = !Number.isNaN(parsedId);
+  const result = await pool.query(
+    `SELECT 1
+     FROM devices d
+     JOIN user_device_access uda ON uda.device_id = d.device_id
+     WHERE uda.user_id = $1
+       AND ${useInternalId ? 'd.id = $2' : 'd.device_id = $2'}
+     LIMIT 1`,
+    [userId, useInternalId ? parsedId : rawId],
+  );
+  return (result.rowCount ?? 0) > 0;
+};
+
 export const findById = async (id: number): Promise<Device | null> =>
   findOne<Device>(
     `SELECT
