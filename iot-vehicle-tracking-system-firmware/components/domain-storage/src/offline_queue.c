@@ -590,28 +590,49 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
     }
     memcpy(rec.payload, payload, payload_len + 1U); // Copy payload plus its terminating NUL.
 
-    if (CONFIG_TRACKER_SD_LOG_ENABLE) {
-        /* Treat a temporarily unavailable card as best-effort; do not fail caller telemetry paths. */
-        offline_queue_try_mount(util_uptime_ms());
-        if (!sd_log_store_is_mounted()) {
-#if CONFIG_TRACKER_SD_DIAG_ENABLE
-            offline_queue_log_enqueue_result(&rec);
-#endif
-            return ESP_OK;
-        }
-
-        esp_err_t err = sd_log_store_append(&rec);
-        ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "sd append failed");
-#if CONFIG_TRACKER_FIELD_VALIDATION_MODE
-        static bool s_gc_skip_logged = false;
-        if (!s_gc_skip_logged) {
-            ESP_LOGW(TAG, "Field validation override: defer synchronous SD GC to keep OTA loop responsive");
-            s_gc_skip_logged = true;
-        }
-#else
-        (void)sd_log_store_gc_if_needed();
-#endif
+    if (!CONFIG_TRACKER_SD_LOG_ENABLE) {
+        telemetry_counters_inc_sd_write_fail();
+        ESP_LOGW(TAG,
+                 "offline enqueue failed type=%u reason=sd_logging_disabled",
+                 (unsigned)type);
+        return ESP_ERR_NOT_SUPPORTED;
     }
+
+    /*
+     * Fallback success means durable persistence. A temporarily unavailable SD
+     * card must therefore propagate failure to the publish pipeline rather than
+     * pretending the payload was queued.
+     */
+    offline_queue_try_mount(util_uptime_ms());
+    if (!sd_log_store_is_mounted()) {
+        telemetry_counters_inc_sd_write_fail();
+#if CONFIG_TRACKER_SD_DIAG_ENABLE
+        offline_queue_log_enqueue_result(&rec);
+#endif
+        ESP_LOGW(TAG,
+                 "offline enqueue failed type=%u reason=sd_unavailable",
+                 (unsigned)type);
+        return ESP_ERR_NOT_FOUND;
+    }
+
+    esp_err_t err = sd_log_store_append(&rec);
+    if (err != ESP_OK) {
+        telemetry_counters_inc_sd_write_fail();
+        ESP_LOGW(TAG,
+                 "offline enqueue failed type=%u reason=sd_append err=%s",
+                 (unsigned)type,
+                 esp_err_to_name(err));
+        return err;
+    }
+#if CONFIG_TRACKER_FIELD_VALIDATION_MODE
+    static bool s_gc_skip_logged = false;
+    if (!s_gc_skip_logged) {
+        ESP_LOGW(TAG, "Field validation override: defer synchronous SD GC to keep OTA loop responsive");
+        s_gc_skip_logged = true;
+    }
+#else
+    (void)sd_log_store_gc_if_needed();
+#endif
 
 #if CONFIG_TRACKER_SD_DIAG_ENABLE
     offline_queue_log_enqueue_result(&rec);
