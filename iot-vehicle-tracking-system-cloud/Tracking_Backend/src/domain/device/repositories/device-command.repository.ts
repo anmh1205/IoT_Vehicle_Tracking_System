@@ -55,11 +55,10 @@ export const createCommand = async (input: {
         command,
         params,
         status,
-        sent_at,
         actor_user_id,
         correlation_id
       )
-      VALUES ($1, $2, $3::jsonb, 'pending', NOW(), $4, $5)
+      VALUES ($1, $2, $3::jsonb, 'pending', $4, $5)
       RETURNING id, device_id, command, params, status, sent_at, acked_at, response`,
     [
       input.deviceId,
@@ -83,6 +82,10 @@ export const updateCommandStatus = async (
     `UPDATE device_commands
      SET status = $2::varchar,
          response = COALESCE($3, response),
+         sent_at = CASE
+            WHEN $2::varchar = 'sent' AND sent_at IS NULL THEN NOW()
+            ELSE sent_at
+          END,
          acked_at = CASE
             WHEN ($2::varchar = 'acknowledged' OR $4::boolean = TRUE) AND acked_at IS NULL THEN NOW()
             ELSE acked_at
@@ -114,7 +117,7 @@ export const listDeviceCommands = async (deviceId: string, page: number, limit: 
       `SELECT id, device_id, command, params, status, sent_at, acked_at, response
        FROM device_commands
        WHERE device_id = $1
-       ORDER BY sent_at DESC, id DESC
+       ORDER BY COALESCE(sent_at, created_at) DESC, id DESC
        LIMIT $2 OFFSET $3`,
       [deviceId, limit, offset],
     ),
