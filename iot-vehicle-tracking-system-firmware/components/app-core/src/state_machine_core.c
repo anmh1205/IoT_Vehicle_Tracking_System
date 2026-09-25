@@ -828,11 +828,13 @@ static bool state_machine_persist_active_session(void) {
 /**
  * @brief Clear any persisted session candidate from NVS.
  */
-static void state_machine_clear_persisted_session(void) {
+static bool state_machine_clear_persisted_session(void) {
     esp_err_t err = nvs_config_clear_session_context();
     if (err != ESP_OK) {
         ESP_LOGW(TAG, "event=session_persist_clear_failed err=%s", esp_err_to_name(err));
+        return false;
     }
+    return true;
 }
 
 /**
@@ -941,10 +943,25 @@ static bool state_machine_reconcile_stale_restored_session(void) {
         return false;
     }
 
+    if (!state_machine_clear_persisted_session()) {
+        /*
+         * The cloud end boundary is already durable, but the local active marker
+         * is not cleared yet. Keep the complete identity in RAM and retry later;
+         * otherwise a reboot can resurrect this ended session from NVS.
+         */
+        s_session_restore_pending = true;
+        offline_queue_set_session(0);
+        ESP_LOGW(TAG,
+                 "event=session_restore_reconcile_deferred local=%lu canonical=%llu boot_id=%s reason=persist_clear_failed",
+                 (unsigned long)s_session_id,
+                 (unsigned long long)s_canonical_session_id,
+                 s_session_boot_id);
+        return false;
+    }
+
     offline_queue_stop_session(true);
     offline_queue_set_session(0);
     session_mgr_mark_stopped();
-    state_machine_clear_persisted_session();
     state_machine_reset_session_runtime();
     s_publish_status = TRACKER_PUBLISH_STATUS_STOPPED;
 
@@ -982,10 +999,23 @@ static bool state_machine_commit_session_end(void) {
         return false;
     }
 
+    if (!state_machine_clear_persisted_session()) {
+        /*
+         * Do not let RAM/session-manager teardown outrun the durable NVS marker.
+         * A later retry may re-publish the idempotent ended boundary, but the
+         * old session can no longer be resurrected after a reboot.
+         */
+        ESP_LOGW(TAG,
+                 "event=session_end_deferred local=%lu canonical=%llu boot_id=%s reason=persist_clear_failed",
+                 (unsigned long)s_session_id,
+                 (unsigned long long)s_canonical_session_id,
+                 s_session_boot_id);
+        return false;
+    }
+
     offline_queue_stop_session(true);
     offline_queue_set_session(0);
     session_mgr_mark_stopped();
-    state_machine_clear_persisted_session();
     state_machine_reset_session_runtime();
     s_publish_status = TRACKER_PUBLISH_STATUS_STOPPED;
     return true;
