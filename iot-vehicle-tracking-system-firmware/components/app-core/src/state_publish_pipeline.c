@@ -470,32 +470,7 @@ bool state_machine_publish_firmware_status(const char *status,
 }
 
 /**
- * @brief Build a firmware status payload and defer it for the next online window.
- *
- * Used when MQTT is down: the report is staged in memory rather than dropped so
- * the most recent OTA state is still delivered once connectivity returns.
- *
- * @param[in] status OTA lifecycle status label.
- * @param[in] progress OTA progress percentage/state.
- * @param[in] version Target firmware version.
- * @param[in] job_id Cloud OTA job identifier.
- * @param[in] partition Optional partition label.
- * @param[in] error Optional short error string.
- */
-static void state_machine_stage_firmware_status_for_online_publish(const char *status,
-                                                                   uint8_t progress,
-                                                                   const char *version,
-                                                                   const char *job_id,
-                                                                   const char *partition,
-                                                                   const char *error) {
-    // Cache the firmware status locally so the next connected window can publish the exact same OTA report.
-    firmware_status_t firmware = {0};
-    state_machine_fill_firmware_status(&firmware, status, progress, version, job_id, partition, error);
-    state_machine_defer_firmware_report(&firmware);
-}
-
-/**
- * @brief Publish firmware status immediately when online, otherwise defer it.
+ * @brief Publish firmware status through the durable live/offline pipeline.
  *
  * @param[in] status Firmware lifecycle status.
  * @param[in] progress OTA progress percentage/state.
@@ -510,22 +485,18 @@ void state_machine_publish_or_stage_firmware_status(const char *status,
                                                     const char *job_id,
                                                     const char *partition,
                                                     const char *error) {
-    // Publish firmware status immediately when possible, or stage it for the next connected window when MQTT is still down.
-    if (tracker_mqtt_is_connected()) {
-        /*
-         * The publish wrapper re-stages the report when both MQTT and durable
-         * offline fallback fail, so connected-state races cannot lose it.
-         */
-        (void)state_machine_publish_firmware_status(status, progress, version, job_id, partition, error);
-        return;
-    }
-
-    state_machine_stage_firmware_status_for_online_publish(status,
-                                                           progress,
-                                                           version,
-                                                           job_id,
-                                                           partition,
-                                                           error);
+    /*
+     * Always use the shared pipeline, even when MQTT is already known offline.
+     * It persists OFFLINE_RECORD_FIRMWARE to the critical SD queue first.
+     * state_machine_publish_firmware_payload() keeps a RAM copy only when both
+     * live transport and durable storage reject the report.
+     */
+    (void)state_machine_publish_firmware_status(status,
+                                                progress,
+                                                version,
+                                                job_id,
+                                                partition,
+                                                error);
 }
 
 /**

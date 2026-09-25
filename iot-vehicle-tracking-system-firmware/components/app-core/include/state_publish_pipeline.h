@@ -61,11 +61,11 @@ bool state_machine_publish_firmware_status(const char *status,
                                            const char *partition,
                                            const char *error);
 /**
- * @brief Publish firmware status now, or defer it until MQTT is connected.
+ * @brief Publish firmware status through live MQTT or durable offline storage.
  *
- * Uses the same payload contract as `state_machine_publish_firmware_status()`,
- * but keeps the report in memory when the device is offline so the next online
- * cycle can still emit the most recent OTA state.
+ * Uses the shared firmware pipeline regardless of current connectivity. RAM
+ * staging is only the final fallback when neither MQTT nor the SD queue accepts
+ * the report.
  */
 void state_machine_publish_or_stage_firmware_status(const char *status,
                                                     uint8_t progress,
