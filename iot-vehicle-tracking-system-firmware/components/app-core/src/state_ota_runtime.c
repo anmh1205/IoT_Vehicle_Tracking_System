@@ -242,6 +242,14 @@ void state_machine_try_confirm_running_firmware(void) {
     s_ota_confirm_retry_after_ms = 0;
     s_ota_confirm_checked = true;
     if (!g_rtc_context.ota_pending_confirm) {
+        // Only now is it safe to describe this as a normal fresh boot: persisted
+        // OTA state was read successfully and proved no confirmation is pending.
+        (void)state_machine_publish_firmware_status(TRACKER_OTA_STATUS_SUCCESS,
+                                                    TRACKER_OTA_PROGRESS_DONE,
+                                                    s_current_version,
+                                                    "",
+                                                    "",
+                                                    "");
         return;
     }
 
