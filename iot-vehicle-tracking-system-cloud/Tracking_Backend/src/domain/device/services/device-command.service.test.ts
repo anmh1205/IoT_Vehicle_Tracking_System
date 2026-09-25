@@ -7,6 +7,7 @@ vi.mock('mqtt', () => ({
 vi.mock('@/domain/device/repositories/device-command.repository', () => ({
   MAX_OUTSTANDING_DEVICE_COMMANDS: 8,
   createCommand: vi.fn(),
+  failPendingCommandBeforeDispatch: vi.fn(),
   listPendingCommandsBefore: vi.fn(),
   updateCommandStatus: vi.fn(),
   listDeviceCommands: vi.fn(),
@@ -116,19 +117,63 @@ describe('device-command.service', () => {
       response: null,
       createdAt: new Date(Date.now() - 301_000).toISOString(),
     }]);
-    vi.mocked(deviceCommandRepo.updateCommandStatus).mockResolvedValue(null);
+    vi.mocked(deviceCommandRepo.failPendingCommandBeforeDispatch).mockResolvedValue({
+      id: 43,
+      deviceId: 'TRACKER_OLD',
+      command: 'reboot',
+      params: {},
+      status: 'failed',
+      sentAt: null,
+      ackedAt: null,
+      response: 'command_expired_before_dispatch',
+    });
 
     initDeviceCommandDispatcher();
     handlers.get('connect')?.();
     await vi.waitFor(() => {
-      expect(deviceCommandRepo.updateCommandStatus).toHaveBeenCalledWith(
+      expect(deviceCommandRepo.failPendingCommandBeforeDispatch).toHaveBeenCalledWith(
         43,
-        'failed',
         'command_expired_before_dispatch',
       );
     });
 
     expect(client.publish).not.toHaveBeenCalled();
+  });
+
+  it('does not overwrite a command that left pending while expiry was being reconciled', async () => {
+    const handlers = new Map<string, (...args: any[]) => void>();
+    const client = {
+      connected: true,
+      on: vi.fn((event: string, handler: (...args: any[]) => void) => {
+        handlers.set(event, handler);
+        return client;
+      }),
+      publish: vi.fn(),
+      end: vi.fn((_force: boolean, _options: unknown, callback: () => void) => callback()),
+    } as any;
+    vi.mocked(mqtt.connect).mockReturnValue(client);
+    vi.mocked(deviceCommandRepo.listPendingCommandsBefore).mockResolvedValue([{
+      id: 44,
+      deviceId: 'TRACKER_OLD',
+      command: 'reboot',
+      params: {},
+      status: 'pending',
+      sentAt: null,
+      ackedAt: null,
+      response: null,
+      createdAt: new Date(Date.now() - 301_000).toISOString(),
+    }]);
+    // Null means an ACK or another worker already moved the row out of pending.
+    vi.mocked(deviceCommandRepo.failPendingCommandBeforeDispatch).mockResolvedValue(null);
+
+    initDeviceCommandDispatcher();
+    handlers.get('connect')?.();
+    await vi.waitFor(() => {
+      expect(deviceCommandRepo.failPendingCommandBeforeDispatch).toHaveBeenCalled();
+    });
+
+    expect(client.publish).not.toHaveBeenCalled();
+    expect(deviceCommandRepo.updateCommandStatus).not.toHaveBeenCalled();
   });
 
   it('keeps a recovery row pending when MQTT publish fails', async () => {
