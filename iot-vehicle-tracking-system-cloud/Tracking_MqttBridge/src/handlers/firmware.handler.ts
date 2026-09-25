@@ -128,6 +128,76 @@ export const handleFirmware = async (
     return;
   }
 
+  const jobId = payload.jobId.trim();
+  if (!jobId) {
+    if (payload.status !== 'success') {
+      logger.warn(
+        {
+          deviceId: payload.device_id,
+          status: payload.status,
+          event: 'jobless_firmware_status_ignored',
+        },
+        'Ignored non-success firmware status without deployment job',
+      );
+      return;
+    }
+
+    try {
+      await pool.query(
+        `UPDATE devices
+         SET firmware_version = $2,
+             target_firmware_version = CASE
+               WHEN target_firmware_version = $2 THEN NULL
+               ELSE target_firmware_version
+             END,
+             updated_at = NOW()
+         WHERE device_id = $1`,
+        [payload.device_id, payload.currentVersion],
+      );
+    } catch (err) {
+      logger.error(
+        {
+          err,
+          deviceId: payload.device_id,
+          currentVersion: payload.currentVersion,
+          event: 'firmware_inventory_sync_failed',
+        },
+        'Firmware inventory sync failed',
+      );
+      return;
+    }
+
+    writeDeviceEvent(
+      payload.device_id,
+      'firmware_inventory',
+      `Firmware inventory: ${payload.currentVersion}`,
+      {
+        current_version: payload.currentVersion,
+        target_version: payload.targetVersion,
+        message_id: messageId,
+        schema_version: schemaVersion,
+        seq_no: seqNo,
+        boot_id: bootId,
+      },
+    ).catch((err) => {
+      logger.error(
+        { err, deviceId: payload.device_id, event: 'firmware_inventory_log_write_failed' },
+        'Firmware inventory event log write failed',
+      );
+    });
+
+    logger.info(
+      {
+        deviceId: payload.device_id,
+        currentVersion: payload.currentVersion,
+        bootId,
+        event: 'firmware_inventory_synced',
+      },
+      'Firmware inventory synchronized',
+    );
+    return;
+  }
+
   let updateDecision: UpdateDecision = { accept: true, reason: 'unknown' };
 
   try {
@@ -138,7 +208,7 @@ export const handleFirmware = async (
        WHERE job_id = $1 AND device_id = $2
        ORDER BY updated_at DESC
        LIMIT 1`,
-      [payload.jobId, payload.device_id],
+      [jobId, payload.device_id],
     );
 
     const existing = existingResult.rows[0] ?? null;
@@ -147,7 +217,7 @@ export const handleFirmware = async (
     if (!updateDecision.accept) {
       logger.info(
         {
-          jobId: payload.jobId,
+          jobId,
           deviceId: payload.device_id,
           status: payload.status,
           seqNo,
@@ -196,7 +266,7 @@ export const handleFirmware = async (
           NOW()
         )`,
         [
-          payload.jobId,
+          jobId,
           payload.device_id,
           payload.status,
           payload.progress ?? null,
@@ -258,14 +328,41 @@ export const handleFirmware = async (
     }
   } catch (err) {
     logger.error(
-      { err, deviceId: payload.device_id, jobId: payload.jobId, event: 'firmware_status_log_failed' },
+      { err, deviceId: payload.device_id, jobId, event: 'firmware_status_log_failed' },
       'Firmware status log failed',
     );
     return;
   }
 
+  if (payload.status === 'success') {
+    try {
+      await pool.query(
+        `UPDATE devices
+         SET firmware_version = $2,
+             target_firmware_version = CASE
+               WHEN target_firmware_version = $2 OR target_firmware_version = $3 THEN NULL
+               ELSE target_firmware_version
+             END,
+             updated_at = NOW()
+         WHERE device_id = $1`,
+        [payload.device_id, payload.currentVersion, payload.targetVersion],
+      );
+    } catch (err) {
+      logger.error(
+        {
+          err,
+          deviceId: payload.device_id,
+          jobId,
+          currentVersion: payload.currentVersion,
+          event: 'firmware_inventory_sync_failed',
+        },
+        'Firmware inventory sync failed after OTA success',
+      );
+    }
+  }
+
   publishInternalEvent('firmware', {
-    jobId: payload.jobId,
+    jobId,
     device_id: payload.device_id,
     status: payload.status,
     progress: payload.progress,
@@ -284,7 +381,7 @@ export const handleFirmware = async (
     'firmware_update',
     `Firmware ${payload.status}: ${payload.targetVersion}`,
     {
-      job_id: payload.jobId,
+      job_id: jobId,
       firmware_status: payload.status,
       progress: payload.progress,
       target_version: payload.targetVersion,
@@ -298,13 +395,13 @@ export const handleFirmware = async (
       update_reason: updateDecision.reason,
     },
   ).catch((err) => {
-    logger.error({ err, deviceId: payload.device_id, jobId: payload.jobId, event: 'firmware_event_log_write_failed' }, 'Firmware event log write failed');
+    logger.error({ err, deviceId: payload.device_id, jobId, event: 'firmware_event_log_write_failed' }, 'Firmware event log write failed');
   });
 
   logger.info(
     {
       deviceId: payload.device_id,
-      jobId: payload.jobId,
+      jobId,
       status: payload.status,
       targetVersion: payload.targetVersion,
       currentVersion: payload.currentVersion,
