@@ -82,6 +82,7 @@ describe('device-command.repository', () => {
         sent_at: null,
         acked_at: null,
         response: null,
+        created_at: new Date('2026-09-25T22:00:00.000Z'),
       }],
     } as any);
 
@@ -92,8 +93,10 @@ describe('device-command.repository', () => {
     expect(sql).toContain("WHERE status = 'pending'");
     expect(sql).toContain('created_at <= $1');
     expect(sql).toContain('ORDER BY created_at ASC, id ASC');
+    expect(sql).toContain('created_at');
     expect(params).toEqual([cutoff.toISOString(), 25]);
     expect(rows[0]?.id).toBe(21);
+    expect(rows[0]?.createdAt).toBe('2026-09-25T22:00:00.000Z');
   });
 
   it('sets sent_at only when publish transitions the command to sent', async () => {
