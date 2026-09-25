@@ -30,8 +30,8 @@ const AssignmentCell = ({
 
 export const getDeviceColumns = (actions: {
   onView: (item: Device) => void;
-  onEdit: (item: Device) => void;
-  onDelete: (item: Device) => void;
+  onEdit?: (item: Device) => void;
+  onDelete?: (item: Device) => void;
 }): ColumnDef<Device>[] => [
   {
     accessorKey: 'deviceId',
@@ -89,14 +89,21 @@ export const getDeviceColumns = (actions: {
             <Eye className="mr-2 h-4 w-4" />
             Xem chi tiết
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => actions.onEdit(row.original)}>
-            <Pencil className="mr-2 h-4 w-4" />
-            Chỉnh sửa
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => actions.onDelete(row.original)} className="text-destructive">
-            <Trash2 className="mr-2 h-4 w-4" />
-            Xóa
-          </DropdownMenuItem>
+          {actions.onEdit ? (
+            <DropdownMenuItem onClick={() => actions.onEdit?.(row.original)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Chỉnh sửa
+            </DropdownMenuItem>
+          ) : null}
+          {actions.onDelete ? (
+            <DropdownMenuItem
+              onClick={() => actions.onDelete?.(row.original)}
+              className="text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Xóa
+            </DropdownMenuItem>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
     ),
