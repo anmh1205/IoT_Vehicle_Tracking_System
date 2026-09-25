@@ -70,7 +70,7 @@ esp_err_t command_handler_init(config_t *config);
  * @param out_deferred Optional output set true only when the command was staged
  *        for later FSM execution. Immediate commands complete in the parser path.
  * @param out_duplicate Optional output set true when a QoS1 redelivery repeats a
- *        command ID that was already accepted during the current MQTT runtime.
+ *        command ID already accepted in the persistent recent-command window.
  *
  * @return ESP_OK when the command was accepted/staged.
  * @return ESP_ERR_INVALID_ARG when the command or params are invalid.
