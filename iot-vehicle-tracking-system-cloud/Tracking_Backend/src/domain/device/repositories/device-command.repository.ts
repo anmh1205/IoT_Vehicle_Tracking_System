@@ -2,6 +2,8 @@ import { pool } from '@/infrastructure/database/pool';
 
 export type DeviceCommandStatus = 'pending' | 'sent' | 'accepted' | 'acknowledged' | 'failed';
 
+export const MAX_OUTSTANDING_DEVICE_COMMANDS = 8;
+
 export interface DeviceCommandRecord {
   id: number;
   deviceId: string;
@@ -48,28 +50,64 @@ export const createCommand = async (input: {
   params?: Record<string, unknown>;
   actorUserId?: number;
   correlationId?: string;
-}): Promise<DeviceCommandRecord> => {
-  const result = await pool.query<DeviceCommandRow>(
-    `INSERT INTO device_commands (
-        device_id,
-        command,
-        params,
-        status,
-        actor_user_id,
-        correlation_id
-      )
-      VALUES ($1, $2, $3::jsonb, 'pending', $4, $5)
-      RETURNING id, device_id, command, params, status, sent_at, acked_at, response`,
-    [
-      input.deviceId,
-      input.command,
-      JSON.stringify(input.params ?? {}),
-      input.actorUserId ?? null,
-      input.correlationId ?? null,
-    ],
-  );
+}): Promise<DeviceCommandRecord | null> => {
+  const client = await pool.connect();
 
-  return mapRow(result.rows[0]);
+  try {
+    await client.query('BEGIN');
+
+    // Serialize command admission per device. PostgreSQL READ COMMITTED takes a
+    // fresh snapshot for the count statement after this row lock is acquired,
+    // so concurrent HTTP requests cannot both pass the outstanding-command cap.
+    await client.query(
+      'SELECT device_id FROM devices WHERE device_id = $1 FOR UPDATE',
+      [input.deviceId],
+    );
+
+    const outstanding = await client.query<{ total: number }>(
+      `SELECT COUNT(*)::int AS total
+       FROM device_commands
+       WHERE device_id = $1
+         AND status IN ('pending', 'sent', 'accepted')`,
+      [input.deviceId],
+    );
+    if (Number(outstanding.rows[0]?.total ?? 0) >= MAX_OUTSTANDING_DEVICE_COMMANDS) {
+      await client.query('ROLLBACK');
+      return null;
+    }
+
+    const result = await client.query<DeviceCommandRow>(
+      `INSERT INTO device_commands (
+          device_id,
+          command,
+          params,
+          status,
+          actor_user_id,
+          correlation_id
+        )
+        VALUES ($1, $2, $3::jsonb, 'pending', $4, $5)
+        RETURNING id, device_id, command, params, status, sent_at, acked_at, response`,
+      [
+        input.deviceId,
+        input.command,
+        JSON.stringify(input.params ?? {}),
+        input.actorUserId ?? null,
+        input.correlationId ?? null,
+      ],
+    );
+
+    await client.query('COMMIT');
+    return mapRow(result.rows[0]);
+  } catch (error) {
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      // Preserve the original database error.
+    }
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 export const updateCommandStatus = async (
