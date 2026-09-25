@@ -108,6 +108,7 @@ static uint64_t s_last_health_snapshot_log_ms = 0;
 typedef struct {
     uint64_t command_id;
     esp_err_t process_result;
+    bool execution_result;
 } state_machine_command_ack_t;
 
 #define TRACKER_COMMAND_ACK_QUEUE_LEN 16U
@@ -115,10 +116,10 @@ typedef struct {
 
 static QueueHandle_t s_command_ack_queue = NULL;
 
-static const char *state_machine_command_ack_response(esp_err_t result) {
+static const char *state_machine_command_ack_response(esp_err_t result, bool execution_result) {
     switch (result) {
         case ESP_OK:
-            return "accepted";
+            return execution_result ? "executed" : "accepted";
         case ESP_ERR_INVALID_ARG:
             return "invalid_command";
         case ESP_ERR_NOT_SUPPORTED:
@@ -126,9 +127,11 @@ static const char *state_machine_command_ack_response(esp_err_t result) {
         case ESP_ERR_NO_MEM:
             return "command_queue_full";
         case ESP_ERR_TIMEOUT:
-            return "command_state_busy";
+            return execution_result ? "execution_timeout" : "command_state_busy";
+        case ESP_ERR_INVALID_STATE:
+            return execution_result ? "execution_invalid_state" : "command_rejected";
         default:
-            return "command_rejected";
+            return execution_result ? "execution_failed" : "command_rejected";
     }
 }
 
@@ -143,7 +146,8 @@ static void state_machine_command_callback(const char *topic, const char *payloa
     (void)topic;
 
     uint64_t command_id = 0U;
-    esp_err_t process_result = command_handler_process(payload, &command_id);
+    bool deferred = false;
+    esp_err_t process_result = command_handler_process(payload, &command_id, &deferred);
     if (command_id == 0U) {
         /*
          * Legacy/local commands can still execute, but without a cloud-issued
@@ -158,6 +162,7 @@ static void state_machine_command_callback(const char *topic, const char *payloa
     state_machine_command_ack_t ack = {
         .command_id = command_id,
         .process_result = process_result,
+        .execution_result = process_result == ESP_OK && !deferred,
     };
     if (s_command_ack_queue == NULL ||
         xQueueSendToBack(s_command_ack_queue, &ack, 0) != pdTRUE) {
@@ -181,8 +186,12 @@ static void state_machine_publish_pending_command_acks(void) {
             return;
         }
 
-        const char *status = ack.process_result == ESP_OK ? "accepted" : "failed";
-        const char *response = state_machine_command_ack_response(ack.process_result);
+        const char *status =
+            ack.process_result == ESP_OK
+                ? (ack.execution_result ? "acknowledged" : "accepted")
+                : "failed";
+        const char *response =
+            state_machine_command_ack_response(ack.process_result, ack.execution_result);
         char ack_payload[192] = {0};
         int written = snprintf(ack_payload,
                                sizeof(ack_payload),
@@ -216,6 +225,35 @@ static void state_machine_publish_pending_command_acks(void) {
                  ack.command_id,
                  status);
     }
+}
+
+bool state_machine_has_pending_command_acks(void) {
+    return s_command_ack_queue != NULL && uxQueueMessagesWaiting(s_command_ack_queue) > 0U;
+}
+
+bool state_machine_queue_command_execution_ack(uint64_t command_id, esp_err_t result) {
+    if (command_id == 0U) {
+        return true;
+    }
+    if (s_command_ack_queue == NULL) {
+        ESP_LOGW(TAG,
+                 "event=command_execution_ack_dropped command_id=%" PRIu64 " reason=queue_unavailable",
+                 command_id);
+        return false;
+    }
+
+    state_machine_command_ack_t ack = {
+        .command_id = command_id,
+        .process_result = result,
+        .execution_result = true,
+    };
+    if (xQueueSendToBack(s_command_ack_queue, &ack, 0) != pdTRUE) {
+        ESP_LOGW(TAG,
+                 "event=command_execution_ack_dropped command_id=%" PRIu64 " reason=queue_full",
+                 command_id);
+        return false;
+    }
+    return true;
 }
 
 /**
@@ -872,11 +910,11 @@ static void state_machine_commit_session_end(void) {
  * match the active runtime session. That prevents stale downlink commands from
  * overwriting a newer session after reconnect or reboot.
  */
-void state_machine_apply_session_assignment(uint32_t local_session_key,
-                                           uint64_t canonical_session_id,
-                                           const char *session_boot_id) {
+esp_err_t state_machine_apply_session_assignment(uint32_t local_session_key,
+                                                 uint64_t canonical_session_id,
+                                                 const char *session_boot_id) {
     if (local_session_key == 0U || canonical_session_id == 0U || util_string_empty(session_boot_id)) {
-        return;
+        return ESP_ERR_INVALID_ARG;
     }
 
     if (s_session_id != local_session_key || strcmp(s_session_boot_id, session_boot_id) != 0) {
@@ -887,11 +925,11 @@ void state_machine_apply_session_assignment(uint32_t local_session_key,
                  session_boot_id,
                  (unsigned long)s_session_id,
                  s_session_boot_id);
-        return;
+        return ESP_ERR_INVALID_STATE;
     }
 
     if (s_canonical_session_id == canonical_session_id) {
-        return;
+        return ESP_OK;
     }
 
     s_canonical_session_id = canonical_session_id;
@@ -901,6 +939,7 @@ void state_machine_apply_session_assignment(uint32_t local_session_key,
              (unsigned long)s_session_id,
              (unsigned long long)s_canonical_session_id,
              s_session_boot_id);
+    return ESP_OK;
 }
 
 /**
