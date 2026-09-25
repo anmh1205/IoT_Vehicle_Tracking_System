@@ -99,6 +99,9 @@ describe('device.repository access scope', () => {
     expect(sql).toContain('COALESCE(d.last_latitude, d.latitude) IS NOT NULL');
     expect(sql).toContain("raw_payload,data,device_battery");
     expect(sql).toContain("raw_payload,diagnostics,signals,rpm");
+    expect(sql).toContain("context->>'live_mutation'");
+    expect(sql).toContain('COALESCE(device_timestamp, server_timestamp) DESC');
+    expect(sql).toContain("el.context ? 'position_valid'");
     expect(params).toEqual([7]);
   });
 });

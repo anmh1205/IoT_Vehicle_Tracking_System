@@ -47,3 +47,19 @@ export const eventLogPositionExistsSql = (
 export const eventLogValidPositionSql = (alias?: string): string =>
   `(${eventLogPositionExistsSql('latitude', alias)}
     AND ${eventLogPositionExistsSql('longitude', alias)})`;
+
+
+/**
+ * Latest/live-state readers must ignore event rows that the bridge explicitly
+ * classified as historical-only. Legacy rows without the flag remain eligible.
+ */
+export const eventLogLiveMutationSql = (alias?: string): string => {
+  const context = column(alias, 'context');
+  return `COALESCE((${context}->>'live_mutation')::boolean, true)`;
+};
+
+/** Effective device occurrence time, falling back to server receive time. */
+export const eventLogTelemetryTimestampSql = (alias?: string): string => {
+  const prefix = alias ? `${alias}.` : '';
+  return `COALESCE(${prefix}device_timestamp, ${prefix}server_timestamp)`;
+};
