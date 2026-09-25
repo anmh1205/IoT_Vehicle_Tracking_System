@@ -1,5 +1,5 @@
 import type { QueryResultRow } from 'pg';
-import { executeQuery, findMany } from '@/infrastructure/database/queries';
+import { executeQuery, findMany, findOne } from '@/infrastructure/database/queries';
 
 export type NotificationType = 'alert' | 'system' | 'export' | 'firmware' | 'zone';
 
@@ -22,6 +22,16 @@ export interface NotificationFilters {
   search?: string;
   from?: string;
   to?: string;
+  isRead?: boolean;
+}
+
+export interface NotificationCounts {
+  total: number;
+  unreadCount: number;
+}
+
+export interface NotificationStats extends NotificationCounts {
+  byType: Record<NotificationType, number>;
 }
 
 const NOTIFICATION_LINK_JOINS = `LEFT JOIN devices d ON d.device_id = a.device_id
@@ -132,8 +142,14 @@ const buildFilterSql = (
   }
 
   if (filters.to) {
-    conditions.push(`a.created_at <= $${paramIndex}`);
+    conditions.push(`a.created_at <= ${paramIndex}`);
     values.push(filters.to);
+    paramIndex += 1;
+  }
+
+  if (filters.isRead !== undefined) {
+    conditions.push(`COALESCE(state.is_read, FALSE) = ${paramIndex}`);
+    values.push(filters.isRead);
   }
 
   return {
@@ -142,11 +158,16 @@ const buildFilterSql = (
   };
 };
 
-export const findNotificationRows = async (
+export const findNotificationPage = async (
   userId: number,
   filters: NotificationFilters,
+  limit: number,
+  offset: number,
 ): Promise<NotificationRow[]> => {
   const { whereClause, values } = buildFilterSql(filters);
+  const limitIndex = values.length + 2;
+  const offsetIndex = limitIndex + 1;
+
   return findMany<NotificationRow>(
     `SELECT
         a.id,
@@ -181,9 +202,93 @@ export const findNotificationRows = async (
      LEFT JOIN notification_states state
        ON state.user_id = $1 AND state.alert_id = a.id
      ${whereClause}
-     ORDER BY a.created_at DESC`,
+     ORDER BY a.created_at DESC
+     LIMIT $${limitIndex}
+     OFFSET $${offsetIndex}`,
+    [userId, ...values, limit, offset],
+  );
+};
+
+export const getNotificationCounts = async (
+  userId: number,
+  filters: NotificationFilters,
+): Promise<NotificationCounts> => {
+  const { whereClause, values } = buildFilterSql(filters);
+  const row = await findOne<{
+    total_count: number | string;
+    unread_count: number | string;
+  }>(
+    `SELECT
+        COUNT(*)::int AS total_count,
+        COUNT(*) FILTER (WHERE COALESCE(state.is_read, FALSE) = FALSE)::int AS unread_count
+     FROM alerts a
+     ${NOTIFICATION_LINK_JOINS}
+     LEFT JOIN notification_states state
+       ON state.user_id = $1 AND state.alert_id = a.id
+     ${whereClause}`,
     [userId, ...values],
   );
+
+  return {
+    total: Number(row?.total_count ?? 0),
+    unreadCount: Number(row?.unread_count ?? 0),
+  };
+};
+
+const NOTIFICATION_TYPE_SQL = `CASE
+  WHEN a.alert_type::text ILIKE '%zone%' OR a.alert_type::text ILIKE '%geofence%' THEN 'zone'
+  WHEN a.alert_type::text ILIKE '%firmware%' THEN 'firmware'
+  WHEN a.alert_type::text ILIKE '%export%' THEN 'export'
+  WHEN (
+    a.alert_type::text ILIKE '%system%'
+    OR a.alert_type::text ILIKE '%offline%'
+    OR a.alert_type::text ILIKE '%database%'
+    OR a.alert_type::text ILIKE '%service%'
+  ) THEN 'system'
+  ELSE 'alert'
+END`;
+
+export const getNotificationStats = async (userId: number): Promise<NotificationStats> => {
+  const row = await findOne<{
+    total_count: number | string;
+    unread_count: number | string;
+    alert_count: number | string;
+    system_count: number | string;
+    export_count: number | string;
+    firmware_count: number | string;
+    zone_count: number | string;
+  }>(
+    `SELECT
+        COUNT(*)::int AS total_count,
+        COUNT(*) FILTER (WHERE is_read = FALSE)::int AS unread_count,
+        COUNT(*) FILTER (WHERE notification_type = 'alert')::int AS alert_count,
+        COUNT(*) FILTER (WHERE notification_type = 'system')::int AS system_count,
+        COUNT(*) FILTER (WHERE notification_type = 'export')::int AS export_count,
+        COUNT(*) FILTER (WHERE notification_type = 'firmware')::int AS firmware_count,
+        COUNT(*) FILTER (WHERE notification_type = 'zone')::int AS zone_count
+     FROM (
+       SELECT
+         ${NOTIFICATION_TYPE_SQL} AS notification_type,
+         COALESCE(state.is_read, FALSE) AS is_read
+       FROM alerts a
+       LEFT JOIN notification_states state
+         ON state.user_id = $1 AND state.alert_id = a.id
+       WHERE state.hidden_at IS NULL
+     ) classified`,
+    [userId],
+  );
+
+  return {
+    total: Number(row?.total_count ?? 0),
+    unreadCount: Number(row?.unread_count ?? 0),
+    byType: {
+      alert: Number(row?.alert_count ?? 0),
+      system: Number(row?.system_count ?? 0),
+      export: Number(row?.export_count ?? 0),
+      firmware: Number(row?.firmware_count ?? 0),
+      zone: Number(row?.zone_count ?? 0),
+    },
+  };
 };
 
 export const markNotificationRead = async (userId: number, alertId: number): Promise<void> => {
