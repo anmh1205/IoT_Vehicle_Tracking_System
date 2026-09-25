@@ -1,5 +1,7 @@
 #include "state_machine_core.h"
 
+#include <inttypes.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "freertos/FreeRTOS.h"
@@ -103,9 +105,71 @@ static uint64_t s_last_health_snapshot_log_ms = 0;
  * @param[in] topic MQTT topic string (unused because only the command topic is wired here).
  * @param[in] payload Raw command JSON payload.
  */
+static const char *state_machine_command_ack_response(esp_err_t result) {
+    switch (result) {
+        case ESP_OK:
+            return "accepted";
+        case ESP_ERR_INVALID_ARG:
+            return "invalid_command";
+        case ESP_ERR_NOT_SUPPORTED:
+            return "unsupported_command";
+        case ESP_ERR_NO_MEM:
+            return "command_queue_full";
+        case ESP_ERR_TIMEOUT:
+            return "command_state_busy";
+        default:
+            return "command_rejected";
+    }
+}
+
 static void state_machine_command_callback(const char *topic, const char *payload) {
     (void)topic;
-    command_handler_process(payload);
+
+    uint64_t command_id = 0U;
+    esp_err_t process_result = command_handler_process(payload, &command_id);
+    if (command_id == 0U) {
+        /*
+         * Legacy/local commands can still execute, but without a cloud-issued
+         * correlation ID the backend has no command row that can be updated.
+         */
+        ESP_LOGW(TAG,
+                 "event=command_ack_skipped reason=missing_command_id process_err=%s",
+                 esp_err_to_name(process_result));
+        return;
+    }
+
+    const char *status = process_result == ESP_OK ? "acknowledged" : "failed";
+    const char *response = state_machine_command_ack_response(process_result);
+    char ack_payload[192] = {0};
+    int written = snprintf(ack_payload,
+                           sizeof(ack_payload),
+                           "{\"command_id\":\"%" PRIu64
+                           "\",\"status\":\"%s\",\"response\":\"%s\"}",
+                           command_id,
+                           status,
+                           response);
+    if (written <= 0 || (size_t)written >= sizeof(ack_payload)) {
+        ESP_LOGW(TAG,
+                 "event=command_ack_encode_failed command_id=%" PRIu64,
+                 command_id);
+        return;
+    }
+
+    esp_err_t ack_err = tracker_mqtt_publish_command_ack(ack_payload);
+    if (ack_err != ESP_OK) {
+        ESP_LOGW(TAG,
+                 "event=command_ack_publish_failed command_id=%" PRIu64
+                 " status=%s err=%s",
+                 command_id,
+                 status,
+                 esp_err_to_name(ack_err));
+        return;
+    }
+
+    ESP_LOGI(TAG,
+             "event=command_ack_published command_id=%" PRIu64 " status=%s",
+             command_id,
+             status);
 }
 
 /**
