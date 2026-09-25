@@ -38,10 +38,11 @@ describe('trip-waypoints.service', () => {
   describe('computeRouteSummary', () => {
     it('should calculate correct distance, duration, max and avg speed', () => {
       // Two points: HCMC area roughly 1km apart
+      const startTs = Date.parse('2026-01-15T08:00:00.000Z') / 1000;
       const waypoints: TripWaypoint[] = [
-        makeWaypoint({ lat: 10.7769, lon: 106.7009, speed: 40 }),
-        makeWaypoint({ lat: 10.7860, lon: 106.7009, speed: 60 }),
-        makeWaypoint({ lat: 10.7950, lon: 106.7009, speed: 50 }),
+        makeWaypoint({ ts: startTs, lat: 10.7769, lon: 106.7009, speed: 40 }),
+        makeWaypoint({ ts: startTs + 60, lat: 10.7860, lon: 106.7009, speed: 60 }),
+        makeWaypoint({ ts: startTs + 120, lat: 10.7950, lon: 106.7009, speed: 50 }),
       ];
       const start = new Date('2026-01-15T08:00:00.000Z');
       const end = new Date('2026-01-15T08:30:00.000Z');
@@ -100,24 +101,61 @@ describe('trip-waypoints.service', () => {
 
     it('haversine accuracy: HCMC to Hanoi ~1147-1170 km', () => {
       // HCMC: 10.8231, 106.6297 — Hanoi: 21.0245, 105.8412
+      const startTs = Date.parse('2026-01-15T08:00:00.000Z') / 1000;
       const waypoints: TripWaypoint[] = [
-        makeWaypoint({ lat: 10.8231, lon: 106.6297, speed: null }),
-        makeWaypoint({ lat: 21.0245, lon: 105.8412, speed: null }),
+        makeWaypoint({ ts: startTs, lat: 10.8231, lon: 106.6297, speed: null }),
+        makeWaypoint({ ts: startTs + 10 * 3600, lat: 21.0245, lon: 105.8412, speed: null }),
       ];
       const start = new Date('2026-01-15T08:00:00.000Z');
-      const end = new Date('2026-01-15T09:00:00.000Z');
+      const end = new Date('2026-01-15T18:00:00.000Z');
 
       const result = computeRouteSummary(waypoints, start, end);
 
-      // Haversine HCMC→Hanoi is approximately 1147-1170 km
+      // Haversine HCMC→Hanoi is approximately 1147-1170 km and ~115 km/h over 10h
       expect(result.distanceKm).toBeGreaterThan(1100);
       expect(result.distanceKm).toBeLessThan(1200);
     });
 
-    it('should round distanceKm to 2 decimal places', () => {
+    it('should ignore an isolated GPS ghost jump when calculating distance', () => {
+      const startTs = Date.parse('2026-01-15T08:00:00.000Z') / 1000;
       const waypoints: TripWaypoint[] = [
-        makeWaypoint({ lat: 10.7769, lon: 106.7009, speed: 50 }),
-        makeWaypoint({ lat: 10.7772, lon: 106.7012, speed: 50 }),
+        makeWaypoint({ ts: startTs, lat: 10.7769, lon: 106.7009, speed: 40 }),
+        // Valid coordinate range, but physically impossible from the previous point in 15 seconds.
+        makeWaypoint({ ts: startTs + 15, lat: 21.0245, lon: 105.8412, speed: 40 }),
+        makeWaypoint({ ts: startTs + 30, lat: 10.7772, lon: 106.7012, speed: 42 }),
+      ];
+      const start = new Date('2026-01-15T08:00:00.000Z');
+      const end = new Date('2026-01-15T08:00:30.000Z');
+
+      const result = computeRouteSummary(waypoints, start, end);
+
+      expect(result.distanceKm).toBeLessThan(0.1);
+      expect(result.startLat).toBe(10.7769);
+      expect(result.endLat).toBe(10.7772);
+      expect(result.maxSpeed).toBe(42);
+    });
+
+    it('should ignore impossible reported speed samples in max and average speed', () => {
+      const startTs = Date.parse('2026-01-15T08:00:00.000Z') / 1000;
+      const waypoints: TripWaypoint[] = [
+        makeWaypoint({ ts: startTs, speed: 40 }),
+        makeWaypoint({ ts: startTs + 15, lat: 10.7770, lon: 106.7010, speed: 5000 }),
+        makeWaypoint({ ts: startTs + 30, lat: 10.7771, lon: 106.7011, speed: 60 }),
+      ];
+      const start = new Date('2026-01-15T08:00:00.000Z');
+      const end = new Date('2026-01-15T08:00:30.000Z');
+
+      const result = computeRouteSummary(waypoints, start, end);
+
+      expect(result.maxSpeed).toBe(60);
+      expect(result.avgSpeed).toBe(50);
+    });
+
+    it('should round distanceKm to 2 decimal places', () => {
+      const startTs = Date.parse('2026-01-15T08:00:00.000Z') / 1000;
+      const waypoints: TripWaypoint[] = [
+        makeWaypoint({ ts: startTs, lat: 10.7769, lon: 106.7009, speed: 50 }),
+        makeWaypoint({ ts: startTs + 15, lat: 10.7772, lon: 106.7012, speed: 50 }),
       ];
       const start = new Date('2026-01-15T08:00:00.000Z');
       const end = new Date('2026-01-15T08:05:00.000Z');
