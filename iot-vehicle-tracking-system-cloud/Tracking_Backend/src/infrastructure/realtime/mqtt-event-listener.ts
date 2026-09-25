@@ -375,6 +375,8 @@ const persistRawDataEventLog = async (
 };
 
 let client: mqtt.MqttClient | null = null;
+const pendingMessageWork = new WeakMap<object, Promise<void>>();
+
 
 export const initMqttEventListener = (): void => {
   const protocol = mqttConfig.useTls ? 'mqtts' : 'mqtt';
@@ -390,6 +392,25 @@ export const initMqttEventListener = (): void => {
     rejectUnauthorized: mqttConfig.rejectUnauthorized,
   });
 
+  /*
+   * MQTT.js emits 'message' before calling handleMessage(), and sends QoS1
+   * PUBACK only after handleMessage's callback. Wait for the per-packet
+   * application work registered below so broker acknowledgement follows the
+   * durable Backend side effect rather than mere socket delivery.
+   */
+  client.handleMessage = (packet, callback) => {
+    const work = pendingMessageWork.get(packet as object);
+    if (!work) {
+      callback();
+      return;
+    }
+
+    void work.then(
+      () => callback(),
+      (error) => callback(error instanceof Error ? error : new Error(String(error))),
+    );
+  };
+
   client.on('connect', () => {
     log.info(`Connected to EMQX at ${brokerUrl} for internal events`);
     client!.subscribe('internal/events/#', { qos: 1 }, (err) => {
@@ -401,7 +422,8 @@ export const initMqttEventListener = (): void => {
     });
   });
 
-  client.on('message', (topic: string, payload: Buffer) => {
+  client.on('message', (topic: string, payload: Buffer, packet) => {
+    const criticalTasks: Promise<void>[] = [];
     let data: InternalEnvelope;
     try {
       data = JSON.parse(payload.toString()) as InternalEnvelope;
@@ -415,12 +437,15 @@ export const initMqttEventListener = (): void => {
 
     switch (data.event_type) {
       case 'status':
-        void reconcileAcceptedCommandsForRuntimeBoot(envelopePayload).catch((error) => {
-          log.error('Failed to reconcile accepted commands on status boot observation', {
-            error,
-            deviceId: envelopePayload.device_id,
-          });
-        });
+        criticalTasks.push(
+          reconcileAcceptedCommandsForRuntimeBoot(envelopePayload).catch((error) => {
+            log.error('Failed to reconcile accepted commands on status boot observation', {
+              error,
+              deviceId: envelopePayload.device_id,
+            });
+            throw error;
+          }),
+        );
         publishEvent('device:status', {
           deviceId: String(envelopePayload.device_id ?? ''),
           status: String(envelopePayload.current_status ?? 'unknown'),
@@ -589,12 +614,14 @@ export const initMqttEventListener = (): void => {
         if (action === 'started') {
           const boundaryTimestamp =
             envelopePayload.timestamp == null ? data.timestamp : String(envelopePayload.timestamp);
-          void handleSessionBoundaryEvent({
-            device_id: String(envelopePayload.device_id ?? ''),
-            session_id: sessionId,
-            action: 'started',
-            occurred_at: boundaryTimestamp,
-          });
+          criticalTasks.push(
+            handleSessionBoundaryEvent({
+              device_id: String(envelopePayload.device_id ?? ''),
+              session_id: sessionId,
+              action: 'started',
+              occurred_at: boundaryTimestamp,
+            }),
+          );
           publishEvent('device:session_start', {
             deviceId: String(envelopePayload.device_id ?? ''),
             sessionId,
@@ -613,12 +640,14 @@ export const initMqttEventListener = (): void => {
         } else if (action === 'ended' || action === 'discarded') {
           const boundaryTimestamp =
             envelopePayload.timestamp == null ? data.timestamp : String(envelopePayload.timestamp);
-          void handleSessionBoundaryEvent({
-            device_id: String(envelopePayload.device_id ?? ''),
-            session_id: sessionId,
-            action,
-            occurred_at: boundaryTimestamp,
-          });
+          criticalTasks.push(
+            handleSessionBoundaryEvent({
+              device_id: String(envelopePayload.device_id ?? ''),
+              session_id: sessionId,
+              action,
+              occurred_at: boundaryTimestamp,
+            }),
+          );
           const realtimeEvent =
             action === 'discarded' ? 'device:session_discarded' : 'device:session_end';
           publishEvent(realtimeEvent, {
@@ -695,40 +724,43 @@ export const initMqttEventListener = (): void => {
           };
 
           if (normalizedAlertType) {
-            void alertCrudService.createAlert({
-              vehicleId:
-                envelopePayload.vehicle_id == null
-                  ? undefined
-                  : String(envelopePayload.vehicle_id),
-              deviceId:
-                envelopePayload.device_id == null
-                  ? undefined
-                  : String(envelopePayload.device_id),
-              geofenceId,
-              alertType: normalizedAlertType,
-              source,
-              severity,
-              title,
-              message: message || undefined,
-              latitude,
-              longitude,
-              speed,
-              thresholdValue,
-              actualValue,
-              sourceMessageId: metadata?.message_id,
-            }).catch((error) => {
-              log.error(
-                'Failed to persist internal alert; fallback to realtime-only event',
-                {
-                  error,
-                  rawAlertType,
-                  normalizedAlertType,
-                  deviceId: envelopePayload.device_id,
-                },
-              );
-              publishEvent('alert:new', realtimePayload);
-              publishStatsUpdate('alert:new', envelopePayload, data.timestamp);
-            });
+            criticalTasks.push(
+              alertCrudService.createAlert({
+                vehicleId:
+                  envelopePayload.vehicle_id == null
+                    ? undefined
+                    : String(envelopePayload.vehicle_id),
+                deviceId:
+                  envelopePayload.device_id == null
+                    ? undefined
+                    : String(envelopePayload.device_id),
+                geofenceId,
+                alertType: normalizedAlertType,
+                source,
+                severity,
+                title,
+                message: message || undefined,
+                latitude,
+                longitude,
+                speed,
+                thresholdValue,
+                actualValue,
+                sourceMessageId: metadata?.message_id,
+              }).then(() => undefined).catch((error) => {
+                log.error(
+                  'Failed to persist internal alert; keeping MQTT delivery unacknowledged for retry',
+                  {
+                    error,
+                    rawAlertType,
+                    normalizedAlertType,
+                    deviceId: envelopePayload.device_id,
+                  },
+                );
+                publishEvent('alert:new', realtimePayload);
+                publishStatsUpdate('alert:new', envelopePayload, data.timestamp);
+                throw error;
+              }),
+            );
           } else {
             publishEvent('alert:new', realtimePayload);
             publishStatsUpdate('alert:new', envelopePayload, data.timestamp);
@@ -796,14 +828,24 @@ export const initMqttEventListener = (): void => {
       }
 
       case 'command':
-        void processCommandAck(envelopePayload, data.timestamp).catch((error) => {
-          log.error('Failed to process command ack event', { error, payload: envelopePayload });
-        });
+        criticalTasks.push(
+          processCommandAck(envelopePayload, data.timestamp).catch((error) => {
+            log.error('Failed to process command ack event', { error, payload: envelopePayload });
+            throw error;
+          }),
+        );
         break;
 
       default:
         log.debug(`Unknown internal event type: ${data.event_type} on ${topic}`);
     }
+
+    const packetWork = Promise.all(criticalTasks).then(() => undefined);
+    pendingMessageWork.set(packet as object, packetWork);
+    void packetWork.then(
+      () => pendingMessageWork.delete(packet as object),
+      () => pendingMessageWork.delete(packet as object),
+    );
   });
 
   client.on('error', (err) => {
