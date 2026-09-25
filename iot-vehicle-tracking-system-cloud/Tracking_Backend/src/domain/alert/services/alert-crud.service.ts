@@ -61,10 +61,17 @@ export const getAlertById = async (id: number): Promise<AlertPublic> => {
 };
 
 export const createAlert = async (input: CreateAlertInput): Promise<AlertPublic> => {
-  const alert = await alertRepo.create(input);
-  logger.info(`Alert "${input.title}" created with severity "${input.severity}"`);
-
+  const { alert, created } = await alertRepo.create(input);
   const result = sanitizeAlert(alert);
+
+  if (!created) {
+    logger.debug(
+      `Duplicate alert source message "${input.sourceMessageId ?? ''}" ignored; existing alert ${alert.id} reused`,
+    );
+    return result;
+  }
+
+  logger.info(`Alert "${input.title}" created with severity "${input.severity}"`);
 
   publishEvent('alert:new', {
     id: alert.id,
