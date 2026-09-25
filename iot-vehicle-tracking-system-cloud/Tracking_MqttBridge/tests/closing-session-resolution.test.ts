@@ -296,6 +296,53 @@ test('touchDeviceSession ignores a duplicate message without mutating aggregates
   assert.equal(statements.at(-1), 'COMMIT');
 });
 
+test('touchDeviceSession does not hide non-schema database failures behind legacy fallback', async (t) => {
+  const originalConnect = writablePool.connect;
+  const statements: string[] = [];
+
+  writablePool.connect = async () => ({
+    query: async (sql) => {
+      statements.push(sql);
+      if (/INSERT INTO device_session_telemetry_receipts/.test(sql)) {
+        return { rows: [{ '?column?': 1 }], rowCount: 1 };
+      }
+      if (/UPDATE device_sessions/.test(sql)) {
+        const err = new Error('serialization failure') as Error & { code?: string };
+        err.code = '40001';
+        throw err;
+      }
+      return { rows: [], rowCount: 0 };
+    },
+    release: () => undefined,
+  });
+
+  t.after(() => {
+    writablePool.connect = originalConnect;
+  });
+
+  await assert.rejects(
+    touchDeviceSession({
+      deviceId: 'TRACKER_001',
+      sessionId: 123,
+      messageId: 'boot-1-43',
+      deviceTimestampMs: Date.parse('2026-05-10T10:00:00.000Z'),
+      serverTimestampMs: Date.parse('2026-05-10T10:00:01.000Z'),
+      updateDeviceState: false,
+    }),
+    /serialization failure/,
+  );
+
+  assert.equal(
+    statements.filter((sql) => /UPDATE device_sessions/.test(sql)).length,
+    1,
+  );
+  assert.equal(
+    statements.some((sql) => sql === 'ROLLBACK TO SAVEPOINT session_aggregate_schema'),
+    false,
+  );
+  assert.equal(statements.at(-1), 'ROLLBACK');
+});
+
 test('ensureDeviceSession returns sessions atomically retired by a replacement identity', async (t) => {
   const originalConnect = writablePool.connect;
   const statements: string[] = [];

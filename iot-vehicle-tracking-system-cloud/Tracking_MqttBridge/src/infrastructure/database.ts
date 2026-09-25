@@ -879,7 +879,15 @@ export const touchDeviceSession = async (params: {
         params.deviceId,
       ],
     );
-    } catch {
+    } catch (aggregateErr) {
+      const pgCode =
+        typeof aggregateErr === 'object' && aggregateErr !== null && 'code' in aggregateErr
+          ? String((aggregateErr as { code?: unknown }).code ?? '')
+          : '';
+      if (pgCode !== '42703') {
+        throw aggregateErr;
+      }
+
       await client.query('ROLLBACK TO SAVEPOINT session_aggregate_schema');
       touched = await client.query(
         `UPDATE device_sessions
