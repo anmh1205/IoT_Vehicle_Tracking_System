@@ -21,23 +21,35 @@ test('firmware update resets seq watermark when a new boot is accepted', () => {
 });
 
 test('firmware lifecycle decision is serialized and committed before realtime publish', () => {
-  const begin = source.indexOf("await client.query('BEGIN')");
-  const deviceLock = source.indexOf("SELECT device_id FROM devices WHERE device_id = $1 FOR UPDATE");
-  const deploymentLock = source.indexOf("LIMIT 1\\n       FOR UPDATE");
-  const commit = source.indexOf("await client.query('COMMIT')", deploymentLock);
-  const realtime = source.indexOf("publishInternalEvent('firmware'");
+  const transactionStart = source.indexOf('let updateDecision: UpdateDecision');
+  const realtime = source.indexOf("publishInternalEvent('firmware'", transactionStart);
+  const transaction = source.slice(transactionStart, realtime);
 
-  assert.ok(begin >= 0);
-  assert.ok(deviceLock > begin);
-  assert.ok(deploymentLock > deviceLock);
-  assert.ok(commit > deploymentLock);
-  assert.ok(realtime > commit);
-  assert.match(source, /finally \{\s*client\.release\(\);\s*\}/);
+  assert.ok(transactionStart >= 0);
+  assert.match(transaction, /await client\.query\('BEGIN'\)/);
+  assert.match(
+    transaction,
+    /SELECT device_id FROM devices WHERE device_id = \$1 FOR UPDATE/,
+  );
+  assert.match(
+    transaction,
+    /FROM firmware_update_log[\s\S]*LIMIT 1\s+FOR UPDATE/,
+  );
+  assert.match(transaction, /await client\.query\('COMMIT'\)/);
+  assert.match(transaction, /await client\.query\('ROLLBACK'\)/);
+  assert.match(transaction, /finally \{\s*client\.release\(\);\s*\}/);
+  assert.ok(realtime > transactionStart);
 });
 
 test('successful OTA inventory update shares the lifecycle transaction', () => {
-  const successBranch = source.indexOf("if (payload.status === 'success')");
-  const commit = source.indexOf("await client.query('COMMIT')", successBranch);
+  const transactionStart = source.indexOf('let updateDecision: UpdateDecision');
+  const realtime = source.indexOf("publishInternalEvent('firmware'", transactionStart);
+  const transaction = source.slice(transactionStart, realtime);
+  const successBranch = transaction.indexOf("if (payload.status === 'success')");
+  const inventoryUpdate = transaction.indexOf('SET firmware_version = $2', successBranch);
+  const finalCommit = transaction.lastIndexOf("await client.query('COMMIT')");
+
   assert.ok(successBranch >= 0);
-  assert.ok(source.indexOf('SET firmware_version = $2', successBranch) < commit);
+  assert.ok(inventoryUpdate > successBranch);
+  assert.ok(finalCommit > inventoryUpdate);
 });
