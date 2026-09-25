@@ -42,7 +42,7 @@
  *    - `update_config`: staged as a config delta, validated again on the FSM task
  *    - `ota_update` / `ota_rollback`: staged as OTA command payload
  *    - `assign_session`: staged as canonical cloud session mapping
- *    - `request_location`, `enable_tracking`, `reboot`: reduced to small runtime flags/actions
+ *    - `request_location`, `enable_tracking`, `reboot`: staged as small FSM actions
  */
 
 
@@ -117,6 +117,8 @@ typedef struct {
     command_config_update_t config_update;
     /** Session assignment payload matched to the current firmware session. */
     command_session_assignment_t session_assignment;
+    /** Parsed tracking-enable value applied only from the FSM task. */
+    bool tracking_enabled;
 } command_action_item_t;
 
 /* Payload associated with the action most recently popped from s_action_queue. */
@@ -126,6 +128,8 @@ static command_config_update_t s_consumed_config_update = {0};
 static bool s_consumed_config_update_valid = false;
 static command_session_assignment_t s_consumed_session_assignment = {0};
 static bool s_consumed_session_assignment_valid = false;
+static bool s_consumed_tracking_enabled = true;
+static bool s_consumed_tracking_enabled_valid = false;
 
 /**
  * @brief Clear every staged payload associated with the last consumed action.
@@ -138,6 +142,8 @@ static void command_handler_reset_consumed_payloads(void) {
     s_consumed_ota_command_valid = false;
     s_consumed_config_update_valid = false;
     s_consumed_session_assignment_valid = false;
+    s_consumed_tracking_enabled_valid = false;
+    s_consumed_tracking_enabled = true;
     memset(&s_consumed_ota_command, 0, sizeof(s_consumed_ota_command));
     memset(&s_consumed_config_update, 0, sizeof(s_consumed_config_update));
     memset(&s_consumed_session_assignment, 0, sizeof(s_consumed_session_assignment));
@@ -598,6 +604,8 @@ static const char *command_action_label(command_action_t action) {
     switch (action) {
         case COMMAND_ACTION_APPLY_CONFIG:
             return "apply_config";
+        case COMMAND_ACTION_ENABLE_TRACKING:
+            return "enable_tracking";
         case COMMAND_ACTION_REBOOT:
             return "reboot";
         case COMMAND_ACTION_OTA_UPDATE:
@@ -639,6 +647,12 @@ static void command_handler_stage_consumed_action_payloads(const command_action_
     if (item->action == COMMAND_ACTION_ASSIGN_SESSION) {
         s_consumed_session_assignment = item->session_assignment;
         s_consumed_session_assignment_valid = true;
+        return;
+    }
+
+    if (item->action == COMMAND_ACTION_ENABLE_TRACKING) {
+        s_consumed_tracking_enabled = item->tracking_enabled;
+        s_consumed_tracking_enabled_valid = true;
     }
 }
 
@@ -935,17 +949,21 @@ esp_err_t command_handler_process(const char *command_json,
             *out_deferred = true;
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_ENABLE_TRACKING) == 0) {
-        // Tracking enable is a small runtime flag, so it can be updated under lock without staging a full queue item.
+        // Preserve observability: parse now, apply only from the FSM after the acceptance ACK drains.
         const cJSON *enabled = cJSON_GetObjectItemCaseSensitive(params, "enabled");
         if (!cJSON_IsBool(enabled)) {
             ESP_LOGW(TAG, "event=enable_tracking_rejected reason=enabled_not_boolean");
             result = ESP_ERR_INVALID_ARG;
-        } else if (!command_handler_take_lock_for(COMMAND_NAME_ENABLE_TRACKING)) {
-            result = ESP_ERR_TIMEOUT;
         } else {
-            s_tracking_enabled = cJSON_IsTrue(enabled);
-            command_handler_give_lock();
-            result = ESP_OK;
+            command_action_item_t item = {
+                .command_id = parsed_command_id,
+                .action = COMMAND_ACTION_ENABLE_TRACKING,
+                .tracking_enabled = cJSON_IsTrue(enabled),
+            };
+            result = command_handler_enqueue_action(&item);
+            if (result == ESP_OK && out_deferred != NULL) {
+                *out_deferred = true;
+            }
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_REBOOT) == 0) {
         // Reboot is intentionally deferred into the FSM thread so shutdown side effects stay single-writer.
@@ -1110,6 +1128,31 @@ esp_err_t command_handler_apply_pending_config(void) {
 
     *runtime_config = next_config;
     ESP_LOGI(TAG, "event=update_config_applied");
+    return ESP_OK;
+}
+
+/**
+ * @brief Apply a consumed tracking-enable action from the FSM task.
+ */
+esp_err_t command_handler_apply_pending_tracking_enabled(void) {
+    if (!command_handler_take_lock()) {
+        ESP_LOGW(TAG, "event=enable_tracking_apply_skipped reason=lock_busy");
+        return ESP_ERR_TIMEOUT;
+    }
+
+    if (!s_consumed_tracking_enabled_valid) {
+        command_handler_give_lock();
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    const bool enabled = s_consumed_tracking_enabled;
+    s_tracking_enabled = enabled;
+    s_consumed_tracking_enabled_valid = false;
+    command_handler_give_lock();
+
+    ESP_LOGI(TAG,
+             "event=enable_tracking_applied enabled=%d",
+             enabled ? 1 : 0);
     return ESP_OK;
 }
 

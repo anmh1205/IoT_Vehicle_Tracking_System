@@ -170,6 +170,8 @@ void state_machine_handle_pending_action(void) {
         execution_result = command_handler_apply_pending_config();
     } else if (action == COMMAND_ACTION_REQUEST_LOCATION) {
         execution_result = state_machine_publish_rawdata() ? ESP_OK : ESP_FAIL;
+    } else if (action == COMMAND_ACTION_ENABLE_TRACKING) {
+        execution_result = command_handler_apply_pending_tracking_enabled();
     } else if (action == COMMAND_ACTION_REBOOT) {
         restart_required = true;
     } else if (action == COMMAND_ACTION_ASSIGN_SESSION) {

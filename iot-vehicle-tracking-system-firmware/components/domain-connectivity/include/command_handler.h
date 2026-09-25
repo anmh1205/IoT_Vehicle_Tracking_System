@@ -28,6 +28,8 @@ typedef enum {
     COMMAND_ACTION_APPLY_CONFIG,
     /** Publish one immediate location/rawdata snapshot. */
     COMMAND_ACTION_REQUEST_LOCATION,
+    /** Apply a queued tracking-enable flag on the FSM task. */
+    COMMAND_ACTION_ENABLE_TRACKING,
     /** Reboot command requested by cloud. */
     COMMAND_ACTION_REBOOT,
     /** OTA update command accepted and queued. */
@@ -101,6 +103,15 @@ command_action_t command_handler_consume_action(uint64_t *out_command_id);
  * @return Another ESP-IDF error code when validation or persistence fails.
  */
 esp_err_t command_handler_apply_pending_config(void);
+
+/**
+ * @brief Apply the queued `enable_tracking` value consumed as current action.
+ *
+ * @return ESP_OK when the staged flag was applied.
+ * @return ESP_ERR_INVALID_STATE when no consumed tracking flag is waiting.
+ * @return ESP_ERR_TIMEOUT when command state cannot be acquired in time.
+ */
+esp_err_t command_handler_apply_pending_tracking_enabled(void);
 
 /**
  * @brief Consume pending OTA command payload.
