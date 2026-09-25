@@ -127,14 +127,30 @@ const processCommandAck = async (
       ? null
       : String(payload.response ?? payload.error);
 
-  if (commandId) {
-    await deviceCommandRepo.updateCommandStatus(commandId, status, response, {
-      markAcknowledged: true,
+  const deviceId = String(payload.device_id ?? '').trim();
+  if (!commandId || !deviceId) {
+    log.warn('Ignoring command ACK without a complete correlation key', {
+      commandId,
+      deviceId,
     });
+    return;
+  }
+
+  const updated = await deviceCommandRepo.updateCommandStatus(commandId, status, response, {
+    markAcknowledged: true,
+    expectedDeviceId: deviceId,
+  });
+  if (!updated) {
+    log.warn('Ignoring unmatched command ACK', {
+      commandId,
+      deviceId,
+      status,
+    });
+    return;
   }
 
   publishEvent('command:ack', {
-    device_id: String(payload.device_id ?? ''),
+    device_id: deviceId,
     command_id: String(commandId ?? payload.command_id ?? payload.commandId ?? ''),
     status,
     response,
