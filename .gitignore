@@ -79,3 +79,33 @@ resources/reports/db-sync/**/*.sql
 iot-vehicle-tracking-system-firmware/sdkconfig
 iot-vehicle-tracking-system-firmware/sdkconfig.old
 
+
+# P1-P4 temp (regenerable intermediates — never commit)
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage*
+**/coverage/
+.venv/
+.vite/
+*.log
+*.tmp
+*.bak
+/output/
+**/.playwright-cli/
+repomix-output.xml
+repomix-output*/
+# LaTeX intermediates
+*.aux
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.xdv
+*.dvi
+*.synctex.gz
+~WRL*.tmp
+~$*
+# Firmware IDE-local
+iot-vehicle-tracking-system-firmware/.vscode/
