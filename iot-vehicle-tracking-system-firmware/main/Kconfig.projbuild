@@ -2,11 +2,11 @@ menu "Tracker Firmware"
 
 config TRACKER_DEFAULT_DEVICE_ID
     string "Default device ID"
-    default "TRACKER_001"
+    default ""
 
 config TRACKER_DEFAULT_AUTH_TOKEN
     string "Default auth token"
-    default "provisioning-required"
+    default ""
 
 config TRACKER_DEFAULT_MQTT_HOST
     string "Default MQTT host"
