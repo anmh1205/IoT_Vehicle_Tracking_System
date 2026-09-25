@@ -423,15 +423,28 @@ void state_machine_publish_event(const char *event_type, int code, const char *m
  *
  * @param[in] firmware Firmware status payload to publish.
  */
-void state_machine_publish_firmware_payload(const firmware_status_t *firmware) {
+bool state_machine_publish_firmware_payload(const firmware_status_t *firmware) {
+    if (firmware == NULL) {
+        return false;
+    }
+
     // Publish a fully prepared firmware payload through the common pipeline without rebuilding scalar fields again.
-    (void)state_publish_via_pipeline("firmware",
-                                     OFFLINE_RECORD_FIRMWARE,
-                                     firmware,
-                                     state_publish_format_firmware,
-                                     tracker_mqtt_publish_firmware,
-                                     false,
-                                     false);
+    bool accepted = state_publish_via_pipeline("firmware",
+                                               OFFLINE_RECORD_FIRMWARE,
+                                               firmware,
+                                               state_publish_format_firmware,
+                                               tracker_mqtt_publish_firmware,
+                                               false,
+                                               false);
+    if (!accepted) {
+        /*
+         * Neither live MQTT nor durable SD fallback accepted the report.
+         * Preserve the latest OTA state in RAM so a later connected loop can
+         * retry instead of silently losing a terminal deployment outcome.
+         */
+        state_machine_defer_firmware_report(firmware);
+    }
+    return accepted;
 }
 
 /**
@@ -444,7 +457,7 @@ void state_machine_publish_firmware_payload(const firmware_status_t *firmware) {
  * @param[in] partition OTA/running partition label.
  * @param[in] error Optional firmware error code/string.
  */
-void state_machine_publish_firmware_status(const char *status,
+bool state_machine_publish_firmware_status(const char *status,
                                            uint8_t progress,
                                            const char *version,
                                            const char *job_id,
@@ -453,7 +466,7 @@ void state_machine_publish_firmware_status(const char *status,
     // Publish firmware status through the shared pipeline so OTA progress uses the same metadata and retry rules.
     firmware_status_t firmware = {0};
     state_machine_fill_firmware_status(&firmware, status, progress, version, job_id, partition, error);
-    state_machine_publish_firmware_payload(&firmware);
+    return state_machine_publish_firmware_payload(&firmware);
 }
 
 /**
@@ -499,7 +512,11 @@ void state_machine_publish_or_stage_firmware_status(const char *status,
                                                     const char *error) {
     // Publish firmware status immediately when possible, or stage it for the next connected window when MQTT is still down.
     if (tracker_mqtt_is_connected()) {
-        state_machine_publish_firmware_status(status, progress, version, job_id, partition, error);
+        /*
+         * The publish wrapper re-stages the report when both MQTT and durable
+         * offline fallback fail, so connected-state races cannot lose it.
+         */
+        (void)state_machine_publish_firmware_status(status, progress, version, job_id, partition, error);
         return;
     }
 
@@ -519,6 +536,7 @@ void state_machine_try_flush_deferred_firmware_report(void) {
         return;
     }
 
-    state_machine_publish_firmware_payload(&s_deferred_firmware_report);
-    s_deferred_firmware_report_pending = false;
+    if (state_machine_publish_firmware_payload(&s_deferred_firmware_report)) {
+        s_deferred_firmware_report_pending = false;
+    }
 }
