@@ -70,7 +70,8 @@ typedef struct {
     bool active;                              /**< True when a session was in progress at persist time. */
     uint32_t local_session_key;              /**< Device-local handle for the in-progress session. */
     uint64_t canonical_session_id;           /**< Backend-assigned canonical session identifier. */
-    char boot_id[TRACKER_SESSION_BOOT_ID_LEN]; /**< Unique per-boot tag distinguishing reboots. */
+    char boot_id[TRACKER_SESSION_BOOT_ID_LEN]; /**< Boot ID that owns the logical session identity. */
+    bool start_boundary_pending;              /**< True until running/started is durably accepted. */
 } session_persist_context_t;
 
 /**
