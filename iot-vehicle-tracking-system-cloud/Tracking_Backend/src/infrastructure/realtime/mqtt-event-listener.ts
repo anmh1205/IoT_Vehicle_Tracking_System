@@ -716,6 +716,7 @@ export const initMqttEventListener = (): void => {
               speed,
               thresholdValue,
               actualValue,
+              sourceMessageId: metadata?.message_id,
             }).catch((error) => {
               log.error(
                 'Failed to persist internal alert; fallback to realtime-only event',
