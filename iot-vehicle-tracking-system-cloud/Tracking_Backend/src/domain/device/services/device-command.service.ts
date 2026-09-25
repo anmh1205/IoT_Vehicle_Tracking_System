@@ -9,6 +9,75 @@ import { createConflictError } from '@/shared/utils/errors.util';
 const logger = createLogger('device-command-service');
 
 let mqttClient: mqtt.MqttClient | null = null;
+let recoveryTimer: NodeJS.Timeout | null = null;
+let recoveryCutoff: Date | null = null;
+let recoveryPromise: Promise<void> | null = null;
+
+const RECOVERY_INTERVAL_MS = 30_000;
+const RECOVERY_BATCH_LIMIT = 100;
+
+const publishCommandRecord = async (
+  client: mqtt.MqttClient,
+  command: deviceCommandRepo.DeviceCommandRecord,
+): Promise<void> => {
+  const topic = `v1/${command.deviceId}/commands`;
+  const message = JSON.stringify({
+    command_id: String(command.id),
+    command: command.command,
+    params: command.params ?? {},
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    client.publish(topic, message, { qos: 1, retain: false }, (err?: Error) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve();
+    });
+  });
+};
+
+const recoverPendingCommandsWithClient = async (client: mqtt.MqttClient): Promise<void> => {
+  if (!recoveryCutoff || !client.connected) {
+    return;
+  }
+
+  const pending = await deviceCommandRepo.listPendingCommandsBefore(
+    recoveryCutoff,
+    RECOVERY_BATCH_LIMIT,
+  );
+
+  for (const command of pending) {
+    try {
+      await publishCommandRecord(client, command);
+      await deviceCommandRepo.updateCommandStatus(command.id, 'sent');
+      logger.info('Recovered pending device command after backend restart', {
+        commandId: command.id,
+        deviceId: command.deviceId,
+      });
+    } catch (error) {
+      logger.warn('Pending device command recovery publish failed; keeping row pending', {
+        commandId: command.id,
+        deviceId: command.deviceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      // A transport-wide failure will usually affect later rows too. Stop this
+      // bounded pass and retry on the next connect/interval tick.
+      break;
+    }
+  }
+};
+
+const runPendingCommandRecovery = (client: mqtt.MqttClient): Promise<void> => {
+  if (recoveryPromise) {
+    return recoveryPromise;
+  }
+  recoveryPromise = recoverPendingCommandsWithClient(client).finally(() => {
+    recoveryPromise = null;
+  });
+  return recoveryPromise;
+};
 
 const getMqttClient = (): mqtt.MqttClient => {
   if (mqttClient) {
@@ -30,6 +99,11 @@ const getMqttClient = (): mqtt.MqttClient => {
 
   mqttClient.on('connect', () => {
     logger.info(`Connected to MQTT broker for device commands at ${brokerUrl}`);
+    void runPendingCommandRecovery(mqttClient!).catch((error) => {
+      logger.error('Pending device command recovery failed', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    });
   });
 
   mqttClient.on('error', (err) => {
@@ -62,25 +136,10 @@ export const sendCommand = async (
     );
   }
 
-  const topic = `v1/${deviceId}/commands`;
-  const message = JSON.stringify({
-    command_id: String(command.id),
-    command: payload.command,
-    params: payload.params ?? {},
-  });
-
   const client = getMqttClient();
 
   try {
-    await new Promise<void>((resolve, reject) => {
-      client.publish(topic, message, { qos: 1, retain: false }, (err?: Error) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve();
-      });
-    });
+    await publishCommandRecord(client, command);
 
     return (
       (await deviceCommandRepo.updateCommandStatus(command.id, 'sent')) ?? {
@@ -93,6 +152,51 @@ export const sendCommand = async (
     await deviceCommandRepo.updateCommandStatus(command.id, 'failed', response);
     throw error;
   }
+};
+
+export const initDeviceCommandDispatcher = (): void => {
+  if (recoveryCutoff) {
+    return;
+  }
+
+  recoveryCutoff = new Date();
+  const client = getMqttClient();
+  recoveryTimer = setInterval(() => {
+    void runPendingCommandRecovery(client).catch((error) => {
+      logger.error('Periodic pending device command recovery failed', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    });
+  }, RECOVERY_INTERVAL_MS);
+  recoveryTimer.unref?.();
+};
+
+export const closeDeviceCommandDispatcher = async (): Promise<void> => {
+  if (recoveryTimer) {
+    clearInterval(recoveryTimer);
+    recoveryTimer = null;
+  }
+
+  const inFlight = recoveryPromise;
+  if (inFlight) {
+    try {
+      await inFlight;
+    } catch {
+      // Shutdown must continue even when the final recovery pass failed.
+    }
+  }
+
+  const client = mqttClient;
+  mqttClient = null;
+  recoveryCutoff = null;
+  recoveryPromise = null;
+  if (!client) {
+    return;
+  }
+
+  await new Promise<void>((resolve) => {
+    client.end(false, {}, () => resolve());
+  });
 };
 
 export const listCommands = async (deviceId: string, page = 1, limit = 20) => {

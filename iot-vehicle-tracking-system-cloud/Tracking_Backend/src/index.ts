@@ -21,6 +21,10 @@ import metricsRoutes from '@/api/routes/metrics.routes';
 import { logger } from '@/infrastructure/logger';
 import { closePool } from '@/infrastructure/database/pool';
 import {
+  initDeviceCommandDispatcher,
+  closeDeviceCommandDispatcher,
+} from '@/domain/device/services/device-command.service';
+import {
   registerRealtime,
   closeSocketServer,
   getRealtimeHealthSnapshot,
@@ -108,6 +112,9 @@ app.use(sentryErrorHandler);
 // 13. Error handler (LAST)
 app.use(errorHandler);
 
+// Start the durable device-command dispatcher before accepting API traffic.
+initDeviceCommandDispatcher();
+
 // Start server
 const server = app.listen(appConfig.port, () => {
   logger.info(`Server started on port ${appConfig.port} (${appConfig.nodeEnv})`);
@@ -126,6 +133,8 @@ const gracefulShutdown = (signal: string) => {
     logger.info('HTTP server closed');
     await closeMqttEventListener();
     logger.info('MQTT event listener closed');
+    await closeDeviceCommandDispatcher();
+    logger.info('MQTT device command dispatcher closed');
     await closeSocketServer();
     logger.info('WebSocket server closed');
     await closePool();

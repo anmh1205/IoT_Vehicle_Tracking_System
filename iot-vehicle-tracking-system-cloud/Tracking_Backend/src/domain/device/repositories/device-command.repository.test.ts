@@ -9,6 +9,7 @@ import { pool } from '@/infrastructure/database/pool';
 import {
   createCommand,
   observeRuntimeBootAndMarkStaleAcceptedIndeterminate,
+  listPendingCommandsBefore,
   updateCommandStatus,
 } from './device-command.repository';
 
@@ -68,6 +69,31 @@ describe('device-command.repository', () => {
     expect(query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO device_commands'))).toBe(false);
     expect(query.mock.calls.some(([sql]) => sql === 'ROLLBACK')).toBe(true);
     expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  it('lists only durable pending commands at or before the current process cutoff', async () => {
+    vi.mocked(pool.query).mockResolvedValue({
+      rows: [{
+        id: 21,
+        device_id: 'TRACKER_001',
+        command: 'reboot',
+        params: {},
+        status: 'pending',
+        sent_at: null,
+        acked_at: null,
+        response: null,
+      }],
+    } as any);
+
+    const cutoff = new Date('2026-09-25T22:30:00.000Z');
+    const rows = await listPendingCommandsBefore(cutoff, 25);
+
+    const [sql, params] = vi.mocked(pool.query).mock.calls[0] ?? [];
+    expect(sql).toContain("WHERE status = 'pending'");
+    expect(sql).toContain('created_at <= $1');
+    expect(sql).toContain('ORDER BY created_at ASC, id ASC');
+    expect(params).toEqual([cutoff.toISOString(), 25]);
+    expect(rows[0]?.id).toBe(21);
   });
 
   it('sets sent_at only when publish transitions the command to sent', async () => {
