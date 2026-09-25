@@ -39,8 +39,9 @@ void state_machine_publish_event(const char *event_type, int code, const char *m
  * @brief Publish one firmware-status payload immediately.
  *
  * @param firmware Fully populated firmware status payload.
+ * @return true when MQTT or durable offline storage accepted the report.
  */
-void state_machine_publish_firmware_payload(const firmware_status_t *firmware);
+bool state_machine_publish_firmware_payload(const firmware_status_t *firmware);
 /**
  * @brief Build and publish a firmware-status payload from primitive fields.
  *
@@ -50,8 +51,9 @@ void state_machine_publish_firmware_payload(const firmware_status_t *firmware);
  * @param job_id Cloud OTA job identifier.
  * @param partition Partition label when relevant.
  * @param error Stable short error text when the status represents failure.
+ * @return true when MQTT or durable offline storage accepted the report.
  */
-void state_machine_publish_firmware_status(const char *status,
+bool state_machine_publish_firmware_status(const char *status,
                                            uint8_t progress,
                                            const char *version,
                                            const char *job_id,
