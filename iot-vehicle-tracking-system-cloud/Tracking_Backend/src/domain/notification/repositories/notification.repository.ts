@@ -83,8 +83,20 @@ const buildTypeClause = (
       AND a.alert_type::text NOT ILIKE $${startIndex + 2}
       AND a.alert_type::text NOT ILIKE $${startIndex + 3}
       AND a.alert_type::text NOT ILIKE $${startIndex + 4}
+      AND a.alert_type::text NOT ILIKE $${startIndex + 5}
+      AND a.alert_type::text NOT ILIKE $${startIndex + 6}
+      AND a.alert_type::text NOT ILIKE $${startIndex + 7}
     )`,
-    values: ['%zone%', '%geofence%', '%firmware%', '%export%', '%system%'],
+    values: [
+      '%zone%',
+      '%geofence%',
+      '%firmware%',
+      '%export%',
+      '%system%',
+      '%offline%',
+      '%database%',
+      '%service%',
+    ],
   };
 };
 

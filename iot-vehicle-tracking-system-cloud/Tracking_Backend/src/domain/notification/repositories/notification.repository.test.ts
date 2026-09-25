@@ -28,7 +28,17 @@ describe('notification.repository', () => {
     const [sql, params] = vi.mocked(findMany).mock.calls[0] ?? [];
 
     expect(sql).toContain('a.alert_type::text NOT ILIKE $2');
-    expect(sql).toContain('a.alert_type::text NOT ILIKE $6');
-    expect(params).toEqual([1, '%zone%', '%geofence%', '%firmware%', '%export%', '%system%']);
+    expect(sql).toContain('a.alert_type::text NOT ILIKE $9');
+    expect(params).toEqual([
+      1,
+      '%zone%',
+      '%geofence%',
+      '%firmware%',
+      '%export%',
+      '%system%',
+      '%offline%',
+      '%database%',
+      '%service%',
+    ]);
   });
 });
