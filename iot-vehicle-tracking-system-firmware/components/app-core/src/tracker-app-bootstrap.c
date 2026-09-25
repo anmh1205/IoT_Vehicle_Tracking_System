@@ -29,7 +29,6 @@
  * This translation unit belongs to the app-core orchestration layer and keeps FSM transitions, retained runtime state, and orchestration policy centralized inside app-core.
  */
 
-
 /* Logging tag for main application module. */
 static const char *TAG = "TRACKER_MAIN";
 
@@ -58,7 +57,8 @@ static esp_err_t tracker_storage_queue_enqueue_port(int record_type,
                                                     bool gps_fix,
                                                     bool net_up,
                                                     bool time_trusted,
-                                                    uint64_t timestamp_ms) {
+                                                    uint64_t timestamp_ms)
+{
     return offline_queue_enqueue((offline_record_type_t)record_type,
                                  payload,
                                  gps_fix,
@@ -72,7 +72,8 @@ static esp_err_t tracker_storage_queue_enqueue_port(int record_type,
  *
  * @param[in] cb Callback invoked for incoming command payloads.
  */
-static void tracker_mqtt_set_command_callback_port(tracker_command_message_callback_t cb) {
+static void tracker_mqtt_set_command_callback_port(tracker_command_message_callback_t cb)
+{
     tracker_mqtt_set_command_callback(cb);
 }
 
@@ -86,7 +87,8 @@ static void tracker_mqtt_set_command_callback_port(tracker_command_message_callb
  */
 static void *tracker_obd_connect_port(tracker_obd_response_callback_t response_cb,
                                       void *user_ctx,
-                                      uint32_t connect_timeout_ms) {
+                                      uint32_t connect_timeout_ms)
+{
     return ble_obd_connect((ble_obd_response_cb_t)response_cb, user_ctx, connect_timeout_ms);
 }
 
@@ -96,7 +98,8 @@ static void *tracker_obd_connect_port(tracker_obd_response_callback_t response_c
  * @param[in] ctx Opaque BLE OBD context.
  * @return ESP-IDF style status code from the BLE OBD adapter.
  */
-static esp_err_t tracker_obd_disconnect_port(void *ctx) {
+static esp_err_t tracker_obd_disconnect_port(void *ctx)
+{
     return ble_obd_disconnect((ble_obd_ctx_t *)ctx);
 }
 
@@ -106,7 +109,8 @@ static esp_err_t tracker_obd_disconnect_port(void *ctx) {
  * @param[in] ctx Opaque BLE OBD context.
  * @return true when the BLE OBD session is connected.
  */
-static bool tracker_obd_is_connected_port(void *ctx) {
+static bool tracker_obd_is_connected_port(void *ctx)
+{
     return ble_obd_is_connected((ble_obd_ctx_t *)ctx);
 }
 
@@ -119,7 +123,8 @@ static bool tracker_obd_is_connected_port(void *ctx) {
  * @param[in] timeout_ms Request timeout in milliseconds.
  * @return BLE OBD adapter return code.
  */
-static int tracker_obd_request_pid_port(void *ctx, uint8_t mode, uint8_t pid, uint32_t timeout_ms) {
+static int tracker_obd_request_pid_port(void *ctx, uint8_t mode, uint8_t pid, uint32_t timeout_ms)
+{
     return ble_obd_rxtx((ble_obd_ctx_t *)ctx, mode, pid, timeout_ms);
 }
 
@@ -131,7 +136,8 @@ static int tracker_obd_request_pid_port(void *ctx, uint8_t mode, uint8_t pid, ui
  * @param[in] timeout_ms Request timeout in milliseconds.
  * @return BLE OBD adapter return code.
  */
-static int tracker_obd_request_mode_port(void *ctx, uint8_t mode, uint32_t timeout_ms) {
+static int tracker_obd_request_mode_port(void *ctx, uint8_t mode, uint32_t timeout_ms)
+{
     return ble_obd_request_mode((ble_obd_ctx_t *)ctx, mode, timeout_ms);
 }
 
@@ -141,7 +147,8 @@ static int tracker_obd_request_mode_port(void *ctx, uint8_t mode, uint32_t timeo
  * @param[in] ctx Opaque BLE OBD context.
  * @return ESP-IDF style status code from the BLE OBD adapter.
  */
-static esp_err_t tracker_obd_elm327_init_port(void *ctx) {
+static esp_err_t tracker_obd_elm327_init_port(void *ctx)
+{
     return ble_obd_elm327_init((ble_obd_ctx_t *)ctx);
 }
 
@@ -151,7 +158,8 @@ static esp_err_t tracker_obd_elm327_init_port(void *ctx) {
  * @param[in] ctx Opaque BLE OBD context.
  * @return ECU-state label string.
  */
-static const char *tracker_obd_get_ecu_state_label_port(void *ctx) {
+static const char *tracker_obd_get_ecu_state_label_port(void *ctx)
+{
     return ble_obd_get_last_ecu_state_label((ble_obd_ctx_t *)ctx);
 }
 
@@ -251,7 +259,8 @@ static const tracker_runtime_ports_t s_runtime_ports = {
  * Long OTA/network acceptance loops can legitimately exceed the production WDT
  * budget. This override is limited to validation builds.
  */
-static void tracker_main_relax_task_wdt_for_field_validation(void) {
+static void tracker_main_relax_task_wdt_for_field_validation(void)
+{
     const esp_task_wdt_config_t wdt_cfg = {
         .timeout_ms = 30000,
         .idle_core_mask = (1U << portNUM_PROCESSORS) - 1U,
@@ -259,9 +268,12 @@ static void tracker_main_relax_task_wdt_for_field_validation(void) {
     };
 
     esp_err_t err = esp_task_wdt_reconfigure(&wdt_cfg);
-    if (err == ESP_OK) {
+    if (err == ESP_OK)
+    {
         ESP_LOGW(TAG, "event=field_validation_wdt_override timeout_ms=%u", (unsigned)wdt_cfg.timeout_ms);
-    } else {
+    }
+    else
+    {
         ESP_LOGW(TAG, "event=field_validation_wdt_override_failed err=%s", esp_err_to_name(err));
     }
 }
@@ -277,7 +289,8 @@ static void tracker_main_relax_task_wdt_for_field_validation(void) {
  * - retry `state_machine_init()` until the app-core is ready
  * - drive `state_machine_run()` on a fixed cooperative loop cadence
  */
-void app_core_bootstrap_run(void) {
+void app_core_bootstrap_run(void)
+{
     // Fail fast if any required adapter port was not wired into app-core correctly.
     ESP_ERROR_CHECK(tracker_runtime_ports_validate(&s_runtime_ports));
 
@@ -287,41 +300,60 @@ void app_core_bootstrap_run(void) {
 
     // Initialize config storage first so later loads can decide between persisted and default policy.
     esp_err_t err = nvs_config_init();
-    if (err != ESP_OK) {
+    if (err != ESP_OK)
+    {
         ESP_LOGW(TAG, "event=nvs_config_init_failed err=%s fallback=in_memory_defaults", esp_err_to_name(err));
     }
 
     // Load the runtime snapshot once at boot; if that fails, continue with compiled defaults.
     config_t config = {0};
     err = nvs_config_load(&config);
-    if (err != ESP_OK) {
+    if (err != ESP_OK)
+    {
         ESP_LOGW(TAG, "event=nvs_config_load_failed err=%s fallback=compiled_defaults", esp_err_to_name(err));
+        app_config_set_defaults(&config);
+    }
+
+    if (config.device_id[0] == '\0')
+    {
+        ESP_LOGE(TAG, "event=missing_device_id action=fallback_to_defaults");
+        app_config_set_defaults(&config);
+    }
+
+    if (config.auth_token[0] == '\0')
+    {
+        ESP_LOGW(TAG, "event=missing_auth_token action=fallback_to_defaults");
         app_config_set_defaults(&config);
     }
 #if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_TRACKER_FIELD_VALIDATION_FORCE_IMU_WAKE
     // Validation builds can force IMU wake so parked-motion acceptance tests stay reproducible.
-    if (!config.imu_wakeup_enabled) {
+    if (!config.imu_wakeup_enabled)
+    {
         ESP_LOGW(TAG, "event=field_validation_imu_wake_forced reason=hardware_acceptance");
     }
     config.imu_wakeup_enabled = true;
 #endif
 #if CONFIG_TRACKER_FIELD_VALIDATION_MODE
     // Validation builds may temporarily point the device at a lab broker without rewriting NVS.
-    if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_MQTT_HOST)) {
+    if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_MQTT_HOST))
+    {
         util_copy_string(config.mqtt_host,
                          sizeof(config.mqtt_host),
                          CONFIG_TRACKER_FIELD_VALIDATION_MQTT_HOST);
-        if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_MQTT_USERNAME)) {
+        if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_MQTT_USERNAME))
+        {
             util_copy_string(config.mqtt_username,
                              sizeof(config.mqtt_username),
                              CONFIG_TRACKER_FIELD_VALIDATION_MQTT_USERNAME);
         }
-        if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_MQTT_PASSWORD)) {
+        if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_MQTT_PASSWORD))
+        {
             util_copy_string(config.mqtt_password,
                              sizeof(config.mqtt_password),
                              CONFIG_TRACKER_FIELD_VALIDATION_MQTT_PASSWORD);
         }
-        if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_AUTH_TOKEN)) {
+        if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_AUTH_TOKEN))
+        {
             util_copy_string(config.auth_token,
                              sizeof(config.auth_token),
                              CONFIG_TRACKER_FIELD_VALIDATION_AUTH_TOKEN);
@@ -333,13 +365,15 @@ void app_core_bootstrap_run(void) {
     }
 #if CONFIG_TRACKER_FIELD_VALIDATION_DISABLE_COMMAND_SUBSCRIBE
     // Some publish-path tests intentionally suppress downlink commands to remove OTA/control noise.
-    if (config.command_subscribe_enabled) {
+    if (config.command_subscribe_enabled)
+    {
         ESP_LOGW(TAG, "event=field_validation_command_subscribe_disabled reason=publish_path_validation");
     }
     config.command_subscribe_enabled = false;
 #else
     // OTA validation loops need command subscribe on even if the persisted config disabled it earlier.
-    if (!config.command_subscribe_enabled) {
+    if (!config.command_subscribe_enabled)
+    {
         ESP_LOGW(TAG, "event=field_validation_command_subscribe_enabled reason=ota_loop");
     }
     config.command_subscribe_enabled = true;
@@ -355,11 +389,13 @@ void app_core_bootstrap_run(void) {
     // Capture current OTA partition metadata once so reboot/rollback diagnostics have a stable reference.
     const esp_partition_t *running = esp_ota_get_running_partition();
     const esp_partition_t *boot = esp_ota_get_boot_partition();
-    if (running != NULL && boot != NULL && running != boot) {
+    if (running != NULL && boot != NULL && running != boot)
+    {
         ESP_LOGW(TAG, "event=ota_partition_mismatch");
     }
 
-    if (running != NULL && !util_string_empty(running->label)) {
+    if (running != NULL && !util_string_empty(running->label))
+    {
         util_copy_string(g_rtc_context.ota_partition,
                          sizeof(g_rtc_context.ota_partition),
                          running->label);
@@ -371,15 +407,21 @@ void app_core_bootstrap_run(void) {
     // Default to a full INIT pass; the wake cause below may shortcut straight into a service state.
     app_state_t state = APP_STATE_INIT;
     esp_sleep_wakeup_cause_t wakeup = esp_sleep_get_wakeup_cause();
-    if (util_is_sleep_enabled()) {
+    if (util_is_sleep_enabled())
+    {
         // Wake cause remaps the very first FSM state only when parked sleep is actually part of runtime policy.
-        if (wakeup == ESP_SLEEP_WAKEUP_TIMER) {
+        if (wakeup == ESP_SLEEP_WAKEUP_TIMER)
+        {
             // Timer wake = scheduled parked heartbeat cadence.
             state = APP_STATE_HEARTBEAT;
-        } else if (wakeup == ESP_SLEEP_WAKEUP_EXT0 && config.imu_wakeup_enabled) {
+        }
+        else if (wakeup == ESP_SLEEP_WAKEUP_EXT0 && config.imu_wakeup_enabled)
+        {
             // EXT0 with IMU wake armed = motion detected on a parked vehicle, treat as alarm.
             state = APP_STATE_ALARM;
-        } else if (wakeup == ESP_SLEEP_WAKEUP_EXT0) {
+        }
+        else if (wakeup == ESP_SLEEP_WAKEUP_EXT0)
+        {
             // EXT0 without IMU policy = treat the unexpected wake conservatively as a heartbeat.
             state = APP_STATE_HEARTBEAT;
         }
@@ -393,17 +435,23 @@ void app_core_bootstrap_run(void) {
 
     // Gate that flips true only once app-core has fully initialized every subsystem.
     bool state_machine_ready = false;
-    while (true) {
+    while (true)
+    {
         uint64_t now_ms = util_uptime_ms();
-        if (!state_machine_ready) {
+        if (!state_machine_ready)
+        {
             // Hold the system in a bounded retry loop until app-core can bring every subsystem up cleanly.
-            if (retry_state_can_run(&s_init_retry, now_ms)) {
+            if (retry_state_can_run(&s_init_retry, now_ms))
+            {
                 err = state_machine_init(&config);
-                if (err == ESP_OK) {
+                if (err == ESP_OK)
+                {
                     // Initialization succeeded: clear backoff and switch the loop into normal FSM service mode.
                     retry_state_reset(&s_init_retry);
                     state_machine_ready = true;
-                } else {
+                }
+                else
+                {
                     // Keep retry timing deterministic so field logs show exactly when the next init attempt should fire.
                     uint32_t delay_ms = retry_state_current_delay_ms(&s_init_retry,
                                                                      &s_init_retry_policy,

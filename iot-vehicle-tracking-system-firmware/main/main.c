@@ -26,6 +26,5 @@
  *       the state machine loop indefinitely until power-off or reset.
  */
 void app_main(void) {
-    // Keep this public facade thin and forward the real work to the focused implementation below.
     app_core_bootstrap_run();
 }
