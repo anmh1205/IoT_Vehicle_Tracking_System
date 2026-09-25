@@ -329,7 +329,7 @@ export const handleStatus = async (
       bootId: sessionBootId,
       runtimeBootId: metadataBootId ?? sessionBootId,
     });
-    await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState);
+    await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState, timestampMs);
     publishSessionAssignment({
       deviceId: payload.device_id,
       localSessionKey,
@@ -377,7 +377,7 @@ export const handleStatus = async (
         runtimeState,
         runtimeBootId: metadataBootId ?? sessionBootId,
       });
-      await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
+      await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState, timestampMs);
     } else {
       const completedSession = await completeDeviceSession(
         payload.device_id,
@@ -401,7 +401,7 @@ export const handleStatus = async (
         runtimeState,
         runtimeBootId: metadataBootId ?? sessionBootId,
       });
-      await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
+      await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState, timestampMs);
 
       if (sessionId && completedSession.completedNow) {
         publishInternalEvent('session', {
@@ -453,7 +453,7 @@ export const handleStatus = async (
       bootId: sessionBootId,
       runtimeBootId: metadataBootId ?? sessionBootId,
     });
-    await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState);
+    await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState, timestampMs);
     publishSessionAssignment({
       deviceId: payload.device_id,
       localSessionKey,
@@ -501,7 +501,7 @@ export const handleStatus = async (
       runtimeState,
       runtimeBootId: metadataBootId ?? sessionBootId,
     });
-    await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
+    await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState, timestampMs);
 
     if (sessionId && completedSession.completedNow) {
       publishInternalEvent('session', {
