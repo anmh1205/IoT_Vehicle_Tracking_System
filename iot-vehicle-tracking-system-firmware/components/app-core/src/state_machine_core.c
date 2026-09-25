@@ -1449,17 +1449,22 @@ esp_err_t state_machine_core_init(const config_t *config) {
     tracker_mqtt_set_command_callback(state_machine_command_callback);
 
     // Restore OTA context before the first firmware-status publish can describe the running image.
-    state_machine_restore_ota_context_from_nvs();
-    bool had_pending_confirm = g_rtc_context.ota_pending_confirm;
+    esp_err_t ota_restore_err = state_machine_restore_ota_context_from_nvs();
+    bool had_pending_confirm =
+        ota_restore_err == ESP_OK && g_rtc_context.ota_pending_confirm;
     state_machine_try_confirm_running_firmware();
-    if (!had_pending_confirm) {
-        // Fresh boots without pending confirmation still emit a success status for the running version.
+    if (ota_restore_err == ESP_OK && !had_pending_confirm) {
+        // Fresh boots are reported successful only after persisted OTA state was read successfully.
         state_machine_publish_firmware_status(TRACKER_OTA_STATUS_SUCCESS,
                                               TRACKER_OTA_PROGRESS_DONE,
                                               s_current_version,
                                               "",
                                               "",
                                               "");
+    } else if (ota_restore_err != ESP_OK) {
+        ESP_LOGW(TAG,
+                 "event=firmware_boot_status_deferred reason=ota_context_unreadable err=%s",
+                 esp_err_to_name(ota_restore_err));
     }
     return ESP_OK;
 }
@@ -1474,6 +1479,7 @@ app_state_t state_machine_core_run(app_state_t current_state) {
     state_led_update(current_state);
     util_set_sleep_enabled(s_config.sleep_enabled);
     state_machine_publish_pending_command_acks();
+    state_machine_try_confirm_running_firmware();
 
     app_state_t next_state = current_state;
     switch (current_state) {
