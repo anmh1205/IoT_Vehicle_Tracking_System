@@ -235,17 +235,23 @@ export const importDevices = asyncHandler(async (req: AuthenticatedRequest, res:
   for (let index = 0; index < rows.length; index += 1) {
     const row = rows[index] as Record<string, unknown>;
     try {
-      const deviceId = String(row.deviceId ?? '').trim();
-      const deviceName = String(row.deviceName ?? '').trim();
-      if (!deviceId || !deviceName) {
-        throw new Error('Missing deviceId or deviceName');
+      const rawImei = row.imei == null ? '' : String(row.imei).trim();
+      const candidate = {
+        deviceId: String(row.deviceId ?? '').trim(),
+        deviceName: String(row.deviceName ?? '').trim(),
+        imei: rawImei || undefined,
+      };
+
+      const parsed = createDeviceSchema.safeParse(candidate);
+      if (!parsed.success) {
+        throw new Error(
+          parsed.error.issues
+            .map((issue) => `${issue.path.join('.') || 'row'}: ${issue.message}`)
+            .join('; '),
+        );
       }
 
-      await deviceCrudService.createDevice({
-        deviceId,
-        deviceName,
-        imei: row.imei ? String(row.imei) : undefined,
-      });
+      await deviceCrudService.createDevice(parsed.data);
       imported += 1;
     } catch (error) {
       errors.push({ row: index + 1, error: (error as Error).message });
