@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS device_commands (
     params JSONB NOT NULL DEFAULT '{}'::jsonb,
     status VARCHAR(20) NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending', 'sent', 'acknowledged', 'failed')),
-    sent_at TIMESTAMPTZ DEFAULT NOW(),
+    sent_at TIMESTAMPTZ,
     acked_at TIMESTAMPTZ,
     response TEXT,
     actor_user_id INT REFERENCES users(id) ON DELETE SET NULL,
