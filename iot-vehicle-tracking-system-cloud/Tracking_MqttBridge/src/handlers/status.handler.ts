@@ -19,7 +19,7 @@ import {
   setStatus,
 } from '../cache/device-state.cache';
 import { logger } from '../infrastructure/logger';
-import { maxTimestampMs, normalizePayloadTimestamp, parseIsoTimestampMs } from '../utils/timestamp.util';
+import { normalizePayloadTimestamp, parseIsoTimestampMs } from '../utils/timestamp.util';
 import { resolveLocalSessionKey } from '../utils/session-identity.util';
 import { normalizeRuntimeState } from '../types/device-state.types';
 import {
@@ -128,10 +128,7 @@ export const handleStatus = async (
     payload.timestamp,
     payload.metadata?.sent_at,
   );
-  const persistedWatermarkMs = maxTimestampMs(
-    parseIsoTimestampMs(device.last_seen_at),
-    parseIsoTimestampMs(device.state_updated_at),
-  );
+  const persistedWatermarkMs = parseIsoTimestampMs(device.payload_updated_at);
   const liveMutationDecision = shouldAcceptLiveMutation({
     incomingTimestampMs: timestampMs,
     incomingSeqNo: seqNo,
@@ -332,7 +329,7 @@ export const handleStatus = async (
       bootId: sessionBootId,
       runtimeBootId: metadataBootId ?? sessionBootId,
     });
-    await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState);
+    await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState, timestampMs);
     publishSessionAssignment({
       deviceId: payload.device_id,
       localSessionKey,
@@ -380,7 +377,7 @@ export const handleStatus = async (
         runtimeState,
         runtimeBootId: metadataBootId ?? sessionBootId,
       });
-      await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
+      await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState, timestampMs);
     } else {
       const completedSession = await completeDeviceSession(
         payload.device_id,
@@ -404,7 +401,7 @@ export const handleStatus = async (
         runtimeState,
         runtimeBootId: metadataBootId ?? sessionBootId,
       });
-      await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
+      await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState, timestampMs);
 
       if (sessionId && completedSession.completedNow) {
         publishInternalEvent('session', {
@@ -456,7 +453,7 @@ export const handleStatus = async (
       bootId: sessionBootId,
       runtimeBootId: metadataBootId ?? sessionBootId,
     });
-    await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState);
+    await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState, timestampMs);
     publishSessionAssignment({
       deviceId: payload.device_id,
       localSessionKey,
@@ -504,7 +501,7 @@ export const handleStatus = async (
       runtimeState,
       runtimeBootId: metadataBootId ?? sessionBootId,
     });
-    await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
+    await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState, timestampMs);
 
     if (sessionId && completedSession.completedNow) {
       publishInternalEvent('session', {
@@ -532,7 +529,7 @@ export const handleStatus = async (
       bootId: sessionBootId,
       runtimeBootId: metadataBootId ?? sessionBootId,
     });
-    await updateDeviceStatus(payload.device_id, effectiveCachedStatus, receivedAtMs, runtimeState);
+    await updateDeviceStatus(payload.device_id, effectiveCachedStatus, receivedAtMs, runtimeState, timestampMs);
   }
 
   const effectiveStatus = boundaryEvent === 'ended' ? 'stopped' : effectiveCachedStatus;
