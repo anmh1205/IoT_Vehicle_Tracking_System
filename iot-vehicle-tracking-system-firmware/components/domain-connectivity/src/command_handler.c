@@ -863,16 +863,33 @@ static bool command_parse_session_assignment(const cJSON *params,
  *
  * @param command_json Raw command JSON string.
  */
-void command_handler_process(const char *command_json) {
+esp_err_t command_handler_process(const char *command_json, uint64_t *out_command_id) {
     // Parse the cloud command once here, then fan out into the staged action path that the FSM consumes safely later.
+    if (out_command_id != NULL) {
+        *out_command_id = 0U;
+    }
     if (util_string_empty(command_json)) {
-        return;
+        return ESP_ERR_INVALID_ARG;
     }
 
     cJSON *root = cJSON_Parse(command_json);
     if (root == NULL) {
         ESP_LOGW(TAG, "event=command_json_invalid");
-        return;
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    /*
+     * command_id is optional for backwards compatibility with locally generated
+     * or legacy commands. Cloud commands include it so app-core can emit a
+     * correlated acknowledgement after parsing/staging finishes.
+     */
+    const cJSON *command_id = cJSON_GetObjectItemCaseSensitive(root, "command_id");
+    if (command_id == NULL) {
+        command_id = cJSON_GetObjectItemCaseSensitive(root, "commandId");
+    }
+    uint64_t parsed_command_id = 0U;
+    if (command_parse_u64_positive(command_id, &parsed_command_id) && out_command_id != NULL) {
+        *out_command_id = parsed_command_id;
     }
 
     // Extract the command verb first; every later branch depends on it being a non-empty string.
@@ -881,10 +898,12 @@ void command_handler_process(const char *command_json) {
 
     if (!cJSON_IsString(command) || util_string_empty(command->valuestring)) {
         cJSON_Delete(root);
-        return;
+        return ESP_ERR_INVALID_ARG;
     }
 
     ESP_LOGI(TAG, "event=command_received command=%s", command->valuestring);
+
+    esp_err_t result = ESP_ERR_NOT_SUPPORTED;
 
     if (strcmp(command->valuestring, COMMAND_NAME_UPDATE_CONFIG) == 0) {
         // Config updates are parsed into a delta object first so the MQTT callback path never mutates runtime config directly.
@@ -894,34 +913,43 @@ void command_handler_process(const char *command_json) {
                 .action = COMMAND_ACTION_APPLY_CONFIG,
                 .config_update = update,
             };
-            (void)command_handler_enqueue_action(&item);
+            result = command_handler_enqueue_action(&item);
+        } else {
+            result = ESP_ERR_INVALID_ARG;
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_REQUEST_LOCATION) == 0) {
         // Location requests collapse into a bounded counter so bursts do not allocate unbounded queue state.
-        if (command_handler_take_lock_for(COMMAND_NAME_REQUEST_LOCATION)) {
-            if (s_location_request_count < COMMAND_HANDLER_MAX_LOCATION_REQUESTS) {
-                s_location_request_count += 1U;
-            } else {
-                atomic_fetch_add(&s_dropped_command_count, 1U);
-                ESP_LOGW(TAG, "event=command_dropped operation=request_location reason=pending_counter_saturated");
-            }
+        if (!command_handler_take_lock_for(COMMAND_NAME_REQUEST_LOCATION)) {
+            result = ESP_ERR_TIMEOUT;
+        } else if (s_location_request_count < COMMAND_HANDLER_MAX_LOCATION_REQUESTS) {
+            s_location_request_count += 1U;
             command_handler_give_lock();
+            result = ESP_OK;
+        } else {
+            atomic_fetch_add(&s_dropped_command_count, 1U);
+            ESP_LOGW(TAG, "event=command_dropped operation=request_location reason=pending_counter_saturated");
+            command_handler_give_lock();
+            result = ESP_ERR_NO_MEM;
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_ENABLE_TRACKING) == 0) {
         // Tracking enable is a small runtime flag, so it can be updated under lock without staging a full queue item.
         const cJSON *enabled = cJSON_GetObjectItemCaseSensitive(params, "enabled");
         if (!cJSON_IsBool(enabled)) {
             ESP_LOGW(TAG, "event=enable_tracking_rejected reason=enabled_not_boolean");
-        } else if (command_handler_take_lock_for(COMMAND_NAME_ENABLE_TRACKING)) {
+            result = ESP_ERR_INVALID_ARG;
+        } else if (!command_handler_take_lock_for(COMMAND_NAME_ENABLE_TRACKING)) {
+            result = ESP_ERR_TIMEOUT;
+        } else {
             s_tracking_enabled = cJSON_IsTrue(enabled);
             command_handler_give_lock();
+            result = ESP_OK;
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_REBOOT) == 0) {
         // Reboot is intentionally deferred into the FSM thread so shutdown side effects stay single-writer.
         command_action_item_t item = {
             .action = COMMAND_ACTION_REBOOT,
         };
-        (void)command_handler_enqueue_action(&item);
+        result = command_handler_enqueue_action(&item);
     } else if (strcmp(command->valuestring, COMMAND_NAME_OTA_UPDATE) == 0) {
         // OTA commands are fully validated and copied now because the original JSON buffer disappears after this callback.
         ota_command_t parsed = {0};
@@ -935,9 +963,10 @@ void command_handler_process(const char *command_json) {
                 .action = COMMAND_ACTION_OTA_UPDATE,
                 .ota_command = parsed,
             };
-            (void)command_handler_enqueue_action(&item);
+            result = command_handler_enqueue_action(&item);
         } else {
             ESP_LOGW(TAG, "event=ota_update_rejected reason=invalid_params");
+            result = ESP_ERR_INVALID_ARG;
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_MANUAL_ROLLBACK) == 0 ||
                strcmp(command->valuestring, COMMAND_NAME_OTA_ROLLBACK) == 0) {
@@ -946,7 +975,7 @@ void command_handler_process(const char *command_json) {
             .action = COMMAND_ACTION_OTA_ROLLBACK,
         };
         item.ota_command.rollback_pending = true;
-        (void)command_handler_enqueue_action(&item);
+        result = command_handler_enqueue_action(&item);
     } else if (strcmp(command->valuestring, COMMAND_NAME_ASSIGN_SESSION) == 0) {
         // Session assignments are staged so the FSM can atomically align local and canonical session identifiers.
         command_session_assignment_t assignment = {0};
@@ -955,13 +984,18 @@ void command_handler_process(const char *command_json) {
                 .action = COMMAND_ACTION_ASSIGN_SESSION,
                 .session_assignment = assignment,
             };
-            (void)command_handler_enqueue_action(&item);
+            result = command_handler_enqueue_action(&item);
         } else {
             ESP_LOGW(TAG, "event=assign_session_rejected reason=invalid_params");
+            result = ESP_ERR_INVALID_ARG;
         }
+    } else {
+        ESP_LOGW(TAG, "event=command_rejected reason=unsupported command=%s", command->valuestring);
+        result = ESP_ERR_NOT_SUPPORTED;
     }
 
     cJSON_Delete(root);
+    return result;
 }
 
 /**

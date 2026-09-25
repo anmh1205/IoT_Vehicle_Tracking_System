@@ -1,5 +1,7 @@
 #include "state_machine_core.h"
 
+#include <inttypes.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "freertos/FreeRTOS.h"
@@ -103,9 +105,117 @@ static uint64_t s_last_health_snapshot_log_ms = 0;
  * @param[in] topic MQTT topic string (unused because only the command topic is wired here).
  * @param[in] payload Raw command JSON payload.
  */
+typedef struct {
+    uint64_t command_id;
+    esp_err_t process_result;
+} state_machine_command_ack_t;
+
+#define TRACKER_COMMAND_ACK_QUEUE_LEN 16U
+#define TRACKER_COMMAND_ACK_PUBLISH_BUDGET 4U
+
+static QueueHandle_t s_command_ack_queue = NULL;
+
+static const char *state_machine_command_ack_response(esp_err_t result) {
+    switch (result) {
+        case ESP_OK:
+            return "accepted";
+        case ESP_ERR_INVALID_ARG:
+            return "invalid_command";
+        case ESP_ERR_NOT_SUPPORTED:
+            return "unsupported_command";
+        case ESP_ERR_NO_MEM:
+            return "command_queue_full";
+        case ESP_ERR_TIMEOUT:
+            return "command_state_busy";
+        default:
+            return "command_rejected";
+    }
+}
+
+/**
+ * @brief Parse/stage an incoming command and queue its ACK for the FSM task.
+ *
+ * The modem URC callback must stay non-blocking. In particular it must not send
+ * another AT/MQTT publish while the RX parser is still handling the inbound
+ * command, so ACK transport is deferred to the cooperative FSM loop.
+ */
 static void state_machine_command_callback(const char *topic, const char *payload) {
     (void)topic;
-    command_handler_process(payload);
+
+    uint64_t command_id = 0U;
+    esp_err_t process_result = command_handler_process(payload, &command_id);
+    if (command_id == 0U) {
+        /*
+         * Legacy/local commands can still execute, but without a cloud-issued
+         * correlation ID the backend has no command row that can be updated.
+         */
+        ESP_LOGW(TAG,
+                 "event=command_ack_skipped reason=missing_command_id process_err=%s",
+                 esp_err_to_name(process_result));
+        return;
+    }
+
+    state_machine_command_ack_t ack = {
+        .command_id = command_id,
+        .process_result = process_result,
+    };
+    if (s_command_ack_queue == NULL ||
+        xQueueSendToBack(s_command_ack_queue, &ack, 0) != pdTRUE) {
+        ESP_LOGW(TAG,
+                 "event=command_ack_queue_full command_id=%" PRIu64,
+                 command_id);
+    }
+}
+
+/**
+ * @brief Publish a bounded number of pending command ACKs outside the RX callback.
+ */
+static void state_machine_publish_pending_command_acks(void) {
+    if (s_command_ack_queue == NULL || !tracker_mqtt_is_connected()) {
+        return;
+    }
+
+    for (uint32_t i = 0; i < TRACKER_COMMAND_ACK_PUBLISH_BUDGET; ++i) {
+        state_machine_command_ack_t ack = {0};
+        if (xQueuePeek(s_command_ack_queue, &ack, 0) != pdTRUE) {
+            return;
+        }
+
+        const char *status = ack.process_result == ESP_OK ? "acknowledged" : "failed";
+        const char *response = state_machine_command_ack_response(ack.process_result);
+        char ack_payload[192] = {0};
+        int written = snprintf(ack_payload,
+                               sizeof(ack_payload),
+                               "{\"command_id\":\"%" PRIu64
+                               "\",\"status\":\"%s\",\"response\":\"%s\"}",
+                               ack.command_id,
+                               status,
+                               response);
+        if (written <= 0 || (size_t)written >= sizeof(ack_payload)) {
+            ESP_LOGW(TAG,
+                     "event=command_ack_encode_failed command_id=%" PRIu64,
+                     ack.command_id);
+            (void)xQueueReceive(s_command_ack_queue, &ack, 0);
+            continue;
+        }
+
+        esp_err_t ack_err = tracker_mqtt_publish_command_ack(ack_payload);
+        if (ack_err != ESP_OK) {
+            ESP_LOGW(TAG,
+                     "event=command_ack_publish_failed command_id=%" PRIu64
+                     " status=%s err=%s",
+                     ack.command_id,
+                     status,
+                     esp_err_to_name(ack_err));
+            return; // Keep the head item queued for the next connected loop.
+        }
+
+        (void)xQueueReceive(s_command_ack_queue, &ack, 0);
+        ESP_LOGI(TAG,
+                 "event=command_ack_published command_id=%" PRIu64 " status=%s",
+                 ack.command_id,
+                 status);
+    }
 }
 
 /**
@@ -1175,6 +1285,18 @@ esp_err_t state_machine_core_init(const config_t *config) {
     }
     ESP_RETURN_ON_FALSE(s_ble_connect_result_queue != NULL, ESP_ERR_NO_MEM, TAG, "BLE result queue init failed");
 
+    // Command ACKs are staged by the modem RX callback and published later by the FSM task.
+    if (s_command_ack_queue == NULL) {
+        s_command_ack_queue = xQueueCreate(TRACKER_COMMAND_ACK_QUEUE_LEN,
+                                           sizeof(state_machine_command_ack_t));
+    } else {
+        xQueueReset(s_command_ack_queue);
+    }
+    ESP_RETURN_ON_FALSE(s_command_ack_queue != NULL,
+                        ESP_ERR_NO_MEM,
+                        TAG,
+                        "command ACK queue init failed");
+
     util_set_sleep_enabled(s_config.sleep_enabled);
     if (!util_string_empty(CONFIG_APP_PROJECT_VER)) {
         util_copy_string(s_current_version, sizeof(s_current_version), CONFIG_APP_PROJECT_VER);
@@ -1240,6 +1362,7 @@ esp_err_t state_machine_core_init(const config_t *config) {
 app_state_t state_machine_core_run(app_state_t current_state) {
     state_led_update(current_state);
     util_set_sleep_enabled(s_config.sleep_enabled);
+    state_machine_publish_pending_command_acks();
 
     app_state_t next_state = current_state;
     switch (current_state) {

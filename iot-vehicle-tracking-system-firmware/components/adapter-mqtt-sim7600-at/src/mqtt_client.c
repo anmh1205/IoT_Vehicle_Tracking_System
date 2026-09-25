@@ -59,6 +59,8 @@ char s_topic_events[MQTT_TOPIC_MAX_LEN] = {0};
 char s_topic_firmware[MQTT_TOPIC_MAX_LEN] = {0};
 /** Commands topic name (v1/{device_id}/commands). */
 char s_topic_commands[MQTT_TOPIC_MAX_LEN] = {0};
+/** Command acknowledgement topic name (v1/{device_id}/commands/ack). */
+char s_topic_command_ack[MQTT_TOPIC_MAX_LEN] = {0};
 /** Primary broker hostname or IP address. */
 char s_server_addr_primary[MQTT_SERVER_ADDR_MAX_LEN] = {0};
 /** Fallback broker hostname or IP address. */
@@ -235,6 +237,13 @@ esp_err_t tracker_mqtt_publish_event(const char *json_payload) {
  */
 esp_err_t tracker_mqtt_publish_firmware(const char *json_payload) {
     return tracker_mqtt_publish(s_topic_firmware, json_payload, 1);
+}
+
+/**
+ * @brief Publish command acknowledgement using QoS 1.
+ */
+esp_err_t tracker_mqtt_publish_command_ack(const char *json_payload) {
+    return tracker_mqtt_publish(s_topic_command_ack, json_payload, 1);
 }
 
 /**

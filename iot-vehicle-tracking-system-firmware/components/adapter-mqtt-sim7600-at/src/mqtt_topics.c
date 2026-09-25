@@ -102,8 +102,8 @@ esp_err_t tracker_mqtt_build_server_addrs(const config_t *cfg) {
 /**
  * @brief Build all device-scoped MQTT topic strings from the device ID.
  *
- * Composes the five `v1/{device_id}/<class>` topics (rawdata, status, events,
- * firmware, commands) into their bounded buffers. Truncation is logged but not
+ * Composes the six device-scoped topics (rawdata, status, events, firmware,
+ * commands, commands/ack) into their bounded buffers. Truncation is logged but not
  * treated as fatal here; the publish/subscribe paths validate topic length
  * before use. Centralizing construction guarantees publish and subscribe refer
  * to byte-identical topic names.
@@ -133,5 +133,13 @@ void tracker_mqtt_build_topics(void) {
     n = snprintf(s_topic_commands, sizeof(s_topic_commands), "v1/%s/commands", s_cfg.device_id);
     if (n < 0 || (size_t)n >= sizeof(s_topic_commands)) {
         ESP_LOGW(TRACKER_MQTT_TAG, "commands topic truncated");
+    }
+
+    n = snprintf(s_topic_command_ack,
+                 sizeof(s_topic_command_ack),
+                 "v1/%s/commands/ack",
+                 s_cfg.device_id);
+    if (n < 0 || (size_t)n >= sizeof(s_topic_command_ack)) {
+        ESP_LOGW(TRACKER_MQTT_TAG, "command ack topic truncated");
     }
 }

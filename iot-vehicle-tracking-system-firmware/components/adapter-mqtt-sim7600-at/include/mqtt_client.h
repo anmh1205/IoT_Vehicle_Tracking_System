@@ -102,6 +102,15 @@ esp_err_t tracker_mqtt_publish_event(const char *json_payload);
 esp_err_t tracker_mqtt_publish_firmware(const char *json_payload);
 
 /**
+ * @brief Publish command acknowledgement to `v1/{device}/commands/ack`.
+ *
+ * @param json_payload JSON-formatted command acknowledgement.
+ *
+ * @return ESP_OK on success, ESP_FAIL on failure.
+ */
+esp_err_t tracker_mqtt_publish_command_ack(const char *json_payload);
+
+/**
  * @brief Subscribe to command topic for this device.
  *
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
