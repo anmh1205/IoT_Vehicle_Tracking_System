@@ -66,6 +66,50 @@ esp_err_t nvs_config_save(const config_t *config) {
     return config_store_nvs_save(config);
 }
 
+
+esp_err_t nvs_config_save_tracking_enabled(bool enabled) {
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READWRITE, &handle);
+    ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to open NVS namespace");
+
+    err = nvs_set_u8(handle, TRACKER_NVS_TRACKING_ENABLED_KEY, enabled ? 1U : 0U);
+    if (err == ESP_OK) {
+        err = nvs_commit(handle);
+    }
+    nvs_close(handle);
+    return err;
+}
+
+esp_err_t nvs_config_load_tracking_enabled(bool *out_enabled, bool *out_found) {
+    if (out_enabled == NULL || out_found == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    *out_enabled = true;
+    *out_found = false;
+
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READONLY, &handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        return ESP_OK;
+    }
+    ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to open NVS namespace");
+
+    uint8_t stored = 1U;
+    err = nvs_get_u8(handle, TRACKER_NVS_TRACKING_ENABLED_KEY, &stored);
+    nvs_close(handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        return ESP_OK;
+    }
+    if (err != ESP_OK) {
+        return err;
+    }
+
+    *out_enabled = stored != 0U;
+    *out_found = true;
+    return ESP_OK;
+}
+
 /**
  * @brief Save OTA context to NVS.
  *
