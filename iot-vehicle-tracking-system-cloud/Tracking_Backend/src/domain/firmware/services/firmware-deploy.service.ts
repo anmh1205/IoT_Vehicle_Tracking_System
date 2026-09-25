@@ -61,6 +61,14 @@ const clampConfirmTimeoutSec = (value: unknown): number => {
 
 const normalizeArtifactSha = (sha256: string): string => sha256.trim().toLowerCase();
 
+const resolveDirectConfirmTimeoutSec = (value: unknown): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0
+    ? Math.floor(parsed)
+    : OTA_CONFIRM_TIMEOUT_DEFAULT_SEC;
+};
+
+
 const parsePublicBaseUrl = (): URL => {
   const raw = firmwareConfig.publicBaseUrl?.trim();
   if (!raw) {
@@ -133,6 +141,9 @@ const assertFirmwareArtifactReady = (firmware: Firmware): FirmwareArtifactDescri
     sha256: normalizedSha,
   };
 };
+
+export const findFirmwareByVersion = async (version: string): Promise<Firmware | null> =>
+  firmwareRepo.findByVersion(version);
 
 export const getFirmwareArtifactDescriptor = async (
   firmwareId: number,
@@ -213,6 +224,113 @@ const toDeploymentView = (item: FirmwareDeploymentRow, nowMs: number): FirmwareD
   };
 };
 
+export const deployFirmwareToDevice = async (
+  firmwareId: number,
+  deviceId: string,
+  input: {
+    force?: boolean;
+    confirmTimeoutSec?: number;
+    actorUserId?: number;
+    correlationId?: string;
+  } = {},
+): Promise<{
+  jobId: string;
+  status: 'assigned';
+  targetVersion: string;
+  commandId: number;
+}> => {
+  const firmware = await firmwareRepo.findById(firmwareId);
+  if (!firmware) {
+    throw createNotFoundError('Firmware not found');
+  }
+
+  const artifact = assertFirmwareArtifactReady(firmware);
+  const knownDeviceIds = await firmwareRepo.findExistingDeviceIds([deviceId]);
+  if (!knownDeviceIds.has(deviceId)) {
+    throw createValidationError(`Unknown deviceId: ${deviceId}`);
+  }
+
+  const confirmTimeoutSec = resolveDirectConfirmTimeoutSec(input.confirmTimeoutSec);
+  const [deployment] = await firmwareRepo.createDeployments(
+    firmwareId,
+    [deviceId],
+    firmware.version,
+    confirmTimeoutSec,
+  );
+
+  if (!deployment?.job_id) {
+    throw createValidationError('Failed to create OTA deployment');
+  }
+
+  const downloadUrl = buildFirmwareDownloadUrl(firmwareId);
+  let command;
+  try {
+    command = await deviceCommandService.sendCommand(
+      deviceId,
+      {
+        command: 'ota_update',
+        params: {
+          jobId: deployment.job_id,
+          version: artifact.version,
+          url: downloadUrl,
+          size: artifact.size,
+          sha256: artifact.sha256,
+          force: input.force === true,
+          confirmTimeoutSec,
+        },
+      },
+      {
+        actorUserId: input.actorUserId,
+        correlationId: input.correlationId,
+      },
+    );
+  } catch (error) {
+    const reasonMessage =
+      error instanceof Error ? error.message : 'MQTT dispatch failed for ota_update';
+    await firmwareRepo.markDeploymentDispatchFailed(
+      deployment.id,
+      'dispatch_failed',
+      reasonMessage,
+    );
+    throw error;
+  }
+
+  try {
+    await firmwareRepo.markDeploymentCommandDispatched(deployment.id);
+  } catch (error) {
+    logger.error('Failed to persist OTA command dispatch timestamp', {
+      error,
+      deploymentId: deployment.id,
+      deviceId,
+      jobId: deployment.job_id,
+    });
+  }
+
+  try {
+    await firmwareRepo.setDeviceTargetFirmwareVersion([deviceId], firmware.version);
+  } catch (error) {
+    logger.error('Failed to update device target firmware inventory', {
+      error,
+      firmwareId,
+      targetVersion: firmware.version,
+      deviceIds: [deviceId],
+    });
+  }
+
+  publishEvent('firmware:assignment', {
+    firmware_id: firmwareId,
+    device_ids: [deviceId],
+    status: 'assigned',
+  });
+
+  return {
+    jobId: deployment.job_id,
+    status: 'assigned',
+    targetVersion: firmware.version,
+    commandId: command.id,
+  };
+};
+
 export const deployFirmware = async (
   firmwareId: number,
   input: {
@@ -290,6 +408,17 @@ export const deployFirmware = async (
           confirmTimeoutSec,
         },
       });
+      try {
+        await firmwareRepo.markDeploymentCommandDispatched(deployment.id);
+        deployment.command_dispatched_at = new Date();
+      } catch (error) {
+        logger.error('Failed to persist OTA command dispatch timestamp', {
+          error,
+          deploymentId: deployment.id,
+          deviceId: deployment.device_id,
+          jobId: deployment.job_id,
+        });
+      }
       dispatchedDeviceIds.push(deployment.device_id);
     } catch (error) {
       const reasonMessage =

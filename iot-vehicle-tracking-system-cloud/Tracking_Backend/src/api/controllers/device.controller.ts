@@ -18,7 +18,6 @@ import * as deviceTelemetryService from '@/domain/device/services/device-telemet
 import * as deviceCommandService from '@/domain/device/services/device-command.service';
 import * as deviceErrorService from '@/domain/device/services/device-error.service';
 import * as deviceEventLogService from '@/domain/device/services/device-event-log.service';
-import * as firmwareRepo from '@/domain/firmware/repositories/firmware.repository';
 import * as firmwareDeployService from '@/domain/firmware/services/firmware-deploy.service';
 
 const resolveDeviceId = async (rawId: string): Promise<string> => {
@@ -168,49 +167,28 @@ export const sendCommand = asyncHandler(async (req: AuthenticatedRequest, res: R
 export const triggerOta = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const deviceId = await resolveDeviceId(req.params.id);
   const firmwareVersion = req.body?.firmwareVersion as string | undefined;
-  const force = !!req.body?.force;
-  const confirmTimeoutSecRaw = Number(req.body?.confirmTimeoutSec);
 
   if (!firmwareVersion) {
     throw createValidationError('Missing firmwareVersion');
   }
 
-  const confirmTimeoutSec = Number.isFinite(confirmTimeoutSecRaw) && confirmTimeoutSecRaw > 0
-    ? Math.floor(confirmTimeoutSecRaw)
-    : 180;
-
-  const firmware = await firmwareRepo.findByVersion(firmwareVersion);
+  const firmware = await firmwareDeployService.findFirmwareByVersion(firmwareVersion);
   if (!firmware) {
     throw createValidationError(`Firmware version ${firmwareVersion} not found`);
   }
 
-  const artifact = await firmwareDeployService.getFirmwareArtifactDescriptor(firmware.id);
-  const downloadUrl = firmwareDeployService.buildFirmwareDownloadUrl(firmware.id);
-
-  const jobId = `ota_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  const result = await deviceCommandService.sendCommand(
+  const result = await firmwareDeployService.deployFirmwareToDevice(
+    firmware.id,
     deviceId,
     {
-      command: 'ota_update',
-      params: {
-        jobId,
-        version: firmware.version,
-        url: downloadUrl,
-        size: artifact.size,
-        sha256: artifact.sha256,
-        force,
-        confirmTimeoutSec,
-      },
+      force: req.body?.force === true,
+      confirmTimeoutSec: req.body?.confirmTimeoutSec,
+      actorUserId: req.user?.id,
+      correlationId: req.correlationId,
     },
-    { actorUserId: req.user?.id, correlationId: req.correlationId },
   );
 
-  sendAccepted(res, {
-    jobId,
-    status: 'assigned',
-    targetVersion: firmwareVersion,
-    commandId: result.id,
-  });
+  sendAccepted(res, result);
 });
 
 export const rollbackOta = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
