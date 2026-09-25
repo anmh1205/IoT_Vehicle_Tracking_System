@@ -1,32 +1,0 @@
-Executing action: all (aliases: build)
-Running ninja in directory E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-firmware\build
-Executing "ninja all"...
-[1/12] Performing build step for 'bootloader'
-[1/1] C:\Windows\system32\cmd.exe /C "cd /D E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-firmware\build\bootloader\esp-idf\esptool_py && C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe C:/Espressif/esp-idf-v5.5.3/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/build/bootloader/bootloader.bin"
-Bootloader binary size 0x5160 bytes. 0x2ea0 bytes (36%) free.
-[2/12] No install step for 'bootloader'
-[3/12] Completed 'bootloader'
-[4/12] Building C object esp-idf/domain-ota/CMakeFiles/__idf_domain-ota.dir/src/util_ota_http.c.obj
-[5/12] Building C object esp-idf/adapter-mqtt-sim7600-at/CMakeFiles/__idf_adapter-mqtt-sim7600-at.dir/src/mqtt_session.c.obj
-[6/12] Linking C static library esp-idf\adapter-mqtt-sim7600-at\libadapter-mqtt-sim7600-at.a
-[7/12] Building C object esp-idf/domain-ota/CMakeFiles/__idf_domain-ota.dir/src/util_ota_update.c.obj
-[8/12] Linking C static library esp-idf\domain-ota\libdomain-ota.a
-[9/12] Generating esp-idf/esp_system/ld/sections.ld
-[10/12] Linking CXX executable Tracking_Firmware.elf
-[11/12] Generating binary image from built executable
-esptool.py v4.12.dev1
-Creating esp32s3 image...
-Merged 4 ELF sections
-Successfully created esp32s3 image.
-Generated E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/build/Tracking_Firmware.bin
-[12/12] C:\Windows\system32\cmd.exe /C "cd /D E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-firmware\build\esp-idf\esptool_py && C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe C:/Espressif/esp-idf-v5.5.3/components/partition_table/check_sizes.py --offset 0x8000 partition --type app E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/build/partition_table/partition-table.bin E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/build/Tracking_Firmware.bin"
-Tracking_Firmware.bin binary size 0xc8860 bytes. Smallest app partition is 0x180000 bytes. 0xb77a0 bytes (48%) free.
-
-Project build complete. To flash, run:
- idf.py flash
-or
- idf.py -p PORT flash
-or
- python -m esptool --chip esp32s3 -b 460800 --before default_reset --after hard_reset write_flash --flash_mode dio --flash_size 16MB --flash_freq 80m 0x0 build\bootloader\bootloader.bin 0x8000 build\partition_table\partition-table.bin 0xf000 build\ota_data_initial.bin 0x20000 build\Tracking_Firmware.bin
-or from the "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-firmware\build" directory
- python -m esptool --chip esp32s3 -b 460800 --before default_reset --after hard_reset write_flash "@flash_args"
