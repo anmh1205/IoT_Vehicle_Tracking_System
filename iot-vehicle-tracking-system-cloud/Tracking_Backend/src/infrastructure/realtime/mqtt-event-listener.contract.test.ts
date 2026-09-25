@@ -29,6 +29,11 @@ describe('mqtt internal event listener session contract', () => {
     expect(listenerSource).toContain('throw error;');
   });
 
+  it('deduplicates rawdata event-log persistence by firmware message identity', () => {
+    expect(listenerSource).toContain("'mqtt_bridge_rawdata'");
+    expect(listenerSource).toContain('ON CONFLICT DO NOTHING');
+  });
+
   it('provides a stable single-instance default', () => {
     expect(envSource).toContain("fromEnv('MQTT_LISTENER_CLIENT_ID')");
     expect(envSource).toContain("'tracking-backend-listener'");
