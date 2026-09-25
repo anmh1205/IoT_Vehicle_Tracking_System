@@ -1,4 +1,8 @@
 import { findMany } from '@/infrastructure/database/queries';
+import {
+  eventLogPositionExistsSql,
+  eventLogPositionValueSql,
+} from '@/shared/utils/event-log-telemetry-sql.util';
 
 interface TelemetryRow {
   telemetry_timestamp: Date;
@@ -22,10 +26,8 @@ const DEFAULT_METRIC = 'imuAccelDeltaMps2';
 const TELEMETRY_TIMESTAMP_SQL = 'COALESCE(device_timestamp, server_timestamp)';
 const SESSION_TELEMETRY_TIMESTAMP_SQL = 'COALESCE(e.device_timestamp, e.server_timestamp)';
 const SESSION_CLOSE_TIMESTAMP_SQL = 'COALESCE(s.session_end, s.server_session_end)';
-const SESSION_LATITUDE_SQL =
-  "COALESCE(e.context#>>'{raw_payload,data,latitude}', e.context->>'latitude', e.metadata->>'latitude')";
-const SESSION_LONGITUDE_SQL =
-  "COALESCE(e.context#>>'{raw_payload,data,longitude}', e.context->>'longitude', e.metadata->>'longitude')";
+const SESSION_LATITUDE_SQL = eventLogPositionValueSql('latitude', 'e');
+const SESSION_LONGITUDE_SQL = eventLogPositionValueSql('longitude', 'e');
 const SESSION_LOCAL_KEY_SQL = "e.context#>>'{raw_payload,local_session_key}'";
 const SESSION_BOOT_ID_SQL =
   "COALESCE(e.context#>>'{raw_payload,boot_id}', e.context#>>'{raw_payload,metadata,boot_id}')";
@@ -55,10 +57,8 @@ const METRIC_SQL: Record<string, { value: string; exists: string }> = {
       "((context#>>'{raw_payload,data,imu_accel_delta_mps2}') IS NOT NULL OR context ? 'imu_accel_delta_mps2' OR metadata ? 'imu_accel_delta_mps2' OR context ? 'vibration' OR metadata ? 'vibration')",
   },
   speed: {
-    value:
-      "COALESCE(context#>>'{raw_payload,data,speed}', context->>'speed', metadata->>'speed')",
-    exists:
-      "((context#>>'{raw_payload,data,speed}') IS NOT NULL OR context ? 'speed' OR metadata ? 'speed')",
+    value: eventLogPositionValueSql('speed'),
+    exists: eventLogPositionExistsSql('speed'),
   },
   vehicleBattery: {
     value:
@@ -85,16 +85,12 @@ const METRIC_SQL: Record<string, { value: string; exists: string }> = {
       "((context#>>'{raw_payload,diagnostics,signals,coolant_c}') IS NOT NULL OR (context#>>'{diagnostics,signals,coolant_c}') IS NOT NULL OR context ? 'temperature' OR (metadata#>>'{raw_payload,diagnostics,signals,coolant_c}') IS NOT NULL OR (metadata#>>'{diagnostics,signals,coolant_c}') IS NOT NULL OR metadata ? 'temperature')",
   },
   latitude: {
-    value:
-      "COALESCE(context#>>'{raw_payload,data,latitude}', context->>'latitude', metadata->>'latitude')",
-    exists:
-      "((context#>>'{raw_payload,data,latitude}') IS NOT NULL OR context ? 'latitude' OR metadata ? 'latitude')",
+    value: eventLogPositionValueSql('latitude'),
+    exists: eventLogPositionExistsSql('latitude'),
   },
   longitude: {
-    value:
-      "COALESCE(context#>>'{raw_payload,data,longitude}', context->>'longitude', metadata->>'longitude')",
-    exists:
-      "((context#>>'{raw_payload,data,longitude}') IS NOT NULL OR context ? 'longitude' OR metadata ? 'longitude')",
+    value: eventLogPositionValueSql('longitude'),
+    exists: eventLogPositionExistsSql('longitude'),
   },
   errorCode: {
     value:
@@ -193,7 +189,7 @@ export const getSessionTelemetry = async (deviceId: string, sessionId: number) =
        ${SESSION_TELEMETRY_TIMESTAMP_SQL} AS telemetry_timestamp,
        ${SESSION_LATITUDE_SQL} AS latitude,
        ${SESSION_LONGITUDE_SQL} AS longitude,
-       COALESCE(e.context#>>'{raw_payload,data,speed}', e.context->>'speed', e.metadata->>'speed') AS speed,
+       ${eventLogPositionValueSql('speed', 'e')} AS speed,
        COALESCE(e.context#>>'{raw_payload,data,device_battery}', e.context->>'device_battery', e.metadata->>'device_battery') AS device_battery,
        COALESCE(e.context#>>'{raw_payload,data,vehicle_battery}', e.context->>'vehicle_battery', e.metadata->>'vehicle_battery') AS vehicle_battery,
        COALESCE(e.context->>'temperature', e.metadata->>'temperature', e.context#>>'{raw_payload,diagnostics,signals,coolant_c}', e.context#>>'{diagnostics,signals,coolant_c}') AS temperature,
