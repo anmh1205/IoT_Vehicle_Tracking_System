@@ -529,7 +529,7 @@ export const handleStatus = async (
       bootId: sessionBootId,
       runtimeBootId: metadataBootId ?? sessionBootId,
     });
-    await updateDeviceStatus(payload.device_id, effectiveCachedStatus, receivedAtMs, runtimeState);
+    await updateDeviceStatus(payload.device_id, effectiveCachedStatus, receivedAtMs, runtimeState, timestampMs);
   }
 
   const effectiveStatus = boundaryEvent === 'ended' ? 'stopped' : effectiveCachedStatus;
