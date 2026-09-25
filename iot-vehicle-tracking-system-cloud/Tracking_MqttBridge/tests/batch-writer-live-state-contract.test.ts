@@ -46,3 +46,15 @@ test('batch writer keeps last_seen monotonic even when a live mutation is reject
     /last_seen_at = GREATEST\([\s\S]*?to_timestamp\(\$6 \/ 1000\.0\)[\s\S]*?\)/,
   );
 });
+
+
+test('batch writer keeps server-time gate separate from device-event watermark', () => {
+  assert.match(
+    updateSql,
+    /payload_updated_at = CASE[\s\S]*?to_timestamp\(\$6 \/ 1000\.0\)[\s\S]*?to_timestamp\(\$13 \/ 1000\.0\)/,
+  );
+  assert.match(
+    updateSql,
+    /last_seen_at = GREATEST[\s\S]*?to_timestamp\(\$6 \/ 1000\.0\)/,
+  );
+});
