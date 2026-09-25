@@ -3,6 +3,7 @@
 import { ChevronDown, LogOut, UserCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { authServices } from '@/lib/api/auth';
+import { unregisterNativePushToken } from '@/lib/native-push';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { UserAvatar } from '@/components/common/user-avatar';
 import {
@@ -29,6 +30,12 @@ export const NavUser = () => {
   const email = user?.email || user?.username || '';
 
   const handleLogout = async () => {
+    try {
+      await unregisterNativePushToken();
+    } catch {
+      // Best-effort: logout must continue even if native push cleanup fails.
+    }
+
     try {
       await authServices.logout();
     } catch {

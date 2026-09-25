@@ -1048,6 +1048,25 @@ export const spec = {
     '/notifications/stats': {
       get: { tags: ['Notifications'], summary: 'Get notification statistics', responses: ok() },
     },
+    '/notifications/push-token': {
+      post: {
+        tags: ['Notifications'],
+        summary: 'Register or refresh a native push token',
+        requestBody: jsonBody({
+          token: { type: 'string' },
+          deviceInfo: { type: 'object', additionalProperties: true },
+        }),
+        responses: crud('Push token registered'),
+      },
+      delete: {
+        tags: ['Notifications'],
+        summary: 'Unregister a native push token',
+        requestBody: jsonBody({
+          token: { type: 'string' },
+        }),
+        responses: crud('Push token unregistered'),
+      },
+    },
     '/notifications/read-all': {
       put: { tags: ['Notifications'], summary: 'Mark all notifications as read', responses: ok() },
     },

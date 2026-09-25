@@ -181,6 +181,7 @@ CREATE TABLE IF NOT EXISTS fcm_tokens (
 
 CREATE INDEX IF NOT EXISTS idx_fcm_tokens_user_id ON fcm_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_fcm_tokens_active ON fcm_tokens(user_id) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_fcm_tokens_token_active ON fcm_tokens(token) WHERE deleted_at IS NULL;
 
 -- -----------------------------------------------------------------------------
 -- user_online_status

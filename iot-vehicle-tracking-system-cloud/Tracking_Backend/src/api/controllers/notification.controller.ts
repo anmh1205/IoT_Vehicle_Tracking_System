@@ -4,6 +4,7 @@ import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { sendOk } from '@/shared/utils/response.util';
 import { createValidationError } from '@/shared/utils/errors.util';
 import * as notificationService from '@/domain/notification/services/notification.service';
+import { pushTokenSchema } from '@/api/validators/notification.validator';
 
 export const listNotifications = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user!.id;
@@ -66,4 +67,29 @@ export const getStats = asyncHandler(async (req: AuthenticatedRequest, res: Resp
   const userId = req.user!.id;
   const stats = await notificationService.getNotificationStats(userId);
   sendOk(res, stats);
+});
+
+
+export const registerPushToken = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const parsed = pushTokenSchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw createValidationError('Invalid push token payload');
+  }
+
+  await notificationService.registerPushToken(
+    req.user!.id,
+    parsed.data.token,
+    parsed.data.deviceInfo,
+  );
+  sendOk(res, { success: true });
+});
+
+export const unregisterPushToken = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const parsed = pushTokenSchema.pick({ token: true }).safeParse(req.body);
+  if (!parsed.success) {
+    throw createValidationError('Invalid push token payload');
+  }
+
+  await notificationService.unregisterPushToken(req.user!.id, parsed.data.token);
+  sendOk(res, { success: true });
 });

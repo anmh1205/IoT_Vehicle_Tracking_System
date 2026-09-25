@@ -3,6 +3,7 @@ import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { QueryProvider } from './query-provider';
 import { SocketProvider } from './socket-provider';
+import { NativePushProvider } from './native-push-provider';
 import { SessionGuard } from '@/components/auth/session-guard';
 import { ActiveTheme } from '@/components/active-theme';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -19,7 +20,9 @@ export const Providers = ({
         <TooltipProvider>
           <QueryProvider>
             <SessionGuard>
-              <SocketProvider>{children}</SocketProvider>
+              <NativePushProvider>
+                <SocketProvider>{children}</SocketProvider>
+              </NativePushProvider>
             </SessionGuard>
           </QueryProvider>
         </TooltipProvider>
