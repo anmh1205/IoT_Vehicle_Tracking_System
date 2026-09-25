@@ -299,10 +299,12 @@ test('touchDeviceSession ignores a duplicate message without mutating aggregates
 test('ensureDeviceSession returns sessions atomically retired by a replacement identity', async (t) => {
   const originalConnect = writablePool.connect;
   const statements: string[] = [];
+  const paramsSeen: Array<unknown[] | undefined> = [];
 
   writablePool.connect = async () => ({
-    query: async (sql) => {
+    query: async (sql, params) => {
       statements.push(sql);
+      paramsSeen.push(params);
 
       if (
         /FROM device_sessions\s+WHERE device_id = \$1\s+AND firmware_boot_id = \$2\s+AND local_session_key = \$3/.test(sql)
@@ -376,4 +378,5 @@ test('ensureDeviceSession returns sessions atomically retired by a replacement i
     (sql) => /UPDATE devices[\s\S]+total_runtime_seconds/.test(sql),
   );
   assert.ok(runtimeUpdateIndex >= 0);
+  assert.deepEqual(paramsSeen[runtimeUpdateIndex], ['TRACKER_001', 123]);
 });
