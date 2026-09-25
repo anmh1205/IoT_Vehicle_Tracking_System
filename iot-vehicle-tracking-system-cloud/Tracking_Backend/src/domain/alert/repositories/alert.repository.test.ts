@@ -102,8 +102,9 @@ describe('alert.repository', () => {
 
     expect(result.created).toBe(false);
     expect(result.alert.id).toBe(41);
-    expect(query.mock.calls[1]?.[0]).toContain('ON CONFLICT (source_message_id)');
-    expect(query.mock.calls[2]?.[0]).toContain('WHERE source_message_id = $1');
-    expect(query.mock.calls[2]?.[1]).toEqual(['boot-1-event-9']);
+    expect(query.mock.calls[1]?.[0]).toContain('ON CONFLICT (device_id, source_message_id, alert_type, title)');
+    expect(query.mock.calls[2]?.[0]).toContain('source_message_id = $2');
+    expect(query.mock.calls[2]?.[0]).toContain('alert_type = $3');
+    expect(query.mock.calls[2]?.[1]).toEqual(['TRACKER_001', 'boot-1-event-9', 'maintenance_due', 'Device warning']);
     expect(release).toHaveBeenCalledOnce();
   });
