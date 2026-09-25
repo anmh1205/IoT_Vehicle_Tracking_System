@@ -807,6 +807,7 @@ static void state_machine_persist_active_session(void) {
         .active = true,
         .local_session_key = s_session_id,
         .canonical_session_id = s_canonical_session_id,
+        .start_boundary_pending = s_session_start_boundary_pending,
     };
     util_copy_string(context.boot_id, sizeof(context.boot_id), s_session_boot_id);
     esp_err_t err = nvs_config_save_session_context(&context);
@@ -853,11 +854,13 @@ static void state_machine_restore_session_context_from_nvs(void) {
         util_copy_string(s_session_boot_id, sizeof(s_session_boot_id), s_boot_id);
     }
     s_session_restore_pending = true;
+    s_session_start_boundary_pending = context.start_boundary_pending;
     ESP_LOGI(TAG,
-             "event=session_candidate_restored local=%lu canonical=%llu boot_id=%s",
+             "event=session_candidate_restored local=%lu canonical=%llu boot_id=%s start_pending=%d",
              (unsigned long)s_session_id,
              (unsigned long long)s_canonical_session_id,
-             s_session_boot_id);
+             s_session_boot_id,
+             s_session_start_boundary_pending ? 1 : 0);
 }
 
 /**
@@ -886,8 +889,11 @@ static void state_machine_resume_active_session(void) {
     session_mgr_restore_active(s_session_id);
     offline_queue_set_session(s_session_id);
     s_session_restore_pending = false;
-    // A reboot-resumed drive already had its original start boundary.
-    s_session_start_boundary_pending = false;
+    /*
+     * Preserve the persisted delivery state. A normal resumed drive has this
+     * false, while a reset that happened before durable start acceptance keeps
+     * it true and retries the authoritative boundary.
+     */
     ESP_LOGI(TAG,
              "event=session_resumed local=%lu canonical=%llu boot_id=%s",
              (unsigned long)s_session_id,
@@ -1048,6 +1054,12 @@ static void state_machine_publish_running_status_if_needed(bool started_session)
     if (s_session_start_boundary_pending) {
         if (state_machine_publish_status("running", "started")) {
             s_session_start_boundary_pending = false;
+            /*
+             * Persist delivery completion before relying on the RAM flag. If
+             * this NVS write fails, reboot recovery conservatively retries the
+             * idempotent start boundary rather than losing it.
+             */
+            state_machine_persist_active_session();
             s_publish_status = TRACKER_PUBLISH_STATUS_RUNNING;
         } else {
             ESP_LOGW(TAG,
