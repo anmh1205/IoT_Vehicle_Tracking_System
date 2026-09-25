@@ -77,7 +77,7 @@ export const updateCommandStatus = async (
   id: number,
   status: DeviceCommandStatus,
   response?: string | null,
-  options?: { markAcknowledged?: boolean },
+  options?: { markAcknowledged?: boolean; expectedDeviceId?: string },
 ): Promise<DeviceCommandRecord | null> => {
   const result = await pool.query<DeviceCommandRow>(
     `UPDATE device_commands
@@ -89,8 +89,15 @@ export const updateCommandStatus = async (
           END,
           updated_at = NOW()
       WHERE id = $1
+        AND ($5::varchar IS NULL OR device_id = $5::varchar)
       RETURNING id, device_id, command, params, status, sent_at, acked_at, response`,
-    [id, status, response ?? null, options?.markAcknowledged ?? false],
+    [
+      id,
+      status,
+      response ?? null,
+      options?.markAcknowledged ?? false,
+      options?.expectedDeviceId ?? null,
+    ],
   );
 
   return result.rows[0] ? mapRow(result.rows[0]) : null;
