@@ -534,6 +534,29 @@ export const handleStatus = async (
 
   const effectiveStatus = boundaryEvent === 'ended' ? 'stopped' : effectiveCachedStatus;
 
+  /*
+   * A mid-session reboot can restore the durable local/boot identity while an
+   * older firmware build (or a failed canonical NVS commit) leaves the
+   * canonical ID empty. When that existing session resolves cleanly, repair
+   * the device-side mapping on the low-rate status stream instead of spamming
+   * an assignment for every rawdata sample.
+   */
+  if (
+    effectiveStatus === 'running' &&
+    boundaryEvent !== 'started' &&
+    resolvedSessionId !== null &&
+    payloadCanonicalSessionId === null &&
+    localSessionKey !== undefined &&
+    sessionBootId !== undefined
+  ) {
+    publishSessionAssignment({
+      deviceId: payload.device_id,
+      localSessionKey,
+      canonicalSessionId: String(resolvedSessionId),
+      bootId: sessionBootId,
+    });
+  }
+
   writeDeviceEvent(
     payload.device_id,
     'status_change',
