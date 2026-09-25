@@ -75,7 +75,18 @@ export const getSessionStats = async (
            ),
            0
          ) AS avg_uptime,
-         COALESCE(AVG(avg_imu_accel_delta_mps2), 0) AS avg_imu_accel_delta_mps2,
+         COALESCE(
+           SUM(
+             avg_imu_accel_delta_mps2
+             * GREATEST(COALESCE(imu_accel_samples_count, 0), 1)
+           ) FILTER (WHERE avg_imu_accel_delta_mps2 IS NOT NULL)
+           / NULLIF(
+               SUM(GREATEST(COALESCE(imu_accel_samples_count, 0), 1))
+                 FILTER (WHERE avg_imu_accel_delta_mps2 IS NOT NULL),
+               0
+             ),
+           0
+         ) AS avg_imu_accel_delta_mps2,
          COALESCE(SUM(data_points_count), 0)::int AS total_data_points
        FROM device_sessions
        WHERE device_id = $1`,

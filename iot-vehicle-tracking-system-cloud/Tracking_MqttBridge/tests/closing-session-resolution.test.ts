@@ -7,6 +7,7 @@ import {
   findClosingDeviceSessionIdByIdentity,
   findDeviceSessionIdByIdentity,
   pool,
+  touchDeviceSession,
 } from '../src/infrastructure/database';
 
 const writablePool = pool as unknown as {
@@ -205,4 +206,43 @@ test('ensureHistoricalDeviceSession never supersedes a newer running session', a
     statements.some((sql) => /UPDATE device_sessions[\s\S]+status = 'completed'/.test(sql)),
     false,
   );
+});
+
+test('touchDeviceSession uses cumulative metric-specific averages and IMU extrema', async (t) => {
+  const originalQuery = writablePool.query;
+  const statements: string[] = [];
+
+  writablePool.query = async (sql) => {
+    statements.push(sql);
+    if (/UPDATE device_sessions/.test(sql)) {
+      return { rows: [{ id: 123 }] } as any;
+    }
+    return { rows: [] } as any;
+  };
+
+  t.after(() => {
+    writablePool.query = originalQuery;
+  });
+
+  await touchDeviceSession({
+    deviceId: 'TRACKER_001',
+    sessionId: 123,
+    deviceTimestampMs: Date.parse('2026-05-10T10:00:00.000Z'),
+    serverTimestampMs: Date.parse('2026-05-10T10:00:01.000Z'),
+    imuAccelDeltaMps2: 1.5,
+    vehicleBattery: 13.4,
+    deviceBattery: 4.1,
+    updateDeviceState: false,
+  });
+
+  const sql = statements.find((statement) => /UPDATE device_sessions/.test(statement)) ?? '';
+  assert.match(sql, /imu_accel_samples_count/);
+  assert.match(sql, /vehicle_battery_samples_count/);
+  assert.match(sql, /device_battery_samples_count/);
+  assert.match(sql, /avg_imu_accel_delta_mps2 \* imu_accel_samples_count/);
+  assert.match(sql, /avg_vehicle_battery \* vehicle_battery_samples_count/);
+  assert.match(sql, /avg_device_battery \* device_battery_samples_count/);
+  assert.match(sql, /min_imu_accel_delta_mps2 = CASE/);
+  assert.match(sql, /max_imu_accel_delta_mps2 = CASE/);
+  assert.equal(/avg_imu_accel_delta_mps2 \+ \$3::numeric\) \/ 2/.test(sql), false);
 });

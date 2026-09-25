@@ -88,6 +88,9 @@ export interface DeviceSession {
   max_vibration?: number | null;
   avg_vehicle_battery: number | null;
   avg_device_battery: number | null;
+  imu_accel_samples_count?: number | null;
+  vehicle_battery_samples_count?: number | null;
+  device_battery_samples_count?: number | null;
   data_points_count: number;
   gps_points_count?: number | null;
   last_update: Date | null;
