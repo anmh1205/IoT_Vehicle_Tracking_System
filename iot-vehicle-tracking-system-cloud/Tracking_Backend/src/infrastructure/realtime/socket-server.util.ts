@@ -313,6 +313,9 @@ const registerEventBridges = (server: TypedIOServer): void => {
   subscribeEvent('device:position', (payload) => emitDeviceEvent(server, 'device:position', payload));
   subscribeEvent('device:session_start', (payload) => emitDeviceEvent(server, 'device:session_start', payload));
   subscribeEvent('device:session_end', (payload) => emitDeviceEvent(server, 'device:session_end', payload));
+  subscribeEvent('device:session_discarded', (payload) =>
+    emitDeviceEvent(server, 'device:session_discarded', payload),
+  );
 
   subscribeEvent('command:ack', (payload) => {
     const deviceId = normalizeDeviceId(payload.device_id);
