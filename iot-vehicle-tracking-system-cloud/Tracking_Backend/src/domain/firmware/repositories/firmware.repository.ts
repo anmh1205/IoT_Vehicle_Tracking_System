@@ -154,11 +154,11 @@ export const createDeployments = async (
         $${paramIndex++},
         'assigned',
         0,
-        ${paramIndex++},
+        $${paramIndex++},
         NOW(),
         NULL,
         NOW(),
-        ${paramIndex++},
+        $${paramIndex++},
         NOW(),
         NOW(),
         NOW()
