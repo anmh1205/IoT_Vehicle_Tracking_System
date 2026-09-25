@@ -56,6 +56,11 @@ export const socketAuthMiddleware = async (
       return;
     }
 
+    if (user.status !== 'active') {
+      next(new Error('Account is not active'));
+      return;
+    }
+
     if (!isUserRole(user.role)) {
       next(new Error('Invalid user role'));
       return;

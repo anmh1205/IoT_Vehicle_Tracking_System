@@ -7,6 +7,7 @@ import { hashPassword, sanitizeUser } from '@/domain/auth/helpers/auth.helpers';
 import * as userRepo from '@/domain/auth/repositories/user.repository';
 import * as sessionRepo from '@/domain/auth/repositories/user-session.repository';
 import { logger } from '@/infrastructure/logger';
+import { publishEvent } from '@/infrastructure/realtime';
 import type {
   UserPublic,
   CreateUserInput,
@@ -152,6 +153,12 @@ export const updateUser = async (id: number, input: UpdateUserInput): Promise<Us
     throw createNotFoundError(`User with id ${id} not found`);
   }
 
+  const accessChanged =
+    (input.status !== undefined && input.status !== existing.status) ||
+    (input.role !== undefined && input.role !== existing.role) ||
+    (input.deviceAccessMode !== undefined &&
+      input.deviceAccessMode !== existing.device_access_mode);
+
   const updated = await userRepo.update(id, {
     full_name: input.fullName,
     role: input.role,
@@ -163,6 +170,12 @@ export const updateUser = async (id: number, input: UpdateUserInput): Promise<Us
 
   if (!updated) {
     throw createNotFoundError(`User with id ${id} not found`);
+  }
+
+  if (accessChanged) {
+    await sessionRepo.deactivateAllForUser(id);
+    publishEvent('auth:access-revoked', { userId: id });
+    logger.info(`Access change revoked active sessions for user "${updated.username}"`);
   }
 
   logger.info(`User "${updated.username}" updated`);

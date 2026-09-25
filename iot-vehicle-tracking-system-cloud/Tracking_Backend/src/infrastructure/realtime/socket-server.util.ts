@@ -461,6 +461,14 @@ const registerEventBridges = (server: TypedIOServer): void => {
     recordEventEmission('simulator:status');
   });
 
+  subscribeEvent('auth:access-revoked', ({ userId }) => {
+    const room = `user:${userId}`;
+    for (const namespaceKey of WS_NAMESPACES) {
+      server.of(`/${namespaceKey}`).in(room).disconnectSockets(true);
+    }
+    log.info('Disconnected realtime sockets after user access change', { userId });
+  });
+
   subscribeEvent('system-admin:settings', (payload) => {
     server.of('/dashboard').to(SYSTEM_ADMIN_ROOM).emit('system-admin:settings', payload);
     recordEventEmission('system-admin:settings');
