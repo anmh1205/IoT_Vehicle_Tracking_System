@@ -760,7 +760,7 @@ export const touchDeviceSession = async (params: {
      * only to this savepoint preserves the already-claimed message receipt.
      */
     await client.query('SAVEPOINT session_aggregate_schema');
-    let touched;
+    let touched: { rowCount: number | null };
     try {
       touched = await client.query(
       `UPDATE device_sessions
