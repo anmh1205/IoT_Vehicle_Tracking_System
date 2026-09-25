@@ -85,6 +85,28 @@ describe('trip-auto.service', () => {
     expect(params).toEqual([9, '2026-09-25T02:00:00.000Z']);
   });
 
+  it('cancels the exact auto-trip when its source session is discarded', async () => {
+    vi.mocked(findOne).mockResolvedValueOnce({
+      id: 12,
+      trip_code: 'AUTO-DEV-001-SESSION-42',
+      status: 'in_progress',
+      actual_start: new Date('2026-09-25T01:00:00.000Z'),
+    } as never);
+    vi.mocked(updateOne).mockResolvedValue({ id: 12 } as never);
+
+    await handleSessionBoundaryEvent({
+      device_id: 'DEV-001',
+      session_id: 42,
+      action: 'discarded',
+      occurred_at: '2026-09-25T01:00:05.000Z',
+    });
+
+    expect(updateOne).toHaveBeenCalledTimes(1);
+    const [sql, params] = vi.mocked(updateOne).mock.calls[0];
+    expect(sql).toContain("status = 'cancelled'");
+    expect(params).toEqual([12, '2026-09-25T01:00:05.000Z']);
+  });
+
   it('does not close a different active trip when a delayed session-end arrives', async () => {
     vi.mocked(findOne).mockResolvedValueOnce(null);
 
