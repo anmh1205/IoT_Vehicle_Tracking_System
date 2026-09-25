@@ -6,7 +6,6 @@ import { handleSessionBoundaryEvent } from '@/domain/trip/services/trip-auto.ser
 import * as alertCrudService from '@/domain/alert/services/alert-crud.service';
 import * as deviceCommandRepo from '@/domain/device/repositories/device-command.repository';
 import { pool } from '@/infrastructure/database/pool';
-import { createMqttClientId } from '@/infrastructure/mqtt-client-id.util';
 
 const log = createLogger('mqtt-listener');
 
@@ -385,7 +384,7 @@ export const initMqttEventListener = (): void => {
   client = mqtt.connect(brokerUrl, {
     username: mqttConfig.username,
     password: mqttConfig.password,
-    clientId: createMqttClientId('backend-listener'),
+    clientId: mqttConfig.listenerClientId,
     reconnectPeriod: 5000,
     clean: false,
     rejectUnauthorized: mqttConfig.rejectUnauthorized,
