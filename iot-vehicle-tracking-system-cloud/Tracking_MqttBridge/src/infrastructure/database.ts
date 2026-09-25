@@ -517,7 +517,7 @@ export const ensureHistoricalDeviceSession = async (
          updated_at
        )
        VALUES ($1, 'running', $2, $2, $3, $4, 'server', 'firmware',
-               'historical_replay_ignition_on', 0, $2, NOW(), NOW())
+               'historical_replay_ignition_on', 0, $2, $2, NOW())
        RETURNING id, status`,
       [deviceId, occurredAt, localSessionKey, firmwareBootId],
     );
