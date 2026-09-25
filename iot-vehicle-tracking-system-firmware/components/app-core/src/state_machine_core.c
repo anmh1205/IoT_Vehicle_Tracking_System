@@ -1020,10 +1020,25 @@ esp_err_t state_machine_apply_session_assignment(uint32_t local_session_key,
         return ESP_OK;
     }
 
+    const uint64_t previous_canonical_session_id = s_canonical_session_id;
     s_canonical_session_id = canonical_session_id;
-    (void)state_machine_persist_active_session();
+    if (!state_machine_persist_active_session()) {
+        /*
+         * The canonical mapping is cloud identity, not a best-effort cache.
+         * Roll RAM back to the value represented by the durable NVS context so
+         * an execution success can never claim a mapping that reboot would lose.
+         */
+        s_canonical_session_id = previous_canonical_session_id;
+        ESP_LOGW(TAG,
+                 "event=session_canonical_assign_failed local=%lu canonical=%llu boot_id=%s reason=persist_failed",
+                 (unsigned long)local_session_key,
+                 (unsigned long long)canonical_session_id,
+                 session_boot_id);
+        return ESP_FAIL;
+    }
+
     ESP_LOGI(TAG,
-             "event=session_canonical_assigned local=%lu canonical=%llu boot_id=%s",
+             "event=session_canonical_assigned local=%lu canonical=%llu boot_id=%s durable=1",
              (unsigned long)s_session_id,
              (unsigned long long)s_canonical_session_id,
              s_session_boot_id);
