@@ -321,8 +321,13 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
                 s_gnss_poll_fail_streak = 0;
             } else {
                 s_gnss_poll_fail_streak += 1;
-                s_telemetry.gnss.fix_valid = false;
-                s_telemetry.gnss.timestamp_ms = 0;
+                /*
+                 * A failed poll invalidates the whole position sample, not just
+                 * its fix bit. Keeping the previous lat/lon/speed/course while
+                 * stamping a new timestamp would turn stale coordinates into a
+                 * fresh-looking cloud point.
+                 */
+                memset(&s_telemetry.gnss, 0, sizeof(s_telemetry.gnss));
                 if (s_gnss_poll_fail_streak >= TRACKER_GNSS_FAIL_REARM_THRESHOLD &&
                     state_machine_try_rearm_gnss("poll_fail_threshold")) {
                     s_gnss_poll_fail_streak = 0;
