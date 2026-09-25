@@ -142,13 +142,13 @@ const buildFilterSql = (
   }
 
   if (filters.to) {
-    conditions.push(`a.created_at <= ${paramIndex}`);
+    conditions.push(`a.created_at <= $${paramIndex}`);
     values.push(filters.to);
     paramIndex += 1;
   }
 
   if (filters.isRead !== undefined) {
-    conditions.push(`COALESCE(state.is_read, FALSE) = ${paramIndex}`);
+    conditions.push(`COALESCE(state.is_read, FALSE) = $${paramIndex}`);
     values.push(filters.isRead);
   }
 
