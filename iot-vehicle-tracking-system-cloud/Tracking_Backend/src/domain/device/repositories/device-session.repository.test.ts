@@ -52,7 +52,6 @@ describe('device-session.repository', () => {
     expect(sql).toContain('gps_points_count');
     expect(params).toEqual(['TRACKER_001']);
   });
-});
 
   it('weights device IMU average by session sample counts', async () => {
     vi.mocked(pool.query).mockResolvedValue({
@@ -73,3 +72,4 @@ describe('device-session.repository', () => {
     expect(sql).not.toContain('AVG(avg_imu_accel_delta_mps2)');
     expect(params).toEqual(['TRACKER_001']);
   });
+});
