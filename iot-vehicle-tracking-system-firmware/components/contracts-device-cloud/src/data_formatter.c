@@ -598,9 +598,12 @@ char *data_format_rawdata(const config_t *cfg,
     cJSON_AddNumberToObject(data, "imu_accel_delta_mps2", telemetry->imu_accel_delta_mps2);
     cJSON_AddNumberToObject(data, "vehicle_battery", telemetry->vehicle_battery);
     cJSON_AddNumberToObject(data, "device_battery", telemetry->device_battery);
-    bool has_valid_gnss_fix = telemetry->gnss.fix_valid &&
-                              telemetry->gnss.latitude != 0.0 &&
-                              telemetry->gnss.longitude != 0.0;
+    /*
+     * The modem parser owns fix validity. A coordinate component equal to zero
+     * is still geographically valid on the equator or prime meridian, so do
+     * not use zero as a no-fix sentinel here.
+     */
+    bool has_valid_gnss_fix = telemetry->gnss.fix_valid;
     if (has_valid_gnss_fix) {
         cJSON_AddNumberToObject(data, "latitude", telemetry->gnss.latitude);
         cJSON_AddNumberToObject(data, "longitude", telemetry->gnss.longitude);
