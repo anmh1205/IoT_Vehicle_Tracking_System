@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   closePool,
   completeDeviceSession,
+  ensureHistoricalDeviceSession,
   findClosingDeviceSessionIdByIdentity,
   findDeviceSessionIdByIdentity,
   pool,
@@ -163,4 +164,43 @@ test('completeDeviceSession reports duplicate completed boundaries as no-op', as
 
   assert.deepEqual(result, { sessionId: 654, discarded: false, completedNow: false });
   assert.equal(statements.some((sql) => /UPDATE device_sessions\s+SET\s+status = 'completed'/.test(sql)), false);
+});
+
+test('ensureHistoricalDeviceSession never supersedes a newer running session', async (t) => {
+  const originalConnect = writablePool.connect;
+  const statements: string[] = [];
+
+  writablePool.connect = async () => ({
+    query: async (sql) => {
+      statements.push(sql);
+      if (/WHERE device_id = \$1\s+AND firmware_boot_id = \$2\s+AND local_session_key = \$3/.test(sql)) {
+        return { rows: [] };
+      }
+      if (/INSERT INTO device_sessions/.test(sql)) {
+        return { rows: [{ id: 777, status: 'running' }] };
+      }
+      return { rows: [] };
+    },
+    release: () => undefined,
+  });
+
+  t.after(() => {
+    writablePool.connect = originalConnect;
+  });
+
+  const result = await ensureHistoricalDeviceSession(
+    'TRACKER_001',
+    Date.parse('2026-05-10T08:00:00.000Z'),
+    { localSessionKey: 17, bootId: 'old-boot' },
+  );
+
+  assert.deepEqual(result, { sessionId: 777, isNew: true, status: 'running' });
+  assert.equal(
+    statements.some((sql) => /end_reason = COALESCE\(end_reason, 'superseded'\)/.test(sql)),
+    false,
+  );
+  assert.equal(
+    statements.some((sql) => /UPDATE device_sessions[\s\S]+status = 'completed'/.test(sql)),
+    false,
+  );
 });
