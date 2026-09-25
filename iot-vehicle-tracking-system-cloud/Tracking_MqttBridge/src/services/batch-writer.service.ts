@@ -10,6 +10,7 @@ interface DeviceUpdate {
   speed?: number;
   sessionId?: number;
   serverTimestamp: number;
+  payloadTimestamp: number;
   runtimeState?: RuntimeStateSnapshot | null;
 }
 
@@ -212,7 +213,15 @@ const flush = async (): Promise<void> => {
                last_seen_at = GREATEST(
                  COALESCE(last_seen_at, to_timestamp($6 / 1000.0)),
                  to_timestamp($6 / 1000.0)
-               )
+               ),
+               payload_updated_at = CASE
+                 WHEN to_timestamp($6 / 1000.0) >= COALESCE(last_seen_at, '-infinity'::timestamptz)
+                 THEN GREATEST(
+                   COALESCE(payload_updated_at, to_timestamp($13 / 1000.0)),
+                   to_timestamp($13 / 1000.0)
+                 )
+                 ELSE payload_updated_at
+               END
            WHERE device_id = $1`,
           [
             update.deviceId,
@@ -227,6 +236,7 @@ const flush = async (): Promise<void> => {
             update.runtimeState?.vehicle_state ?? null,
             update.runtimeState?.device_state ?? null,
             update.runtimeState?.sleep_mode ?? null,
+            update.payloadTimestamp,
           ],
         );
 
