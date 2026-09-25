@@ -196,6 +196,24 @@ export const observeRuntimeBootAndMarkStaleAcceptedIndeterminate = async (
   return result.rows.map(mapRow);
 };
 
+export const listPendingCommandsBefore = async (
+  cutoff: Date,
+  limit = 100,
+): Promise<DeviceCommandRecord[]> => {
+  const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 500);
+  const result = await pool.query<DeviceCommandRow>(
+    `SELECT id, device_id, command, params, status, sent_at, acked_at, response
+     FROM device_commands
+     WHERE status = 'pending'
+       AND created_at < $1
+     ORDER BY created_at ASC, id ASC
+     LIMIT $2`,
+    [cutoff.toISOString(), safeLimit],
+  );
+
+  return result.rows.map(mapRow);
+};
+
 export const listDeviceCommands = async (deviceId: string, page: number, limit: number) => {
   const offset = Math.max(page - 1, 0) * limit;
 
