@@ -979,7 +979,6 @@ export const handleRawData = async (
       localSessionKey,
       canonicalSessionId,
       bootId: sessionBootId,
-      runtimeBootId: metadataBootId ?? sessionBootId,
     });
 
     if (ensuredSession.isNew) {
