@@ -45,6 +45,49 @@ describe('trip-auto.service', () => {
     ]);
   });
 
+  it('reconstructs an older historical trip behind a newer active trip', async () => {
+    vi.mocked(findOne)
+      .mockResolvedValueOnce({ vehicle_id: 'VEH-001' })
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: 99,
+        trip_code: 'AUTO-DEV-001-SESSION-99',
+        status: 'in_progress',
+        actual_start: new Date('2026-09-25T10:00:00.000Z'),
+      } as never);
+    vi.mocked(insertOne).mockResolvedValue({ id: 98 } as never);
+
+    await handleSessionBoundaryEvent({
+      device_id: 'DEV-001',
+      session_id: 42,
+      action: 'started',
+      occurred_at: '2026-09-24T10:00:00.000Z',
+    });
+
+    expect(insertOne).toHaveBeenCalledTimes(1);
+  });
+
+  it('still rejects a session start that overlaps an older active trip', async () => {
+    vi.mocked(findOne)
+      .mockResolvedValueOnce({ vehicle_id: 'VEH-001' })
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: 99,
+        trip_code: 'AUTO-DEV-001-SESSION-99',
+        status: 'in_progress',
+        actual_start: new Date('2026-09-25T09:00:00.000Z'),
+      } as never);
+
+    await handleSessionBoundaryEvent({
+      device_id: 'DEV-001',
+      session_id: 42,
+      action: 'started',
+      occurred_at: '2026-09-25T10:00:00.000Z',
+    });
+
+    expect(insertOne).not.toHaveBeenCalled();
+  });
+
   it('is idempotent when the same session-start event is replayed', async () => {
     vi.mocked(findOne)
       .mockResolvedValueOnce({ vehicle_id: 'VEH-001' })
