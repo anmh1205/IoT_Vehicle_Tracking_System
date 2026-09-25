@@ -30,6 +30,7 @@ interface DeviceRow {
   current_status: string;
   last_seen_at: string | null;
   state_updated_at: string | null;
+  payload_updated_at: string | null;
 }
 
 interface DeviceSessionRow {
@@ -90,7 +91,7 @@ export const validateDevice = async (
   try {
     const result = await pool.query<DeviceRow>(
       `SELECT id, device_id, vehicle_id, current_status
-            , last_seen_at, state_updated_at
+            , last_seen_at, state_updated_at, payload_updated_at
        FROM devices
        WHERE device_id = $1
          AND (
@@ -115,9 +116,11 @@ export const updateDeviceStatus = async (
   status: string,
   lastSeenTimestampMs?: number,
   runtimeState?: RuntimeStateSnapshot | null,
+  payloadTimestampMs?: number,
 ): Promise<void> => {
   const lastSeenAt = lastSeenTimestampMs ? toIsoTimestamp(lastSeenTimestampMs) : null;
   const stateUpdatedAt = lastSeenAt ?? new Date().toISOString();
+  const payloadUpdatedAt = payloadTimestampMs == null ? null : toIsoTimestamp(payloadTimestampMs);
 
   try {
     if (lastSeenAt && runtimeState) {
@@ -130,7 +133,11 @@ export const updateDeviceStatus = async (
              device_state = $6,
              sleep_mode = $7,
              state_updated_at = GREATEST(COALESCE(state_updated_at, $8::timestamptz), $8::timestamptz),
-             last_seen_at = GREATEST(COALESCE(last_seen_at, $8::timestamptz), $8::timestamptz)
+             last_seen_at = GREATEST(COALESCE(last_seen_at, $8::timestamptz), $8::timestamptz),
+             payload_updated_at = CASE
+               WHEN $9::timestamptz IS NULL THEN payload_updated_at
+               ELSE GREATEST(COALESCE(payload_updated_at, $9::timestamptz), $9::timestamptz)
+             END
          WHERE device_id = $1`,
         [
           deviceId,
@@ -141,6 +148,7 @@ export const updateDeviceStatus = async (
           runtimeState.device_state,
           runtimeState.sleep_mode,
           stateUpdatedAt,
+          payloadUpdatedAt,
         ],
       );
       return;
@@ -150,9 +158,13 @@ export const updateDeviceStatus = async (
       await pool.query(
         `UPDATE devices
          SET current_status = $2,
-             last_seen_at = GREATEST(COALESCE(last_seen_at, $3::timestamptz), $3::timestamptz)
+             last_seen_at = GREATEST(COALESCE(last_seen_at, $3::timestamptz), $3::timestamptz),
+             payload_updated_at = CASE
+               WHEN $4::timestamptz IS NULL THEN payload_updated_at
+               ELSE GREATEST(COALESCE(payload_updated_at, $4::timestamptz), $4::timestamptz)
+             END
          WHERE device_id = $1`,
-        [deviceId, status, lastSeenAt],
+        [deviceId, status, lastSeenAt, payloadUpdatedAt],
       );
       return;
     }
