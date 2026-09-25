@@ -208,25 +208,34 @@ test('ensureHistoricalDeviceSession never supersedes a newer running session', a
   );
 });
 
-test('touchDeviceSession uses cumulative metric-specific averages and IMU extrema', async (t) => {
-  const originalQuery = writablePool.query;
+test('touchDeviceSession claims message identity in the same transaction as aggregates', async (t) => {
+  const originalConnect = writablePool.connect;
   const statements: string[] = [];
+  const paramsSeen: Array<unknown[] | undefined> = [];
 
-  writablePool.query = async (sql) => {
-    statements.push(sql);
-    if (/UPDATE device_sessions/.test(sql)) {
-      return { rows: [{ id: 123 }] } as any;
-    }
-    return { rows: [] } as any;
-  };
+  writablePool.connect = async () => ({
+    query: async (sql, params) => {
+      statements.push(sql);
+      paramsSeen.push(params);
+      if (/INSERT INTO device_session_telemetry_receipts/.test(sql)) {
+        return { rows: [{ '?column?': 1 }], rowCount: 1 };
+      }
+      if (/UPDATE device_sessions/.test(sql)) {
+        return { rows: [{ id: 123 }], rowCount: 1 };
+      }
+      return { rows: [], rowCount: 0 };
+    },
+    release: () => undefined,
+  });
 
   t.after(() => {
-    writablePool.query = originalQuery;
+    writablePool.connect = originalConnect;
   });
 
   await touchDeviceSession({
     deviceId: 'TRACKER_001',
     sessionId: 123,
+    messageId: 'boot-1-42',
     deviceTimestampMs: Date.parse('2026-05-10T10:00:00.000Z'),
     serverTimestampMs: Date.parse('2026-05-10T10:00:01.000Z'),
     imuAccelDeltaMps2: 1.5,
@@ -235,14 +244,53 @@ test('touchDeviceSession uses cumulative metric-specific averages and IMU extrem
     updateDeviceState: false,
   });
 
-  const sql = statements.find((statement) => /UPDATE device_sessions/.test(statement)) ?? '';
+  assert.equal(statements[0], 'BEGIN');
+  const receiptIndex = statements.findIndex((sql) => /INSERT INTO device_session_telemetry_receipts/.test(sql));
+  const aggregateIndex = statements.findIndex((sql) => /UPDATE device_sessions/.test(sql));
+  assert.ok(receiptIndex > 0);
+  assert.ok(aggregateIndex > receiptIndex);
+  assert.deepEqual(paramsSeen[receiptIndex], [123, 'boot-1-42']);
+  assert.match(statements[receiptIndex], /ON CONFLICT \(session_id, message_id\) DO NOTHING/);
+
+  const sql = statements[aggregateIndex] ?? '';
   assert.match(sql, /imu_accel_samples_count/);
   assert.match(sql, /vehicle_battery_samples_count/);
   assert.match(sql, /device_battery_samples_count/);
   assert.match(sql, /avg_imu_accel_delta_mps2 \* imu_accel_samples_count/);
-  assert.match(sql, /avg_vehicle_battery \* vehicle_battery_samples_count/);
-  assert.match(sql, /avg_device_battery \* device_battery_samples_count/);
   assert.match(sql, /min_imu_accel_delta_mps2 = CASE/);
   assert.match(sql, /max_imu_accel_delta_mps2 = CASE/);
-  assert.equal(/avg_imu_accel_delta_mps2 \+ \$3::numeric\) \/ 2/.test(sql), false);
+  assert.equal(statements.at(-1), 'COMMIT');
+});
+
+test('touchDeviceSession ignores a duplicate message without mutating aggregates', async (t) => {
+  const originalConnect = writablePool.connect;
+  const statements: string[] = [];
+
+  writablePool.connect = async () => ({
+    query: async (sql) => {
+      statements.push(sql);
+      if (/INSERT INTO device_session_telemetry_receipts/.test(sql)) {
+        return { rows: [], rowCount: 0 };
+      }
+      return { rows: [], rowCount: 0 };
+    },
+    release: () => undefined,
+  });
+
+  t.after(() => {
+    writablePool.connect = originalConnect;
+  });
+
+  await touchDeviceSession({
+    deviceId: 'TRACKER_001',
+    sessionId: 123,
+    messageId: 'boot-1-42',
+    deviceTimestampMs: Date.parse('2026-05-10T10:00:00.000Z'),
+    serverTimestampMs: Date.parse('2026-05-10T10:00:01.000Z'),
+    updateDeviceState: false,
+  });
+
+  assert.equal(statements.some((sql) => /UPDATE device_sessions/.test(sql)), false);
+  assert.equal(statements.some((sql) => /UPDATE devices/.test(sql)), false);
+  assert.equal(statements.at(-1), 'COMMIT');
 });
