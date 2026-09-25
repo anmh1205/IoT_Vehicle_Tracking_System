@@ -100,6 +100,71 @@ esp_err_t nvs_config_clear_ota_context(void) {
 }
 
 /**
+ * @brief Persist the recent cloud-command dedupe window to NVS.
+ */
+esp_err_t nvs_config_save_command_dedupe_context(const command_dedupe_context_t *context) {
+    if (context == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READWRITE, &handle);
+    ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to open NVS namespace");
+
+    err = nvs_set_blob(handle, TRACKER_NVS_COMMAND_DEDUPE_KEY, context, sizeof(*context));
+    if (err == ESP_OK) {
+        err = nvs_commit(handle);
+    }
+    nvs_close(handle);
+    return err;
+}
+
+/**
+ * @brief Load the recent cloud-command dedupe window from NVS.
+ */
+esp_err_t nvs_config_load_command_dedupe_context(command_dedupe_context_t *out_context,
+                                                  bool *out_found) {
+    if (out_context == NULL || out_found == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    memset(out_context, 0, sizeof(*out_context));
+    *out_found = false;
+
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READONLY, &handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        return ESP_OK;
+    }
+    ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to open NVS namespace");
+
+    size_t stored_size = sizeof(*out_context);
+    err = nvs_get_blob(handle, TRACKER_NVS_COMMAND_DEDUPE_KEY, out_context, &stored_size);
+    nvs_close(handle);
+
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        memset(out_context, 0, sizeof(*out_context));
+        return ESP_OK;
+    }
+    if (err != ESP_OK) {
+        memset(out_context, 0, sizeof(*out_context));
+        return err;
+    }
+    if (stored_size != sizeof(*out_context)) {
+        ESP_LOGW(TAG,
+                 "Command dedupe context size mismatch stored=%lu expected=%lu; ignoring",
+                 (unsigned long)stored_size,
+                 (unsigned long)sizeof(*out_context));
+        memset(out_context, 0, sizeof(*out_context));
+        return ESP_OK;
+    }
+
+    out_context->cursor %= TRACKER_COMMAND_DEDUPE_CACHE_LEN;
+    *out_found = true;
+    return ESP_OK;
+}
+
+/**
  * @brief Persist the active session-recovery context to NVS.
  *
  * Stores the boot/session identifiers as a single binary blob so the device can
