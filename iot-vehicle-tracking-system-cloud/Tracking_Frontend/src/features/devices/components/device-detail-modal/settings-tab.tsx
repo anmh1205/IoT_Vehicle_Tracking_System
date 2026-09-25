@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/tooltip';
 import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
 import { notificationUtils } from '@/lib/notification';
+import { useRoleAccess } from '@/hooks/use-role-access';
 import {
   buildFirmwareConfigCommandParams,
   getDeviceConfigSummary,
@@ -204,6 +205,7 @@ export const SettingsTab = () => {
     onUpdateSettings,
     onDeleteDevice,
   } = useDeviceDetailModal();
+  const access = useRoleAccess();
   const config = toRecord(device?.config);
   const drivingConfig = toRecord(config?.driving);
   const parkingConfig = toRecord(config?.parking);
@@ -448,7 +450,8 @@ export const SettingsTab = () => {
               </Card>
             </div>
 
-            <Card className="border-rose-200">
+            {access.canDeleteDevice ? (
+              <Card className="border-rose-200">
               <CardHeader className="px-4 pt-3 pb-2">
                 <CardTitle className="text-base text-rose-700">Vùng nguy hiểm</CardTitle>
               </CardHeader>
@@ -463,6 +466,7 @@ export const SettingsTab = () => {
                 </Button>
               </CardContent>
             </Card>
+            ) : null}
           </div>
 
           <aside className="hidden xl:block">
@@ -533,7 +537,8 @@ export const SettingsTab = () => {
             </div>
           </div>
         </form>
-        <ConfirmDialog
+        {access.canDeleteDevice ? (
+          <ConfirmDialog
           open={deleteConfirmOpen}
           onCancel={() => {
             if (!deletePending) {
@@ -549,6 +554,7 @@ export const SettingsTab = () => {
           variant="destructive"
           isPending={deletePending}
         />
+        ) : null}
       </TooltipProvider>
     </Form>
   );

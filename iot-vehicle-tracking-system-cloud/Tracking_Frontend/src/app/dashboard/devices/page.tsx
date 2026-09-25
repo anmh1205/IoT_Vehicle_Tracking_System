@@ -22,6 +22,7 @@ import { useDeviceRealtime } from '@/features/devices/hooks/use-device-realtime'
 import { useInfiniteDevices } from '@/features/devices/hooks/use-devices';
 import type { Device } from '@/features/devices/types';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useRoleAccess } from '@/hooks/use-role-access';
 import type { DeviceFilters as DeviceFiltersParams } from '@/lib/api/devices';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 
@@ -35,6 +36,7 @@ const DevicesPage = () => {
   const [viewDevice, setViewDevice] = useState<Device | null>(null);
   const [deleteDevice, setDeleteDevice] = useState<Device | null>(null);
   const isMobile = useIsMobile();
+  const access = useRoleAccess();
   const devicesQuery = useInfiniteDevices(
     {
       search: filters.search,
@@ -71,10 +73,12 @@ const DevicesPage = () => {
       pageTitle="Thiết bị"
       pageDescription="Quản lý thiết bị IoT"
       pageHeaderAction={
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Thêm thiết bị
-        </Button>
+        access.canEditDevice ? (
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Thêm thiết bị
+          </Button>
+        ) : undefined
       }
     >
       <DeviceStatsBar devices={rows} totalCount={devicesQuery.total} />
@@ -125,15 +129,19 @@ const DevicesPage = () => {
           <DataTable
             columns={getDeviceColumns({
               onView: setViewDevice,
-              onEdit: setEditDevice,
-              onDelete: setDeleteDevice,
+              onEdit: access.canEditDevice ? setEditDevice : undefined,
+              onDelete: access.canDeleteDevice ? setDeleteDevice : undefined,
             })}
             data={rows}
             pagination={false}
             isLoading={devicesQuery.isLoading}
             emptyIcon={<Cpu className="h-10 w-10" />}
             emptyTitle="Chưa có thiết bị"
-            emptyAction={{ label: 'Thêm thiết bị', onClick: () => setCreateOpen(true) }}
+            emptyAction={
+              access.canEditDevice
+                ? { label: 'Thêm thiết bị', onClick: () => setCreateOpen(true) }
+                : undefined
+            }
             onRowClick={setViewDevice}
           />
         </TabsContent>
@@ -152,21 +160,25 @@ const DevicesPage = () => {
         itemLabel="thiết bị"
       />
 
-      <DeviceCreateModal
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onCreateSuccess={resetDeviceListView}
-      />
+      {access.canEditDevice ? (
+        <>
+          <DeviceCreateModal
+            open={createOpen}
+            onOpenChange={setCreateOpen}
+            onCreateSuccess={resetDeviceListView}
+          />
 
-      <DeviceEditModal
-        open={!!editDevice}
-        onOpenChange={(next) => {
-          if (!next) {
-            setEditDevice(null);
-          }
-        }}
-        device={editDevice}
-      />
+          <DeviceEditModal
+            open={!!editDevice}
+            onOpenChange={(next) => {
+              if (!next) {
+                setEditDevice(null);
+              }
+            }}
+            device={editDevice}
+          />
+        </>
+      ) : null}
 
       <DeviceDetailModalContainer
         device={viewDevice}
@@ -179,7 +191,8 @@ const DevicesPage = () => {
         presentation="workspace"
       />
 
-      <ConfirmDialog
+      {access.canDeleteDevice ? (
+        <ConfirmDialog
         open={!!deleteDevice}
         onCancel={() => setDeleteDevice(null)}
         onConfirm={() => {
@@ -195,7 +208,8 @@ const DevicesPage = () => {
         confirmLabel="Xóa"
         variant="destructive"
         isPending={deleteMutation.isPending}
-      />
+        />
+      ) : null}
     </PageContainer>
   );
 };
