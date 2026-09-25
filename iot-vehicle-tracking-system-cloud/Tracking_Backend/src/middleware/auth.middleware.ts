@@ -80,6 +80,10 @@ export const requireAuth = async (
       throw createUnauthorizedError('User not found');
     }
 
+    if (user.status !== 'active') {
+      throw createUnauthorizedError('Account is not active');
+    }
+
     if (!isUserRole(user.role)) {
       throw createUnauthorizedError('Invalid user role');
     }
@@ -125,7 +129,7 @@ export const attachUserIfAvailable = async (
     }
 
     const user = await findById(session.user_id);
-    if (user && isUserRole(user.role)) {
+    if (user && user.status === 'active' && isUserRole(user.role)) {
       req.user = {
         id: user.id,
         username: user.username,
