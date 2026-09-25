@@ -14,11 +14,42 @@ vi.mock('@/infrastructure/database/queries', () => ({
 
 import { pool } from '@/infrastructure/database/pool';
 import { findMany } from '@/infrastructure/database/queries';
-import { findAll, findAllPositions } from './device.repository';
+import {
+  findAll,
+  findAllPositions,
+  hasAssignedAccessByDeviceId,
+  hasAssignedAccessByReference,
+} from './device.repository';
 
 describe('device.repository access scope', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+  });
+
+  it('checks an assigned device by canonical device id', async () => {
+    vi.mocked(pool.query).mockResolvedValue({ rowCount: 1, rows: [{ '?column?': 1 }] } as any);
+
+    await expect(hasAssignedAccessByDeviceId(7, 'DEVICE_001')).resolves.toBe(true);
+
+    const [sql, params] = vi.mocked(pool.query).mock.calls[0] ?? [];
+    expect(sql).toContain('FROM user_device_access');
+    expect(sql).toContain('device_id = $2');
+    expect(params).toEqual([7, 'DEVICE_001']);
+  });
+
+  it('checks assigned access for numeric and canonical route references', async () => {
+    vi.mocked(pool.query).mockResolvedValue({ rowCount: 0, rows: [] } as any);
+
+    await expect(hasAssignedAccessByReference(7, '42')).resolves.toBe(false);
+    let [sql, params] = vi.mocked(pool.query).mock.calls[0] ?? [];
+    expect(sql).toContain('d.id = $2');
+    expect(params).toEqual([7, 42]);
+
+    vi.mocked(pool.query).mockClear();
+    await expect(hasAssignedAccessByReference(7, 'DEVICE_001')).resolves.toBe(false);
+    [sql, params] = vi.mocked(pool.query).mock.calls[0] ?? [];
+    expect(sql).toContain('d.device_id = $2');
+    expect(params).toEqual([7, 'DEVICE_001']);
   });
 
   it('filters device list by user_device_access for assigned non-admin users', async () => {
