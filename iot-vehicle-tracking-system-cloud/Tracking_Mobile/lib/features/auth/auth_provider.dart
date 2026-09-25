@@ -48,7 +48,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     Log.info('Auth token saved');
   }
 
-  /// Clear token and wipe secure storage.
+  /// Clear only the auth token; keep the installation FCM token for re-registration.
   Future<void> logout() async {
     await _authService.clearToken();
     state = const AuthState();
