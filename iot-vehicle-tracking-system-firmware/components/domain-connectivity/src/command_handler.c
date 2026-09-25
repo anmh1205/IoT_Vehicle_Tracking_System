@@ -75,6 +75,11 @@ static atomic_uint s_dropped_command_count = 0U;
  */
 static uint64_t s_recent_command_ids[COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN] = {0};
 static size_t s_recent_command_cursor = 0U;
+/* Short critical section protects the 64-bit ring from concurrent MQTT/FSM access. */
+static portMUX_TYPE s_recent_command_mux = portMUX_INITIALIZER_UNLOCKED;
+/* Monotonic RAM generation vs the generation represented by the NVS checkpoint. */
+static atomic_uint s_recent_command_generation = 0U;
+static atomic_uint s_recent_command_persisted_generation = 0U;
 /* Blocks command execution until the latest accepted-ID window is durable in NVS. */
 static atomic_bool s_recent_command_persist_pending = false;
 
@@ -83,12 +88,16 @@ static bool command_handler_is_recent_command_id(uint64_t command_id) {
         return false;
     }
 
+    bool found = false;
+    portENTER_CRITICAL(&s_recent_command_mux);
     for (size_t i = 0; i < COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN; ++i) {
         if (s_recent_command_ids[i] == command_id) {
-            return true;
+            found = true;
+            break;
         }
     }
-    return false;
+    portEXIT_CRITICAL(&s_recent_command_mux);
+    return found;
 }
 
 static void command_handler_remember_command_id(uint64_t command_id) {
@@ -96,31 +105,71 @@ static void command_handler_remember_command_id(uint64_t command_id) {
         return;
     }
 
+    portENTER_CRITICAL(&s_recent_command_mux);
     s_recent_command_ids[s_recent_command_cursor] = command_id;
     s_recent_command_cursor =
         (s_recent_command_cursor + 1U) % COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN;
+    atomic_fetch_add(&s_recent_command_generation, 1U);
+    atomic_store(&s_recent_command_persist_pending, true);
+    portEXIT_CRITICAL(&s_recent_command_mux);
 }
 
 /**
- * @brief Persist the current accepted-command dedupe window.
+ * @brief Persist the latest accepted-command dedupe generation from the FSM.
  *
- * The MQTT callback attempts this once after staging a command. If NVS is
- * temporarily unavailable, the FSM retries before it is allowed to consume any
- * queued side effect.
+ * Snapshotting is protected by a tiny critical section, while the slow NVS
+ * write happens outside it. If another command arrives during that write the
+ * generation changes; the saved snapshot remains valid history, but execution
+ * stays blocked until a later FSM iteration commits the newer generation too.
  */
 static esp_err_t command_handler_persist_recent_command_ids(void) {
     command_dedupe_context_t context = {0};
+    uint32_t snapshot_generation = 0U;
+
+    portENTER_CRITICAL(&s_recent_command_mux);
     memcpy(context.command_ids, s_recent_command_ids, sizeof(context.command_ids));
     context.cursor = (uint32_t)s_recent_command_cursor;
+    snapshot_generation = atomic_load(&s_recent_command_generation);
+    if (snapshot_generation == atomic_load(&s_recent_command_persisted_generation)) {
+        atomic_store(&s_recent_command_persist_pending, false);
+        portEXIT_CRITICAL(&s_recent_command_mux);
+        return ESP_OK;
+    }
+    portEXIT_CRITICAL(&s_recent_command_mux);
 
     esp_err_t err = nvs_config_save_command_dedupe_context(&context);
-    atomic_store(&s_recent_command_persist_pending, err != ESP_OK);
     if (err != ESP_OK) {
+        /*
+         * Do not clear pending here. A concurrent receiver may also have moved
+         * the generation forward while this NVS write was failing.
+         */
+        atomic_store(&s_recent_command_persist_pending, true);
         ESP_LOGW(TAG,
                  "event=command_dedupe_persist_failed err=%s action_execution=blocked",
                  esp_err_to_name(err));
+        return err;
     }
-    return err;
+
+    /*
+     * Commit bookkeeping under the same spinlock used by remember(). That
+     * closes the race where a new command could set pending=true between the
+     * generation comparison and an unconditional pending=false store.
+     */
+    portENTER_CRITICAL(&s_recent_command_mux);
+    atomic_store(&s_recent_command_persisted_generation, snapshot_generation);
+    bool superseded =
+        snapshot_generation != atomic_load(&s_recent_command_generation);
+    atomic_store(&s_recent_command_persist_pending, superseded);
+    portEXIT_CRITICAL(&s_recent_command_mux);
+
+    if (superseded) {
+        ESP_LOGI(TAG,
+                 "event=command_dedupe_checkpoint_superseded generation=%lu action_execution=blocked",
+                 (unsigned long)snapshot_generation);
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    return ESP_OK;
 }
 
 /** @brief Canonical command names from cloud payload. */
@@ -812,6 +861,8 @@ esp_err_t command_handler_init(config_t *config) {
         s_recent_command_cursor =
             (size_t)(persisted_dedupe.cursor % COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN);
     }
+    atomic_store(&s_recent_command_generation, 0U);
+    atomic_store(&s_recent_command_persisted_generation, 0U);
     atomic_store(&s_recent_command_persist_pending, false);
     command_handler_reset_consumed_payloads();
     xQueueReset(s_action_queue);
@@ -1006,19 +1057,6 @@ esp_err_t command_handler_process(const char *command_json,
         return ESP_OK;
     }
 
-    if (atomic_load(&s_recent_command_persist_pending)) {
-        /*
-         * Do not accept more correlated commands while the previous dedupe
-         * checkpoint is still volatile. This keeps the persisted ring and
-         * queued side effects in the same order.
-         */
-        ESP_LOGW(TAG,
-                 "event=command_rejected command_id=%llu reason=dedupe_persist_pending",
-                 (unsigned long long)parsed_command_id);
-        cJSON_Delete(root);
-        return ESP_ERR_TIMEOUT;
-    }
-
     // Extract the command verb first; every later branch depends on it being a non-empty string.
     const cJSON *command = cJSON_GetObjectItemCaseSensitive(root, "command");
     const cJSON *params = cJSON_GetObjectItemCaseSensitive(root, "params");
@@ -1145,15 +1183,12 @@ esp_err_t command_handler_process(const char *command_json,
         /*
          * Remember only accepted/staged commands. A transient queue-full or
          * lock/state rejection must remain retryable with the same command ID.
+         * Only mark the new ID dirty here. The app-core callback queues the
+         * application-level acceptance ACK after this function returns.
+         * The FSM later checkpoints this ring after that ACK queue drains and
+         * before it dequeues any side effect.
          */
         command_handler_remember_command_id(parsed_command_id);
-        /*
-         * Commands are infrequent and this small blob write makes application
-         * idempotency survive the persistent MQTT session across MCU reboot.
-         * A failed write does not discard the already queued action; execution
-         * remains gated until the FSM can retry the checkpoint successfully.
-         */
-        (void)command_handler_persist_recent_command_ids();
     }
 
     cJSON_Delete(root);

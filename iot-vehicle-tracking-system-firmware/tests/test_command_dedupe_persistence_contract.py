@@ -13,6 +13,12 @@ NVS_SOURCE = (
 NVS_KEYS = (
     ROOT / "components" / "adapter-kv-nvs" / "include" / "nvs_store_keys.h"
 ).read_text(encoding="utf-8")
+STATE_CORE = (
+    ROOT / "components" / "app-core" / "src" / "state_machine_core.c"
+).read_text(encoding="utf-8")
+OTA_RUNTIME = (
+    ROOT / "components" / "app-core" / "src" / "state_ota_runtime.c"
+).read_text(encoding="utf-8")
 
 
 def test_recent_command_window_is_persisted_and_restored():
@@ -35,7 +41,35 @@ def test_side_effects_wait_for_durable_dedupe_checkpoint():
     assert "command_handler_persist_recent_command_ids() != ESP_OK" in before_dequeue
 
 
-def test_new_commands_backpressure_while_checkpoint_is_volatile():
+def test_receive_callback_only_marks_dedupe_dirty_without_nvs_io():
     process = COMMAND_SOURCE.split("esp_err_t command_handler_process", 1)[1]
-    assert "reason=dedupe_persist_pending" in process
-    assert "return ESP_ERR_TIMEOUT;" in process
+    process = process.split("bool command_handler_is_tracking_enabled", 1)[0]
+    assert "command_handler_remember_command_id(parsed_command_id);" in process
+    assert "command_handler_persist_recent_command_ids()" not in process
+    assert "reason=dedupe_persist_pending" not in process
+
+
+def test_checkpoint_handles_command_bursts_by_generation():
+    assert "s_recent_command_generation" in COMMAND_SOURCE
+    assert "s_recent_command_persisted_generation" in COMMAND_SOURCE
+    assert "portENTER_CRITICAL(&s_recent_command_mux)" in COMMAND_SOURCE
+    assert "snapshot_generation != atomic_load(&s_recent_command_generation)" in COMMAND_SOURCE
+    assert "command_dedupe_checkpoint_superseded" in COMMAND_SOURCE
+
+
+def test_acceptance_ack_gate_precedes_dedupe_checkpoint_and_action_dequeue():
+    callback = STATE_CORE.split("static void state_machine_command_callback", 1)[1]
+    callback = callback.split("static void state_machine_publish_pending_command_acks", 1)[0]
+    assert "command_handler_process(payload, &command_id, &deferred, &duplicate)" in callback
+    assert "xQueueSendToBack(s_command_ack_queue, &ack, 0)" in callback
+
+    executor = OTA_RUNTIME.split("void state_machine_handle_pending_action", 1)[1]
+    executor = executor.split("void state_machine_try_confirm_running_firmware", 1)[0]
+    ack_gate = executor.index("state_machine_has_pending_command_acks()")
+    consume = executor.index("command_handler_consume_action(&command_id)")
+    assert ack_gate < consume
+
+    command_consume = COMMAND_SOURCE.split("command_action_t command_handler_consume_action", 1)[1]
+    checkpoint = command_consume.index("command_handler_persist_recent_command_ids()")
+    dequeue = command_consume.index("xQueueReceive")
+    assert checkpoint < dequeue
