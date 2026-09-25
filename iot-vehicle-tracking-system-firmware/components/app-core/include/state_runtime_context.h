@@ -134,6 +134,7 @@ extern uint32_t s_session_id;
 extern uint64_t s_canonical_session_id;
 extern char s_session_boot_id[TRACKER_BOOT_ID_LEN];
 extern bool s_session_restore_pending;
+extern bool s_session_identity_persisted;
 extern uint64_t s_ignition_off_started_ms;
 extern tracker_publish_status_t s_publish_status;
 extern bool s_mqtt_started;

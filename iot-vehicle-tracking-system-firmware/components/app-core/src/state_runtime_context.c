@@ -48,6 +48,8 @@ uint64_t s_canonical_session_id = 0;
 char s_session_boot_id[TRACKER_BOOT_ID_LEN] = {0};
 /** @brief True when an active session was loaded from NVS and awaits ignition confirmation. */
 bool s_session_restore_pending = false;
+/** @brief True once the active session identity is durably recoverable from NVS. */
+bool s_session_identity_persisted = false;
 /** @brief Timestamp when ignition transitioned to OFF. */
 uint64_t s_ignition_off_started_ms = 0;
 /*==============================================================================
@@ -275,6 +277,7 @@ void state_runtime_context_reset(const config_t *config) {
     s_canonical_session_id = 0;
     memset(s_session_boot_id, 0, sizeof(s_session_boot_id));
     s_session_restore_pending = false;
+    s_session_identity_persisted = false;
     s_ignition_off_started_ms = 0;
     s_publish_status = TRACKER_PUBLISH_STATUS_STOPPED;
     s_mqtt_started = false;
