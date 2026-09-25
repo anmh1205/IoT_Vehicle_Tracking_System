@@ -13,7 +13,7 @@ vi.mock('@/domain/auth/repositories/user.repository', () => ({
 
 import { findByHashedToken, extendSession } from '@/domain/auth/repositories/user-session.repository';
 import { findById } from '@/domain/auth/repositories/user.repository';
-import { requireAuth, attachUserIfAvailable } from './auth.middleware';
+import { requireAuth, attachUserIfAvailable, requireRole } from './auth.middleware';
 
 describe('auth middleware account status', () => {
   beforeEach(() => {
@@ -60,5 +60,58 @@ describe('auth middleware account status', () => {
     expect(next).toHaveBeenCalledWith();
     expect(req.user).toBeUndefined();
     expect(extendSession).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('requireRole', () => {
+  it('allows a configured role', () => {
+    const next = vi.fn();
+    const middleware = requireRole('root', 'admin', 'manager', 'operator');
+
+    middleware(
+      {
+        user: {
+          id: 7,
+          username: 'operator',
+          role: 'operator',
+          deviceAccessMode: 'assigned',
+        },
+      } as any,
+      {} as any,
+      next,
+    );
+
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  it('rejects a role outside the allowed capability set', () => {
+    const next = vi.fn();
+    const middleware = requireRole('root', 'admin', 'manager', 'operator');
+
+    middleware(
+      {
+        user: {
+          id: 8,
+          username: 'viewer',
+          role: 'viewer',
+          deviceAccessMode: 'assigned',
+        },
+      } as any,
+      {} as any,
+      next,
+    );
+
+    expect(next.mock.calls[0]?.[0]).toMatchObject({
+      status: 403,
+      message: 'Insufficient permissions',
+    });
+  });
+
+  it('rejects missing authentication', () => {
+    const next = vi.fn();
+    requireRole('root', 'admin')({} as any, {} as any, next);
+
+    expect(next.mock.calls[0]?.[0]).toMatchObject({ status: 401 });
   });
 });
