@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { deviceServices } from '@/lib/api/devices';
 import type { DeviceFilters } from '@/lib/api/devices';
 import type { Device } from '@/features/devices/types';
+import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
 
 interface DeviceListResult {
   items: Device[];
@@ -35,14 +36,25 @@ const toDevice = (raw: any): Device => ({
   ecuAlerts: toAlertSummary(raw?.ecuAlerts ?? {}, 'ecu'),
   imei: raw?.imei ?? null,
   firmwareVersion: raw?.firmwareVersion ?? null,
+  targetFirmwareVersion: raw?.targetFirmwareVersion ?? null,
   vehiclePlate: raw?.vehiclePlate ?? null,
   customerName: raw?.customerName ?? null,
+  vehicleId: raw?.vehicleId ?? null,
   lastSeenAt: raw?.lastSeenAt ?? null,
   latitude: raw?.latitude !== undefined ? Number(raw.latitude) : null,
   longitude: raw?.longitude !== undefined ? Number(raw.longitude) : null,
   totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? 0),
   requestInterval: Number(raw?.requestInterval ?? 60),
-  vibrationThreshold: Number(raw?.vibrationThreshold ?? 0),
+  imuAccelDeltaThresholdMps2: Number(
+    raw?.imuAccelDeltaThresholdMps2 ??
+      raw?.imu_accel_delta_threshold_mps2 ??
+      raw?.vibrationThreshold ??
+      0,
+  ),
+  lastErrorCode:
+    raw?.lastErrorCode !== undefined && raw?.lastErrorCode !== null
+      ? Number(raw.lastErrorCode)
+      : null,
   config: raw?.config ?? null,
 });
 
@@ -82,8 +94,18 @@ const toDeviceListResult = (payload: any): DeviceListResult => {
   };
 };
 
-export const useDevices = (filters?: DeviceFilters) =>
+export const useDevices = (filters?: DeviceFilters, enabled = true) =>
   useQuery({
     queryKey: ['devices', filters],
     queryFn: () => deviceServices.getList(filters).then(toDeviceListResult),
+    enabled,
+  });
+
+export const useInfiniteDevices = (filters?: Omit<DeviceFilters, 'page' | 'limit'>, pageSize = 20, enabled = true) =>
+  useInfiniteListQuery<Device>({
+    queryKey: ['devices', filters],
+    pageSize,
+    enabled,
+    queryFn: ({ page, limit }) => deviceServices.getList({ ...filters, page, limit }),
+    selectItems: (payload) => toDeviceListResult(payload).items,
   });

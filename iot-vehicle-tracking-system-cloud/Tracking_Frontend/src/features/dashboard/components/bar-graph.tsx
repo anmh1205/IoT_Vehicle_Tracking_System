@@ -13,10 +13,7 @@ export const BarGraph = ({
   data: DeviceActivityPoint[];
   isLoading?: boolean;
 }) => {
-  const totalSignals = data.reduce(
-    (sum, item) => sum + item.running + item.idle + item.offline,
-    0,
-  );
+  const totalSignals = data.reduce((sum, item) => sum + item.running + item.idle + item.offline, 0);
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
   const isChartReady = chartSize.width > 0 && chartSize.height > 0;
@@ -48,11 +45,11 @@ export const BarGraph = ({
   return (
     <Card className="min-w-0">
       <CardHeader>
-        <CardTitle>Hoạt động thiết bị trong 7 ngày</CardTitle>
+        <CardTitle>Nhịp kết nối thiết bị trong 7 ngày</CardTitle>
         <p className="text-sm text-muted-foreground">
           {totalSignals > 0
-            ? `${totalSignals} tín hiệu hoạt động được tổng hợp trong 7 ngày gần nhất`
-            : 'Đang chờ dữ liệu hoạt động được đồng bộ từ thiết bị'}
+            ? `${totalSignals} tín hiệu kết nối được tổng hợp trong 7 ngày gần nhất`
+            : 'Đang chờ dữ liệu kết nối được đồng bộ từ thiết bị'}
         </p>
       </CardHeader>
       <CardContent className="min-w-0">
@@ -61,7 +58,7 @@ export const BarGraph = ({
             <Skeleton className="h-full w-full" />
           ) : data.length === 0 ? (
             <div className="flex h-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-              Chưa có dữ liệu hoạt động để hiển thị.
+              Chưa có dữ liệu nhịp kết nối để hiển thị.
             </div>
           ) : (
             <BarChart width={chartSize.width} height={chartSize.height} data={data} barGap={6}>

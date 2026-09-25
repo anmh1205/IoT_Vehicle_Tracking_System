@@ -23,10 +23,29 @@ export const writeLog = async (entry: LogEntry): Promise<void> => {
     });
 
     if (!response.ok) {
-      logger.error(`VictoriaLogs write failed: ${response.status} ${response.statusText}`);
+      logger.error(
+        {
+          stream: entry.stream,
+          deviceId: entry.device_id,
+          eventType: entry.event_type,
+          status: response.status,
+          statusText: response.statusText,
+          event: 'victorialogs_write_rejected',
+        },
+        'VictoriaLogs write rejected',
+      );
     }
   } catch (err) {
-    logger.error({ err }, 'VictoriaLogs write error');
+    logger.error(
+      {
+        err,
+        stream: entry.stream,
+        deviceId: entry.device_id,
+        eventType: entry.event_type,
+        event: 'victorialogs_write_failed',
+      },
+      'VictoriaLogs write failed',
+    );
   }
 };
 

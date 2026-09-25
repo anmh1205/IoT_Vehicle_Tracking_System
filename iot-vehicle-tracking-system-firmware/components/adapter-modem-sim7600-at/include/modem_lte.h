@@ -8,22 +8,23 @@
 /**
  * @file modem_lte.h
  * @brief LTE registration and PDP session management interface.
+ * This header belongs to the SIM7600 AT modem adapter layer and exposes the modem boundary so higher layers do not depend on UART- or AT-private details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Initialize modem for LTE operation (power, AT session, APN profile).
  *
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
-esp_err_t modem_lte_init(void);
-
 /**
  * @brief Register to LTE network and activate PDP context.
  *
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
-esp_err_t modem_lte_connect(void);
-
 /**
  * @brief Trigger non-blocking LTE connect workflow.
  */
@@ -52,6 +53,16 @@ esp_err_t modem_lte_tick(uint64_t now_ms);
  * @return true when base modem init sequence is completed.
  */
 bool modem_lte_is_initialized(void);
+
+/**
+ * @brief Read whether the modem AT command channel is usable.
+ *
+ * This becomes true earlier than LTE PDP readiness, so GNSS can warm up while
+ * SIM/network registration continues in parallel.
+ *
+ * @return true when AT commands can be exchanged safely.
+ */
+bool modem_lte_is_at_ready(void);
 
 /**
  * @brief Deactivate PDP context if connected.

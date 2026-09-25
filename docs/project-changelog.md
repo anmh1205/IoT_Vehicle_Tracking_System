@@ -1,5 +1,33 @@
 # Project Changelog
 
+## 2026-05-03
+### ECU Simulator State-Driven Refactor (Completed)
+- Refactored `iot-vehicle-tracking-system-ecu-simulator/ecu-simulator/src/` from phase-scripted snapshot mutation into state-driven modules: `driver-input-profile`, `powertrain-state-model`, `diagnostic-state-model`, and `obd-snapshot-builder`.
+- Kept `main.cpp` as the tick owner, narrowed `obd-can.cpp` to CAN transport and OBD reply encoding, and moved snapshot ownership to the ECU model so the CAN layer reads a prebuilt `ecu_snapshot_t` instead of mutating phase-scripted values inline.
+- Validation status: Uno PlatformIO build passed for the refactored simulator scope.
+
+## 2026-05-02
+### Firmware-Authoritative Session Identity Rollout (In Progress)
+- Added additive PostgreSQL session provenance migration in `Tracking_PostgreSQL/init/16-authoritative-session-identity.sql` and aligned fresh bootstrap schema in `init/02-devices.sql` with `local_session_key`, `firmware_boot_id`, `canonical_source`, `boundary_source`, `start_reason`, and `end_reason`.
+- Updated `Tracking_MqttBridge` session persistence so `status.boundary_event=started|ended` is the only path that opens/closes `device_sessions`; bridge rows are now matched and backfilled by provisional identity `(device_id, boot_id, local_session_key)` instead of by status chatter alone.
+- Exposed authoritative session provenance through backend device session DTOs and realtime events, then updated frontend parsing/types so parked heartbeat (`online`) is rendered as `Đỗ xe / còn online` instead of being treated like a driving state.
+- Validation status: IDE diagnostics passed for all touched TypeScript files; service-level `npm run typecheck` remains blocked by a shell-wrapper failure (`/usr/bin/bash: -c: line 174: unexpected EOF while looking for matching '"'`), so end-to-end build verification is still pending.
+
+## 2026-05-01
+### Realtime WebSocket Audit and Event-Driven Dashboard Cutover (Completed)
+- Hardened the Socket.IO gateway with namespace-specific auth and delivery scopes across dashboard, devices, notifications, exports, and firmware.
+- Moved device, notification, export, firmware, simulator, and system-admin updates to real backend realtime producers instead of periodic polling or broad broadcasts.
+- Updated frontend consumers to use namespace-aware sockets, room-scoped device membership, and event-driven cache patching or invalidation with snapshot fetches only at load, reconnect, or manual retry boundaries.
+- Kept firmware realtime traffic restricted to admin/root access and system-admin settings limited to the admin room.
+- Validation status: backend lint, typecheck, test, and coverage passed; frontend lint, typecheck, and build passed; Docker rebuild/restart and smoke checks on `/login` and `/ws-health` passed.
+
+### Firmware Log Monitor Governance (Completed)
+- Standardized firmware logging across app-core FSM, MQTT publish/fallback, offline queue replay, SIM7600 LTE/GNSS/MQTT adapters, BLE OBD diagnostics, and OTA HTTP lifecycle paths.
+- Added telemetry counters for MQTT publish outcomes, LTE recovery, OBD quality, and OTA HTTP results so repeated success/noise can be summarized instead of logged per event.
+- Redacted sensitive firmware logs and tracked test-log artifacts: no raw AT bodies, MQTT credentials/endpoints, APNs, URLs, payloads, full GNSS coordinates, IMEI/IMSI, or secrets in governed logs; stable boot/message/job IDs remain allowed.
+- Cleared the tracked field-validation MQTT password in `iot-vehicle-tracking-system-firmware/sdkconfig`; rotate the previously exposed password if it was valid outside local validation.
+- Validation status: `idf.py -C "iot-vehicle-tracking-system-firmware" reconfigure build size` passed; source/artifact static redaction scans passed; `git diff --check -- "iot-vehicle-tracking-system-firmware"` reported only CRLF normalization warnings.
+
 ## 2026-04-24
 ### Thesis-Anchored Knowledge Base Bootstrap (Completed)
 - Added a repo-local knowledge bootstrap under `resources/docs/knowledge-base/` for `IoT_Vehicle_Tracking_System`, organized as source registry, evidence cards, reconciliation output, repo-pack notes, domain notes, and pattern notes.

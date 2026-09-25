@@ -10,7 +10,6 @@ import {
   PanelRightOpen,
   X,
 } from 'lucide-react';
-import type { VehicleZone } from '@/lib/api/zones';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -22,23 +21,24 @@ import {
 import { useMapInspectShortcuts } from '@/features/map/hooks/use-map-inspect-shortcuts';
 import { useMapStore } from '@/features/map/store/map-store';
 import type { DevicePosition } from '@/features/map/types';
-import { formatRelative } from '@/lib/utils/date/format';
+import { formatNumber, formatRelative } from '@/lib/utils/date/format';
 import {
+  getConnectivityPresentation,
   getDeviceRuntimePresentation,
-  getEnginePresentation,
   getFreshnessPresentation,
-  getMotionPresentation,
+  getVehicleStatePresentation,
 } from '@/lib/utils/device-state';
+import type { VehicleZone } from '@/lib/api/zones';
 import { cn } from '@/lib/utils';
 
 const membershipMeta: Record<
   string,
   { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
 > = {
-  inside: { label: 'Dang trong vung', variant: 'default' },
-  outside: { label: 'Dang ngoai vung', variant: 'destructive' },
-  suspect: { label: 'Sat mep vung', variant: 'secondary' },
-  unknown: { label: 'Chua danh gia', variant: 'outline' },
+  inside: { label: 'Đang trong vùng', variant: 'default' },
+  outside: { label: 'Đang ngoài vùng', variant: 'destructive' },
+  suspect: { label: 'Sát mép vùng', variant: 'secondary' },
+  unknown: { label: 'Chưa đánh giá', variant: 'outline' },
 };
 
 const toneClasses = {
@@ -68,21 +68,23 @@ const formatCoordinateValue = (lat: number | null | undefined, lon: number | nul
   Number.isFinite(lat) && Number.isFinite(lon) ? `${lat!.toFixed(5)}, ${lon!.toFixed(5)}` : '--';
 
 const formatSpeedValue = (speed: number | null | undefined) =>
-  Number.isFinite(speed) ? `${speed!.toFixed(1)} km/h` : '--';
+  Number.isFinite(speed) ? `${formatNumber(speed)} km/h` : '--';
 
 const formatElectricalValue = (value: number | null | undefined) => {
   if (!Number.isFinite(value) || value! <= 0) {
     return '--';
   }
 
-  return value! > 24 ? `${value!.toFixed(0)}%` : `${value!.toFixed(1)} V`;
+  return value! > 24
+    ? `${formatNumber(value, { maximumFractionDigits: 0 })}%`
+    : `${formatNumber(value)} V`;
 };
 
 const formatTemperatureValue = (value: number | null | undefined) =>
-  Number.isFinite(value) ? `${value!.toFixed(1)}°C` : '--';
+  Number.isFinite(value) ? `${formatNumber(value)}°C` : '--';
 
 const formatCountValue = (value: number | null | undefined, suffix = '') =>
-  Number.isFinite(value) ? `${Math.round(value!)}${suffix}` : '--';
+  Number.isFinite(value) ? `${formatNumber(value)}${suffix}` : '--';
 
 const formatErrorCodeValue = (value: number | null | undefined) =>
   Number.isFinite(value) ? String(Math.round(value!)) : '--';
@@ -117,28 +119,28 @@ export const MapInspectRail = ({
   }
 
   const freshness = getFreshnessPresentation(device.stateUpdatedAt ?? device.timestamp);
-  const engine = getEnginePresentation(device.ignitionState);
-  const motion = getMotionPresentation(device.motionState);
+  const vehicle = getVehicleStatePresentation(device.vehicleState);
   const runtime = getDeviceRuntimePresentation(device.deviceState);
+  const connectivity = getConnectivityPresentation(device.status);
   const allowedZoneMembership =
     membershipMeta[allowedZone?.membershipState ?? 'unknown'] ?? membershipMeta.unknown;
 
   const quickStats = [
-    { label: 'Toc do', value: formatSpeedValue(device.speed) },
-    { label: 'Toa do', value: formatCoordinateValue(device.lat, device.lon) },
-    { label: 'Ac quy xe', value: formatElectricalValue(device.vehicleBattery ?? device.battery) },
-    { label: 'Pin thiet bi', value: formatElectricalValue(device.deviceBattery) },
+    { label: 'Tốc độ', value: formatSpeedValue(device.speed) },
+    { label: 'Tọa độ', value: formatCoordinateValue(device.lat, device.lon) },
+    { label: 'Ắc quy xe', value: formatElectricalValue(device.vehicleBattery ?? device.battery) },
+    { label: 'Pin thiết bị', value: formatElectricalValue(device.deviceBattery) },
     {
-      label: 'Nhiet do may',
+      label: 'Nhiệt độ máy',
       value: formatTemperatureValue(device.engineTemperature ?? device.temperature),
     },
-    { label: 'GNSS', value: formatCountValue(device.satellites, ' sat') },
-    { label: 'Rung', value: formatCountValue(device.vibration) },
-    { label: 'Ma loi', value: formatErrorCodeValue(device.errorCode) },
+    { label: 'GNSS', value: formatCountValue(device.satellites, ' vệ tinh') },
+    { label: 'Gia tốc IMU Δ', value: formatCountValue(device.imuAccelDeltaMps2, ' m/s²') },
+    { label: 'Mã lỗi', value: formatErrorCodeValue(device.errorCode) },
   ];
 
   return (
-    <div className="pointer-events-none absolute inset-y-0 right-0 z-[910] hidden md:flex">
+    <div className="pointer-events-none absolute inset-y-0 right-0 z-[var(--layer-map-overlay)] hidden md:flex">
       <TooltipProvider delayDuration={120}>
         <aside
           className={cn(
@@ -159,7 +161,7 @@ export const MapInspectRail = ({
                 variant="ghost"
                 className="h-10 w-10 rounded-2xl"
                 onClick={toggleCollapsed}
-                aria-label={collapsed ? 'Mo rong thanh tac vu' : 'Thu gon thanh tac vu'}
+                aria-label={collapsed ? 'Mở rộng thanh tác vụ' : 'Thu gọn thanh tác vụ'}
               >
                 {collapsed ? (
                   <PanelRightOpen className="h-4 w-4" />
@@ -172,7 +174,7 @@ export const MapInspectRail = ({
                 variant="ghost"
                 className="h-10 w-10 rounded-2xl"
                 onClick={onClose}
-                aria-label="Bo chon thiet bi"
+                aria-label="Bỏ chọn thiết bị"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -197,20 +199,24 @@ export const MapInspectRail = ({
                         </Badge>
                       </div>
                       <p className="truncate text-xs text-muted-foreground">
-                        Cap nhat {device.timestamp ? formatRelative(device.timestamp) : '--'}
+                        Cập nhật {device.timestamp ? formatRelative(device.timestamp) : '--'}
                       </p>
                     </div>
                   </div>
                   <div className="mt-3 grid gap-2">
-                    <MiniStat label={engine.label} value={engine.value} tone={engine.tone} />
-                    <MiniStat label={motion.label} value={motion.value} tone={motion.tone} />
+                    <MiniStat label={vehicle.label} value={vehicle.value} tone={vehicle.tone} />
                     <MiniStat label={runtime.label} value={runtime.value} tone={runtime.tone} />
+                    <MiniStat
+                      label={connectivity.label}
+                      value={connectivity.value}
+                      tone={connectivity.tone}
+                    />
                   </div>
                 </div>
 
                 <div className="rounded-3xl border border-border/70 bg-background/80 p-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                    Thong so nhanh
+                    Thông số nhanh
                   </p>
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     {quickStats.map((stat) => (
@@ -220,12 +226,12 @@ export const MapInspectRail = ({
                 </div>
 
                 <div className="rounded-3xl border border-border/70 bg-background/80 p-3">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Vung</p>
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Vùng</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <Badge variant={allowedZone ? 'secondary' : 'outline'}>
-                      {allowedZone ? 'Da cau hinh' : 'Chua co'}
+                      {allowedZone ? 'Đã cấu hình' : 'Chưa có'}
                     </Badge>
-                    {allowedZoneLoading ? <Badge variant="outline">Dang tai...</Badge> : null}
+                    {allowedZoneLoading ? <Badge variant="outline">Đang tải...</Badge> : null}
                     {allowedZone ? (
                       <>
                         <Badge variant={allowedZoneMembership.variant}>
@@ -293,10 +299,10 @@ export const MapInspectRail = ({
                 variant="outline"
                 className={cn('h-11 rounded-2xl', collapsed && 'px-0')}
                 onClick={onToggleAllowedZoneVisibility}
-                aria-label={showAllowedZone ? 'An vung' : 'Hien vung'}
+                aria-label={showAllowedZone ? 'Ẩn vùng' : 'Hiện vùng'}
               >
                 {showAllowedZone ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                {!collapsed ? <span className="ml-2">{showAllowedZone ? 'An vung' : 'Hien vung'}</span> : null}
+                {!collapsed ? <span className="ml-2">{showAllowedZone ? 'Ẩn vùng' : 'Hiện vùng'}</span> : null}
               </Button>
             ) : null}
             {!allowedZone && onCreateAllowedZone && canEditAllowedZone ? (
@@ -305,10 +311,10 @@ export const MapInspectRail = ({
                 variant="outline"
                 className={cn('h-11 rounded-2xl', collapsed && 'px-0')}
                 onClick={onCreateAllowedZone}
-                aria-label="Tao vung"
+                aria-label="Tạo vùng"
               >
                 <MapPinned className="h-4 w-4" />
-                {!collapsed ? <span className="ml-2">Tao vung</span> : null}
+                {!collapsed ? <span className="ml-2">Tạo vùng</span> : null}
               </Button>
             ) : null}
             {allowedZone && onEditAllowedZone && canEditAllowedZone ? (
@@ -317,10 +323,10 @@ export const MapInspectRail = ({
                 variant="outline"
                 className={cn('h-11 rounded-2xl', collapsed && 'px-0')}
                 onClick={onEditAllowedZone}
-                aria-label="Chinh vung"
+                aria-label="Chỉnh vùng"
               >
                 <MapPinned className="h-4 w-4" />
-                {!collapsed ? <span className="ml-2">Chinh vung</span> : null}
+                {!collapsed ? <span className="ml-2">Chỉnh vùng</span> : null}
               </Button>
             ) : null}
           </div>

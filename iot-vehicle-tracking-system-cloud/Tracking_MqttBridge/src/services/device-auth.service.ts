@@ -6,6 +6,8 @@ interface AuthenticatedDevice {
   device_id: string;
   vehicle_id: string | null;
   current_status: string;
+  last_seen_at: string | null;
+  state_updated_at: string | null;
 }
 
 /**
@@ -20,6 +22,7 @@ export const verifyDeviceToken = async (
   try {
     const result = await pool.query<AuthenticatedDevice>(
       `SELECT id, device_id, vehicle_id, current_status
+            , last_seen_at, state_updated_at
        FROM devices
        WHERE device_id = $1
          AND (
@@ -31,7 +34,7 @@ export const verifyDeviceToken = async (
     );
     return result.rows[0] ?? null;
   } catch (err) {
-    logger.error({ err, deviceId }, 'Device auth verification failed');
+    logger.error({ err, deviceId, event: 'device_auth_verification_failed' }, 'Device auth verification failed');
     return null;
   }
 };

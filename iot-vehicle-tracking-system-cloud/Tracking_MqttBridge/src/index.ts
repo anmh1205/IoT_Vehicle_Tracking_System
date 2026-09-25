@@ -4,6 +4,7 @@ import { handleRawData } from './handlers/rawdata.handler';
 import { handleStatus } from './handlers/status.handler';
 import { handleEvent } from './handlers/event.handler';
 import { handleFirmware } from './handlers/firmware.handler';
+import { publishInternalEvent } from './publishers/internal-event.publisher';
 import { startBatchWriter, stopBatchWriter } from './services/batch-writer.service';
 import { startBridgeHealthServer, stopBridgeHealthServer } from './services/bridge-health.service';
 import { closePool } from './infrastructure/database';
@@ -49,13 +50,36 @@ const extractDeviceId = (topic: string): string | null => {
   return parts[1] ?? null;
 };
 
+const handleCommandAck = (deviceId: string, message: Buffer): void => {
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(message.toString()) as Record<string, unknown>;
+  } catch (err) {
+    logger.warn({ err, deviceId, event: 'command_ack_invalid_json' }, 'Invalid command ack payload');
+    return;
+  }
+
+  const commandId = parsed.command_id ?? parsed.commandId;
+  if (!commandId) {
+    logger.warn({ deviceId, event: 'command_ack_missing_command_id' }, 'Command ack missing command id');
+    return;
+  }
+
+  publishInternalEvent('command', {
+    device_id: deviceId,
+    command_id: String(commandId),
+    status: String(parsed.status ?? 'acknowledged'),
+    response: parsed.response ?? parsed.error ?? null,
+  });
+};
+
 /**
  * Route incoming MQTT messages to the appropriate handler based on topic suffix.
  */
 const routeMessage = (topic: string, message: Buffer): void => {
   const deviceId = extractDeviceId(topic);
   if (!deviceId) {
-    logger.warn({ topic }, 'Cannot extract deviceId from topic');
+    logger.warn({ topic, event: 'mqtt_topic_device_unresolved' }, 'MQTT topic device id unresolved');
     return;
   }
 
@@ -64,26 +88,29 @@ const routeMessage = (topic: string, message: Buffer): void => {
   switch (suffix) {
     case 'rawdata':
       handleRawData(deviceId, message).catch((err) => {
-        logger.error({ err, deviceId }, 'Unhandled error in rawdata handler');
+        logger.error({ err, deviceId, event: 'rawdata_handler_failed' }, 'Rawdata handler failed');
       });
       break;
     case 'status':
       handleStatus(deviceId, message).catch((err) => {
-        logger.error({ err, deviceId }, 'Unhandled error in status handler');
+        logger.error({ err, deviceId, event: 'status_handler_failed' }, 'Status handler failed');
       });
       break;
     case 'events':
       handleEvent(deviceId, message).catch((err) => {
-        logger.error({ err, deviceId }, 'Unhandled error in event handler');
+        logger.error({ err, deviceId, event: 'event_handler_failed' }, 'Event handler failed');
       });
       break;
     case 'firmware':
       handleFirmware(deviceId, message).catch((err) => {
-        logger.error({ err, deviceId }, 'Unhandled error in firmware handler');
+        logger.error({ err, deviceId, event: 'firmware_handler_failed' }, 'Firmware handler failed');
       });
       break;
+    case 'commands/ack':
+      handleCommandAck(deviceId, message);
+      break;
     default:
-      logger.debug({ suffix, topic }, 'Unhandled topic suffix');
+      logger.debug({ suffix, topic, event: 'mqtt_topic_suffix_unhandled' }, 'MQTT topic suffix ignored');
   }
 };
 
@@ -91,7 +118,7 @@ const routeMessage = (topic: string, message: Buffer): void => {
  * Bootstrap the MQTT Bridge service.
  */
 const main = async (): Promise<void> => {
-  logger.info('Starting MQTT Bridge service...');
+  logger.info({ event: 'bridge_starting', healthPort: appConfig.healthPort }, 'MQTT bridge starting');
 
   startBatchWriter();
   await startBridgeHealthServer({
@@ -110,45 +137,42 @@ const main = async (): Promise<void> => {
     routeMessage(topic, message);
   });
 
-  logger.info('MQTT Bridge service started successfully');
+  logger.info({ event: 'bridge_started' }, 'MQTT bridge started');
 };
 
 /**
  * Graceful shutdown: disconnect MQTT, flush batches, close DB pool.
  */
 const shutdown = async (signal: string): Promise<void> => {
-  logger.info({ signal }, 'Shutting down gracefully...');
+  logger.info({ signal, event: 'bridge_shutdown_started' }, 'MQTT bridge shutdown started');
   bridgeHealthState.shuttingDown = true;
   bridgeHealthState.subscriptionsReady = false;
 
   try {
     await disconnectMqtt();
-    logger.info('MQTT disconnected');
   } catch (err) {
-    logger.error({ err }, 'Error disconnecting MQTT');
+    logger.error({ err, event: 'bridge_shutdown_mqtt_disconnect_failed' }, 'MQTT disconnect failed during shutdown');
   }
 
   try {
     await stopBatchWriter();
-    logger.info('Batch writer flushed and stopped');
   } catch (err) {
-    logger.error({ err }, 'Error stopping batch writer');
+    logger.error({ err, event: 'bridge_shutdown_batch_writer_failed' }, 'Batch writer stop failed during shutdown');
   }
 
   try {
     await closePool();
-    logger.info('Database pool closed');
   } catch (err) {
-    logger.error({ err }, 'Error closing database pool');
+    logger.error({ err, event: 'bridge_shutdown_database_close_failed' }, 'Database pool close failed during shutdown');
   }
 
   try {
     await stopBridgeHealthServer();
   } catch (err) {
-    logger.error({ err }, 'Error stopping bridge health server');
+    logger.error({ err, event: 'bridge_shutdown_health_server_failed' }, 'Bridge health server stop failed');
   }
 
-  logger.info('Shutdown complete');
+  logger.info({ event: 'bridge_shutdown_completed' }, 'MQTT bridge shutdown complete');
   process.exit(0);
 };
 
@@ -156,16 +180,16 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 process.on('uncaughtException', (err) => {
-  logger.error({ err }, 'Uncaught exception');
+  logger.error({ err, event: 'process_uncaught_exception' }, 'Uncaught exception');
   shutdown('uncaughtException');
 });
 
 process.on('unhandledRejection', (reason) => {
-  logger.error({ reason }, 'Unhandled rejection');
+  logger.error({ reason, event: 'process_unhandled_rejection' }, 'Unhandled rejection');
 });
 
 main().catch((err) => {
   bridgeHealthState.lastError = err instanceof Error ? err.message : 'Failed to start MQTT Bridge';
-  logger.error({ err }, 'Failed to start MQTT Bridge');
+  logger.error({ err, event: 'bridge_start_failed' }, 'MQTT bridge start failed');
   process.exit(1);
 });

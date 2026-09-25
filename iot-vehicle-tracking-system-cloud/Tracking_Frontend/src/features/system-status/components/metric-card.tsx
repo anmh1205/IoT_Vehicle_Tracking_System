@@ -24,7 +24,7 @@ export const MetricCard = ({
       <StatCard
         title={title}
         value="--"
-        subtitle={unavailableText ?? 'Chưa có dữ liệu telemetry'}
+        subtitle={unavailableText ?? 'Chưa có telemetry'}
         icon={icon}
       />
     );

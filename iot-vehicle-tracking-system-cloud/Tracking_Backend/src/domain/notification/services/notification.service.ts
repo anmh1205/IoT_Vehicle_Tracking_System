@@ -5,6 +5,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from '@/domain/notification/repositories/notification.repository';
+import { publishEvent } from '@/infrastructure/realtime';
 
 interface NotificationItem {
   id: number;
@@ -98,14 +99,29 @@ export const listNotifications = async (
 
 export const markRead = async (userId: number, id: number): Promise<void> => {
   await markNotificationRead(userId, id);
+  publishEvent('notification:updated', {
+    user_id: userId,
+    id,
+    action: 'read',
+  });
 };
 
 export const markAllRead = async (userId: number): Promise<void> => {
   await markAllNotificationsRead(userId);
+  publishEvent('notification:updated', {
+    user_id: userId,
+    unreadCount: 0,
+    action: 'read_all',
+  });
 };
 
 export const deleteNotification = async (userId: number, id: number): Promise<void> => {
   await hideNotification(userId, id);
+  publishEvent('notification:updated', {
+    user_id: userId,
+    id,
+    action: 'hidden',
+  });
 };
 
 export const getNotificationStats = async (

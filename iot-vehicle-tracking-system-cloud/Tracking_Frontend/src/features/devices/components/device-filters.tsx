@@ -1,4 +1,5 @@
 'use client';
+
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { DeviceFilters as DeviceFiltersQuery } from '@/lib/api/devices';
+
 export const DeviceFilters = ({
   filters,
   onChange,
@@ -23,9 +25,7 @@ export const DeviceFilters = ({
         <Input
           placeholder="Tìm theo ID hoặc tên thiết bị..."
           value={filters.search ?? ''}
-          onChange={(event) =>
-            onChange({ ...filters, page: 1, search: event.target.value || undefined })
-          }
+          onChange={(event) => onChange({ ...filters, search: event.target.value.trim() || undefined })}
           className="pl-8"
         />
       </div>
@@ -35,18 +35,18 @@ export const DeviceFilters = ({
         onValueChange={(value) =>
           onChange({
             ...filters,
-            page: 1,
             status: value === 'all' ? undefined : value,
           })
         }
       >
         <SelectTrigger className="w-full md:w-[180px]">
-          <SelectValue placeholder="Trạng thái" />
+          <SelectValue placeholder="Kết nối" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Tất cả trạng thái</SelectItem>
-          <SelectItem value="running">Đang chạy</SelectItem>
-          <SelectItem value="stopped">Tạm dừng</SelectItem>
+          <SelectItem value="all">Tất cả kết nối</SelectItem>
+          <SelectItem value="running">Đang gửi dữ liệu</SelectItem>
+          <SelectItem value="online">Còn heartbeat</SelectItem>
+          <SelectItem value="stopped">Chậm nhịp</SelectItem>
           <SelectItem value="disconnected">Mất kết nối</SelectItem>
         </SelectContent>
       </Select>
@@ -57,7 +57,6 @@ export const DeviceFilters = ({
           const [sortBy, sortOrder] = value.split(':');
           onChange({
             ...filters,
-            page: 1,
             sortBy,
             sortOrder: sortOrder as 'asc' | 'desc',
           });
@@ -70,7 +69,7 @@ export const DeviceFilters = ({
           <SelectItem value="createdAt:desc">Mới cập nhật</SelectItem>
           <SelectItem value="deviceName:asc">Tên A-Z</SelectItem>
           <SelectItem value="deviceName:desc">Tên Z-A</SelectItem>
-          <SelectItem value="currentStatus:asc">Trạng thái</SelectItem>
+          <SelectItem value="currentStatus:asc">Kết nối</SelectItem>
         </SelectContent>
       </Select>
     </div>

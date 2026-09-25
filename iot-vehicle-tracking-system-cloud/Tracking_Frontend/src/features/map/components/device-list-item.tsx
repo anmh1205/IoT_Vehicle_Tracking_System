@@ -3,8 +3,8 @@
 import { Badge } from '@/components/ui/badge';
 import { MAP_STATUS_LABELS } from '@/features/map/constants/map-config';
 import type { DevicePosition } from '@/features/map/types';
-import { formatRelative } from '@/lib/utils/date/format';
 import { cn } from '@/lib/utils';
+import { formatRelative } from '@/lib/utils/date/format';
 
 const STATUS_VARIANTS: Record<
   DevicePosition['status'],
@@ -39,9 +39,9 @@ export const DeviceListItem = ({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="line-clamp-1 text-sm font-semibold">{device.deviceName}</p>
+          <p className="line-clamp-1 text-sm font-semibold">{device.deviceName || device.deviceId}</p>
           <p className="line-clamp-1 text-xs text-muted-foreground">
-            {device.vehiclePlate ?? device.deviceId ?? 'Chưa gán phương tiện'}
+            {device.vehiclePlate ?? device.deviceId ?? 'Chưa gắn phương tiện'}
           </p>
         </div>
         <Badge variant={STATUS_VARIANTS[device.status]}>{MAP_STATUS_LABELS[device.status]}</Badge>

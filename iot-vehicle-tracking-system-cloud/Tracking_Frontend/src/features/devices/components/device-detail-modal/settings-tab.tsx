@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Form,
@@ -25,7 +26,12 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
-import { getDeviceConfigSummary } from './device-detail-presenters';
+import { notificationUtils } from '@/lib/notification';
+import {
+  buildFirmwareConfigCommandParams,
+  getDeviceConfigSummary,
+  pickLatestTelemetryTimestamp,
+} from './device-detail-presenters';
 import { useDeviceDetailModal } from './modal-context';
 import {
   formatSecondsLabel,
@@ -36,11 +42,11 @@ import {
 
 const schema = z.object({
   deviceName: z.string().min(1),
-  drivingIntervalSec: z.number().int().min(10).max(3600),
+  drivingIntervalSec: z.number().int().min(1).max(3600),
   parkingIntervalSec: z.number().int().min(30).max(21600),
   parkingHeartbeatSec: z.number().int().min(30).max(21600),
   overspeedKph: z.number().int().min(20).max(180),
-  vibrationThreshold: z.number().min(0).max(100),
+  imuAccelDeltaThresholdMps2: z.number().min(0).max(100),
   offlineAfterSec: z.number().int().min(60).max(86400),
 });
 
@@ -64,6 +70,13 @@ const pickNumber = (sources: unknown[], fallback: number) => {
   }
   return fallback;
 };
+
+const omitLegacyThresholdKeys = (value: ConfigRecord | null): ConfigRecord =>
+  Object.fromEntries(
+    Object.entries(value ?? {}).filter(
+      ([key]) => key !== 'vibrationThreshold' && key !== 'vibration_threshold',
+    ),
+  );
 
 const resolveDefaultValues = (device: DeviceState): SettingsFormValues => {
   const config = toRecord(device?.config);
@@ -90,8 +103,14 @@ const resolveDefaultValues = (device: DeviceState): SettingsFormValues => {
       900,
     ),
     overspeedKph: pickNumber([alertConfig?.overspeedKph, alertConfig?.overspeed_kph], 80),
-    vibrationThreshold: pickNumber(
-      [alertConfig?.vibrationThreshold, alertConfig?.vibration_threshold, device?.vibrationThreshold],
+    imuAccelDeltaThresholdMps2: pickNumber(
+      [
+        alertConfig?.imuAccelDeltaThresholdMps2,
+        alertConfig?.imu_accel_delta_threshold_mps2,
+        alertConfig?.vibrationThreshold,
+        alertConfig?.vibration_threshold,
+        device?.imuAccelDeltaThresholdMps2,
+      ],
       2,
     ),
     offlineAfterSec: pickNumber([alertConfig?.offlineAfterSec, alertConfig?.offline_after_s], 600),
@@ -189,15 +208,21 @@ export const SettingsTab = () => {
   const drivingConfig = toRecord(config?.driving);
   const parkingConfig = toRecord(config?.parking);
   const alertConfig = toRecord(config?.alerts);
+  const alertConfigWithoutLegacyThreshold = omitLegacyThresholdKeys(alertConfig);
   const configSummary = getDeviceConfigSummary(device);
   const observedCadence = getObservedCadenceSeconds(trackingRowsAscending);
-  const latestTelemetryTimestamp =
-    latestTrackingRow?.timestamp ?? positionSnapshot?.timestamp ?? device?.lastSeenAt ?? null;
+  const latestTelemetryTimestamp = pickLatestTelemetryTimestamp(
+    latestTrackingRow?.timestamp,
+    positionSnapshot?.timestamp,
+    device?.lastSeenAt ?? null,
+  );
   const telemetryState = getTelemetryFreshnessState(
     getFreshnessSeconds(latestTelemetryTimestamp),
     configSummary.activeIntervalSec,
   );
   const [payloadPreviewOpen, setPayloadPreviewOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deletePending, setDeletePending] = useState(false);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(schema),
@@ -227,24 +252,15 @@ export const SettingsTab = () => {
           ? { label: 'Đang mất tín hiệu', variant: 'destructive' as const }
           : { label: 'Chưa đủ dữ liệu', variant: 'outline' as const };
 
+  const firmwareCommandParams = buildFirmwareConfigCommandParams({
+    drivingIntervalSec: preview.drivingIntervalSec,
+    parkingHeartbeatSec: preview.parkingHeartbeatSec,
+  });
+
   const commandPreview = JSON.stringify(
     {
       command: 'update_config',
-      requestInterval: preview.drivingIntervalSec,
-      config: {
-        driving: {
-          tracking_interval_s: preview.drivingIntervalSec,
-        },
-        parking: {
-          tracking_interval_s: preview.parkingIntervalSec,
-          heartbeat_interval_s: preview.parkingHeartbeatSec,
-        },
-        alerts: {
-          overspeed_kph: preview.overspeedKph,
-          vibration_threshold: preview.vibrationThreshold,
-          offline_after_s: preview.offlineAfterSec,
-        },
-      },
+      params: firmwareCommandParams,
     },
     null,
     2,
@@ -252,6 +268,16 @@ export const SettingsTab = () => {
 
   const isDirty = form.formState.isDirty;
   const isSubmitting = form.formState.isSubmitting;
+
+  const handleDelete = async () => {
+    setDeletePending(true);
+    try {
+      await onDeleteDevice();
+      setDeleteConfirmOpen(false);
+    } finally {
+      setDeletePending(false);
+    }
+  };
 
   const onSubmit = async (values: SettingsFormValues) => {
     const nextConfig = {
@@ -269,22 +295,38 @@ export const SettingsTab = () => {
         heartbeat_interval_s: values.parkingHeartbeatSec,
       },
       alerts: {
-        ...(alertConfig ?? {}),
+        ...alertConfigWithoutLegacyThreshold,
         overspeedKph: values.overspeedKph,
         overspeed_kph: values.overspeedKph,
-        vibrationThreshold: values.vibrationThreshold,
-        vibration_threshold: values.vibrationThreshold,
+        imuAccelDeltaThresholdMps2: values.imuAccelDeltaThresholdMps2,
+        imu_accel_delta_threshold_mps2: values.imuAccelDeltaThresholdMps2,
         offlineAfterSec: values.offlineAfterSec,
         offline_after_s: values.offlineAfterSec,
       },
     };
 
-    await onUpdateNameId({ deviceName: values.deviceName });
-    await onUpdateSettings({
-      requestInterval: values.drivingIntervalSec,
-      vibrationThreshold: values.vibrationThreshold,
-      config: nextConfig,
-    });
+    let nameUpdateSucceeded = false;
+    try {
+      await onUpdateNameId({ deviceName: values.deviceName });
+      nameUpdateSucceeded = true;
+    } catch {
+      return;
+    }
+
+    try {
+      await onUpdateSettings({
+        requestInterval: values.drivingIntervalSec,
+        imuAccelDeltaThresholdMps2: values.imuAccelDeltaThresholdMps2,
+        config: nextConfig,
+      });
+    } catch {
+      if (nameUpdateSucceeded) {
+        notificationUtils.warning(
+          'Lưu cấu hình không hoàn tất',
+          'Tên thiết bị đã cập nhật nhưng cấu hình kỹ thuật thất bại. Vui lòng thử lại.',
+        );
+      }
+    }
   };
 
   return (
@@ -314,7 +356,7 @@ export const SettingsTab = () => {
                   }
                 />
                 <ContextCell
-                  label="Profile cloud"
+                  label="Hồ sơ cloud"
                   value={`${configSummary.activeProfileLabel} · ${formatSecondsLabel(configSummary.activeIntervalSec)} / lần`}
                   hint={configSummary.activeProfileHint}
                 />
@@ -348,7 +390,7 @@ export const SettingsTab = () => {
                       <FormItem className="space-y-2 md:col-span-2 xl:col-span-3">
                         <FormLabel className="flex items-center gap-1.5">
                           <span>Tên thiết bị</span>
-                          <FieldHintTooltip content="Tên hiển thị ở dashboard, modal thiết bị và bản đồ." />
+                          <FieldHintTooltip content="Tên hiển thị ở bảng điều khiển, màn hình thiết bị và bản đồ." />
                         </FormLabel>
                         <FormControl>
                           <Input {...field} autoComplete="off" spellCheck={false} />
@@ -362,19 +404,19 @@ export const SettingsTab = () => {
                     control={form.control}
                     name="drivingIntervalSec"
                     label="Chu kỳ gửi khi đang chạy (giây)"
-                    hint="Đây là nhịp telemetry chính và là requestInterval cloud dùng để điều phối."
+                    hint="Đây là nhịp gửi telemetry chính và là requestInterval cloud dùng để điều phối."
                   />
                   <NumberInputField
                     control={form.control}
                     name="parkingIntervalSec"
-                    label="Chu kỳ gửi khi đỗ (giây)"
-                    hint="Giảm lưu lượng khi đỗ nhưng vẫn đủ dữ liệu cho bản đồ và cảnh báo."
+                    label="Nhịp tham chiếu khi đỗ ở cloud (giây)"
+                    hint="Chỉ dùng cho hồ sơ cloud và đánh giá nhịp; firmware hiện không có tracking_interval_s riêng cho trạng thái đỗ."
                   />
                   <NumberInputField
                     control={form.control}
                     name="parkingHeartbeatSec"
                     label="Heartbeat khi đỗ (giây)"
-                    hint="Giữ thiết bị không bị đánh dấu offline quá sớm khi dừng lâu."
+                    hint="Đây là tham số firmware thực sự dùng cho parked wake; hiện firmware giới hạn wake tối đa 120 giây để bắt lại IGN."
                   />
                 </CardContent>
               </Card>
@@ -388,13 +430,13 @@ export const SettingsTab = () => {
                     control={form.control}
                     name="overspeedKph"
                     label="Ngưỡng quá tốc độ (km/h)"
-                    hint="Giữ cùng một mốc giữa rule cloud, audit UI và dữ liệu firmware."
+                    hint="Giữ cùng một mốc giữa quy tắc cloud, giao diện kiểm tra và dữ liệu firmware."
                   />
                   <NumberInputField
                     control={form.control}
-                    name="vibrationThreshold"
-                    label="Ngưỡng rung"
-                    hint="Dùng chung cho rule cảnh báo và đối chiếu trạng thái chuyển động."
+                    name="imuAccelDeltaThresholdMps2"
+                    label="Ngưỡng gia tốc IMU Δ (m/s²)"
+                    hint="Dùng chung cho quy tắc cảnh báo với đơn vị gia tốc chuẩn hóa m/s²."
                   />
                   <NumberInputField
                     control={form.control}
@@ -412,11 +454,10 @@ export const SettingsTab = () => {
               </CardHeader>
               <CardContent className="px-4 pb-4">
                 <Button
+                  type="button"
                   variant="destructive"
-                  disabled={isSubmitting}
-                  onClick={async () => {
-                    await onDeleteDevice();
-                  }}
+                  disabled={isSubmitting || deletePending}
+                  onClick={() => setDeleteConfirmOpen(true)}
                 >
                   Xóa thiết bị
                 </Button>
@@ -432,8 +473,11 @@ export const SettingsTab = () => {
               <CardContent className="space-y-3 px-4 pb-4">
                 <SummaryRow label="Tên hiển thị" value={preview.deviceName || '-'} />
                 <SummaryRow label="Nhịp chạy" value={`${preview.drivingIntervalSec}s / lần`} />
-                <SummaryRow label="Nhịp đỗ" value={`${preview.parkingIntervalSec}s / lần`} />
-                <SummaryRow label="Offline sau" value={`${preview.offlineAfterSec}s`} />
+                <SummaryRow
+                  label="Heartbeat parked áp dụng"
+                  value={`${configSummary.appliedParkingWakeIntervalSec ?? preview.parkingHeartbeatSec}s / lần`}
+                />
+                <SummaryRow label="Mất tín hiệu sau" value={`${preview.offlineAfterSec}s`} />
 
                 <Collapsible open={payloadPreviewOpen} onOpenChange={setPayloadPreviewOpen}>
                   <CollapsibleTrigger asChild>
@@ -470,7 +514,7 @@ export const SettingsTab = () => {
 
           <div className="sticky bottom-0 z-20 mt-4 rounded-xl border bg-background/95 px-3 py-2 shadow-lg backdrop-blur xl:hidden">
             <p className="text-xs text-muted-foreground">
-              Nhịp chạy {preview.drivingIntervalSec}s · Nhịp đỗ {preview.parkingIntervalSec}s · Offline{' '}
+              Nhịp chạy {preview.drivingIntervalSec}s · Heartbeat parked {configSummary.appliedParkingWakeIntervalSec ?? preview.parkingHeartbeatSec}s · Mất tín hiệu sau{' '}
               {preview.offlineAfterSec}s
             </p>
             <div className="mt-2 grid grid-cols-2 gap-2">
@@ -489,6 +533,22 @@ export const SettingsTab = () => {
             </div>
           </div>
         </form>
+        <ConfirmDialog
+          open={deleteConfirmOpen}
+          onCancel={() => {
+            if (!deletePending) {
+              setDeleteConfirmOpen(false);
+            }
+          }}
+          onConfirm={() => {
+            void handleDelete();
+          }}
+          title="Xóa thiết bị"
+          description={`Bạn có chắc muốn xóa thiết bị ${device?.deviceName ?? device?.deviceId ?? ''}?`}
+          confirmLabel="Xóa"
+          variant="destructive"
+          isPending={deletePending}
+        />
       </TooltipProvider>
     </Form>
   );

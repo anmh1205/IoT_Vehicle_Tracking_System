@@ -6,7 +6,9 @@
 /**
  * @file ble_util.c
  * @brief BLE address string/byte conversion helpers.
+ * This translation unit belongs to the BLE OBD NimBLE adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
+
 
 /**
  * @brief Convert BLE address bytes into standard MAC string.

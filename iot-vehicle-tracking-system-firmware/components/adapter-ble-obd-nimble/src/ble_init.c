@@ -19,9 +19,12 @@
 /**
  * @file ble_init.c
  * @brief NimBLE host stack startup/shutdown sequence for ESP-IDF.
+ * This translation unit belongs to the BLE OBD NimBLE adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
 
+
 static const char *TAG = "BLE_INIT";
+static const UBaseType_t BLE_HOST_TASK_PRIORITY = (UBaseType_t)(configMAX_PRIORITIES - 4);
 
 /**
  * @brief Convert controller status enum to readable text.
@@ -43,9 +46,10 @@ static const char *ble_controller_status_to_str(esp_bt_controller_status_t statu
  * @brief Log BLE init stage with current controller status.
  */
 static void ble_log_controller_stage(const char *stage) {
+    // Log the controller bring-up stage here so BLE stack bootstrap failures are easier to pinpoint.
     esp_bt_controller_status_t status = esp_bt_controller_get_status();
     ESP_LOGI(TAG,
-             "BLE init stage=%s controller_status=%s(%d)",
+             "event=ble_init_stage stage=%s controller_status=%s status_code=%d",
              stage,
              ble_controller_status_to_str(status),
              (int)status);
@@ -66,14 +70,17 @@ void ble_store_config_init(void);
  */
 static void ble_task(void *param) {
     (void)param;
-    ESP_LOGI(TAG, "NimBLE host task started");
+    ESP_LOGI(TAG, "event=nimble_host_task_started");
 
     /* Blocks until `nimble_port_stop()` is called. */
     nimble_port_run();
 
-    /* Notify deinit path that host loop has exited. */
-    if (s_ble_stop_sem != NULL) {
-        xSemaphoreGive(s_ble_stop_sem);
+    /* Notify deinit path that host loop has exited.
+     * Read the semaphore handle into a local copy first — the deinit path
+     * may NULL the global between our check and the give call. */
+    SemaphoreHandle_t stop_sem = s_ble_stop_sem;
+    if (stop_sem != NULL) {
+        xSemaphoreGive(stop_sem);
     }
 
     /* Release NimBLE RTOS resources associated with host task. */
@@ -83,20 +90,24 @@ static void ble_task(void *param) {
     vTaskDelete(NULL);
 }
 
+static BaseType_t ble_host_task_core(void) {
+    return CONFIG_BT_NIMBLE_PINNED_TO_CORE < portNUM_PROCESSORS ? CONFIG_BT_NIMBLE_PINNED_TO_CORE : tskNO_AFFINITY;
+}
+
 /**
  * @brief Default stack reset callback used when caller does not supply one.
  *
  * @param reason NimBLE reset reason code.
  */
 static void default_reset_cb(int reason) {
-    ESP_LOGW(TAG, "NimBLE reset reason=%d", reason);
+    ESP_LOGW(TAG, "event=nimble_reset reason=%d", reason);
 }
 
 /**
  * @brief Default stack sync callback used when caller does not supply one.
  */
 static void default_sync_cb(void) {
-    ESP_LOGI(TAG, "NimBLE host synced");
+    ESP_LOGI(TAG, "event=nimble_host_synced");
 }
 
 /**
@@ -113,7 +124,7 @@ esp_err_t ble_init_stack(const ble_init_config_t *config) {
 
     /* Idempotent init: repeated calls are accepted. */
     if (s_stack_started) {
-        ESP_LOGW(TAG, "ble_init_stack called while stack already started");
+        ESP_LOGW(TAG, "event=ble_stack_init_skipped reason=already_started");
         ble_log_controller_stage("already-started");
         return ESP_OK;
     }
@@ -122,7 +133,7 @@ esp_err_t ble_init_stack(const ble_init_config_t *config) {
     ble_log_controller_stage("before-nimble_port_init");
     esp_err_t err = nimble_port_init();
     if (err != ESP_OK) {
-        ESP_LOGE(TAG, "nimble_port_init failed: %s", esp_err_to_name(err));
+        ESP_LOGE(TAG, "event=nimble_port_init_failed err=%s", esp_err_to_name(err));
         ble_log_controller_stage("after-nimble_port_init-fail");
         return err;
     }
@@ -138,12 +149,24 @@ esp_err_t ble_init_stack(const ble_init_config_t *config) {
     s_ble_stop_sem = xSemaphoreCreateBinary();
     if (s_ble_stop_sem == NULL) {
         nimble_port_deinit();
-        ESP_LOGE(TAG, "Failed to create BLE stop semaphore");
+        ESP_LOGE(TAG, "event=ble_stop_semaphore_create_failed");
         return ESP_ERR_NO_MEM;
     }
 
-    /* Spawn NimBLE host task. */
-    BaseType_t task_result = xTaskCreate(ble_task, "nimble_host", 4096, NULL, 5, NULL);
+    /* Keep host task affinity/priority aligned with the ESP-IDF NimBLE port. */
+    BaseType_t host_core = ble_host_task_core();
+    ESP_LOGI(TAG,
+             "event=nimble_host_task_create stack=%u priority=%u core=%ld",
+             (unsigned)CONFIG_BT_NIMBLE_HOST_TASK_STACK_SIZE,
+             (unsigned)BLE_HOST_TASK_PRIORITY,
+             (long)host_core);
+    BaseType_t task_result = xTaskCreatePinnedToCore(ble_task,
+                                                     "nimble_host",
+                                                     CONFIG_BT_NIMBLE_HOST_TASK_STACK_SIZE,
+                                                     NULL,
+                                                     BLE_HOST_TASK_PRIORITY,
+                                                     NULL,
+                                                     host_core);
     if (task_result != pdPASS) {
         /* Full rollback when task creation fails. */
         vSemaphoreDelete(s_ble_stop_sem);
@@ -178,32 +201,50 @@ bool ble_stack_is_started(void) {
 /**
  * @brief Stop NimBLE host task and release stack resources.
  *
- * @return ESP_OK on success, otherwise an ESP-IDF error code.
+ * Uses a 3-second timeout waiting for the host task to exit gracefully.
+ * If the task does not exit in time, the semaphore is intentionally leaked
+ * (not deleted) to prevent use-after-free when the task eventually calls
+ * xSemaphoreGive on the handle. The leaked semaphore (~80 bytes) is
+ * reclaimed on next successful init cycle.
+ *
+ * @return ESP_OK on success, ESP_ERR_TIMEOUT if host task did not exit in time.
  */
 esp_err_t ble_stack_deinit(void) {
     ble_log_controller_stage("deinit-enter");
 
     /* Idempotent deinit for safe repeated calls. */
     if (!s_stack_started) {
-        ESP_LOGW(TAG, "ble_stack_deinit called while stack not started");
+        ESP_LOGW(TAG, "event=ble_stack_deinit_skipped reason=not_started");
         return ESP_OK;
     }
 
     /* Request host loop stop. */
     nimble_port_stop();
+
+    esp_err_t result = ESP_OK;
     if (s_ble_stop_sem != NULL) {
-        /* Wait briefly for host task graceful exit. */
-        if (xSemaphoreTake(s_ble_stop_sem, pdMS_TO_TICKS(1000)) != pdTRUE) {
-            ESP_LOGW(TAG, "Timed out waiting for NimBLE host task to stop");
+        /* Wait for host task graceful exit (3s is generous for BLE teardown). */
+        if (xSemaphoreTake(s_ble_stop_sem, pdMS_TO_TICKS(3000)) == pdTRUE) {
+            /* Task exited cleanly — safe to delete semaphore. */
+            vSemaphoreDelete(s_ble_stop_sem);
+            s_ble_stop_sem = NULL;
+        } else {
+            /* Timeout: host task may still be running. Do NOT delete the
+             * semaphore — the task will eventually call xSemaphoreGive on it.
+             * Leak the handle intentionally to prevent use-after-free crash.
+             * Next ble_init_stack() will create a fresh semaphore. */
+            ESP_LOGE(TAG, "event=nimble_host_task_stop_timeout action=leak_semaphore");
+            s_ble_stop_sem = NULL;
+            result = ESP_ERR_TIMEOUT;
         }
-        vSemaphoreDelete(s_ble_stop_sem);
-        s_ble_stop_sem = NULL;
     }
 
-    /* Deinitialize host and controller stack. */
+    /* Deinitialize host and controller stack regardless of task exit status.
+     * nimble_port_deinit() is safe to call even if the host task is still
+     * winding down — it disables the controller and frees port resources. */
     nimble_port_deinit();
     s_stack_started = false;
     ble_log_controller_stage("deinit-done");
-    ESP_LOGI(TAG, "NimBLE stack deinitialized");
-    return ESP_OK;
+    ESP_LOGI(TAG, "event=nimble_stack_deinitialized");
+    return result;
 }

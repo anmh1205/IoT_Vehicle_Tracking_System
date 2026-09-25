@@ -8,7 +8,12 @@
 /**
  * @file ota_contract.h
  * @brief OTA payload contract, status strings, and progress/error constants.
+ * This header belongs to the device-cloud contract layer and describes the payload contract that firmware and cloud services must interpret the same way.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /** @brief OTA confirm timeout defaults and bounds (seconds). */
 #define TRACKER_OTA_CONFIRM_TIMEOUT_DEFAULT_SEC 180U
@@ -50,6 +55,7 @@
 #define TRACKER_OTA_ERROR_HTTP_HEX_DECODE_FAILED "http_hex_decode_failed"
 #define TRACKER_OTA_ERROR_OTA_WRITE_FAILED "ota_write_failed"
 #define TRACKER_OTA_ERROR_HTTP_SIZE_MISMATCH "http_size_mismatch"
+#define TRACKER_OTA_ERROR_HTTP_INVALID_IMAGE "http_invalid_image"
 #define TRACKER_OTA_ERROR_SHA256_MISMATCH "sha256_mismatch"
 #define TRACKER_OTA_ERROR_OTA_END_FAILED "ota_end_failed"
 #define TRACKER_OTA_ERROR_SET_BOOT_PARTITION_FAILED "set_boot_partition_failed"

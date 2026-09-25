@@ -2,6 +2,8 @@ export interface Trip {
   id: number;
   trip_code: string;
   vehicle_id: string | null;
+  vehicle_plate?: string | null;
+  customer_name?: string | null;
   device_id: string | null;
   driver_name: string | null;
   driver_phone: string | null;
@@ -27,6 +29,8 @@ export interface TripPublic {
   id: number;
   tripCode: string;
   vehicleId: string | null;
+  vehiclePlate: string | null;
+  customerName: string | null;
   deviceId: string | null;
   driverName: string | null;
   driverPhone: string | null;
@@ -61,7 +65,17 @@ export interface CreateTripInput {
   notes?: string;
 }
 
-export interface UpdateTripInput extends Partial<Omit<CreateTripInput, 'tripCode'>> {}
+export interface UpdateTripInput {
+  vehicleId?: string | null;
+  deviceId?: string | null;
+  driverName?: string | null;
+  driverPhone?: string | null;
+  startLocation?: string | null;
+  endLocation?: string | null;
+  plannedStart?: string | null;
+  plannedEnd?: string | null;
+  notes?: string | null;
+}
 
 export interface TripListQuery {
   page?: number;

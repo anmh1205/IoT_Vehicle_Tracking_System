@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import { systemAdminServices, type VmSettingResource } from '@/lib/api/system-admin';
 import type {
   ActivateVmSettingPayload,
@@ -138,7 +139,6 @@ export const useSystemAdminHealth = (enabled = true) => {
     queryKey: systemAdminQueryKeys.health,
     queryFn: () => systemAdminServices.health(),
     enabled,
-    refetchInterval: 30000,
   });
 };
 
@@ -153,7 +153,6 @@ export const useSystemLogs = (filters: LogsFilterState) => {
       });
       return normalizeLogQueryResult(payload);
     },
-    refetchInterval: 60000,
   });
 };
 
@@ -165,7 +164,8 @@ export const useSystemTables = () => {
 };
 
 export const useSystemAdminSettings = (enabled = true, resource?: VmSettingResource) => {
-  return useQuery({
+  const queryClient = useQueryClient();
+  const query = useQuery({
     queryKey: systemAdminQueryKeys.vmSettings(resource ?? 'all'),
     queryFn: async (): Promise<SystemAdminSetting[]> => {
       const payload = await systemAdminServices.getSettings({ resource });
@@ -173,6 +173,20 @@ export const useSystemAdminSettings = (enabled = true, resource?: VmSettingResou
     },
     enabled,
   });
+
+  useRealtimeSubscription({
+    namespace: 'dashboard',
+    event: 'system-admin:settings',
+    enabled,
+    handler: (payload: { key?: string; resource?: VmSettingResource }) => {
+      if (resource && payload.resource && payload.resource !== resource) {
+        return;
+      }
+      void invalidateVmSettingScope(queryClient, payload.key);
+    },
+  });
+
+  return query;
 };
 
 export const useCreateSystemSetting = () => {

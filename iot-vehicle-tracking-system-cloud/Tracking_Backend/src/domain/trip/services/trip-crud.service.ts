@@ -17,6 +17,8 @@ const sanitizeTrip = (t: Trip): TripPublic => ({
   id: t.id,
   tripCode: t.trip_code,
   vehicleId: t.vehicle_id,
+  vehiclePlate: t.vehicle_plate ?? null,
+  customerName: t.customer_name ?? null,
   deviceId: t.device_id,
   driverName: t.driver_name,
   driverPhone: t.driver_phone,

@@ -84,7 +84,20 @@ export interface CreateDriverInput {
   notes?: string;
 }
 
-export interface UpdateDriverInput extends Partial<CreateDriverInput> {}
+export interface UpdateDriverInput {
+  driverCode?: string;
+  fullName?: string;
+  phone?: string | null;
+  email?: string | null;
+  licenseNumber?: string | null;
+  licenseType?: string | null;
+  licenseExpiry?: string | null;
+  dateOfBirth?: string | null;
+  address?: string | null;
+  avatarUrl?: string | null;
+  status?: 'active' | 'inactive' | 'suspended';
+  notes?: string | null;
+}
 
 export interface DriverListQuery {
   page?: number;

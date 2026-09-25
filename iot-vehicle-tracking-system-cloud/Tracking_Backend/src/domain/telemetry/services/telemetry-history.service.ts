@@ -8,25 +8,43 @@ interface EventLogRow {
 
 interface TelemetryFieldDescriptor {
   outputKey: string;
-  storageKey: string;
+  storageKeys: string[];
 }
 
 const DEFAULT_FIELDS = ['latitude', 'longitude', 'speed'];
 const FIELD_ALIASES: Record<string, TelemetryFieldDescriptor> = {
-  latitude: { outputKey: 'latitude', storageKey: 'latitude' },
-  longitude: { outputKey: 'longitude', storageKey: 'longitude' },
-  speed: { outputKey: 'speed', storageKey: 'speed' },
-  course: { outputKey: 'course', storageKey: 'course' },
-  vibration: { outputKey: 'vibration', storageKey: 'vibration' },
-  temperature: { outputKey: 'temperature', storageKey: 'temperature' },
-  vehiclebattery: { outputKey: 'vehicleBattery', storageKey: 'vehicle_battery' },
-  devicebattery: { outputKey: 'deviceBattery', storageKey: 'device_battery' },
-  errorcode: { outputKey: 'errorCode', storageKey: 'error_code' },
+  latitude: { outputKey: 'latitude', storageKeys: ['latitude'] },
+  longitude: { outputKey: 'longitude', storageKeys: ['longitude'] },
+  speed: { outputKey: 'speed', storageKeys: ['speed'] },
+  course: { outputKey: 'course', storageKeys: ['course'] },
+  imuacceldeltamps2: {
+    outputKey: 'imuAccelDeltaMps2',
+    storageKeys: ['imu_accel_delta_mps2', 'vibration'],
+  },
+  vibration: {
+    outputKey: 'imuAccelDeltaMps2',
+    storageKeys: ['imu_accel_delta_mps2', 'vibration'],
+  },
+  temperature: { outputKey: 'temperature', storageKeys: ['temperature'] },
+  vehiclebattery: { outputKey: 'vehicleBattery', storageKeys: ['vehicle_battery'] },
+  devicebattery: { outputKey: 'deviceBattery', storageKeys: ['device_battery'] },
+  errorcode: { outputKey: 'errorCode', storageKeys: ['error_code'] },
 };
 
-const readValue = (source: Record<string, unknown> | null, key: string): number | string | null => {
+const readValueAtPath = (
+  source: Record<string, unknown> | null,
+  path: string[],
+): number | string | null => {
   if (!source) return null;
-  const value = source[key];
+  let value: unknown = source;
+
+  for (const segment of path) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return null;
+    }
+    value = (value as Record<string, unknown>)[segment];
+  }
+
   if (value === undefined || value === null) return null;
   if (typeof value === 'number') return value;
   if (typeof value === 'string') {
@@ -35,6 +53,47 @@ const readValue = (source: Record<string, unknown> | null, key: string): number 
   }
   return null;
 };
+
+const buildCandidatePaths = (key: string): string[][] => {
+  const topLevel = [key];
+
+  switch (key) {
+    case 'latitude':
+    case 'longitude':
+    case 'speed':
+    case 'course':
+    case 'error_code':
+    case 'satellites':
+    case 'device_battery':
+    case 'vehicle_battery':
+    case 'imu_accel_delta_mps2':
+      return [
+        ['raw_payload', 'data', key],
+        topLevel,
+      ];
+    case 'temperature':
+      return [
+        topLevel,
+        ['raw_payload', 'diagnostics', 'signals', 'coolant_c'],
+        ['diagnostics', 'signals', 'coolant_c'],
+        ['raw_payload', 'diagnostics', 'signals', 'intake_air_temp_c'],
+        ['diagnostics', 'signals', 'intake_air_temp_c'],
+      ];
+    case 'vibration':
+      return [
+        ['raw_payload', 'data', 'imu_accel_delta_mps2'],
+        ['imu_accel_delta_mps2'],
+        topLevel,
+      ];
+    default:
+      return [topLevel];
+  }
+};
+
+const readValue = (source: Record<string, unknown> | null, key: string): number | string | null =>
+  buildCandidatePaths(key)
+    .map((path) => readValueAtPath(source, path))
+    .find((value) => value !== null) ?? null;
 
 export const getTelemetryHistory = async (params: {
   deviceId: string;
@@ -67,8 +126,12 @@ export const getTelemetryHistory = async (params: {
       timestamp: row.server_timestamp.toISOString(),
     };
     for (const field of fields) {
-      const fromContext = readValue(row.context, field.storageKey);
-      const fromMetadata = readValue(row.metadata, field.storageKey);
+      const fromContext = field.storageKeys
+        .map((key) => readValue(row.context, key))
+        .find((value) => value !== null);
+      const fromMetadata = field.storageKeys
+        .map((key) => readValue(row.metadata, key))
+        .find((value) => value !== null);
       point[field.outputKey] = fromContext ?? fromMetadata ?? null;
     }
     return point;

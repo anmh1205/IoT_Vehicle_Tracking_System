@@ -14,12 +14,26 @@ import type {
 } from '@/domain/trip/types/trip.types';
 
 const ALLOWED_SORT_COLUMNS: Record<string, string> = {
-  tripCode: 'trip_code',
-  status: 'status',
-  plannedStart: 'planned_start',
-  actualStart: 'actual_start',
-  createdAt: 'created_at',
+  tripCode: 't.trip_code',
+  status: 't.status',
+  plannedStart: 't.planned_start',
+  actualStart: 't.actual_start',
+  createdAt: 't.created_at',
 };
+
+const TRIP_FROM_CLAUSE = `
+  FROM trips t
+  LEFT JOIN vehicles v ON v.vehicle_id = t.vehicle_id
+  LEFT JOIN customers c ON c.id = v.customer_id
+`;
+
+const TRIP_SELECT_CLAUSE = `
+  SELECT
+    t.*,
+    v.plate_number AS vehicle_plate,
+    c.name AS customer_name
+  ${TRIP_FROM_CLAUSE}
+`;
 
 export const findAll = async (query: TripListQuery): Promise<{ trips: Trip[]; total: number }> => {
   const page = query.page ?? 1;
@@ -31,18 +45,18 @@ export const findAll = async (query: TripListQuery): Promise<{ trips: Trip[]; to
   let paramIndex = 1;
 
   if (query.status) {
-    conditions.push(`status = $${paramIndex++}`);
+    conditions.push(`t.status = $${paramIndex++}`);
     params.push(query.status);
   }
 
   if (query.vehicleId) {
-    conditions.push(`vehicle_id = $${paramIndex++}`);
+    conditions.push(`t.vehicle_id = $${paramIndex++}`);
     params.push(query.vehicleId);
   }
 
   if (query.search) {
     conditions.push(
-      `(trip_code ILIKE $${paramIndex} OR vehicle_id ILIKE $${paramIndex} OR device_id ILIKE $${paramIndex} OR driver_name ILIKE $${paramIndex} OR start_location ILIKE $${paramIndex} OR end_location ILIKE $${paramIndex} OR notes ILIKE $${paramIndex})`,
+      `(t.trip_code ILIKE $${paramIndex} OR t.vehicle_id ILIKE $${paramIndex} OR v.plate_number ILIKE $${paramIndex} OR c.name ILIKE $${paramIndex} OR t.device_id ILIKE $${paramIndex} OR t.driver_name ILIKE $${paramIndex} OR t.start_location ILIKE $${paramIndex} OR t.end_location ILIKE $${paramIndex} OR t.notes ILIKE $${paramIndex})`,
     );
     params.push(`%${query.search}%`);
     paramIndex++;
@@ -50,18 +64,18 @@ export const findAll = async (query: TripListQuery): Promise<{ trips: Trip[]; to
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-  const sortColumn = ALLOWED_SORT_COLUMNS[query.sortBy ?? ''] ?? 'created_at';
+  const sortColumn = ALLOWED_SORT_COLUMNS[query.sortBy ?? ''] ?? 't.created_at';
   const sortOrder = query.sortOrder === 'asc' ? 'ASC' : 'DESC';
   const orderClause = `ORDER BY ${sortColumn} ${sortOrder}`;
 
   const countResult = await pool.query(
-    `SELECT COUNT(*) as total FROM trips ${whereClause}`,
+    `SELECT COUNT(t.id) as total ${TRIP_FROM_CLAUSE} ${whereClause}`,
     params,
   );
   const total = parseInt(countResult.rows[0].total, 10);
 
   const trips = await findMany<Trip>(
-    `SELECT * FROM trips ${whereClause} ${orderClause} LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+    `${TRIP_SELECT_CLAUSE} ${whereClause} ${orderClause} LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
 
@@ -69,7 +83,7 @@ export const findAll = async (query: TripListQuery): Promise<{ trips: Trip[]; to
 };
 
 export const findById = async (id: number): Promise<Trip | null> =>
-  findOne<Trip>('SELECT * FROM trips WHERE id = $1', [id]);
+  findOne<Trip>(`${TRIP_SELECT_CLAUSE} WHERE t.id = $1`, [id]);
 
 export const findByTripCode = async (tripCode: string): Promise<Trip | null> =>
   findOne<Trip>('SELECT * FROM trips WHERE trip_code = $1', [tripCode]);

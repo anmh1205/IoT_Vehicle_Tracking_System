@@ -2,11 +2,11 @@ menu "Tracker Firmware"
 
 config TRACKER_DEFAULT_DEVICE_ID
     string "Default device ID"
-    default "TRACKER_001"
+    default ""
 
 config TRACKER_DEFAULT_AUTH_TOKEN
     string "Default auth token"
-    default "provisioning-required"
+    default ""
 
 config TRACKER_DEFAULT_MQTT_HOST
     string "Default MQTT host"
@@ -16,6 +16,15 @@ config TRACKER_DEFAULT_MQTT_PORT
     int "Default MQTT port"
     range 1 65535
     default 1883
+
+config TRACKER_MQTT_DNS_FALLBACK_IPV4
+    string "Fallback MQTT IPv4 when modem DNS resolution fails"
+    default ""
+    help
+        Optional broker IPv4 literal used only when the SIM7600 cannot resolve
+        the configured MQTT hostname. Primary MQTT connect still uses the
+        configured hostname first; this value is a resilience fallback for
+        field networks where modem DNS intermittently fails.
 
 config TRACKER_TLS_VERIFY_SERVER
     bool "Verify TLS server certificate"
@@ -47,9 +56,26 @@ config TRACKER_DEFAULT_TRACKING_INTERVAL_S
     range 1 3600
     default 10
 
+config TRACKER_DEFAULT_IGNITION_OFF_HOLD_MS
+    int "Ignition OFF hold window (milliseconds)"
+    range 1000 60000
+    default 15000
+    help
+        Minimum sustained OFF evidence before a running trip session can close.
+        Keep this above short ECU idle/deceleration gaps so RPM=0 chatter does
+        not split one drive into many tiny sessions.
+
 config TRACKER_ENABLE_COMMAND_SUBSCRIBE
     bool "Subscribe command topic"
     default y
+
+config TRACKER_PARKED_KEEP_MODEM_GNSS_WARM
+    bool "Keep modem and GNSS warm while parked"
+    default y
+    help
+        Leave SIM7600/GNSS powered across parked light-sleep heartbeat windows
+        so OFF-state tracking keeps a warm fix and the next ignition ON edge is
+        not delayed by a full modem/GNSS cold start.
 
 config TRACKER_FAKE_SLEEP_ENABLED
     bool "Use fake parked sleep loop instead of real sleep entry"
@@ -115,7 +141,7 @@ if TRACKER_FIELD_VALIDATION_MODE
 
 config TRACKER_FIELD_VALIDATION_KEEP_AWAKE
     bool "Disable sleep in field-validation mode"
-    default y
+    default n
 
 config TRACKER_FIELD_VALIDATION_FORCE_IMU_WAKE
     bool "Force IMU wake enabled in field-validation mode"
@@ -140,6 +166,14 @@ config TRACKER_FIELD_VALIDATION_AUTH_TOKEN
 config TRACKER_FIELD_VALIDATION_DISABLE_COMMAND_SUBSCRIBE
     bool "Disable command subscribe in field-validation mode"
     default y
+
+config TRACKER_FIELD_VALIDATION_SKIP_OBD_AUTODISCOVER
+    bool "Skip OBD BLE auto-discover in field-validation mode when preferred MAC is missing"
+    default y
+    help
+        Keeps publish-path validation stable on field devices that do not have a
+        provisioned OBD adapter MAC yet. BLE OBD still works when an explicit
+        preferred MAC is configured.
 
 endif
 

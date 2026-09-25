@@ -23,7 +23,7 @@ const SOURCE_LABELS: Record<string, string> = {
   session: 'Phiên',
   error: 'Lỗi',
   command: 'Lệnh',
-  'event-log': 'Event log',
+  'event-log': 'Nhật ký sự kiện',
   'obd-diagnostic': 'OBD',
 };
 
@@ -41,13 +41,13 @@ const SOURCE_VARIANTS: Record<
 
 const FILTERS = [
   { label: 'Tất cả', value: 'all' },
-  { label: 'Rawdata device', value: 'rawdata' },
+  { label: 'Dữ liệu thô thiết bị', value: 'rawdata' },
   { label: 'Telemetry', value: 'telemetry' },
   { label: 'OBD', value: 'obd-diagnostic' },
   { label: 'Phiên', value: 'session' },
   { label: 'Lỗi', value: 'error' },
   { label: 'Lệnh', value: 'command' },
-  { label: 'Event log hệ thống', value: 'event-log' },
+  { label: 'Nhật ký sự kiện hệ thống', value: 'event-log' },
 ] as const;
 
 type RawFeedFilter = (typeof FILTERS)[number]['value'];
@@ -104,7 +104,7 @@ const normalizeCanonicalFirmwarePayload = (
     ['timestamp', toFirmwareTimestamp(sanitizedPayload.timestamp)],
     ['uptime', sanitizedPayload.uptime],
     ['data', compactRecord([
-      ['vibration', data.vibration],
+      ['imu_accel_delta_mps2', data.imu_accel_delta_mps2 ?? data.vibration],
       ['vehicle_battery', data.vehicle_battery],
       ['device_battery', data.device_battery],
       ['latitude', data.latitude],
@@ -142,7 +142,7 @@ const extractFirmwareRawPayload = (
   const metadata = toRecord(payload.metadata);
   const diagnostics = toRecord(context?.diagnostics ?? payload.diagnostics);
   const data = compactRecord([
-    ['vibration', context?.vibration],
+    ['imu_accel_delta_mps2', context?.imu_accel_delta_mps2 ?? context?.vibration],
     ['vehicle_battery', context?.vehicle_battery],
     ['device_battery', context?.device_battery],
     ['latitude', context?.latitude],
@@ -272,24 +272,29 @@ const extractFirmwareRawMatrixRows = (
   const dtc = toRecord(diagnostics?.dtc);
 
   return [
-    rowItem('device_id', 'Thiết bị', 'Mã thiết bị trong payload rawdata firmware.', firmwarePayload.device_id),
-    rowItem('timestamp', 'Timestamp firmware', 'Mốc thời gian firmware gửi lên, đơn vị millisecond.', firmwarePayload.timestamp),
-    rowItem('data.vibration', 'Rung', 'Giá trị rung từ payload data.', data.vibration),
+    rowItem('device_id', 'Thiết bị', 'Mã thiết bị trong payload dữ liệu thô firmware.', firmwarePayload.device_id),
+    rowItem('timestamp', 'Mốc thời gian firmware', 'Mốc thời gian firmware gửi lên, đơn vị mili giây.', firmwarePayload.timestamp),
+    rowItem(
+      'data.imu_accel_delta_mps2',
+      'Gia tốc IMU Δ',
+      'Độ biến thiên gia tốc IMU trong cửa sổ publish, đơn vị m/s².',
+      data.imu_accel_delta_mps2 ?? data.vibration,
+    ),
     rowItem('data.vehicle_battery', 'Ắc quy xe', 'Điện áp nguồn chính/ắc quy xe từ firmware.', data.vehicle_battery),
     rowItem('data.device_battery', 'Pin thiết bị', 'Điện áp tracker hoặc pin backup từ firmware.', data.device_battery),
     rowItem('data.latitude', 'Vĩ độ', 'Tọa độ vĩ độ GNSS từ firmware.', data.latitude),
     rowItem('data.longitude', 'Kinh độ', 'Tọa độ kinh độ GNSS từ firmware.', data.longitude),
     rowItem('data.speed', 'Tốc độ GNSS', 'Tốc độ GNSS trong payload data.', data.speed),
-    rowItem('data.course', 'Hướng di chuyển', 'Course/heading GNSS trong payload data.', data.course),
+    rowItem('data.course', 'Hướng di chuyển', 'Hướng GNSS trong payload data.', data.course),
     rowItem('data.satellites', 'Vệ tinh', 'Số vệ tinh GNSS firmware báo cáo.', data.satellites),
-    rowItem('data.ignition', 'Ignition', 'Trạng thái đánh lửa firmware gửi lên.', data.ignition),
+    rowItem('data.ignition', 'Trạng thái khóa điện', 'Trạng thái đánh lửa firmware gửi lên.', data.ignition),
     rowItem('data.error_code', 'Mã lỗi thiết bị', 'Mã lỗi kỹ thuật trong payload data.', data.error_code),
-    rowItem('diagnostics.channel.ble_obd_connected', 'BLE OBD', 'Trạng thái kết nối BLE tới adapter OBD.', channel?.ble_obd_connected),
-    rowItem('diagnostics.channel.elm_ready', 'ELM ready', 'Adapter ELM đã sẵn sàng nhận PID hay chưa.', channel?.elm_ready),
+    rowItem('diagnostics.channel.ble_obd_connected', 'BLE OBD', 'Trạng thái kết nối BLE tới bộ chuyển đổi OBD.', channel?.ble_obd_connected),
+    rowItem('diagnostics.channel.elm_ready', 'ELM ready', 'Bộ chuyển đổi ELM đã sẵn sàng nhận PID hay chưa.', channel?.elm_ready),
     rowItem('diagnostics.channel.ecu_state', 'Trạng thái ECU', 'Trạng thái ECU firmware ghi nhận.', channel?.ecu_state),
     rowItem('diagnostics.signals.rpm', 'RPM', 'Vòng tua động cơ trong diagnostics.signals.', signals?.rpm),
     rowItem('diagnostics.signals.obd_speed_kph', 'Tốc độ OBD', 'Tốc độ xe do ECU cung cấp.', signals?.obd_speed_kph),
-    rowItem('diagnostics.signals.coolant_c', 'Coolant', 'Nhiệt độ nước làm mát động cơ.', signals?.coolant_c),
+    rowItem('diagnostics.signals.coolant_c', 'Nước làm mát', 'Nhiệt độ nước làm mát động cơ.', signals?.coolant_c),
     rowItem('diagnostics.signals.engine_load_pct', 'Tải động cơ', 'Engine load do ECU cung cấp.', signals?.engine_load_pct),
     rowItem('diagnostics.quality.sample_age_ms', 'Độ trễ mẫu', 'Độ cũ của mẫu OBD gần nhất.', quality?.sample_age_ms),
     rowItem('diagnostics.mil_on', 'MIL', 'Đèn báo lỗi động cơ do ECU trả về.', diagnostics?.mil_on),
@@ -335,7 +340,7 @@ const extractMatrixRows = (
       rowItem(
         'temperature',
         'Nhiệt độ động cơ',
-        'Nhiệt độ vận hành ưu tiên từ động cơ hoặc coolant OBD.',
+        'Nhiệt độ vận hành ưu tiên từ động cơ hoặc nước làm mát OBD.',
         payload.engineTemperature ?? payload.temperature,
       ),
       rowItem('errorCode', 'Mã lỗi', 'Mã lỗi kỹ thuật được firmware gửi kèm bản tin.', payload.errorCode),
@@ -344,8 +349,8 @@ const extractMatrixRows = (
 
   if (row.source === 'command') {
     return [
-      rowItem('command', 'Lệnh', 'Tên command cloud phát xuống thiết bị.', payload.command),
-      rowItem('status', 'Trạng thái', 'Trạng thái gửi và ACK hiện tại của command.', payload.status),
+      rowItem('command', 'Lệnh', 'Tên lệnh cloud phát xuống thiết bị.', payload.command),
+      rowItem('status', 'Trạng thái', 'Trạng thái gửi và ACK hiện tại của lệnh.', payload.status),
       rowItem('sent_at', 'Gửi lúc', 'Thời điểm command được phát đi.', payload.sentAt ?? payload.sent_at),
       rowItem('acked_at', 'ACK lúc', 'Thời điểm thiết bị phản hồi ACK.', payload.ackedAt ?? payload.acked_at),
     ];
@@ -364,9 +369,9 @@ const extractMatrixRows = (
     const snapshot = extractDiagnosticsSnapshotFromRow(row);
 
     return [
-      rowItem('ble_obd_connected', 'BLE OBD', 'Trạng thái kết nối BLE tới adapter OBD.', snapshot?.bleConnected),
-      rowItem('elm_ready', 'ELM ready', 'Adapter ELM đã sẵn sàng nhận PID hay chưa.', snapshot?.elmReady),
-      rowItem('ecu_state', 'Trạng thái ECU', 'Kết quả làm việc hiện tại giữa adapter và ECU.', snapshot?.ecuState),
+      rowItem('ble_obd_connected', 'BLE OBD', 'Trạng thái kết nối BLE tới bộ chuyển đổi OBD.', snapshot?.bleConnected),
+      rowItem('elm_ready', 'ELM ready', 'Bộ chuyển đổi ELM đã sẵn sàng nhận PID hay chưa.', snapshot?.elmReady),
+      rowItem('ecu_state', 'Trạng thái ECU', 'Kết quả làm việc hiện tại giữa bộ chuyển đổi và ECU.', snapshot?.ecuState),
       rowItem('mil_on', 'MIL', 'Đèn báo lỗi động cơ do ECU trả về.', snapshot?.milOn),
       rowItem('rpm', 'RPM', 'Vòng tua động cơ hiện tại.', snapshot?.rpm),
       rowItem('obd_speed_kph', 'Tốc độ OBD', 'Tốc độ xe do ECU cung cấp.', snapshot?.obdSpeedKph),
@@ -463,15 +468,15 @@ const SummaryPill = ({
 const getSourceBadges = (row: DeviceRawFeedRow): Array<{ label: string; variant: BadgeVariant }> => {
   if (isMqttRawDataRow(row)) {
     return [
-      { label: 'Rawdata device', variant: 'default' },
-      { label: 'Event log', variant: 'outline' },
+      { label: 'Dữ liệu thô thiết bị', variant: 'default' },
+      { label: 'Nhật ký sự kiện', variant: 'outline' },
     ];
   }
 
   if (row.source === 'obd-diagnostic') {
     return [
       { label: 'OBD', variant: 'secondary' },
-      { label: 'Event log', variant: 'outline' },
+      { label: 'Nhật ký sự kiện', variant: 'outline' },
     ];
   }
 
@@ -549,7 +554,7 @@ export const RawDataTab = () => {
     return (
       <DeviceDetailEmptyState
         title="Chưa có dữ liệu thô"
-        description="Bảng raw feed sẽ hiển thị khi backend ghi nhận telemetry, phiên chạy, lỗi hoặc lệnh."
+        description="Bảng dữ liệu thô sẽ hiển thị khi backend ghi nhận telemetry, phiên chạy, lỗi hoặc lệnh."
       />
     );
   }
@@ -567,7 +572,7 @@ export const RawDataTab = () => {
             />
             <SummaryPill
               active={filter === 'rawdata'}
-              label="Rawdata device"
+              label="Dữ liệu thô thiết bị"
               value={String(counts.rawdata)}
               onClick={() => setFilter('rawdata')}
             />
@@ -603,7 +608,7 @@ export const RawDataTab = () => {
             />
             <SummaryPill
               active={filter === 'event-log'}
-              label="Event log"
+              label="Nhật ký sự kiện"
               value={`${counts.eventLog} / ${eventLogsTotal}`}
               onClick={() => setFilter('event-log')}
             />
@@ -739,21 +744,21 @@ export const RawDataTab = () => {
                     <div className="grid h-full min-h-0 gap-3">
                       <JsonPayloadPanel
                         className="min-h-[14rem]"
-                        title="Rawdata device canonical"
-                        subtitle="Payload canonical do device gui len, da bo auth_token"
+                        title="Dữ liệu thô thiết bị chuẩn hóa"
+                        subtitle="Payload chuẩn hóa do thiết bị gửi lên, đã bỏ auth_token"
                         payload={selectedFirmwarePayload}
                       />
                       <JsonPayloadPanel
                         className="min-h-[14rem]"
-                        title="Event log hệ thống"
-                        subtitle="Bản ghi backend lưu trong event_logs"
+                        title="Nhật ký sự kiện hệ thống"
+                        subtitle="Bản ghi backend lưu trong bảng event_logs"
                         payload={selectedRow.payload}
                       />
                     </div>
                   ) : (
                     <JsonPayloadPanel
                       className="h-full"
-                      title="Event log hệ thống"
+                      title="Nhật ký sự kiện hệ thống"
                       subtitle="Payload API gốc của bản ghi đang chọn"
                       payload={selectedRow.payload}
                     />
@@ -771,4 +776,3 @@ export const RawDataTab = () => {
     </div>
   );
 };
-

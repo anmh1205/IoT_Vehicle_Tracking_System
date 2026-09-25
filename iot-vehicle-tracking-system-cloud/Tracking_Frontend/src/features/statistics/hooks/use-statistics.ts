@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { deviceServices } from '@/lib/api/devices';
 import { apiClient, unwrap } from '@/lib/api/client';
 import { statisticsServices } from '@/lib/api/statistics';
+import { roundNumber } from '@/lib/utils/date/format';
 import { formatLocalDateKey, parseDateKeyAsLocal, toLocalDateInputValue } from '@/lib/utils';
 import { deriveDeviceStatus } from '@/hooks/use-device-status-realtime';
 
@@ -54,8 +55,7 @@ const normalizeSummary = (payload: any): StatisticsSummary => ({
 const toDeviceSnapshot = (raw: any): StatisticsDeviceSnapshot => ({
   deviceId: String(raw?.deviceId ?? ''),
   deviceName: String(raw?.deviceName ?? raw?.deviceId ?? 'Thiết bị'),
-  currentStatus: (raw?.currentStatus ??
-    'disconnected') as StatisticsDeviceSnapshot['currentStatus'],
+  currentStatus: (raw?.currentStatus ?? 'disconnected') as StatisticsDeviceSnapshot['currentStatus'],
   lastSeenAt: raw?.lastSeenAt ?? null,
   requestInterval: Number(raw?.requestInterval ?? 60),
   totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? 0),
@@ -116,16 +116,16 @@ const isMeaningfulSeries = (values: number[]) => values.some((value) => Number(v
 const buildFleetUsageFromDevices = (devices: StatisticsDeviceSnapshot[], params: StatisticsParams) => {
   const labels = buildLabels(params);
   const lastIndex = Math.max(labels.length - 1, 0);
-  const activeCount = devices.filter((device) => {
+  const connectedCount = devices.filter((device) => {
     const status = getSnapshotStatus(device);
     return status === 'running' || status === 'online';
   }).length;
-  const inactiveCount = Math.max(devices.length - activeCount, 0);
+  const disconnectedCount = devices.filter((device) => getSnapshotStatus(device) === 'disconnected').length;
 
   return {
     labels,
-    activeVehicles: labels.map((_, index) => (index === lastIndex ? activeCount : 0)),
-    inactiveVehicles: labels.map((_, index) => (index === lastIndex ? inactiveCount : 0)),
+    activeVehicles: labels.map((_, index) => (index === lastIndex ? connectedCount : 0)),
+    inactiveVehicles: labels.map((_, index) => (index === lastIndex ? disconnectedCount : 0)),
   };
 };
 
@@ -139,15 +139,22 @@ const buildDeviceUptimeFromDevices = (devices: StatisticsDeviceSnapshot[], param
   return {
     devices: devices.map((device) => {
       const status = getSnapshotStatus(device);
-      const uptimePercent = status === 'running' || status === 'online' ? 100 : status === 'stopped' ? 60 : 0;
+      const uptimePercent =
+        status === 'running'
+          ? 100
+          : status === 'online'
+            ? 85
+            : status === 'stopped'
+              ? 55
+              : 0;
       const downHours = Math.max(totalHours * (1 - uptimePercent / 100), 0);
 
       return {
         deviceId: device.deviceId,
         deviceName: device.deviceName,
         uptimePercent,
-        totalHours: Number(totalHours.toFixed(1)),
-        downHours: Number(downHours.toFixed(1)),
+        totalHours: roundNumber(totalHours, 1),
+        downHours: roundNumber(downHours, 1),
       };
     }),
   };
@@ -164,16 +171,13 @@ const buildSummaryFromDevices = (
   const runtimeFallback = activeLike.length * 0.2;
 
   return {
-    totalRuntimeHours: Number(
-      (runtimeFromTotals > 0 ? runtimeFromTotals : runtimeFallback).toFixed(1),
-    ),
+    totalRuntimeHours: roundNumber(runtimeFromTotals > 0 ? runtimeFromTotals : runtimeFallback, 1),
     averageUptimePercent:
       uptimeDevices.length > 0
-        ? Number(
-            (
-              uptimeDevices.reduce((sum, item) => sum + Number(item.uptimePercent ?? 0), 0) /
-              uptimeDevices.length
-            ).toFixed(1),
+        ? roundNumber(
+            uptimeDevices.reduce((sum, item) => sum + Number(item.uptimePercent ?? 0), 0) /
+              uptimeDevices.length,
+            1,
           )
         : 0,
     totalSessions: activeLike.length,
@@ -235,8 +239,8 @@ export const useStatisticsSummary = (params: StatisticsParams) => {
           ? trips.totalTrips.reduce((sum: number, value: number) => sum + Number(value ?? 0), 0)
           : 0;
         const fallback = {
-          totalRuntimeHours: Number(runtimeHours.toFixed(1)),
-          averageUptimePercent: Number(averageUptimePercent.toFixed(1)),
+          totalRuntimeHours: roundNumber(runtimeHours, 1),
+          averageUptimePercent: roundNumber(averageUptimePercent, 1),
           totalSessions,
           totalAlerts,
         };

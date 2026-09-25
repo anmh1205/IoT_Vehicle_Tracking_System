@@ -65,6 +65,7 @@ export const AlertFilters = ({
           <SelectItem value="active">Đang hoạt động</SelectItem>
           <SelectItem value="acknowledged">Đã xác nhận</SelectItem>
           <SelectItem value="resolved">Đã giải quyết</SelectItem>
+          <SelectItem value="dismissed">Đã bỏ qua</SelectItem>
         </SelectContent>
       </Select>
 

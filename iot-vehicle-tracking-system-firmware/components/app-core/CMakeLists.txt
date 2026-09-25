@@ -9,6 +9,7 @@ idf_component_register(
         "src/state_publish_pipeline.c"
         "src/state_ota_runtime.c"
         "src/state_obd_runtime.c"
+        "src/state_led_control.c"
     INCLUDE_DIRS
         "include"
     REQUIRES
@@ -23,6 +24,7 @@ idf_component_register(
         domain-ota
         domain-storage
         domain-telemetry
+        esp_driver_usb_serial_jtag
         log
         platform-board-esp32s3
         platform-hal-esp-idf

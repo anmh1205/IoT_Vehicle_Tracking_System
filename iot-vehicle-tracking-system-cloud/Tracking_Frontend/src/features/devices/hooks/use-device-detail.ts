@@ -8,7 +8,7 @@ export interface DeviceDetailData {
     totalRuntime: number;
     totalSessions: number;
     avgSessionDuration: number;
-    avgVibration: number;
+    avgImuAccelDeltaMps2: number;
     totalDataPoints: number;
   } | null;
   sessions: unknown[];
@@ -23,15 +23,35 @@ const toAlertSummary = (raw: any, source: 'device' | 'ecu'): Device['deviceAlert
   titles: Array.isArray(raw?.titles) ? raw.titles.map((item: unknown) => String(item ?? '')) : [],
 });
 
+const toOptionalNumber = (value: unknown): number | null => {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 const toDeviceSession = (raw: any): DeviceSession => ({
   id: Number(raw?.id ?? 0),
   status: raw?.status ?? 'running',
-  serverSessionStart: raw?.serverSessionStart ?? null,
-  serverSessionEnd: raw?.serverSessionEnd ?? null,
-  uptime: raw?.uptime !== undefined && raw?.uptime !== null ? Number(raw.uptime) : null,
-  avgVibration:
-    raw?.avgVibration !== undefined && raw?.avgVibration !== null ? Number(raw.avgVibration) : null,
-  dataPointsCount: Number(raw?.dataPointsCount ?? 0),
+  serverSessionStart: raw?.serverSessionStart ?? raw?.server_session_start ?? null,
+  serverSessionEnd: raw?.serverSessionEnd ?? raw?.server_session_end ?? null,
+  sessionStart: raw?.sessionStart ?? raw?.session_start ?? null,
+  sessionEnd: raw?.sessionEnd ?? raw?.session_end ?? null,
+  localSessionKey: toOptionalNumber(raw?.localSessionKey ?? raw?.local_session_key),
+  firmwareBootId: raw?.firmwareBootId ?? raw?.firmware_boot_id ?? null,
+  canonicalSource: raw?.canonicalSource ?? raw?.canonical_source ?? null,
+  boundarySource: raw?.boundarySource ?? raw?.boundary_source ?? null,
+  startReason: raw?.startReason ?? raw?.start_reason ?? null,
+  endReason: raw?.endReason ?? raw?.end_reason ?? null,
+  uptime: toOptionalNumber(raw?.uptime),
+  avgImuAccelDeltaMps2: toOptionalNumber(
+    raw?.avgImuAccelDeltaMps2 ?? raw?.avg_imu_accel_delta_mps2 ?? raw?.avgVibration,
+  ),
+  dataPointsCount: Number(raw?.dataPointsCount ?? raw?.data_points_count ?? 0),
+  gpsPointsCount: Number(
+    raw?.gpsPointsCount ?? raw?.gps_points_count ?? raw?.dataPointsCount ?? raw?.data_points_count ?? 0,
+  ),
 });
 
 const toDevice = (raw: any): Device => ({
@@ -58,7 +78,12 @@ const toDevice = (raw: any): Device => ({
   longitude: raw?.longitude !== undefined ? Number(raw.longitude) : null,
   totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? 0),
   requestInterval: Number(raw?.requestInterval ?? 60),
-  vibrationThreshold: Number(raw?.vibrationThreshold ?? 0),
+  imuAccelDeltaThresholdMps2: Number(
+    raw?.imuAccelDeltaThresholdMps2 ??
+      raw?.imu_accel_delta_threshold_mps2 ??
+      raw?.vibrationThreshold ??
+      0,
+  ),
   lastErrorCode: raw?.lastErrorCode !== undefined && raw?.lastErrorCode !== null
     ? Number(raw.lastErrorCode)
     : null,

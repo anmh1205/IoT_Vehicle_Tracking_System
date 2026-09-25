@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+const nullableString = (max: number) => z.string().max(max).nullable().optional();
+const nullableDateTime = z.string().datetime().nullable().optional();
+
 export const createTripSchema = z.object({
   tripCode: z
     .string()
@@ -21,15 +24,15 @@ export const createTripSchema = z.object({
 });
 
 export const updateTripSchema = z.object({
-  vehicleId: z.string().max(50).optional(),
-  deviceId: z.string().max(50).optional(),
-  driverName: z.string().max(200).optional(),
-  driverPhone: z.string().max(20).optional(),
-  startLocation: z.string().max(500).optional(),
-  endLocation: z.string().max(500).optional(),
-  plannedStart: z.string().datetime().optional(),
-  plannedEnd: z.string().datetime().optional(),
-  notes: z.string().max(500).optional(),
+  vehicleId: nullableString(50),
+  deviceId: nullableString(50),
+  driverName: nullableString(200),
+  driverPhone: nullableString(20),
+  startLocation: nullableString(500),
+  endLocation: nullableString(500),
+  plannedStart: nullableDateTime,
+  plannedEnd: nullableDateTime,
+  notes: nullableString(500),
 });
 
 export const tripListQuerySchema = z.object({

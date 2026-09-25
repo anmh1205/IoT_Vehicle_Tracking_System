@@ -2,6 +2,35 @@
 
 ## Phase Status
 
+### P1 - Firmware-Authoritative Session Lifecycle Rollout In Progress
+- Scope: move session authority from cloud-inferred status chatter to firmware ignition boundaries across bridge persistence, backend contracts, and frontend semantics.
+- Milestones in progress:
+  - Added additive `device_sessions` provenance fields for provisional identity and boundary/canonical source tracking in PostgreSQL bootstrap + migration files.
+  - Updated MQTT Bridge so only firmware `boundary_event` opens/closes sessions, with bridge-side matching/backfill by `(device_id, boot_id, local_session_key)` and canonical assignment handoff to the device.
+  - Exposed authoritative session timestamps/provenance through backend session DTOs and realtime payload contracts.
+  - Updated frontend session parsers and status labels so `online` means parked heartbeat visibility rather than a driving-equivalent state.
+- Remaining closure:
+  - Resolve shell-wrapper blocker preventing service-level `npm run typecheck`/build verification in this environment.
+  - Continue downstream UI/runtime consumers and historical cleanup/audit phases from the authoritative-session plan.
+
+### P1 - Cloud Realtime WebSocket Audit Complete
+- Scope: end-to-end Socket.IO audit across backend namespace auth/scoping, frontend namespace-aware consumers, and event-driven dashboard updates.
+- Milestones completed:
+  - Added namespace-scoped realtime channels for dashboard, devices, notifications, exports, and firmware with role-based access for firmware and system-admin settings.
+  - Scoped device, user, and admin delivery to rooms instead of namespace-wide broadcast.
+  - Replaced hot-path polling on dashboard surfaces with event-driven cache patching/invalidation and snapshot-only fetches at load or reconnect boundaries.
+  - Wired real backend producers for notification, export, firmware, simulator, and system-admin realtime events.
+  - Validation passed with backend/frontend lint, typecheck, build, Docker rebuild/restart, and smoke checks on `/login` and `/ws-health`.
+
+### P2 - Firmware Log Monitor Governance Complete
+- Scope: firmware-wide logging/monitoring governance for ESP32-S3 runtime paths, implemented hotspot-first without adding a shared logging framework.
+- Milestones completed:
+  - Added structured transition/recovery/fallback/stage logs with local gating where repeated paths can spam UART.
+  - Extended runtime telemetry counters for MQTT publish outcomes, LTE recovery, OBD quality, and OTA HTTP results.
+  - Added app-core diagnostic health snapshots gated by field-validation mode.
+  - Redacted sensitive firmware logs and tracked test-log artifacts, including raw AT bodies, MQTT credentials/endpoints, APNs, URLs, payloads, full coordinates, IMEI/IMSI, and secrets.
+  - Firmware build/size and static redaction validation passed; hardware scenario validation remains recommended before field release.
+
 ### P1 - MQTT Device Simulator + VPS Fix-Loop Automation Complete
 - Scope: deterministic MQTT device simulator plus bounded local-agent/VPS SSH fix-loop automation under `resources/mock-data/scripts` and `resources/mock-data/simulator-specs`.
 - Milestones completed:

@@ -111,7 +111,7 @@ export const listVehicleZones = async (): Promise<{ items: VehicleZoneVehicleSum
   return {
     items: rows.map((row) => ({
       id: row.vehicle_record_id,
-      vehicleId: row.vehicle_id,
+      vehicleId: row.summary_vehicle_id,
       plateNumber: row.plate_number,
       customerName: row.customer_name,
       deviceId: row.device_id,

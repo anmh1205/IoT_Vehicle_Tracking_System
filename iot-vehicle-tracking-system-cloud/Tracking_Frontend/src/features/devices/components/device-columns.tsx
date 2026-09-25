@@ -1,6 +1,8 @@
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
+import { Eye, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,10 +11,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
-import { MoreHorizontal, Eye, Pencil, Trash2 } from 'lucide-react';
-import { DEVICE_STATUS_LABELS, DEVICE_STATUS_VARIANTS } from './device-constants';
 import { formatRelative } from '@/lib/utils/date/format';
+import { DEVICE_STATUS_LABELS, DEVICE_STATUS_VARIANTS } from './device-constants';
 import type { Device } from '../types';
 
 const AssignmentCell = ({
@@ -44,9 +44,7 @@ export const getDeviceColumns = (actions: {
   {
     accessorKey: 'vehiclePlate',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Xe đang gắn" />,
-    cell: ({ row }) => (
-      <AssignmentCell value={row.original.vehiclePlate} emptyLabel="Chưa gắn xe" />
-    ),
+    cell: ({ row }) => <AssignmentCell value={row.original.vehiclePlate} emptyLabel="Chưa gắn xe" />,
   },
   {
     accessorKey: 'customerName',
@@ -57,7 +55,7 @@ export const getDeviceColumns = (actions: {
   },
   {
     accessorKey: 'currentStatus',
-    header: 'Trạng thái',
+    header: 'Kết nối',
     cell: ({ row }) => {
       const current = String(row.getValue('currentStatus'));
       return (
@@ -95,10 +93,7 @@ export const getDeviceColumns = (actions: {
             <Pencil className="mr-2 h-4 w-4" />
             Chỉnh sửa
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => actions.onDelete(row.original)}
-            className="text-destructive"
-          >
+          <DropdownMenuItem onClick={() => actions.onDelete(row.original)} className="text-destructive">
             <Trash2 className="mr-2 h-4 w-4" />
             Xóa
           </DropdownMenuItem>

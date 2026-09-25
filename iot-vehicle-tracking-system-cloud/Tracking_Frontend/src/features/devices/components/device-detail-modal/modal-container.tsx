@@ -1,10 +1,11 @@
 ﻿'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useDeviceRoom } from '@/components/providers/socket-provider';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import { useRoleAccess } from '@/hooks/use-role-access';
-import { alertServices, localizeAlertForDisplay } from '@/lib/api/alerts';
+import { alertServices, isObdMaintenanceAlert, localizeAlertForDisplay } from '@/lib/api/alerts';
 import { vehicleServices } from '@/lib/api/vehicles';
 import { notificationUtils } from '@/lib/notification';
 import type { Device, DeviceRawFeedRow } from '@/features/devices/types';
@@ -22,10 +23,12 @@ import { useUpdateDevice } from '@/features/devices/hooks/use-update-device';
 import { useUpdateDeviceSettings } from '@/features/devices/hooks/use-update-device-settings';
 import { getDashboardEventPresentation } from '@/features/dashboard/components/dashboard-event-presenters';
 import { DeviceDetailModal } from './index';
+import { buildFirmwareConfigCommandParams } from './device-detail-presenters';
 import { buildDiagnosticsSummary, extractDiagnosticsPayloadFromEventLog } from './obd-diagnostics';
 import type { DeviceDetailTab } from '@/features/devices/components/device-constants';
 import type { DeviceDetailModalPresentation, DeviceLinkedVehicle, DeviceWorkspaceActions, DeviceWorkspaceAlert } from './workspace-types';
 import type { MapInspectPanelPayload, MapInspectPanelTarget } from '@/features/map/types';
+import { buildAlertQueueHref } from '@/features/alerts/lib/alert-queue-route';
 
 const resolveTimestamp = (value: unknown): string | null => {
   if (typeof value === 'string' && value.length > 0) {
@@ -37,22 +40,13 @@ const resolveTimestamp = (value: unknown): string | null => {
   return null;
 };
 
+const TELEMETRY_REFRESH_THROTTLE_MS = 10_000;
+
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return null;
   }
   return value as Record<string, unknown>;
-};
-
-const appendConfigParam = (
-  target: Record<string, number>,
-  key: string,
-  value: unknown,
-) => {
-  const parsed = Number(value);
-  if (Number.isFinite(parsed) && parsed > 0) {
-    target[key] = Math.round(parsed);
-  }
 };
 
 const getEventLogPresentation = (
@@ -186,7 +180,7 @@ const buildRawFeed = (params: {
                   },
                 },
               },
-              message: 'Mock diagnostics row for UI preview',
+              message: 'Dòng chẩn đoán mẫu để xem trước giao diện',
             },
           },
         ]
@@ -199,21 +193,6 @@ const buildRawFeed = (params: {
       return rightTime - leftTime;
     })
     .slice(0, 200);
-};
-
-const isObdMaintenanceAlert = (item: Record<string, unknown>): boolean => {
-  const title = String(item.title ?? '').toLowerCase();
-  const message = String(item.message ?? '').toLowerCase();
-  const signature = `${title} ${message}`;
-
-  return (
-    item.alertType === 'maintenance_due' &&
-    (signature.includes('obd') ||
-      signature.includes('coolant') ||
-      signature.includes('voltage') ||
-      signature.includes('idle-load') ||
-      signature.includes('channel'))
-  );
 };
 
 const localizeObdAlertTitle = (title: string): string => {
@@ -376,6 +355,7 @@ export const DeviceDetailModalContainer = ({
 }) => {
   const [activeTab, setActiveTab] = useState<DeviceDetailTab>('overview');
   const queryClient = useQueryClient();
+  const lastTelemetryRefreshAtRef = useRef(0);
   const access = useRoleAccess();
   const deviceId = device?.id ?? null;
 
@@ -392,6 +372,7 @@ export const DeviceDetailModalContainer = ({
 
   const devicePublicId = detail.data?.device?.deviceId ?? device?.deviceId ?? null;
   const linkedVehicleIdentifier = detail.data?.device?.vehicleId ?? device?.vehicleId ?? null;
+  useDeviceRoom(devicePublicId, open && !!devicePublicId);
   const position = useDevicePositionSnapshot(devicePublicId, open);
   const eventLogs = useDeviceEventLogs(devicePublicId, {
     enabled: open && access.canViewSystemInfo,
@@ -405,7 +386,7 @@ export const DeviceDetailModalContainer = ({
         page: 1,
         limit: 10,
         status: 'active',
-        alertType: 'maintenance_due',
+        source: 'obd',
         deviceId: devicePublicId,
       }),
   });
@@ -466,8 +447,9 @@ export const DeviceDetailModalContainer = ({
       queryClient.invalidateQueries({ queryKey: ['device-errors', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-commands', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-runtime-chart', deviceId] }),
-      queryClient.invalidateQueries({ queryKey: ['device-vibration-chart', deviceId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-imu-accel-delta-chart', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-tracking-telemetry', deviceId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-session-telemetry', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-position-snapshot'] }),
       queryClient.invalidateQueries({ queryKey: ['device-event-logs', devicePublicId] }),
       queryClient.invalidateQueries({ queryKey: ['device-obd-alerts', devicePublicId] }),
@@ -476,32 +458,87 @@ export const DeviceDetailModalContainer = ({
     ]);
   }, [deviceId, devicePublicId, linkedVehicleIdentifier, queryClient]);
 
+  const refreshTelemetryViews = useCallback(async () => {
+    if (!deviceId) {
+      return;
+    }
+
+    const now = Date.now();
+    const shouldRefreshHeavyViews =
+      now - lastTelemetryRefreshAtRef.current >= TELEMETRY_REFRESH_THROTTLE_MS;
+
+    const invalidations: Array<Promise<unknown>> = [];
+
+    if (shouldRefreshHeavyViews) {
+      lastTelemetryRefreshAtRef.current = now;
+      invalidations.push(
+        queryClient.invalidateQueries({ queryKey: ['device', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-detail', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-tracking-telemetry', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-session-telemetry', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-sessions', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-runtime-chart', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-imu-accel-delta-chart', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-event-logs', devicePublicId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-obd-alerts', devicePublicId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-workspace-alerts', devicePublicId] }),
+      );
+    }
+
+    await Promise.all(invalidations);
+  }, [deviceId, devicePublicId, queryClient]);
+
   useRealtimeSubscription<any>({
+    namespace: 'devices',
     event: 'device:status',
-    enabled: open && !!deviceId,
+    enabled: open && !!devicePublicId,
     handler: (payload) => {
-      const payloadId = String(payload?.deviceId ?? '');
-      if (payloadId && payloadId !== String(detail.data?.device?.deviceId)) return;
+      const payloadId = String(payload?.deviceId ?? payload?.device_id ?? '');
+      if (payloadId && payloadId !== devicePublicId) return;
       void refreshCurrent();
     },
   });
 
   useRealtimeSubscription<any>({
+    namespace: 'devices',
+    event: 'device:position',
+    enabled: open && !!devicePublicId,
+    handler: (payload) => {
+      const payloadId = String(payload?.deviceId ?? payload?.device_id ?? '');
+      if (payloadId && payloadId !== devicePublicId) return;
+      void refreshTelemetryViews();
+    },
+  });
+
+  useRealtimeSubscription<any>({
+    namespace: 'devices',
     event: 'device:session_start',
-    enabled: open && !!deviceId,
+    enabled: open && !!devicePublicId,
     handler: (payload) => {
-      const payloadId = String(payload?.deviceId ?? '');
-      if (payloadId && payloadId !== String(detail.data?.device?.deviceId)) return;
+      const payloadId = String(payload?.deviceId ?? payload?.device_id ?? '');
+      if (payloadId && payloadId !== devicePublicId) return;
       void refreshCurrent();
     },
   });
 
   useRealtimeSubscription<any>({
+    namespace: 'devices',
     event: 'device:session_end',
-    enabled: open && !!deviceId,
+    enabled: open && !!devicePublicId,
     handler: (payload) => {
-      const payloadId = String(payload?.deviceId ?? '');
-      if (payloadId && payloadId !== String(detail.data?.device?.deviceId)) return;
+      const payloadId = String(payload?.deviceId ?? payload?.device_id ?? '');
+      if (payloadId && payloadId !== devicePublicId) return;
+      void refreshCurrent();
+    },
+  });
+
+  useRealtimeSubscription<any>({
+    namespace: 'devices',
+    event: 'command:ack',
+    enabled: open && !!devicePublicId,
+    handler: (payload) => {
+      const payloadId = String(payload?.deviceId ?? payload?.device_id ?? '');
+      if (payloadId && payloadId !== devicePublicId) return;
       void refreshCurrent();
     },
   });
@@ -568,18 +605,18 @@ export const DeviceDetailModalContainer = ({
       onSessionsLoadMore: sessions.onLoadMore,
       errorCodes: errors.items,
       errorCodesTotal: errors.total,
-      errorCodesPage: errors.page,
-      errorCodesTotalPages: errors.totalPages,
+      errorCodesLoadedCount: errors.loadedCount,
+      errorCodesHasMore: errors.hasMore,
       errorCodesStatus: errors.status,
       errorCodesType: errors.type,
-      onErrorCodesPageChange: errors.onPageChange,
+      onErrorCodesLoadMore: errors.onLoadMore,
       onErrorCodesStatusChange: errors.onStatusChange,
       onErrorCodesTypeChange: errors.onTypeChange,
       commands: commands.items,
       commandsTotal: commands.total,
-      commandsPage: commands.page,
-      commandsTotalPages: commands.totalPages,
-      onCommandsPageChange: commands.onPageChange,
+      commandsLoadedCount: commands.loadedCount,
+      commandsHasMore: commands.hasMore,
+      onCommandsLoadMore: commands.onLoadMore,
       runtimeChart: runtime.data,
       runtimeRange: runtime.range,
       onRuntimeRangeChange: runtime.onRangeChange,
@@ -616,41 +653,22 @@ export const DeviceDetailModalContainer = ({
         await updateSettings.mutateAsync(data);
         const config = toRecord(data.config);
         const parking = toRecord(config?.parking);
-        const alerts = toRecord(config?.alerts);
-        const commandParams: Record<string, number> = {};
-
-        appendConfigParam(commandParams, 'tracking_interval_s', data.requestInterval);
-        appendConfigParam(
-          commandParams,
-          'parking_interval_s',
-          parking?.trackingIntervalSec ?? parking?.tracking_interval_s,
-        );
-        appendConfigParam(
-          commandParams,
-          'heartbeat_interval_s',
-          parking?.heartbeatIntervalSec ?? parking?.heartbeat_interval_s,
-        );
-        appendConfigParam(
-          commandParams,
-          'overspeed_kph',
-          alerts?.overspeedKph ?? alerts?.overspeed_kph,
-        );
-        appendConfigParam(
-          commandParams,
-          'vibration_threshold',
-          data.vibrationThreshold ?? alerts?.vibrationThreshold ?? alerts?.vibration_threshold,
-        );
-        appendConfigParam(
-          commandParams,
-          'offline_after_s',
-          alerts?.offlineAfterSec ?? alerts?.offline_after_s,
-        );
+        const commandParams = buildFirmwareConfigCommandParams({
+          drivingIntervalSec:
+            typeof data.requestInterval === 'number' ? data.requestInterval : null,
+          parkingHeartbeatSec:
+            typeof parking?.heartbeatIntervalSec === 'number'
+              ? parking.heartbeatIntervalSec
+              : typeof parking?.heartbeat_interval_s === 'number'
+                ? parking.heartbeat_interval_s
+                : null,
+        });
 
         if (Object.keys(commandParams).length > 0) {
           try {
             await sendCommand.mutateAsync({
               command: 'update_config',
-              params: commandParams,
+              params: { ...commandParams },
             });
           } catch {
             notificationUtils.warning(
@@ -677,10 +695,10 @@ export const DeviceDetailModalContainer = ({
     [
       activeTab,
       commands.items,
-      commands.onPageChange,
-      commands.page,
+      commands.onLoadMore,
+      commands.hasMore,
+      commands.loadedCount,
       commands.total,
-      commands.totalPages,
       deleteDevice,
       detail.data?.device,
       detail.data?.runtime,
@@ -689,13 +707,13 @@ export const DeviceDetailModalContainer = ({
       device,
       deviceId,
       errors.items,
-      errors.onPageChange,
+      errors.onLoadMore,
       errors.onStatusChange,
       errors.onTypeChange,
-      errors.page,
+      errors.hasMore,
+      errors.loadedCount,
       errors.status,
       errors.total,
-      errors.totalPages,
       errors.type,
       eventLogs.items,
       eventLogs.total,
@@ -751,10 +769,11 @@ export const DeviceDetailModalContainer = ({
       fallbackPaths={
         fallbackPaths ?? {
           alertsPath: devicePublicId
-            ? `/dashboard/attention/queue?${new URLSearchParams({
+            ? buildAlertQueueHref({
                 deviceId: devicePublicId,
-                ...(linkedVehicleIdentifier ? { vehicleId: linkedVehicleIdentifier } : {}),
-              }).toString()}`
+                vehicleId: linkedVehicleIdentifier,
+                status: 'active',
+              })
             : null,
           deviceDetailPath: deviceId ? `/dashboard/fleet/devices/${deviceId}` : null,
           geofencesPath: '/dashboard/zones',

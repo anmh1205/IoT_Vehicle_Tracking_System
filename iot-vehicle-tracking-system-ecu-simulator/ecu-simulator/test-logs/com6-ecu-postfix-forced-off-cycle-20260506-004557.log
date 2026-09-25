@@ -1,0 +1,19 @@
+===== ecu monitor start port=COM6 ts=1778003160 =====
+IGN ON for 180s
+ECU simulator ready
+>>> ign on
+IGN ON for 180s
+IGN FORCED ON
+>>> ign status
+IGN STATUS ON
+===== ecu hold on seconds=60 =====
+>>> ign off 360
+IGN OFF for 360s
+IGN FORCED OFF for 360s then ON
+>>> ign status
+IGN STATUS OFF timer=355s next=ON
+===== ecu monitor after off seconds=440 =====
+IGN ON for 180s
+>>> ign status
+IGN STATUS ON
+===== ecu monitor done ts=1778003686 =====

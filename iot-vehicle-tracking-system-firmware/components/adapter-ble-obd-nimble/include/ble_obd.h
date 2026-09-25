@@ -6,10 +6,17 @@
 
 #include "esp_err.h"
 
+#include "ble_util.h"
+
 /**
  * @file ble_obd.h
  * @brief OBD-over-BLE high-level API built on top of BLE manager.
+ * This header belongs to the BLE OBD NimBLE adapter layer and exposes the adapter boundary so higher layers do not depend on hardware- or transport-private details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /** @brief Maximum decoded OBD payload bytes. */
 #define BLE_OBD_MAX_DATA_LEN 256
@@ -28,6 +35,16 @@ typedef struct ble_obd_ctx ble_obd_ctx_t;
  * @return Stable lowercase label for the latest observed OBD response state.
  */
 const char *ble_obd_get_last_ecu_state_label(ble_obd_ctx_t *ctx);
+
+/**
+ * @brief Copy the connected adapter MAC into a printable buffer.
+ *
+ * @param ctx BLE OBD context.
+ * @param out Destination string buffer sized `BLE_ADDR_STR_LEN`.
+ *
+ * @return true when a connected peer address is available.
+ */
+bool ble_obd_get_peer_address_string(ble_obd_ctx_t *ctx, char out[BLE_ADDR_STR_LEN]);
 
 /**
  * @brief Decoded OBD response payload.

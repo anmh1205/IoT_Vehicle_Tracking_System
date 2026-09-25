@@ -6,7 +6,12 @@
 /**
  * @file obd.h
  * @brief OBD PID conversion helpers and metadata.
+ * This header belongs to the OBD domain layer and defines the conversion and model boundary that runtime code uses without duplicating OBD math.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Conversion callback signature for raw OBD response bytes.

@@ -11,6 +11,10 @@ export interface RealtimeEventMap {
   'device:status': {
     deviceId: string;
     status: string;
+    boundaryEvent?: 'started' | 'ended' | 'none';
+    boundarySource?: string | null;
+    localSessionKey?: number | null;
+    canonicalSessionId?: string | null;
     ignitionState?: 'ON' | 'OFF' | 'UNKNOWN' | null;
     motionState?: 'MOVING' | 'STATIONARY' | 'UNKNOWN' | null;
     vehicleState?:
@@ -45,6 +49,8 @@ export interface RealtimeEventMap {
     course?: number | null;
     timestamp: number;
     status?: string;
+    localSessionKey?: number | null;
+    canonicalSessionId?: string | null;
     ignitionState?: 'ON' | 'OFF' | 'UNKNOWN' | null;
     motionState?: 'MOVING' | 'STATIONARY' | 'UNKNOWN' | null;
     vehicleState?:
@@ -74,7 +80,7 @@ export interface RealtimeEventMap {
     deviceBattery?: number | null;
     vehicleBattery?: number | null;
     satellites?: number | null;
-    vibration?: number | null;
+    imuAccelDeltaMps2?: number | null;
     errorCode?: number | null;
     temperature?: number | null;
     engineTemperature?: number | null;
@@ -94,17 +100,24 @@ export interface RealtimeEventMap {
   'device:session_start': {
     deviceId: string;
     sessionId: number;
+    boundarySource?: string | null;
+    localSessionKey?: number | null;
+    canonicalSessionId?: string | null;
     metadata?: RealtimeMetadata;
   };
   'device:session_end': {
     deviceId: string;
     sessionId: number;
+    boundarySource?: string | null;
+    localSessionKey?: number | null;
+    canonicalSessionId?: string | null;
     metadata?: RealtimeMetadata;
   };
   'command:ack': {
     device_id: string;
     command_id: string;
     status: string;
+    response?: string | null;
   };
 
   'stats:update': Record<string, unknown>;
@@ -121,6 +134,36 @@ export interface RealtimeEventMap {
     longitude?: number;
     metadata?: RealtimeMetadata;
     alertMetadata?: Record<string, unknown>;
+  };
+  'alert:updated': {
+    id: number;
+    vehicle_id?: string | null;
+    device_id?: string | null;
+    status: 'active' | 'acknowledged' | 'resolved' | 'dismissed';
+    action: 'acknowledge' | 'resolve' | 'dismiss';
+    updated_at: string;
+  };
+  'alert:deleted': {
+    id: number;
+    vehicle_id?: string | null;
+    device_id?: string | null;
+    deleted_at: string;
+  };
+  'violation:new': {
+    id: number;
+    alert_id?: number | null;
+    vehicle_id?: string | null;
+    violation_type: string;
+    severity: string;
+    created_at: string;
+  };
+  'violation:updated': {
+    id: number;
+    alert_id?: number | null;
+    vehicle_id?: string | null;
+    action: 'acknowledge';
+    acknowledged: boolean;
+    updated_at: string;
   };
   'zone:updated': {
     vehicle_id: string;
@@ -140,29 +183,13 @@ export interface RealtimeEventMap {
     longitude?: number;
     metadata?: RealtimeMetadata;
   };
-  'geofence:allowed-zone-updated': {
-    vehicle_id: string;
-    allowed_zone_id: number | null;
-    status: 'active' | 'disabled';
-    membership_state?: 'unknown' | 'inside' | 'outside' | 'suspect';
-    last_changed_at?: string | null;
-  };
-  'geofence:allowed-zone-state-changed': {
-    device_id?: string;
-    vehicle_id: string;
-    allowed_zone_id: number;
-    previous_membership_state: 'unknown' | 'inside' | 'outside' | 'suspect';
-    membership_state: 'unknown' | 'inside' | 'outside' | 'suspect';
-    last_changed_at: string;
-    latitude?: number;
-    longitude?: number;
-    metadata?: RealtimeMetadata;
-  };
   'activity:new': {
     id: number;
     type: string;
     message: string;
     timestamp: string;
+    vehicle_id?: string | null;
+    device_id?: string | null;
   };
 
   'geofence:enter': {
@@ -178,6 +205,32 @@ export interface RealtimeEventMap {
     timestamp: string;
   };
 
+  'notification:new': {
+    id: number;
+    type: string;
+    title: string;
+    message?: string;
+    isRead?: boolean;
+    referenceId?: number | null;
+    referenceType?: string | null;
+    vehicleId?: string | null;
+    deviceId?: string | null;
+    createdAt: string;
+  };
+  'notification:updated': {
+    user_id?: number | null;
+    id?: number;
+    ids?: number[];
+    unreadCount?: number;
+    action: 'read' | 'read_all' | 'hidden';
+  };
+
+  'export:progress': {
+    id: number;
+    user_id: number;
+    progress: number;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+  };
   'export:ready': {
     id: number;
     user_id: number;
@@ -189,6 +242,42 @@ export interface RealtimeEventMap {
     firmware_id: number;
     device_ids: string[];
     status: string;
+  };
+  'firmware:progress': {
+    jobId: string;
+    deviceId: string;
+    status: string;
+    progress?: number | null;
+    targetVersion?: string;
+    currentVersion?: string;
+    partition?: string | null;
+    error?: string | null;
+    metadata?: RealtimeMetadata;
+  };
+
+  'simulator:status': {
+    running: boolean;
+    paused: boolean;
+    jobId: string | null;
+    startedBy: number | null;
+    startedAt: string | null;
+    stoppedAt: string | null;
+    expiresAt: string | null;
+    lastTickAt: string | null;
+    intervalSec: number | null;
+    durationMin: number | null;
+    ticks: number;
+    sentPoints: number;
+    deviceIds: string[];
+    reason: string | null;
+    preview: Array<Record<string, unknown>>;
+  };
+  'system-admin:settings': {
+    key: string;
+    action: 'create' | 'update' | 'delete' | 'activate' | 'rollback';
+    resource?: string;
+    revision?: number;
+    actorUserId?: number;
   };
 }
 

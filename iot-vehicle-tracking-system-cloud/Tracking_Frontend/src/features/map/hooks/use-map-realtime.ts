@@ -53,7 +53,7 @@ const toDevicePosition = (raw: any): DevicePosition => ({
   deviceBattery: toNullableNumber(raw?.deviceBattery),
   vehicleBattery: toNullableNumber(raw?.vehicleBattery),
   satellites: toNullableNumber(raw?.satellites),
-  vibration: toNullableNumber(raw?.vibration),
+  imuAccelDeltaMps2: toNullableNumber(raw?.imuAccelDeltaMps2 ?? raw?.imu_accel_delta_mps2 ?? raw?.vibration),
   errorCode: toNullableNumber(raw?.errorCode),
   temperature: toNullableNumber(raw?.temperature),
   engineTemperature: toNullableNumber(raw?.engineTemperature),
@@ -63,6 +63,12 @@ const toDevicePosition = (raw: any): DevicePosition => ({
   deviceAlerts: toAlertSummary(raw?.deviceAlerts ?? {}, 'device'),
   ecuAlerts: toAlertSummary(raw?.ecuAlerts ?? {}, 'ecu'),
 });
+
+const isOlderPosition = (
+  next: DevicePosition,
+  previous: DevicePosition | undefined,
+): boolean =>
+  next.timestamp !== null && previous?.timestamp != null && next.timestamp < previous.timestamp;
 
 const mergePosition = (
   next: DevicePosition,
@@ -91,7 +97,7 @@ const mergePosition = (
   deviceBattery: next.deviceBattery ?? previous?.deviceBattery ?? null,
   vehicleBattery: next.vehicleBattery ?? previous?.vehicleBattery ?? null,
   satellites: next.satellites ?? previous?.satellites ?? null,
-  vibration: next.vibration ?? previous?.vibration ?? null,
+  imuAccelDeltaMps2: next.imuAccelDeltaMps2 ?? previous?.imuAccelDeltaMps2 ?? null,
   errorCode: next.errorCode ?? previous?.errorCode ?? null,
   temperature: next.temperature ?? previous?.temperature ?? null,
   engineTemperature: next.engineTemperature ?? previous?.engineTemperature ?? null,
@@ -123,15 +129,21 @@ export const useMapRealtime = () => {
     }
     const buffered = bufferRef.current.get(position.deviceId);
     const existing = useMapStore.getState().positions.get(position.deviceId);
-    bufferRef.current.set(position.deviceId, mergePosition(position, buffered ?? existing));
+    const previous = buffered ?? existing;
+    if (isOlderPosition(position, previous)) {
+      return;
+    }
+    bufferRef.current.set(position.deviceId, mergePosition(position, previous));
   }, []);
 
   useRealtimeSubscription({
+    namespace: 'devices',
     event: 'device:position',
     handler: enqueuePosition,
   });
 
   useRealtimeSubscription({
+    namespace: 'devices',
     event: 'device:status',
     handler: enqueuePosition,
   });

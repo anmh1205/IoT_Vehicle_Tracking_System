@@ -1,5 +1,5 @@
 ﻿import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import {
   Table,
   TableBody,
@@ -29,14 +29,19 @@ const formatParams = (params: Record<string, unknown>) => {
 };
 
 export const CommandsTab = () => {
-  const { commands, commandsPage, commandsTotalPages, commandsTotal, onCommandsPageChange } =
-    useDeviceDetailModal();
+  const {
+    commands,
+    commandsTotal,
+    commandsLoadedCount,
+    commandsHasMore,
+    onCommandsLoadMore,
+  } = useDeviceDetailModal();
 
   if (commands.length === 0) {
     return (
       <DeviceDetailEmptyState
-        title="Chưa có lệnh điều khiển"
-        description="Lịch sử lệnh sẽ xuất hiện khi hệ thống gửi command đến thiết bị."
+        title="Chưa có lịch sử lệnh điều khiển"
+        description="Lịch sử lệnh sẽ xuất hiện khi hệ thống gửi command đến thiết bị. Gửi lệnh mới từ tab Cài đặt."
       />
     );
   }
@@ -70,30 +75,13 @@ export const CommandsTab = () => {
         </Table>
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">Tổng lệnh: {commandsTotal}</p>
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={commandsPage <= 1}
-            onClick={() => onCommandsPageChange(commandsPage - 1)}
-          >
-            Trang trước
-          </Button>
-          <span className="text-xs text-muted-foreground">
-            Trang {commandsPage} / {commandsTotalPages}
-          </span>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={commandsPage >= commandsTotalPages}
-            onClick={() => onCommandsPageChange(commandsPage + 1)}
-          >
-            Trang sau
-          </Button>
-        </div>
-      </div>
+      <InfiniteScrollTrigger
+        hasMore={commandsHasMore}
+        onLoadMore={onCommandsLoadMore}
+        loadedCount={commandsLoadedCount}
+        totalCount={commandsTotal}
+        itemLabel="lệnh"
+      />
     </div>
   );
 };

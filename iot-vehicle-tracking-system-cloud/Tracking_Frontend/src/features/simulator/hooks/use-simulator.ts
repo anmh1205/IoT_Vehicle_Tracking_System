@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { simulatorServices, type SimulatorConfig } from '@/lib/api/simulator';
+import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
+
 export interface SimulatorPayload {
   deviceId: string;
   timestamp: string;
@@ -10,11 +12,12 @@ export interface SimulatorPayload {
   longitude: number;
   speed: number;
   heading?: number;
-  vibration: number;
+  imuAccelDeltaMps2: number;
   vehicleBattery: number;
   deviceBattery: number;
   errorCode?: number | null;
 }
+
 interface SimulatorStatusPayload {
   running: boolean;
   paused: boolean;
@@ -24,9 +27,11 @@ interface SimulatorStatusPayload {
   durationMin: number | null;
   preview: unknown[];
 }
+
 export interface SimulatorState extends SimulatorConfig {
   selectedDeviceIds: string[];
 }
+
 export const DEFAULT_SIMULATOR_STATE: SimulatorState = {
   selectedDeviceIds: [],
   deviceIds: [],
@@ -34,13 +39,14 @@ export const DEFAULT_SIMULATOR_STATE: SimulatorState = {
   durationMin: 15,
   speedMin: 10,
   speedMax: 80,
-  vibrationMin: 1,
-  vibrationMax: 10,
+  imuAccelDeltaMinMps2: 1,
+  imuAccelDeltaMaxMps2: 10,
   batteryMin: 30,
   batteryMax: 100,
   lat: 10.762622,
   lon: 106.660172,
 };
+
 const normalizePoint = (raw: any): SimulatorPayload => ({
   deviceId: String(raw?.deviceId ?? ''),
   timestamp: String(raw?.timestamp ?? new Date().toISOString()),
@@ -48,14 +54,15 @@ const normalizePoint = (raw: any): SimulatorPayload => ({
   longitude: Number(raw?.longitude ?? 0),
   speed: Number(raw?.speed ?? 0),
   heading: raw?.heading !== undefined && raw?.heading !== null ? Number(raw.heading) : undefined,
-  vibration: Number(raw?.vibration ?? 0),
+  imuAccelDeltaMps2: Number(
+    raw?.imuAccelDeltaMps2 ?? raw?.imu_accel_delta_mps2 ?? raw?.vibration ?? 0,
+  ),
   vehicleBattery: Number(raw?.vehicleBattery ?? 0),
   deviceBattery: Number(raw?.deviceBattery ?? 0),
   errorCode:
-    raw?.errorCode !== undefined && raw?.errorCode !== null
-      ? Number(raw.errorCode)
-      : null,
+    raw?.errorCode !== undefined && raw?.errorCode !== null ? Number(raw.errorCode) : null,
 });
+
 const normalizeStatus = (raw: any): SimulatorStatusPayload => ({
   running: Boolean(raw?.running),
   paused: Boolean(raw?.paused),
@@ -65,6 +72,7 @@ const normalizeStatus = (raw: any): SimulatorStatusPayload => ({
   durationMin: raw?.durationMin ?? null,
   preview: Array.isArray(raw?.preview) ? raw.preview : [],
 });
+
 const validateBeforeStart = (state: SimulatorState): string | null => {
   if (state.selectedDeviceIds.length === 0) {
     return 'Vui lòng chọn ít nhất một thiết bị.';
@@ -72,8 +80,8 @@ const validateBeforeStart = (state: SimulatorState): string | null => {
   if (state.speedMin > state.speedMax) {
     return 'Tốc độ tối thiểu phải nhỏ hơn hoặc bằng tốc độ tối đa.';
   }
-  if (state.vibrationMin > state.vibrationMax) {
-    return 'Rung động tối thiểu phải nhỏ hơn hoặc bằng rung động tối đa.';
+  if (state.imuAccelDeltaMinMps2 > state.imuAccelDeltaMaxMps2) {
+    return 'Gia tốc IMU Δ tối thiểu phải nhỏ hơn hoặc bằng gia tốc IMU Δ tối đa.';
   }
   if (state.batteryMin > state.batteryMax) {
     return 'Pin tối thiểu phải nhỏ hơn hoặc bằng pin tối đa.';
@@ -83,6 +91,7 @@ const validateBeforeStart = (state: SimulatorState): string | null => {
   }
   return null;
 };
+
 export const useSimulator = () => {
   const queryClient = useQueryClient();
   const [state, setState] = useState<SimulatorState>(DEFAULT_SIMULATOR_STATE);
@@ -90,6 +99,7 @@ export const useSimulator = () => {
   const [paused, setPaused] = useState(false);
   const [preview, setPreview] = useState<SimulatorPayload | null>(null);
   const [history, setHistory] = useState<SimulatorPayload[]>([]);
+
   const applyStatus = useCallback((payload: SimulatorStatusPayload) => {
     setRunning(payload.running);
     setPaused(payload.running ? payload.paused : false);
@@ -97,24 +107,29 @@ export const useSimulator = () => {
     setPreview(points[0] ?? null);
     setHistory(points.slice(0, 80));
   }, []);
+
   const statusQuery = useQuery({
     queryKey: ['simulator', 'status'],
     queryFn: () => simulatorServices.status().then((payload) => normalizeStatus(payload)),
-    refetchInterval: (query) => {
-      const status = query.state.data as SimulatorStatusPayload | undefined;
-      if (!status?.running) {
-        return 10000;
-      }
-      const intervalSec = Number(status.intervalSec ?? state.intervalSec ?? 5);
-      return Math.max(1000, Math.min(intervalSec * 1000, 5000));
-    },
   });
+
   useEffect(() => {
     if (!statusQuery.data) {
       return;
     }
     applyStatus(statusQuery.data);
   }, [statusQuery.data, applyStatus]);
+
+  useRealtimeSubscription({
+    namespace: 'dashboard',
+    event: 'simulator:status',
+    handler: (payload: unknown) => {
+      const status = normalizeStatus(payload);
+      applyStatus(status);
+      queryClient.setQueryData(['simulator', 'status'], status);
+    },
+  });
+
   const startMutation = useMutation({
     mutationFn: async () => {
       const payload: SimulatorConfig = {
@@ -125,24 +140,32 @@ export const useSimulator = () => {
     },
     onSuccess: (status) => {
       applyStatus(status);
-      void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
+      queryClient.setQueryData(['simulator', 'status'], status);
       notificationUtils.success('Đã bắt đầu mô phỏng');
     },
     onError: (error: unknown) => {
-      notificationUtils.error('Không thể bắt đầu mô phỏng', getApiErrorMessage(error, 'Lỗi không xác định'));
+      notificationUtils.error(
+        'Không thể bắt đầu mô phỏng',
+        getApiErrorMessage(error, 'Lỗi không xác định'),
+      );
     },
   });
+
   const stopMutation = useMutation({
     mutationFn: async () => simulatorServices.stop().then((response) => normalizeStatus(response)),
     onSuccess: (status) => {
       applyStatus(status);
-      void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
+      queryClient.setQueryData(['simulator', 'status'], status);
       notificationUtils.info('Đã dừng mô phỏng');
     },
     onError: (error: unknown) => {
-      notificationUtils.error('Không thể dừng mô phỏng', getApiErrorMessage(error, 'Lỗi không xác định'));
+      notificationUtils.error(
+        'Không thể dừng mô phỏng',
+        getApiErrorMessage(error, 'Lỗi không xác định'),
+      );
     },
   });
+
   const start = async () => {
     const validationError = validateBeforeStart(state);
     if (validationError) {
@@ -151,14 +174,16 @@ export const useSimulator = () => {
     }
     await startMutation.mutateAsync();
   };
+
   const stop = async () => {
     await stopMutation.mutateAsync();
   };
+
   const pauseMutation = useMutation({
     mutationFn: async () => simulatorServices.pause().then((response) => normalizeStatus(response)),
     onSuccess: (status) => {
       applyStatus(status);
-      void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
+      queryClient.setQueryData(['simulator', 'status'], status);
       notificationUtils.info('Đã tạm dừng mô phỏng');
     },
     onError: (error: unknown) => {
@@ -168,12 +193,12 @@ export const useSimulator = () => {
       );
     },
   });
+
   const resumeMutation = useMutation({
-    mutationFn: async () =>
-      simulatorServices.resume().then((response) => normalizeStatus(response)),
+    mutationFn: async () => simulatorServices.resume().then((response) => normalizeStatus(response)),
     onSuccess: (status) => {
       applyStatus(status);
-      void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
+      queryClient.setQueryData(['simulator', 'status'], status);
       notificationUtils.info('Đã tiếp tục mô phỏng');
     },
     onError: (error: unknown) => {
@@ -183,24 +208,30 @@ export const useSimulator = () => {
       );
     },
   });
+
   const pause = () => {
     void pauseMutation.mutateAsync();
   };
+
   const resume = () => {
     void resumeMutation.mutateAsync();
   };
+
   const setSelectedDeviceIds = (deviceIds: string[]) => {
     setState((prev) => ({ ...prev, selectedDeviceIds: deviceIds, deviceIds }));
   };
+
   const setConfig = <TKey extends keyof SimulatorState>(key: TKey, value: SimulatorState[TKey]) => {
     setState((prev) => ({ ...prev, [key]: value }));
   };
+
   const statusLabel = useMemo(() => {
     if (!running) {
       return 'Đã dừng';
     }
     return paused ? 'Đã tạm dừng (xem trước)' : 'Đang chạy';
   }, [paused, running]);
+
   return {
     state,
     running,

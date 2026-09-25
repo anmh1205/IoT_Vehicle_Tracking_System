@@ -5,6 +5,7 @@ import { logger } from '@/infrastructure/logger';
 import { mqttConfig } from '@/config/env';
 import { hashToken } from '@/shared/utils/crypto.util';
 import { createValidationError } from '@/shared/utils/errors.util';
+import { publishEvent } from '@/infrastructure/realtime';
 import type {
   SimulatorPoint,
   SimulatorStartInput,
@@ -272,7 +273,7 @@ const publishDeviceRawData = (
   device: DeviceSimulatorRuntime,
   timestamp: number,
   data: {
-    vibration: number;
+    imuAccelDeltaMps2: number;
     vehicleBattery: number;
     deviceBattery: number;
     latitude: number;
@@ -300,7 +301,7 @@ const publishDeviceRawData = (
       timestamp,
       uptime: data.uptimeMs,
       data: {
-        vibration: data.vibration,
+        imu_accel_delta_mps2: data.imuAccelDeltaMps2,
         vehicle_battery: data.vehicleBattery,
         device_battery: data.deviceBattery,
         latitude: data.latitude,
@@ -417,6 +418,11 @@ const toStatus = (
     reason: snapshot.reason ?? null,
     preview: snapshot.preview,
   };
+};
+
+const publishSimulatorStatus = (status: SimulatorStatus): void => {
+  const preview: Array<Record<string, unknown>> = status.preview.map((point) => ({ ...point }));
+  publishEvent('simulator:status', { ...status, preview });
 };
 
 const closeSimulatorOwnedSession = async (sessionId: number, deviceId: string): Promise<void> => {
@@ -594,7 +600,9 @@ const stopSimulationInternal = async (reason: string): Promise<SimulatorStatus> 
     preview: current.preview,
   };
 
-  return toStatus(lastSnapshot, false);
+  const status = toStatus(lastSnapshot, false);
+  publishSimulatorStatus(status);
+  return status;
 };
 
 const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
@@ -605,8 +613,8 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
 
   for (const device of state.devices) {
     const speed = roundTo(randomBetween(state.config.speedMin, state.config.speedMax), 2);
-    const vibration = roundTo(
-      randomBetween(state.config.vibrationMin, state.config.vibrationMax),
+    const imuAccelDeltaMps2 = roundTo(
+      randomBetween(state.config.imuAccelDeltaMinMps2, state.config.imuAccelDeltaMaxMps2),
       2,
     );
 
@@ -647,7 +655,10 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
         : randomBetween(850 + speed * 26, 980 + speed * 38),
       0,
     );
-    const engineLoadPct = roundTo(clamp(speed * 0.9 + vibration * 5 + randomBetween(5, 20), 10, 98), 2);
+    const engineLoadPct = roundTo(
+      clamp(speed * 0.9 + imuAccelDeltaMps2 * 5 + randomBetween(5, 20), 10, 98),
+      2,
+    );
     const coolantC = roundTo(clamp(76 + engineLoadPct * 0.32 + randomBetween(-2, 2), 70, 118), 1);
     const sampleAgeMs = Math.round(randomBetween(80, 1400));
     const satellites = Math.round(randomBetween(6, 16));
@@ -662,7 +673,7 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
 
     const timestamp = now.getTime();
     await publishDeviceRawData(state.mqttClient, device, timestamp, {
-      vibration,
+      imuAccelDeltaMps2,
       vehicleBattery: device.vehicleBattery,
       deviceBattery,
       latitude: device.lat,
@@ -710,7 +721,7 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
       longitude: device.lon,
       speed,
       heading: roundTo(device.heading, 2),
-      vibration,
+      imuAccelDeltaMps2,
       vehicleBattery: device.vehicleBattery,
       deviceBattery,
       errorCode,
@@ -739,12 +750,18 @@ const executeTickSafely = async (): Promise<void> => {
   }
   state.ticking = true;
 
+  let ticked = false;
   try {
     await tickSimulation(state);
+    ticked = true;
   } catch (error) {
     logger.error('Simulator tick failed', { error: (error as Error).message });
   } finally {
     state.ticking = false;
+  }
+
+  if (ticked && runningSimulation === state) {
+    publishSimulatorStatus(toStatus(state, true));
   }
 
   if (Date.now() >= state.expiresAt.getTime()) {
@@ -882,9 +899,10 @@ export const startSimulation = async (
     mqttClient: mqttClient!,
   };
 
+  publishSimulatorStatus(toStatus(runningSimulation, true));
   await executeTickSafely();
 
-  return toStatus(runningSimulation, true);
+  return getSimulationStatus();
 };
 
 export const stopSimulation = async (): Promise<SimulatorStatus> =>
@@ -902,7 +920,9 @@ export const pauseSimulation = (): SimulatorStatus => {
     return toStatus(lastSnapshot, false);
   }
   runningSimulation.paused = true;
-  return toStatus(runningSimulation, true);
+  const status = toStatus(runningSimulation, true);
+  publishSimulatorStatus(status);
+  return status;
 };
 
 export const resumeSimulation = (): SimulatorStatus => {
@@ -910,5 +930,7 @@ export const resumeSimulation = (): SimulatorStatus => {
     return toStatus(lastSnapshot, false);
   }
   runningSimulation.paused = false;
-  return toStatus(runningSimulation, true);
+  const status = toStatus(runningSimulation, true);
+  publishSimulatorStatus(status);
+  return status;
 };

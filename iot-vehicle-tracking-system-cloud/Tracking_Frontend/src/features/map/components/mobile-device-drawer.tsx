@@ -49,7 +49,7 @@ export const MobileDeviceDrawer = () => {
         <Button
           size="sm"
           variant="secondary"
-          className="absolute left-3 top-[max(0.75rem,var(--safe-area-top))] z-[930] h-11 rounded-full px-4 shadow-lg md:hidden"
+          className="absolute left-3 top-[max(0.75rem,var(--safe-area-top))] z-[var(--layer-map-surface)] h-11 rounded-full px-4 shadow-lg md:hidden"
           onClick={openMobileList}
         >
           <List className="mr-2 h-4 w-4" aria-hidden="true" />

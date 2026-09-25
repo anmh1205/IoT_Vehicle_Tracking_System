@@ -8,7 +8,12 @@
 /**
  * @file offline_queue.h
  * @brief Queue-first telemetry flow with FIFO replay and publish-result commit.
+ * This header belongs to the storage domain layer and defines the replay and buffering boundary that adapters and app-core use without duplicating queue rules.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 typedef enum {
     /** High-rate raw telemetry, usually replayed with QoS 0. */

@@ -68,6 +68,14 @@ export interface RawDiagnosticsDtc {
   permanent?: string[];
 }
 
+export type GnssQueryMode = 'unknown' | 'cgnsinf' | 'cgpsinfo_fallback';
+
+export interface RawDiagnosticsGnss {
+  query_mode?: GnssQueryMode;
+  fix_valid?: boolean;
+  satellites_reported?: number;
+}
+
 export interface RawDiagnostics {
   channel?: RawDiagnosticsChannel;
   signals?: RawDiagnosticsSignals;
@@ -77,6 +85,7 @@ export interface RawDiagnostics {
   reported_dtc_count?: number;
   readiness?: RawDiagnosticsReadiness;
   dtc?: RawDiagnosticsDtc;
+  gnss?: RawDiagnosticsGnss;
 }
 
 export type BoundaryEvent = 'started' | 'ended' | 'none';
@@ -85,7 +94,9 @@ export interface RawDataPayload {
   device_id: string;
   auth_token: string;
   timestamp: number;
+  timestamp_trusted?: boolean;
   uptime?: number;
+  session_id?: number;
   local_session_key?: number;
   canonical_session_id?: string;
   boot_id?: string;

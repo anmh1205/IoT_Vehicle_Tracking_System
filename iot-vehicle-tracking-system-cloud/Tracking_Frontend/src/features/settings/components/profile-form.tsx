@@ -20,17 +20,33 @@ export const ProfileForm = ({
   statusMessage,
 }: {
   defaultValues?: ProfileFormDefaults;
-  onSubmit: (payload: { fullName?: string; email?: string }) => void;
+  onSubmit: (payload: { fullName?: string; email?: string | null }) => void;
   isPending?: boolean;
   statusMessage?: string | null;
 }) => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
     setFullName(defaultValues?.fullName ?? '');
     setEmail(defaultValues?.email ?? '');
   }, [defaultValues]);
+
+  const handleSubmit = () => {
+    const normalizedFullName = fullName.trim();
+    if (!normalizedFullName) {
+      setLocalError('Họ và tên là bắt buộc.');
+      return;
+    }
+
+    setLocalError(null);
+    const normalizedEmail = email.trim();
+    onSubmit({
+      fullName: normalizedFullName,
+      email: normalizedEmail || null,
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -55,7 +71,12 @@ export const ProfileForm = ({
           placeholder="Ví dụ: Nguyễn Văn A"
           autoComplete="name"
           value={fullName}
-          onChange={(event) => setFullName(event.target.value)}
+          onChange={(event) => {
+            setFullName(event.target.value);
+            if (localError) {
+              setLocalError(null);
+            }
+          }}
         />
       </div>
 
@@ -73,9 +94,10 @@ export const ProfileForm = ({
         />
       </div>
 
+      {localError ? <p className="text-sm text-destructive">{localError}</p> : null}
       {statusMessage ? <p className="text-sm text-muted-foreground">{statusMessage}</p> : null}
 
-      <Button disabled={isPending} onClick={() => onSubmit({ fullName, email })}>
+      <Button disabled={isPending} onClick={handleSubmit}>
         {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
         Cập nhật hồ sơ
       </Button>

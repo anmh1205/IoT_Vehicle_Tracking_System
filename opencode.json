@@ -1,8 +1,0 @@
-{
-  "instructions": [
-    "AGENTS.md",
-    "resources/docs/*.md",
-    ".codex/rules/*.md",
-    ".codex/agent/*.md"
-  ]
-}

@@ -26,38 +26,57 @@
 /**
  * @file ble_mgr.c
  * @brief BLE central manager handling scan/connect/discovery/notify workflow.
+ * This translation unit belongs to the BLE OBD NimBLE adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
 
+
+/* Per-scan-cycle duration handed to ble_gap_disc(); scanning self-restarts on completion. */
 #define BLE_DISCOVERY_TIMEOUT_MS 5000U
+/* Upper bound NimBLE waits for a single GAP connection attempt to complete. */
 #define BLE_CONNECT_ATTEMPT_TIMEOUT_MS 7000U
+/* Total time the synchronous disconnect path polls for link teardown before giving up. */
 #define BLE_DISCONNECT_WAIT_MS 1200U
+/* Poll granularity while waiting for the async disconnect event to clear connection state. */
 #define BLE_DISCONNECT_POLL_MS 20U
 
 /* CCCD payload enabling notifications (0x0001 little-endian). */
 static const uint8_t cccd_notify_enable_cfg[] = {0x01, 0x00};
 
+/* Mailbox message carrying the outcome of an async GAP/GATT operation back to the API caller. */
 typedef struct {
-    ble_mgr_status_t status;
+    ble_mgr_status_t status; /* Final status posted by a BLE callback. */
 } ble_mgr_result_t;
 
+/* Singleton central-manager state shared between the public API and NimBLE callbacks. */
 struct ble_mgr_ctx {
-    uint16_t conn_handle;
-    bool is_connected;
-    bool is_connecting;
-    const ble_mgr_disc_cfg_t *disc_cfg;
-    void *usr_ctx;
+    uint16_t conn_handle;                 /* Active GATT connection handle, or BLE_HS_CONN_HANDLE_NONE. */
+    bool is_connected;                    /* True once link established and discovery succeeded. */
+    bool is_connecting;                   /* True between candidate selection and connect completion. */
+    bool peer_addr_valid;                 /* True when peer_addr holds the currently/last connected address. */
+    ble_addr_t peer_addr;                 /* Address of the connected peripheral. */
+    const ble_mgr_disc_cfg_t *disc_cfg;   /* Active discovery profile (service + filter/disconnect callbacks). */
+    void *usr_ctx;                        /* Opaque context forwarded to user callbacks. */
+    /* Snapshot of the chosen candidate, captured before scan is cancelled to start connect. */
     struct {
-        uint32_t adv_seen;
-        uint32_t parse_failures;
-        uint32_t connect_matches;
+        ble_addr_t addr;                  /* Address of the device we are about to connect to. */
+        int8_t rssi;                      /* Signal strength of the selecting advertisement. */
+        bool service_match;               /* True when target service UUID was present in the adv payload. */
+        bool armed;                       /* True while a pending connect is staged but not yet issued. */
+    } pending_connect;
+    /* Rolling scan counters used for rate-limited diagnostic logging. */
+    struct {
+        uint32_t adv_seen;                /* Total advertisements observed this scan session. */
+        uint32_t parse_failures;          /* Advertisements that failed adv-field parsing. */
+        uint32_t connect_matches;         /* Candidates that passed filtering and triggered a connect. */
     } scan_diag;
+    /* GATT discovery progress flags driving completion detection across two callback stages. */
     struct {
-        bool svc_disc_completed;
-        bool chr_disc_completed;
-        bool chr_disc_started;
+        bool svc_disc_completed;          /* Service enumeration finished (BLE_HS_EDONE seen). */
+        bool chr_disc_completed;          /* Characteristic enumeration finished for the matched service. */
+        bool chr_disc_started;            /* Characteristic discovery was launched for the matched service. */
     } svc_disc_ctx;
-    QueueHandle_t result_queue;
-    SemaphoreHandle_t lock_mtx;
+    QueueHandle_t result_queue;           /* Single-slot mailbox delivering async results to the waiter. */
+    SemaphoreHandle_t lock_mtx;           /* Serializes public API calls and guards context lifecycle. */
 };
 
 static const char *TAG = "BLE_MGR";
@@ -75,6 +94,7 @@ static ble_mgr_ctx_t s_mgr = {
 static void ble_mgr_gap_stack_reset_cb(int reason);
 static void ble_mgr_gap_stack_sync_cb(void);
 static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg);
+static ble_mgr_status_t ble_mgr_start_pending_connect(ble_mgr_ctx_t *mgr_ctx);
 static int ble_mgr_gatt_svc_discovered_cb(uint16_t conn_handle,
                                           const struct ble_gatt_error *error,
                                           const struct ble_gatt_svc *service,
@@ -90,22 +110,24 @@ static const ble_init_config_t s_ble_init_cfg = {
     .sync_cb = ble_mgr_gap_stack_sync_cb,
 };
 
+/* Active scan parameters: solicit scan responses, fully-utilized scan window, drop duplicate adverts. */
 static const struct ble_gap_disc_params s_disc_params = {
-    .passive = 0,
-    .itvl = 0x0010,
-    .window = 0x0010,
-    .filter_duplicates = 1,
+    .passive = 0,             /* Active scan so peripherals return their scan-response (name) payload. */
+    .itvl = 0x0010,           /* Scan interval (0x0010 * 0.625ms = 10ms). */
+    .window = 0x0010,         /* Scan window equals interval => continuous listening. */
+    .filter_duplicates = 1,   /* Controller suppresses repeated adverts from the same device. */
 };
 
+/* Connection parameters used when initiating the GATT link to the selected peripheral. */
 static const struct ble_gap_conn_params s_conn_params = {
-    .scan_itvl = 0x0010,
-    .scan_window = 0x0010,
-    .itvl_min = 0x0010,
-    .itvl_max = 0x0020,
-    .latency = 0,
-    .supervision_timeout = 0x0100,
-    .min_ce_len = 0x0010,
-    .max_ce_len = 0x0300,
+    .scan_itvl = 0x0010,          /* Scan interval used while attempting to connect. */
+    .scan_window = 0x0010,        /* Scan window used while attempting to connect. */
+    .itvl_min = 0x0010,           /* Min connection interval (0x0010 * 1.25ms = 20ms). */
+    .itvl_max = 0x0020,           /* Max connection interval (0x0020 * 1.25ms = 40ms). */
+    .latency = 0,                 /* No slave latency: peripheral answers every connection event. */
+    .supervision_timeout = 0x0100, /* Link-loss timeout (0x0100 * 10ms = 2.56s). */
+    .min_ce_len = 0x0010,         /* Minimum connection event length hint. */
+    .max_ce_len = 0x0300,         /* Maximum connection event length hint. */
 };
 
 /**
@@ -145,6 +167,7 @@ static void ble_mgr_queue_clear(ble_mgr_ctx_t *mgr_ctx) {
  * @param status Operation status.
  */
 static void ble_mgr_queue_send(ble_mgr_ctx_t *mgr_ctx, ble_mgr_status_t status) {
+    // Push mgr send through the shared publish path so metadata and error handling stay aligned.
     if (mgr_ctx == NULL || mgr_ctx->result_queue == NULL) {
         return;
     }
@@ -178,26 +201,41 @@ static bool ble_mgr_queue_wait(ble_mgr_ctx_t *mgr_ctx, ble_mgr_status_t *status,
     return true;
 }
 
+/**
+ * @brief Tear down RTOS primitives and clear all manager state to a pristine value.
+ *
+ * Called when reinitializing the singleton after a stack deinit left stale
+ * handles behind. Frees the result queue and API mutex, then zeroes every
+ * connection/scan/discovery field so a fresh init starts clean.
+ *
+ * @param mgr_ctx BLE manager context.
+ */
 static void ble_mgr_reset_context(ble_mgr_ctx_t *mgr_ctx) {
     if (mgr_ctx == NULL) {
         return;
     }
 
+    /* Release the async mailbox if it survived a partial teardown. */
     if (mgr_ctx->result_queue != NULL) {
         xQueueReset(mgr_ctx->result_queue);
         vQueueDelete(mgr_ctx->result_queue);
         mgr_ctx->result_queue = NULL;
     }
+    /* Release the API lock so a fresh init can recreate it. */
     if (mgr_ctx->lock_mtx != NULL) {
         vSemaphoreDelete(mgr_ctx->lock_mtx);
         mgr_ctx->lock_mtx = NULL;
     }
 
+    /* Reset every connection/scan/discovery field to a known-idle baseline. */
     mgr_ctx->disc_cfg = NULL;
     mgr_ctx->usr_ctx = NULL;
     mgr_ctx->is_connecting = false;
     mgr_ctx->is_connected = false;
+    mgr_ctx->peer_addr_valid = false;
     mgr_ctx->conn_handle = BLE_HS_CONN_HANDLE_NONE;
+    memset(&mgr_ctx->peer_addr, 0, sizeof(mgr_ctx->peer_addr));
+    memset(&mgr_ctx->pending_connect, 0, sizeof(mgr_ctx->pending_connect));
     memset(&mgr_ctx->scan_diag, 0, sizeof(mgr_ctx->scan_diag));
     mgr_ctx->svc_disc_ctx.svc_disc_completed = false;
     mgr_ctx->svc_disc_ctx.chr_disc_completed = false;
@@ -219,11 +257,45 @@ static ble_mgr_status_t ble_mgr_connect_complete(ble_mgr_ctx_t *mgr_ctx, ble_mgr
 
     mgr_ctx->is_connecting = false;
     mgr_ctx->is_connected = (status == BLE_MGR_E_OK);
+    mgr_ctx->pending_connect.armed = false;
     if (status != BLE_MGR_E_OK) {
+        /* On any failure the handle is no longer valid for sends. */
         mgr_ctx->conn_handle = BLE_HS_CONN_HANDLE_NONE;
     }
+    /* Wake the API caller blocked in ble_mgr_queue_wait() with the verdict. */
     ble_mgr_queue_send(mgr_ctx, status);
     return status;
+}
+
+static ble_mgr_status_t ble_mgr_start_pending_connect(ble_mgr_ctx_t *mgr_ctx) {
+    if (mgr_ctx == NULL || !mgr_ctx->pending_connect.armed) {
+        return BLE_MGR_E_NULL;
+    }
+
+    char addr_str[BLE_ADDR_STR_LEN] = {0};
+    (void)ble_addr_to_str(&mgr_ctx->pending_connect.addr, addr_str);
+    ESP_LOGI(TAG,
+             "event=ble_connect_start addr=%s rssi=%d service_match=%d",
+             addr_str,
+             mgr_ctx->pending_connect.rssi,
+             mgr_ctx->pending_connect.service_match ? 1 : 0);
+
+    ble_mgr_queue_clear(mgr_ctx);
+    int rc = ble_gap_connect(BLE_OWN_ADDR_PUBLIC,
+                             &mgr_ctx->pending_connect.addr,
+                             BLE_CONNECT_ATTEMPT_TIMEOUT_MS,
+                             &s_conn_params,
+                             ble_mgr_gap_event_cb,
+                             mgr_ctx);
+    if (rc != 0) {
+        ESP_LOGW(TAG, "event=ble_connect_start_failed addr=%s rc=%d", addr_str, rc);
+        mgr_ctx->pending_connect.armed = false;
+        mgr_ctx->is_connecting = false;
+        return BLE_MGR_E_NOT_CONNECTED;
+    }
+
+    mgr_ctx->pending_connect.armed = false;
+    return BLE_MGR_E_OK;
 }
 
 /**
@@ -232,14 +304,14 @@ static ble_mgr_status_t ble_mgr_connect_complete(ble_mgr_ctx_t *mgr_ctx, ble_mgr
  * @param reason Reset reason code.
  */
 static void ble_mgr_gap_stack_reset_cb(int reason) {
-    ESP_LOGW(TAG, "NimBLE stack reset, reason=%d", reason);
+    ESP_LOGW(TAG, "event=nimble_stack_reset reason=%d", reason);
 }
 
 /**
  * @brief NimBLE sync callback used to release init wait.
  */
 static void ble_mgr_gap_stack_sync_cb(void) {
-    ESP_LOGI(TAG, "NimBLE stack synced");
+    ESP_LOGI(TAG, "event=nimble_stack_synced");
     ble_mgr_queue_send(&s_mgr, BLE_MGR_E_OK);
 }
 
@@ -323,26 +395,31 @@ static void ble_mgr_gatt_svc_chr_disc_completed_check(ble_mgr_ctx_t *mgr_ctx,
     }
 
     if (error->status == 0) {
+        /* status == 0 reports an individual entry, not completion; nothing to finalize yet. */
         return;
     }
 
     if (error->status != BLE_HS_EDONE) {
-        ESP_LOGE(TAG, "BLE discovery failed: %d", error->status);
+        /* Any non-EDONE terminal status indicates the discovery procedure itself failed. */
+        ESP_LOGE(TAG, "event=ble_discovery_failed status=%d", error->status);
         ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_DISCOVERY_FAILED);
         return;
     }
 
     if (mgr_ctx->svc_disc_ctx.chr_disc_started && !mgr_ctx->svc_disc_ctx.chr_disc_completed) {
+        /* Service pass finished but characteristic enumeration is still in flight; wait for it. */
         return;
     }
 
     if ((mgr_ctx->svc_disc_ctx.svc_disc_completed && mgr_ctx->svc_disc_ctx.chr_disc_completed) ||
         (!mgr_ctx->svc_disc_ctx.chr_disc_started && mgr_ctx->svc_disc_ctx.svc_disc_completed)) {
+        /* Both stages done, or services enumerated without ever matching the target service. */
         /* Validate that all required characteristics were found. */
         const ble_mgr_svc_def_t *svc_def = mgr_ctx->disc_cfg->svc_def;
         bool missing_required_char = false;
         for (size_t i = 0; i < svc_def->num_chars; ++i) {
             if (svc_def->chars[i].handle == 0) {
+                /* A zero handle means this characteristic was never discovered. */
                 missing_required_char = true;
                 break;
             }
@@ -353,6 +430,7 @@ static void ble_mgr_gatt_svc_chr_disc_completed_check(ble_mgr_ctx_t *mgr_ctx,
             return;
         }
 
+        /* Full profile resolved: report the connection as ready. */
         ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_OK);
     }
 }
@@ -383,13 +461,16 @@ static int ble_mgr_gatt_chr_discovered_cb(uint16_t conn_handle,
         for (size_t i = 0; i < mgr_ctx->disc_cfg->svc_def->num_chars; ++i) {
             ble_gatt_char_def_t *char_def = &mgr_ctx->disc_cfg->svc_def->chars[i];
             if (char_def->uuid == NULL || strcmp(uuid_str, char_def->uuid) != 0) {
+                /* Skip characteristics this profile does not care about. */
                 continue;
             }
 
             /* Save characteristic value handle for future writes/notifications. */
             char_def->handle = chr->val_handle;
             if (char_def->notify_cb != NULL) {
-                /* Subscribe by writing CCCD at handle + 1 for this profile. */
+                /* Subscribe by writing CCCD at handle + 1 for this profile.
+                 * The Client Characteristic Configuration descriptor conventionally
+                 * sits immediately after the value attribute for these OBD adapters. */
                 int rc = ble_gattc_write_flat(conn_handle,
                                               chr->val_handle + 1,
                                               cccd_notify_enable_cfg,
@@ -397,7 +478,7 @@ static int ble_mgr_gatt_chr_discovered_cb(uint16_t conn_handle,
                                               NULL,
                                               NULL);
                 if (rc != 0) {
-                    ESP_LOGW(TAG, "Failed to subscribe to notifications: %d", rc);
+                    ESP_LOGW(TAG, "event=ble_notify_subscribe_failed rc=%d", rc);
                 }
             }
             break;
@@ -448,7 +529,7 @@ static int ble_mgr_gatt_svc_discovered_cb(uint16_t conn_handle,
                                              ble_mgr_gatt_chr_discovered_cb,
                                              mgr_ctx);
             if (rc != 0) {
-                ESP_LOGE(TAG, "Characteristic discovery start failed: %d", rc);
+                ESP_LOGE(TAG, "event=ble_characteristic_discovery_start_failed rc=%d", rc);
                 ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_DISCOVERY_FAILED);
             }
         }
@@ -474,18 +555,20 @@ static void ble_mgr_gap_connected_cb(ble_mgr_ctx_t *mgr_ctx, uint16_t conn_handl
     }
 
     if (status != 0) {
-        ESP_LOGW(TAG, "BLE connection failed: %d", status);
+        ESP_LOGW(TAG, "event=ble_connect_failed status=%d", status);
         ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_NOT_CONNECTED);
 
         /* Resume scanning to find next candidate after failed connect. */
         int rc = ble_gap_disc(0, BLE_DISCOVERY_TIMEOUT_MS, &s_disc_params, ble_mgr_gap_event_cb, mgr_ctx);
         if (rc != 0) {
-            ESP_LOGW(TAG, "Failed to restart discovery after connect failure: %d", rc);
+            ESP_LOGW(TAG, "event=ble_scan_restart_failed reason=connect_failed rc=%d", rc);
         }
         return;
     }
 
     mgr_ctx->conn_handle = conn_handle;
+    mgr_ctx->peer_addr = mgr_ctx->pending_connect.addr;
+    mgr_ctx->peer_addr_valid = true;
     mgr_ctx->svc_disc_ctx.svc_disc_completed = false;
     mgr_ctx->svc_disc_ctx.chr_disc_completed = false;
     mgr_ctx->svc_disc_ctx.chr_disc_started = false;
@@ -493,7 +576,7 @@ static void ble_mgr_gap_connected_cb(ble_mgr_ctx_t *mgr_ctx, uint16_t conn_handl
     /* After connection, discover all services then drill into required one. */
     int rc = ble_gattc_disc_all_svcs(conn_handle, ble_mgr_gatt_svc_discovered_cb, mgr_ctx);
     if (rc != 0) {
-        ESP_LOGE(TAG, "Service discovery start failed: %d", rc);
+        ESP_LOGE(TAG, "event=ble_service_discovery_start_failed rc=%d", rc);
         ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_DISCOVERY_FAILED);
     }
 }
@@ -507,6 +590,7 @@ static void ble_mgr_gap_connected_cb(ble_mgr_ctx_t *mgr_ctx, uint16_t conn_handl
  * @return 0 to keep NimBLE processing.
  */
 static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
+    // Centralize scan, connect, disconnect, and notify handling here so NimBLE GAP policy lives in one place.
     ble_mgr_ctx_t *mgr_ctx = (ble_mgr_ctx_t *)arg;
     if (mgr_ctx == NULL || mgr_ctx->disc_cfg == NULL || mgr_ctx->disc_cfg->svc_def == NULL) {
         return 0;
@@ -519,6 +603,7 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
             }
 
             mgr_ctx->scan_diag.adv_seen++;
+            // Decode the advertisement first so both built-in service matching and profile-specific filters see the same fields.
             /* Parse advertisement payload and allow profile-specific filtering. */
             struct ble_hs_adv_fields adv_fields;
             int rc = ble_hs_adv_parse_fields(&adv_fields, event->disc.data, event->disc.length_data);
@@ -526,7 +611,7 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
                 mgr_ctx->scan_diag.parse_failures++;
                 if (mgr_ctx->scan_diag.parse_failures <= 3U || (mgr_ctx->scan_diag.parse_failures % 20U) == 0U) {
                     ESP_LOGW(TAG,
-                             "BLE adv parse failed count=%lu len=%u rc=%d",
+                             "event=ble_adv_parse_failed count=%lu adv_len=%u rc=%d",
                              (unsigned long)mgr_ctx->scan_diag.parse_failures,
                              (unsigned int)event->disc.length_data,
                              rc);
@@ -542,7 +627,7 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
                 (void)ble_addr_to_str(&event->disc.addr, addr_str);
                 ble_mgr_copy_adv_name(&adv_fields, name_buf, sizeof(name_buf));
                 ESP_LOGI(TAG,
-                         "BLE adv #%lu addr=%s rssi=%d name=%s service_match=%d",
+                         "event=ble_adv_observed seq=%lu addr=%s rssi=%d name=%s service_match=%d",
                          (unsigned long)mgr_ctx->scan_diag.adv_seen,
                          addr_str,
                          event->disc.rssi,
@@ -550,6 +635,7 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
                          service_match ? 1 : 0);
             }
 
+            // Service UUID is only the first gate; profile-specific code can still reject the candidate afterwards.
             bool connect = service_match;
             if (mgr_ctx->disc_cfg->dev_filter_cb != NULL) {
                 connect = mgr_ctx->disc_cfg->dev_filter_cb(
@@ -560,41 +646,46 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
             }
 
             mgr_ctx->scan_diag.connect_matches++;
-            /* Stop scan and initiate connection to selected peripheral. */
+            // Queue the candidate first, then stop discovery so the connect path works from a stable target snapshot.
+            /* Stop scan before starting connect, matching NimBLE central examples. */
             char addr_str[BLE_ADDR_STR_LEN] = {0};
             (void)ble_addr_to_str(&event->disc.addr, addr_str);
             ESP_LOGI(TAG,
-                     "Connecting to BLE candidate addr=%s rssi=%d service_match=%d",
+                     "event=ble_candidate_selected addr=%s rssi=%d service_match=%d action=stop_scan",
                      addr_str,
                      event->disc.rssi,
                      service_match ? 1 : 0);
             mgr_ctx->is_connecting = true;
-            ble_gap_disc_cancel();
-            ble_mgr_queue_clear(mgr_ctx);
-            rc = ble_gap_connect(BLE_OWN_ADDR_PUBLIC,
-                                 &event->disc.addr,
-                                 BLE_CONNECT_ATTEMPT_TIMEOUT_MS,
-                                 &s_conn_params,
-                                 ble_mgr_gap_event_cb,
-                                 mgr_ctx);
-            if (rc != 0) {
+            mgr_ctx->pending_connect.addr = event->disc.addr;
+            mgr_ctx->pending_connect.rssi = event->disc.rssi;
+            mgr_ctx->pending_connect.service_match = service_match;
+            mgr_ctx->pending_connect.armed = true;
+            rc = ble_gap_disc_cancel();
+            if (rc != 0 && rc != BLE_HS_EALREADY) {
+                ESP_LOGW(TAG, "event=ble_scan_cancel_failed rc=%d", rc);
+                mgr_ctx->pending_connect.armed = false;
                 mgr_ctx->is_connecting = false;
+                ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_NOT_CONNECTED);
+                break;
+            }
+            if (ble_mgr_start_pending_connect(mgr_ctx) != BLE_MGR_E_OK) {
                 ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_NOT_CONNECTED);
             }
             break;
         }
 
         case BLE_GAP_EVENT_DISC_COMPLETE:
+            // When nothing is connected yet, discovery is intentionally self-restarting so the manager keeps hunting.
             /* Keep discovery alive when nothing is connecting/connected. */
             if (!mgr_ctx->is_connecting && !mgr_ctx->is_connected) {
                 ESP_LOGI(TAG,
-                         "BLE scan cycle complete adv=%lu parse_fail=%lu matches=%lu",
+                         "event=ble_scan_cycle_complete adv_seen=%lu parse_failures=%lu connect_matches=%lu",
                          (unsigned long)mgr_ctx->scan_diag.adv_seen,
                          (unsigned long)mgr_ctx->scan_diag.parse_failures,
                          (unsigned long)mgr_ctx->scan_diag.connect_matches);
                 int rc = ble_gap_disc(0, BLE_DISCOVERY_TIMEOUT_MS, &s_disc_params, ble_mgr_gap_event_cb, mgr_ctx);
                 if (rc != 0) {
-                    ESP_LOGW(TAG, "Failed to restart discovery: %d", rc);
+                    ESP_LOGW(TAG, "event=ble_scan_restart_failed reason=cycle_complete rc=%d", rc);
                 }
             }
             break;
@@ -604,15 +695,17 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
             break;
 
         case BLE_GAP_EVENT_DISCONNECT:
+            // Disconnect clears the active link state first; the profile callback then decides whether scanning should resume.
             /* Clear connection state and optionally restart discovery by policy. */
             mgr_ctx->conn_handle = BLE_HS_CONN_HANDLE_NONE;
             mgr_ctx->is_connected = false;
             mgr_ctx->is_connecting = false;
+            mgr_ctx->pending_connect.armed = false;
             if (mgr_ctx->disc_cfg->disconnected_cb != NULL &&
                 mgr_ctx->disc_cfg->disconnected_cb(mgr_ctx, mgr_ctx->usr_ctx)) {
                 int rc = ble_gap_disc(0, BLE_DISCOVERY_TIMEOUT_MS, &s_disc_params, ble_mgr_gap_event_cb, mgr_ctx);
                 if (rc != 0) {
-                    ESP_LOGW(TAG, "Failed to restart discovery after disconnect: %d", rc);
+                    ESP_LOGW(TAG, "event=ble_scan_restart_failed reason=disconnect rc=%d", rc);
                 }
             }
             break;
@@ -667,19 +760,23 @@ const char *ble_mgr_status_to_string(ble_mgr_status_t status) {
 /**
  * @brief Initialize BLE manager singleton and wait for NimBLE sync.
  *
- * @param timeout_ms Timeout waiting for sync signal.
+ * Creates the BLE manager context with result queue and lock.
+ * Waits for NimBLE host stack to synchronize before returning.
  *
- * @return Context pointer on success, NULL on failure.
+ * @param timeout_ms Maximum time to wait for sync.
+ * @return Manager context pointer on success, NULL on timeout/failure.
  */
 ble_mgr_ctx_t *ble_mgr_init(uint32_t timeout_ms) {
     ble_mgr_ctx_t *mgr_ctx = &s_mgr;
 
     if ((mgr_ctx->lock_mtx != NULL || mgr_ctx->result_queue != NULL) && !ble_stack_is_started()) {
-        ESP_LOGW(TAG, "Resetting stale BLE manager context after stack deinit");
+        // Recover from partial deinit so the singleton manager can be reinitialized without carrying stale handles.
+        ESP_LOGW(TAG, "event=ble_manager_context_reset reason=stale_after_stack_deinit");
         ble_mgr_reset_context(mgr_ctx);
     }
 
     if (mgr_ctx->lock_mtx != NULL) {
+        // Existing mutex implies the singleton manager is already ready for reuse.
         return mgr_ctx;
     }
 
@@ -706,7 +803,8 @@ ble_mgr_ctx_t *ble_mgr_init(uint32_t timeout_ms) {
     /* Start BLE stack then wait for sync callback to post queue result. */
     esp_err_t err = ble_init_stack(&s_ble_init_cfg);
     if (err != ESP_OK) {
-        ESP_LOGE(TAG, "BLE stack init failed: %s", esp_err_to_name(err));
+        // Tear everything back down if the stack never reached the async sync phase.
+        ESP_LOGE(TAG, "event=ble_stack_init_failed err=%s", esp_err_to_name(err));
         xQueueReset(mgr_ctx->result_queue);
         vQueueDelete(mgr_ctx->result_queue);
         mgr_ctx->result_queue = NULL;
@@ -723,7 +821,8 @@ ble_mgr_ctx_t *ble_mgr_init(uint32_t timeout_ms) {
 
     bool wait_ok = ble_mgr_queue_wait(mgr_ctx, NULL, timeout_ms);
     if (!wait_ok) {
-        ESP_LOGE(TAG, "Timed out waiting for BLE stack sync");
+        // A sync timeout means NimBLE never announced readiness, so deinit and reset the singleton before returning NULL.
+        ESP_LOGE(TAG, "event=ble_stack_sync_timeout");
         (void)ble_stack_deinit();
         xQueueReset(mgr_ctx->result_queue);
         vQueueDelete(mgr_ctx->result_queue);
@@ -739,6 +838,7 @@ ble_mgr_ctx_t *ble_mgr_init(uint32_t timeout_ms) {
         return NULL;
     }
 
+    // Release the API mutex only after the stack sync handshake completes so later callers see a fully usable manager.
     xSemaphoreGive(mgr_ctx->lock_mtx);
     return mgr_ctx;
 }
@@ -770,6 +870,7 @@ ble_mgr_status_t ble_mgr_connect_service(ble_mgr_ctx_t *mgr_ctx,
     mgr_ctx->is_connecting = false;
     mgr_ctx->disc_cfg = disc_cfg;
     mgr_ctx->usr_ctx = usr_ctx;
+    memset(&mgr_ctx->pending_connect, 0, sizeof(mgr_ctx->pending_connect));
     memset(&mgr_ctx->scan_diag, 0, sizeof(mgr_ctx->scan_diag));
 
     /* Clear previous characteristic handles before new discovery pass. */
@@ -791,7 +892,10 @@ ble_mgr_status_t ble_mgr_connect_service(ble_mgr_ctx_t *mgr_ctx,
 
     ble_mgr_status_t status = BLE_MGR_E_OK;
     if (!ble_mgr_queue_wait(mgr_ctx, &status, timeout_ms)) {
-        ble_gap_disc_cancel();
+        (void)ble_gap_disc_cancel();
+        (void)ble_gap_conn_cancel();
+        mgr_ctx->pending_connect.armed = false;
+        mgr_ctx->is_connecting = false;
         xSemaphoreGive(mgr_ctx->lock_mtx);
         return BLE_MGR_E_TIMEOUT;
     }
@@ -811,6 +915,7 @@ ble_mgr_status_t ble_mgr_connect_service(ble_mgr_ctx_t *mgr_ctx,
  * @return BLE manager status.
  */
 ble_mgr_status_t ble_mgr_send(ble_mgr_ctx_t *mgr_ctx, uint16_t chr_handle, const char *data, size_t len) {
+    // Push mgr send through the shared publish path so metadata and error handling stay aligned.
     if (mgr_ctx == NULL || data == NULL) {
         return BLE_MGR_E_NULL;
     }
@@ -836,8 +941,23 @@ ble_mgr_status_t ble_mgr_send(ble_mgr_ctx_t *mgr_ctx, uint16_t chr_handle, const
  *
  * @return true when connected.
  */
+/**
+ * @brief Check BLE manager connection state.
+ *
+ * @param mgr_ctx BLE manager context.
+ * @return True if connected.
+ */
 bool ble_mgr_is_connected(ble_mgr_ctx_t *mgr_ctx) {
     return mgr_ctx != NULL && mgr_ctx->is_connected;
+}
+
+bool ble_mgr_get_peer_address(ble_mgr_ctx_t *mgr_ctx, ble_addr_t *out_addr) {
+    if (mgr_ctx == NULL || out_addr == NULL || !mgr_ctx->peer_addr_valid) {
+        return false;
+    }
+
+    *out_addr = mgr_ctx->peer_addr;
+    return true;
 }
 
 /**
@@ -870,7 +990,7 @@ esp_err_t ble_mgr_disconnect(ble_mgr_ctx_t *mgr_ctx) {
     while (mgr_ctx->conn_handle != BLE_HS_CONN_HANDLE_NONE || mgr_ctx->is_connected || mgr_ctx->is_connecting) {
         if ((util_uptime_ms() - start_ms) >= BLE_DISCONNECT_WAIT_MS) {
             ESP_LOGW(TAG,
-                     "BLE disconnect wait timed out handle=%u connected=%d connecting=%d",
+                     "event=ble_disconnect_wait_timeout handle=%u connected=%d connecting=%d",
                      (unsigned)mgr_ctx->conn_handle,
                      mgr_ctx->is_connected ? 1 : 0,
                      mgr_ctx->is_connecting ? 1 : 0);

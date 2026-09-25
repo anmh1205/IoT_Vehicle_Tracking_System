@@ -25,6 +25,7 @@ export const searchBoundaries = async (
   const clauses = ['1 = 1'];
   const values: unknown[] = [];
   let index = 1;
+  let searchIndex: number | null = null;
 
   if (query.level) {
     clauses.push(`level = $${index++}`);
@@ -37,24 +38,48 @@ export const searchBoundaries = async (
   }
 
   if (query.query?.trim()) {
+    searchIndex = index;
     clauses.push(
-      `(unit_name ILIKE $${index} OR COALESCE(full_name, '') ILIKE $${index} OR unit_code ILIKE $${index})`,
+      `(
+        unit_name ILIKE $${index}
+        OR COALESCE(full_name, '') ILIKE $${index}
+        OR unit_code ILIKE $${index}
+        OR unaccent(unit_name) ILIKE unaccent($${index})
+        OR unaccent(COALESCE(full_name, '')) ILIKE unaccent($${index})
+      )`,
     );
     values.push(`%${query.query.trim()}%`);
     index += 1;
   }
 
   values.push(Math.max(1, Math.min(query.limit ?? DEFAULT_LIMIT, 100)));
+  const relevanceOrder = searchIndex
+    ? `CASE
+         WHEN unit_name ILIKE $${searchIndex}
+           OR unaccent(unit_name) ILIKE unaccent($${searchIndex}) THEN 1
+         WHEN unit_code ILIKE $${searchIndex} THEN 2
+         WHEN COALESCE(full_name, '') ILIKE $${searchIndex}
+           OR unaccent(COALESCE(full_name, '')) ILIKE unaccent($${searchIndex}) THEN 3
+         ELSE 4
+       END,`
+    : '';
 
   return findMany<ZoneBoundaryRow>(
     `SELECT provider, unit_code, unit_name, full_name, level, parent_code, sync_version, synced_at
      FROM gis_admin_units
      WHERE ${clauses.join(' AND ')}
      ORDER BY
+       ${relevanceOrder}
        CASE level
          WHEN 'province' THEN 1
          WHEN 'district' THEN 2
          ELSE 3
+       END,
+       CASE provider
+         WHEN 'gis.vn' THEN 1
+         WHEN 'gis.vn-legacy' THEN 2
+         WHEN 'osm' THEN 3
+         ELSE 4
        END,
        unit_name ASC
      LIMIT $${index}`,

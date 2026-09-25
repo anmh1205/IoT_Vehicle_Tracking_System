@@ -19,9 +19,16 @@ export const PasswordForm = ({
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const valid = useMemo(
-    () => newPassword.length >= 8 && newPassword === confirmPassword,
-    [newPassword, confirmPassword],
+    () => currentPassword.length > 0 && newPassword.length >= 8 && newPassword === confirmPassword,
+    [currentPassword, newPassword, confirmPassword],
   );
+
+  const handleSubmit = () => {
+    onSubmit({ currentPassword, newPassword });
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  };
 
   return (
     <div className="space-y-4">
@@ -61,14 +68,16 @@ export const PasswordForm = ({
         />
       </div>
 
-      {!valid && confirmPassword ? (
-        <p className="text-sm text-destructive">Mật khẩu mới chưa khớp hoặc chưa đủ 8 ký tự.</p>
+      {!valid && (confirmPassword || newPassword) ? (
+        <p className="text-sm text-destructive">
+          {!currentPassword ? 'Vui lòng nhập mật khẩu hiện tại.' : 'Mật khẩu mới chưa khớp hoặc chưa đủ 8 ký tự.'}
+        </p>
       ) : null}
       {statusMessage ? <p className="text-sm text-muted-foreground">{statusMessage}</p> : null}
 
       <Button
         disabled={!valid || isPending}
-        onClick={() => onSubmit({ currentPassword, newPassword })}
+        onClick={handleSubmit}
       >
         {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
         Lưu mật khẩu

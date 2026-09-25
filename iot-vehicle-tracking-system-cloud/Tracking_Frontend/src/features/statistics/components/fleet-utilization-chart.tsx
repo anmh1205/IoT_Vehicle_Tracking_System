@@ -1,8 +1,10 @@
 'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/common/empty-state';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
 export const FleetUtilizationChart = ({
   data,
   isLoading,
@@ -19,11 +21,11 @@ export const FleetUtilizationChart = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Mức sử dụng đội xe</CardTitle>
+        <CardTitle>Mức độ sẵn sàng kết nối đội xe</CardTitle>
         <p className="text-sm text-muted-foreground">
           {totalSignals > 0
-            ? 'Ưu tiên hiển thị trạng thái đội xe mới nhất trong khoảng thời gian đang chọn'
-            : 'Chưa có đủ dữ liệu để vẽ mức sử dụng đội xe'}
+            ? 'Ưu tiên hiển thị thiết bị còn tín hiệu so với nhóm đã mất kết nối trong khoảng thời gian đang chọn'
+            : 'Chưa có đủ dữ liệu để vẽ mức độ sẵn sàng kết nối đội xe'}
         </p>
       </CardHeader>
       <CardContent className="h-[320px]">
@@ -33,7 +35,7 @@ export const FleetUtilizationChart = ({
           <div className="flex h-full items-center justify-center">
             <EmptyState
               title="Chưa có dữ liệu"
-              description="Không có dữ liệu mức sử dụng đội xe cho khoảng thời gian đã chọn"
+              description="Không có dữ liệu sẵn sàng kết nối đội xe cho khoảng thời gian đã chọn"
             />
           </div>
         ) : (

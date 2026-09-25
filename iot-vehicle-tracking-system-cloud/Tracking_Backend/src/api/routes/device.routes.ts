@@ -15,6 +15,7 @@ router.post('/', deviceController.createDevice);
 router.put('/:id', deviceController.updateDevice);
 router.delete('/:id', deviceController.deleteDevice);
 router.get('/:id/sessions', deviceController.getDeviceSessions);
+router.get('/:id/sessions/:sessionId/telemetry', deviceController.getSessionTelemetry);
 router.get('/:id/runtime', deviceController.getRuntimeStats);
 router.get('/:id/telemetry', deviceController.getTelemetry);
 router.post('/:id/command', deviceController.sendCommand);

@@ -6,9 +6,11 @@ import type { Vehicle } from '@/domain/vehicle/types/vehicle.types';
 /** Real-time device row from devices table */
 interface DeviceRow {
   device_id: string;
-  status: string;
+  current_status: string;
   last_seen_at: Date | null;
-  battery_level: number | null;
+  last_latitude: number | null;
+  last_longitude: number | null;
+  last_speed: number | null;
 }
 
 /** Active trip row */
@@ -32,7 +34,8 @@ interface TelemetryRow {
   longitude: number | null;
   speed: number | null;
   course: number | null;
-  recorded_at: Date | null;
+  server_timestamp: Date | null;
+  device_battery: number | null;
 }
 
 export interface VehicleStatusPublic {
@@ -76,35 +79,62 @@ export const getVehicleStatus = async (id: number): Promise<VehicleStatusPublic>
 
   if (vehicle.device_id) {
     const device = await findOne<DeviceRow>(
-      `SELECT device_id, status, last_seen_at, battery_level FROM devices WHERE device_id = $1`,
+      `SELECT
+         device_id,
+         current_status,
+         last_seen_at,
+         last_latitude,
+         last_longitude,
+         last_speed
+       FROM devices
+       WHERE device_id = $1`,
       [vehicle.device_id],
     );
 
     if (device) {
+      const telemetry = await findOne<TelemetryRow>(
+        `SELECT
+           COALESCE(NULLIF(context#>>'{raw_payload,data,latitude}', '')::float8, NULLIF(context->>'latitude', '')::float8) AS latitude,
+           COALESCE(NULLIF(context#>>'{raw_payload,data,longitude}', '')::float8, NULLIF(context->>'longitude', '')::float8) AS longitude,
+           COALESCE(NULLIF(context#>>'{raw_payload,data,speed}', '')::float8, NULLIF(context->>'speed', '')::float8) AS speed,
+           COALESCE(NULLIF(context#>>'{raw_payload,data,course}', '')::float8, NULLIF(context->>'course', '')::float8) AS course,
+           COALESCE(NULLIF(context#>>'{raw_payload,data,device_battery}', '')::float8, NULLIF(context->>'device_battery', '')::float8) AS device_battery,
+           server_timestamp
+         FROM event_logs
+         WHERE device_id = $1
+           AND (
+             (context#>>'{raw_payload,data,latitude}') IS NOT NULL
+             OR context ? 'latitude'
+             OR (context#>>'{raw_payload,data,device_battery}') IS NOT NULL
+             OR context ? 'device_battery'
+             OR (context#>>'{raw_payload,data,course}') IS NOT NULL
+             OR context ? 'course'
+           )
+         ORDER BY server_timestamp DESC
+         LIMIT 1`,
+        [vehicle.device_id],
+      );
+
       deviceInfo = {
-        status: device.status,
+        status: device.current_status,
         lastSeen: device.last_seen_at?.toISOString() ?? new Date(0).toISOString(),
-        batteryLevel: device.battery_level,
+        batteryLevel: telemetry?.device_battery ?? null,
       };
-    }
 
-    // 3. Latest telemetry position from device_data_logs or event_logs
-    const telemetry = await findOne<TelemetryRow>(
-      `SELECT latitude, longitude, speed, course, recorded_at
-       FROM event_logs
-       WHERE device_id = $1 AND latitude IS NOT NULL AND longitude IS NOT NULL
-       ORDER BY recorded_at DESC LIMIT 1`,
-      [vehicle.device_id],
-    );
-
-    if (telemetry?.latitude != null && telemetry?.longitude != null) {
-      currentLocation = {
-        lat: telemetry.latitude,
-        lon: telemetry.longitude,
-        speed: telemetry.speed ?? 0,
-        course: telemetry.course ?? 0,
-        timestamp: telemetry.recorded_at?.toISOString() ?? new Date().toISOString(),
-      };
+      const latitude = telemetry?.latitude ?? device.last_latitude;
+      const longitude = telemetry?.longitude ?? device.last_longitude;
+      if (latitude != null && longitude != null) {
+        currentLocation = {
+          lat: latitude,
+          lon: longitude,
+          speed: telemetry?.speed ?? device.last_speed ?? 0,
+          course: telemetry?.course ?? 0,
+          timestamp:
+            telemetry?.server_timestamp?.toISOString()
+            ?? device.last_seen_at?.toISOString()
+            ?? new Date().toISOString(),
+        };
+      }
     }
   }
 

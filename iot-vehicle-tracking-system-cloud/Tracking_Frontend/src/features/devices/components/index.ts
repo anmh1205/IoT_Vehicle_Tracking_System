@@ -12,7 +12,7 @@ export * from './device-runtime-chart';
 export * from './device-skeletons';
 export * from './device-stats-bar';
 export * from './device-utils';
-export * from './device-vibration-chart';
+export * from './device-imu-accel-delta-chart';
 export * from './error-box';
 export * from './export-modal';
 export * from './mobile-device-content';

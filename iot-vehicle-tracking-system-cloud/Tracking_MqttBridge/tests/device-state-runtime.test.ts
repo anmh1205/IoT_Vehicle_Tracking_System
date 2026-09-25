@@ -5,12 +5,15 @@ import { setStatus, getStatus } from '../src/cache/device-state.cache';
 test('setStatus keeps runtime state and session for running status updates', () => {
   const deviceId = 'runtime-cache-device';
 
-  setStatus(deviceId, 'running', 123, {
-    ignition_state: 'ON',
-    motion_state: 'MOVING',
-    vehicle_state: 'MOVING_ON',
-    device_state: 'ACTIVE',
-    sleep_mode: 'NONE',
+  setStatus(deviceId, 'running', {
+    sessionId: 123,
+    runtimeState: {
+      ignition_state: 'ON',
+      motion_state: 'MOVING',
+      vehicle_state: 'MOVING_ON',
+      device_state: 'ACTIVE',
+      sleep_mode: 'NONE',
+    },
   });
 
   const state = getStatus(deviceId);

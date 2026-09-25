@@ -51,26 +51,26 @@ const buildTypeClause = (
 ): { clause: string; values: unknown[] } => {
   if (type === 'zone') {
     return {
-      clause: `(a.alert_type ILIKE $${startIndex} OR a.alert_type ILIKE $${startIndex + 1})`,
+      clause: `(a.alert_type::text ILIKE $${startIndex} OR a.alert_type::text ILIKE $${startIndex + 1})`,
       values: ['%zone%', '%geofence%'],
     };
   }
 
   if (type === 'firmware') {
-    return { clause: `a.alert_type ILIKE $${startIndex}`, values: ['%firmware%'] };
+    return { clause: `a.alert_type::text ILIKE $${startIndex}`, values: ['%firmware%'] };
   }
 
   if (type === 'export') {
-    return { clause: `a.alert_type ILIKE $${startIndex}`, values: ['%export%'] };
+    return { clause: `a.alert_type::text ILIKE $${startIndex}`, values: ['%export%'] };
   }
 
   if (type === 'system') {
     return {
       clause: `(
-        a.alert_type ILIKE $${startIndex}
-        OR a.alert_type ILIKE $${startIndex + 1}
-        OR a.alert_type ILIKE $${startIndex + 2}
-        OR a.alert_type ILIKE $${startIndex + 3}
+        a.alert_type::text ILIKE $${startIndex}
+        OR a.alert_type::text ILIKE $${startIndex + 1}
+        OR a.alert_type::text ILIKE $${startIndex + 2}
+        OR a.alert_type::text ILIKE $${startIndex + 3}
       )`,
       values: ['%system%', '%offline%', '%database%', '%service%'],
     };
@@ -78,10 +78,11 @@ const buildTypeClause = (
 
   return {
     clause: `(
-      a.alert_type NOT ILIKE $${startIndex}
-      AND a.alert_type NOT ILIKE $${startIndex + 1}
-      AND a.alert_type NOT ILIKE $${startIndex + 2}
-      AND a.alert_type NOT ILIKE $${startIndex + 3}
+      a.alert_type::text NOT ILIKE $${startIndex}
+      AND a.alert_type::text NOT ILIKE $${startIndex + 1}
+      AND a.alert_type::text NOT ILIKE $${startIndex + 2}
+      AND a.alert_type::text NOT ILIKE $${startIndex + 3}
+      AND a.alert_type::text NOT ILIKE $${startIndex + 4}
     )`,
     values: ['%zone%', '%geofence%', '%firmware%', '%export%', '%system%'],
   };

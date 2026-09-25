@@ -38,9 +38,11 @@ const makeVehicle = (overrides = {}) => ({
 
 const makeDevice = (overrides = {}) => ({
   device_id: 'DEV-001',
-  status: 'online',
+  current_status: 'online',
   last_seen_at: NOW,
-  battery_level: 85,
+  last_latitude: 10.7769,
+  last_longitude: 106.7009,
+  last_speed: 45.5,
   ...overrides,
 });
 
@@ -49,7 +51,8 @@ const makeTelemetry = (overrides = {}) => ({
   longitude: 106.7009,
   speed: 45.5,
   course: 90,
-  recorded_at: NOW,
+  device_battery: 85,
+  server_timestamp: NOW,
   ...overrides,
 });
 
@@ -141,7 +144,7 @@ describe('vehicle-status.service', () => {
     expect(result.activeAlerts).toEqual([]);
   });
 
-  it('should return null currentLocation when telemetry has null coordinates', async () => {
+  it('should fall back to device snapshot when telemetry has null coordinates', async () => {
     const vehicle = makeVehicle();
     const device = makeDevice();
     const telemetry = makeTelemetry({ latitude: null, longitude: null });
@@ -156,7 +159,11 @@ describe('vehicle-status.service', () => {
 
     const result = await getVehicleStatus(1);
 
-    expect(result.currentLocation).toBeNull();
+    expect(result.currentLocation).toMatchObject({
+      lat: 10.7769,
+      lon: 106.7009,
+      speed: 45.5,
+    });
   });
 
   it('should skip device/telemetry queries when vehicle has no device_id', async () => {

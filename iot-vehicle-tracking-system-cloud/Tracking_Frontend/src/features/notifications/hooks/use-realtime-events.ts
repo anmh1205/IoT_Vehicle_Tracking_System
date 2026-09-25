@@ -17,12 +17,32 @@ export const useRealtimeEvents = () => {
     void requestNotificationPermission();
   }, []);
 
-  const onAlert = useCallback(
-    (payload: any) => {
-      queryInvalidation.notifications.all(queryClient);
+  const refreshNotifications = useCallback(() => {
+    queryInvalidation.notifications.all(queryClient);
+    void queryClient.invalidateQueries({ queryKey: ['notification-stats'] });
+  }, [queryClient]);
+
+  const refreshAlertSurfaces = useCallback(
+    (payload?: any) => {
+      refreshNotifications();
       void queryClient.invalidateQueries({ queryKey: ['alerts'] });
       void queryClient.invalidateQueries({ queryKey: ['violations'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard-recent-alerts'] });
+      queryInvalidation.device.list(queryClient);
+      queryInvalidation.map.positions(queryClient);
+      queryInvalidation.dashboard.stats(queryClient);
 
+      const deviceId = payload?.deviceId ?? payload?.device_id;
+      if (deviceId !== undefined && deviceId !== null) {
+        queryInvalidation.device.detail(queryClient, String(deviceId));
+      }
+    },
+    [queryClient, refreshNotifications],
+  );
+
+  const onAlert = useCallback(
+    (payload: any) => {
+      refreshAlertSurfaces(payload);
       showAlertNotification(payload);
 
       if (payload?.severity === 'critical') {
@@ -35,32 +55,40 @@ export const useRealtimeEvents = () => {
       }
       notificationUtils.info(payload?.title ?? 'Cảnh báo mới');
     },
-    [queryClient],
+    [refreshAlertSurfaces],
   );
 
   const onExportReady = useCallback(() => {
     queryInvalidation.exports.all(queryClient);
-    queryInvalidation.notifications.all(queryClient);
+    refreshNotifications();
     notificationUtils.success('Xuất dữ liệu hoàn tất');
-  }, [queryClient]);
+  }, [queryClient, refreshNotifications]);
 
-  const onZoneStateChanged = useCallback((payload: any) => {
-    const vehicleId = payload?.vehicle_id ?? payload?.device_id ?? 'Thiết bị';
-    const state = String(payload?.membership_state ?? '').toLowerCase();
-
-    if (state === 'outside') {
-      notificationUtils.warning(`${vehicleId} đang ở ngoài vùng`);
-      return;
-    }
-
-    if (state === 'inside') {
-      notificationUtils.info(`${vehicleId} đã quay lại vùng`);
-    }
-  }, []);
-
-  const onZoneUpdated = useCallback(() => {
+  const refreshZoneSurfaces = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ['vehicles-for-zones-page'] });
+    void queryClient.invalidateQueries({ queryKey: ['vehicles-for-allowed-zone-page'] });
+    queryInvalidation.map.positions(queryClient);
+    queryInvalidation.map.roomIds(queryClient);
+    queryInvalidation.dashboard.stats(queryClient);
   }, [queryClient]);
+
+  const onZoneStateChanged = useCallback(
+    (payload: any) => {
+      refreshZoneSurfaces();
+      const vehicleId = payload?.vehicle_id ?? payload?.device_id ?? 'Thiết bị';
+      const state = String(payload?.membership_state ?? '').toLowerCase();
+
+      if (state === 'outside') {
+        notificationUtils.warning(`${vehicleId} đang ở ngoài vùng`);
+        return;
+      }
+
+      if (state === 'inside') {
+        notificationUtils.info(`${vehicleId} đã quay lại vùng`);
+      }
+    },
+    [refreshZoneSurfaces],
+  );
 
   const onStatsUpdated = useCallback(() => {
     queryInvalidation.dashboard.stats(queryClient);
@@ -70,21 +98,16 @@ export const useRealtimeEvents = () => {
     queryInvalidation.dashboard.activity(queryClient);
   }, [queryClient]);
 
-  const onDeviceSessionChanged = useCallback(() => {
-    queryInvalidation.device.list(queryClient);
-  }, [queryClient]);
-
-  const onCommandAck = useCallback(() => {
-    queryInvalidation.device.commands(queryClient);
-  }, [queryClient]);
-
-  useRealtimeSubscription({ event: 'alert:new', handler: onAlert });
-  useRealtimeSubscription({ event: 'export:ready', handler: onExportReady });
-  useRealtimeSubscription({ event: 'zone:updated', handler: onZoneUpdated });
-  useRealtimeSubscription({ event: 'zone:state-changed', handler: onZoneStateChanged });
-  useRealtimeSubscription({ event: 'stats:update', handler: onStatsUpdated });
-  useRealtimeSubscription({ event: 'activity:new', handler: onActivityCreated });
-  useRealtimeSubscription({ event: 'device:session_start', handler: onDeviceSessionChanged });
-  useRealtimeSubscription({ event: 'device:session_end', handler: onDeviceSessionChanged });
-  useRealtimeSubscription({ event: 'command:ack', handler: onCommandAck });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'alert:new', handler: onAlert });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'alert:updated', handler: refreshAlertSurfaces });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'alert:deleted', handler: refreshAlertSurfaces });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'violation:new', handler: refreshAlertSurfaces });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'violation:updated', handler: refreshAlertSurfaces });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'notification:new', handler: refreshNotifications });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'notification:updated', handler: refreshNotifications });
+  useRealtimeSubscription({ namespace: 'exports', event: 'export:ready', handler: onExportReady });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'zone:updated', handler: refreshZoneSurfaces });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'zone:state-changed', handler: onZoneStateChanged });
+  useRealtimeSubscription({ namespace: 'dashboard', event: 'stats:update', handler: onStatsUpdated });
+  useRealtimeSubscription({ namespace: 'dashboard', event: 'activity:new', handler: onActivityCreated });
 };

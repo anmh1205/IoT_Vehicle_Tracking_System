@@ -11,19 +11,21 @@
 /**
  * @file rtc_ds3231m.c
  * @brief Minimal DS3231M RTC integration for trusted timestamp fallback.
+ * This translation unit belongs to the DS3231M RTC adapter layer and keeps adapter-local state, register policy, and recovery behavior isolated behind the exported entry points.
  */
 
-#define RTC_DS3231M_I2C_PORT I2C_NUM_0
-#define RTC_DS3231M_I2C_FREQ_HZ 100000
-#define RTC_DS3231M_I2C_ADDR 0x68
-#define RTC_DS3231M_TIMEOUT_MS 100
 
-#define RTC_REG_SECONDS 0x00
-#define RTC_REG_STATUS 0x0F
-#define RTC_STATUS_OSF_BIT 0x80
+#define RTC_DS3231M_I2C_PORT I2C_NUM_0      /* I2C controller instance the DS3231M lives on. */
+#define RTC_DS3231M_I2C_FREQ_HZ 100000      /* 100 kHz standard-mode clock; well within the part's 400 kHz max. */
+#define RTC_DS3231M_I2C_ADDR 0x68           /* Fixed 7-bit I2C slave address of the DS3231M. */
+#define RTC_DS3231M_TIMEOUT_MS 100          /* Per-transaction I2C timeout to avoid blocking the caller indefinitely. */
 
-#define RTC_VALID_MIN_EPOCH_MS 1704067200000ULL /* 2024-01-01T00:00:00Z */
-#define RTC_VALID_MAX_EPOCH_MS 4102444800000ULL /* 2100-01-01T00:00:00Z */
+#define RTC_REG_SECONDS 0x00                /* First timekeeping register (seconds); 0x00-0x06 hold the full date/time. */
+#define RTC_REG_STATUS 0x0F                 /* Status register containing the oscillator-stop flag. */
+#define RTC_STATUS_OSF_BIT 0x80             /* Oscillator Stop Flag: set by hardware whenever the clock lost time. */
+
+#define RTC_VALID_MIN_EPOCH_MS 1704067200000ULL /* Lower sanity bound: 2024-01-01T00:00:00Z. Reject earlier "garbage" times. */
+#define RTC_VALID_MAX_EPOCH_MS 4102444800000ULL /* Upper sanity bound: 2100-01-01T00:00:00Z. Reject implausibly future times. */
 
 static const char *TAG = "RTC_DS3231M";
 
@@ -42,21 +44,57 @@ typedef struct {
     i2c_master_dev_handle_t dev_handle;
 } rtc_ds3231m_ctx_t;
 
+/* Runtime context for DS3231M RTC module. */
 static rtc_ds3231m_ctx_t s_ctx;
 
+/**
+ * @brief Convert BCD (binary-coded decimal) to decimal value.
+ *
+ * DS3231M RTC stores calendar/time fields in packed BCD format where each
+ * nibble represents a decimal digit. This function reverses that encoding.
+ *
+ * Example: 0x45 (BCD) -> 45 (decimal)
+ *
+ * @param value BCD-encoded byte from RTC register.
+ * @return uint8_t Decimal representation of the BCD value.
+ */
 static uint8_t rtc_bcd_to_dec(uint8_t value) {
     /* DS3231M stores calendar/time fields in packed BCD, not binary. */
     return (uint8_t)(((value >> 4U) * 10U) + (value & 0x0FU));
 }
 
+/**
+ * @brief Convert decimal to BCD.
+ *
+ * @param value Decimal value.
+ * @return BCD value.
+ */
 static uint8_t rtc_dec_to_bcd(uint8_t value) {
     return (uint8_t)(((value / 10U) << 4U) | (value % 10U));
 }
 
+/**
+ * @brief Check if year is a leap year per Gregorian calendar rules.
+ *
+ * Leap year rules:
+ * - Divisible by 4: leap year
+ * - Divisible by 100: not leap year
+ * - Divisible by 400: leap year
+ *
+ * @param year Year to check (e.g., 2024).
+ * @return true if leap year, false otherwise.
+ */
 static bool rtc_is_leap_year(int year) {
     return ((year % 4) == 0 && (year % 100) != 0) || ((year % 400) == 0);
 }
 
+/**
+ * @brief Get days in month.
+ *
+ * @param year Year.
+ * @param month_1_to_12 Month (1-12).
+ * @return Days in month.
+ */
 static uint8_t rtc_days_in_month(int year, int month_1_to_12) {
     static const uint8_t days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     if (month_1_to_12 == 2 && rtc_is_leap_year(year)) {
@@ -65,6 +103,24 @@ static uint8_t rtc_days_in_month(int year, int month_1_to_12) {
     return days[month_1_to_12 - 1];
 }
 
+/**
+ * @brief Convert struct tm to epoch milliseconds (UTC).
+ *
+ * Validates and converts a broken-down calendar time (struct tm) to Unix epoch
+ * milliseconds. Performs range validation on all fields before conversion.
+ *
+ * Workflow:
+ * 1. Validate input pointers non-null
+ * 2. Convert tm_year/tm_mon to 1-based year/month
+ * 3. Validate year >= 1970 (Unix epoch start)
+ * 4. Validate month 1-12, day within valid range for given month
+ * 5. Use mktime() to convert to epoch seconds (assumes UTC)
+ * 6. Multiply by 1000 to get milliseconds
+ *
+ * @param[in] tm_value Broken-down time structure (struct tm).
+ * @param[out] out_ms Output epoch milliseconds (must be non-null).
+ * @return ESP_OK on success, ESP_ERR_INVALID_ARG on validation failure.
+ */
 static esp_err_t rtc_tm_to_epoch_ms_utc(const struct tm *tm_value, uint64_t *out_ms) {
     ESP_RETURN_ON_NULL(tm_value, ESP_ERR_INVALID_ARG, TAG, "tm_value null");
     ESP_RETURN_ON_NULL(out_ms, ESP_ERR_INVALID_ARG, TAG, "out_ms null");
@@ -105,10 +161,23 @@ static esp_err_t rtc_tm_to_epoch_ms_utc(const struct tm *tm_value, uint64_t *out
     return ESP_OK;
 }
 
+/**
+ * @brief Read a contiguous block of DS3231M registers over I2C.
+ *
+ * Performs the classic register-pointer protocol: write the starting register
+ * address, then read @p len bytes back in a single repeated-start transaction.
+ *
+ * @param reg  Starting register address to read from.
+ * @param data Destination buffer for the read bytes (must be non-null).
+ * @param len  Number of register bytes to read.
+ *
+ * @return ESP_OK on success, ESP_ERR_INVALID_ARG/STATE on guard failure, or an I2C error.
+ */
 static esp_err_t rtc_read_regs(uint8_t reg, uint8_t *data, size_t len) {
     ESP_RETURN_ON_NULL(data, ESP_ERR_INVALID_ARG, TAG, "rtc_read_regs data null");
     ESP_RETURN_ON_NULL(s_ctx.dev_handle, ESP_ERR_INVALID_STATE, TAG, "rtc_read_regs device not ready");
 
+    // Write the register pointer (1 byte) then read `len` bytes in one transaction.
     return i2c_master_transmit_receive(s_ctx.dev_handle,
                                        &reg,
                                        1,
@@ -117,36 +186,55 @@ static esp_err_t rtc_read_regs(uint8_t reg, uint8_t *data, size_t len) {
                                        RTC_DS3231M_TIMEOUT_MS);
 }
 
+/**
+ * @brief Write a single DS3231M register over I2C.
+ *
+ * Sends a two-byte payload {register address, value}; the device latches the
+ * value into the addressed register.
+ *
+ * @param reg   Target register address.
+ * @param value Byte to store in the register.
+ *
+ * @return ESP_OK on success, ESP_ERR_INVALID_STATE if the device is not ready, or an I2C error.
+ */
 static esp_err_t rtc_write_reg(uint8_t reg, uint8_t value) {
     ESP_RETURN_ON_NULL(s_ctx.dev_handle, ESP_ERR_INVALID_STATE, TAG, "rtc_write_reg device not ready");
 
+    // {address, value}: the DS3231M writes `value` into register `reg`.
     uint8_t payload[2] = {reg, value};
     return i2c_master_transmit(s_ctx.dev_handle, payload, sizeof(payload), RTC_DS3231M_TIMEOUT_MS);
 }
 
 bool rtc_ds3231m_is_time_valid_ms(uint64_t time_ms) {
+    // Accept only timestamps inside the firmware's plausible window [2024, 2100):
+    // this rejects both pre-2024 garbage and obviously-wrong far-future values.
     return time_ms >= RTC_VALID_MIN_EPOCH_MS && time_ms < RTC_VALID_MAX_EPOCH_MS;
 }
 
 esp_err_t rtc_ds3231m_init(void) {
+    // Idempotent: a second call just reports the result of the first probe instead of re-creating I2C resources.
     if (s_ctx.initialized) {
         return s_ctx.available ? ESP_OK : ESP_FAIL;
     }
 
+    // Assume we do not own the bus until i2c_new_master_bus succeeds below.
     s_ctx.owns_bus = false;
+    // Standard-mode (100 kHz) I2C master on the DS3231 pins; internal pull-ups
+    // and glitch filtering harden the line on prototype wiring.
     i2c_master_bus_config_t bus_cfg = {
         .i2c_port = RTC_DS3231M_I2C_PORT,
         .sda_io_num = PIN_DS3231_SDA,
         .scl_io_num = PIN_DS3231_SCL,
         .clk_source = I2C_CLK_SRC_DEFAULT,
-        .glitch_ignore_cnt = 7,
-        .intr_priority = 0,
-        .trans_queue_depth = 0,
-        .flags.enable_internal_pullup = true,
+        .glitch_ignore_cnt = 7,        // Reject sub-7-cycle line glitches.
+        .intr_priority = 0,            // Let the driver pick the interrupt priority.
+        .trans_queue_depth = 0,        // Synchronous (blocking) transactions only.
+        .flags.enable_internal_pullup = true, // Use on-chip pull-ups if board lacks externals.
     };
 
     esp_err_t err = i2c_new_master_bus(&bus_cfg, &s_ctx.bus_handle);
     if (err == ESP_OK) {
+        // Remember bus ownership so cleanup only tears down buses that this driver created itself.
         s_ctx.owns_bus = true;
     } else if (err == ESP_ERR_INVALID_STATE) {
         /* Another driver already created the bus; attach to it instead of failing. */
@@ -164,6 +252,7 @@ esp_err_t rtc_ds3231m_init(void) {
         return err;
     }
 
+    // Bind a device handle to the DS3231M at its fixed 7-bit address 0x68.
     i2c_device_config_t dev_cfg = {
         .dev_addr_length = I2C_ADDR_BIT_LEN_7,
         .device_address = RTC_DS3231M_I2C_ADDR,
@@ -174,6 +263,7 @@ esp_err_t rtc_ds3231m_init(void) {
     if (err != ESP_OK) {
         ESP_LOGW(TAG, "i2c_master_bus_add_device failed: %s", esp_err_to_name(err));
         if (s_ctx.owns_bus) {
+            // Only delete the bus on attach failure when this module created it; shared buses must remain available to peers.
             i2c_del_master_bus(s_ctx.bus_handle);
             s_ctx.bus_handle = NULL;
             s_ctx.owns_bus = false;
@@ -183,13 +273,17 @@ esp_err_t rtc_ds3231m_init(void) {
         return err;
     }
 
+    // Probe the device by reading its status register; this both confirms the
+    // DS3231M answers on the bus and exposes the oscillator-stop (OSF) flag.
     uint8_t status = 0;
     err = rtc_read_regs(RTC_REG_STATUS, &status, 1);
     if (err != ESP_OK) {
+        // Probe failure leaves the driver initialized-but-unavailable so callers can degrade gracefully without retry storms.
         ESP_LOGW(TAG, "DS3231M probe failed: %s", esp_err_to_name(err));
         s_ctx.available = false;
         s_ctx.time_valid = false;
     } else {
+        // OSF cleared means the oscillator has kept time since the last power-loss/reset event.
         s_ctx.available = true;
         s_ctx.time_valid = (status & RTC_STATUS_OSF_BIT) == 0;
     }
@@ -207,6 +301,7 @@ esp_err_t rtc_ds3231m_get_time_ms(uint64_t *out_time_ms) {
     ESP_RETURN_ON_NULL(out_time_ms, ESP_ERR_INVALID_ARG, TAG, "out_time_ms null");
     ESP_RETURN_ON_FALSE(s_ctx.available, ESP_ERR_INVALID_STATE, TAG, "RTC unavailable");
 
+    // Read the full clock register block in one shot so BCD fields describe one coherent RTC second.
     uint8_t regs[7] = {0};
     esp_err_t read_err = rtc_read_regs(RTC_REG_SECONDS, regs, sizeof(regs));
     if (read_err != ESP_OK) {
@@ -227,6 +322,7 @@ esp_err_t rtc_ds3231m_get_time_ms(uint64_t *out_time_ms) {
         tm_value.tm_hour = (int)rtc_bcd_to_dec((uint8_t)(regs[2] & 0x3FU));
     }
 
+    // Convert the remaining calendar fields from RTC BCD layout into the standard `struct tm` representation.
     tm_value.tm_mday = (int)rtc_bcd_to_dec((uint8_t)(regs[4] & 0x3FU));
     tm_value.tm_mon = (int)rtc_bcd_to_dec((uint8_t)(regs[5] & 0x1FU)) - 1;
     tm_value.tm_year = 100 + (int)rtc_bcd_to_dec(regs[6]);
@@ -254,6 +350,7 @@ esp_err_t rtc_ds3231m_get_time_ms(uint64_t *out_time_ms) {
     }
 
     *out_time_ms = epoch_ms;
+    // Final range validation filters out RTC garbage such as reset defaults that still convert mathematically.
     s_ctx.time_valid = rtc_ds3231m_is_time_valid_ms(*out_time_ms);
     if (!s_ctx.time_valid) {
         ESP_LOGW(TAG, "RTC read out-of-range ms=%llu", (unsigned long long)*out_time_ms);
@@ -266,21 +363,25 @@ esp_err_t rtc_ds3231m_set_time_ms(uint64_t time_ms) {
     ESP_RETURN_ON_FALSE(s_ctx.available, ESP_ERR_INVALID_STATE, TAG, "RTC unavailable");
     ESP_RETURN_ON_FALSE(rtc_ds3231m_is_time_valid_ms(time_ms), ESP_ERR_INVALID_ARG, TAG, "RTC set invalid time");
 
+    // Convert epoch ms -> UTC broken-down time; gmtime_r avoids local-timezone drift.
     time_t epoch_s = (time_t)(time_ms / 1000ULL);
     struct tm tm_value = {0};
     ESP_RETURN_ON_NULL(gmtime_r(&epoch_s, &tm_value), ESP_FAIL, TAG, "RTC gmtime failed");
 
+    // Build one contiguous write: leading register pointer (seconds) followed by
+    // each time/calendar field re-encoded into the DS3231M's packed BCD layout.
     uint8_t regs[8] = {
-        RTC_REG_SECONDS,
-        rtc_dec_to_bcd((uint8_t)tm_value.tm_sec),
-        rtc_dec_to_bcd((uint8_t)tm_value.tm_min),
-        rtc_dec_to_bcd((uint8_t)tm_value.tm_hour),
-        rtc_dec_to_bcd((uint8_t)(tm_value.tm_wday == 0 ? 7 : tm_value.tm_wday)),
-        rtc_dec_to_bcd((uint8_t)tm_value.tm_mday),
-        rtc_dec_to_bcd((uint8_t)(tm_value.tm_mon + 1)),
-        rtc_dec_to_bcd((uint8_t)(tm_value.tm_year - 100)),
+        RTC_REG_SECONDS,                                                   // Auto-incrementing write starts at the seconds register.
+        rtc_dec_to_bcd((uint8_t)tm_value.tm_sec),                          // Seconds (24h, no AM/PM bits set -> 24-hour mode).
+        rtc_dec_to_bcd((uint8_t)tm_value.tm_min),                          // Minutes.
+        rtc_dec_to_bcd((uint8_t)tm_value.tm_hour),                         // Hours in 24-hour form.
+        rtc_dec_to_bcd((uint8_t)(tm_value.tm_wday == 0 ? 7 : tm_value.tm_wday)), // Day-of-week 1-7 (RTC uses 1-7, tm uses 0-6 with Sunday=0).
+        rtc_dec_to_bcd((uint8_t)tm_value.tm_mday),                         // Day-of-month.
+        rtc_dec_to_bcd((uint8_t)(tm_value.tm_mon + 1)),                    // Month 1-12 (tm_mon is 0-based).
+        rtc_dec_to_bcd((uint8_t)(tm_value.tm_year - 100)),                 // Year offset from 2000 (tm_year is years since 1900).
     };
 
+    // Single I2C transaction writes the full clock block atomically from the device's view.
     esp_err_t write_err = i2c_master_transmit(s_ctx.dev_handle,
                                               regs,
                                               sizeof(regs),
@@ -303,6 +404,7 @@ esp_err_t rtc_ds3231m_get_health(bool *available, bool *time_valid) {
     ESP_RETURN_ON_NULL(available, ESP_ERR_INVALID_ARG, TAG, "available null");
     ESP_RETURN_ON_NULL(time_valid, ESP_ERR_INVALID_ARG, TAG, "time_valid null");
 
+    // Surface the cached health flags without touching the bus, so diagnostics stay cheap.
     *available = s_ctx.available;
     *time_valid = s_ctx.time_valid;
     return ESP_OK;

@@ -2,6 +2,7 @@ import mqtt from 'mqtt';
 
 import { mqttConfig } from '@/config/env';
 import * as deviceCommandRepo from '@/domain/device/repositories/device-command.repository';
+import { createMqttClientId } from '@/infrastructure/mqtt-client-id.util';
 import { createLogger } from '@/infrastructure/logger';
 
 const logger = createLogger('device-command-service');
@@ -20,7 +21,7 @@ const getMqttClient = (): mqtt.MqttClient => {
   mqttClient = mqtt.connect(brokerUrl, {
     username: mqttConfig.username,
     password: mqttConfig.password,
-    clientId: `backend-device-command-${process.pid}`,
+    clientId: createMqttClientId('backend-device-command'),
     reconnectPeriod: 5000,
     clean: true,
     rejectUnauthorized: mqttConfig.rejectUnauthorized,
@@ -56,6 +57,7 @@ export const sendCommand = async (
 
   const topic = `v1/${deviceId}/commands`;
   const message = JSON.stringify({
+    command_id: String(command.id),
     command: payload.command,
     params: payload.params ?? {},
   });

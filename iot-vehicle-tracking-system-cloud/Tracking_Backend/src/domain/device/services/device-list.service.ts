@@ -1,4 +1,5 @@
 import * as deviceRepo from '@/domain/device/repositories/device.repository';
+import type { SessionUser } from '@/shared/types/common.types';
 import type {
   Device,
   DeviceListQuery,
@@ -46,6 +47,7 @@ const sanitizeDevice = (device: Device): DevicePublic => ({
   latitude: device.latitude,
   longitude: device.longitude,
   firmwareVersion: device.firmware_version,
+  targetFirmwareVersion: device.target_firmware_version,
   lastErrorCode: device.last_error_code,
   createdAt: device.created_at.toISOString(),
   vehiclePlate: device.vehicle_plate ?? null,
@@ -55,6 +57,7 @@ const sanitizeDevice = (device: Device): DevicePublic => ({
 
 export const listDevices = async (
   query: DeviceListQuery,
+  user?: SessionUser,
 ): Promise<{
   items: DevicePublic[];
   pagination: { page: number; limit: number; total: number; totalPages: number };
@@ -66,7 +69,7 @@ export const listDevices = async (
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 
-  const result = await deviceRepo.findAll(query);
+  const result = await deviceRepo.findAll(query, user);
   const items = result.devices.map(sanitizeDevice);
   const pagination = {
     page,
@@ -85,5 +88,5 @@ export const listDevices = async (
   };
 };
 
-export const getDevicePositions = async (): Promise<DevicePosition[]> =>
-  deviceRepo.findAllPositions();
+export const getDevicePositions = async (user?: SessionUser): Promise<DevicePosition[]> =>
+  deviceRepo.findAllPositions(user);

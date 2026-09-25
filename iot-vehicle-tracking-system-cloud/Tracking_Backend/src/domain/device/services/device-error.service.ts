@@ -1,44 +1,82 @@
 import { findMany } from '@/infrastructure/database/queries';
 
-interface DeviceErrorRow {
+interface DeviceErrorAlertRow {
   id: number;
-  error_code: number | null;
+  title: string | null;
   message: string | null;
-  metadata: Record<string, unknown> | null;
-  server_timestamp: Date;
+  severity: string | null;
+  status: string | null;
+  created_at: Date;
   resolved_at: Date | null;
 }
 
-const extractDtcLabel = (row: DeviceErrorRow): string | null => {
-  const dtc = row.metadata?.dtc;
-  if (typeof dtc === 'string' && dtc.trim().length > 0) {
-    return dtc.trim().toUpperCase();
-  }
+const DTC_PATTERN = /\b[PCBU][0-3][0-9A-F]{3}\b/i;
+const ECU_ALERT_FILTER_SQL = `device_id = $1
+  AND (
+    source::text IN ('ecu', 'obd')
+    OR CONCAT_WS(' ', COALESCE(title, ''), COALESCE(message, '')) ~*
+      '(^|[^a-z0-9])(obd|dtc|mil|ecu|[pcbu][0-3][0-9a-f]{3})([^a-z0-9]|$)'
+  )`;
 
-  const matchedCode = row.message?.match(/\b[PCBU][0-9A-F]{4}\b/i)?.[0];
-  return matchedCode ? matchedCode.toUpperCase() : null;
+const extractDtcCode = (title: string | null, message: string | null): string | null => {
+  const matched = `${title ?? ''} ${message ?? ''}`.match(DTC_PATTERN)?.[0];
+  return matched ? matched.toUpperCase() : null;
+};
+
+const severityToErrorCode = (severity: string | null): number => {
+  switch (String(severity ?? '').toLowerCase()) {
+    case 'critical':
+      return 500;
+    case 'high':
+      return 400;
+    case 'medium':
+      return 300;
+    case 'low':
+      return 200;
+    default:
+      return 100;
+  }
 };
 
 export const listErrors = async (deviceId: string, page = 1, limit = 20) => {
   const offset = (page - 1) * limit;
-  const rows = await findMany<DeviceErrorRow>(
-    `SELECT id, error_code, message, metadata, server_timestamp, resolved_at
-     FROM event_logs
-     WHERE device_id = $1
-       AND (error_code IS NOT NULL OR metadata ? 'dtc')
-     ORDER BY server_timestamp DESC
-     LIMIT $2 OFFSET $3`,
-    [deviceId, limit, offset],
-  );
+  const [rows, totalRows] = await Promise.all([
+    findMany<DeviceErrorAlertRow>(
+      `SELECT id, title, message, severity, status, created_at, resolved_at
+       FROM alerts
+       WHERE ${ECU_ALERT_FILTER_SQL}
+       ORDER BY created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [deviceId, limit, offset],
+    ),
+    findMany<{ total: number }>(
+      `SELECT COUNT(*)::int AS total
+       FROM alerts
+       WHERE ${ECU_ALERT_FILTER_SQL}`,
+      [deviceId],
+    ),
+  ]);
+  const total = totalRows[0]?.total ?? 0;
 
   return {
-    items: rows.map((row) => ({
-      id: row.id,
-      errorCode: row.error_code ?? 0,
-      errorName: extractDtcLabel(row) ?? `Code ${row.error_code ?? 0}`,
-      description: row.message ?? '',
-      occurredAt: row.server_timestamp.toISOString(),
-      resolvedAt: row.resolved_at?.toISOString() ?? null,
-    })),
+    items: rows.map((row) => {
+      const dtcCode = extractDtcCode(row.title, row.message);
+      return {
+        id: row.id,
+        errorCode: severityToErrorCode(row.severity),
+        errorName: dtcCode ?? row.title ?? `Alert ${row.id}`,
+        description: row.message ?? row.title ?? '',
+        severity: row.severity ?? 'medium',
+        status: row.status ?? 'active',
+        occurredAt: row.created_at.toISOString(),
+        resolvedAt: row.resolved_at?.toISOString() ?? null,
+      };
+    }),
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.max(Math.ceil(total / Math.max(limit, 1)), 1),
+    },
   };
 };

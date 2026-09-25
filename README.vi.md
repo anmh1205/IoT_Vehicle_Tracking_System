@@ -226,7 +226,7 @@ Grafana hiển thị dữ liệu từ VictoriaMetrics và VictoriaLogs.
 | `v1/{device_id}/commands` | Server -> Device | 1 | Lệnh từ xa/cập nhật cấu hình |
 
 Các trường canonical của `v1/{device_id}/rawdata.data`:
-- `vibration`, `vehicle_battery`, `device_battery`
+- `imu_accel_delta_mps2`, `vehicle_battery`, `device_battery`
 - `latitude`, `longitude`, `speed`, `course`
 - `satellites`, `ignition`, `error_code`
 
@@ -459,7 +459,7 @@ Theo tài liệu thesis draft và đồng bộ với tài sản dự án hiện 
 
 - **MCU**: ESP32-S3 làm bộ điều khiển trung tâm.
 - **Cellular + GNSS**: SIM7600CE-T (LTE + GNSS tích hợp), điều khiển qua luồng AT command.
-- **IMU**: LIS3DH cho cơ chế đánh thức theo chuyển động.
+- **IMU**: LIS3DSH cho cơ chế đánh thức theo chuyển động và telemetry gia tốc delta IMU theo đơn vị `m/s^2`.
 - **Tích hợp OBD2**: luồng BLE adapter (nhóm thiết bị vgate iCar Pro).
 
 Hành vi vận hành liên quan:

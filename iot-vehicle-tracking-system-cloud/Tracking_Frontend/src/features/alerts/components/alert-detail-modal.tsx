@@ -1,10 +1,13 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useMap } from 'react-leaflet';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { CheckCircle2, CircleCheckBig, XCircle } from 'lucide-react';
 import { EmptyState } from '@/components/common/empty-state';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
@@ -15,44 +18,22 @@ import {
 } from '@/components/ui/dialog';
 import { createDeviceMarkerIcon } from '@/features/map/components/marker-icon';
 import { hasValidMapCoordinates, MAP_LAYER_CONFIG } from '@/features/map/constants/map-config';
-import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
+import {
+  alertServices,
+  getAlertSeverityLabel,
+  getAlertStatusLabel,
+  getAlertTypeLabel,
+} from '@/lib/api/alerts';
+import { notificationUtils } from '@/lib/notification';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
+import { queryInvalidation } from '@/lib/utils/query-invalidation';
+import { formatDateTime, formatNumber, formatRelative } from '@/lib/utils/date/format';
 
 const MapContainer = dynamic(() => import('react-leaflet').then((m) => m.MapContainer), {
   ssr: false,
 });
 const TileLayer = dynamic(() => import('react-leaflet').then((m) => m.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then((m) => m.Marker), { ssr: false });
-
-const SEVERITY_LABELS: Record<string, string> = {
-  critical: 'Nghiêm trọng',
-  high: 'Cao',
-  medium: 'Trung bình',
-  low: 'Thấp',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  active: 'Đang hoạt động',
-  acknowledged: 'Đã xác nhận',
-  resolved: 'Đã giải quyết',
-  dismissed: 'Đã bỏ qua',
-};
-
-const ALERT_TYPE_LABELS: Record<string, string> = {
-  speeding: 'Vượt tốc độ',
-  geofence: 'Vùng',
-  geofence_enter: 'Vào vùng',
-  geofence_exit: 'Rời vùng',
-  zone_enter: 'Vào vùng',
-  zone_exit: 'Rời vùng',
-  zone_outside_periodic: 'Đang ở ngoài vùng',
-  offline: 'Mất kết nối',
-  device_offline: 'Mất kết nối thiết bị',
-  maintenance: 'Bảo trì',
-  maintenance_due: 'Khuyến nghị bảo trì',
-  harsh_braking: 'Phanh gấp',
-  idle_too_long: 'Dừng quá lâu',
-  other: 'Khác',
-};
 
 const stripAlertMarkup = (value: unknown, fallback: string) => {
   if (typeof value !== 'string') {
@@ -98,7 +79,7 @@ const buildAlertExplanation = (alert: any, displayMessage: string) => {
         summary: `Xe ${vehicleRef} vượt ngưỡng tốc độ trong phiên theo dõi.`,
         trigger:
           overThreshold !== null
-            ? `Tốc độ ${actualValue?.toFixed(1)} km/h, cao hơn ${overThreshold.toFixed(1)} km/h so với ngưỡng ${thresholdValue?.toFixed(1)} km/h.`
+            ? `Tốc độ ${formatNumber(actualValue)} km/h, cao hơn ${formatNumber(overThreshold)} km/h so với ngưỡng ${formatNumber(thresholdValue)} km/h.`
             : displayMessage,
         actions: [
           'Kiểm tra đoạn đường và giới hạn tốc độ tại thời điểm phát sinh.',
@@ -156,7 +137,7 @@ const buildAlertExplanation = (alert: any, displayMessage: string) => {
         summary: `Xe ${vehicleRef} đã tới ngưỡng cần bảo trì.`,
         trigger:
           actualValue !== null && thresholdValue !== null
-            ? `Chỉ số hiện tại ${actualValue.toFixed(1)} so với ngưỡng ${thresholdValue.toFixed(1)}.`
+            ? `Chỉ số hiện tại ${formatNumber(actualValue)} so với ngưỡng ${formatNumber(thresholdValue)}.`
             : displayMessage,
         actions: [
           'Tạo phiếu bảo trì theo đúng hạng mục cảnh báo.',
@@ -179,7 +160,7 @@ const buildAlertExplanation = (alert: any, displayMessage: string) => {
         summary: `Xe ${vehicleRef} dừng/đỗ vượt thời gian cho phép.`,
         trigger:
           actualValue !== null && thresholdValue !== null
-            ? `Thời gian dừng ${actualValue.toFixed(1)} phút, ngưỡng ${thresholdValue.toFixed(1)} phút.`
+            ? `Thời gian dừng ${formatNumber(actualValue)} phút, ngưỡng ${formatNumber(thresholdValue)} phút.`
             : displayMessage,
         actions: [
           'Xác minh lý do dừng lâu với tài xế hoặc điều phối.',
@@ -192,8 +173,8 @@ const buildAlertExplanation = (alert: any, displayMessage: string) => {
         summary: `Cảnh báo ${alert?.alertType ?? 'không xác định'} phát sinh từ ${sourceRef}.`,
         trigger: `Xe liên quan: ${vehicleRef}. Giá trị thực tế: ${formatMetricValue(alert?.actualValue ?? alert?.rawValue)} • Ngưỡng: ${formatMetricValue(alert?.thresholdValue)}.`,
         actions: [
-          'Mở log rule để xác định chính xác điều kiện kích hoạt.',
-          'Đối chiếu timeline bản đồ và dữ liệu telemetry cùng thời điểm.',
+          'Mở nhật ký quy tắc để xác định chính xác điều kiện kích hoạt.',
+          'Đối chiếu dòng thời gian bản đồ và telemetry cùng thời điểm.',
           'Ghi rõ nguyên nhân thực tế vào ghi chú xử lý trước khi đóng.',
         ],
       };
@@ -223,7 +204,31 @@ const AlertDetailMapSync = ({
       return undefined;
     }
 
+    const canUseMap = () => {
+      try {
+        return map.getContainer().isConnected;
+      } catch {
+        return false;
+      }
+    };
+    const safeStop = () => {
+      if (!canUseMap()) {
+        return;
+      }
+
+      try {
+        map.stop();
+      } catch {
+        // Ignore stop calls after the alert dialog begins unmounting.
+      }
+    };
+
     const syncMap = () => {
+      if (!canUseMap()) {
+        return;
+      }
+
+      safeStop();
       map.invalidateSize({ pan: false, debounceMoveend: true });
       map.setView([lat, lon], 14, { animate: false });
     };
@@ -236,6 +241,7 @@ const AlertDetailMapSync = ({
       window.cancelAnimationFrame(frame);
       window.clearTimeout(timeoutId);
       window.clearTimeout(lateTimeoutId);
+      safeStop();
     };
   }, [lat, lon, map, open]);
 
@@ -246,11 +252,58 @@ export const AlertDetailModal = ({
   open,
   onOpenChange,
   alert,
+  onActionComplete,
 }: {
   open: boolean;
   onOpenChange: (value: boolean) => void;
   alert: any | null;
+  onActionComplete?: () => void;
 }) => {
+  const queryClient = useQueryClient();
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
+
+  const ackMutation = useMutation({
+    mutationFn: (id: number) => alertServices.acknowledge(id),
+    onSuccess: () => {
+      queryInvalidation.alerts.all(queryClient);
+      notificationUtils.success('Đã xác nhận cảnh báo');
+      onActionComplete?.();
+    },
+    onError: (error: unknown) => {
+      notificationUtils.error('Xác nhận cảnh báo thất bại', getApiErrorMessage(error, 'Không thể cập nhật trạng thái.'));
+    },
+    onSettled: () => setPendingAction(null),
+  });
+
+  const resolveMutation = useMutation({
+    mutationFn: (id: number) => alertServices.resolve(id),
+    onSuccess: () => {
+      queryInvalidation.alerts.all(queryClient);
+      notificationUtils.success('Đã giải quyết cảnh báo');
+      onActionComplete?.();
+    },
+    onError: (error: unknown) => {
+      notificationUtils.error('Giải quyết cảnh báo thất bại', getApiErrorMessage(error, 'Không thể đóng cảnh báo.'));
+    },
+    onSettled: () => setPendingAction(null),
+  });
+
+  const dismissMutation = useMutation({
+    mutationFn: (id: number) => alertServices.dismiss(id),
+    onSuccess: () => {
+      queryInvalidation.alerts.all(queryClient);
+      notificationUtils.success('Đã bỏ qua cảnh báo');
+      onActionComplete?.();
+    },
+    onError: (error: unknown) => {
+      notificationUtils.error('Bỏ qua cảnh báo thất bại', getApiErrorMessage(error, 'Không thể bỏ qua cảnh báo.'));
+    },
+    onSettled: () => setPendingAction(null),
+  });
+
+  const isPending = Boolean(pendingAction);
+  const isResolved = alert?.status === 'resolved' || alert?.status === 'dismissed';
+
   const coordinates = {
     lat: Number(alert?.latitude),
     lon: Number(alert?.longitude),
@@ -281,13 +334,13 @@ export const AlertDetailModal = ({
         <DialogHeader className="shrink-0 space-y-3 border-b bg-background px-5 py-4 sm:px-6">
           <div className="flex flex-wrap gap-2">
             <Badge variant={alert?.severity === 'critical' ? 'destructive' : 'secondary'}>
-              {SEVERITY_LABELS[alert?.severity] ?? formatMetricValue(alert?.severity, 'Chưa xác định')}
+              {getAlertSeverityLabel(alert?.severity)}
             </Badge>
             <Badge variant={alert?.status === 'active' ? 'default' : 'outline'}>
-              {STATUS_LABELS[alert?.status] ?? formatMetricValue(alert?.status, 'Chưa xác định')}
+              {getAlertStatusLabel(alert?.status)}
             </Badge>
             <Badge variant="outline">
-              {ALERT_TYPE_LABELS[alert?.alertType] ?? formatMetricValue(alert?.alertType, 'Chưa xác định')}
+              {getAlertTypeLabel(alert?.alertType)}
             </Badge>
           </div>
 
@@ -295,6 +348,46 @@ export const AlertDetailModal = ({
             <DialogTitle>{displayTitle}</DialogTitle>
             <DialogDescription>{displayMessage}</DialogDescription>
           </div>
+
+          {!isResolved && alert?.id ? (
+            <div className="flex flex-wrap gap-2 border-t pt-3">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={isPending || alert?.status !== 'active'}
+                onClick={() => {
+                  setPendingAction('acknowledge');
+                  ackMutation.mutate(alert.id);
+                }}
+              >
+                <CircleCheckBig className="mr-2 h-4 w-4" />
+                {pendingAction === 'acknowledge' ? 'Đang xử lý...' : 'Xác nhận'}
+              </Button>
+              <Button
+                size="sm"
+                disabled={isPending}
+                onClick={() => {
+                  setPendingAction('resolve');
+                  resolveMutation.mutate(alert.id);
+                }}
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                {pendingAction === 'resolve' ? 'Đang xử lý...' : 'Giải quyết'}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={isPending}
+                onClick={() => {
+                  setPendingAction('dismiss');
+                  dismissMutation.mutate(alert.id);
+                }}
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                {pendingAction === 'dismiss' ? 'Đang xử lý...' : 'Bỏ qua'}
+              </Button>
+            </div>
+          ) : null}
         </DialogHeader>
 
         <div className="min-h-0 flex-1 overflow-hidden px-5 py-4 sm:px-6">
@@ -312,7 +405,10 @@ export const AlertDetailModal = ({
                     }
                   />
                   <InfoRow label="Giá trị thực tế" value={formatMetricValue(alert?.actualValue)} />
-                  <InfoRow label="Ngưỡng cảnh báo" value={formatMetricValue(alert?.thresholdValue)} />
+                  <InfoRow
+                    label="Ngưỡng cảnh báo"
+                    value={formatMetricValue(alert?.thresholdValue)}
+                  />
                 </CardContent>
               </Card>
 
@@ -321,17 +417,39 @@ export const AlertDetailModal = ({
                   <CardTitle className="text-base">Thông tin cảnh báo</CardTitle>
                 </CardHeader>
                 <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  <InfoRow label="Phương tiện" value={alert?.vehiclePlate ?? alert?.vehicleId ?? 'Chưa liên kết'} />
-                  <InfoRow label="Thiết bị" value={alert?.deviceName ?? alert?.deviceId ?? 'Chưa liên kết'} />
-                  <InfoRow label="Khách hàng" value={alert?.customerName ?? 'Chưa có thông tin khách hàng'} />
-                  <InfoRow label="Chuyến đi" value={alert?.tripId ? String(alert.tripId) : 'Không gắn chuyến đi'} />
+                  <InfoRow
+                    label="Phương tiện"
+                    value={alert?.vehiclePlate ?? alert?.vehicleId ?? 'Chưa liên kết'}
+                  />
+                  <InfoRow
+                    label="Thiết bị"
+                    value={alert?.deviceName ?? alert?.deviceId ?? 'Chưa liên kết'}
+                  />
+                  <InfoRow
+                    label="Khách hàng"
+                    value={alert?.customerName ?? 'Chưa có thông tin khách hàng'}
+                  />
+                  <InfoRow
+                    label="Chuyến đi"
+                    value={
+                      alert?.tripCode ??
+                      (alert?.tripId ? String(alert.tripId) : 'Không gắn chuyến đi')
+                    }
+                  />
                   <InfoRow
                     label="Vùng"
-                    value={alert?.geofenceName ?? (alert?.geofenceId ? String(alert.geofenceId) : 'Không gắn vùng')}
+                    value={
+                      alert?.geofenceName ??
+                      (alert?.geofenceId ? String(alert.geofenceId) : 'Không gắn vùng')
+                    }
                   />
                   <InfoRow
                     label="Tốc độ lúc cảnh báo"
-                    value={alert?.speed !== null && alert?.speed !== undefined ? `${alert.speed} km/h` : 'Chưa có'}
+                    value={
+                      alert?.speed !== null && alert?.speed !== undefined
+                        ? `${formatNumber(alert.speed)} km/h`
+                        : 'Chưa có'
+                    }
                   />
                 </CardContent>
               </Card>
@@ -391,6 +509,9 @@ export const AlertDetailModal = ({
                         center={[coordinates.lat, coordinates.lon]}
                         zoom={14}
                         className="h-full w-full"
+                        zoomAnimation={false}
+                        fadeAnimation={false}
+                        markerZoomAnimation={false}
                       >
                         <AlertDetailMapSync lat={coordinates.lat} lon={coordinates.lon} open={open} />
                         <TileLayer
@@ -418,7 +539,9 @@ export const AlertDetailModal = ({
                 <CardContent className="grid gap-3">
                   <div className="rounded-xl border bg-muted/20 px-4 py-3">
                     <p className="text-sm font-semibold">Tạo cảnh báo</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{formatDateTime(alert?.createdAt)}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {formatDateTime(alert?.createdAt)}
+                    </p>
                   </div>
                   <div className="rounded-xl border bg-muted/20 px-4 py-3">
                     <p className="text-sm font-semibold">Xác nhận</p>
@@ -448,7 +571,7 @@ export const AlertDetailModal = ({
                   <InfoRow label="ID cảnh báo" value={formatMetricValue(alert?.id)} />
                   <InfoRow
                     label="Mức nghiêm trọng"
-                    value={SEVERITY_LABELS[alert?.severity] ?? formatMetricValue(alert?.severity)}
+                    value={getAlertSeverityLabel(alert?.severity, formatMetricValue(alert?.severity))}
                   />
                   <InfoRow
                     label="Nguồn phản ứng"

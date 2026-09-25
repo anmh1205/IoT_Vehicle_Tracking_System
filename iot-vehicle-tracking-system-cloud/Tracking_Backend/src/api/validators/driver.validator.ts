@@ -1,5 +1,12 @@
 import { z } from 'zod';
 
+const nullableString = (max: number) => z.string().max(max).nullable().optional();
+const nullableDateString = z.string().nullable().optional();
+const nullableEmail = z
+  .union([z.string().email('Invalid email address').max(100), z.literal(''), z.null()])
+  .optional();
+const nullableUrl = z.union([z.string().url(), z.literal(''), z.null()]).optional();
+
 export const createDriverSchema = z.object({
   driverCode: z
     .string()
@@ -25,7 +32,17 @@ export const createDriverSchema = z.object({
   notes: z.string().max(500).optional(),
 });
 
-export const updateDriverSchema = createDriverSchema.partial();
+export const updateDriverSchema = createDriverSchema.partial().extend({
+  phone: nullableString(20),
+  email: nullableEmail,
+  licenseNumber: nullableString(50),
+  licenseType: nullableString(20),
+  licenseExpiry: nullableDateString,
+  dateOfBirth: nullableDateString,
+  address: z.string().nullable().optional(),
+  avatarUrl: nullableUrl,
+  notes: nullableString(500),
+});
 
 export const driverListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

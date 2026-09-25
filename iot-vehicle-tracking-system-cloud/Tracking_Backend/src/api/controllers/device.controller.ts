@@ -7,6 +7,7 @@ import {
   createDeviceSchema,
   updateDeviceSchema,
   deviceListQuerySchema,
+  sendDeviceCommandSchema,
 } from '@/api/validators/device.validator';
 import * as deviceCrudService from '@/domain/device/services/device-crud.service';
 import * as deviceListService from '@/domain/device/services/device-list.service';
@@ -34,7 +35,7 @@ export const listDevices = asyncHandler(async (req: AuthenticatedRequest, res: R
     throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
   }
 
-  const result = await deviceListService.listDevices(parsed.data);
+  const result = await deviceListService.listDevices(parsed.data, req.user);
   sendOk(res, result);
 });
 
@@ -99,8 +100,8 @@ export const getRuntimeStats = asyncHandler(async (req: AuthenticatedRequest, re
 });
 
 export const getDevicePositions = asyncHandler(
-  async (_req: AuthenticatedRequest, res: Response) => {
-    const positions = await deviceListService.getDevicePositions();
+  async (req: AuthenticatedRequest, res: Response) => {
+    const positions = await deviceListService.getDevicePositions(req.user);
     sendOk(res, positions);
   },
 );
@@ -117,7 +118,7 @@ export const regenerateToken = asyncHandler(async (req: AuthenticatedRequest, re
 
 export const getTelemetry = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const deviceId = await resolveDeviceId(req.params.id);
-  const metric = (req.query.metric as string | undefined) ?? 'vibration';
+  const metric = (req.query.metric as string | undefined) ?? 'imuAccelDeltaMps2';
   const from = req.query.from as string | undefined;
   const to = req.query.to as string | undefined;
 
@@ -125,18 +126,30 @@ export const getTelemetry = asyncHandler(async (req: AuthenticatedRequest, res: 
   sendOk(res, data);
 });
 
+export const getSessionTelemetry = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const deviceId = await resolveDeviceId(req.params.id);
+  const sessionId = Number.parseInt(req.params.sessionId, 10);
+  if (Number.isNaN(sessionId)) {
+    throw createValidationError('Invalid session ID');
+  }
+
+  const data = await deviceTelemetryService.getSessionTelemetry(deviceId, sessionId);
+  sendOk(res, data);
+});
+
 export const sendCommand = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const deviceId = await resolveDeviceId(req.params.id);
-  const command = req.body?.command as string | undefined;
-  const params = (req.body?.params as Record<string, unknown> | undefined) ?? {};
-
-  if (!command) {
-    throw createValidationError('Missing command');
+  const parsed = sendDeviceCommandSchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw createValidationError('Invalid command payload', parsed.error.flatten().fieldErrors);
   }
 
   const result = await deviceCommandService.sendCommand(
     deviceId,
-    { command, params },
+    {
+      command: parsed.data.command,
+      params: (parsed.data.params as Record<string, unknown> | undefined) ?? {},
+    },
     { actorUserId: req.user?.id, correlationId: req.correlationId },
   );
   sendOk(res, result);

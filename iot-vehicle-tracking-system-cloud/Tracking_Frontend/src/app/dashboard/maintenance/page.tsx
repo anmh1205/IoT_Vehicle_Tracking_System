@@ -7,6 +7,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { CalendarClock, CircleCheckBig, CircleOff, Plus, Wrench } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { StatCard } from '@/components/common/stat-card';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +33,7 @@ import { formatDateTime, formatNumber } from '@/lib/utils/date/format';
 import { MaintenanceCalendar } from '@/features/maintenance/components/maintenance-calendar';
 import { MaintenanceForm } from '@/features/maintenance/components/maintenance-form';
 import { MileageForecaster } from '@/features/maintenance/components/mileage-forecaster';
+import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
 import {
   MAINTENANCE_STATUS_BADGE_VARIANTS,
   MAINTENANCE_STATUS_LABELS,
@@ -95,23 +97,22 @@ const MaintenancePage = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [createDefaults, setCreateDefaults] = useState<Record<string, string> | undefined>(undefined);
   const [filters, setFilters] = useState({
-    page: 1,
     status: 'all',
     maintenanceType: 'all',
     vehicleId: '',
   });
 
-  const queryParams = {
-    page: filters.page,
-    limit: PAGE_SIZE,
-    status: filters.status === 'all' ? undefined : filters.status,
-    maintenanceType: filters.maintenanceType === 'all' ? undefined : filters.maintenanceType,
-    vehicleId: filters.vehicleId.trim() || undefined,
-  };
-
-  const maint = useQuery({
-    queryKey: ['maintenance', queryParams],
-    queryFn: () => maintenanceServices.getList(queryParams),
+  const maint = useInfiniteListQuery<any>({
+    queryKey: ['maintenance', filters.status, filters.maintenanceType, filters.vehicleId.trim()],
+    pageSize: PAGE_SIZE,
+    queryFn: ({ page, limit }) =>
+      maintenanceServices.getList({
+        page,
+        limit,
+        status: filters.status === 'all' ? undefined : filters.status,
+        maintenanceType: filters.maintenanceType === 'all' ? undefined : filters.maintenanceType,
+        vehicleId: filters.vehicleId.trim() || undefined,
+      }),
   });
 
   const vehiclesQuery = useQuery({
@@ -153,7 +154,7 @@ const MaintenancePage = () => {
         page: 1,
         limit: 30,
         status: 'active',
-        alertType: 'maintenance_due',
+        source: 'obd',
       }),
   });
 
@@ -202,7 +203,7 @@ const MaintenancePage = () => {
     },
   });
 
-  const rows = useMemo(() => maint.data?.items ?? maint.data?.data?.items ?? [], [maint.data]);
+  const rows = maint.items;
   const vehicles = useMemo<MaintenanceVehicleContext[]>(
     () => (vehiclesQuery.data?.items ?? vehiclesQuery.data?.data?.items ?? []) as MaintenanceVehicleContext[],
     [vehiclesQuery.data],
@@ -212,13 +213,6 @@ const MaintenancePage = () => {
       (customersQuery.data?.items ?? customersQuery.data?.data?.items ?? []) as MaintenanceCustomerContext[],
     [customersQuery.data],
   );
-  const pagination = maint.data?.pagination ?? {
-    page: filters.page,
-    limit: PAGE_SIZE,
-    total: rows.length,
-    totalPages: 1,
-  };
-
   const vehicleById = useMemo(
     () => new Map(vehicles.map((vehicle) => [String(vehicle.vehicleId), vehicle])),
     [vehicles],
@@ -509,7 +503,7 @@ const MaintenancePage = () => {
                 id="maintenance-vehicle"
                 value={filters.vehicleId}
                 onChange={(event) =>
-                  setFilters((prev) => ({ ...prev, page: 1, vehicleId: event.target.value }))
+                  setFilters((prev) => ({ ...prev, vehicleId: event.target.value }))
                 }
                 placeholder="Nhập mã xe"
               />
@@ -518,7 +512,7 @@ const MaintenancePage = () => {
               <Label>Trạng thái</Label>
               <Select
                 value={filters.status}
-                onValueChange={(value) => setFilters((prev) => ({ ...prev, page: 1, status: value }))}
+                onValueChange={(value) => setFilters((prev) => ({ ...prev, status: value }))}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -537,7 +531,7 @@ const MaintenancePage = () => {
               <Select
                 value={filters.maintenanceType}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, page: 1, maintenanceType: value }))
+                  setFilters((prev) => ({ ...prev, maintenanceType: value }))
                 }
               >
                 <SelectTrigger className="w-full">
@@ -559,7 +553,6 @@ const MaintenancePage = () => {
                 className="w-full"
                 onClick={() =>
                   setFilters({
-                    page: 1,
                     status: 'all',
                     maintenanceType: 'all',
                     vehicleId: '',
@@ -771,37 +764,22 @@ const MaintenancePage = () => {
             <DataTable
               columns={columns}
               data={tableRows}
+              pagination={false}
               searchKey="vehicleSearch"
               searchPlaceholder="Tìm xe, biển số, thiết bị hoặc khách hàng..."
               isLoading={maint.isLoading}
               onRowClick={(row) => router.push(`/dashboard/attention/maintenance/${row.id}`)}
             />
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-muted-foreground">
-              Trang {pagination.page} / {pagination.totalPages || 1} • {pagination.total} lịch bảo trì
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 sm:flex-none"
-                onClick={() => setFilters((prev) => ({ ...prev, page: prev.page - 1 }))}
-                disabled={pagination.page <= 1 || maint.isFetching}
-              >
-                Trang trước
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 sm:flex-none"
-                onClick={() => setFilters((prev) => ({ ...prev, page: prev.page + 1 }))}
-                disabled={pagination.page >= (pagination.totalPages || 1) || maint.isFetching}
-              >
-                Trang sau
-              </Button>
-            </div>
-          </div>
+
+          <InfiniteScrollTrigger
+            hasMore={maint.hasMore}
+            isLoadingMore={maint.isFetchingNextPage}
+            onLoadMore={maint.loadMore}
+            loadedCount={maint.loadedCount}
+            totalCount={maint.total}
+            itemLabel="lịch bảo trì"
+          />
         </TabsContent>
 
         <TabsContent value="calendar">

@@ -1,11 +1,15 @@
 'use client';
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
-import { DeviceDetailModalProvider } from './modal-context';
-import { DeviceDetailDialogBody } from './dialog-body';
-import { DeviceWorkspaceShell } from './workspace-shell';
-import type { DeviceDetailModalPresentation, DeviceWorkspaceActions, DeviceWorkspaceFallbackPaths } from './workspace-types';
 import type { MapInspectPanelPayload, MapInspectPanelTarget } from '@/features/map/types';
+import { DeviceDetailDialogBody } from './dialog-body';
+import { DeviceDetailModalProvider } from './modal-context';
+import { DeviceWorkspaceShell } from './workspace-shell';
+import type {
+  DeviceDetailModalPresentation,
+  DeviceWorkspaceActions,
+  DeviceWorkspaceFallbackPaths,
+} from './workspace-types';
 
 export const DeviceDetailModal = ({
   open,
@@ -33,7 +37,14 @@ export const DeviceDetailModal = ({
       <DeviceDetailModalProvider value={context}>
         {presentation === 'workspace' ? (
           <DeviceWorkspaceShell
-            fallbackPaths={fallbackPaths ?? { alertsPath: null, deviceDetailPath: null, geofencesPath: '/dashboard/zones', vehicleDetailPath: null }}
+            fallbackPaths={
+              fallbackPaths ?? {
+                alertsPath: null,
+                deviceDetailPath: null,
+                geofencesPath: '/dashboard/zones',
+                vehicleDetailPath: null,
+              }
+            }
             launchPayload={launchPayload}
             launchRequestKey={launchRequestKey}
             launchTarget={launchTarget}

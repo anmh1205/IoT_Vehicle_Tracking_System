@@ -52,6 +52,10 @@ export const MapControls = ({
         return;
       }
 
+      if (followModeEnabled) {
+        return;
+      }
+
       const center = map.getCenter();
       const zoom = map.getZoom();
 
@@ -72,7 +76,7 @@ export const MapControls = ({
       window.clearTimeout(enableSyncTimer);
       map.off('moveend', syncViewport);
     };
-  }, [map, setMapViewport]);
+  }, [followModeEnabled, map, setMapViewport]);
 
   const fitAllBounds = () => {
     if (devices.length === 0) {
@@ -111,7 +115,7 @@ export const MapControls = ({
   };
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[920]">
+    <div className="pointer-events-none absolute inset-0 z-[var(--layer-map-overlay)]">
       <div className="pointer-events-auto absolute right-3 top-3 flex flex-col items-end gap-2 md:right-[var(--map-controls-right)]" style={desktopOffsetStyle}>
         <div className="flex items-center gap-2 rounded-2xl border border-border/70 bg-background/95 p-1.5 shadow-lg backdrop-blur">
           <MapLayerSwitcher />
@@ -137,7 +141,7 @@ export const MapControls = ({
               className="h-8 w-8 rounded-xl"
               aria-pressed={isZoneEditMode}
               aria-label={
-                isZoneEditMode ? 'Đóng panel vùng' : 'Mở panel vùng'
+                isZoneEditMode ? 'Đóng khung vùng' : 'Mở khung vùng'
               }
               title="Vùng"
             >

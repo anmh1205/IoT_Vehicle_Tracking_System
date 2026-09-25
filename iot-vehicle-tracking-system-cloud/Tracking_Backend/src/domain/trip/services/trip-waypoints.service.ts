@@ -56,15 +56,15 @@ const getEventLogWaypoints = async (
   const rows = await findMany<EventLogWaypointRow>(
     `SELECT
         server_timestamp,
-        COALESCE(context->>'latitude', metadata->>'latitude') AS lat,
-        COALESCE(context->>'longitude', metadata->>'longitude') AS lon,
-        COALESCE(context->>'speed', metadata->>'speed') AS speed,
-        COALESCE(context->>'course', metadata->>'course') AS course
+        COALESCE(context#>>'{raw_payload,data,latitude}', context->>'latitude', metadata->>'latitude') AS lat,
+        COALESCE(context#>>'{raw_payload,data,longitude}', context->>'longitude', metadata->>'longitude') AS lon,
+        COALESCE(context#>>'{raw_payload,data,speed}', context->>'speed', metadata->>'speed') AS speed,
+        COALESCE(context#>>'{raw_payload,data,course}', context->>'course', metadata->>'course') AS course
      FROM event_logs
      WHERE device_id = $1
        AND server_timestamp BETWEEN $2 AND $3
-       AND (context ? 'latitude' OR metadata ? 'latitude')
-       AND (context ? 'longitude' OR metadata ? 'longitude')
+       AND ((context#>>'{raw_payload,data,latitude}') IS NOT NULL OR context ? 'latitude' OR metadata ? 'latitude')
+       AND ((context#>>'{raw_payload,data,longitude}') IS NOT NULL OR context ? 'longitude' OR metadata ? 'longitude')
      ORDER BY server_timestamp ASC
      LIMIT 5000`,
     [deviceId, startTime.toISOString(), endTime.toISOString()],

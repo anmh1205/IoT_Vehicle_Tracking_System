@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Device } from '@/features/devices/types';
 import type { FirmwareDeployment } from '@/lib/api/firmware';
 import {
+  DEVICE_STATUS_LABELS,
   formatDateTime,
   getDeploymentBadgeVariant,
   getDeploymentStatusLabel,
@@ -75,7 +76,7 @@ export const FirmwareDeploymentHistory = ({
           <div className="flex flex-wrap gap-2 text-xs">
             <Badge variant="outline">Tổng {deployments.length}</Badge>
             <Badge variant="outline">Thành công {successCount}</Badge>
-            <Badge variant="outline">Đang chạy {activeCount}</Badge>
+            <Badge variant="outline">Đang triển khai {activeCount}</Badge>
             <Badge variant={failedCount > 0 ? 'destructive' : 'outline'}>Lỗi {failedCount}</Badge>
           </div>
         </div>
@@ -114,6 +115,9 @@ export const FirmwareDeploymentHistory = ({
               const device = deviceById.get(item.deviceId);
               const deviceLabel = device?.deviceName ?? item.deviceId;
               const sourceLabel = [device?.vehiclePlate, item.deviceId].filter(Boolean).join(' • ');
+              const connectivityLabel = device?.currentStatus
+                ? DEVICE_STATUS_LABELS[device.currentStatus]
+                : 'Chưa rõ';
               const statusTone =
                 displayStatus === 'failed' || displayStatus === 'stuck_timeout'
                   ? 'text-rose-600'
@@ -140,16 +144,16 @@ export const FirmwareDeploymentHistory = ({
                     <div className="space-y-3">
                       <div className="grid gap-2 sm:grid-cols-2">
                         <div className="rounded-lg border bg-muted/20 p-3 text-xs">
-                          <p className="text-muted-foreground">Luồng version</p>
+                          <p className="text-muted-foreground">Luồng phiên bản</p>
                           <p className="mt-1 font-medium">
                             {getFirmwareDisplayVersion(item.currentVersion)} →{' '}
                             {getFirmwareDisplayVersion(item.targetVersion)}
                           </p>
                         </div>
                         <div className="rounded-lg border bg-muted/20 p-3 text-xs">
-                          <p className="text-muted-foreground">Job / boot</p>
+                          <p className="text-muted-foreground">Tác vụ / lần khởi động</p>
                           <p className="mt-1 font-medium">
-                            {item.jobId ?? 'Chưa có job'} • {item.lastBootId ?? '--'}
+                            {item.jobId ?? 'Chưa có tác vụ'} • {item.lastBootId ?? '--'}
                           </p>
                         </div>
                       </div>
@@ -177,7 +181,7 @@ export const FirmwareDeploymentHistory = ({
                       <div className="space-y-1 text-muted-foreground">
                         <p className="inline-flex items-center gap-1.5">
                           <Smartphone className="h-3.5 w-3.5" />
-                          Thiết bị: {device?.currentStatus ?? 'Chưa rõ'}
+                          Kết nối thiết bị: {connectivityLabel}
                         </p>
                         <p className="inline-flex items-center gap-1.5">
                           <RadioTower className="h-3.5 w-3.5" />

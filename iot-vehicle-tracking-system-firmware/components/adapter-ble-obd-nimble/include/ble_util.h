@@ -5,7 +5,12 @@
 /**
  * @file ble_util.h
  * @brief Utility helpers for BLE address conversion.
+ * This header belongs to the BLE OBD NimBLE adapter layer and exposes the adapter boundary so higher layers do not depend on hardware- or transport-private details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /** @brief String length for BLE MAC `AA:BB:CC:DD:EE:FF` including null terminator. */
 #define BLE_ADDR_STR_LEN 18

@@ -1,4 +1,4 @@
-import type { DeviceTelemetryRow } from '@/features/devices/types';
+import type { DeviceSession, DeviceTelemetryRow } from '@/features/devices/types';
 
 export interface RouteReplayPoint extends DeviceTelemetryRow {
   latitude: number;
@@ -15,6 +15,37 @@ const parseTimestamp = (value: string | null | undefined): number | null => {
 
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? timestamp : null;
+};
+
+const SESSION_WINDOW_TOLERANCE_MS = 2 * 1000;
+
+export const filterTelemetryRowsBySession = (
+  rows: DeviceTelemetryRow[],
+  session: DeviceSession | null,
+): DeviceTelemetryRow[] => {
+  if (!session) {
+    return [];
+  }
+
+  const start = parseTimestamp(session.sessionStart) ?? parseTimestamp(session.serverSessionStart);
+  const end = parseTimestamp(session.sessionEnd) ?? parseTimestamp(session.serverSessionEnd);
+
+  if (start === null) {
+    return [];
+  }
+
+  return rows.filter((row) => {
+    const timestamp = parseTimestamp(row.timestamp);
+    if (timestamp === null || timestamp < start - SESSION_WINDOW_TOLERANCE_MS) {
+      return false;
+    }
+
+    if (end !== null && timestamp > end + SESSION_WINDOW_TOLERANCE_MS) {
+      return false;
+    }
+
+    return true;
+  });
 };
 
 export const hasValidTelemetryCoordinates = (
@@ -99,6 +130,14 @@ export const selectLatestContiguousRouteRows = (
   segments.push(activeSegment);
   return [...segments].reverse().find((segment) => segment.length > 1) ?? activeSegment;
 };
+
+export const countRouteReplayPointsForSession = (
+  rowsAscending: DeviceTelemetryRow[],
+  session: DeviceSession | null,
+): number =>
+  buildRouteReplayPoints(
+    selectLatestContiguousRouteRows(filterTelemetryRowsBySession(rowsAscending, session)),
+  ).length;
 
 export const getObservedCadenceSeconds = (
   rows: DeviceTelemetryRow[],

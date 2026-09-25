@@ -30,6 +30,7 @@ export interface VehicleZoneRow extends QueryResultRow {
 
 export interface VehicleZoneVehicleSummaryRow extends VehicleZoneRow {
   vehicle_record_id: number;
+  summary_vehicle_id: string;
   plate_number: string | null;
   customer_name: string | null;
   device_id: string | null;
@@ -85,15 +86,40 @@ const VEHICLE_ZONE_COLUMNS = `id,
   created_at,
   updated_at`;
 
+const VEHICLE_ZONE_COLUMNS_FROM_ALIAS = `vz.id AS id,
+  vz.vehicle_id AS vehicle_id,
+  vz.zone_type AS zone_type,
+  vz.center_lat::double precision AS center_lat,
+  vz.center_lon::double precision AS center_lon,
+  vz.radius_m::double precision AS radius_m,
+  vz.center_source AS center_source,
+  vz.center_snapshot_at AS center_snapshot_at,
+  vz.boundary_selection_json AS boundary_selection_json,
+  vz.geometry_json AS geometry_json,
+  vz.status AS status,
+  vz.membership_state AS membership_state,
+  vz.last_membership_changed_at AS last_membership_changed_at,
+  vz.last_alerted_type AS last_alerted_type,
+  vz.last_alerted_at AS last_alerted_at,
+  vz.suppression_until AS suppression_until,
+  vz.alert_mode AS alert_mode,
+  vz.cooldown_sec AS cooldown_sec,
+  vz.warning_json AS warning_json,
+  vz.created_by AS created_by,
+  vz.updated_by AS updated_by,
+  vz.created_at AS created_at,
+  vz.updated_at AS updated_at`;
+
 export const listVehiclesWithZoneSummary = async (): Promise<VehicleZoneVehicleSummaryRow[]> =>
   findMany<VehicleZoneVehicleSummaryRow>(
     `SELECT
        v.id AS vehicle_record_id,
+       v.vehicle_id AS summary_vehicle_id,
        v.plate_number,
        c.name AS customer_name,
        v.device_id,
        v.status::text AS vehicle_status,
-       ${VEHICLE_ZONE_COLUMNS}
+       ${VEHICLE_ZONE_COLUMNS_FROM_ALIAS}
      FROM vehicles v
      LEFT JOIN customers c ON c.id = v.customer_id
      LEFT JOIN vehicle_zones vz ON vz.vehicle_id = v.vehicle_id AND vz.status = 'active'
@@ -195,8 +221,8 @@ export const getVehiclePositionSnapshot = async (
        v.vehicle_id,
        v.plate_number,
        v.device_id,
-       d.latitude,
-       d.longitude,
+       COALESCE(d.last_latitude, d.latitude)::double precision AS latitude,
+       COALESCE(d.last_longitude, d.longitude)::double precision AS longitude,
        d.last_seen_at
      FROM vehicles v
      LEFT JOIN devices d ON d.device_id = v.device_id

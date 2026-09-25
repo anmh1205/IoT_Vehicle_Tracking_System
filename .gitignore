@@ -34,11 +34,12 @@
 
 /iot-vehicle-tracking-system-firmware/build
 /.agents
-/iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/History
-/iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/Project Logs for iot-vehicle-tracking-system-main
-/iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/Library/IP5310/History
-/iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/__Previews
-/iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/Library/SIM7600CE/SIM7600CE/History
+/iot-vehicle-tracking-system-hardware/iot-vehicle-tracking-system-main/History
+/iot-vehicle-tracking-system-hardware/iot-vehicle-tracking-system-main/Project Logs for iot-vehicle-tracking-system-main
+/iot-vehicle-tracking-system-hardware/iot-vehicle-tracking-system-main/Library/IP5310/History
+/iot-vehicle-tracking-system-hardware/iot-vehicle-tracking-system-main/__Previews
+/iot-vehicle-tracking-system-hardware/iot-vehicle-tracking-system-main/Library/SIM7600CE/SIM7600CE/History
+/iot-vehicle-tracking-system-hardware/iot-vehicle-tracking-system-main/Library/Altium_MEHT_BASIC_COMPONENTS
 .claude/hooks/.logs/hook-log.jsonl
 .claude/worktrees/
 
@@ -64,3 +65,47 @@ logs/security/
 .codex/skills/vps-control/keys/
 .playwright-mcp/
 resources/reports/db-sync/**/*.sql
+/iot-vehicle-tracking-system-cloud/Tracking_Backend/coverage
+/.playwright-cli
+
+# Private keys committed by accident — untracked, keep local (rotate on server)
+.claude/skills/esp32-loop-coding/remote/key/id_ed25519_anmh1
+.claude/skills/vps-control/keys/id_ed25519_vps_control
+.codex/skills/esp32-loop-coding/remote/key/id_ed25519_anmh1
+.codex/skills/vps-control/keys/id_ed25519_vps_control
+.codex/vps-control/keys/id_ed25519_vps_control
+
+# ESP-IDF generated sdkconfig with device secrets — untracked, keep local
+iot-vehicle-tracking-system-firmware/sdkconfig
+iot-vehicle-tracking-system-firmware/sdkconfig.old
+
+
+# P1-P4 temp (regenerable intermediates — never commit)
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage*
+**/coverage/
+.venv/
+.vite/
+*.log
+*.tmp
+*.bak
+/output/
+**/.playwright-cli/
+repomix-output.xml
+repomix-output*/
+# LaTeX intermediates
+*.aux
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.xdv
+*.dvi
+*.synctex.gz
+~WRL*.tmp
+~$*
+# Firmware IDE-local
+iot-vehicle-tracking-system-firmware/.vscode/

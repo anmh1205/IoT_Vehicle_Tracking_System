@@ -9,7 +9,7 @@ import {
 import { verifyDeviceToken } from '../services/device-auth.service';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
-import { publishToDevice } from '../mqtt/client';
+import { publishSessionAssignment } from '../publishers/session-assignment.publisher';
 import {
   clearSession,
   getStatus,
@@ -17,43 +17,21 @@ import {
   setStatus,
 } from '../cache/device-state.cache';
 import { logger } from '../infrastructure/logger';
-import { normalizePayloadTimestamp } from '../utils/timestamp.util';
+import { maxTimestampMs, normalizePayloadTimestamp, parseIsoTimestampMs } from '../utils/timestamp.util';
+import { resolveLocalSessionKey } from '../utils/session-identity.util';
 import { normalizeRuntimeState } from '../types/device-state.types';
+import {
+  canUseRunningStatusForSession,
+  hasAuthoritativeSessionIdentity,
+  normalizeStatusForSessionRuntime,
+  shouldAcceptLiveMutation,
+} from '../utils/session-runtime.util';
 
 const toCachedStatus = (status: StatusPayload['status']): 'running' | 'stopped' | 'online' => {
   return status === 'heartbeat' ? 'online' : status;
 };
 
 const SESSION_FALLBACK_BOUNDARY_SOURCE = 'bridge_fallback';
-
-const publishAssignSession = (params: {
-  deviceId: string;
-  localSessionKey?: number;
-  canonicalSessionId: string;
-  bootId?: string;
-}): void => {
-  if (!params.localSessionKey || !params.bootId) {
-    logger.warn(
-      {
-        deviceId: params.deviceId,
-        localSessionKey: params.localSessionKey,
-        bootId: params.bootId,
-        canonicalSessionId: params.canonicalSessionId,
-      },
-      'Skipped assign_session publish because firmware session identity is incomplete',
-    );
-    return;
-  }
-
-  publishToDevice(params.deviceId, 'commands', {
-    command: 'assign_session',
-    params: {
-      local_session_key: params.localSessionKey,
-      canonical_session_id: params.canonicalSessionId,
-      boot_id: params.bootId,
-    },
-  });
-};
 
 export const handleStatus = async (
   deviceIdFromTopic: string,
@@ -63,14 +41,14 @@ export const handleStatus = async (
   try {
     parsed = JSON.parse(message.toString());
   } catch {
-    logger.warn(`Invalid JSON status from device ${deviceIdFromTopic}`);
+    logger.warn({ deviceId: deviceIdFromTopic, event: 'status_payload_invalid_json' }, 'Invalid status payload');
     return;
   }
 
   const result = statusSchema.safeParse(parsed);
   if (!result.success) {
     logger.warn(
-      { deviceId: deviceIdFromTopic, issues: result.error.issues },
+      { deviceId: deviceIdFromTopic, issues: result.error.issues, event: 'status_payload_validation_failed' },
       'Invalid status payload',
     );
     return;
@@ -83,20 +61,24 @@ export const handleStatus = async (
   const seqNo = payload.metadata?.seq_no;
   const metadataBootId = payload.metadata?.boot_id;
   const sessionBootId = payload.boot_id ?? metadataBootId;
-  const localSessionKey = payload.local_session_key ?? payload.session_id;
+  const localSessionKey = resolveLocalSessionKey(
+    payload.local_session_key,
+    payload.session_id,
+  );
   const payloadCanonicalSessionId = payload.canonical_session_id ?? null;
-  const boundaryEvent = payload.boundary_event ?? 'none';
+  const reportedBoundaryEvent = payload.boundary_event ?? 'none';
 
   if (payload.device_id !== deviceIdFromTopic) {
     logger.warn(
-      `Device ID mismatch: topic=${deviceIdFromTopic}, payload=${payload.device_id}`,
+      { topicDeviceId: deviceIdFromTopic, payloadDeviceId: payload.device_id, event: 'status_device_id_mismatch' },
+      'Status device id mismatch',
     );
     return;
   }
 
   const device = await verifyDeviceToken(payload.device_id, payload.auth_token);
   if (!device) {
-    logger.warn(`Auth failed for device ${payload.device_id}`);
+    logger.warn({ deviceId: payload.device_id, event: 'device_auth_failed' }, 'Device auth failed');
     return;
   }
 
@@ -108,11 +90,57 @@ export const handleStatus = async (
     legacyStatus: payload.status,
     previous: previousState?.runtimeState,
   });
+  const hasAuthoritativeIdentity = hasAuthoritativeSessionIdentity({
+    localSessionKey,
+    canonicalSessionId: payloadCanonicalSessionId,
+    bootId: sessionBootId,
+  });
+  let boundaryEvent = reportedBoundaryEvent;
+  if (reportedBoundaryEvent === 'started' && !hasAuthoritativeIdentity) {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        localSessionKey,
+        canonicalSessionId: payloadCanonicalSessionId,
+        bootId: sessionBootId,
+        messageId,
+        event: 'status_boundary_started_degraded',
+        reason: 'missing_authoritative_session_identity',
+      },
+      'Started boundary degraded to status update',
+    );
+    boundaryEvent = 'none';
+  }
+  const effectiveCachedStatus = normalizeStatusForSessionRuntime({
+    cachedStatus,
+    runtimeState,
+    hasAuthoritativeIdentity,
+  });
+  const canStartSessionFromStatus = canUseRunningStatusForSession({
+    cachedStatus,
+    runtimeState,
+    hasAuthoritativeIdentity,
+  });
   const stateUpdatedAt = new Date(receivedAtMs).toISOString();
   const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
     payload.timestamp,
     payload.metadata?.sent_at,
   );
+  const persistedWatermarkMs = maxTimestampMs(
+    parseIsoTimestampMs(device.last_seen_at),
+    parseIsoTimestampMs(device.state_updated_at),
+  );
+  const liveMutationDecision = shouldAcceptLiveMutation({
+    incomingTimestampMs: timestampMs,
+    incomingSeqNo: seqNo,
+    incomingBootId: sessionBootId,
+    incomingLocalSessionKey: localSessionKey,
+    cachedLastPayloadTimestampMs: previousState?.lastPayloadTimestampMs ?? null,
+    cachedLastSeqNo: previousState?.lastSeqNo ?? null,
+    cachedBootId: previousState?.bootId ?? null,
+    cachedLocalSessionKey: previousState?.localSessionKey ?? null,
+    persistedWatermarkMs,
+  });
 
   if (timestampSource !== 'payload') {
     logger.warn(
@@ -122,9 +150,29 @@ export const handleStatus = async (
         metadataSentAt: payload.metadata?.sent_at,
         normalizedTimestampMs: timestampMs,
         timestampSource,
+        event: 'status_timestamp_normalized',
       },
-      'Normalized invalid status timestamp before publishing realtime events',
+      'Status timestamp normalized before publishing realtime events',
     );
+  }
+
+  if (!liveMutationDecision.accept) {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        boundaryEvent,
+        localSessionKey,
+        canonicalSessionId: payloadCanonicalSessionId,
+        bootId: sessionBootId,
+        seqNo,
+        timestampMs,
+        watermarkMs: liveMutationDecision.watermarkMs,
+        reason: liveMutationDecision.reason,
+        event: 'status_live_mutation_ignored',
+      },
+      'Status live mutation ignored',
+    );
+    return;
   }
 
   const cachedResolvedSessionId = resolveSessionId(payload.device_id, {
@@ -166,8 +214,10 @@ export const handleStatus = async (
           bootId: sessionBootId,
           existingStatus: ensuredSession.status,
           messageId,
+          event: 'status_boundary_started_ignored',
+          reason: 'completed_authoritative_session',
         },
-        'Ignored stale started boundary for a completed authoritative session',
+        'Started boundary ignored',
       );
       return;
     }
@@ -177,13 +227,15 @@ export const handleStatus = async (
 
     setStatus(payload.device_id, 'running', {
       sessionId,
+      lastPayloadTimestampMs: timestampMs,
+      lastSeqNo: seqNo ?? null,
       runtimeState,
       localSessionKey,
       canonicalSessionId,
       bootId: sessionBootId,
     });
     await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState);
-    publishAssignSession({
+    publishSessionAssignment({
       deviceId: payload.device_id,
       localSessionKey,
       canonicalSessionId,
@@ -206,7 +258,8 @@ export const handleStatus = async (
       });
     }
   } else if (boundaryEvent === 'ended') {
-    if (resolvedSessionId === null) {
+    const sessionIdToComplete = resolvedSessionId ?? sessionId;
+    if (sessionIdToComplete === null) {
       logger.warn(
         {
           deviceId: payload.device_id,
@@ -214,15 +267,26 @@ export const handleStatus = async (
           canonicalSessionId,
           bootId: sessionBootId,
           messageId,
+          event: 'ended_boundary_ignored',
+          reason: 'authoritative_session_missing',
         },
-        'Ignored ended boundary without authoritative session match',
+        'Ended boundary ignored',
       );
-      return;
+      sessionId = null;
+      sessionBoundarySource = 'firmware';
+      clearSession(payload.device_id);
+      setStatus(payload.device_id, 'stopped', {
+        sessionId: null,
+        lastPayloadTimestampMs: timestampMs,
+        lastSeqNo: seqNo ?? null,
+        runtimeState,
+      });
+      await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
     } else {
       const completedSession = await completeDeviceSession(
         payload.device_id,
         timestampMs,
-        resolvedSessionId,
+        sessionIdToComplete,
         receivedAtMs,
         'stopped',
         {
@@ -236,6 +300,8 @@ export const handleStatus = async (
       clearSession(payload.device_id);
       setStatus(payload.device_id, 'stopped', {
         sessionId: null,
+        lastPayloadTimestampMs: timestampMs,
+        lastSeqNo: seqNo ?? null,
         runtimeState,
       });
       await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
@@ -256,28 +322,32 @@ export const handleStatus = async (
         });
       }
     }
-  } else if (cachedStatus === 'running' && sessionId === null) {
+  } else if (canStartSessionFromStatus && sessionId === null) {
+    const boundarySource = hasAuthoritativeIdentity ? 'firmware' : SESSION_FALLBACK_BOUNDARY_SOURCE;
+    const startReason = hasAuthoritativeIdentity ? 'status_running_authoritative' : 'status_running';
     const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs, {
       localSessionKey,
       bootId: sessionBootId,
       canonicalSource: 'server',
-      boundarySource: SESSION_FALLBACK_BOUNDARY_SOURCE,
-      startReason: 'status_running',
+      boundarySource,
+      startReason,
     });
 
     sessionId = ensuredSession.sessionId;
     canonicalSessionId = String(ensuredSession.sessionId);
-    sessionBoundarySource = SESSION_FALLBACK_BOUNDARY_SOURCE;
+    sessionBoundarySource = boundarySource;
 
     setStatus(payload.device_id, 'running', {
       sessionId,
+      lastPayloadTimestampMs: timestampMs,
+      lastSeqNo: seqNo ?? null,
       runtimeState,
       localSessionKey,
       canonicalSessionId,
       bootId: sessionBootId,
     });
     await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState);
-    publishAssignSession({
+    publishSessionAssignment({
       deviceId: payload.device_id,
       localSessionKey,
       canonicalSessionId,
@@ -289,7 +359,7 @@ export const handleStatus = async (
         device_id: payload.device_id,
         session_id: sessionId,
         action: 'started',
-        boundary_source: SESSION_FALLBACK_BOUNDARY_SOURCE,
+        boundary_source: boundarySource,
         local_session_key: localSessionKey,
         canonical_session_id: canonicalSessionId,
         boot_id: sessionBootId,
@@ -299,7 +369,7 @@ export const handleStatus = async (
         timestamp: new Date(timestampMs).toISOString(),
       });
     }
-  } else if (cachedStatus === 'stopped') {
+  } else if (effectiveCachedStatus === 'stopped') {
     const completedSession = await completeDeviceSession(
       payload.device_id,
       timestampMs,
@@ -319,6 +389,8 @@ export const handleStatus = async (
     clearSession(payload.device_id);
     setStatus(payload.device_id, 'stopped', {
       sessionId: null,
+      lastPayloadTimestampMs: timestampMs,
+      lastSeqNo: seqNo ?? null,
       runtimeState,
     });
     await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
@@ -339,17 +411,19 @@ export const handleStatus = async (
       });
     }
   } else {
-    setStatus(payload.device_id, cachedStatus, {
+    setStatus(payload.device_id, effectiveCachedStatus, {
       sessionId,
+      lastPayloadTimestampMs: timestampMs,
+      lastSeqNo: seqNo ?? null,
       runtimeState,
       localSessionKey,
       canonicalSessionId,
       bootId: sessionBootId,
     });
-    await updateDeviceStatus(payload.device_id, cachedStatus, receivedAtMs, runtimeState);
+    await updateDeviceStatus(payload.device_id, effectiveCachedStatus, receivedAtMs, runtimeState);
   }
 
-  const effectiveStatus = boundaryEvent === 'ended' ? 'stopped' : cachedStatus;
+  const effectiveStatus = boundaryEvent === 'ended' ? 'stopped' : effectiveCachedStatus;
 
   writeDeviceEvent(
     payload.device_id,
@@ -370,7 +444,7 @@ export const handleStatus = async (
       boot_id: sessionBootId,
     },
   ).catch((err) => {
-    logger.error({ err, deviceId: payload.device_id }, 'VictoriaLogs write failed for status change');
+    logger.error({ err, deviceId: payload.device_id, event: 'status_change_log_write_failed' }, 'Status change log write failed');
   });
 
   publishInternalEvent('status', {

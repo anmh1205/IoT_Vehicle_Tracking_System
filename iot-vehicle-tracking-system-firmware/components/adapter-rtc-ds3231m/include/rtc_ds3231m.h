@@ -8,7 +8,12 @@
 /**
  * @file rtc_ds3231m.h
  * @brief DS3231M RTC driver interface for trusted timestamp fallback.
+ * This header belongs to the DS3231M RTC adapter layer and exposes the RTC boundary so higher layers do not depend on register- or I2C-private details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Initialize the RTC driver and probe DS3231M availability.

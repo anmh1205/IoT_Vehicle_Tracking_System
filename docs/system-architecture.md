@@ -43,6 +43,13 @@ The canonical public MQTT domain is `mqtt.thingdock.dev`, served through `tracki
 - TLS termination for MQTTS happens at EMQX (NPM forwards raw TCP on 8883 without TLS interception).
 - EMQX is internal-only; it does not expose any host ports directly.
 
+## Realtime WebSocket Architecture
+- The backend exposes namespace-specific Socket.IO channels for `/dashboard`, `/devices`, `/notifications`, `/exports`, and `/firmware`, all authenticated through the shared socket auth middleware.
+- Firmware and system-admin realtime traffic is restricted to admin/root roles, while device and notification delivery is scoped through `device:{deviceId}`, `user:{userId}`, and `role:system-admin` rooms instead of namespace-wide broadcast.
+- The frontend `SocketProvider` only instantiates namespaces the current user can access, and `useDeviceRoom` keeps device-room membership reference-counted so multiple features can share one subscription safely.
+- Dashboard features now prefer event-driven cache patching and invalidation for device, trip, notification, export, firmware, simulator, and system-status updates, while snapshot fetches remain the boundary fallback for initial load, reconnect, and manual retry.
+- Backend producers emit real events for notification, export, firmware, simulator, and system-admin changes so UI surfaces stay in sync without hot-path polling.
+
 ## Integration Notes
 - No new backend contracts were added for the HTTP transport layer beyond the standardized response/error shapes.
 - Web root `/` now redirects to `/login`, while the protected dashboard shell remains under `/dashboard/*`.
@@ -68,11 +75,18 @@ The canonical public MQTT domain is `mqtt.thingdock.dev`, served through `tracki
 - Parked heartbeat wake now publishes both telemetry snapshot (`rawdata`) and runtime visibility (`status`) before returning to sleep when policy allows.
 - GNSS queries in `modem_gnss.c` now emit streak-aware observability for transport failure, parse failure, no-fix, and fix-success paths, then perform bounded self-heal repower with cooldown when failures persist.
 - The tracker state machine re-arms GNSS after LTE recovery or repeated GNSS poll failures, gating repeat re-arm attempts with cooldown to avoid modem thrash.
+- Firmware observability now uses source-side log governance instead of a central logging framework: app-core emits state transition and diagnostic health snapshots, adapters emit redacted stage/recovery/fallback events, and `domain-telemetry` counters aggregate MQTT/LTE/OBD/OTA outcomes.
+- Firmware logs intentionally expose stable trace IDs for correlation but redact transport bodies and sensitive config values, using summaries such as `response_len`, `topic_class`, `endpoint_configured`, `apn_configured`, and `fix_valid`.
+- The Uno-based ECU simulator under `iot-vehicle-tracking-system-ecu-simulator/ecu-simulator/src/` now follows a state-driven split: `driver-input-profile.*` resolves the repeatable drive cycle, `powertrain-state-model.*` owns drivetrain/runtime state, `diagnostic-state-model.*` owns fault/readiness progression, and `obd-snapshot-builder.*` materializes the PID-facing `ecu_snapshot_t`.
+- `main.cpp` remains the tick owner (`poll serial -> ecu_model_tick() -> obd_can_poll()`), `obd-can.cpp` is transport-only, and the ECU model now exposes the latest prebuilt snapshot through a read-only accessor instead of mutating snapshot state inside the CAN transport path.
 - Simulator token flow and rollback/race handling were hardened to avoid replaying legacy ingestion behavior during the cutover.
 - OTA lifecycle now uses one canonical raw state set end-to-end: `assigned`, `downloading`, `verifying`, `installing`, `rebooting`, `confirming`, `success`, `failed`, `rolled_back`; backend/frontend derive `in_progress` and `stuck_timeout` for operator grouping without mutating firmware-native raw states.
 - Backend OTA deploy now treats artifact readiness and command dispatch as explicit preconditions, and firmware download responses are hardened for device fetch semantics (binary-only headers, no session redirect dependency).
 - MQTT Bridge OTA ingest now uses metadata-aware reconciliation (`message_id`, `seq_no`, `boot_id`) to block duplicate/out-of-order regressions and keep terminal states sticky.
 - Firmware OTA runtime now emits milestone statuses during apply flow and enforces confirm-timeout deadline checks on post-OTA boot when trusted time is available.
+- Authoritative driving-session rollout is now partially wired end to end: firmware-facing MQTT payloads carry `local_session_key`, `canonical_session_id`, `boot_id`, and `boundary_event`; the bridge creates/completes `device_sessions` only from firmware boundaries, persists provisional identity/provenance in PostgreSQL, and republishes canonical assignment back to the device on `v1/{device_id}/commands`.
+- Backend session DTOs and realtime event contracts now expose both device-reported boundary timestamps (`sessionStart/sessionEnd`) and cloud-observed timestamps (`serverSessionStart/serverSessionEnd`), plus provenance (`boundarySource`, `canonicalSource`, provisional identity) so downstream consumers can distinguish active driving from parked-but-online heartbeat.
+- Frontend device status semantics now treat `online` as parked heartbeat visibility instead of a driving-equivalent state, including updated labels and parking-profile hints in device detail surfaces.
 
 ## Traceability
 - See root redirect and split login entry changes in `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/page.tsx`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/login/page.tsx`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/auth/components/login-form.tsx`, and `iot-vehicle-tracking-system-cloud/Tracking_Frontend/middleware.ts`.

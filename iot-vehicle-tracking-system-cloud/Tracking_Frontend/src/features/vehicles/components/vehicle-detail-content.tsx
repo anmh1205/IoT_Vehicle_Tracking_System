@@ -185,7 +185,7 @@ export const VehicleDetailContent = ({
                 {statusLabel}
               </Badge>
               <Badge variant={vehicle.deviceId ? 'secondary' : 'outline'}>
-                {vehicle.deviceId ? 'Đã gắn telemetry' : 'Thiếu thiết bị telemetry'}
+                {vehicle.deviceId ? 'Đã gắn thiết bị telemetry' : 'Thiếu thiết bị telemetry'}
               </Badge>
               <Badge variant={insuranceBadge.variant}>{insuranceBadge.label}</Badge>
               {missingAssignments.length > 0 ? (

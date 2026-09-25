@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { API_BASE_URL } from '@/lib/api/base-url';
+import { resolvePublicApiOrigin } from '@/lib/runtime/public-origin';
 import type { SystemAdminHealthResponse } from '@/lib/api/system-admin';
 import { StatusBadge } from '@/features/system-status/components/status-badge';
 
@@ -25,6 +26,15 @@ const formatUptime = (uptimeSeconds?: number) => {
 };
 
 const getBackendOrigin = () => {
+  const publicOrigin = resolvePublicApiOrigin(
+    process.env.NEXT_PUBLIC_API_DIRECT_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.NEXT_PUBLIC_API_BASE_URL,
+  );
+  if (publicOrigin) {
+    return publicOrigin;
+  }
+
   try {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:4001';
     return new URL(API_BASE_URL, baseUrl).origin;
@@ -48,7 +58,7 @@ export const AdminUtilitiesPanel = ({
     },
     {
       title: 'Bảo trì',
-      description: 'Mở workspace điều phối bảo trì theo lịch, OBD và trạng thái xe.',
+      description: 'Mở không gian điều phối bảo trì theo lịch, OBD và trạng thái xe.',
       href: '/dashboard/attention/maintenance',
       icon: Wrench,
     },
@@ -60,7 +70,7 @@ export const AdminUtilitiesPanel = ({
     },
     {
       title: 'Firmware / OTA',
-      description: 'Đối chiếu đợt OTA gần nhất, lỗi rollout và firmware đang lệch active.',
+      description: 'Đối chiếu đợt OTA gần nhất, lỗi triển khai và firmware đang lệch bản kích hoạt.',
       href: '/dashboard/platform/firmware',
       icon: RadioTower,
     },
@@ -84,19 +94,19 @@ export const AdminUtilitiesPanel = ({
     {
       title: 'API docs',
       href: `${backendOrigin}/api-docs`,
-      note: 'Swagger để kiểm tra contract và thử API.',
+      note: 'Swagger để kiểm tra hợp đồng API và thử API.',
       status: health?.status ?? 'unknown',
     },
     {
       title: 'REST health',
       href: `${backendOrigin}/health`,
-      note: 'Kiểm tra health tổng của backend.',
+      note: 'Kiểm tra trạng thái tổng của backend.',
       status: findCheckStatus(/api|backend|rest/),
     },
     {
       title: 'WS health',
       href: `${backendOrigin}/ws-health`,
-      note: 'Xác nhận realtime gateway còn sẵn sàng.',
+      note: 'Xác nhận cổng realtime còn sẵn sàng.',
       status: findCheckStatus(/ws|socket|realtime/),
     },
   ];
@@ -126,7 +136,7 @@ export const AdminUtilitiesPanel = ({
                     <Icon className="mt-0.5 h-4 w-4 text-muted-foreground" />
                   </div>
                   <Button asChild variant="outline" size="sm" className="mt-4">
-                    <Link href={item.href}>Mở workspace</Link>
+                    <Link href={item.href}>Mở không gian làm việc</Link>
                   </Button>
                 </div>
               );
@@ -189,7 +199,7 @@ export const AdminUtilitiesPanel = ({
                     <StatusBadge status={check.status} />
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {check.error ?? 'Dịch vụ đang ở trạng thái suy giảm, cần mở log hoặc workspace liên quan để xác nhận nguyên nhân.'}
+                    {check.error ?? 'Dịch vụ đang ở trạng thái suy giảm, cần mở nhật ký hoặc không gian làm việc liên quan để xác nhận nguyên nhân.'}
                   </p>
                   {check.endpoint ? <p className="text-xs text-muted-foreground">{check.endpoint}</p> : null}
                 </div>
@@ -197,7 +207,7 @@ export const AdminUtilitiesPanel = ({
             ))
           ) : (
             <div className="rounded-2xl border border-dashed px-4 py-6 text-sm text-muted-foreground">
-              Chưa ghi nhận service suy giảm hoặc ngừng hoạt động ở lần kiểm tra gần nhất.
+              Chưa ghi nhận dịch vụ suy giảm hoặc ngừng hoạt động ở lần kiểm tra gần nhất.
             </div>
           )}
         </CardContent>

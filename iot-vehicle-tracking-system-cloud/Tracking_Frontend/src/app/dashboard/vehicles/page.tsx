@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CarFront, CircleOff, Plus, Wrench, Zap } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { StatCard } from '@/components/common/stat-card';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { Button } from '@/components/ui/button';
@@ -26,8 +27,16 @@ import { getVehicleColumns } from '@/features/vehicles/components/vehicle-column
 import { VehicleAssignDevice } from '@/features/vehicles/components/vehicle-assign-device';
 import { VehicleForm } from '@/features/vehicles/components/vehicle-form';
 import { VehicleDetailModal } from '@/features/vehicles/components/vehicle-detail-modal';
+import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
 
 const PAGE_SIZE = 20;
+
+const emptyToNull = (value: unknown) => {
+  const normalized = typeof value === 'string' ? value.trim() : '';
+  return normalized.length > 0 ? normalized : null;
+};
+
+const emptyToUndefined = (value: unknown) => emptyToNull(value) ?? undefined;
 
 const VehiclesPage = () => {
   const [open, setOpen] = useState(false);
@@ -37,18 +46,18 @@ const VehiclesPage = () => {
   const [assignItem, setAssignItem] = useState<any | null>(null);
   const [vehicleFormError, setVehicleFormError] = useState<string | null>(null);
   const [vehicleFieldErrors, setVehicleFieldErrors] = useState<Record<string, string>>({});
-  const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<'all' | 'active' | 'maintenance' | 'inactive' | 'retired'>('all');
-  const deferredSearch = useDeferredValue(search);
+  const deferredSearch = useDeferredValue(search.trim());
   const queryClient = useQueryClient();
 
-  const vehicles = useQuery({
-    queryKey: ['vehicles', page, deferredSearch, status],
-    queryFn: () =>
+  const vehicles = useInfiniteListQuery<any>({
+    queryKey: ['vehicles', deferredSearch, status],
+    pageSize: PAGE_SIZE,
+    queryFn: ({ page, limit }) =>
       vehicleServices.getList({
         page,
-        limit: PAGE_SIZE,
+        limit,
         search: deferredSearch || undefined,
         status: status === 'all' ? undefined : status,
       }),
@@ -67,11 +76,11 @@ const VehiclesPage = () => {
   const createMutation = useMutation({
     mutationFn: (payload: any) =>
       vehicleServices.create({
-        vehicleId: payload.vehicleId,
-        plateNumber: payload.plateNumber,
-        brand: payload.brand,
-        model: payload.model,
-        year: payload.year ? Number(payload.year) : undefined,
+        vehicleId: String(payload.vehicleId ?? '').trim(),
+        plateNumber: emptyToUndefined(payload.plateNumber),
+        brand: emptyToUndefined(payload.brand),
+        model: emptyToUndefined(payload.model),
+        year: String(payload.year ?? '').trim() ? Number(payload.year) : undefined,
         customerId: payload.customerId === 'none' ? undefined : Number(payload.customerId),
       }),
     onMutate: () => {
@@ -79,7 +88,6 @@ const VehiclesPage = () => {
       setVehicleFieldErrors({});
     },
     onSuccess: async () => {
-      setPage(1);
       setSearch('');
       setStatus('all');
       await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
@@ -100,10 +108,10 @@ const VehiclesPage = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: any) =>
       vehicleServices.update(id, {
-        plateNumber: payload.plateNumber,
-        brand: payload.brand,
-        model: payload.model,
-        year: payload.year ? Number(payload.year) : undefined,
+        plateNumber: emptyToNull(payload.plateNumber),
+        brand: emptyToNull(payload.brand),
+        model: emptyToNull(payload.model),
+        year: String(payload.year ?? '').trim() ? Number(payload.year) : null,
         customerId: payload.customerId === 'none' ? null : Number(payload.customerId),
       }),
     onMutate: () => {
@@ -157,21 +165,18 @@ const VehiclesPage = () => {
     },
   });
 
-  const rows = useMemo(() => vehicles.data?.items ?? vehicles.data?.data?.items ?? [], [vehicles.data]);
-  const pagination = vehicles.data?.pagination ?? vehicles.data?.data?.pagination;
+  const rows = vehicles.items;
   const deviceRows = devices.data?.items ?? [];
   const customerRows = customers.data?.items ?? customers.data?.data?.items ?? [];
   const stats = useMemo(
     () => ({
-      total: pagination?.total ?? rows.length,
+      total: vehicles.total || rows.length,
       active: rows.filter((row: any) => row.status === 'active').length,
       maintenance: rows.filter((row: any) => row.status === 'maintenance').length,
       inactive: rows.filter((row: any) => row.status === 'inactive' || row.status === 'retired').length,
     }),
-    [pagination?.total, rows],
+    [vehicles.total, rows],
   );
-
-  const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
   const vehiclesErrorMessage = vehicles.isError
     ? getApiErrorMessage(
         vehicles.error,
@@ -256,19 +261,13 @@ const VehiclesPage = () => {
           <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:gap-2 lg:flex-nowrap">
             <Input
               value={search}
-              onChange={(event) => {
-                setPage(1);
-                setSearch(event.target.value);
-              }}
+              onChange={(event) => setSearch(event.target.value)}
               placeholder="Tìm theo mã xe, biển số hoặc hãng xe..."
               className="w-full md:min-w-[320px] md:max-w-[460px]"
             />
             <Select
               value={status}
-              onValueChange={(value: 'all' | 'active' | 'maintenance' | 'inactive' | 'retired') => {
-                setPage(1);
-                setStatus(value);
-              }}
+              onValueChange={(value: 'all' | 'active' | 'maintenance' | 'inactive' | 'retired') => setStatus(value)}
             >
               <SelectTrigger className="w-full sm:w-[220px]">
                 <SelectValue placeholder="Trạng thái" />
@@ -285,25 +284,14 @@ const VehiclesPage = () => {
         }
       />
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">
-          Trang {pagination?.page ?? page} / {totalPages}. Hiển thị {rows.length} phương tiện trên tổng{' '}
-          {pagination?.total ?? rows.length} bản ghi.
-        </p>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>
-            Trang trước
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => setPage((value) => value + 1)}
-          >
-            Trang sau
-          </Button>
-        </div>
-      </div>
+      <InfiniteScrollTrigger
+        hasMore={vehicles.hasMore}
+        isLoadingMore={vehicles.isFetchingNextPage}
+        onLoadMore={vehicles.loadMore}
+        loadedCount={vehicles.loadedCount}
+        totalCount={vehicles.total}
+        itemLabel="phương tiện"
+      />
 
       <VehicleForm
         open={open}

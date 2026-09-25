@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+const nullableString = (max: number) => z.string().max(max).nullable().optional();
+
 export const createVehicleSchema = z.object({
   vehicleId: z
     .string()
@@ -33,7 +35,11 @@ export const createVehicleSchema = z.object({
 });
 
 export const updateVehicleSchema = createVehicleSchema.partial().extend({
+  plateNumber: nullableString(20),
+  brand: nullableString(100),
+  model: nullableString(100),
   customerId: z.union([z.number().int().positive(), z.null()]).optional(),
+  year: z.union([z.number().int().min(1900).max(2100), z.null()]).optional(),
 });
 
 export const vehicleListQuerySchema = z.object({

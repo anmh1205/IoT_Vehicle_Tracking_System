@@ -16,7 +16,12 @@ import {
 } from '@/components/ui/select';
 import { zoneServices, type ZoneBoundaryLevel, type ZoneBoundarySelection } from '@/lib/api/zones';
 import { cn } from '@/lib/utils';
-import { describeBoundarySelections, formatBoundarySelectionLabel } from '@/features/geofences/lib/allowed-zone-form';
+import {
+  describeBoundarySelections,
+  formatBoundarySelectionDetail,
+  formatBoundarySelectionLabel,
+  getBoundaryProviderLabel,
+} from '@/features/geofences/lib/allowed-zone-form';
 
 const LEVEL_LABELS: Record<ZoneBoundaryLevel, string> = {
   province: 'Tỉnh / thành',
@@ -24,8 +29,17 @@ const LEVEL_LABELS: Record<ZoneBoundaryLevel, string> = {
   ward: 'Xã / phường',
 };
 
+const PROVIDER_BADGE_CLASS_NAMES: Record<string, string> = {
+  'gis.vn': 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300',
+  'gis.vn-legacy': 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300',
+  osm: 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300',
+};
+
 const getSelectionKey = (selection: Pick<ZoneBoundarySelection, 'provider' | 'unitCode'>) =>
   `${selection.provider}:${selection.unitCode}`;
+
+const getProviderBadgeClassName = (provider: string) =>
+  PROVIDER_BADGE_CLASS_NAMES[provider] ?? 'border-muted-foreground/25 text-muted-foreground';
 
 export const ZoneBoundarySelector = ({
   value,
@@ -71,11 +85,11 @@ export const ZoneBoundarySelector = ({
   };
 
   return (
-    <div className="space-y-3 rounded-2xl border bg-muted/10 p-4">
+    <div className="space-y-3 rounded-lg border bg-muted/10 p-4">
       <div className="space-y-1">
         <Label>Địa lý hành chính</Label>
         <p className="text-xs text-muted-foreground">
-          Tìm và chọn nhiều tỉnh, huyện, xã rồi hợp thành một vùng duy nhất cho xe.
+          Tìm theo tên có dấu hoặc không dấu. Kết quả ưu tiên ranh giới hiện hành, vẫn giữ bộ trước 01/07/2025 để tra cứu tên cũ.
         </p>
       </div>
 
@@ -89,7 +103,7 @@ export const ZoneBoundarySelector = ({
               value={query}
               disabled={disabled}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Ví dụ: Hà Nội, Hưng Yên, Long Biên..."
+              placeholder="Ví dụ: Hà Nội, Phú Thọ, Vĩnh Phúc, Đà Nẵng..."
               className="pl-9"
             />
           </div>
@@ -111,7 +125,7 @@ export const ZoneBoundarySelector = ({
         </div>
       </div>
 
-      <div className="space-y-2 rounded-xl border bg-background p-3">
+      <div className="space-y-2 rounded-lg border bg-background p-3">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={value.length > 0 ? 'secondary' : 'outline'}>
             {value.length > 0 ? `${value.length} đơn vị đã chọn` : 'Chưa chọn đơn vị'}
@@ -125,9 +139,11 @@ export const ZoneBoundarySelector = ({
               <Badge
                 key={getSelectionKey(selection)}
                 variant="outline"
-                className="gap-1.5 rounded-full px-3 py-1"
+                className="min-h-8 gap-1.5 rounded-full px-3 py-1"
               >
                 <span>{formatBoundarySelectionLabel(selection)}</span>
+                <span className="text-muted-foreground">-</span>
+                <span className="text-muted-foreground">{getBoundaryProviderLabel(selection.provider)}</span>
                 {!disabled ? (
                   <button
                     type="button"
@@ -144,7 +160,7 @@ export const ZoneBoundarySelector = ({
         ) : null}
       </div>
 
-      <div className="space-y-2 rounded-xl border bg-background p-3">
+      <div className="space-y-2 rounded-lg border bg-background p-3">
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm font-medium">Kết quả tìm kiếm</p>
           {boundariesQuery.isFetching ? (
@@ -156,6 +172,8 @@ export const ZoneBoundarySelector = ({
           <div className="space-y-2 pr-3">
             {boundariesQuery.data?.items?.map((item) => {
               const selected = selectedKeys.has(getSelectionKey(item));
+              const providerLabel = getBoundaryProviderLabel(item.provider);
+              const detail = formatBoundarySelectionDetail(item);
               return (
                 <button
                   key={getSelectionKey(item)}
@@ -163,23 +181,36 @@ export const ZoneBoundarySelector = ({
                   disabled={disabled || selected}
                   onClick={() => addSelection(item)}
                   className={cn(
-                    'w-full rounded-xl border px-3 py-3 text-left transition-colors',
-                    selected ? 'border-primary/40 bg-primary/5' : 'hover:bg-muted/40',
+                    'w-full rounded-lg border px-3 py-3 text-left transition-colors',
+                    selected
+                      ? 'cursor-not-allowed border-primary/40 bg-primary/5'
+                      : 'cursor-pointer hover:bg-muted/40',
                   )}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium">{formatBoundarySelectionLabel(item)}</p>
-                    <Badge variant="outline">{LEVEL_LABELS[item.level]}</Badge>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="min-w-0 text-sm font-medium">{formatBoundarySelectionLabel(item)}</p>
+                    <div className="flex flex-wrap items-center justify-end gap-1.5">
+                      <Badge variant="outline">{LEVEL_LABELS[item.level]}</Badge>
+                      {providerLabel ? (
+                        <Badge
+                          variant="outline"
+                          className={cn('border px-2 font-medium', getProviderBadgeClassName(item.provider))}
+                        >
+                          {providerLabel}
+                        </Badge>
+                      ) : null}
+                    </div>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {item.fullName ?? item.unitName}
+                  {detail ? <p className="mt-1 text-xs text-muted-foreground">{detail}</p> : null}
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Mã {item.provider}:{item.unitCode}
                   </p>
                 </button>
               );
             })}
 
             {!boundariesQuery.isFetching && (boundariesQuery.data?.items?.length ?? 0) === 0 ? (
-              <div className="rounded-xl border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
+              <div className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
                 {deferredQuery.length === 0 && level === 'all'
                   ? 'Nhập tên tỉnh, huyện hoặc xã để bắt đầu tìm.'
                   : 'Không tìm thấy đơn vị phù hợp trong cache địa giới.'}

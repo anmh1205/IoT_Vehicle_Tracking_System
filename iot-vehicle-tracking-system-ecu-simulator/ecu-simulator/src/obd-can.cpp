@@ -32,6 +32,7 @@ void send_payload(uint16_t response_id, const uint8_t *payload, uint8_t payload_
   if (s_can == nullptr) {
     return;
   }
+
   struct can_frame frame = {};
   frame.can_id = response_id;
   frame.can_dlc = static_cast<uint8_t>(min(8, payload_len + 1U));
@@ -39,17 +40,23 @@ void send_payload(uint16_t response_id, const uint8_t *payload, uint8_t payload_
   for (uint8_t i = 0; i < payload_len && i < 7; ++i) {
     frame.data[i + 1] = payload[i];
   }
-  const MCP2515::ERROR send_error = s_can->sendMessage(&frame);
-  if (send_error != MCP2515::ERROR_OK) {
-    Serial.print(F("CAN send failed err="));
-    Serial.println(static_cast<int>(send_error));
-  }
+  s_can->sendMessage(&frame);
 }
 
-bool build_pid_payload(uint8_t pid, uint8_t *data, uint8_t &len) {
-  const ecu_snapshot_t &snap = ecu_model_get();
+bool build_pid_payload(const ecu_snapshot_t &snap, uint8_t pid, uint8_t *data, uint8_t &len) {
   switch (pid) {
-    case 0x00: case 0x20: case 0x40: case 0x60: { const uint32_t bits = build_bitmap(pid); data[0] = bits >> 24; data[1] = bits >> 16; data[2] = bits >> 8; data[3] = bits; len = 4; return true; }
+    case 0x00:
+    case 0x20:
+    case 0x40:
+    case 0x60: {
+      const uint32_t bits = build_bitmap(pid);
+      data[0] = bits >> 24;
+      data[1] = bits >> 16;
+      data[2] = bits >> 8;
+      data[3] = bits;
+      len = 4;
+      return true;
+    }
     case 0x01: for (uint8_t i = 0; i < 4; ++i) { data[i] = snap.readiness_bytes[i]; } len = 4; return true;
     case 0x03: data[0] = snap.fuel_system_status_a; data[1] = snap.fuel_system_status_b; len = 2; return true;
     case 0x04: data[0] = encode_percent(snap.engine_load_pct); len = 1; return true;
@@ -85,12 +92,13 @@ bool build_pid_payload(uint8_t pid, uint8_t *data, uint8_t &len) {
   }
 }
 
-void send_current_data(uint16_t response_id, uint8_t pid) {
+void send_current_data(uint16_t response_id, const ecu_snapshot_t &snap, uint8_t pid) {
   uint8_t pid_data[4] = {};
   uint8_t pid_len = 0;
-  if (!build_pid_payload(pid, pid_data, pid_len)) {
+  if (!build_pid_payload(snap, pid, pid_data, pid_len)) {
     return;
   }
+
   uint8_t payload[7] = {0x41, pid, 0, 0, 0, 0, 0};
   for (uint8_t i = 0; i < pid_len; ++i) {
     payload[i + 2] = pid_data[i];
@@ -113,7 +121,9 @@ void send_dtc(uint16_t response_id, uint8_t mode, const obd_dtc_bucket_t &bucket
 }
 }  // namespace
 
-void obd_can_begin(MCP2515 &can_controller) { s_can = &can_controller; }
+void obd_can_begin(MCP2515 &can_controller) {
+  s_can = &can_controller;
+}
 
 void obd_can_poll() {
   if (s_can == nullptr) {
@@ -124,7 +134,6 @@ void obd_can_poll() {
   if (s_can->readMessage(&request) != MCP2515::ERROR_OK) {
     return;
   }
-
   if (request.can_dlc < 2) {
     return;
   }
@@ -133,38 +142,20 @@ void obd_can_poll() {
   const uint8_t pid = request.can_dlc >= 3 ? request.data[2] : 0x00;
   const uint16_t response_id = response_id_for(static_cast<uint16_t>(request.can_id));
   const ecu_snapshot_t &snap = ecu_model_get();
-  Serial.print(F("REQ id=0x"));
-  Serial.print(static_cast<uint16_t>(request.can_id), HEX);
-  Serial.print(F(" mode=0x"));
-  Serial.print(mode, HEX);
-  Serial.print(F(" pid=0x"));
-  Serial.println(pid, HEX);
 
   if (mode == 0x01) {
-    send_current_data(response_id, pid);
-    Serial.print(F("PID 0x"));
-    Serial.print(pid, HEX);
-    Serial.print(F(" rpm="));
-    Serial.print(snap.rpm);
-    Serial.print(F(" spd="));
-    Serial.print(snap.speed_kph);
-    Serial.print(F(" mil="));
-    Serial.println(snap.mil_on ? F("on") : F("off"));
+    send_current_data(response_id, snap, pid);
     return;
   }
-
   if (mode == 0x03) {
     send_dtc(response_id, mode, snap.stored_dtc);
-    Serial.println(F("Sent stored DTC"));
     return;
   }
   if (mode == 0x07) {
     send_dtc(response_id, mode, snap.pending_dtc);
-    Serial.println(F("Sent pending DTC"));
     return;
   }
   if (mode == 0x0A) {
     send_dtc(response_id, mode, snap.permanent_dtc);
-    Serial.println(F("Sent permanent DTC"));
   }
 }

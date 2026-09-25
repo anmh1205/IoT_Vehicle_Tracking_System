@@ -18,7 +18,45 @@
 /**
  * @file modem_at.c
  * @brief Thread-safe AT command transport over UART with URC dispatch support.
+ *
+ * ## AT Command Transport Flow
+ *
+ * ### 1. Initialization (modem_at_init)
+ *    - Install UART driver with RTS/CTS flow control
+ *    - Create mutex for thread-safe access
+ *    - Create URC callback registry
+ *    - Register default URC handlers (+CMSE: +CGEV for network events)
+ *
+ * ### 2. Send Command (modem_at_send)
+ *    - Take mutex lock
+ *    - Clear response buffer
+ *    - Send AT command via UART
+ *    - Wait for response (configurable timeout)
+ *    - Copy response to caller's buffer
+ *    - Release mutex
+ *
+ * ### 3. Send with Expect (modem_at_send_expect)
+ *    - Wraps modem_at_send()
+ *    - Checks for expected token in response
+ *    - Returns ESP_OK if found, ESP_FAIL if not
+ *
+ * ### 4. URC (Unsolicited Result Code) Handling
+ *    - URCs are async messages from modem
+ *    - Registered callbacks invoked when prefix matches
+ *    - Examples: +CMT (SMS), +CGEV (PDP), +CMQTTCONNLOST (MQTT)
+ *    - Polled in FSM loop via modem_at_poll_urc()
+ *
+ * ## Thread Safety
+ *    - Single mutex protects UART send/receive
+ *    - URC callbacks execute in ISR context (must be fast)
+ *    - Response buffer not protected (single consumer assumed)
+ *
+ * ## UART Configuration
+ *    - Default: 115200 baud, 8N1
+ *    - Flow control: RTS/CTS (hardware)
+ *    - Buffer sizes: 2KB RX, 2KB TX
  */
+
 
 #define MODEM_RX_BUFFER_SIZE 1024
 #define MODEM_MAX_URC_CALLBACKS 8
@@ -59,11 +97,25 @@ static QueueHandle_t s_uart_event_queue = NULL;
 static modem_at_uart_diag_t s_uart_diag = {0};
 /* Incremental line-assembly buffer for URC/response dispatch across UART chunks. */
 static char s_dispatch_line_buf[MODEM_URC_LINE_BUFFER_SIZE] = {0};
+/* Current length of assembled line in dispatch buffer. */
 static size_t s_dispatch_line_len = 0;
+/* Flag indicating dispatch line buffer has overflowed. */
 static bool s_dispatch_line_overflow = false;
 
 /**
  * @brief Drain UART event queue and aggregate error counters.
+ *
+ * Processes all pending UART events from the driver event queue and aggregates
+ * diagnostic counters for various error conditions. Called periodically to
+ * prevent queue overflow and maintain diagnostic visibility.
+ *
+ * Workflow:
+ * 1. Loop: xQueueReceive until queue empty (non-blocking, 0 timeout)
+ * 2. Switch: categorize event type (FIFO overflow, buffer full, parity, frame, break)
+ * 3. Increment: corresponding diagnostic counter for each error type
+ * 4. Flush: input buffer on overflow/buffer-full to recover
+ *
+ * Counter values are exposed via s_uart_diag for runtime health monitoring.
  */
 static void modem_at_drain_uart_events(void) {
     if (s_uart_event_queue == NULL) {
@@ -71,27 +123,31 @@ static void modem_at_drain_uart_events(void) {
     }
 
     uart_event_t event = {0};
+    // Non-blocking drain (0 tick wait): empty the queue so it never overflows and
+    // so error counters reflect the latest line health before we read AT bytes.
     while (xQueueReceive(s_uart_event_queue, &event, 0) == pdTRUE) {
         switch (event.type) {
             case UART_FIFO_OVF:
+                // Hardware FIFO overran; flush input to drop the corrupted tail and resync.
                 s_uart_diag.fifo_overflow_count += 1U;
                 uart_flush_input(MODEM_UART_NUM);
                 break;
             case UART_BUFFER_FULL:
+                // Driver ring buffer saturated; flush to recover from back-pressure.
                 s_uart_diag.buffer_full_count += 1U;
                 uart_flush_input(MODEM_UART_NUM);
                 break;
             case UART_PARITY_ERR:
-                s_uart_diag.parity_err_count += 1U;
+                s_uart_diag.parity_err_count += 1U;  // Count only; data may still be usable.
                 break;
             case UART_FRAME_ERR:
-                s_uart_diag.frame_err_count += 1U;
+                s_uart_diag.frame_err_count += 1U;   // Often signals baud/wiring mismatch.
                 break;
             case UART_BREAK:
-                s_uart_diag.break_count += 1U;
+                s_uart_diag.break_count += 1U;       // Line break, e.g. modem reset/power event.
                 break;
             default:
-                break;
+                break;  // Ignore TX-done, pattern, and other non-error event types.
         }
     }
 }
@@ -106,16 +162,30 @@ static void modem_at_dispatch_line(const char *line) {
         return;
     }
 
+    // Match the assembled line against every registered URC prefix; a line may
+    // match more than one handler, so do not break early.
     for (size_t i = 0; i < ARRAY_SIZE(s_urc_entries); ++i) {
         if (s_urc_entries[i].callback == NULL) {
-            continue;
+            continue;  // Empty slot.
         }
+        // Prefix (not exact) match so "+CGEV: ..." style URCs hit their "+CGEV" handler.
         if (strncmp(line, s_urc_entries[i].prefix, strlen(s_urc_entries[i].prefix)) == 0) {
             s_urc_entries[i].callback(line);
         }
     }
 }
 
+/**
+ * @brief Reassemble CRLF-delimited lines from arbitrary UART chunks and dispatch them.
+ *
+ * UART reads do not align to line boundaries, so bytes are accumulated into a
+ * persistent buffer (s_dispatch_line_buf) across calls until a CR or LF closes a
+ * line. This lets URC detection work even when a single URC is split across two
+ * reads, or several URCs arrive in one read.
+ *
+ * @param chunk Raw bytes just read from UART.
+ * @param chunk_len Number of valid bytes in @p chunk.
+ */
 static void modem_at_dispatch_chunk_lines(const char *chunk, size_t chunk_len) {
     if (chunk == NULL || chunk_len == 0U) {
         return;
@@ -124,6 +194,8 @@ static void modem_at_dispatch_chunk_lines(const char *chunk, size_t chunk_len) {
     for (size_t i = 0; i < chunk_len; ++i) {
         char ch = chunk[i];
         if (ch == '\r' || ch == '\n') {
+            // Line terminator: dispatch the accumulated line (ignore empty lines
+            // and lines that were dropped due to overflow), then reset the buffer.
             if (!s_dispatch_line_overflow && s_dispatch_line_len > 0U) {
                 s_dispatch_line_buf[s_dispatch_line_len] = '\0';
                 modem_at_dispatch_line(s_dispatch_line_buf);
@@ -134,17 +206,21 @@ static void modem_at_dispatch_chunk_lines(const char *chunk, size_t chunk_len) {
         }
 
         if (s_dispatch_line_overflow) {
-            continue;
+            continue;  // Already overflowed: skip bytes until the next terminator.
         }
 
+        // Reserve one byte for the NUL terminator; if the line would not fit, drop
+        // the whole line rather than risk a buffer overrun.
         if (s_dispatch_line_len + 1U >= sizeof(s_dispatch_line_buf)) {
             s_dispatch_line_len = 0U;
             s_dispatch_line_overflow = true;
-            ESP_LOGW(TAG, "AT line overflow (>=%u bytes), drop current line", (unsigned)sizeof(s_dispatch_line_buf));
+            ESP_LOGW(TAG,
+                     "event=at_line_overflow buffer_size=%u action=drop_line",
+                     (unsigned)sizeof(s_dispatch_line_buf));
             continue;
         }
 
-        s_dispatch_line_buf[s_dispatch_line_len++] = ch;
+        s_dispatch_line_buf[s_dispatch_line_len++] = ch;  // Accumulate one content byte.
     }
 }
 
@@ -162,16 +238,18 @@ static void modem_at_drain_pending_input(uint32_t max_read_bytes) {
     uint32_t remaining = max_read_bytes;
     char chunk[128];
     while (remaining > 0U) {
-        modem_at_drain_uart_events();
+        modem_at_drain_uart_events();  // Keep error counters current between reads.
+        // Read at most one chunk worth, capped by the remaining byte budget; reserve
+        // 1 byte for the NUL terminator used by line dispatch.
         size_t read_cap = (size_t)MIN_VALUE((uint32_t)(sizeof(chunk) - 1U), remaining);
         int read = uart_read_bytes(MODEM_UART_NUM, (uint8_t *)chunk, read_cap, 0);
         if (read <= 0) {
-            break;
+            break;  // No more bytes pending right now.
         }
 
         remaining -= (uint32_t)read;
         chunk[read] = '\0';
-        modem_at_dispatch_chunk_lines(chunk, (size_t)read);
+        modem_at_dispatch_chunk_lines(chunk, (size_t)read);  // Extract and fire URCs.
     }
 }
 
@@ -183,6 +261,8 @@ static void modem_at_drain_pending_input(uint32_t max_read_bytes) {
  * @return true when response has terminal marker.
  */
 static bool modem_at_response_done(const char *buffer) {
+    // Trim trailing whitespace so a response ending in "OK\r\n" still matches the
+    // bare "OK"/"ERROR" tail checks below.
     size_t len = strlen(buffer);
     while (len > 0) {
         char c = buffer[len - 1];
@@ -192,14 +272,189 @@ static bool modem_at_response_done(const char *buffer) {
         len -= 1;
     }
 
+    // Final-result codes can appear as a clean trailing token (after trim)...
     bool ends_with_ok = len >= 2 && strncmp(buffer + (len - 2), "OK", 2) == 0;
     bool ends_with_error = len >= 5 && strncmp(buffer + (len - 5), "ERROR", 5) == 0;
-    bool ends_with_prompt = len >= 1 && buffer[len - 1] == '>';
 
+    // ...or embedded as the canonical CRLF-wrapped markers / +CME/+CMS error forms.
     return strstr(buffer, "\r\nOK\r\n") != NULL || strstr(buffer, "\r\nERROR\r\n") != NULL ||
-           strstr(buffer, "+CME ERROR") != NULL || ends_with_ok || ends_with_error || ends_with_prompt;
+           strstr(buffer, "+CME ERROR") != NULL || strstr(buffer, "+CMS ERROR") != NULL ||
+           ends_with_ok || ends_with_error;
 }
 
+/**
+ * @brief Check if response buffer indicates modem is waiting for input prompt.
+ *
+ * The SIM7600 modem sends ">" prompt when it expects additional input data
+ * after certain AT commands (e.g., AT+CMGS for SMS, AT+HTTPPARA for HTTP POST data).
+ * This function detects various prompt formats that the modem may send.
+ *
+ * @param buffer Response buffer containing modem output.
+ * @return true if prompt detected, false otherwise.
+ */
+static bool modem_at_response_has_prompt(const char *buffer) {
+    if (buffer == NULL) {
+        return false;
+    }
+
+    size_t len = strlen(buffer);
+    while (len > 0) {
+        char c = buffer[len - 1];
+        if (c != '\r' && c != '\n' && c != ' ' && c != '\t') {
+            break;
+        }
+        len -= 1;
+    }
+
+    // Accept the prompt in any of the CRLF framings the modem may use, or as a
+    // bare trailing '>' once trailing whitespace has been trimmed.
+    return strstr(buffer, "\r\n>\r\n") != NULL || strstr(buffer, "\n>\n") != NULL ||
+           strstr(buffer, "\r\n>") != NULL || strstr(buffer, "\n>") != NULL ||
+           (len >= 1U && buffer[len - 1] == '>');
+}
+
+static void modem_at_append_response_probe(char *probe,
+                                           size_t *probe_len,
+                                           const char *chunk,
+                                           size_t chunk_len);
+
+/**
+ * @brief Collect modem response until completion marker or timeout.
+ *
+ * Reads from UART continuously until:
+ * - OK/ERROR marker detected in response
+ * - Prompt ">" detected (when stop_on_prompt=true)
+ * - Timeout expires
+ *
+ * This function handles both single-line responses and multi-line modem outputs.
+ * It also dispatches URC (Unsolicited Result Code) lines to registered callbacks.
+ *
+ * @param response Output buffer for response text (can be NULL to discard).
+ * @param resp_len Size of response buffer.
+ * @param timeout_ms Maximum time to wait for response completion.
+ * @param stop_on_prompt If true, stop collection when prompt ">" is detected.
+ * @return ESP_OK on success, ESP_FAIL on error, ESP_ERR_TIMEOUT on timeout.
+ */
+static esp_err_t modem_at_collect_response_until(char *response,
+                                                  size_t resp_len,
+                                                  uint32_t timeout_ms,
+                                                  bool stop_on_prompt) {
+    size_t used = 0U;
+    uint64_t deadline = esp_timer_get_time() + ((uint64_t)timeout_ms * 1000ULL);
+    char chunk[128];
+    char response_probe[MODEM_RESPONSE_PROBE_SIZE] = {0};
+    size_t response_probe_len = 0U;
+
+    if (response != NULL && resp_len > 0U) {
+        response[0] = '\0';
+    }
+
+    while (esp_timer_get_time() < deadline) {
+        modem_at_drain_uart_events();
+        // Block up to 100 ms per read so the loop stays responsive to the deadline.
+        int read = uart_read_bytes(MODEM_UART_NUM, (uint8_t *)chunk, sizeof(chunk) - 1, pdMS_TO_TICKS(100));
+        if (read <= 0) {
+            continue;  // Nothing yet; re-check deadline.
+        }
+
+        chunk[read] = '\0';
+        // Append into the caller buffer if room remains (leaving space for NUL).
+        if (response != NULL && resp_len > 1U && used < resp_len - 1U) {
+            size_t copy_len = MIN_VALUE((size_t)read, resp_len - used - 1U);
+            memcpy(response + used, chunk, copy_len);
+            used += copy_len;
+            response[used] = '\0';
+        }
+        // Always feed the sliding probe + URC dispatcher even if the caller buffer is full,
+        // so completion detection and async URCs keep working on long responses.
+        modem_at_append_response_probe(response_probe, &response_probe_len, chunk, (size_t)read);
+        modem_at_dispatch_chunk_lines(chunk, (size_t)read);
+
+        // Completion can be detected either in the (possibly truncated) caller buffer...
+        bool response_done = false;
+        if (response != NULL) {
+            response_done = modem_at_response_done(response) || (stop_on_prompt && modem_at_response_has_prompt(response));
+        }
+        // ...or in the sliding probe window, which is what catches markers when the
+        // caller buffer overflowed or was NULL.
+        if (!response_done) {
+            response_done = modem_at_response_done(response_probe) ||
+                            (stop_on_prompt && modem_at_response_has_prompt(response_probe));
+        }
+
+        if (response_done) {
+            // Classify the terminal marker: any ERROR variant maps to ESP_FAIL.
+            bool has_error = strstr(response_probe, "ERROR") != NULL ||
+                            strstr(response_probe, "+CME ERROR") != NULL ||
+                            strstr(response_probe, "+CMS ERROR") != NULL;
+            if (!has_error && response != NULL) {
+                has_error = strstr(response, "ERROR") != NULL;
+            }
+            return has_error ? ESP_FAIL : ESP_OK;
+        }
+    }
+
+    modem_at_drain_uart_events();
+    return ESP_ERR_TIMEOUT;  // Deadline elapsed without a terminal marker.
+}
+
+/**
+ * @brief Write raw data bytes to UART TX FIFO.
+ *
+ * Writes data in a loop to ensure all bytes are transmitted.
+ * Waits for TX FIFO to drain completely before returning.
+ *
+ * @param data Pointer to data bytes to write.
+ * @param data_len Number of bytes to write.
+ * @return ESP_OK on success, ESP_FAIL on write failure.
+ */
+static esp_err_t modem_at_write_all_bytes(const uint8_t *data, size_t data_len) {
+    ESP_RETURN_ON_FALSE(data != NULL, ESP_ERR_INVALID_ARG, TAG, "data null");
+    ESP_RETURN_ON_FALSE(data_len > 0U, ESP_ERR_INVALID_ARG, TAG, "data_len invalid");
+
+    // uart_write_bytes() may accept fewer bytes than requested, so loop until the
+    // whole payload is queued into the TX ring buffer.
+    size_t written_total = 0U;
+    while (written_total < data_len) {
+        int written = uart_write_bytes(MODEM_UART_NUM,
+                                       (const char *)data + written_total,
+                                       data_len - written_total);
+        if (written <= 0) {
+            return ESP_FAIL;  // Driver rejected the write; abort the transfer.
+        }
+        written_total += (size_t)written;
+    }
+
+    // Block until the bytes physically leave the shift register so the modem sees a
+    // complete payload before the next transaction step runs.
+    return uart_wait_tx_done(MODEM_UART_NUM, pdMS_TO_TICKS(1000));
+}
+
+/**
+ * @brief Clear pending UART data after command failure.
+ *
+ * When an AT command fails, the modem may have leftover data in its UART buffers.
+ * This function drains both the event queue and pending input to prepare
+ * for the next command attempt.
+ */
+static void modem_at_clear_pending_after_failure(void) {
+    modem_at_drain_uart_events();
+    modem_at_drain_pending_input(MODEM_RX_BUFFER_SIZE);
+}
+
+/**
+ * @brief Append new chunk to response probe buffer with sliding window.
+ *
+ * Maintains a fixed-size sliding window of the most recent response data.
+ * When new data exceeds buffer size, older data is discarded.
+ * This probe is used for quick completion detection without
+ * scanning the full potentially-large response buffer.
+ *
+ * @param probe Probe buffer to append to.
+ * @param probe_len In/out pointer to current probe length.
+ * @param chunk New data chunk to append.
+ * @param chunk_len Length of new chunk.
+ */
 static void modem_at_append_response_probe(char *probe,
                                            size_t *probe_len,
                                            const char *chunk,
@@ -209,6 +464,8 @@ static void modem_at_append_response_probe(char *probe,
     }
 
     size_t max_probe_len = MODEM_RESPONSE_PROBE_SIZE - 1U;
+    // Chunk alone fills the window: keep only its trailing bytes (terminal markers
+    // like "OK\r\n" always sit at the very end of a response).
     if (chunk_len >= max_probe_len) {
         memcpy(probe, chunk + (chunk_len - max_probe_len), max_probe_len);
         *probe_len = max_probe_len;
@@ -216,12 +473,15 @@ static void modem_at_append_response_probe(char *probe,
         return;
     }
 
+    // Not enough room for the new chunk: slide the window left, dropping the oldest
+    // bytes so the most recent data (where completion markers appear) is retained.
     if (*probe_len + chunk_len > max_probe_len) {
         size_t drop_len = (*probe_len + chunk_len) - max_probe_len;
         memmove(probe, probe + drop_len, *probe_len - drop_len);
         *probe_len -= drop_len;
     }
 
+    // Append the new chunk after the retained tail and keep the buffer NUL-terminated.
     memcpy(probe + *probe_len, chunk, chunk_len);
     *probe_len += chunk_len;
     probe[*probe_len] = '\0';
@@ -254,6 +514,7 @@ esp_err_t modem_at_init(void) {
                                         0);
     bool driver_installed = err == ESP_OK;
     if (err == ESP_OK) {
+        // Apply the transport profile step-by-step so a failing UART primitive reports the exact initialization phase.
         err = uart_param_config(MODEM_UART_NUM, &uart_cfg);
     }
     if (err == ESP_OK) {
@@ -270,15 +531,16 @@ esp_err_t modem_at_init(void) {
             uart_driver_delete(MODEM_UART_NUM);
         }
         s_uart_event_queue = NULL;
-        ESP_LOGE(TAG, "UART init failed: %s", esp_err_to_name(err));
+        ESP_LOGE(TAG, "event=at_uart_init_failed err=%s", esp_err_to_name(err));
         return err;
     }
 
     s_at_lock = xSemaphoreCreateMutex();
     if (s_at_lock == NULL) {
+        // Without the mutex the shared modem UART cannot be used safely across tasks, so undo driver install immediately.
         uart_driver_delete(MODEM_UART_NUM);
         s_uart_event_queue = NULL;
-        ESP_LOGE(TAG, "Failed to create AT mutex");
+        ESP_LOGE(TAG, "event=at_mutex_create_failed");
         return ESP_ERR_NO_MEM;
     }
 
@@ -293,6 +555,7 @@ esp_err_t modem_at_init(void) {
     s_uart_parity = UART_PARITY_DISABLE;
     s_uart_stop_bits = UART_STOP_BITS_1;
     s_uart_source_clk = UART_SCLK_DEFAULT;
+    // Reset dispatch and diagnostics together so a reused modem session starts from a clean line parser state.
     memset(&s_uart_diag, 0, sizeof(s_uart_diag));
     modem_at_drain_uart_events();
     s_uart_ready = true;
@@ -335,18 +598,12 @@ esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
     ESP_RETURN_ON_NULL(cmd, ESP_ERR_INVALID_ARG, TAG, "cmd is NULL");
 
+    // Serialize the whole transaction: only one AT command may own the UART at a time.
     if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
     }
 
-    if (response != NULL && resp_len > 0) {
-        response[0] = '\0';
-    }
-
-    /*
-     * Preserve asynchronous URCs (especially MQTT RX commands) instead of
-     * dropping them with a raw UART flush before each AT command.
-     */
+    // Flush stale bytes/URCs left from a previous command so they do not contaminate this response.
     modem_at_drain_uart_events();
     modem_at_drain_pending_input(MODEM_RX_BUFFER_SIZE);
     int written = uart_write_bytes(MODEM_UART_NUM, cmd, strlen(cmd));
@@ -355,53 +612,101 @@ esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32
         return ESP_FAIL;
     }
 
-    size_t used = 0;
-    uint64_t deadline = esp_timer_get_time() + ((uint64_t)timeout_ms * 1000ULL);
-    char chunk[128];
-    char response_probe[MODEM_RESPONSE_PROBE_SIZE] = {0};
-    size_t response_probe_len = 0U;
-
-    while (esp_timer_get_time() < deadline) {
-        modem_at_drain_uart_events();
-        int read = uart_read_bytes(MODEM_UART_NUM, (uint8_t *)chunk, sizeof(chunk) - 1, pdMS_TO_TICKS(100));
-        if (read <= 0) {
-            continue;
-        }
-
-        chunk[read] = '\0';
-        if (response != NULL && resp_len > 1) {
-            size_t copy_len = MIN_VALUE((size_t)read, resp_len - used - 1);
-            memcpy(response + used, chunk, copy_len);
-            used += copy_len;
-            response[used] = '\0';
-        }
-        modem_at_append_response_probe(response_probe, &response_probe_len, chunk, (size_t)read);
-
-        modem_at_dispatch_chunk_lines(chunk, (size_t)read);
-
-        bool response_done = false;
-        if (response != NULL) {
-            response_done = modem_at_response_done(response);
-        }
-        if (!response_done) {
-            response_done = modem_at_response_done(response_probe);
-        }
-
-        if (response_done) {
-            xSemaphoreGive(s_at_lock);
-            bool has_error = strstr(response_probe, "ERROR") != NULL || strstr(response_probe, "+CME ERROR") != NULL;
-            if (!has_error && response != NULL) {
-                has_error = strstr(response, "ERROR") != NULL;
-            }
-            return has_error ? ESP_FAIL : ESP_OK;
-        }
+    // Collect until OK/ERROR marker; stop_on_prompt=false because a plain command never waits for '>'.
+    esp_err_t err = modem_at_collect_response_until(response, resp_len, timeout_ms, false);
+    if (err != ESP_OK) {
+        // On failure drain any half-received reply so the next command starts clean.
+        modem_at_clear_pending_after_failure();
     }
-
-    modem_at_drain_uart_events();
     xSemaphoreGive(s_at_lock);
-    return ESP_ERR_TIMEOUT;
+    return err;
 }
 
+/**
+ * @brief Send AT command that requires data input after prompt.
+ *
+ * Two-phase send for commands that need additional data after receiving
+ * the modem prompt (">"). Example: AT+CMGS (SMS send), AT+HTTPPOST.
+ *
+ * Phase 1: Send prepare_cmd, wait for ">" prompt.
+ * Phase 2: Send data payload, wait for final response.
+ *
+ * @param prepare_cmd Initial AT command (e.g., "AT+CMGS=number\r").
+ * @param data Data payload to send after prompt.
+ * @param data_len Length of data payload.
+ * @param response Output response buffer (optional).
+ * @param resp_len Response buffer size.
+ * @param timeout_ms Timeout for each phase.
+ * @return ESP_OK on success, ESP_FAIL/ESP_ERR_TIMEOUT on failure.
+ */
+esp_err_t modem_at_send_prompt_data(const char *prepare_cmd,
+                                    const uint8_t *data,
+                                    size_t data_len,
+                                    char *response,
+                                    size_t resp_len,
+                                    uint32_t timeout_ms) {
+    ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
+    ESP_RETURN_ON_NULL(prepare_cmd, ESP_ERR_INVALID_ARG, TAG, "prepare_cmd null");
+    ESP_RETURN_ON_FALSE(data != NULL && data_len > 0U, ESP_ERR_INVALID_ARG, TAG, "prompt data invalid");
+
+    // Hold the lock for BOTH phases so the prompt and the payload stay atomic on the shared UART.
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
+        return ESP_ERR_TIMEOUT;
+    }
+
+    // Clear leftovers, then send the prepare command (e.g. AT+CMGS=...) that asks the modem for a '>' prompt.
+    modem_at_drain_uart_events();
+    modem_at_drain_pending_input(MODEM_RX_BUFFER_SIZE);
+    int written = uart_write_bytes(MODEM_UART_NUM, prepare_cmd, strlen(prepare_cmd));
+    if (written < 0) {
+        xSemaphoreGive(s_at_lock);
+        return ESP_FAIL;
+    }
+
+    // Phase 1: collect with stop_on_prompt=true and require the '>' prompt before sending data.
+    esp_err_t err = modem_at_collect_response_until(response, resp_len, timeout_ms, true);
+    if (err != ESP_OK || !modem_at_response_has_prompt(response)) {
+        // No prompt means the modem rejected the prepare command; promote a silent OK into a failure.
+        if (err == ESP_OK) {
+            err = ESP_FAIL;
+        }
+        modem_at_clear_pending_after_failure();
+        xSemaphoreGive(s_at_lock);
+        return err;
+    }
+
+    // Phase 2: stream the raw payload bytes the modem is now waiting for.
+    err = modem_at_write_all_bytes(data, data_len);
+    if (err != ESP_OK) {
+        modem_at_clear_pending_after_failure();
+        xSemaphoreGive(s_at_lock);
+        return err;
+    }
+
+    // Collect the final result text (OK/ERROR) that follows the payload.
+    err = modem_at_collect_response_until(response, resp_len, timeout_ms, false);
+    if (err != ESP_OK) {
+        modem_at_clear_pending_after_failure();
+    }
+    xSemaphoreGive(s_at_lock);
+    return err;
+}
+
+/**
+ * @brief Send AT command and collect response with idle timeout.
+ *
+ * Variant of modem_at_send that allows specifying idle timeout.
+ * Stops collection early if no more data arrives after idle_timeout_ms.
+ * Useful for commands that return variable-length responses.
+ *
+ * @param cmd AT command to send.
+ * @param response Output buffer for response data.
+ * @param resp_len Response buffer size.
+ * @param out_len Actual bytes written to response buffer.
+ * @param timeout_ms Maximum time to wait for first data.
+ * @param idle_timeout_ms Maximum idle time after first data arrives.
+ * @return ESP_OK on success, ESP_ERR_TIMEOUT if no data received.
+ */
 esp_err_t modem_at_send_collect(const char *cmd,
                                 uint8_t *response,
                                 size_t resp_len,
@@ -430,10 +735,10 @@ esp_err_t modem_at_send_collect(const char *cmd,
         return ESP_FAIL;
     }
 
-    size_t used = 0U;
-    bool received_any = false;
-    uint64_t deadline = esp_timer_get_time() + ((uint64_t)timeout_ms * 1000ULL);
-    uint64_t idle_deadline = 0ULL;
+    size_t used = 0U;                 // Bytes copied into the caller buffer so far.
+    bool received_any = false;        // Whether any payload byte has arrived yet.
+    uint64_t deadline = esp_timer_get_time() + ((uint64_t)timeout_ms * 1000ULL); // Hard overall deadline.
+    uint64_t idle_deadline = 0ULL;    // Re-armed on every read; fires when the stream goes quiet.
     char chunk[128] = {0};
 
     while (esp_timer_get_time() < deadline) {
@@ -441,8 +746,10 @@ esp_err_t modem_at_send_collect(const char *cmd,
         int read = uart_read_bytes(MODEM_UART_NUM, (uint8_t *)chunk, sizeof(chunk), pdMS_TO_TICKS(50));
         if (read > 0) {
             received_any = true;
+            // Fresh bytes: push the idle window forward so we keep reading while data flows.
             idle_deadline = esp_timer_get_time() + ((uint64_t)idle_timeout_ms * 1000ULL);
 
+            // Append as much as fits; binary payloads are not NUL-terminated, so copy by length only.
             size_t copy_len = MIN_VALUE((size_t)read, resp_len - used);
             if (copy_len > 0U) {
                 memcpy(response + used, chunk, copy_len);
@@ -450,11 +757,12 @@ esp_err_t modem_at_send_collect(const char *cmd,
             }
 
             if (used >= resp_len) {
-                break;
+                break;  // Caller buffer full; stop collecting.
             }
             continue;
         }
 
+        // No new bytes: once something was received, an elapsed idle window ends the transfer early.
         if (received_any && idle_timeout_ms > 0U && esp_timer_get_time() >= idle_deadline) {
             break;
         }
@@ -475,13 +783,16 @@ esp_err_t modem_at_send_collect(const char *cmd,
 }
 
 /**
- * @brief Send AT command and assert expected marker in response.
+ * @brief Send AT command and verify expected token in response.
  *
- * @param cmd AT command.
- * @param expect Expected substring or NULL.
+ * Convenience wrapper that sends a command and checks if the expected
+ * token string appears in the response. Useful for simple
+ * "verify X succeeded" checks.
+ *
+ * @param cmd AT command to send.
+ * @param expect Expected token in response (can be NULL to skip check).
  * @param timeout_ms Timeout in milliseconds.
- *
- * @return ESP_OK on success, otherwise an error code.
+ * @return ESP_OK if response contains expect token, ESP_FAIL otherwise.
  */
 esp_err_t modem_at_send_expect(const char *cmd, const char *expect, uint32_t timeout_ms) {
     char response[MODEM_RX_BUFFER_SIZE] = {0};
@@ -497,11 +808,22 @@ esp_err_t modem_at_send_expect(const char *cmd, const char *expect, uint32_t tim
     return ESP_OK;
 }
 
+/**
+ * @brief Change UART baudrate at runtime.
+ *
+ * Dynamically changes the UART baudrate for the modem transport.
+ * Used for high-speed data transfers that support higher
+ * baud rates than the default.
+ *
+ * @param baud New baudrate value.
+ * @return ESP_OK on success, ESP_ERR_INVALID_ARG on invalid baud,
+ *         ESP_ERR_TIMEOUT on mutex timeout.
+ */
 esp_err_t modem_at_set_baud(uint32_t baud) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
     ESP_RETURN_ON_FALSE(baud > 0, ESP_ERR_INVALID_ARG, TAG, "Invalid baud");
 
-    if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(30000)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
     }
 
@@ -520,14 +842,20 @@ esp_err_t modem_at_set_baud(uint32_t baud) {
     return err;
 }
 
-uint32_t modem_at_get_baud(void) {
-    return s_uart_baud;
-}
-
+/**
+ * @brief Change UART TX/RX pins at runtime.
+ *
+ * Reconfigures the GPIO pins used for UART communication.
+ * Requires UART driver to be initialized first.
+ *
+ * @param tx_pin New TX GPIO pin number.
+ * @param rx_pin New RX GPIO pin number.
+ * @return ESP_OK on success, ESP_ERR_TIMEOUT on mutex timeout.
+ */
 esp_err_t modem_at_set_pins(gpio_num_t tx_pin, gpio_num_t rx_pin) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
-    if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(30000)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
     }
 
@@ -542,19 +870,19 @@ esp_err_t modem_at_set_pins(gpio_num_t tx_pin, gpio_num_t rx_pin) {
     return err;
 }
 
-void modem_at_get_pins(gpio_num_t *out_tx_pin, gpio_num_t *out_rx_pin) {
-    if (out_tx_pin != NULL) {
-        *out_tx_pin = s_uart_tx_pin;
-    }
-    if (out_rx_pin != NULL) {
-        *out_rx_pin = s_uart_rx_pin;
-    }
-}
-
+/**
+ * @brief Set UART line inverse mask for signal level reversal.
+ *
+ * Some modem designs use inverted signal levels.
+ * This function configures which signals are inverted.
+ *
+ * @param inverse_mask Bitmask of signals to invert.
+ * @return ESP_OK on success, ESP_ERR_TIMEOUT on mutex timeout.
+ */
 esp_err_t modem_at_set_line_inverse(uint32_t inverse_mask) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
-    if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(30000)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
     }
 
@@ -573,16 +901,25 @@ esp_err_t modem_at_set_line_inverse(uint32_t inverse_mask) {
     return err;
 }
 
-uint32_t modem_at_get_line_inverse(void) {
-    return s_uart_inverse_mask;
-}
-
+/**
+ * @brief Set UART frame format (data bits, parity, stop bits).
+ *
+ * Configures the serial frame parameters for UART communication.
+ * Default is 8N1 (8 data bits, no parity, 1 stop bit).
+ *
+ * @param data_bits Number of data bits (5-8).
+ * @param parity Parity mode (UART_PARITY_DISABLE, EVEN, ODD).
+ * @param stop_bits Number of stop bits (1, 1.5, 2).
+ * @return ESP_OK on success, ESP_ERR_INVALID_ARG on invalid params,
+ *         ESP_ERR_TIMEOUT on mutex timeout.
+ */
 esp_err_t modem_at_set_frame_format(uart_word_length_t data_bits,
                                     uart_parity_t parity,
                                     uart_stop_bits_t stop_bits) {
+    // Build the AT set frame format representation here so every caller emits the same contract.
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
-    if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(30000)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
     }
 
@@ -610,24 +947,20 @@ esp_err_t modem_at_set_frame_format(uart_word_length_t data_bits,
     return err;
 }
 
-void modem_at_get_frame_format(uart_word_length_t *out_data_bits,
-                               uart_parity_t *out_parity,
-                               uart_stop_bits_t *out_stop_bits) {
-    if (out_data_bits != NULL) {
-        *out_data_bits = s_uart_data_bits;
-    }
-    if (out_parity != NULL) {
-        *out_parity = s_uart_parity;
-    }
-    if (out_stop_bits != NULL) {
-        *out_stop_bits = s_uart_stop_bits;
-    }
-}
-
+/**
+ * @brief Set UART source clock.
+ *
+ * Configures the clock source for UART operation.
+ * Default is APB clock. Changing may be needed for
+ * specific power or accuracy requirements.
+ *
+ * @param source_clk Clock source (UART_SCLK_APB, UART_SCLK_RTOS, etc.).
+ * @return ESP_OK on success, ESP_ERR_TIMEOUT on mutex timeout.
+ */
 esp_err_t modem_at_set_source_clk(uart_sclk_t source_clk) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
-    if (xSemaphoreTake(s_at_lock, portMAX_DELAY) != pdTRUE) {
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(30000)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
     }
 
@@ -654,10 +987,23 @@ esp_err_t modem_at_set_source_clk(uart_sclk_t source_clk) {
     return err;
 }
 
+/**
+ * @brief Get current UART source clock.
+ *
+ * @return Current source clock setting.
+ */
 uart_sclk_t modem_at_get_source_clk(void) {
     return s_uart_source_clk;
 }
 
+/**
+ * @brief Get aggregated UART diagnostics.
+ *
+ * Returns cumulative error and event counters since last reset.
+ * Includes FIFO overflow, buffer full, parity errors, etc.
+ *
+ * @param out_diag Output structure for diagnostics (cannot be NULL).
+ */
 void modem_at_get_uart_diag(modem_at_uart_diag_t *out_diag) {
     if (out_diag == NULL) {
         return;
@@ -667,6 +1013,13 @@ void modem_at_get_uart_diag(modem_at_uart_diag_t *out_diag) {
     *out_diag = s_uart_diag;
 }
 
+/**
+ * @brief Reset UART diagnostics counters to zero.
+ *
+ * Clears all cumulative error and event counters.
+ * Should be called after clearing a fault condition
+ * to start fresh diagnostics accumulation.
+ */
 void modem_at_reset_uart_diag(void) {
     modem_at_drain_uart_events();
     memset(&s_uart_diag, 0, sizeof(s_uart_diag));
@@ -684,6 +1037,8 @@ void modem_at_register_urc(const char *prefix, modem_urc_cb_t cb) {
     }
 
     size_t prefix_len = strlen(prefix);
+    // First pass: update an existing slot if the same callback or prefix is already registered
+    // (idempotent re-registration), avoiding duplicate entries for the same URC.
     for (size_t i = 0; i < ARRAY_SIZE(s_urc_entries); ++i) {
         if (s_urc_entries[i].callback == NULL) {
             continue;
@@ -694,7 +1049,7 @@ void modem_at_register_urc(const char *prefix, modem_urc_cb_t cb) {
             s_urc_entries[i].callback = cb;
             if (copied < prefix_len) {
                 ESP_LOGW(TAG,
-                         "URC prefix truncated on update idx=%u src_len=%u dst_len=%u",
+                         "event=urc_prefix_truncated stage=update idx=%u src_len=%u dst_len=%u",
                          (unsigned)i,
                          (unsigned)prefix_len,
                          (unsigned)sizeof(s_urc_entries[i].prefix));
@@ -703,13 +1058,14 @@ void modem_at_register_urc(const char *prefix, modem_urc_cb_t cb) {
         }
     }
 
+    // Second pass: no existing match, so claim the first free slot for this new prefix/callback.
     for (size_t i = 0; i < ARRAY_SIZE(s_urc_entries); ++i) {
         if (s_urc_entries[i].callback == NULL) {
             size_t copied = util_copy_string(s_urc_entries[i].prefix, sizeof(s_urc_entries[i].prefix), prefix);
             s_urc_entries[i].callback = cb;
             if (copied < prefix_len) {
                 ESP_LOGW(TAG,
-                         "URC prefix truncated idx=%u src_len=%u dst_len=%u",
+                         "event=urc_prefix_truncated stage=insert idx=%u src_len=%u dst_len=%u",
                          (unsigned)i,
                          (unsigned)prefix_len,
                          (unsigned)sizeof(s_urc_entries[i].prefix));
@@ -718,12 +1074,24 @@ void modem_at_register_urc(const char *prefix, modem_urc_cb_t cb) {
         }
     }
 
+    // No free slot: the fixed-size registry is full, so the URC cannot be tracked.
     ESP_LOGE(TAG,
-             "URC register failed (table full=%u) prefix=%s",
+             "event=urc_register_failed reason=table_full capacity=%u prefix=%s",
              (unsigned)ARRAY_SIZE(s_urc_entries),
              prefix);
 }
 
+/**
+ * @brief Poll for URC (Unsolicited Result Code) data.
+ *
+ * Non-blocking poll that reads up to max_read_bytes from UART
+ * and dispatches complete lines to registered URC handlers.
+ * Must be called regularly to process async modem events.
+ *
+ * @param max_read_bytes Maximum bytes to read in this call.
+ * @return ESP_OK on success, ESP_ERR_INVALID_STATE if not initialized,
+ *         ESP_ERR_TIMEOUT if lock could not be acquired immediately.
+ */
 esp_err_t modem_at_poll_urc(uint32_t max_read_bytes) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
@@ -731,6 +1099,8 @@ esp_err_t modem_at_poll_urc(uint32_t max_read_bytes) {
         return ESP_OK;
     }
 
+    // Non-blocking lock attempt (0 timeout): if an AT transaction owns the UART, skip this poll
+    // rather than block — the in-flight command already drains and dispatches URC lines itself.
     if (xSemaphoreTake(s_at_lock, 0) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
     }
@@ -739,17 +1109,19 @@ esp_err_t modem_at_poll_urc(uint32_t max_read_bytes) {
     char chunk[128];
     while (remaining > 0U) {
         modem_at_drain_uart_events();
+        // Read without blocking (0 ticks) in bounded chunks until UART RX is empty or budget spent.
         size_t read_cap = (size_t)MIN_VALUE((uint32_t)(sizeof(chunk) - 1U), remaining);
         int read = uart_read_bytes(MODEM_UART_NUM,
                                    (uint8_t *)chunk,
                                    read_cap,
                                    0);
         if (read <= 0) {
-            break;
+            break;  // RX drained.
         }
 
         remaining -= (uint32_t)read;
         chunk[read] = '\0';
+        // Assemble bytes into lines and fire any matching URC callbacks.
         modem_at_dispatch_chunk_lines(chunk, (size_t)read);
     }
 

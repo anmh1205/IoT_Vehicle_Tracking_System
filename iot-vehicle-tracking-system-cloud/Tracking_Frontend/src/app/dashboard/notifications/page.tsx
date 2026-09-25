@@ -5,7 +5,8 @@ import { CheckCheck } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/button';
 import { parseDateKeyAsLocal } from '@/lib/utils';
-import { useNotifications } from '@/features/notifications/hooks/use-notifications';
+import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
+import { notificationServices } from '@/lib/api/notifications';
 import { useNotificationStats } from '@/features/notifications/hooks/use-notification-stats';
 import { useMarkAllRead } from '@/features/notifications/hooks/use-mark-all-read';
 import {
@@ -14,6 +15,7 @@ import {
 } from '@/features/notifications/components/notification-filters';
 import { NotificationStats } from '@/features/notifications/components/notification-stats';
 import { NotificationList } from '@/features/notifications/components/notification-list';
+import type { NotificationItem, NotificationListResponse } from '@/features/notifications/types';
 
 const DEFAULT_FILTERS: NotificationFilterState = {
   search: '',
@@ -41,11 +43,8 @@ const toDateBoundaryIso = (value: string | undefined, boundary: 'start' | 'end')
 
 const NotificationsPage = () => {
   const [filters, setFilters] = useState<NotificationFilterState>(DEFAULT_FILTERS);
-  const [page, setPage] = useState(1);
   const params = useMemo(
     () => ({
-      page,
-      limit: PAGE_SIZE,
       search: filters.search.trim() || undefined,
       type: filters.type === 'all' ? undefined : filters.type,
       isRead:
@@ -55,12 +54,16 @@ const NotificationsPage = () => {
       from: toDateBoundaryIso(filters.from, 'start'),
       to: toDateBoundaryIso(filters.to, 'end'),
     }),
-    [filters, page],
+    [filters],
   );
-  const notificationsQuery = useNotifications(params);
+  const notificationsQuery = useInfiniteListQuery<NotificationItem, NotificationListResponse>({
+    queryKey: ['notifications', params],
+    pageSize: PAGE_SIZE,
+    queryFn: ({ page, limit }) => notificationServices.getList({ ...params, page, limit }),
+  });
   const statsQuery = useNotificationStats();
   const markAllRead = useMarkAllRead();
-  const items = notificationsQuery.data?.items ?? [];
+  const items = notificationsQuery.items;
 
   return (
     <PageContainer
@@ -82,23 +85,22 @@ const NotificationsPage = () => {
         value={filters}
         onChange={(next) => {
           setFilters(next);
-          setPage(1);
         }}
         onReset={() => {
           setFilters(DEFAULT_FILTERS);
-          setPage(1);
         }}
       />
       <NotificationList
         items={items}
-        total={notificationsQuery.data?.total ?? 0}
-        page={notificationsQuery.data?.page ?? page}
-        pageSize={notificationsQuery.data?.limit ?? PAGE_SIZE}
-        unreadCount={statsQuery.data?.unreadCount ?? notificationsQuery.data?.unreadCount ?? 0}
+        total={notificationsQuery.total}
+        loadedCount={notificationsQuery.loadedCount}
+        hasMore={notificationsQuery.hasMore}
+        isFetchingNextPage={notificationsQuery.isFetchingNextPage}
+        unreadCount={statsQuery.data?.unreadCount ?? 0}
         isLoading={notificationsQuery.isLoading}
         isFetching={notificationsQuery.isFetching}
         onRefresh={() => void notificationsQuery.refetch()}
-        onPageChange={setPage}
+        onLoadMore={notificationsQuery.loadMore}
       />
     </PageContainer>
   );

@@ -1,11 +1,28 @@
 import L from 'leaflet';
 import { MAP_STATUS_COLORS } from '@/features/map/constants/map-config';
 import type { DeviceMapStatus } from '@/features/map/types';
+
+const markerIconCache = new Map<string, L.DivIcon>();
+
+const normalizeHeadingForIcon = (heading = 0) => {
+  if (!Number.isFinite(heading)) {
+    return 0;
+  }
+
+  return Math.round(((heading % 360) + 360) % 360);
+};
+
 export const createDeviceMarkerIcon = (status: DeviceMapStatus, heading = 0): L.DivIcon => {
   const color = MAP_STATUS_COLORS[status] ?? MAP_STATUS_COLORS.disconnected;
-  const normalizedHeading = Number.isFinite(heading) ? heading : 0;
+  const normalizedHeading = normalizeHeadingForIcon(heading);
+  const cacheKey = `${status}:${normalizedHeading}`;
+  const cachedIcon = markerIconCache.get(cacheKey);
 
-  return L.divIcon({
+  if (cachedIcon) {
+    return cachedIcon;
+  }
+
+  const icon = L.divIcon({
     className: 'device-marker-icon',
     html: `<div style="position:relative;width:40px;height:40px;transform:rotate(${normalizedHeading}deg);filter:drop-shadow(0 6px 10px rgba(15,23,42,0.28));">
       <svg viewBox="0 0 64 64" width="40" height="40" aria-hidden="true">
@@ -28,4 +45,8 @@ export const createDeviceMarkerIcon = (status: DeviceMapStatus, heading = 0): L.
     iconAnchor: [20, 20],
     popupAnchor: [0, -20],
   });
+
+  markerIconCache.set(cacheKey, icon);
+
+  return icon;
 };

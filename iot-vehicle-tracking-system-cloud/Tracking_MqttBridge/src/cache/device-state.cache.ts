@@ -4,6 +4,8 @@ interface DeviceState {
   status: 'online' | 'offline' | 'running' | 'stopped';
   sessionId: number | null;
   lastSeenAt: number;
+  lastPayloadTimestampMs: number | null;
+  lastSeqNo: number | null;
   runtimeState: RuntimeStateSnapshot | null;
   localSessionKey: number | null;
   canonicalSessionId: string | null;
@@ -12,6 +14,8 @@ interface DeviceState {
 
 interface DeviceStateUpdate {
   sessionId?: number | null;
+  lastPayloadTimestampMs?: number | null;
+  lastSeqNo?: number | null;
   runtimeState?: RuntimeStateSnapshot | null;
   localSessionKey?: number | null;
   canonicalSessionId?: string | null;
@@ -58,6 +62,14 @@ export const setStatus = (
         ? update.sessionId
         : (existing?.sessionId ?? parsedCanonicalSessionId ?? null),
     lastSeenAt: Date.now(),
+    lastPayloadTimestampMs:
+      update.lastPayloadTimestampMs !== undefined
+        ? update.lastPayloadTimestampMs
+        : (existing?.lastPayloadTimestampMs ?? null),
+    lastSeqNo:
+      update.lastSeqNo !== undefined
+        ? update.lastSeqNo
+        : (existing?.lastSeqNo ?? null),
     runtimeState:
       update.runtimeState !== undefined ? update.runtimeState : (existing?.runtimeState ?? null),
     localSessionKey:
@@ -81,9 +93,7 @@ export const clearSession = (deviceId: string): number | null => {
   const oldSessionId = state.sessionId;
   state.sessionId = null;
   state.lastSeenAt = Date.now();
-  state.localSessionKey = null;
   state.canonicalSessionId = null;
-  state.bootId = null;
 
   return oldSessionId;
 };
@@ -108,13 +118,11 @@ export const resolveSessionId = (
 
   if (
     sessionIdentity.localSessionKey !== undefined &&
-    state.localSessionKey === sessionIdentity.localSessionKey &&
-    (
-      !sessionIdentity.bootId ||
-      !state.bootId ||
-      state.bootId === sessionIdentity.bootId
-    )
+    state.localSessionKey === sessionIdentity.localSessionKey
   ) {
+    if (state.bootId && sessionIdentity.bootId !== state.bootId) {
+      return null;
+    }
     return state.sessionId;
   }
 

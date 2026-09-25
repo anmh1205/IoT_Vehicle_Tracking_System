@@ -50,7 +50,7 @@ export interface DevicePosition {
   deviceBattery?: number | null;
   vehicleBattery?: number | null;
   satellites?: number | null;
-  vibration?: number | null;
+  imuAccelDeltaMps2?: number | null;
   errorCode?: number | null;
   temperature?: number | null;
   engineTemperature?: number | null;

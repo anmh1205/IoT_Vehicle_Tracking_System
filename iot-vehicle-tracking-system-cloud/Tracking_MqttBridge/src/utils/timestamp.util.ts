@@ -10,6 +10,29 @@ export interface NormalizedTimestamp {
   source: TimestampSource;
 }
 
+export const parseIsoTimestampMs = (value?: string | null): number | null => {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+export const maxTimestampMs = (...values: Array<number | null | undefined>): number | null => {
+  let maxValue: number | null = null;
+
+  values.forEach((value) => {
+    if (value === null || value === undefined || !Number.isFinite(value)) {
+      return;
+    }
+
+    maxValue = maxValue === null ? value : Math.max(maxValue, value);
+  });
+
+  return maxValue;
+};
+
 const normalizeUnixTimestamp = (value: number): number => {
   if (!Number.isFinite(value) || value <= 0) {
     return Number.NaN;

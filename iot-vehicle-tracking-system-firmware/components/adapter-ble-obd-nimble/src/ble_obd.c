@@ -15,29 +15,33 @@
 
 #include "ble_mgr.h"
 #include "ble_util.h"
+#include "telemetry_counters.h"
 #include "util.h"
 
 /**
  * @file ble_obd.c
  * @brief OBD-over-BLE session layer with ELM327 command/response handling.
+ * This translation unit belongs to the BLE OBD NimBLE adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
 
-#define OBD_MODE_CURRENT_DATA 0x01
-#define OBD_TX_CHAR_UUID "0x2af1"
-#define OBD_RX_CHAR_UUID "0x2af0"
-#define OBD_SERVICE_UUID "0x18f0"
-#define BLE_OBD_ELM327_INTER_CMD_DELAY_MS 80
-#define BLE_OBD_DIAG_LOG_INTERVAL_MS 10000U
-#define BLE_OBD_CONNECT_TIMEOUT_DEFAULT_MS 15000U
-#define BLE_OBD_CONNECT_TIMEOUT_MIN_MS 7000U
 
+#define OBD_MODE_CURRENT_DATA 0x01           /* OBD-II service/mode 01: live current data. */
+#define OBD_TX_CHAR_UUID "0x2af1"            /* GATT characteristic the host writes ELM327 commands to. */
+#define OBD_RX_CHAR_UUID "0x2af0"            /* GATT characteristic delivering adapter responses via notifications. */
+#define OBD_SERVICE_UUID "0x18f0"            /* Vendor BLE service exposing the serial-over-GATT OBD adapter. */
+#define BLE_OBD_ELM327_INTER_CMD_DELAY_MS 80 /* Settling delay between consecutive ELM327 init commands. */
+#define BLE_OBD_DIAG_LOG_INTERVAL_MS 10000U  /* Minimum spacing between rolling diagnostic counter dumps. */
+#define BLE_OBD_CONNECT_TIMEOUT_DEFAULT_MS 15000U /* Fallback connect/discovery timeout when caller passes 0. */
+#define BLE_OBD_CONNECT_TIMEOUT_MIN_MS 7000U /* Floor applied to connect timeout so discovery always has room. */
+
+/* ECU/session state inferred from the latest OBD response, surfaced to higher layers for telemetry. */
 typedef enum {
-    BLE_OBD_RESPONSE_STATE_UNKNOWN = 0,
-    BLE_OBD_RESPONSE_STATE_LIVE,
-    BLE_OBD_RESPONSE_STATE_STOPPED,
-    BLE_OBD_RESPONSE_STATE_NO_DATA,
-    BLE_OBD_RESPONSE_STATE_SEARCHING,
-    BLE_OBD_RESPONSE_STATE_ERROR,
+    BLE_OBD_RESPONSE_STATE_UNKNOWN = 0,  /* No classification yet, or response did not match any known pattern. */
+    BLE_OBD_RESPONSE_STATE_LIVE,         /* Valid OBD payload decoded: ECU is responding with live data. */
+    BLE_OBD_RESPONSE_STATE_STOPPED,      /* Adapter reported "STOPPED" (transaction interrupted). */
+    BLE_OBD_RESPONSE_STATE_NO_DATA,      /* Adapter reported "NO DATA" (PID unsupported or ECU silent). */
+    BLE_OBD_RESPONSE_STATE_SEARCHING,    /* Adapter still negotiating the OBD protocol with the vehicle bus. */
+    BLE_OBD_RESPONSE_STATE_ERROR,        /* Error/'?'/"UNABLE TO CONNECT" reply observed. */
 } ble_obd_response_state_t;
 
 /**
@@ -96,7 +100,9 @@ struct ble_obd_ctx {
 
 static const char *TAG = "BLE_OBD";
 
-/* Characteristic definition order: TX first, RX second. */
+/* Characteristic definition order: TX first, RX second.
+ * Index 0 = write target (commands out), index 1 = notify source (responses in).
+ * ble_obd_tx_handle()/ble_obd_rx_handle() depend on this fixed ordering. */
 static ble_gatt_char_def_t s_obd_chars[] = {
     {.uuid = OBD_TX_CHAR_UUID, .handle = 0, .notify_cb = NULL},
     {.uuid = OBD_RX_CHAR_UUID, .handle = 0, .notify_cb = NULL},
@@ -111,6 +117,7 @@ static ble_mgr_svc_def_t s_obd_service = {
 
 /* Optional preferred BLE address configured from persisted config. */
 static ble_addr_t s_preferred_addr;
+/* Flag indicating preferred address has been set. */
 static bool s_has_preferred_addr = false;
 
 static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_handle, void *usr_ctx);
@@ -163,6 +170,21 @@ static uint16_t ble_obd_rx_handle(void) {
 
 /**
  * @brief Copy advertising name into a null-terminated scratch buffer.
+ *
+ * Extracts the device name from BLE advertising fields (if present) and copies
+ * it to the caller's buffer with null termination. Handles edge cases: null
+ * input, zero-length name, and buffer overflow protection.
+ *
+ * Workflow:
+ * 1. Validate output buffer exists and has space
+ * 2. Check advertising fields contain name data
+ * 3. Calculate safe copy length (name_len vs buffer_capacity-1)
+ * 4. memcpy name bytes and null-terminate
+ *
+ * @param[in] adv_fields BLE advertising fields containing optional name.
+ * @param[out] buf Destination buffer for copied name (must be non-null).
+ * @param buf_len Size of destination buffer in bytes.
+ * @return size_t Number of characters copied (excluding null), 0 on failure.
  */
 static size_t ble_obd_copy_adv_name(const struct ble_hs_adv_fields *adv_fields, char *buf, size_t buf_len) {
     if (buf == NULL || buf_len == 0) {
@@ -182,6 +204,20 @@ static size_t ble_obd_copy_adv_name(const struct ble_hs_adv_fields *adv_fields, 
 
 /**
  * @brief Case-insensitive substring check used for OBD adapter names.
+ *
+ * Performs case-insensitive search for keyword substring within value string.
+ * Used to identify common OBD adapter naming patterns (e.g., "OBD", "Vgate",
+ * "ScanTool") without exact matching requirements.
+ *
+ * Workflow:
+ * 1. Validate both strings are non-empty
+ * 2. Early-exit if keyword longer than value
+ * 3. Slide window across value, compare each position case-insensitively
+ * 4. Return true on first match, false if no match found
+ *
+ * @param[in] value String to search within (e.g., device advertising name).
+ * @param[in] keyword Substring to find (e.g., "OBD").
+ * @return true if keyword found (case-insensitive), false otherwise.
  */
 static bool ble_obd_name_contains_keyword(const char *value, const char *keyword) {
     if (util_string_empty(value) || util_string_empty(keyword)) {
@@ -232,10 +268,12 @@ static ble_obd_response_state_t ble_obd_classify_response_state(ble_obd_ctx_t *c
         return BLE_OBD_RESPONSE_STATE_UNKNOWN;
     }
 
+    /* A decoded OBD payload is the strongest signal: ECU is live. */
     if (has_valid_obd) {
         return BLE_OBD_RESPONSE_STATE_LIVE;
     }
 
+    /* Otherwise inspect the raw ELM327 text for well-known status keywords. */
     const char *response = ctx->rx_data.buf;
     if (ble_obd_name_contains_keyword(response, "stopped")) {
         return BLE_OBD_RESPONSE_STATE_STOPPED;
@@ -246,6 +284,7 @@ static ble_obd_response_state_t ble_obd_classify_response_state(ble_obd_ctx_t *c
     if (ble_obd_name_contains_keyword(response, "searching")) {
         return BLE_OBD_RESPONSE_STATE_SEARCHING;
     }
+    /* '?' flag or explicit error text maps to the error state. */
     if (ctx->rx_data.has_error || ble_obd_name_contains_keyword(response, "error") ||
         ble_obd_name_contains_keyword(response, "unable to connect")) {
         return BLE_OBD_RESPONSE_STATE_ERROR;
@@ -304,7 +343,7 @@ static bool ble_obd_device_filter_cb(ble_mgr_ctx_t *mgr_ctx,
     if (s_has_preferred_addr && addr != NULL) {
         if (memcmp(addr->val, s_preferred_addr.val, sizeof(addr->val)) == 0) {
             ESP_LOGI(TAG,
-                     "BLE candidate matched preferred MAC addr=%s name=%s service_match=%d",
+                     "event=ble_candidate_selected reason=preferred_addr addr=%s name=%s service_match=%d",
                      addr_str,
                      display_name,
                      service_match ? 1 : 0);
@@ -314,12 +353,12 @@ static bool ble_obd_device_filter_cb(ble_mgr_ctx_t *mgr_ctx,
     }
 
     if (service_match) {
-        ESP_LOGI(TAG, "BLE candidate discovered service-match addr=%s name=%s", addr_str, display_name);
+        ESP_LOGI(TAG, "event=ble_candidate_selected reason=service_match addr=%s name=%s", addr_str, display_name);
         return true;
     }
 
     if (ble_obd_name_looks_like_adapter(name_buf)) {
-        ESP_LOGI(TAG, "BLE candidate discovered name-match addr=%s name=%s", addr_str, display_name);
+        ESP_LOGI(TAG, "event=ble_candidate_selected reason=name_match addr=%s name=%s", addr_str, display_name);
         return true;
     }
 
@@ -356,6 +395,7 @@ static bool ble_obd_parse_hex_response(const char *response, uint8_t *values, si
     size_t copy_len = MIN_VALUE(strlen(response), sizeof(parse_buf) - 1);
     memcpy(parse_buf, response, copy_len);
 
+    /* Turn the ELM prompt marker into whitespace so it splits tokens cleanly. */
     for (size_t i = 0; i < copy_len; ++i) {
         if (parse_buf[i] == '>') {
             parse_buf[i] = ' ';
@@ -364,18 +404,23 @@ static bool ble_obd_parse_hex_response(const char *response, uint8_t *values, si
 
     *out_count = 0;
     char *save = NULL;
+    /* Split on any whitespace/punctuation ELM327 may use between hex bytes. */
     char *token = strtok_r(parse_buf, " \r\n\t,;:", &save);
     while (token != NULL && *out_count < max_values) {
         size_t token_len = strlen(token);
+        /* Only even-length tokens of >=1 byte represent packed hex octets. */
         if ((token_len % 2) == 0 && token_len >= 2) {
             for (size_t i = 0; i + 1 < token_len && *out_count < max_values; i += 2) {
+                /* Skip non-hex pairs rather than aborting the whole token. */
                 if (!isxdigit((unsigned char)token[i]) || !isxdigit((unsigned char)token[i + 1])) {
                     continue;
                 }
 
+                /* Convert one two-char hex pair into a single byte value. */
                 char hex[3] = {token[i], token[i + 1], '\0'};
                 char *end_ptr = NULL;
                 long value = strtol(hex, &end_ptr, 16);
+                /* Accept only a fully-consumed pair within byte range. */
                 if (end_ptr == hex + 2 && value >= 0 && value <= 0xFF) {
                     values[*out_count] = (uint8_t)value;
                     (*out_count)++;
@@ -426,7 +471,7 @@ static void ble_obd_diag_log_periodic(ble_obd_ctx_t *ctx, bool force_now) {
     }
 
     ESP_LOGD(TAG,
-             "OBD diag total=%lu valid=%lu invalid=%lu timeout=%lu overflow=%lu",
+             "event=obd_diag total=%lu valid=%lu invalid=%lu timeout=%lu overflow=%lu",
              (unsigned long)ctx->diag.rxtx_total,
              (unsigned long)ctx->diag.notify_valid,
              (unsigned long)ctx->diag.notify_invalid,
@@ -446,6 +491,7 @@ static void ble_obd_diag_log_periodic(ble_obd_ctx_t *ctx, bool force_now) {
  * @param usr_ctx BLE OBD context pointer.
  */
 static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_handle, void *usr_ctx) {
+    // Buffer fragmented RX notifications here until the ELM prompt marks one complete response transaction.
     uint16_t rx_handle = ble_obd_rx_handle();
     if (rx_handle == 0 || attr_handle != rx_handle) {
         return;
@@ -468,6 +514,7 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
         ctx->diag.rx_overflow++;
     }
 
+    // Prompt detection decides when the accumulated RX buffer is complete enough to parse and release the waiter.
     bool chunk_has_prompt = memchr(data, '>', len) != NULL;
     bool has_prompt = chunk_has_prompt || ble_obd_response_has_prompt(ctx->rx_data.buf);
     if (memchr(data, '?', len) != NULL) {
@@ -484,17 +531,22 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
     bool has_hex = ble_obd_parse_hex_response(ctx->rx_data.buf, values, ARRAY_SIZE(values), &value_count);
 
     bool has_valid_obd = false;
-    size_t payload_offset = 0;
+    size_t payload_offset = 0; /* Index of the first data byte once the response header is located. */
+    /* PID-bearing modes echo back mode+PID (2 bytes); modes like 03/07/0A echo only the mode (1 byte). */
     size_t required_header_len = ctx->tx_data.expect_pid_header ? 2U : 1U;
     if (has_hex && value_count >= required_header_len) {
+        // Search the parsed bytes for the expected mode/PID header and discard stray echo/noise ahead of it.
         for (size_t i = 0; i + required_header_len - 1U < value_count; ++i) {
+            /* OBD-II positive responses set the high bit of the mode byte (request mode + 0x40). */
             if (values[i] != (ctx->tx_data.mode + 0x40)) {
                 continue;
             }
+            /* For PID requests the byte after the mode echo must match the requested PID. */
             if (ctx->tx_data.expect_pid_header && values[i + 1] != ctx->tx_data.pid) {
                 continue;
             }
 
+            /* Header matched: payload begins right after the mode (+PID) echo. */
             has_valid_obd = true;
             payload_offset = i + required_header_len;
             break;
@@ -506,8 +558,10 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
             ble_obd_classify_response_state(ctx, has_valid_obd);
         ctx->last_response_state = response_state;
         if (has_valid_obd) {
+            // Valid payloads are forwarded upward with the OBD header trimmed away already.
             ctx->tx_data.got_valid_payload = true;
             ctx->diag.notify_valid++;
+            telemetry_counters_inc_obd_read_ok();
             if (ctx->response_cb != NULL) {
                 int response_pid = ctx->tx_data.expect_pid_header ? (int)ctx->tx_data.pid : -1;
                 ctx->response_cb(ctx->tx_data.mode,
@@ -517,18 +571,22 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
                                  ctx->usr_ctx);
             }
         } else {
+            // Invalid/error responses still close the transaction so timeout and retry logic can advance deterministically.
             ctx->tx_data.got_valid_payload = false;
             ctx->diag.notify_invalid++;
+            telemetry_counters_inc_obd_invalid_response();
             if (ctx->diag.notify_invalid <= 5U || (ctx->diag.notify_invalid % 20U) == 0U) {
+                uint32_t suppressed = ctx->diag.notify_invalid <= 5U ? 0U : (ctx->diag.notify_invalid == 20U ? 14U : 19U);
                 ESP_LOGW(TAG,
-                         "OBD invalid response count=%lu mode=0x%02X pid=0x%02X state=%s has_hex=%d has_error=%d rx_len=%u",
+                         "event=obd_invalid_response count=%lu mode=0x%02X pid=0x%02X state=%s has_hex=%d has_error=%d rx_len=%u suppressed=%lu",
                          (unsigned long)ctx->diag.notify_invalid,
                          (unsigned)ctx->tx_data.mode,
                          (unsigned)ctx->tx_data.pid,
                          ble_obd_response_state_to_string(response_state),
                          has_hex ? 1 : 0,
                          ctx->rx_data.has_error ? 1 : 0,
-                         (unsigned)ctx->rx_data.len);
+                         (unsigned)ctx->rx_data.len,
+                         (unsigned long)suppressed);
             }
             if ((ctx->rx_data.has_error || has_hex) && ctx->response_cb != NULL) {
                 ctx->response_cb(ctx->tx_data.mode, -1, NULL, 0, ctx->usr_ctx);
@@ -547,6 +605,12 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
  * @param address MAC string or empty string to clear filter.
  *
  * @return ESP_OK on success, otherwise ESP_ERR_INVALID_ARG.
+ */
+/**
+ * @brief Set preferred OBD adapter address.
+ *
+ * @param address MAC address string.
+ * @return ESP_OK on success.
  */
 esp_err_t ble_obd_set_preferred_address(const char *address) {
     if (util_string_empty(address)) {
@@ -598,7 +662,7 @@ ble_obd_ctx_t *ble_obd_connect(ble_obd_response_cb_t response_cb, void *usr_ctx,
     ble_mgr_status_t status = ble_mgr_connect_service(mgr_ctx, &s_obd_disc_cfg, timeout_ms, ctx);
     if (status != BLE_MGR_E_OK) {
         ESP_LOGW(TAG,
-                 "BLE connect failed: %s (timeout=%lums preferred_mac=%d)",
+                 "event=ble_obd_connect_failed status=%s timeout_ms=%lu preferred_addr_configured=%d",
                  ble_mgr_status_to_string(status),
                  (unsigned long)timeout_ms,
                  s_has_preferred_addr ? 1 : 0);
@@ -652,6 +716,20 @@ bool ble_obd_is_connected(ble_obd_ctx_t *ctx) {
     return ble_mgr_is_connected(ctx->mgr_ctx);
 }
 
+bool ble_obd_get_peer_address_string(ble_obd_ctx_t *ctx, char out[BLE_ADDR_STR_LEN]) {
+    // Translate the connected peer address into a stable string for higher-layer reconnect hints.
+    if (ctx == NULL || ctx->mgr_ctx == NULL || out == NULL) {
+        return false;
+    }
+
+    ble_addr_t addr = {0};
+    if (!ble_mgr_get_peer_address(ctx->mgr_ctx, &addr)) {
+        return false;
+    }
+
+    return ble_addr_to_str(&addr, out) != NULL;
+}
+
 const char *ble_obd_get_last_ecu_state_label(ble_obd_ctx_t *ctx) {
     if (ctx == NULL) {
         return "disconnected";
@@ -670,6 +748,7 @@ const char *ble_obd_get_last_ecu_state_label(ble_obd_ctx_t *ctx) {
  * @return ESP_OK on success, otherwise timeout/state/send error.
  */
 esp_err_t ble_obd_send_raw(ble_obd_ctx_t *ctx, const char *command, uint32_t timeout_ms) {
+    // Push OBD send raw through the shared publish path so metadata and error handling stay aligned.
     ESP_RETURN_ON_NULL(ctx, ESP_ERR_INVALID_ARG, TAG, "ctx is NULL");
     ESP_RETURN_ON_NULL(command, ESP_ERR_INVALID_ARG, TAG, "command is NULL");
 
@@ -761,6 +840,7 @@ static int ble_obd_execute_request(ble_obd_ctx_t *ctx,
     BaseType_t has_response = xSemaphoreTake(ctx->response_sem, pdMS_TO_TICKS(timeout_ms));
     if (has_response != pdTRUE) {
         ctx->diag.rxtx_timeout++;
+        telemetry_counters_inc_obd_timeout();
     }
 
     bool has_valid_payload = has_response == pdTRUE && ctx->tx_data.got_valid_payload;
@@ -790,15 +870,18 @@ int ble_obd_request_mode(ble_obd_ctx_t *ctx, uint8_t mode, uint32_t timeout_ms) 
 esp_err_t ble_obd_elm327_init(ble_obd_ctx_t *ctx) {
     ESP_RETURN_ON_NULL(ctx, ESP_ERR_INVALID_ARG, TAG, "ctx is NULL");
 
+    /* Baseline ELM327 setup: reset, disable echo/linefeed/spaces, hide headers,
+     * then force ISO 15765-4 CAN 11-bit/500k (protocol 6). */
     const char *commands[] = {
-        "ATZ\r",
-        "ATE0\r",
-        "ATL0\r",
-        "ATS0\r",
-        "ATH0\r",
-        "ATSP6\r",
+        "ATZ\r",    /* Full reset of the adapter. */
+        "ATE0\r",   /* Echo off so responses omit the sent command. */
+        "ATL0\r",   /* Linefeeds off. */
+        "ATS0\r",   /* Spaces off in hex output. */
+        "ATH0\r",   /* Headers off; only data bytes returned. */
+        "ATSP6\r",  /* Select protocol 6 (CAN 11-bit, 500 kbps). */
     };
 
+    /* Per-command timeouts; ATZ needs the longest as it reboots the adapter. */
     static const uint32_t command_timeouts_ms[] = {
         5000,
         2000,
@@ -812,7 +895,10 @@ esp_err_t ble_obd_elm327_init(ble_obd_ctx_t *ctx) {
         uint32_t timeout_ms = command_timeouts_ms[i];
         esp_err_t err = ble_obd_send_raw(ctx, commands[i], timeout_ms);
         if (err != ESP_OK) {
-            ESP_LOGW(TAG, "ELM327 init failed at step %u (timeout=%lums)", (unsigned)i, (unsigned long)timeout_ms);
+            ESP_LOGW(TAG,
+                     "event=elm327_init_step_failed step=%u timeout_ms=%lu",
+                     (unsigned)i,
+                     (unsigned long)timeout_ms);
             return err;
         }
 

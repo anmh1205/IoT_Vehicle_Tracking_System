@@ -6,6 +6,8 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { EmptyState } from '@/components/common/empty-state';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { StatCard } from '@/components/common/stat-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,6 +26,7 @@ import {
   getZoneTypeLabel,
 } from '@/features/geofences/lib/allowed-zone-form';
 import { useRoleAccess } from '@/hooks/use-role-access';
+import { useProgressiveList } from '@/hooks/use-progressive-list';
 import { zoneServices, type VehicleZoneVehicleSummary } from '@/lib/api/zones';
 import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
 
@@ -128,7 +131,7 @@ const ZonesPage = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'configured' | 'missing' | 'outside'>('all');
   const [selectedVehicle, setSelectedVehicle] = useState<VehicleZoneVehicleSummary | null>(null);
-  const deferredSearch = useDeferredValue(search);
+  const deferredSearch = useDeferredValue(search.trim());
 
   const zonesQuery = useQuery({
     queryKey: ['vehicles-for-zones-page'],
@@ -138,7 +141,7 @@ const ZonesPage = () => {
   const rows = useMemo(() => zonesQuery.data?.items ?? [], [zonesQuery.data?.items]);
 
   const filteredRows = useMemo(() => {
-    const keyword = deferredSearch.trim().toLowerCase();
+    const keyword = deferredSearch.toLowerCase();
     return rows.filter((row) => {
       const matchesSearch =
         keyword.length === 0 ||
@@ -163,6 +166,10 @@ const ZonesPage = () => {
       return true;
     });
   }, [deferredSearch, filter, rows]);
+  const visibleRows = useProgressiveList(filteredRows, {
+    pageSize: 20,
+    resetKey: `${filter}|${deferredSearch}|${filteredRows.length}`,
+  });
 
   const stats = useMemo(() => {
     const configured = rows.filter((row) => Boolean(row.zone)).length;
@@ -174,7 +181,7 @@ const ZonesPage = () => {
   return (
     <PageContainer
       pageTitle="Vùng"
-      pageDescription="Quản lý vùng active theo từng xe, hỗ trợ cả bán kính và địa lý hành chính từ một luồng duy nhất."
+      pageDescription="Quản lý vùng đang kích hoạt theo từng xe, hỗ trợ cả bán kính và địa lý hành chính từ một luồng duy nhất."
       pageHeaderAction={
         <Button
           variant="outline"
@@ -189,71 +196,95 @@ const ZonesPage = () => {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Tổng phương tiện"
-          value={stats.total}
+          value={zonesQuery.isError ? '--' : stats.total}
           icon={<MapPinned className="h-4 w-4" />}
           isLoading={zonesQuery.isLoading}
         />
         <StatCard
           title="Đã có vùng"
-          value={stats.configured}
+          value={zonesQuery.isError ? '--' : stats.configured}
           icon={<ShieldCheck className="h-4 w-4" />}
           isLoading={zonesQuery.isLoading}
         />
         <StatCard
           title="Chưa thiết lập"
-          value={stats.missing}
+          value={zonesQuery.isError ? '--' : stats.missing}
           icon={<CircleOff className="h-4 w-4" />}
           isLoading={zonesQuery.isLoading}
         />
         <StatCard
           title="Đang ngoài vùng"
-          value={stats.outside}
+          value={zonesQuery.isError ? '--' : stats.outside}
           icon={<ShieldAlert className="h-4 w-4" />}
           isLoading={zonesQuery.isLoading}
         />
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredRows}
-        pagination={false}
-        isLoading={zonesQuery.isLoading}
-        onRowClick={access.canEditDevice ? setSelectedVehicle : undefined}
-        emptyTitle="Chưa có phương tiện phù hợp"
-        emptyDescription="Điều chỉnh bộ lọc hoặc chọn một phương tiện khác để thiết lập vùng."
-        emptyAction={
-          rows.length > 0 && access.canEditDevice
-            ? {
-                label: 'Mở phương tiện đầu tiên',
-                onClick: () => setSelectedVehicle(rows[0] ?? null),
-              }
-            : undefined
-        }
-        toolbar={
-          <div className="flex w-full flex-col gap-2 sm:flex-row lg:flex-nowrap">
-            <Input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Tìm theo mã xe, biển số, khách hàng hoặc thiết bị..."
-              className="w-full sm:max-w-sm"
-            />
-            <Select
-              value={filter}
-              onValueChange={(value: 'all' | 'configured' | 'missing' | 'outside') => setFilter(value)}
-            >
-              <SelectTrigger className="w-full sm:w-[220px]">
-                <SelectValue placeholder="Bộ lọc trạng thái" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả phương tiện</SelectItem>
-                <SelectItem value="configured">Đã có vùng</SelectItem>
-                <SelectItem value="missing">Chưa thiết lập</SelectItem>
-                <SelectItem value="outside">Đang ngoài vùng</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        }
-      />
+      {zonesQuery.isError ? (
+        <div className="rounded-xl border border-dashed p-6">
+          <EmptyState
+            title="Không thể tải danh sách vùng"
+            description={
+              zonesQuery.error instanceof Error
+                ? zonesQuery.error.message
+                : 'Dữ liệu vùng hiện chưa sẵn sàng. Hãy thử lại sau.'
+            }
+            action={{ label: 'Thử lại', onClick: () => void zonesQuery.refetch() }}
+          />
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={visibleRows.items}
+          pagination={false}
+          isLoading={zonesQuery.isLoading}
+          onRowClick={access.canEditDevice ? setSelectedVehicle : undefined}
+          emptyTitle="Chưa có phương tiện phù hợp"
+          emptyDescription="Điều chỉnh bộ lọc hoặc chọn một phương tiện khác để thiết lập vùng."
+          emptyAction={
+            rows.length > 0 && access.canEditDevice
+              ? {
+                  label: 'Mở phương tiện đầu tiên',
+                  onClick: () => setSelectedVehicle(rows[0] ?? null),
+                }
+              : undefined
+          }
+          toolbar={
+            <div className="flex w-full flex-col gap-2 sm:flex-row lg:flex-nowrap">
+              <Input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Tìm theo mã xe, biển số, khách hàng hoặc thiết bị..."
+                className="w-full sm:max-w-sm"
+              />
+              <Select
+                value={filter}
+                onValueChange={(value: 'all' | 'configured' | 'missing' | 'outside') => setFilter(value)}
+              >
+                <SelectTrigger className="w-full sm:w-[220px]">
+                  <SelectValue placeholder="Bộ lọc trạng thái" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả phương tiện</SelectItem>
+                  <SelectItem value="configured">Đã có vùng</SelectItem>
+                  <SelectItem value="missing">Chưa thiết lập</SelectItem>
+                  <SelectItem value="outside">Đang ngoài vùng</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          }
+        />
+      )}
+
+      {!zonesQuery.isError ? (
+        <InfiniteScrollTrigger
+          hasMore={visibleRows.hasMore}
+          onLoadMore={visibleRows.loadMore}
+          loadedCount={visibleRows.loadedCount}
+          totalCount={visibleRows.totalCount}
+          itemLabel="phương tiện"
+        />
+      ) : null}
 
       <AllowedZoneSetupSheet
         open={Boolean(selectedVehicle)}

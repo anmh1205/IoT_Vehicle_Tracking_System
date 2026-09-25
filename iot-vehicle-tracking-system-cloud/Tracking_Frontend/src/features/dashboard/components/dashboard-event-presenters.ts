@@ -40,7 +40,7 @@ const CODE_TITLE_MAP: Record<string, string> = {
 };
 
 const FALLBACK_DESCRIPTION: Record<string, string> = {
-  mqtt_bridge_rawdata: 'MQTT Bridge vừa xác nhận đã nhận bản tin rawdata mới từ thiết bị.',
+  mqtt_bridge_rawdata: 'MQTT Bridge vừa xác nhận đã nhận bản tin dữ liệu thô mới từ thiết bị.',
   obd_live_data: 'Thiết bị vừa gửi thêm mẫu PID hoặc telemetry OBD mới lên cloud.',
   dtc_pending: 'Thiết bị vừa phát hiện mã lỗi OBD cần tiếp tục theo dõi hoặc xác nhận.',
   idle_too_long: 'Thiết bị đứng yên lâu hơn ngưỡng vận hành đã theo dõi.',
@@ -58,7 +58,7 @@ const localizeMessage = (message: string, eventCode: string) => {
   }
 
   if (/Recent MQTT Bridge rawdata heartbeat/i.test(normalized)) {
-    return 'MQTT Bridge vừa nhận heartbeat rawdata mới trong môi trường audit local.';
+    return 'MQTT Bridge vừa nhận heartbeat dữ liệu thô mới trong môi trường kiểm tra cục bộ.';
   }
   if (/Latest OBD telemetry sample matched/i.test(normalized)) {
     return 'Mẫu telemetry OBD mới nhất đã khớp với ảnh chụp trạng thái thiết bị hiện tại.';

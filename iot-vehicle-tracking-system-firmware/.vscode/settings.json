@@ -1,7 +1,7 @@
 {
-  "idf.port": "COM6",
-  "idf.portWin": "COM5",
-  "idf.monitorPort": "COM6",
+  "idf.port": "COM5",
+  "idf.portWin": "COM8",
+  "idf.monitorPort": "COM8",
   "idf.flashType": "UART",
   "idf.openOcdConfigs": ["board/esp32s3-builtin.cfg"],
   "idf.customExtraVars": {
@@ -10,5 +10,6 @@
     "IDF_PYTHON_ENV_PATH": "C:\\Espressif\\python_env\\idf5.5_py3.11_env",
     "ESP_ROM_ELF_DIR": "C:\\Espressif\\tools\\esp-rom-elfs\\20250904",
     "IDF_TARGET": "esp32s3"
-  }
+  },
+  "idf.currentSetup": "C:\\Espressif\\esp-idf-v5.5.3"
 }

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Clock3, Cpu, Gauge } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,10 +8,10 @@ import { DEVICE_ANIMATIONS, DEVICE_SHADOWS } from './device-design-constants';
 import type { Device } from '@/features/devices/types';
 import {
   getAlertSummaryPresentation,
+  getConnectivityPresentation,
   getDeviceRuntimePresentation,
-  getEnginePresentation,
   getFreshnessPresentation,
-  getMotionPresentation,
+  getVehicleStatePresentation,
   type StateTone,
 } from '@/lib/utils/device-state';
 
@@ -38,9 +38,9 @@ const StateChip = ({ label, value, tone }: { label: string; value: string; tone:
 export const DeviceCard = ({ device, onClick }: DeviceCardProps) => {
   const interactive = typeof onClick === 'function';
   const freshness = getFreshnessPresentation(device.stateUpdatedAt ?? device.lastSeenAt);
-  const engine = getEnginePresentation(device.ignitionState);
-  const motion = getMotionPresentation(device.motionState);
+  const vehicle = getVehicleStatePresentation(device.vehicleState);
   const runtime = getDeviceRuntimePresentation(device.deviceState);
+  const connectivity = getConnectivityPresentation(device.currentStatus);
   const deviceAlerts = getAlertSummaryPresentation(device.deviceAlerts, 'Thiết bị');
   const ecuAlerts = getAlertSummaryPresentation(device.ecuAlerts, 'ECU');
 
@@ -76,9 +76,9 @@ export const DeviceCard = ({ device, onClick }: DeviceCardProps) => {
         </div>
 
         <div className="grid grid-cols-3 gap-2">
-          <StateChip {...engine} />
-          <StateChip {...motion} />
+          <StateChip {...vehicle} />
           <StateChip {...runtime} />
+          <StateChip {...connectivity} />
         </div>
       </CardHeader>
 
@@ -105,17 +105,23 @@ export const DeviceCard = ({ device, onClick }: DeviceCardProps) => {
           </span>
           <span className="inline-flex items-center gap-1">
             <Clock3 className="h-3.5 w-3.5" />
-            {device.lastSeenAt ? `Cập nhật ${new Date(device.lastSeenAt).toLocaleString('vi-VN')}` : 'Chưa có telemetry'}
+            {device.lastSeenAt
+              ? `Cập nhật ${new Date(device.lastSeenAt).toLocaleString('vi-VN')}`
+              : 'Chưa có telemetry'}
           </span>
         </div>
 
         <div className="grid gap-2">
           <div className={`rounded-xl border px-3 py-2 ${toneClassNames[deviceAlerts.tone]}`}>
-            <p className="text-[10px] uppercase tracking-[0.14em] opacity-70">{deviceAlerts.label}</p>
+            <p className="text-[10px] uppercase tracking-[0.14em] opacity-70">
+              {deviceAlerts.label}
+            </p>
             <p className="mt-1 text-sm font-medium">{deviceAlerts.summary}</p>
           </div>
           <div className={`rounded-xl border px-3 py-2 ${toneClassNames[ecuAlerts.tone]}`}>
-            <p className="text-[10px] uppercase tracking-[0.14em] opacity-70">{ecuAlerts.label}</p>
+            <p className="text-[10px] uppercase tracking-[0.14em] opacity-70">
+              {ecuAlerts.label}
+            </p>
             <p className="mt-1 text-sm font-medium">{ecuAlerts.summary}</p>
           </div>
         </div>
@@ -123,4 +129,3 @@ export const DeviceCard = ({ device, onClick }: DeviceCardProps) => {
     </Card>
   );
 };
-

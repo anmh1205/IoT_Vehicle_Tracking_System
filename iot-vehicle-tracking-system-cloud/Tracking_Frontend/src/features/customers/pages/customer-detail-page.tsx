@@ -110,7 +110,7 @@ const CustomerDetailPage = ({
   const customerId = Number(id);
   const [assignOpen, setAssignOpen] = useState(false);
   const [vehicleSearch, setVehicleSearch] = useState('');
-  const deferredVehicleSearch = useDeferredValue(vehicleSearch);
+  const deferredVehicleSearch = useDeferredValue(vehicleSearch.trim());
   const queryClient = useQueryClient();
 
   const query = useQuery({
@@ -175,6 +175,17 @@ const CustomerDetailPage = ({
           description="Không thể lấy thông tin khách hàng. Vui lòng thử lại."
           action={{ label: 'Thử lại', onClick: () => void query.refetch() }}
         />
+      </PageContainer>
+    );
+  }
+
+  if (query.isLoading) {
+    return (
+      <PageContainer pageTitle={`Khách hàng #${id}`} pageDescription="Chi tiết khách hàng">
+        <div className="space-y-4">
+          <div className="h-48 animate-pulse rounded-xl border bg-muted/30" />
+          <div className="h-64 animate-pulse rounded-xl border bg-muted/30" />
+        </div>
       </PageContainer>
     );
   }

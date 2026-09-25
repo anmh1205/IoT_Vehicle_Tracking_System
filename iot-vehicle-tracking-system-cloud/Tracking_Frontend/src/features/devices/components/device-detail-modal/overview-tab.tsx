@@ -2,10 +2,16 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { DEVICE_STATUS_LABELS } from '@/features/devices/components/device-constants';
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/utils/date/format';
 import {
+  getConnectivityPresentation,
+  getDeviceRuntimePresentation,
+  getVehicleStatePresentation,
+} from '@/lib/utils/device-state';
+import {
   formatElectricalMetric,
+  pickLatestTelemetryTimestamp,
+  pickLatestTelemetryValue,
   formatTemperatureMetric,
   getDeviceConfigSummary,
   resolveDeviceBatteryValue,
@@ -129,7 +135,7 @@ const resolveObdHealthState = (snapshot: DiagnosticsSnapshot | null): ObdHealthS
 
 const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[] => {
   if (!snapshot) {
-    return ['Chưa có snapshot OBD. Hãy kết nối adapter rồi gửi telemetry để modal phân tích.'];
+    return ['Chưa có ảnh chụp OBD. Hãy kết nối bộ chuyển đổi rồi gửi telemetry để màn hình phân tích.'];
   }
 
   const recommendations: string[] = [];
@@ -138,10 +144,10 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
   const permanentDtc = snapshot.dtcPermanent ?? [];
 
   if (snapshot.bleConnected === false || snapshot.elmReady === false) {
-    recommendations.push('Kiểm tra adapter OBD BLE, nguồn cổng OBD và trạng thái wakeup của thiết bị.');
+    recommendations.push('Kiểm tra bộ chuyển đổi OBD BLE, nguồn cổng OBD và trạng thái đánh thức của thiết bị.');
   }
   if (snapshot.milOn === true) {
-    recommendations.push('MIL đang bật. Nên kiểm tra ngay DTC stored và pending để xác định nguyên nhân gốc.');
+    recommendations.push('MIL đang bật. Nên kiểm tra ngay DTC đã lưu và DTC chờ xác nhận để xác định nguyên nhân gốc.');
   }
   if (storedDtc.length > 0) {
     recommendations.push(`DTC đang lưu: ${storedDtc.join(', ')}.`);
@@ -153,7 +159,7 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
     recommendations.push(`DTC thường trực: ${permanentDtc.join(', ')}.`);
   }
   if (snapshot.ecuState === 'stopped') {
-    recommendations.push('ECU đang ở trạng thái dừng. Cần bật ignition hoặc đánh thức bus OBD trước khi chờ PID thời gian thực.');
+    recommendations.push('ECU đang ở trạng thái dừng. Cần bật khóa điện hoặc đánh thức bus OBD trước khi chờ PID thời gian thực.');
   }
   if (snapshot.ecuState === 'searching' || snapshot.ecuState === 'no_data') {
     recommendations.push('OBD đã nối nhưng ECU chưa trả PID hợp lệ. Kiểm tra giao thức xe và thứ tự wakeup.');
@@ -178,7 +184,7 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
 
   return recommendations.length > 0
     ? recommendations.slice(0, 3)
-    : ['OBD đang ổn định. Tiếp tục theo dõi định kỳ trong modal thiết bị.'];
+    : ['OBD đang ổn định. Tiếp tục theo dõi định kỳ trong màn hình thiết bị.'];
 };
 
 const InfoMatrixCard = ({
@@ -260,8 +266,11 @@ export const OverviewTab = () => {
   const obdRecommendations = buildObdRecommendations(diagnosticsSnapshot);
   const configSummary = getDeviceConfigSummary(device);
   const observedCadence = getObservedCadenceSeconds(trackingRowsAscending);
-  const latestTelemetryTimestamp =
-    latestTrackingRow?.timestamp ?? positionSnapshot?.timestamp ?? device?.lastSeenAt ?? null;
+  const latestTelemetryTimestamp = pickLatestTelemetryTimestamp(
+    latestTrackingRow?.timestamp,
+    positionSnapshot?.timestamp,
+    device?.lastSeenAt ?? null,
+  );
   const telemetryFreshness = getFreshnessSeconds(latestTelemetryTimestamp);
   const telemetryFreshnessState = getTelemetryFreshnessState(
     telemetryFreshness,
@@ -272,11 +281,30 @@ export const OverviewTab = () => {
     telemetryFreshnessState === 'stale' || telemetryFreshnessState === 'offline';
 
   const latestPosition = {
-    latitude: latestTrackingRow?.latitude ?? positionSnapshot?.latitude ?? device?.latitude ?? null,
-    longitude:
-      latestTrackingRow?.longitude ?? positionSnapshot?.longitude ?? device?.longitude ?? null,
+    latitude: pickLatestTelemetryValue(
+      latestTrackingRow?.latitude,
+      latestTrackingRow?.timestamp,
+      positionSnapshot?.latitude,
+      positionSnapshot?.timestamp,
+      device?.latitude ?? null,
+    ),
+    longitude: pickLatestTelemetryValue(
+      latestTrackingRow?.longitude,
+      latestTrackingRow?.timestamp,
+      positionSnapshot?.longitude,
+      positionSnapshot?.timestamp,
+      device?.longitude ?? null,
+    ),
   };
-  const latestSpeed = latestTrackingRow?.speed ?? positionSnapshot?.speed ?? null;
+  const vehicleState = getVehicleStatePresentation(device?.vehicleState);
+  const deviceRuntimeState = getDeviceRuntimePresentation(device?.deviceState);
+  const connectivityState = getConnectivityPresentation(device?.currentStatus);
+  const latestSpeed = pickLatestTelemetryValue(
+    latestTrackingRow?.speed,
+    latestTrackingRow?.timestamp,
+    positionSnapshot?.speed,
+    positionSnapshot?.timestamp,
+  );
   const latestDeviceBattery = resolveDeviceBatteryValue(latestTrackingRow, positionSnapshot);
   const latestVehicleBattery = resolveVehicleBatteryValue(latestTrackingRow, positionSnapshot);
   const latestEngineTemperature = resolveEngineTemperatureValue(
@@ -301,8 +329,8 @@ export const OverviewTab = () => {
         emphasize: true,
       },
       {
-        label: 'Trạng thái',
-        value: DEVICE_STATUS_LABELS[device?.currentStatus ?? ''] ?? device?.currentStatus ?? '-',
+        label: vehicleState.label,
+        value: vehicleState.value,
         note: device?.vehiclePlate ? `Biển số ${device.vehiclePlate}` : 'Chưa gán biển số',
       },
     ],
@@ -318,8 +346,18 @@ export const OverviewTab = () => {
     ],
     [
       {
+        label: deviceRuntimeState.label,
+        value: deviceRuntimeState.value,
+      },
+      {
+        label: connectivityState.label,
+        value: connectivityState.value,
+      },
+    ],
+    [
+      {
         label: speedLabel,
-        value: latestSpeed !== null ? `${latestSpeed.toFixed(1)} km/h` : '-',
+        value: latestSpeed !== null ? `${formatNumber(latestSpeed)} km/h` : '-',
       },
       {
         label: vehicleBatteryLabel,
@@ -362,7 +400,7 @@ export const OverviewTab = () => {
     [
       {
         label: 'Quãng đường theo dải dữ liệu',
-        value: `${distanceKm.toFixed(2)} km`,
+        value: `${formatNumber(distanceKm)} km`,
       },
       {
         label: 'Bản tin đã nhận',
@@ -372,7 +410,7 @@ export const OverviewTab = () => {
     [
       {
         label: 'Tốc độ TB / tối đa',
-        value: `${averageSpeed.toFixed(1)} / ${maxSpeed.toFixed(1)} km/h`,
+        value: `${formatNumber(averageSpeed)} / ${formatNumber(maxSpeed)} km/h`,
       },
       {
         label: 'Phiên vận hành / mã lỗi',
@@ -397,7 +435,7 @@ export const OverviewTab = () => {
         diagnosticsSnapshot.bleConnected === true ? 'BLE ổn' : diagnosticsSnapshot.bleConnected === false ? 'BLE ngắt' : 'BLE chưa rõ',
         diagnosticsSnapshot.elmReady === true ? 'ELM sẵn sàng' : diagnosticsSnapshot.elmReady === false ? 'ELM chưa sẵn sàng' : 'ELM chưa rõ',
       ].join(' · ')
-    : 'Chưa có snapshot OBD để đánh giá kết nối.';
+    : 'Chưa có ảnh chụp OBD để đánh giá kết nối.';
 
   const obdRows: MatrixCell[][] = [
     [
@@ -411,7 +449,7 @@ export const OverviewTab = () => {
       },
       {
         label: 'MIL / số DTC báo cáo',
-        value: `${diagnosticsSnapshot?.milOn === undefined ? '-' : diagnosticsSnapshot.milOn ? 'ON' : 'OFF'} / ${diagnosticsSnapshot?.reportedDtcCount !== undefined ? diagnosticsSnapshot.reportedDtcCount.toFixed(0) : '-'}`,
+        value: `${diagnosticsSnapshot?.milOn === undefined ? '-' : diagnosticsSnapshot.milOn ? 'ON' : 'OFF'} / ${diagnosticsSnapshot?.reportedDtcCount !== undefined ? formatNumber(diagnosticsSnapshot.reportedDtcCount, { maximumFractionDigits: 0 }) : '-'}`,
       },
     ],
     [
@@ -419,37 +457,37 @@ export const OverviewTab = () => {
         label: 'Độ trễ mẫu',
         value:
           diagnosticsSnapshot?.sampleAgeMs !== undefined
-            ? `${diagnosticsSnapshot.sampleAgeMs.toFixed(0)} ms`
+            ? `${formatNumber(diagnosticsSnapshot.sampleAgeMs, { maximumFractionDigits: 0 })} ms`
             : '-',
       },
       {
         label: 'Lỗi kết nối / 5 phút',
         value:
           diagnosticsSnapshot?.connectFailCount5m !== undefined
-            ? diagnosticsSnapshot.connectFailCount5m.toFixed(0)
+            ? formatNumber(diagnosticsSnapshot.connectFailCount5m, { maximumFractionDigits: 0 })
             : '-',
       },
     ],
     [
       {
         label: 'RPM / tốc độ OBD',
-        value: `${diagnosticsSnapshot?.rpm !== undefined ? diagnosticsSnapshot.rpm.toFixed(0) : '-'} / ${diagnosticsSnapshot?.obdSpeedKph !== undefined ? `${diagnosticsSnapshot.obdSpeedKph.toFixed(1)} km/h` : '-'}`,
+        value: `${diagnosticsSnapshot?.rpm !== undefined ? formatNumber(diagnosticsSnapshot.rpm, { maximumFractionDigits: 0 }) : '-'} / ${diagnosticsSnapshot?.obdSpeedKph !== undefined ? `${formatNumber(diagnosticsSnapshot.obdSpeedKph)} km/h` : '-'}`,
       },
       {
         label: 'Nhiệt độ / tải máy',
-        value: `${diagnosticsSnapshot?.coolantC !== undefined ? `${diagnosticsSnapshot.coolantC.toFixed(1)}°C` : '-'} / ${diagnosticsSnapshot?.engineLoadPct !== undefined ? `${diagnosticsSnapshot.engineLoadPct.toFixed(1)}%` : '-'}`,
+        value: `${diagnosticsSnapshot?.coolantC !== undefined ? `${formatNumber(diagnosticsSnapshot.coolantC)}°C` : '-'} / ${diagnosticsSnapshot?.engineLoadPct !== undefined ? `${formatNumber(diagnosticsSnapshot.engineLoadPct)}%` : '-'}`,
       },
     ],
     [
       {
         label: 'DTC hiện có',
-        value: `Stored ${storedDtc.length} · Pending ${pendingDtc.length} · Permanent ${permanentDtc.length}`,
+        value: `Đã lưu ${storedDtc.length} · Chờ xác nhận ${pendingDtc.length} · Thường trực ${permanentDtc.length}`,
         note:
           storedDtc.length + pendingDtc.length + permanentDtc.length > 0
             ? [
-                storedDtc.length > 0 ? `Stored: ${storedDtc.join(', ')}` : '',
-                pendingDtc.length > 0 ? `Pending: ${pendingDtc.join(', ')}` : '',
-                permanentDtc.length > 0 ? `Permanent: ${permanentDtc.join(', ')}` : '',
+                storedDtc.length > 0 ? `Đã lưu: ${storedDtc.join(', ')}` : '',
+                pendingDtc.length > 0 ? `Chờ xác nhận: ${pendingDtc.join(', ')}` : '',
+                permanentDtc.length > 0 ? `Thường trực: ${permanentDtc.join(', ')}` : '',
               ]
                 .filter(Boolean)
                 .join(' · ')
@@ -464,7 +502,7 @@ export const OverviewTab = () => {
           diagnosticsSnapshot?.readinessIncomplete && diagnosticsSnapshot.readinessIncomplete.length > 0
             ? diagnosticsSnapshot.readinessIncomplete.join(', ')
             : '-',
-        note: 'Dùng để đánh giá readiness của ECU trước khi kết luận trạng thái OBD.',
+        note: 'Dùng để đánh giá trạng thái sẵn sàng của ECU trước khi kết luận trạng thái OBD.',
         colSpan: 2,
       },
     ],
@@ -491,18 +529,19 @@ export const OverviewTab = () => {
       <AllowedZoneStatusCard
         vehicleId={device?.vehicleId ?? null}
         title="Vùng"
+        variant="compact"
         canEdit={access.canEditDevice && Boolean(device?.vehicleId)}
         onConfigure={() => setAllowedZoneOpen(true)}
       />
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-start">
           <InfoMatrixCard
-          title="Trạng thái thiết bị"
+          title="Xe / Thiết bị / Kết nối"
           rows={deviceRows}
           className="xl:w-[31%] xl:flex-none"
         />
         <InfoMatrixCard
-          title="Tình trạng telemetry"
+          title="Telemetry"
           rows={telemetryRows}
           badge={<Badge variant={telemetryState.variant}>{telemetryState.label}</Badge>}
           className="xl:w-[31%] xl:flex-none"

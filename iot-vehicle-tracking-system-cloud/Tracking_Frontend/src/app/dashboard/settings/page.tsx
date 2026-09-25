@@ -96,7 +96,8 @@ const SettingsPage = () => {
   );
 
   const profileMutation = useMutation({
-    mutationFn: (payload: { fullName?: string; email?: string }) => authServices.updateProfile(payload),
+    mutationFn: (payload: { fullName?: string; email?: string | null }) =>
+      authServices.updateProfile(payload),
     onMutate: () => setProfileStatus(null),
     onSuccess: (updatedUser) => {
       setAuth(

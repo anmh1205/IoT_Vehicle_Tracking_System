@@ -7,7 +7,12 @@
 /**
  * @file data_formatter.h
  * @brief JSON payload formatting helpers for MQTT publications.
+ * This header belongs to the device-cloud contract layer and describes the payload contract that firmware and cloud services must interpret the same way.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Build raw telemetry payload JSON string.
@@ -25,7 +30,10 @@ char *data_format_rawdata(const config_t *cfg,
                           uint64_t timestamp_ms,
                           const char *message_id,
                           uint32_t seq_no,
-                          const char *boot_id);
+                          const char *metadata_boot_id,
+                          uint32_t local_session_key,
+                          uint64_t canonical_session_id,
+                          const char *session_boot_id);
 
 /**
  * @brief Build status payload JSON string.
@@ -46,7 +54,11 @@ char *data_format_status(const config_t *cfg,
                          uint64_t timestamp_ms,
                          const char *message_id,
                          uint32_t seq_no,
-                         const char *boot_id);
+                         const char *metadata_boot_id,
+                         uint32_t local_session_key,
+                         uint64_t canonical_session_id,
+                         const char *session_boot_id,
+                         const char *boundary_event);
 
 /**
  * @brief Build event payload JSON string.

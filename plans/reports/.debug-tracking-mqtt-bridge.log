@@ -1,9 +1,0 @@
-2026-03-31T17:15:18.259436623Z {"level":30,"time":1774977318257,"service":"mqtt-bridge","msg":"Starting MQTT Bridge service..."}
-2026-03-31T17:15:19.150382456Z {"level":30,"time":1774977318260,"service":"mqtt-bridge","msg":"Batch writer started (interval=1000ms, maxBuffer=100)"}
-2026-03-31T17:15:19.150418784Z {"level":30,"time":1774977318260,"service":"mqtt-bridge","msg":"Connecting to MQTT broker at mqtts://tracking-emqx:8883..."}
-2026-03-31T17:15:19.201438288Z {"level":30,"time":1774977319195,"service":"mqtt-bridge","msg":"MQTT connected successfully"}
-2026-03-31T17:15:19.231328850Z {"level":30,"time":1774977319230,"service":"mqtt-bridge","topic":"v1/+/rawdata","qos":0,"msg":"Subscribed to topic"}
-2026-03-31T17:15:19.231363181Z {"level":30,"time":1774977319230,"service":"mqtt-bridge","topic":"v1/+/status","qos":1,"msg":"Subscribed to topic"}
-2026-03-31T17:15:19.231369269Z {"level":30,"time":1774977319230,"service":"mqtt-bridge","topic":"v1/+/events","qos":1,"msg":"Subscribed to topic"}
-2026-03-31T17:15:19.231373161Z {"level":30,"time":1774977319230,"service":"mqtt-bridge","topic":"v1/+/firmware","qos":1,"msg":"Subscribed to topic"}
-2026-03-31T17:15:19.231376854Z {"level":30,"time":1774977319230,"service":"mqtt-bridge","msg":"MQTT Bridge service started successfully"}

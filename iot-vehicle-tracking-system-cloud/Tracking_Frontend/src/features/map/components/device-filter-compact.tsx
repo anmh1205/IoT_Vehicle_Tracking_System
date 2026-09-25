@@ -1,4 +1,5 @@
 'use client';
+
 import { Funnel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,17 +8,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { MAP_STATUS_FILTER_OPTIONS } from '@/features/map/constants/map-config';
 import type { DeviceMapStatus } from '@/features/map/types';
+
 const FILTER_OPTIONS: Array<{
   value: 'all' | DeviceMapStatus;
   label: string;
-}> = [
-  { value: 'all', label: 'Tất cả' },
-  { value: 'running', label: 'Đang chạy' },
-  { value: 'stopped', label: 'Đã dừng' },
-  { value: 'error', label: 'Lỗi' },
-  { value: 'disconnected', label: 'Mất kết nối' },
-];
+}> = [{ value: 'all', label: 'Tất cả' }, ...MAP_STATUS_FILTER_OPTIONS];
+
 export const DeviceFilterCompact = ({
   value,
   onChange,
@@ -26,6 +24,7 @@ export const DeviceFilterCompact = ({
   onChange: (value: 'all' | DeviceMapStatus) => void;
 }) => {
   const label = FILTER_OPTIONS.find((item) => item.value === value)?.label ?? 'Tất cả';
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

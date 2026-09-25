@@ -7,8 +7,8 @@ import type { GeoJsonGeometry, VehicleZone } from '@/lib/api/zones';
 export type ZonePreviewDraft =
   | {
       zoneType: 'circle';
-      centerLatitude: number;
-      centerLongitude: number;
+      centerLatitude: number | null;
+      centerLongitude: number | null;
       radiusMeters: number;
       isPickingCenter: boolean;
     }
@@ -46,11 +46,15 @@ const hasMeaningfulCenterChange = (
 ) => !previous || Math.abs(previous[0] - next[0]) > 0.0002 || Math.abs(previous[1] - next[1]) > 0.0002;
 
 const toCircle = (
-  centerLatitude: number,
-  centerLongitude: number,
+  centerLatitude: number | null,
+  centerLongitude: number | null,
   radiusMeters: number,
   isPreview: boolean,
 ): ZoneCircle | null => {
+  if (centerLatitude === null || centerLongitude === null) {
+    return null;
+  }
+
   const center = [Number(centerLatitude), Number(centerLongitude)] as [number, number];
   const radius = Number(radiusMeters);
 
@@ -70,6 +74,10 @@ const resolveViewportCenter = (
   preview: ZonePreviewDraft,
 ): [number, number] | null => {
   if (preview?.zoneType === 'circle') {
+    if (preview.centerLatitude === null || preview.centerLongitude === null) {
+      return null;
+    }
+
     return [preview.centerLatitude, preview.centerLongitude];
   }
 

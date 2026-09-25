@@ -2,11 +2,12 @@
 
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import type { User } from '@/lib/stores/auth-store';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Plus, RotateCcwKey, ShieldAlert, ShieldCheck, UserCog, UserMinus } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { StatCard } from '@/components/common/stat-card';
@@ -34,6 +35,7 @@ import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { useRoleAccess } from '@/hooks/use-role-access';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
 
 const PAGE_SIZE = 20;
 
@@ -72,6 +74,13 @@ const EMPTY_FORM: UserFormState = {
   status: 'active',
 };
 
+const emptyToNull = (value: unknown) => {
+  const normalized = typeof value === 'string' ? value.trim() : '';
+  return normalized.length > 0 ? normalized : null;
+};
+
+const emptyToUndefined = (value: unknown) => emptyToNull(value) ?? undefined;
+
 const UserForm = ({
   open,
   onOpenChange,
@@ -107,11 +116,11 @@ const UserForm = ({
   const createMutation = useMutation({
     mutationFn: () =>
       userServices.create({
-        username: form.username,
+        username: form.username.trim(),
         password: form.password,
-        fullName: form.fullName,
+        fullName: form.fullName.trim(),
         role: form.role,
-        email: form.email || undefined,
+        email: emptyToUndefined(form.email),
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -133,10 +142,10 @@ const UserForm = ({
       }
 
       return userServices.update(defaultValues.id, {
-        fullName: form.fullName,
+        fullName: form.fullName.trim(),
         role: form.role,
         status: form.status,
-        email: form.email || null,
+        email: emptyToNull(form.email),
       });
     },
     onSuccess: () => {
@@ -157,6 +166,18 @@ const UserForm = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl">
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (isEditing) {
+              updateMutation.mutate();
+              return;
+            }
+
+            createMutation.mutate();
+          }}
+        >
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Cập nhật người dùng' : 'Thêm người dùng'}</DialogTitle>
           <DialogDescription>
@@ -254,17 +275,15 @@ const UserForm = ({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" disabled={isPending} onClick={() => onOpenChange(false)}>
+          <Button type="button" variant="outline" disabled={isPending} onClick={() => onOpenChange(false)}>
             Hủy
           </Button>
-          <Button
-            disabled={isPending}
-            onClick={() => (isEditing ? updateMutation.mutate() : createMutation.mutate())}
-          >
+          <Button type="submit" disabled={isPending}>
             {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Lưu người dùng
           </Button>
         </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
@@ -275,27 +294,27 @@ const UsersPage = () => {
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<(User & { status?: UserStatus }) | null>(null);
   const [deleteItem, setDeleteItem] = useState<User | null>(null);
+  const [resetPasswordTarget, setResetPasswordTarget] = useState<User | null>(null);
   const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [role, setRole] = useState<'all' | 'admin' | 'manager' | 'operator' | 'viewer'>('all');
   const [status, setStatus] = useState<'all' | 'active' | 'inactive' | 'suspended'>('all');
-  const deferredSearch = useDeferredValue(search);
+  const deferredSearch = useDeferredValue(search.trim());
   const queryClient = useQueryClient();
 
   const resetListView = () => {
-    setPage(1);
-    setSearch('');
+      setSearch('');
     setRole('all');
     setStatus('all');
   };
 
-  const users = useQuery({
-    queryKey: ['users', page, deferredSearch, role, status],
-    queryFn: () =>
+  const users = useInfiniteListQuery<User>({
+    queryKey: ['users', deferredSearch, role, status],
+    pageSize: PAGE_SIZE,
+    queryFn: ({ page, limit }) =>
       userServices.getList({
         page,
-        limit: PAGE_SIZE,
+        limit,
         search: deferredSearch || undefined,
         role: role === 'all' ? undefined : role,
         status: status === 'all' ? undefined : status,
@@ -329,17 +348,15 @@ const UsersPage = () => {
     },
   });
 
-  const rows = useMemo(() => users.data?.items ?? users.data?.data?.items ?? [], [users.data]);
-  const pagination = users.data?.pagination ?? users.data?.data?.pagination;
-  const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
+  const rows = users.items;
   const stats = useMemo(
     () => ({
-      total: pagination?.total ?? rows.length,
+      total: users.total || rows.length,
       admins: rows.filter((row: any) => row.role === 'admin').length,
       suspended: rows.filter((row: any) => row.status === 'suspended').length,
       inactive: rows.filter((row: any) => row.status === 'inactive').length,
     }),
-    [pagination?.total, rows],
+    [users.total, rows],
   );
 
   if (!access.canManageUsers) {
@@ -398,7 +415,7 @@ const UsersPage = () => {
             size="sm"
             variant="outline"
             disabled={resetPasswordMutation.isPending}
-            onClick={() => resetPasswordMutation.mutate(row.original.id)}
+            onClick={() => setResetPasswordTarget(row.original)}
           >
             Đặt lại mật khẩu
           </Button>
@@ -448,19 +465,19 @@ const UsersPage = () => {
           isLoading={users.isLoading}
         />
         <StatCard
-          title="Quản trị viên trên trang"
+          title="Quản trị viên đã tải"
           value={stats.admins}
           icon={<ShieldCheck className="h-4 w-4" />}
           isLoading={users.isLoading}
         />
         <StatCard
-          title="Tạm khóa trên trang"
+          title="Tạm khóa đã tải"
           value={stats.suspended}
           icon={<RotateCcwKey className="h-4 w-4" />}
           isLoading={users.isLoading}
         />
         <StatCard
-          title="Ngưng hoạt động trên trang"
+          title="Ngưng hoạt động đã tải"
           value={stats.inactive}
           icon={<UserMinus className="h-4 w-4" />}
           isLoading={users.isLoading}
@@ -485,19 +502,13 @@ const UsersPage = () => {
           <div className="flex w-full flex-col gap-2 sm:flex-row lg:flex-nowrap">
             <Input
               value={search}
-              onChange={(event) => {
-                setPage(1);
-                setSearch(event.target.value);
-              }}
+              onChange={(event) => setSearch(event.target.value)}
               placeholder="Tìm theo tên đăng nhập, họ tên hoặc email..."
               className="w-full sm:max-w-sm"
             />
             <Select
               value={role}
-              onValueChange={(value: 'all' | 'admin' | 'manager' | 'operator' | 'viewer') => {
-                setPage(1);
-                setRole(value);
-              }}
+              onValueChange={(value: 'all' | 'admin' | 'manager' | 'operator' | 'viewer') => setRole(value)}
             >
               <SelectTrigger className="w-full sm:w-[220px]">
                 <SelectValue placeholder="Vai trò" />
@@ -512,10 +523,7 @@ const UsersPage = () => {
             </Select>
             <Select
               value={status}
-              onValueChange={(value: 'all' | 'active' | 'inactive' | 'suspended') => {
-                setPage(1);
-                setStatus(value);
-              }}
+              onValueChange={(value: 'all' | 'active' | 'inactive' | 'suspended') => setStatus(value)}
             >
               <SelectTrigger className="w-full sm:w-[220px]">
                 <SelectValue placeholder="Trạng thái" />
@@ -531,25 +539,14 @@ const UsersPage = () => {
         }
       />
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">
-          Trang {pagination?.page ?? page} / {totalPages}. Hiển thị {rows.length} tài khoản trên tổng{' '}
-          {pagination?.total ?? rows.length} người dùng.
-        </p>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>
-            Trang trước
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => setPage((value) => value + 1)}
-          >
-            Trang sau
-          </Button>
-        </div>
-      </div>
+      <InfiniteScrollTrigger
+        hasMore={users.hasMore}
+        isLoadingMore={users.isFetchingNextPage}
+        onLoadMore={users.loadMore}
+        loadedCount={users.loadedCount}
+        totalCount={users.total}
+        itemLabel="người dùng"
+      />
 
       <UserForm
         open={open}
@@ -572,6 +569,23 @@ const UsersPage = () => {
         confirmLabel="Xóa"
         variant="destructive"
         isPending={deleteMutation.isPending}
+      />
+
+      <ConfirmDialog
+        open={Boolean(resetPasswordTarget)}
+        onCancel={() => setResetPasswordTarget(null)}
+        onConfirm={() => {
+          if (resetPasswordTarget) {
+            resetPasswordMutation.mutate(resetPasswordTarget.id, {
+              onSettled: () => setResetPasswordTarget(null),
+            });
+          }
+        }}
+        title="Đặt lại mật khẩu"
+        description={`Bạn có chắc muốn đặt lại mật khẩu cho tài khoản ${resetPasswordTarget?.username ?? ''}? Mật khẩu hiện tại sẽ bị vô hiệu hóa ngay lập tức.`}
+        confirmLabel="Đặt lại"
+        variant="destructive"
+        isPending={resetPasswordMutation.isPending}
       />
     </PageContainer>
   );

@@ -8,6 +8,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { DataTable } from '@/components/common/data-table';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { StatCard } from '@/components/common/stat-card';
 import { PageContainer } from '@/components/layout/PageContainer';
 import {
@@ -34,6 +35,7 @@ import { customerServices } from '@/lib/api/customers';
 import { vehicleServices } from '@/lib/api/vehicles';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorDescription, getApiErrorMessage, getApiFieldErrors } from '@/lib/utils/api-error';
+import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
 
 const PAGE_SIZE = 20;
 
@@ -66,6 +68,13 @@ const EMPTY_FORM = {
   notes: '',
   status: 'active',
 };
+
+const emptyToNull = (value: unknown) => {
+  const normalized = typeof value === 'string' ? value.trim() : '';
+  return normalized.length > 0 ? normalized : null;
+};
+
+const emptyToUndefined = (value: unknown) => emptyToNull(value) ?? undefined;
 
 const getCustomerNumericId = (value: unknown): number | null => {
   const parsed = Number(value);
@@ -116,15 +125,15 @@ const CustomerForm = ({
   const createMutation = useMutation({
     mutationFn: () =>
       customerServices.create({
-        customerCode: form.customerCode,
-        name: form.name,
+        customerCode: form.customerCode.trim(),
+        name: form.name.trim(),
         customerType: form.customerType,
-        contactPerson: form.contactPerson || undefined,
-        phone: form.phone || undefined,
-        email: form.email || undefined,
-        address: form.address || undefined,
-        taxCode: form.taxCode || undefined,
-        notes: form.notes || undefined,
+        contactPerson: emptyToUndefined(form.contactPerson),
+        phone: emptyToUndefined(form.phone),
+        email: emptyToUndefined(form.email),
+        address: emptyToUndefined(form.address),
+        taxCode: emptyToUndefined(form.taxCode),
+        notes: emptyToUndefined(form.notes),
       }),
     onMutate: () => {
       setFormError(null);
@@ -150,14 +159,14 @@ const CustomerForm = ({
   const updateMutation = useMutation({
     mutationFn: () =>
       customerServices.update(defaultValues.id, {
-        name: form.name,
+        name: form.name.trim(),
         customerType: form.customerType,
-        contactPerson: form.contactPerson || undefined,
-        phone: form.phone || undefined,
-        email: form.email || undefined,
-        address: form.address || undefined,
-        taxCode: form.taxCode || undefined,
-        notes: form.notes || undefined,
+        contactPerson: emptyToNull(form.contactPerson),
+        phone: emptyToNull(form.phone),
+        email: emptyToNull(form.email),
+        address: emptyToNull(form.address),
+        taxCode: emptyToNull(form.taxCode),
+        notes: emptyToNull(form.notes),
         status: form.status,
       }),
     onMutate: () => {
@@ -401,26 +410,25 @@ const CustomersPage = () => {
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<any | null>(null);
   const [deleteItem, setDeleteItem] = useState<any | null>(null);
-  const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<'all' | 'active' | 'inactive' | 'suspended'>('all');
   const [customerType, setCustomerType] = useState<'all' | 'individual' | 'company'>('all');
-  const deferredSearch = useDeferredValue(search);
+  const deferredSearch = useDeferredValue(search.trim());
   const queryClient = useQueryClient();
 
   const resetListView = () => {
-    setPage(1);
     setSearch('');
     setStatus('all');
     setCustomerType('all');
   };
 
-  const customers = useQuery({
-    queryKey: ['customers', page, deferredSearch, status, customerType],
-    queryFn: () =>
+  const customers = useInfiniteListQuery<any>({
+    queryKey: ['customers', deferredSearch, status, customerType],
+    pageSize: PAGE_SIZE,
+    queryFn: ({ page, limit }) =>
       customerServices.getList({
         page,
-        limit: PAGE_SIZE,
+        limit,
         search: deferredSearch || undefined,
         status: status === 'all' ? undefined : status,
         customerType: customerType === 'all' ? undefined : customerType,
@@ -451,7 +459,7 @@ const CustomersPage = () => {
     },
   });
 
-  const rows = useMemo(() => customers.data?.items ?? customers.data?.data?.items ?? [], [customers.data]);
+  const rows = customers.items;
   const assignmentByCustomer = useMemo(() => {
     const vehicles = vehicleAssignments.data?.items ?? vehicleAssignments.data?.data?.items ?? [];
     const map = new Map<number, { count: number; plates: string[] }>();
@@ -473,10 +481,9 @@ const CustomersPage = () => {
 
     return map;
   }, [vehicleAssignments.data]);
-  const pagination = customers.data?.pagination ?? customers.data?.data?.pagination;
   const stats = useMemo(
     () => ({
-      total: pagination?.total ?? rows.length,
+      total: customers.total || rows.length,
       active: rows.filter((row: any) => row.status === 'active').length,
       inactive: rows.filter((row: any) => row.status === 'inactive' || row.status === 'suspended').length,
       withVehicle: rows.filter((row: any) => {
@@ -484,7 +491,7 @@ const CustomersPage = () => {
         return customerId !== null && (assignmentByCustomer.get(customerId)?.count ?? 0) > 0;
       }).length,
     }),
-    [assignmentByCustomer, pagination?.total, rows],
+    [assignmentByCustomer, customers.total, rows],
   );
 
   const columns: ColumnDef<any>[] = [
@@ -574,8 +581,6 @@ const CustomersPage = () => {
     },
   });
 
-  const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
-
   return (
     <PageContainer
       pageTitle="Khách hàng"
@@ -600,19 +605,19 @@ const CustomersPage = () => {
           isLoading={customers.isLoading}
         />
         <StatCard
-          title="Hoạt động trên trang"
+          title="Hoạt động đã tải"
           value={stats.active}
           icon={<UserRoundCheck className="h-4 w-4" />}
           isLoading={customers.isLoading}
         />
         <StatCard
-          title="Ngưng hoạt động trên trang"
+          title="Ngưng hoạt động đã tải"
           value={stats.inactive}
           icon={<UserRoundX className="h-4 w-4" />}
           isLoading={customers.isLoading}
         />
         <StatCard
-          title="Đã gán phương tiện"
+          title="Đã gắn phương tiện đã tải"
           value={stats.withVehicle}
           icon={<Mail className="h-4 w-4" />}
           isLoading={customers.isLoading || vehicleAssignments.isLoading}
@@ -638,19 +643,13 @@ const CustomersPage = () => {
           <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:gap-2 lg:flex-nowrap">
             <Input
               value={search}
-              onChange={(event) => {
-                setPage(1);
-                setSearch(event.target.value);
-              }}
+              onChange={(event) => setSearch(event.target.value)}
               placeholder="Tìm theo mã, tên hoặc email khách hàng..."
               className="w-full md:min-w-[320px] md:max-w-[460px]"
             />
             <Select
               value={status}
-              onValueChange={(value: 'all' | 'active' | 'inactive' | 'suspended') => {
-                setPage(1);
-                setStatus(value);
-              }}
+              onValueChange={(value: 'all' | 'active' | 'inactive' | 'suspended') => setStatus(value)}
             >
               <SelectTrigger className="w-full sm:w-[220px]">
                 <SelectValue placeholder="Trạng thái" />
@@ -664,10 +663,7 @@ const CustomersPage = () => {
             </Select>
             <Select
               value={customerType}
-              onValueChange={(value: 'all' | 'individual' | 'company') => {
-                setPage(1);
-                setCustomerType(value);
-              }}
+              onValueChange={(value: 'all' | 'individual' | 'company') => setCustomerType(value)}
             >
               <SelectTrigger className="w-full sm:w-[220px]">
                 <SelectValue placeholder="Loại khách hàng" />
@@ -682,25 +678,14 @@ const CustomersPage = () => {
         }
       />
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">
-          Trang {pagination?.page ?? page} / {totalPages}. Hiển thị {rows.length} hồ sơ trên tổng{' '}
-          {pagination?.total ?? rows.length} khách hàng.
-        </p>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>
-            Trang trước
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => setPage((value) => value + 1)}
-          >
-            Trang sau
-          </Button>
-        </div>
-      </div>
+      <InfiniteScrollTrigger
+        hasMore={customers.hasMore}
+        isLoadingMore={customers.isFetchingNextPage}
+        onLoadMore={customers.loadMore}
+        loadedCount={customers.loadedCount}
+        totalCount={customers.total}
+        itemLabel="khách hàng"
+      />
 
       <CustomerForm
         open={open}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Download, TimerReset, TrendingUp, Gauge, AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Download, Gauge, TimerReset, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -127,7 +127,7 @@ export const StatisticsOverview = () => {
           isLoading={summaryQuery.isLoading}
         />
         <StatCard
-          title="Uptime trung bình"
+          title="Độ ổn định kết nối"
           value={`${formatNumber(summaryQuery.data?.averageUptimePercent ?? 0)}%`}
           icon={<TrendingUp className="h-4 w-4" />}
           isLoading={summaryQuery.isLoading}

@@ -1,5 +1,6 @@
 'use client';
 
+import { isVehicleEngineOnState, isVehicleMovingState, isVehicleStationaryState } from '@/lib/utils/device-state';
 import { hasValidMapCoordinates } from '@/features/map/constants/map-config';
 import type { DevicePosition } from '@/features/map/types';
 
@@ -69,13 +70,16 @@ export const buildMapDeviceStats = (
   total: totalDevices,
   visible: visibleDevices.length,
   engineOn: visibleDevices.filter(
-    (device) => device.ignitionState === 'ON' || device.status === 'running',
+    (device) =>
+      device.ignitionState === 'ON' || isVehicleEngineOnState(device.vehicleState),
   ).length,
   moving: visibleDevices.filter(
-    (device) => device.motionState === 'MOVING' || device.status === 'running',
+    (device) =>
+      device.motionState === 'MOVING' || isVehicleMovingState(device.vehicleState),
   ).length,
   stationary: visibleDevices.filter(
-    (device) => device.motionState === 'STATIONARY' || device.status === 'stopped',
+    (device) =>
+      device.motionState === 'STATIONARY' || isVehicleStationaryState(device.vehicleState),
   ).length,
   deviceFaults: visibleDevices.filter(
     (device) =>

@@ -42,7 +42,15 @@ export interface CreateCustomerInput {
   notes?: string;
 }
 
-export interface UpdateCustomerInput extends Partial<Omit<CreateCustomerInput, 'customerCode'>> {
+export interface UpdateCustomerInput {
+  name?: string;
+  customerType?: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  taxCode?: string | null;
+  contactPerson?: string | null;
+  notes?: string | null;
   status?: string;
 }
 

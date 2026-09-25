@@ -1,19 +1,20 @@
 import { useEffect, useRef } from 'react';
-import { useSocket } from '@/components/providers/socket-provider';
+import { useSocket, type RealtimeNamespace } from '@/components/providers/socket-provider';
 
 interface UseRealtimeSubscriptionOptions<TPayload> {
   event: string;
   enabled?: boolean;
-  namespace?: string;
+  namespace?: RealtimeNamespace;
   handler: (payload: TPayload) => void;
 }
 
 export function useRealtimeSubscription<TPayload>({
   event,
   enabled = true,
+  namespace = 'dashboard',
   handler,
 }: UseRealtimeSubscriptionOptions<TPayload>) {
-  const socket = useSocket();
+  const socket = useSocket(namespace);
   const handlerRef = useRef(handler);
 
   useEffect(() => {

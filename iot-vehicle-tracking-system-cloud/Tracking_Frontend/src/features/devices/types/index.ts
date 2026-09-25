@@ -52,7 +52,7 @@ export interface Device {
   longitude: number | null;
   totalRuntimeSeconds?: number;
   requestInterval?: number;
-  vibrationThreshold?: number;
+  imuAccelDeltaThresholdMps2?: number;
   lastErrorCode?: number | null;
   config?: Record<string, unknown> | null;
   currentSession?: DeviceSession | null;
@@ -64,9 +64,18 @@ export interface DeviceSession {
   status: 'running' | 'completed' | 'disconnected' | string;
   serverSessionStart: string | null;
   serverSessionEnd: string | null;
+  sessionStart: string | null;
+  sessionEnd: string | null;
+  localSessionKey: number | null;
+  firmwareBootId: string | null;
+  canonicalSource: string | null;
+  boundarySource: string | null;
+  startReason: string | null;
+  endReason: string | null;
   uptime: number | null;
-  avgVibration: number | null;
+  avgImuAccelDeltaMps2: number | null;
   dataPointsCount: number;
+  gpsPointsCount: number;
 }
 
 export interface DeviceErrorCode {
@@ -74,6 +83,8 @@ export interface DeviceErrorCode {
   errorCode: number;
   errorName: string;
   description: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical' | string;
+  status?: string;
   occurredAt: string;
   resolvedAt: string | null;
 }
@@ -83,7 +94,7 @@ export interface DeviceRuntimeBucket {
   runtimeSeconds: number;
 }
 
-export interface DeviceVibrationPoint {
+export interface DeviceImuAccelDeltaPoint {
   timestamp: string;
   value: number;
 }
@@ -107,7 +118,7 @@ export type DeviceTrackingMetric =
   | 'vehicleBattery'
   | 'temperature'
   | 'errorCode'
-  | 'vibration';
+  | 'imuAccelDeltaMps2';
 
 export interface DeviceTelemetryPoint {
   timestamp: string;
@@ -124,7 +135,7 @@ export interface DeviceTelemetryRow {
   temperature: number | null;
   engineTemperature: number | null;
   errorCode: number | null;
-  vibration: number | null;
+  imuAccelDeltaMps2: number | null;
 }
 
 export interface DevicePositionSnapshot {
@@ -146,7 +157,7 @@ export interface DevicePositionSnapshot {
   timestamp: string | null;
   deviceBattery: number | null;
   vehicleBattery: number | null;
-  vibration: number | null;
+  imuAccelDeltaMps2: number | null;
   errorCode: number | null;
   temperature: number | null;
   engineTemperature: number | null;

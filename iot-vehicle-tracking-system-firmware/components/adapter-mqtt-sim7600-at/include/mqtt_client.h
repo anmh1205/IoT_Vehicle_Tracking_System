@@ -8,7 +8,12 @@
 /**
  * @file mqtt_client.h
  * @brief MQTT wrapper for tracker topics and command callbacks.
+ * This header belongs to the SIM7600 AT MQTT adapter layer and exposes the MQTT transport boundary so higher layers do not depend on CMQTT command details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Callback for command messages received from command topic.

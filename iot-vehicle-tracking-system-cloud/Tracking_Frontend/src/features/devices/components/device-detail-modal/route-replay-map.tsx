@@ -29,8 +29,30 @@ const RouteReplayViewport = ({
   currentPoint: RouteReplayPoint | null;
 }) => {
   const map = useMap();
+  const canUseMap = useCallback(() => {
+    try {
+      return map.getContainer().isConnected;
+    } catch {
+      return false;
+    }
+  }, [map]);
+  const safeStop = useCallback(() => {
+    if (!canUseMap()) {
+      return;
+    }
+
+    try {
+      map.stop();
+    } catch {
+      // Leaflet can throw while the dialog is tearing down. Ignore stale stop calls.
+    }
+  }, [canUseMap, map]);
 
   const syncViewport = useCallback(() => {
+    if (!canUseMap()) {
+      return false;
+    }
+
     if (pathPoints.length >= 2) {
       const bounds = L.latLngBounds(pathPoints);
       map.fitBounds(bounds.pad(0.18), { animate: false });
@@ -43,10 +65,15 @@ const RouteReplayViewport = ({
     }
 
     return false;
-  }, [currentPoint, map, pathPoints]);
+  }, [canUseMap, currentPoint, map, pathPoints]);
 
   useEffect(() => {
     const refreshMap = () => {
+      if (!canUseMap()) {
+        return;
+      }
+
+      safeStop();
       map.invalidateSize({ pan: false, animate: false });
       syncViewport();
     };
@@ -59,16 +86,22 @@ const RouteReplayViewport = ({
     return () => {
       window.clearTimeout(immediateTimer);
       window.clearTimeout(settleTimer);
+      safeStop();
     };
-  }, [map, syncViewport]);
+  }, [canUseMap, safeStop, syncViewport, map]);
 
   useEffect(() => {
-    if (!currentPoint) {
+    if (!currentPoint || !canUseMap()) {
       return;
     }
 
-    map.panTo([currentPoint.latitude, currentPoint.longitude], { animate: true, duration: 0.4 });
-  }, [currentPoint, map]);
+    safeStop();
+    map.panTo([currentPoint.latitude, currentPoint.longitude], { animate: false });
+
+    return () => {
+      safeStop();
+    };
+  }, [canUseMap, currentPoint, safeStop, map]);
 
   return null;
 };
@@ -91,7 +124,15 @@ export const RouteReplayMap = ({
   const layer = MAP_LAYER_CONFIG[mapLayer];
 
   return (
-    <MapContainer center={center} zoom={13} className="h-full w-full" preferCanvas>
+    <MapContainer
+      center={center}
+      zoom={13}
+      className="h-full w-full"
+      preferCanvas
+      zoomAnimation={false}
+      fadeAnimation={false}
+      markerZoomAnimation={false}
+    >
       <TileLayer url={layer.url} attribution={layer.attribution} />
       {pathPoints.length > 1 ? (
         <Polyline positions={pathPoints} pathOptions={{ color: '#0ea5e9', weight: 5 }} />

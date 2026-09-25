@@ -1,4 +1,5 @@
 import type { DeviceRawFeedRow } from '@/features/devices/types';
+import { formatNumber } from '@/lib/utils/date/format';
 import { normalizeObdSampleAgeMs } from './normalize-obd-sample-age';
 
 export interface ObdDiagnosticsSnapshot {
@@ -341,7 +342,7 @@ export const extractLatestDiagnosticsSnapshot = (
 export const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): string => {
   const snapshot = snapshotFromDiagnosticsPayload(diagnostics);
   if (!snapshot) {
-    return 'Không đọc được snapshot OBD';
+    return 'Không đọc được ảnh chụp OBD';
   }
 
   const parts = [
@@ -353,18 +354,18 @@ export const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): s
           ? 'OBD đã nối'
           : 'OBD không ổn định',
     `mil=${snapshot.milOn === undefined ? '-' : snapshot.milOn ? 'on' : 'off'}`,
-    `rpm=${snapshot.rpm?.toFixed(0) ?? '-'}`,
-    `speed=${snapshot.obdSpeedKph?.toFixed(1) ?? '-'} km/h`,
-    `coolant=${snapshot.coolantC?.toFixed(1) ?? '-'} C`,
-    `load=${snapshot.engineLoadPct?.toFixed(1) ?? '-'}%`,
-    `age=${snapshot.sampleAgeMs?.toFixed(0) ?? '-'} ms`,
+    `rpm=${snapshot.rpm !== undefined ? formatNumber(snapshot.rpm, { maximumFractionDigits: 0 }) : '-'}`,
+    `speed=${snapshot.obdSpeedKph !== undefined ? formatNumber(snapshot.obdSpeedKph) : '-'} km/h`,
+    `coolant=${snapshot.coolantC !== undefined ? formatNumber(snapshot.coolantC) : '-'} C`,
+    `load=${snapshot.engineLoadPct !== undefined ? formatNumber(snapshot.engineLoadPct) : '-'}%`,
+    `age=${snapshot.sampleAgeMs !== undefined ? formatNumber(snapshot.sampleAgeMs, { maximumFractionDigits: 0 }) : '-'} ms`,
   ];
 
   if (snapshot.ecuState && snapshot.ecuState !== 'live' && snapshot.ecuState !== 'stopped') {
     parts.push(`ecu=${snapshot.ecuState}`);
   }
   if (snapshot.connectFailCount5m !== undefined) {
-    parts.push(`fail5m=${snapshot.connectFailCount5m.toFixed(0)}`);
+    parts.push(`fail5m=${formatNumber(snapshot.connectFailCount5m, { maximumFractionDigits: 0 })}`);
   }
   if ((snapshot.dtcStored?.length ?? 0) > 0) {
     parts.push(`stored=${snapshot.dtcStored?.join(',')}`);

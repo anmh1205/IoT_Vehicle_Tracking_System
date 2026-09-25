@@ -8,9 +8,18 @@ const sanitizeSession = (session: DeviceSession): DeviceSessionPublic => ({
   status: session.status,
   serverSessionStart: session.server_session_start?.toISOString() ?? null,
   serverSessionEnd: session.server_session_end?.toISOString() ?? null,
+  sessionStart: session.session_start?.toISOString() ?? null,
+  sessionEnd: session.session_end?.toISOString() ?? null,
+  localSessionKey: session.local_session_key,
+  firmwareBootId: session.firmware_boot_id,
+  canonicalSource: session.canonical_source,
+  boundarySource: session.boundary_source,
+  startReason: session.start_reason,
+  endReason: session.end_reason,
   uptime: session.uptime,
-  avgVibration: session.avg_vibration,
+  avgImuAccelDeltaMps2: session.avg_imu_accel_delta_mps2 ?? session.avg_vibration ?? null,
   dataPointsCount: session.data_points_count,
+  gpsPointsCount: session.gps_points_count ?? 0,
 });
 
 export const getDeviceSessions = async (

@@ -10,6 +10,7 @@ import { hashToken } from '@/shared/utils/crypto.util';
 import type {
   Device,
   DeviceListQuery,
+  DeviceAccessScope,
   CreateDeviceInput,
   UpdateDeviceInput,
   DevicePosition,
@@ -89,8 +90,116 @@ const ALERT_SUMMARY_LATERAL = `LEFT JOIN LATERAL (
   WHERE a.device_id = d.device_id
 ) alerts ON true`;
 
+const EVENT_CONTEXT_SPEED_EXPR = `COALESCE(
+  NULLIF(el.context#>>'{raw_payload,data,speed}', '')::float8,
+  NULLIF(el.context->>'speed', '')::float8
+)`;
+
+const EVENT_CONTEXT_COURSE_EXPR = `COALESCE(
+  NULLIF(el.context#>>'{raw_payload,data,course}', '')::float8,
+  NULLIF(el.context->>'course', '')::float8
+)`;
+
+const EVENT_CONTEXT_DEVICE_BATTERY_EXPR = `COALESCE(
+  NULLIF(el.context#>>'{raw_payload,data,device_battery}', '')::float8,
+  NULLIF(el.context->>'device_battery', '')::float8
+)`;
+
+const EVENT_CONTEXT_VEHICLE_BATTERY_EXPR = `COALESCE(
+  NULLIF(el.context#>>'{raw_payload,data,vehicle_battery}', '')::float8,
+  NULLIF(el.context->>'vehicle_battery', '')::float8
+)`;
+
+const EVENT_CONTEXT_SATELLITES_EXPR = `COALESCE(
+  NULLIF(el.context#>>'{raw_payload,data,satellites}', '')::int,
+  NULLIF(el.context->>'satellites', '')::int
+)`;
+
+const EVENT_CONTEXT_IMU_DELTA_EXPR = `COALESCE(
+  NULLIF(el.context#>>'{raw_payload,data,imu_accel_delta_mps2}', '')::float8,
+  NULLIF(el.context->>'imu_accel_delta_mps2', '')::float8,
+  NULLIF(el.context->>'vibration', '')::float8
+)`;
+
+const EVENT_CONTEXT_ERROR_CODE_EXPR = `COALESCE(
+  NULLIF(el.context#>>'{raw_payload,data,error_code}', '')::int,
+  NULLIF(el.context->>'error_code', '')::int,
+  d.last_error_code
+)`;
+
+const EVENT_CONTEXT_TEMPERATURE_EXPR = `COALESCE(
+  NULLIF(el.context->>'temperature', '')::float8,
+  NULLIF(el.context#>>'{raw_payload,diagnostics,signals,coolant_c}', '')::float8,
+  NULLIF(el.context#>>'{diagnostics,signals,coolant_c}', '')::float8,
+  NULLIF(el.context#>>'{raw_payload,diagnostics,signals,intake_air_temp_c}', '')::float8,
+  NULLIF(el.context#>>'{diagnostics,signals,intake_air_temp_c}', '')::float8
+)`;
+
+const EVENT_CONTEXT_ENGINE_TEMPERATURE_EXPR = `COALESCE(
+  NULLIF(el.context#>>'{raw_payload,diagnostics,signals,coolant_c}', '')::float8,
+  NULLIF(el.context#>>'{diagnostics,signals,coolant_c}', '')::float8,
+  NULLIF(el.context->>'temperature', '')::float8
+)`;
+
+const EVENT_CONTEXT_RPM_EXPR = `COALESCE(
+  NULLIF(el.context#>>'{raw_payload,diagnostics,signals,rpm}', '')::float8,
+  NULLIF(el.context#>>'{diagnostics,signals,rpm}', '')::float8
+)`;
+
+const EVENT_CONTEXT_EXISTS_CONDITION = `(context ?| ARRAY[
+  'speed',
+  'course',
+  'vehicle_battery',
+  'device_battery',
+  'satellites',
+  'imu_accel_delta_mps2',
+  'vibration',
+  'error_code',
+  'temperature',
+  'diagnostics',
+  'raw_payload'
+])`;
+
+const isMissingColumnError = (error: unknown): boolean =>
+  typeof error === 'object'
+  && error !== null
+  && 'code' in error
+  && error.code === '42703';
+
+const GLOBAL_DEVICE_ACCESS_ROLES = new Set(['root', 'admin']);
+
+const appendDeviceAccessCondition = (
+  conditions: string[],
+  params: unknown[],
+  paramIndex: number,
+  accessScope?: DeviceAccessScope,
+): number => {
+  if (
+    !accessScope ||
+    GLOBAL_DEVICE_ACCESS_ROLES.has(accessScope.role ?? '') ||
+    accessScope.deviceAccessMode === 'all'
+  ) {
+    return paramIndex;
+  }
+
+  if (!accessScope.userId) {
+    conditions.push('FALSE');
+    return paramIndex;
+  }
+
+  conditions.push(`EXISTS (
+    SELECT 1
+    FROM user_device_access uda
+    WHERE uda.user_id = $${paramIndex}
+      AND uda.device_id = d.device_id
+  )`);
+  params.push(accessScope.userId);
+  return paramIndex + 1;
+};
+
 export const findAll = async (
   query: DeviceListQuery,
+  accessScope?: DeviceAccessScope,
 ): Promise<{ devices: Device[]; total: number }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
@@ -106,19 +215,29 @@ export const findAll = async (
   }
 
   if (query.search) {
-    conditions.push(`(d.device_id ILIKE $${paramIndex} OR d.device_name ILIKE $${paramIndex})`);
+    conditions.push(`(
+      d.device_id ILIKE $${paramIndex}
+      OR d.device_name ILIKE $${paramIndex}
+      OR COALESCE(d.vehicle_id, '') ILIKE $${paramIndex}
+      OR COALESCE(link.linked_vehicle_id, '') ILIKE $${paramIndex}
+      OR COALESCE(link.vehicle_plate, '') ILIKE $${paramIndex}
+      OR COALESCE(link.customer_name, '') ILIKE $${paramIndex}
+    )`);
     params.push(`%${query.search}%`);
     paramIndex++;
   }
 
+  paramIndex = appendDeviceAccessCondition(conditions, params, paramIndex, accessScope);
+
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const countJoinClause = query.search ? DEVICE_LINK_LATERAL : '';
 
   const sortColumn = ALLOWED_SORT_COLUMNS[query.sortBy ?? ''] ?? 'created_at';
   const sortOrder = query.sortOrder === 'asc' ? 'ASC' : 'DESC';
   const orderClause = `ORDER BY d.${sortColumn} ${sortOrder}`;
 
   const countResult = await pool.query(
-    `SELECT COUNT(*) as total FROM devices d ${whereClause}`,
+    `SELECT COUNT(*) as total FROM devices d ${countJoinClause} ${whereClause}`,
     params,
   );
   const total = parseInt(countResult.rows[0].total, 10);
@@ -193,61 +312,104 @@ export const findByDeviceId = async (deviceId: string): Promise<Device | null> =
 
 export const create = async (input: CreateDeviceInput, authToken: string): Promise<Device> => {
   const hashedAuthToken = hashToken(authToken);
+  const imuAccelDeltaThresholdMps2 =
+    input.imuAccelDeltaThresholdMps2 ?? input.vibrationThreshold ?? 2.0;
+
+  const params = [
+    input.deviceId,
+    input.deviceName,
+    hashedAuthToken,
+    input.imei ?? null,
+    imuAccelDeltaThresholdMps2,
+    input.requestInterval ?? 10,
+    input.config ? JSON.stringify(input.config) : null,
+  ];
+
+  try {
+    return await insertOne<Device>(
+      `INSERT INTO devices (device_id, device_name, auth_token, imei, imu_accel_delta_threshold_mps2, request_interval, config, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+       RETURNING *`,
+      params,
+    );
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw error;
+    }
+  }
 
   return insertOne<Device>(
     `INSERT INTO devices (device_id, device_name, auth_token, imei, vibration_threshold, request_interval, config, created_at, updated_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
      RETURNING *`,
-    [
-      input.deviceId,
-      input.deviceName,
-      hashedAuthToken,
-      input.imei ?? null,
-      input.vibrationThreshold ?? 2.0,
-      input.requestInterval ?? 10,
-      input.config ? JSON.stringify(input.config) : null,
-    ],
+    params,
   );
 };
 
 export const update = async (id: number, input: UpdateDeviceInput): Promise<Device | null> => {
-  const setClauses: string[] = [];
-  const values: unknown[] = [];
-  let paramIndex = 1;
+  const imuAccelDeltaThresholdMps2 =
+    input.imuAccelDeltaThresholdMps2 ?? input.vibrationThreshold;
 
-  if (input.deviceName !== undefined) {
-    setClauses.push(`device_name = $${paramIndex++}`);
-    values.push(input.deviceName);
-  }
-  if (input.imei !== undefined) {
-    setClauses.push(`imei = $${paramIndex++}`);
-    values.push(input.imei);
-  }
-  if (input.vibrationThreshold !== undefined) {
-    setClauses.push(`vibration_threshold = $${paramIndex++}`);
-    values.push(input.vibrationThreshold);
-  }
-  if (input.requestInterval !== undefined) {
-    setClauses.push(`request_interval = $${paramIndex++}`);
-    values.push(input.requestInterval);
-  }
-  if (input.targetFirmwareVersion !== undefined) {
-    setClauses.push(`target_firmware_version = $${paramIndex++}`);
-    values.push(input.targetFirmwareVersion);
-  }
-  if (input.config !== undefined) {
-    setClauses.push(`config = $${paramIndex++}`);
-    values.push(JSON.stringify(input.config));
+  const buildUpdateQuery = (thresholdColumn: 'imu_accel_delta_threshold_mps2' | 'vibration_threshold') => {
+    const setClauses: string[] = [];
+    const values: unknown[] = [];
+    let paramIndex = 1;
+
+    if (input.deviceName !== undefined) {
+      setClauses.push(`device_name = $${paramIndex++}`);
+      values.push(input.deviceName);
+    }
+    if (input.imei !== undefined) {
+      setClauses.push(`imei = $${paramIndex++}`);
+      values.push(input.imei);
+    }
+    if (imuAccelDeltaThresholdMps2 !== undefined) {
+      setClauses.push(`${thresholdColumn} = $${paramIndex++}`);
+      values.push(imuAccelDeltaThresholdMps2);
+    }
+    if (input.requestInterval !== undefined) {
+      setClauses.push(`request_interval = $${paramIndex++}`);
+      values.push(input.requestInterval);
+    }
+    if (input.targetFirmwareVersion !== undefined) {
+      setClauses.push(`target_firmware_version = $${paramIndex++}`);
+      values.push(input.targetFirmwareVersion);
+    }
+    if (input.config !== undefined) {
+      setClauses.push(`config = $${paramIndex++}`);
+      values.push(JSON.stringify(input.config));
+    }
+
+    if (setClauses.length === 0) {
+      return null;
+    }
+
+    setClauses.push(`updated_at = NOW()`);
+    values.push(id);
+
+    return {
+      query: `UPDATE devices SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+      values,
+    };
+  };
+
+  const canonicalUpdate = buildUpdateQuery('imu_accel_delta_threshold_mps2');
+  if (canonicalUpdate === null) {
+    return findById(id);
   }
 
-  if (setClauses.length === 0) return findById(id);
+  try {
+    return await updateOne<Device>(canonicalUpdate.query, canonicalUpdate.values);
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw error;
+    }
+  }
 
-  setClauses.push(`updated_at = NOW()`);
-  values.push(id);
-
+  const legacyUpdate = buildUpdateQuery('vibration_threshold');
   return updateOne<Device>(
-    `UPDATE devices SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
-    values,
+    legacyUpdate?.query ?? '',
+    legacyUpdate?.values,
   );
 };
 
@@ -260,7 +422,22 @@ export const updateAuthToken = async (id: number, authToken: string): Promise<De
 export const remove = async (id: number): Promise<boolean> =>
   deleteOne('DELETE FROM devices WHERE id = $1', [id]);
 
-export const findAllPositions = async (): Promise<DevicePosition[]> => {
+export const findAllPositions = async (
+  accessScope?: DeviceAccessScope,
+): Promise<DevicePosition[]> => {
+  const conditions = [
+    'COALESCE(d.last_latitude, d.latitude) IS NOT NULL',
+    'COALESCE(d.last_longitude, d.longitude) IS NOT NULL',
+    'ABS(COALESCE(d.last_latitude, d.latitude)) <= 90',
+    'ABS(COALESCE(d.last_longitude, d.longitude)) <= 180',
+    `NOT (
+      COALESCE(d.last_latitude, d.latitude) = 0
+      AND COALESCE(d.last_longitude, d.longitude) = 0
+    )`,
+  ];
+  const params: unknown[] = [];
+  appendDeviceAccessCondition(conditions, params, 1, accessScope);
+
   const result = await pool.query<{
     device_id: string;
     device_name: string;
@@ -282,7 +459,7 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     device_battery: number | null;
     vehicle_battery: number | null;
     satellites: number | null;
-    vibration: number | null;
+    imu_accel_delta_mps2: number | null;
     error_code: number | null;
     temperature: number | null;
     engine_temperature: number | null;
@@ -312,27 +489,17 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
        d.last_seen_at,
        COALESCE(
          d.last_speed,
-         NULLIF(el.context->>'speed', '')::float8
+         ${EVENT_CONTEXT_SPEED_EXPR}
        ) AS speed,
-       NULLIF(el.context->>'course', '')::float8 AS course,
-       NULLIF(el.context->>'device_battery', '')::float8 AS device_battery,
-       NULLIF(el.context->>'vehicle_battery', '')::float8 AS vehicle_battery,
-       NULLIF(el.context->>'satellites', '')::int AS satellites,
-       NULLIF(el.context->>'vibration', '')::float8 AS vibration,
-       COALESCE(
-         NULLIF(el.context->>'error_code', '')::int,
-         d.last_error_code
-       ) AS error_code,
-       COALESCE(
-         NULLIF(el.context->>'temperature', '')::float8,
-         NULLIF(el.context#>>'{diagnostics,signals,coolant_c}', '')::float8,
-         NULLIF(el.context#>>'{diagnostics,signals,intake_air_temp_c}', '')::float8
-       ) AS temperature,
-       COALESCE(
-         NULLIF(el.context#>>'{diagnostics,signals,coolant_c}', '')::float8,
-         NULLIF(el.context->>'temperature', '')::float8
-       ) AS engine_temperature,
-       NULLIF(el.context#>>'{diagnostics,signals,rpm}', '')::float8 AS rpm,
+       ${EVENT_CONTEXT_COURSE_EXPR} AS course,
+       ${EVENT_CONTEXT_DEVICE_BATTERY_EXPR} AS device_battery,
+       ${EVENT_CONTEXT_VEHICLE_BATTERY_EXPR} AS vehicle_battery,
+       ${EVENT_CONTEXT_SATELLITES_EXPR} AS satellites,
+       ${EVENT_CONTEXT_IMU_DELTA_EXPR} AS imu_accel_delta_mps2,
+       ${EVENT_CONTEXT_ERROR_CODE_EXPR} AS error_code,
+       ${EVENT_CONTEXT_TEMPERATURE_EXPR} AS temperature,
+       ${EVENT_CONTEXT_ENGINE_TEMPERATURE_EXPR} AS engine_temperature,
+       ${EVENT_CONTEXT_RPM_EXPR} AS rpm,
        COALESCE(alerts.device_alert_count, 0) AS device_alert_count,
        COALESCE(alerts.device_alert_titles, ARRAY[]::text[]) AS device_alert_titles,
        COALESCE(alerts.device_alert_highest_severity, 'none') AS device_alert_highest_severity,
@@ -345,29 +512,13 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
        SELECT context
        FROM event_logs
        WHERE device_id = d.device_id
-         AND context ?| ARRAY[
-           'speed',
-           'course',
-           'vehicle_battery',
-           'device_battery',
-           'satellites',
-           'vibration',
-           'error_code',
-           'temperature',
-           'diagnostics'
-         ]
+         AND ${EVENT_CONTEXT_EXISTS_CONDITION}
        ORDER BY server_timestamp DESC
        LIMIT 1
      ) el ON true
      ${ALERT_SUMMARY_LATERAL}
-     WHERE COALESCE(d.last_latitude, d.latitude) IS NOT NULL
-       AND COALESCE(d.last_longitude, d.longitude) IS NOT NULL
-       AND ABS(COALESCE(d.last_latitude, d.latitude)) <= 90
-       AND ABS(COALESCE(d.last_longitude, d.longitude)) <= 180
-       AND NOT (
-         COALESCE(d.last_latitude, d.latitude) = 0
-         AND COALESCE(d.last_longitude, d.longitude) = 0
-       )`,
+      WHERE ${conditions.join(' AND ')}`,
+    params,
   );
 
   return result.rows.map((row) => ({
@@ -391,7 +542,7 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     deviceBattery: row.device_battery,
     vehicleBattery: row.vehicle_battery,
     satellites: row.satellites,
-    vibration: row.vibration,
+    imuAccelDeltaMps2: row.imu_accel_delta_mps2,
     errorCode: row.error_code,
     temperature: row.temperature,
     engineTemperature: row.engine_temperature,

@@ -9,7 +9,12 @@
 /**
  * @file modem_gnss.h
  * @brief GNSS control and parsing API via modem AT commands.
+ * This header belongs to the SIM7600 AT modem adapter layer and exposes the modem boundary so higher layers do not depend on UART- or AT-private details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Power on modem GNSS engine.
@@ -30,8 +35,6 @@ esp_err_t modem_gnss_power_off(void);
  *
  * @return true when the last parsed GNSS sample had valid fix.
  */
-bool modem_gnss_has_fix(void);
-
 /**
  * @brief Check whether GNSS startup warm-up window has elapsed.
  *

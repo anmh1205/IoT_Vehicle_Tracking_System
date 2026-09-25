@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSocket } from '@/components/providers/socket-provider';
 import { healthServices } from '@/lib/api/system-status';
 
 export type ServiceStatus = 'up' | 'down' | 'degraded';
@@ -101,19 +103,37 @@ const normalizeMetrics = (payload: any): SystemMetrics => ({
 });
 
 export const useSystemStatus = (enabled = true) => {
+  const dashboardSocket = useSocket('dashboard');
   const healthQuery = useQuery({
     queryKey: ['system-status', 'health'],
     queryFn: () => healthServices.getHealth(),
-    refetchInterval: 30000,
     enabled,
   });
 
   const metricsQuery = useQuery({
     queryKey: ['system-status', 'metrics'],
     queryFn: () => healthServices.getMetrics().then(normalizeMetrics),
-    refetchInterval: 30000,
     enabled,
   });
+
+  useEffect(() => {
+    if (!dashboardSocket || !enabled) {
+      return;
+    }
+
+    const refreshSnapshot = () => {
+      void healthQuery.refetch();
+      void metricsQuery.refetch();
+    };
+
+    dashboardSocket.on('connect', refreshSnapshot);
+    dashboardSocket.on('system-admin:settings', refreshSnapshot);
+
+    return () => {
+      dashboardSocket.off('connect', refreshSnapshot);
+      dashboardSocket.off('system-admin:settings', refreshSnapshot);
+    };
+  }, [dashboardSocket, enabled, healthQuery, metricsQuery]);
 
   return {
     healthQuery,
@@ -124,7 +144,7 @@ export const useSystemStatus = (enabled = true) => {
       ? toErrorMessage(healthQuery.error, 'Không tải được trạng thái các dịch vụ.')
       : null,
     metricsNotice: metricsQuery.isError
-      ? toErrorMessage(metricsQuery.error, 'Chưa nhận được telemetry hạ tầng từ endpoint metrics.')
+      ? toErrorMessage(metricsQuery.error, 'Chưa nhận được telemetry hạ tầng từ endpoint số liệu.')
       : null,
   };
 };

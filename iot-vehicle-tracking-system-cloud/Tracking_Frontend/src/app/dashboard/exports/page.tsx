@@ -6,6 +6,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { StatCard } from '@/components/common/stat-card';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
 import {
@@ -28,6 +29,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { exportServices } from '@/lib/api/exports';
 import { useCreateExport } from '@/hooks/mutations/use-create-export';
+import { useProgressiveList } from '@/hooks/use-progressive-list';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import { queryInvalidation } from '@/lib/utils/query-invalidation';
 import { useRoleAccess } from '@/hooks/use-role-access';
@@ -184,8 +186,8 @@ const ExportsPage = () => {
     queryInvalidation.exports.all(queryClient);
   }, [queryClient]);
 
-  useRealtimeSubscription({ event: 'export:progress', handler: onProgress });
-  useRealtimeSubscription({ event: 'export:ready', handler: onReady });
+  useRealtimeSubscription({ namespace: 'exports', event: 'export:progress', handler: onProgress });
+  useRealtimeSubscription({ namespace: 'exports', event: 'export:ready', handler: onReady });
 
   const rows = useMemo(() => exportsQuery.data?.items ?? [], [exportsQuery.data?.items]);
   const filteredRows = useMemo(
@@ -198,6 +200,10 @@ const ExportsPage = () => {
       }),
     [rows, search, statusFilter],
   );
+  const visibleRows = useProgressiveList(filteredRows, {
+    pageSize: 20,
+    resetKey: `${statusFilter}|${search.trim().toLowerCase()}|${filteredRows.length}`,
+  });
 
   const activeJobIds = useMemo(() => {
     const ids = rows
@@ -333,7 +339,7 @@ const ExportsPage = () => {
 
       <DataTable
         columns={columns}
-        data={filteredRows}
+        data={visibleRows.items}
         pagination={false}
         isLoading={exportsQuery.isLoading}
         emptyTitle="Chưa có yêu cầu xuất phù hợp"
@@ -361,6 +367,14 @@ const ExportsPage = () => {
             </Select>
           </div>
         }
+      />
+
+      <InfiniteScrollTrigger
+        hasMore={visibleRows.hasMore}
+        onLoadMore={visibleRows.loadMore}
+        loadedCount={visibleRows.loadedCount}
+        totalCount={visibleRows.totalCount}
+        itemLabel="yêu cầu xuất"
       />
 
       <ExportForm open={open} onOpenChange={setOpen} onCreateSuccess={resetListView} />

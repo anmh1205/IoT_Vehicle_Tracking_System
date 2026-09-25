@@ -163,7 +163,10 @@ export const checkGeofences = async (
 
   const occurredAtMs = Date.parse(occurredAt);
   if (!Number.isFinite(occurredAtMs)) {
-    logger.warn({ deviceId, vehicleId, occurredAt }, 'Skipping vehicle zone evaluation for invalid timestamp');
+    logger.warn(
+      { deviceId, vehicleId, occurredAt, event: 'vehicle_zone_check_skipped', reason: 'invalid_timestamp' },
+      'Vehicle zone evaluation skipped',
+    );
     return;
   }
 
@@ -172,7 +175,7 @@ export const checkGeofences = async (
     zone.last_alerted_at?.getTime() ?? Number.NEGATIVE_INFINITY,
   );
   if (occurredAtMs < newestKnownAt) {
-    logger.debug({ deviceId, vehicleId, zoneId: zone.id, occurredAt }, 'Skipping stale vehicle zone sample');
+    logger.debug({ deviceId, vehicleId, zoneId: zone.id, occurredAt, event: 'vehicle_zone_sample_skipped', reason: 'stale_sample' }, 'Vehicle zone sample skipped');
     return;
   }
 
@@ -199,7 +202,7 @@ export const checkGeofences = async (
   });
 
   if (!updatedZone) {
-    logger.debug({ deviceId, vehicleId, zoneId: zone.id, occurredAt }, 'Dropped vehicle zone update after race/loss');
+    logger.debug({ deviceId, vehicleId, zoneId: zone.id, occurredAt, event: 'vehicle_zone_update_dropped', reason: 'race_or_cache_loss' }, 'Vehicle zone update dropped');
     return;
   }
 
@@ -251,7 +254,7 @@ export const checkGeofences = async (
   });
 
   logger.info(
-    { deviceId, vehicleId, zoneId: updatedZone.id, alertType, previousState, nextState: updatedZone.membership_state },
+    { deviceId, vehicleId, zoneId: updatedZone.id, alertType, previousState, nextState: updatedZone.membership_state, event: 'vehicle_zone_alert_emitted' },
     'Vehicle zone alert emitted',
   );
 };

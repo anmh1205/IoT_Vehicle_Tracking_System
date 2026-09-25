@@ -34,10 +34,18 @@ export const writeMetric = async (
     });
 
     if (!response.ok) {
-      logger.error(`VictoriaMetrics write failed: ${response.status} ${response.statusText}`);
+      logger.error(
+        {
+          metricName,
+          status: response.status,
+          statusText: response.statusText,
+          event: 'victoriametrics_write_rejected',
+        },
+        'VictoriaMetrics write rejected',
+      );
     }
   } catch (err) {
-    logger.error({ err }, 'VictoriaMetrics write error');
+    logger.error({ err, metricName, event: 'victoriametrics_write_failed' }, 'VictoriaMetrics write failed');
   }
 };
 
@@ -68,9 +76,21 @@ export const writeDeviceTelemetry = async (
     });
 
     if (!response.ok) {
-      logger.error(`VictoriaMetrics batch write failed: ${response.status}`);
+      logger.error(
+        {
+          deviceId,
+          lineCount: lines.length,
+          status: response.status,
+          statusText: response.statusText,
+          event: 'victoriametrics_batch_write_rejected',
+        },
+        'VictoriaMetrics batch write rejected',
+      );
     }
   } catch (err) {
-    logger.error({ err }, 'VictoriaMetrics batch write error');
+    logger.error(
+      { err, deviceId, lineCount: lines.length, event: 'victoriametrics_batch_write_failed' },
+      'VictoriaMetrics batch write failed',
+    );
   }
 };

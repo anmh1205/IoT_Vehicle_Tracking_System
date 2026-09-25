@@ -11,10 +11,19 @@
 /**
  * @file modem_at.h
  * @brief AT command transport interface over modem UART.
+ * This header belongs to the SIM7600 AT modem adapter layer and exposes the modem boundary so higher layers do not depend on UART- or AT-private details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Callback type for unsolicited modem result codes (URC).
+ *
+ * URCs are async lines the modem pushes without a matching command (e.g. "RDY",
+ * "+CMTI", "+CGEV"). The handler runs in the polling task context, not an ISR,
+ * but it shares the AT lock window, so it must be fast and non-blocking.
  *
  * @param urc_line Null-terminated URC line (without trailing CRLF).
  */
@@ -22,13 +31,16 @@ typedef void (*modem_urc_cb_t)(const char *urc_line);
 
 /**
  * @brief UART receive error counters captured from ESP-IDF UART event queue.
+ *
+ * Cumulative since the last reset; used to surface physical-layer health (wiring,
+ * baud mismatch, buffer pressure) when AT sync misbehaves.
  */
 typedef struct {
-    uint32_t frame_err_count;
-    uint32_t parity_err_count;
-    uint32_t fifo_overflow_count;
-    uint32_t buffer_full_count;
-    uint32_t break_count;
+    uint32_t frame_err_count;     /**< UART framing errors (often baud/wiring mismatch). */
+    uint32_t parity_err_count;    /**< UART parity errors (frame format mismatch/noise). */
+    uint32_t fifo_overflow_count; /**< Hardware FIFO overruns (RX not drained fast enough). */
+    uint32_t buffer_full_count;   /**< Driver ring buffer full events (back-pressure). */
+    uint32_t break_count;         /**< UART break conditions detected on the line. */
 } modem_at_uart_diag_t;
 
 /**
@@ -54,6 +66,28 @@ void modem_at_deinit(void);
  * @return ESP_OK when command succeeds, ESP_FAIL for `ERROR`, or timeout/state errors.
  */
 esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32_t timeout_ms);
+
+/**
+ * @brief Run one prompt-mode transaction atomically on the modem UART.
+ *
+ * Sends the prepare command, waits for the `>` prompt, writes exactly `data_len`
+ * raw bytes, then collects the modem result text for the same transaction.
+ *
+ * @param prepare_cmd AT command string that should return a prompt.
+ * @param data Raw bytes to write after prompt.
+ * @param data_len Number of raw bytes to write.
+ * @param response Optional output response buffer for prompt + final result.
+ * @param resp_len Output buffer size in bytes.
+ * @param timeout_ms Timeout for the whole prompt transaction.
+ *
+ * @return ESP_OK on success, ESP_FAIL for modem error, or timeout/state errors.
+ */
+esp_err_t modem_at_send_prompt_data(const char *prepare_cmd,
+                                    const uint8_t *data,
+                                    size_t data_len,
+                                    char *response,
+                                    size_t resp_len,
+                                    uint32_t timeout_ms);
 
 /**
  * @brief Send AT command and collect raw UART bytes until idle timeout.
@@ -102,8 +136,6 @@ esp_err_t modem_at_set_baud(uint32_t baud);
  *
  * @return Active UART baudrate.
  */
-uint32_t modem_at_get_baud(void);
-
 /**
  * @brief Update modem UART TX/RX pin mapping at runtime.
  *
@@ -120,8 +152,6 @@ esp_err_t modem_at_set_pins(gpio_num_t tx_pin, gpio_num_t rx_pin);
  * @param out_tx_pin Optional output TX GPIO pointer.
  * @param out_rx_pin Optional output RX GPIO pointer.
  */
-void modem_at_get_pins(gpio_num_t *out_tx_pin, gpio_num_t *out_rx_pin);
-
 /**
  * @brief Configure UART signal inversion mask for modem AT transport.
  *
@@ -136,8 +166,6 @@ esp_err_t modem_at_set_line_inverse(uint32_t inverse_mask);
  *
  * @return Current inversion mask.
  */
-uint32_t modem_at_get_line_inverse(void);
-
 /**
  * @brief Configure UART frame format at runtime.
  *
@@ -150,17 +178,6 @@ uint32_t modem_at_get_line_inverse(void);
 esp_err_t modem_at_set_frame_format(uart_word_length_t data_bits,
                                     uart_parity_t parity,
                                     uart_stop_bits_t stop_bits);
-
-/**
- * @brief Read current UART frame format.
- *
- * @param out_data_bits Optional output data bits pointer.
- * @param out_parity Optional output parity pointer.
- * @param out_stop_bits Optional output stop bits pointer.
- */
-void modem_at_get_frame_format(uart_word_length_t *out_data_bits,
-                               uart_parity_t *out_parity,
-                               uart_stop_bits_t *out_stop_bits);
 
 /**
  * @brief Configure UART source clock.

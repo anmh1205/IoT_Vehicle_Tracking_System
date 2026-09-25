@@ -2,6 +2,7 @@ import { rawDataSchema } from '../validators/payload.validator';
 import type { RawDataPayload, RawDiagnostics } from '../types/payload.types';
 import {
   ensureDeviceSession,
+  findClosingDeviceSessionIdByIdentity,
   findDeviceSessionIdByIdentity,
   syncActiveMaintenanceAlertsByMessage,
   syncActiveMaintenanceAlertsByTitle,
@@ -12,12 +13,21 @@ import {
 import { writeDeviceTelemetry } from '../infrastructure/victoriametrics';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
+import { publishSessionAssignment } from '../publishers/session-assignment.publisher';
 import { getStatus, resolveSessionId, setStatus } from '../cache/device-state.cache';
 import { addUpdate } from '../services/batch-writer.service';
 import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
-import { normalizePayloadTimestamp } from '../utils/timestamp.util';
-import { normalizeRuntimeState } from '../types/device-state.types';
+import { maxTimestampMs, normalizePayloadTimestamp, parseIsoTimestampMs } from '../utils/timestamp.util';
+import { resolveLocalSessionKey } from '../utils/session-identity.util';
+import { normalizeRuntimeState, type RuntimeStateSnapshot } from '../types/device-state.types';
+import {
+  hasAuthoritativeSessionIdentity,
+  shouldEnsureSessionForTelemetry,
+  shouldRetainSessionHistory,
+  shouldAcceptLiveMutation,
+  telemetryReportsEngineOff,
+} from '../utils/session-runtime.util';
 
 const IMU_ACCEL_DELTA_ALERT_THRESHOLD_MPS2 = 3.5;
 const HIGH_IMU_ACCEL_DELTA_ALERT_TITLE = 'high_imu_accel_delta';
@@ -216,17 +226,20 @@ const normalizeGnssLocation = (
 const isLikelyActiveSessionTelemetry = (params: {
   ignition?: boolean;
   speed?: number;
-  runtimeIgnitionState: 'ON' | 'OFF' | 'UNKNOWN';
-  runtimeMotionState: 'MOVING' | 'STATIONARY' | 'UNKNOWN';
+  runtimeState: RuntimeStateSnapshot;
   previousStatus?: 'online' | 'offline' | 'running' | 'stopped';
   persistedStatus?: string;
 }): boolean => {
-  if (params.ignition === true || params.runtimeIgnitionState === 'ON') {
+  if (telemetryReportsEngineOff({ ignition: params.ignition, runtimeState: params.runtimeState })) {
+    return false;
+  }
+
+  if (params.ignition === true || params.runtimeState.ignition_state === 'ON') {
     return true;
   }
 
   if (
-    params.runtimeMotionState === 'MOVING' ||
+    params.runtimeState.motion_state === 'MOVING' ||
     (params.speed !== undefined && params.speed > SESSION_FALLBACK_SPEED_THRESHOLD_KPH)
   ) {
     return true;
@@ -452,7 +465,10 @@ const publishObdMaintenanceAlert = (
     seq_no: context.seqNo,
     boot_id: context.bootId,
   }).catch((err) => {
-    logger.error({ err, deviceId: context.deviceId, ruleId: input.ruleId }, 'OBD alert log write failed');
+    logger.error(
+      { err, deviceId: context.deviceId, ruleId: input.ruleId, event: 'obd_alert_log_write_failed' },
+      'OBD alert log write failed',
+    );
   });
 };
 
@@ -600,7 +616,13 @@ const syncHighImuAccelDeltaAlert = async (
   });
 
   logger.info(
-    `ALERT: High IMU acceleration delta (${imuAccelDeltaMps2}) on device ${context.deviceId}`,
+    {
+      deviceId: context.deviceId,
+      value: imuAccelDeltaMps2,
+      threshold: IMU_ACCEL_DELTA_ALERT_THRESHOLD_MPS2,
+      event: 'high_imu_accel_alert_emitted',
+    },
+    'High IMU acceleration alert emitted',
   );
 };
 
@@ -758,7 +780,7 @@ export const handleRawData = async (
   try {
     parsed = JSON.parse(message.toString());
   } catch {
-    logger.warn(`Invalid JSON from device ${deviceIdFromTopic}`);
+    logger.warn({ deviceId: deviceIdFromTopic, event: 'rawdata_payload_invalid_json' }, 'Invalid rawdata payload');
     return;
   }
 
@@ -766,7 +788,7 @@ export const handleRawData = async (
   const result = rawDataSchema.safeParse(parsed);
   if (!result.success) {
     logger.warn(
-      { deviceId: deviceIdFromTopic, issues: result.error.issues },
+      { deviceId: deviceIdFromTopic, issues: result.error.issues, event: 'rawdata_payload_validation_failed' },
       'Invalid rawdata payload',
     );
     return;
@@ -806,7 +828,8 @@ export const handleRawData = async (
   // Verify topic deviceId matches payload deviceId
   if (payload.device_id !== deviceIdFromTopic) {
     logger.warn(
-      `Device ID mismatch: topic=${deviceIdFromTopic}, payload=${payload.device_id}`,
+      { topicDeviceId: deviceIdFromTopic, payloadDeviceId: payload.device_id, event: 'rawdata_device_id_mismatch' },
+      'Rawdata device id mismatch',
     );
     return;
   }
@@ -814,13 +837,17 @@ export const handleRawData = async (
   // 2. Validate device auth
   const device = await validateDevice(payload.device_id, payload.auth_token);
   if (!device) {
-    logger.warn(`Auth failed for device ${payload.device_id}`);
+    logger.warn({ deviceId: payload.device_id, event: 'device_auth_failed' }, 'Device auth failed');
     return;
   }
 
   const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
     payload.timestamp,
     payload.metadata?.sent_at,
+  );
+  const persistedWatermarkMs = maxTimestampMs(
+    parseIsoTimestampMs(device.last_seen_at),
+    parseIsoTimestampMs(device.state_updated_at),
   );
 
   if (timestampSource !== 'payload') {
@@ -831,8 +858,9 @@ export const handleRawData = async (
         metadataSentAt: payload.metadata?.sent_at,
         normalizedTimestampMs: timestampMs,
         timestampSource,
+        event: 'rawdata_timestamp_normalized',
       },
-      'Normalized invalid telemetry timestamp before persistence',
+      'Telemetry timestamp normalized before persistence',
     );
   }
 
@@ -845,12 +873,30 @@ export const handleRawData = async (
     speedKph: effectiveSpeed ?? toFiniteNumber(normalizedObdSignals?.obd_speed_kph),
     previous: previousState?.runtimeState,
   });
+  const reportsEngineOff = telemetryReportsEngineOff({
+    ignition: payload.data.ignition,
+    runtimeState,
+  });
   const stateUpdatedAt = new Date(receivedAtMs).toISOString();
 
   // 3. Attach telemetry only to an authoritative session identity from firmware.
-  const localSessionKey = payload.local_session_key;
+  const localSessionKey = resolveLocalSessionKey(
+    payload.local_session_key,
+    payload.session_id,
+  );
   const sessionBootId = payload.boot_id ?? payload.metadata?.boot_id;
   const payloadCanonicalSessionId = payload.canonical_session_id ?? null;
+  const liveMutationDecision = shouldAcceptLiveMutation({
+    incomingTimestampMs: timestampMs,
+    incomingSeqNo: seqNo,
+    incomingBootId: sessionBootId,
+    incomingLocalSessionKey: localSessionKey,
+    cachedLastPayloadTimestampMs: previousState?.lastPayloadTimestampMs ?? null,
+    cachedLastSeqNo: previousState?.lastSeqNo ?? null,
+    cachedBootId: previousState?.bootId ?? null,
+    cachedLocalSessionKey: previousState?.localSessionKey ?? null,
+    persistedWatermarkMs,
+  });
   const cachedResolvedSessionId = resolveSessionId(payload.device_id, {
     localSessionKey,
     canonicalSessionId: payloadCanonicalSessionId,
@@ -864,30 +910,49 @@ export const handleRawData = async (
           bootId: sessionBootId,
         })
       : null;
-  let sessionId = cachedResolvedSessionId ?? databaseResolvedSessionId;
+  const closingResolvedSessionId =
+    cachedResolvedSessionId === null && databaseResolvedSessionId === null && reportsEngineOff
+      ? await findClosingDeviceSessionIdByIdentity(
+          payload.device_id,
+          {
+            localSessionKey,
+            bootId: sessionBootId,
+          },
+          timestampMs,
+          receivedAtMs,
+        )
+      : null;
+  const resolvedClosingTelemetry = closingResolvedSessionId !== null;
+  let sessionId = cachedResolvedSessionId ?? databaseResolvedSessionId ?? closingResolvedSessionId;
   let canonicalSessionId =
     payloadCanonicalSessionId ??
     (sessionId !== null && previousState?.sessionId === sessionId
       ? previousState.canonicalSessionId
       : (sessionId !== null ? String(sessionId) : null));
-  const hasAuthoritativeSessionIdentity =
-    payloadCanonicalSessionId !== null || localSessionKey !== undefined;
-  const canCreateFallbackSession =
-    sessionId === null &&
-    isLikelyActiveSessionTelemetry({
-      ignition: payload.data.ignition,
-      speed: effectiveSpeed,
-      runtimeIgnitionState: runtimeState.ignition_state,
-      runtimeMotionState: runtimeState.motion_state,
-      previousStatus,
-      persistedStatus: device.current_status,
-    }) &&
-    (
-      sessionBootId !== undefined ||
-      localSessionKey !== undefined ||
-      previousState?.status === 'running' ||
-      device.current_status === 'running'
-    );
+  const hasAuthoritativeIdentity = hasAuthoritativeSessionIdentity({
+    localSessionKey,
+    canonicalSessionId: payloadCanonicalSessionId,
+    bootId: sessionBootId,
+  });
+  const isActiveSessionTelemetry = isLikelyActiveSessionTelemetry({
+    ignition: payload.data.ignition,
+    speed: effectiveSpeed,
+    runtimeState,
+    previousStatus,
+    persistedStatus: device.current_status,
+  });
+  const hasFallbackIdentity =
+    sessionBootId !== undefined ||
+    localSessionKey !== undefined ||
+    previousState?.status === 'running' ||
+    device.current_status === 'running';
+  const canCreateFallbackSession = shouldEnsureSessionForTelemetry({
+    liveMutationAccepted: liveMutationDecision.accept,
+    resolvedSessionId: sessionId,
+    hasAuthoritativeIdentity,
+    hasFallbackIdentity,
+    isActiveTelemetry: isActiveSessionTelemetry,
+  });
 
   if (canCreateFallbackSession) {
     const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs, {
@@ -899,6 +964,12 @@ export const handleRawData = async (
     });
     sessionId = ensuredSession.sessionId;
     canonicalSessionId = String(ensuredSession.sessionId);
+    publishSessionAssignment({
+      deviceId: payload.device_id,
+      localSessionKey,
+      canonicalSessionId,
+      bootId: sessionBootId,
+    });
 
     if (ensuredSession.isNew) {
       publishInternalEvent('session', {
@@ -917,7 +988,7 @@ export const handleRawData = async (
     }
   }
 
-  if (sessionId === null && hasAuthoritativeSessionIdentity) {
+  if (sessionId === null && hasAuthoritativeIdentity && liveMutationDecision.accept) {
     logger.warn(
       {
         deviceId: payload.device_id,
@@ -925,8 +996,66 @@ export const handleRawData = async (
         canonicalSessionId,
         bootId: sessionBootId,
         messageId,
+        event: 'telemetry_session_unmapped',
+        reason: 'authoritative_identity_unresolved',
       },
-      'Telemetry arrived without authoritative session mapping',
+      'Telemetry session unresolved',
+    );
+  }
+
+  if (!liveMutationDecision.accept) {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        localSessionKey,
+        canonicalSessionId: payloadCanonicalSessionId,
+        bootId: sessionBootId,
+        seqNo,
+        timestampMs,
+        watermarkMs: liveMutationDecision.watermarkMs,
+        reason: liveMutationDecision.reason,
+        event: 'rawdata_live_mutation_ignored',
+      },
+      'Telemetry live mutation ignored',
+    );
+  }
+
+  const shouldRetainStaleSessionTelemetry = shouldRetainSessionHistory({
+    liveMutationAccepted: liveMutationDecision.accept,
+    resolvedSessionId: sessionId,
+    hasAuthoritativeIdentity,
+  });
+  const shouldTreatEngineOffTelemetryAsHistorical =
+    liveMutationDecision.accept &&
+    sessionId !== null &&
+    hasAuthoritativeIdentity &&
+    reportsEngineOff &&
+    previousState?.status !== 'running' &&
+    device.current_status !== 'running';
+  const shouldAppendHistoricalSessionTelemetry =
+    shouldRetainStaleSessionTelemetry ||
+    shouldTreatEngineOffTelemetryAsHistorical ||
+    resolvedClosingTelemetry;
+  const shouldMutateLiveState =
+    liveMutationDecision.accept && !shouldAppendHistoricalSessionTelemetry;
+  const shouldPublishDataEvent = shouldMutateLiveState || shouldAppendHistoricalSessionTelemetry;
+
+  if (shouldAppendHistoricalSessionTelemetry) {
+    logger.info(
+      {
+        deviceId: payload.device_id,
+        sessionId,
+        localSessionKey,
+        canonicalSessionId,
+        bootId: sessionBootId,
+        seqNo,
+        timestampMs,
+        liveMutationReason: liveMutationDecision.reason,
+        engineOffTelemetry: shouldTreatEngineOffTelemetryAsHistorical,
+        closingTelemetry: resolvedClosingTelemetry,
+        event: 'rawdata_session_history_retained',
+      },
+      'Telemetry retained for session history',
     );
   }
 
@@ -969,7 +1098,7 @@ export const handleRawData = async (
   }
 
   writeDeviceTelemetry(payload.device_id, metricsData, timestampMs).catch((err) => {
-    logger.error(`VictoriaMetrics write failed for ${payload.device_id}`, err);
+    logger.error({ err, deviceId: payload.device_id, event: 'rawdata_metrics_write_failed' }, 'Telemetry metrics write failed');
   });
 
   // 5. Write to VictoriaLogs
@@ -984,7 +1113,7 @@ export const handleRawData = async (
     speed: effectiveSpeed,
     diagnostics: normalizedDiagnostics ?? null,
   }).catch((err) => {
-    logger.error(`VictoriaLogs write failed for ${payload.device_id}`, err);
+    logger.error({ err, deviceId: payload.device_id, event: 'rawdata_event_log_write_failed' }, 'Telemetry event log write failed');
   });
 
   if (normalizedDiagnostics) {
@@ -996,7 +1125,10 @@ export const handleRawData = async (
       boot_id: bootId,
       diagnostics: normalizedDiagnostics,
     }).catch((err) => {
-      logger.error({ err, deviceId: payload.device_id }, 'OBD diagnostics log write failed');
+      logger.error(
+        { err, deviceId: payload.device_id, event: 'obd_diagnostics_log_write_failed' },
+        'OBD diagnostics log write failed',
+      );
     });
 
     writeDeviceEvent(payload.device_id, 'obd_diagnostic_snapshot', 'Normalized OBD diagnostic snapshot', {
@@ -1016,7 +1148,10 @@ export const handleRawData = async (
       },
       quality: normalizedDiagnosticsQuality,
     }).catch((err) => {
-      logger.error({ err, deviceId: payload.device_id }, 'OBD normalized diagnostic log write failed');
+      logger.error(
+        { err, deviceId: payload.device_id, event: 'obd_diagnostics_snapshot_log_write_failed' },
+        'OBD normalized diagnostic log write failed',
+      );
     });
   }
 
@@ -1026,21 +1161,29 @@ export const handleRawData = async (
       : device.current_status === 'running' || device.current_status === 'online'
         ? device.current_status
         : 'stopped';
-  const effectiveStatus = sessionId !== null ? 'running' : (previousState?.status ?? fallbackStatus);
+  const effectiveStatus =
+    sessionId !== null && !shouldAppendHistoricalSessionTelemetry
+      ? 'running'
+      : (previousState?.status ?? fallbackStatus);
+  const eventStatus = shouldMutateLiveState
+    ? effectiveStatus
+    : (previousState?.status ?? fallbackStatus);
 
   // 6. Add to batch writer (PostgreSQL)
-  addUpdate({
-    deviceId: payload.device_id,
-    status: effectiveStatus === 'offline' ? 'disconnected' : effectiveStatus,
-    latitude: effectiveLatitude,
-    longitude: effectiveLongitude,
-    speed: effectiveSpeed,
-    sessionId: sessionId ?? undefined,
-    serverTimestamp: receivedAtMs,
-    runtimeState,
-  });
+  if (shouldMutateLiveState) {
+    addUpdate({
+      deviceId: payload.device_id,
+      status: effectiveStatus === 'offline' ? 'disconnected' : effectiveStatus,
+      latitude: effectiveLatitude,
+      longitude: effectiveLongitude,
+      speed: effectiveSpeed,
+      sessionId: sessionId ?? undefined,
+      serverTimestamp: receivedAtMs,
+      runtimeState,
+    });
+  }
 
-  if (sessionId !== null) {
+  if (sessionId !== null && shouldPublishDataEvent) {
     await touchDeviceSession({
       deviceId: payload.device_id,
       sessionId,
@@ -1052,62 +1195,73 @@ export const handleRawData = async (
       latitude: effectiveLatitude,
       longitude: effectiveLongitude,
       speed: effectiveSpeed,
+      allowCompleted: shouldAppendHistoricalSessionTelemetry,
+      updateDeviceState: shouldMutateLiveState,
     });
   }
 
-  // 7. Check active vehicle zone (fire-and-forget, non-blocking)
-  if (
-    effectiveLatitude !== undefined &&
-    effectiveLongitude !== undefined &&
-    device.vehicle_id
-  ) {
-    checkGeofences(
-      payload.device_id,
-      device.vehicle_id,
-      effectiveLatitude,
-      effectiveLongitude,
-      new Date(timestampMs).toISOString(),
-    ).catch((err) => {
-      logger.error({ err, deviceId: payload.device_id }, 'Vehicle zone check failed');
+  if (shouldMutateLiveState) {
+    // 7. Check active vehicle zone (fire-and-forget, non-blocking)
+    if (
+      effectiveLatitude !== undefined &&
+      effectiveLongitude !== undefined &&
+      device.vehicle_id
+    ) {
+      checkGeofences(
+        payload.device_id,
+        device.vehicle_id,
+        effectiveLatitude,
+        effectiveLongitude,
+        new Date(timestampMs).toISOString(),
+      ).catch((err) => {
+        logger.error({ err, deviceId: payload.device_id, event: 'vehicle_zone_check_failed' }, 'Vehicle zone check failed');
+      });
+    }
+
+    setStatus(payload.device_id, effectiveStatus, {
+      sessionId,
+      lastPayloadTimestampMs: timestampMs,
+      lastSeqNo: seqNo ?? null,
+      runtimeState,
+      localSessionKey,
+      canonicalSessionId,
+      bootId: sessionBootId,
     });
   }
 
-  setStatus(payload.device_id, effectiveStatus, {
-    sessionId,
-    runtimeState,
-    localSessionKey,
-    canonicalSessionId,
-    bootId: sessionBootId,
-  });
-
-  publishInternalEvent('data', {
-    device_id: payload.device_id,
-    vehicle_id: device.vehicle_id ?? undefined,
-    session_id: sessionId,
-    current_status: effectiveStatus,
-    latitude: effectiveLatitude,
-    longitude: effectiveLongitude,
-    speed: effectiveSpeed,
-    course: effectiveCourse,
-    satellites: payload.data.satellites,
-    vehicle_battery: payload.data.vehicle_battery,
-    device_battery: payload.data.device_battery,
-    imu_accel_delta_mps2: imuAccelDeltaMps2,
-    error_code: payload.data.error_code,
-    ignition_state: runtimeState.ignition_state,
-    motion_state: runtimeState.motion_state,
-    vehicle_state: runtimeState.vehicle_state,
-    device_state: runtimeState.device_state,
-    sleep_mode: runtimeState.sleep_mode,
-    state_updated_at: stateUpdatedAt,
-    diagnostics: normalizedDiagnostics ?? undefined,
-    raw_payload: buildSanitizedRawPayload(payload),
-    message_id: messageId,
-    schema_version: schemaVersion,
-    seq_no: seqNo,
-    boot_id: bootId,
-    timestamp: new Date(timestampMs).toISOString(),
-  });
+  if (shouldPublishDataEvent) {
+    publishInternalEvent('data', {
+      device_id: payload.device_id,
+      vehicle_id: device.vehicle_id ?? undefined,
+      session_id: sessionId,
+      current_status: eventStatus,
+      latitude: effectiveLatitude,
+      longitude: effectiveLongitude,
+      speed: effectiveSpeed,
+      course: effectiveCourse,
+      satellites: payload.data.satellites,
+      vehicle_battery: payload.data.vehicle_battery,
+      device_battery: payload.data.device_battery,
+      imu_accel_delta_mps2: imuAccelDeltaMps2,
+      error_code: payload.data.error_code,
+      ignition_state: runtimeState.ignition_state,
+      motion_state: runtimeState.motion_state,
+      vehicle_state: runtimeState.vehicle_state,
+      device_state: runtimeState.device_state,
+      sleep_mode: runtimeState.sleep_mode,
+      state_updated_at: stateUpdatedAt,
+      diagnostics: normalizedDiagnostics ?? undefined,
+      raw_payload: buildSanitizedRawPayload(payload),
+      message_id: messageId,
+      schema_version: schemaVersion,
+      seq_no: seqNo,
+      boot_id: bootId,
+      live_mutation: shouldMutateLiveState,
+      historical_session_append: shouldAppendHistoricalSessionTelemetry,
+      stale_reason: shouldRetainStaleSessionTelemetry ? liveMutationDecision.reason : undefined,
+      timestamp: new Date(timestampMs).toISOString(),
+    });
+  }
 
   const obdAlertContext: ObdAlertContext = {
     deviceId: payload.device_id,
@@ -1121,23 +1275,25 @@ export const handleRawData = async (
     bootId,
   };
 
-  const obdRuleResults = await Promise.allSettled([
-    evaluateObdMaintenanceRules(
-      normalizedDiagnostics,
-      obdAlertContext,
-      payload.data.vehicle_battery,
-      effectiveSpeed,
-    ),
-    evaluateObdDtcRules(normalizedDiagnostics, obdAlertContext),
-    syncObdConnectionWarnings(normalizedDiagnostics, obdAlertContext),
-    syncHighImuAccelDeltaAlert(imuAccelDeltaMps2, obdAlertContext),
-  ]);
-  obdRuleResults.forEach((result, index) => {
-    if (result.status === 'rejected') {
-      logger.error(
-        { err: result.reason, deviceId: payload.device_id, taskIndex: index },
-        'OBD rule evaluation failed without blocking telemetry ingest',
-      );
-    }
-  });
+  if (shouldMutateLiveState) {
+    const obdRuleResults = await Promise.allSettled([
+      evaluateObdMaintenanceRules(
+        normalizedDiagnostics,
+        obdAlertContext,
+        payload.data.vehicle_battery,
+        effectiveSpeed,
+      ),
+      evaluateObdDtcRules(normalizedDiagnostics, obdAlertContext),
+      syncObdConnectionWarnings(normalizedDiagnostics, obdAlertContext),
+      syncHighImuAccelDeltaAlert(imuAccelDeltaMps2, obdAlertContext),
+    ]);
+    obdRuleResults.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        logger.error(
+          { err: result.reason, deviceId: payload.device_id, taskIndex: index, event: 'obd_rule_evaluation_failed' },
+          'OBD rule evaluation failed',
+        );
+      }
+    });
+  }
 };

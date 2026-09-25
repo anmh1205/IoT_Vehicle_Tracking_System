@@ -51,12 +51,17 @@ export const DriverForm = ({
   isPending = false,
 }: DriverFormProps) => {
   const [form, setForm] = useState(EMPTY_FORM);
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setLocalErrors({});
+      return;
+    }
 
     if (!defaultValues) {
       setForm(EMPTY_FORM);
+      setLocalErrors({});
       return;
     }
 
@@ -73,7 +78,21 @@ export const DriverForm = ({
       status: defaultValues.status ?? 'active',
       notes: defaultValues.notes ?? '',
     });
+    setLocalErrors({});
   }, [defaultValues, open]);
+
+  const validate = (): boolean => {
+    const errors: Record<string, string> = {};
+    if (!form.driverCode.trim()) errors.driverCode = 'Mã tài xế là bắt buộc';
+    if (!form.fullName.trim()) errors.fullName = 'Họ và tên là bắt buộc';
+    setLocalErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (!validate()) return;
+    onSubmit(form);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -92,8 +111,12 @@ export const DriverForm = ({
               spellCheck={false}
               value={form.driverCode}
               disabled={Boolean(defaultValues?.id)}
+              className={localErrors.driverCode ? 'border-destructive focus-visible:ring-destructive' : undefined}
               onChange={(event) => setForm((state) => ({ ...state, driverCode: event.target.value }))}
             />
+            {localErrors.driverCode ? (
+              <p role="alert" className="text-sm text-destructive">{localErrors.driverCode}</p>
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -103,8 +126,12 @@ export const DriverForm = ({
               autoComplete="name"
               placeholder="Ví dụ: Nguyễn Văn A"
               value={form.fullName}
+              className={localErrors.fullName ? 'border-destructive focus-visible:ring-destructive' : undefined}
               onChange={(event) => setForm((state) => ({ ...state, fullName: event.target.value }))}
             />
+            {localErrors.fullName ? (
+              <p role="alert" className="text-sm text-destructive">{localErrors.fullName}</p>
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -235,7 +262,7 @@ export const DriverForm = ({
           <Button variant="outline" disabled={isPending} onClick={() => onOpenChange(false)}>
             Hủy
           </Button>
-          <Button disabled={isPending} onClick={() => onSubmit(form)}>
+          <Button disabled={isPending} onClick={handleSubmit}>
             {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Lưu tài xế
           </Button>
