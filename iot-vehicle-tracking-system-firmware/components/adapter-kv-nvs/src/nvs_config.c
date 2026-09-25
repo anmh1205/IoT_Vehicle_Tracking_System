@@ -144,17 +144,14 @@ esp_err_t nvs_config_save_session_context(const session_persist_context_t *conte
  * @return ESP_OK on success or clean not-found, otherwise an NVS error.
  */
 esp_err_t nvs_config_load_session_context(session_persist_context_t *out_context, bool *out_found) {
-    // Both outputs are required; bail out before touching NVS if either is null.
     if (out_context == NULL || out_found == NULL) {
         ESP_LOGE(TAG, "session load outputs are NULL");
         return ESP_ERR_INVALID_ARG;
     }
 
-    // Safe baseline: zeroed context and "not found" until a valid blob is confirmed.
     memset(out_context, 0, sizeof(*out_context));
     *out_found = false;
 
-    // Open read-only; absent namespace simply means no session was ever stored.
     nvs_handle_t handle = 0;
     esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READONLY, &handle);
     if (err == ESP_ERR_NVS_NOT_FOUND) {
@@ -162,19 +159,51 @@ esp_err_t nvs_config_load_session_context(session_persist_context_t *out_context
     }
     ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to open NVS namespace");
 
-    // Probe the stored size with a NULL buffer before allocating/copying.
     size_t stored_size = 0;
     err = nvs_get_blob(handle, TRACKER_NVS_SESSION_CONTEXT_KEY, NULL, &stored_size);
     if (err == ESP_ERR_NVS_NOT_FOUND) {
         nvs_close(handle);
-        return ESP_OK; // Key absent -> nothing to recover.
+        return ESP_OK;
     }
     if (err != ESP_OK) {
         nvs_close(handle);
-        return err; // Genuine read error.
+        return err;
     }
+
+    /*
+     * v1 did not persist start-boundary delivery state. Preserve those active
+     * sessions across firmware upgrade and treat them as already committed,
+     * matching the semantics of the firmware that wrote the old blob.
+     */
+    typedef struct {
+        bool active;
+        uint32_t local_session_key;
+        uint64_t canonical_session_id;
+        char boot_id[TRACKER_SESSION_BOOT_ID_LEN];
+    } session_persist_context_v1_t;
+
+    if (stored_size == sizeof(session_persist_context_v1_t)) {
+        session_persist_context_v1_t legacy = {0};
+        size_t legacy_size = sizeof(legacy);
+        err = nvs_get_blob(handle, TRACKER_NVS_SESSION_CONTEXT_KEY, &legacy, &legacy_size);
+        nvs_close(handle);
+        ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to read legacy session context blob");
+
+        out_context->active = legacy.active;
+        out_context->local_session_key = legacy.local_session_key;
+        out_context->canonical_session_id = legacy.canonical_session_id;
+        memcpy(out_context->boot_id, legacy.boot_id, sizeof(out_context->boot_id));
+        out_context->boot_id[TRACKER_SESSION_BOOT_ID_LEN - 1] = '\0';
+        out_context->start_boundary_pending = false;
+        *out_found = true;
+
+        ESP_LOGI(TAG,
+                 "Migrated session context v1 local=%lu start_pending=0",
+                 (unsigned long)out_context->local_session_key);
+        return ESP_OK;
+    }
+
     if (stored_size != sizeof(*out_context)) {
-        // Layout changed across firmware versions: discard the incompatible blob.
         nvs_close(handle);
         ESP_LOGW(TAG,
                  "Session context size mismatch stored=%lu expected=%lu; clearing key",
@@ -184,13 +213,11 @@ esp_err_t nvs_config_load_session_context(session_persist_context_t *out_context
         return ESP_OK;
     }
 
-    // Size matches the current struct: copy the blob into the caller's buffer.
     size_t required_size = sizeof(*out_context);
     err = nvs_get_blob(handle, TRACKER_NVS_SESSION_CONTEXT_KEY, out_context, &required_size);
     nvs_close(handle);
     ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to read session context blob");
 
-    // Defensively terminate the boot-id string in case stored bytes were not NUL-terminated.
     out_context->boot_id[TRACKER_SESSION_BOOT_ID_LEN - 1] = '\0';
     *out_found = true;
     return ESP_OK;
