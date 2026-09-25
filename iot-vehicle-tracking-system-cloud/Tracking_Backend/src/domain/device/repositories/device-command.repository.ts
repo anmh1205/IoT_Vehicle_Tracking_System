@@ -205,7 +205,7 @@ export const listPendingCommandsBefore = async (
     `SELECT id, device_id, command, params, status, sent_at, acked_at, response
      FROM device_commands
      WHERE status = 'pending'
-       AND created_at < $1
+       AND created_at <= $1
      ORDER BY created_at ASC, id ASC
      LIMIT $2`,
     [cutoff.toISOString(), safeLimit],
