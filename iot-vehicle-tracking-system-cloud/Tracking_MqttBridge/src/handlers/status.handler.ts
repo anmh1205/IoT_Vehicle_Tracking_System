@@ -3,6 +3,7 @@ import { statusSchema } from '../validators/payload.validator';
 import {
   completeDeviceSession,
   ensureDeviceSession,
+  ensureHistoricalDeviceSession,
   findDeviceSessionIdByIdentity,
   updateDeviceStatus,
 } from '../infrastructure/database';
@@ -172,6 +173,90 @@ export const handleStatus = async (
       },
       'Status live mutation ignored',
     );
+
+    // A stale status must never roll live device/cache state backwards, but an
+    // authoritative session boundary is still historical truth. Reconstruct it
+    // against the identified session using device time for both historical
+    // boundaries so replay receive-time cannot inflate runtime.
+    if (hasAuthoritativeIdentity && boundaryEvent === 'started') {
+      const historicalSession = await ensureHistoricalDeviceSession(
+        payload.device_id,
+        timestampMs,
+        {
+          localSessionKey,
+          canonicalSessionId: payloadCanonicalSessionId,
+          bootId: sessionBootId,
+        },
+      );
+
+      if (historicalSession.isNew && historicalSession.sessionId !== null) {
+        publishInternalEvent('session', {
+          device_id: payload.device_id,
+          session_id: historicalSession.sessionId,
+          action: 'started',
+          boundary_source: 'firmware',
+          local_session_key: localSessionKey,
+          canonical_session_id:
+            payloadCanonicalSessionId ?? String(historicalSession.sessionId),
+          boot_id: sessionBootId,
+          message_id: messageId,
+          schema_version: schemaVersion,
+          seq_no: seqNo,
+          timestamp: new Date(timestampMs).toISOString(),
+        });
+      }
+    } else if (hasAuthoritativeIdentity && boundaryEvent === 'ended') {
+      const historicalSessionId = await findDeviceSessionIdByIdentity(payload.device_id, {
+        localSessionKey,
+        canonicalSessionId: payloadCanonicalSessionId,
+        bootId: sessionBootId,
+      });
+
+      if (historicalSessionId !== null) {
+        const completedSession = await completeDeviceSession(
+          payload.device_id,
+          timestampMs,
+          historicalSessionId,
+          timestampMs,
+          'stopped',
+          {
+            localSessionKey,
+            bootId: sessionBootId,
+            boundarySource: 'firmware',
+            endReason: 'historical_replay_ignition_off',
+          },
+        );
+
+        if (completedSession.completedNow && !completedSession.discarded) {
+          publishInternalEvent('session', {
+            device_id: payload.device_id,
+            session_id: historicalSessionId,
+            action: 'ended',
+            boundary_source: 'firmware',
+            local_session_key: localSessionKey,
+            canonical_session_id:
+              payloadCanonicalSessionId ?? String(historicalSessionId),
+            boot_id: sessionBootId,
+            message_id: messageId,
+            schema_version: schemaVersion,
+            seq_no: seqNo,
+            timestamp: new Date(timestampMs).toISOString(),
+          });
+        }
+      } else {
+        logger.warn(
+          {
+            deviceId: payload.device_id,
+            localSessionKey,
+            canonicalSessionId: payloadCanonicalSessionId,
+            bootId: sessionBootId,
+            event: 'historical_ended_boundary_unresolved',
+          },
+          'Historical ended boundary could not resolve a session',
+        );
+      }
+    }
+
     return;
   }
 
@@ -306,7 +391,7 @@ export const handleStatus = async (
       });
       await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
 
-      if (sessionId && !completedSession.discarded) {
+      if (sessionId && completedSession.completedNow && !completedSession.discarded) {
         publishInternalEvent('session', {
           device_id: payload.device_id,
           session_id: sessionId,
@@ -395,7 +480,7 @@ export const handleStatus = async (
     });
     await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
 
-    if (sessionId && !completedSession.discarded) {
+    if (sessionId && completedSession.completedNow && !completedSession.discarded) {
       publishInternalEvent('session', {
         device_id: payload.device_id,
         session_id: sessionId,

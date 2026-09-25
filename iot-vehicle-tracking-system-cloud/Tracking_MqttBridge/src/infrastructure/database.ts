@@ -442,6 +442,110 @@ export const ensureDeviceSession = async (
   }
 };
 
+export const ensureHistoricalDeviceSession = async (
+  deviceId: string,
+  deviceTimestampMs: number,
+  sessionIdentity: Pick<SessionIdentityInput, 'localSessionKey' | 'canonicalSessionId' | 'bootId'>,
+): Promise<{ sessionId: number | null; isNew: boolean; status: string | null }> => {
+  const canonicalSessionId = toOptionalPositiveInt(sessionIdentity.canonicalSessionId);
+  const localSessionKey = sessionIdentity.localSessionKey ?? null;
+  const firmwareBootId = sessionIdentity.bootId?.trim() || null;
+  const occurredAt = toIsoTimestamp(deviceTimestampMs);
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    if (canonicalSessionId !== null) {
+      const canonical = await client.query<DeviceSessionRow>(
+        `SELECT id, status
+         FROM device_sessions
+         WHERE id = $1 AND device_id = $2
+         LIMIT 1
+         FOR UPDATE`,
+        [canonicalSessionId, deviceId],
+      );
+      if (canonical.rows[0]) {
+        await client.query('COMMIT');
+        return {
+          sessionId: canonical.rows[0].id,
+          isNew: false,
+          status: canonical.rows[0].status ?? null,
+        };
+      }
+    }
+
+    if (localSessionKey === null || firmwareBootId === null) {
+      await client.query('COMMIT');
+      return { sessionId: null, isNew: false, status: null };
+    }
+
+    const existing = await client.query<DeviceSessionRow>(
+      `SELECT id, status
+       FROM device_sessions
+       WHERE device_id = $1
+         AND firmware_boot_id = $2
+         AND local_session_key = $3
+       ORDER BY created_at DESC
+       LIMIT 1
+       FOR UPDATE`,
+      [deviceId, firmwareBootId, localSessionKey],
+    );
+    if (existing.rows[0]) {
+      await client.query('COMMIT');
+      return {
+        sessionId: existing.rows[0].id,
+        isNew: false,
+        status: existing.rows[0].status ?? null,
+      };
+    }
+
+    const created = await client.query<DeviceSessionRow>(
+      `INSERT INTO device_sessions (
+         device_id,
+         status,
+         server_session_start,
+         session_start,
+         local_session_key,
+         firmware_boot_id,
+         canonical_source,
+         boundary_source,
+         start_reason,
+         data_points_count,
+         last_update,
+         created_at,
+         updated_at
+       )
+       VALUES ($1, 'running', $2, $2, $3, $4, 'server', 'firmware',
+               'historical_replay_ignition_on', 0, $2, $2, NOW())
+       RETURNING id, status`,
+      [deviceId, occurredAt, localSessionKey, firmwareBootId],
+    );
+
+    await client.query('COMMIT');
+    return {
+      sessionId: created.rows[0]?.id ?? null,
+      isNew: Boolean(created.rows[0]?.id),
+      status: created.rows[0]?.status ?? 'running',
+    };
+  } catch (err) {
+    await client.query('ROLLBACK');
+    logger.error(
+      {
+        err,
+        deviceId,
+        localSessionKey,
+        firmwareBootId,
+        event: 'ensure_historical_device_session_failed',
+      },
+      'Ensure historical device session failed',
+    );
+    throw err;
+  } finally {
+    client.release();
+  }
+};
+
 export const findDeviceSessionIdByIdentity = async (
   deviceId: string,
   sessionIdentity: Pick<SessionIdentityInput, 'localSessionKey' | 'canonicalSessionId' | 'bootId'>,
@@ -800,7 +904,7 @@ export const completeDeviceSession = async (
   serverTimestampMs?: number,
   completionSource: 'stopped' | 'heartbeat' = 'stopped',
   sessionIdentity: SessionIdentityInput = {},
-): Promise<{ sessionId: number | null; discarded: boolean }> => {
+): Promise<{ sessionId: number | null; discarded: boolean; completedNow: boolean }> => {
   const client = await pool.connect();
   const deviceOccurredAt = toIsoTimestamp(deviceTimestampMs);
   const serverOccurredAt = toIsoTimestamp(serverTimestampMs ?? Date.now());
@@ -835,12 +939,12 @@ export const completeDeviceSession = async (
     const session = active.rows[0];
     if (!session) {
       await client.query('COMMIT');
-      return { sessionId: null, discarded: false };
+      return { sessionId: null, discarded: false, completedNow: false };
     }
 
     if (session.status && session.status !== 'running') {
       await client.query('COMMIT');
-      return { sessionId: session.id, discarded: false };
+      return { sessionId: session.id, discarded: false, completedNow: false };
     }
 
     let runtimeSeconds = 0;
@@ -931,7 +1035,7 @@ export const completeDeviceSession = async (
         },
         'Device session discarded',
       );
-      return { sessionId: session.id, discarded: true };
+      return { sessionId: session.id, discarded: true, completedNow: true };
     }
 
     await client.query(
@@ -942,7 +1046,7 @@ export const completeDeviceSession = async (
     );
 
     await client.query('COMMIT');
-    return { sessionId: session.id, discarded: false };
+    return { sessionId: session.id, discarded: false, completedNow: true };
   } catch (err) {
     await client.query('ROLLBACK');
     logger.error({ err, deviceId, event: 'complete_device_session_failed' }, 'Complete device session failed');
