@@ -1,11 +1,14 @@
 import { findOne, findMany } from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
 import type { DeviceSession } from '@/domain/device/types/device.types';
+import {
+  eventLogPositionValueSql,
+  eventLogValidPositionSql,
+} from '@/shared/utils/event-log-telemetry-sql.util';
 
-const GPS_LATITUDE_SQL =
-  "COALESCE(e.context#>>'{raw_payload,data,latitude}', e.context->>'latitude', e.metadata->>'latitude')";
-const GPS_LONGITUDE_SQL =
-  "COALESCE(e.context#>>'{raw_payload,data,longitude}', e.context->>'longitude', e.metadata->>'longitude')";
+const GPS_LATITUDE_SQL = eventLogPositionValueSql('latitude', 'e');
+const GPS_LONGITUDE_SQL = eventLogPositionValueSql('longitude', 'e');
+const GPS_VALID_SQL = eventLogValidPositionSql('e');
 const SESSION_WITH_GPS_COUNT_SQL = `s.*, COALESCE(gps.gps_points_count, 0)::int AS gps_points_count`;
 const GPS_COUNT_JOIN_SQL = `
   LEFT JOIN LATERAL (
@@ -13,8 +16,7 @@ const GPS_COUNT_JOIN_SQL = `
     FROM event_logs e
     WHERE e.session_id = s.id
       AND e.event_code = 'mqtt_bridge_rawdata'
-      AND ${GPS_LATITUDE_SQL} IS NOT NULL
-      AND ${GPS_LONGITUDE_SQL} IS NOT NULL
+      AND ${GPS_VALID_SQL}
   ) gps ON TRUE
 `;
 
