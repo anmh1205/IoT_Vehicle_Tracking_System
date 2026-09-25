@@ -104,7 +104,7 @@ export interface DeviceCommand {
   deviceId: string;
   command: string;
   params: Record<string, unknown>;
-  status: 'pending' | 'sent' | 'acknowledged' | 'failed' | string;
+  status: 'pending' | 'sent' | 'accepted' | 'acknowledged' | 'failed' | string;
   sentAt: string | null;
   ackedAt: string | null;
   response: string | null;
