@@ -60,8 +60,16 @@ esp_err_t command_handler_init(config_t *config);
  * @brief Parse and apply command JSON payload.
  *
  * @param command_json Raw JSON command payload.
+ * @param out_command_id Optional output for the cloud correlation ID. Set to 0
+ *        when the payload is legacy or does not contain a valid command ID.
+ *
+ * @return ESP_OK when the command was accepted/staged.
+ * @return ESP_ERR_INVALID_ARG when the command or params are invalid.
+ * @return ESP_ERR_NOT_SUPPORTED for an unknown command verb.
+ * @return ESP_ERR_NO_MEM when bounded command staging is full.
+ * @return ESP_ERR_TIMEOUT when command state cannot be acquired in time.
  */
-void command_handler_process(const char *command_json);
+esp_err_t command_handler_process(const char *command_json, uint64_t *out_command_id);
 
 /**
  * @brief Consume one-shot location-request flag.
