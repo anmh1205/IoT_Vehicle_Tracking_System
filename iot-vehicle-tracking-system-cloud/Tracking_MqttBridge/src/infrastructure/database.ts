@@ -748,19 +748,56 @@ export const touchDeviceSession = async (params: {
          END,
          avg_imu_accel_delta_mps2 = CASE
            WHEN $3::numeric IS NULL THEN avg_imu_accel_delta_mps2
-           WHEN avg_imu_accel_delta_mps2 IS NULL THEN $3::numeric
-           ELSE ROUND(((avg_imu_accel_delta_mps2 + $3::numeric) / 2)::numeric, 3)
+           WHEN COALESCE(imu_accel_samples_count, 0) = 0 OR avg_imu_accel_delta_mps2 IS NULL
+             THEN ROUND($3::numeric, 3)
+           ELSE ROUND(
+             (
+               (avg_imu_accel_delta_mps2 * imu_accel_samples_count + $3::numeric)
+               / (imu_accel_samples_count + 1)
+             )::numeric,
+             3
+           )
          END,
+         min_imu_accel_delta_mps2 = CASE
+           WHEN $3::numeric IS NULL THEN min_imu_accel_delta_mps2
+           WHEN min_imu_accel_delta_mps2 IS NULL THEN ROUND($3::numeric, 3)
+           ELSE LEAST(min_imu_accel_delta_mps2, ROUND($3::numeric, 3))
+         END,
+         max_imu_accel_delta_mps2 = CASE
+           WHEN $3::numeric IS NULL THEN max_imu_accel_delta_mps2
+           WHEN max_imu_accel_delta_mps2 IS NULL THEN ROUND($3::numeric, 3)
+           ELSE GREATEST(max_imu_accel_delta_mps2, ROUND($3::numeric, 3))
+         END,
+         imu_accel_samples_count =
+           COALESCE(imu_accel_samples_count, 0) + CASE WHEN $3::numeric IS NULL THEN 0 ELSE 1 END,
          avg_vehicle_battery = CASE
            WHEN $4::numeric IS NULL THEN avg_vehicle_battery
-           WHEN avg_vehicle_battery IS NULL THEN $4::numeric
-           ELSE ROUND(((avg_vehicle_battery + $4::numeric) / 2)::numeric, 2)
+           WHEN COALESCE(vehicle_battery_samples_count, 0) = 0 OR avg_vehicle_battery IS NULL
+             THEN ROUND($4::numeric, 2)
+           ELSE ROUND(
+             (
+               (avg_vehicle_battery * vehicle_battery_samples_count + $4::numeric)
+               / (vehicle_battery_samples_count + 1)
+             )::numeric,
+             2
+           )
          END,
+         vehicle_battery_samples_count =
+           COALESCE(vehicle_battery_samples_count, 0) + CASE WHEN $4::numeric IS NULL THEN 0 ELSE 1 END,
          avg_device_battery = CASE
            WHEN $5::numeric IS NULL THEN avg_device_battery
-           WHEN avg_device_battery IS NULL THEN $5::numeric
-           ELSE ROUND(((avg_device_battery + $5::numeric) / 2)::numeric, 2)
+           WHEN COALESCE(device_battery_samples_count, 0) = 0 OR avg_device_battery IS NULL
+             THEN ROUND($5::numeric, 2)
+           ELSE ROUND(
+             (
+               (avg_device_battery * device_battery_samples_count + $5::numeric)
+               / (device_battery_samples_count + 1)
+             )::numeric,
+             2
+           )
          END,
+         device_battery_samples_count =
+           COALESCE(device_battery_samples_count, 0) + CASE WHEN $5::numeric IS NULL THEN 0 ELSE 1 END,
          last_latitude = COALESCE($6, last_latitude),
          last_longitude = COALESCE($7, last_longitude),
          last_speed = COALESCE($8, last_speed),
@@ -826,18 +863,49 @@ export const touchDeviceSession = async (params: {
            END,
            avg_imu_accel_delta_mps2 = CASE
              WHEN $3::numeric IS NULL THEN avg_imu_accel_delta_mps2
-             WHEN avg_imu_accel_delta_mps2 IS NULL THEN $3::numeric
-             ELSE ROUND(((avg_imu_accel_delta_mps2 + $3::numeric) / 2)::numeric, 3)
+             WHEN avg_imu_accel_delta_mps2 IS NULL OR COALESCE(data_points_count, 0) = 0
+               THEN ROUND($3::numeric, 3)
+             ELSE ROUND(
+               (
+                 (avg_imu_accel_delta_mps2 * data_points_count + $3::numeric)
+                 / (data_points_count + 1)
+               )::numeric,
+               3
+             )
+           END,
+           min_imu_accel_delta_mps2 = CASE
+             WHEN $3::numeric IS NULL THEN min_imu_accel_delta_mps2
+             WHEN min_imu_accel_delta_mps2 IS NULL THEN ROUND($3::numeric, 3)
+             ELSE LEAST(min_imu_accel_delta_mps2, ROUND($3::numeric, 3))
+           END,
+           max_imu_accel_delta_mps2 = CASE
+             WHEN $3::numeric IS NULL THEN max_imu_accel_delta_mps2
+             WHEN max_imu_accel_delta_mps2 IS NULL THEN ROUND($3::numeric, 3)
+             ELSE GREATEST(max_imu_accel_delta_mps2, ROUND($3::numeric, 3))
            END,
            avg_vehicle_battery = CASE
              WHEN $4::numeric IS NULL THEN avg_vehicle_battery
-             WHEN avg_vehicle_battery IS NULL THEN $4::numeric
-             ELSE ROUND(((avg_vehicle_battery + $4::numeric) / 2)::numeric, 2)
+             WHEN avg_vehicle_battery IS NULL OR COALESCE(data_points_count, 0) = 0
+               THEN ROUND($4::numeric, 2)
+             ELSE ROUND(
+               (
+                 (avg_vehicle_battery * data_points_count + $4::numeric)
+                 / (data_points_count + 1)
+               )::numeric,
+               2
+             )
            END,
            avg_device_battery = CASE
              WHEN $5::numeric IS NULL THEN avg_device_battery
-             WHEN avg_device_battery IS NULL THEN $5::numeric
-             ELSE ROUND(((avg_device_battery + $5::numeric) / 2)::numeric, 2)
+             WHEN avg_device_battery IS NULL OR COALESCE(data_points_count, 0) = 0
+               THEN ROUND($5::numeric, 2)
+             ELSE ROUND(
+               (
+                 (avg_device_battery * data_points_count + $5::numeric)
+                 / (data_points_count + 1)
+               )::numeric,
+               2
+             )
            END,
            last_latitude = COALESCE($6, last_latitude),
            last_longitude = COALESCE($7, last_longitude),
