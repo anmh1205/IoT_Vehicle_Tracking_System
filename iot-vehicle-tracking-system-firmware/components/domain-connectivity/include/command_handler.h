@@ -69,6 +69,8 @@ esp_err_t command_handler_init(config_t *config);
  *        when the payload is legacy or does not contain a valid command ID.
  * @param out_deferred Optional output set true only when the command was staged
  *        for later FSM execution. Immediate commands complete in the parser path.
+ * @param out_duplicate Optional output set true when a QoS1 redelivery repeats a
+ *        command ID that was already accepted during the current MQTT runtime.
  *
  * @return ESP_OK when the command was accepted/staged.
  * @return ESP_ERR_INVALID_ARG when the command or params are invalid.
@@ -78,7 +80,8 @@ esp_err_t command_handler_init(config_t *config);
  */
 esp_err_t command_handler_process(const char *command_json,
                                   uint64_t *out_command_id,
-                                  bool *out_deferred);
+                                  bool *out_deferred,
+                                  bool *out_duplicate);
 
 /**
  * @brief Read current tracking enabled/disabled state.
