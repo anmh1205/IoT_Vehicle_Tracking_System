@@ -33,6 +33,11 @@ WHERE event_code = 'mqtt_bridge_rawdata';
 CREATE INDEX IF NOT EXISTS idx_event_logs_mqtt_bridge_source_time ON event_logs(server_timestamp)
 WHERE context->>'source' = 'mqtt_bridge_rawdata';
 
+CREATE UNIQUE INDEX IF NOT EXISTS uq_event_logs_mqtt_bridge_message
+ON event_logs(device_id, (metadata->>'message_id'))
+WHERE event_code = 'mqtt_bridge_rawdata'
+  AND metadata->>'message_id' IS NOT NULL;
+
 CREATE TRIGGER trigger_event_logs_updated_at
     BEFORE UPDATE ON event_logs
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
