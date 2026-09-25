@@ -61,6 +61,14 @@ const clampConfirmTimeoutSec = (value: unknown): number => {
 
 const normalizeArtifactSha = (sha256: string): string => sha256.trim().toLowerCase();
 
+const resolveDirectConfirmTimeoutSec = (value: unknown): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0
+    ? Math.floor(parsed)
+    : OTA_CONFIRM_TIMEOUT_DEFAULT_SEC;
+};
+
+
 const parsePublicBaseUrl = (): URL => {
   const raw = firmwareConfig.publicBaseUrl?.trim();
   if (!raw) {
@@ -242,7 +250,7 @@ export const deployFirmwareToDevice = async (
     throw createValidationError(`Unknown deviceId: ${deviceId}`);
   }
 
-  const confirmTimeoutSec = clampConfirmTimeoutSec(input.confirmTimeoutSec);
+  const confirmTimeoutSec = resolveDirectConfirmTimeoutSec(input.confirmTimeoutSec);
   const [deployment] = await firmwareRepo.createDeployments(
     firmwareId,
     [deviceId],
