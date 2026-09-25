@@ -244,7 +244,7 @@ export const ensureDeviceSession = async (
          WHERE device_id = $1
            AND status = 'running'
            AND ($5::bigint IS NULL OR id <> $5::bigint)
-         RETURNING id`,
+         RETURNING id, COALESCE(total_runtime_seconds, uptime, 0)::text AS runtime_seconds`,
         [
           deviceId,
           serverOccurredAt,
@@ -253,7 +253,22 @@ export const ensureDeviceSession = async (
           keepSessionId ?? null,
         ],
       );
-      retired.rows.forEach((row) => retiredSessionIds.add(row.id));
+
+      let retiredRuntimeSeconds = 0;
+      retired.rows.forEach((row) => {
+        retiredSessionIds.add(row.id);
+        retiredRuntimeSeconds += Math.max(toInt(row.runtime_seconds), 0);
+      });
+
+      if (retiredRuntimeSeconds > 0) {
+        await client.query(
+          `UPDATE devices
+           SET total_runtime_seconds = COALESCE(total_runtime_seconds, 0) + $2,
+               updated_at = NOW()
+           WHERE device_id = $1`,
+          [deviceId, retiredRuntimeSeconds],
+        );
+      }
     };
 
     if (hasAuthoritativeIdentity) {
