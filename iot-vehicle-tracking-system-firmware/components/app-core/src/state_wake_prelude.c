@@ -735,7 +735,13 @@ void state_machine_run_wake_prelude(bool allow_replay) {
         state_machine_refresh_telemetry(modem_ready, true);
     }
 
-    state_machine_handle_pending_action();
+    /*
+     * Do not drain actions a second time here. A command can arrive while the
+     * network/telemetry work above is polling modem URCs. Its acceptance ACK is
+     * deliberately queued for the next FSM iteration, where
+     * state_machine_core_run() flushes command ACKs before this prelude gets a
+     * chance to execute terminal actions such as reboot or OTA rollback.
+     */
     offline_queue_set_online(modem_ready && tracker_mqtt_is_connected());
     if (allow_replay) {
         offline_queue_replay_tick();
