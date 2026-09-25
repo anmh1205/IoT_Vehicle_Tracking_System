@@ -311,6 +311,17 @@ static void state_machine_defer_firmware_report(const firmware_status_t *firmwar
              firmware->job_id);
 }
 
+static bool state_machine_firmware_report_same_lineage(const firmware_status_t *left,
+                                                        const firmware_status_t *right) {
+    if (left == NULL || right == NULL) {
+        return false;
+    }
+
+    return strcmp(left->job_id, right->job_id) == 0 &&
+           strcmp(left->target_version, right->target_version) == 0;
+}
+
+
 /**
  * @brief Populate a firmware status struct from primitive OTA fields.
  *
@@ -443,6 +454,21 @@ bool state_machine_publish_firmware_payload(const firmware_status_t *firmware) {
          * retry instead of silently losing a terminal deployment outcome.
          */
         state_machine_defer_firmware_report(firmware);
+    } else if (
+        s_deferred_firmware_report_pending &&
+        state_machine_firmware_report_same_lineage(firmware, &s_deferred_firmware_report)
+    ) {
+        /*
+         * A newer status from the same OTA job has already reached MQTT or
+         * durable offline storage. The older RAM-only snapshot is now
+         * superseded and must never be replayed afterward.
+         */
+        ESP_LOGD(TAG,
+                 "event=firmware_status_deferred_superseded status=%s progress=%u job=%s",
+                 s_deferred_firmware_report.status,
+                 (unsigned)s_deferred_firmware_report.progress,
+                 s_deferred_firmware_report.job_id);
+        s_deferred_firmware_report_pending = false;
     }
     return accepted;
 }
