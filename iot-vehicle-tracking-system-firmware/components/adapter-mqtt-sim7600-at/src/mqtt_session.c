@@ -34,8 +34,8 @@
  *    AT+CMQTTCFG -> Set UTF-8 check, operation timeout
  *
  * ### 5. Connection (tracker_mqtt_connect)
- *    AT+CMQTTCONNECT -> Connect to broker with keepalive
- *    AT+CMQTTSUB -> Subscribe to command topic
+ *    AT+CMQTTCONNECT -> Connect with a persistent broker session so QoS1 commands survive offline windows
+ *    AT+CMQTTSUB -> Reassert the command-topic subscription idempotently
  *    Polls for session window until connected
  *
  * ### 6. Disconnect (tracker_mqtt_disconnect)
@@ -874,10 +874,10 @@ static esp_err_t tracker_mqtt_build_connect_cmd(const char *server_addr, char *c
     // Build the CMQTTCONNECT command once here so every connect attempt uses the same broker contract.
     int n = 0;
     if (util_string_empty(s_cfg.mqtt_username)) {
-        // Anonymous connect: <client>,<addr>,<keepalive>,1 (1 = clean session).
+        // Anonymous connect: <client>,<addr>,<keepalive>,0 (0 = persistent session).
         n = snprintf(cmd,
                      cmd_size,
-                     "AT+CMQTTCONNECT=%d,\"%s\",%u,1\r",
+                     "AT+CMQTTCONNECT=%d,\"%s\",%u,0\r",
                      MQTT_CLIENT_INDEX,
                      server_addr,
                      (unsigned int)MQTT_DEFAULT_KEEPALIVE_S);
@@ -885,7 +885,7 @@ static esp_err_t tracker_mqtt_build_connect_cmd(const char *server_addr, char *c
         // Authenticated connect appends quoted username/password credentials.
         n = snprintf(cmd,
                      cmd_size,
-                     "AT+CMQTTCONNECT=%d,\"%s\",%u,1,\"%s\",\"%s\"\r",
+                     "AT+CMQTTCONNECT=%d,\"%s\",%u,0,\"%s\",\"%s\"\r",
                      MQTT_CLIENT_INDEX,
                      server_addr,
                      (unsigned int)MQTT_DEFAULT_KEEPALIVE_S,
