@@ -154,11 +154,11 @@ export const createDeployments = async (
         $${paramIndex++},
         'assigned',
         0,
-        $${paramIndex++},
+        ${paramIndex++},
         NOW(),
+        NULL,
         NOW(),
-        NOW(),
-        $${paramIndex++},
+        ${paramIndex++},
         NOW(),
         NOW(),
         NOW()
@@ -237,6 +237,19 @@ export const findActiveDeploymentsByDeviceAndTargetVersion = async (
        AND status NOT IN ('success', 'failed', 'rolled_back')
      ORDER BY updated_at DESC`,
     [deviceIds, targetVersion],
+  );
+};
+
+export const markDeploymentCommandDispatched = async (
+  deploymentId: number,
+): Promise<void> => {
+  await pool.query(
+    `UPDATE firmware_update_log
+     SET command_dispatched_at = COALESCE(command_dispatched_at, NOW()),
+         last_seen_at = COALESCE(last_seen_at, NOW()),
+         updated_at = NOW()
+     WHERE id = $1`,
+    [deploymentId],
   );
 };
 
