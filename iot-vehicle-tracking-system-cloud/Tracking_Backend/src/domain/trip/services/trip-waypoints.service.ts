@@ -24,7 +24,7 @@ export interface TripRouteSummary {
 }
 
 interface EventLogWaypointRow {
-  server_timestamp: Date;
+  telemetry_timestamp: Date;
   lat: string | null;
   lon: string | null;
   speed: string | null;
@@ -55,17 +55,17 @@ const getEventLogWaypoints = async (
 ): Promise<TripWaypoint[]> => {
   const rows = await findMany<EventLogWaypointRow>(
     `SELECT
-        server_timestamp,
+        COALESCE(device_timestamp, server_timestamp) AS telemetry_timestamp,
         COALESCE(context#>>'{raw_payload,data,latitude}', context->>'latitude', metadata->>'latitude') AS lat,
         COALESCE(context#>>'{raw_payload,data,longitude}', context->>'longitude', metadata->>'longitude') AS lon,
         COALESCE(context#>>'{raw_payload,data,speed}', context->>'speed', metadata->>'speed') AS speed,
         COALESCE(context#>>'{raw_payload,data,course}', context->>'course', metadata->>'course') AS course
      FROM event_logs
      WHERE device_id = $1
-       AND server_timestamp BETWEEN $2 AND $3
+       AND COALESCE(device_timestamp, server_timestamp) BETWEEN $2 AND $3
        AND ((context#>>'{raw_payload,data,latitude}') IS NOT NULL OR context ? 'latitude' OR metadata ? 'latitude')
        AND ((context#>>'{raw_payload,data,longitude}') IS NOT NULL OR context ? 'longitude' OR metadata ? 'longitude')
-     ORDER BY server_timestamp ASC
+     ORDER BY telemetry_timestamp ASC, server_timestamp ASC
      LIMIT 5000`,
     [deviceId, startTime.toISOString(), endTime.toISOString()],
   );
@@ -80,7 +80,7 @@ const getEventLogWaypoints = async (
       return [];
     }
 
-    const ts = Math.floor(row.server_timestamp.getTime() / 1000);
+    const ts = Math.floor(row.telemetry_timestamp.getTime() / 1000);
     if (previousTimestamp > 0 && ts - previousTimestamp < minGapSeconds) {
       return [];
     }
@@ -88,7 +88,7 @@ const getEventLogWaypoints = async (
 
     return [{
       ts,
-      timestamp: row.server_timestamp.toISOString(),
+      timestamp: row.telemetry_timestamp.toISOString(),
       lat,
       lon,
       speed: toFiniteNumber(row.speed),
