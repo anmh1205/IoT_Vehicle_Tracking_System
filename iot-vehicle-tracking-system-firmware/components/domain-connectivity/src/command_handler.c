@@ -68,10 +68,10 @@ static bool s_tracking_enabled = true;
 /* Tracks command drops without expanding the cloud command contract. */
 static atomic_uint s_dropped_command_count = 0U;
 /*
- * Recent accepted cloud command IDs. The MQTT connection uses clean-session=1,
- * so this bounded RAM window only needs to absorb QoS1 DUP delivery inside the
- * active broker session. It deliberately exceeds the backend's 8-command
- * outstanding window.
+ * Recent accepted cloud command IDs. Device MQTT now uses a persistent
+ * clean-session=0 subscription, so this bounded window is mirrored to NVS and
+ * survives reconnect/reboot redelivery. It deliberately exceeds the backend's
+ * 8-command outstanding window.
  */
 static uint64_t s_recent_command_ids[COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN] = {0};
 static size_t s_recent_command_cursor = 0U;
