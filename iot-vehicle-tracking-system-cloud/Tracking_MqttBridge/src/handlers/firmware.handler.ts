@@ -199,15 +199,29 @@ export const handleFirmware = async (
   }
 
   let updateDecision: UpdateDecision = { accept: true, reason: 'unknown' };
+  const client = await pool.connect();
 
   try {
-    const existingResult = await pool.query<FirmwareLogRow>(
-      `SELECT id, status, progress, last_message_id, last_seq_no
-             , last_boot_id
+    await client.query('BEGIN');
+
+    /*
+     * Serialize all lifecycle decisions for one device before reading the job
+     * row. This also covers an unknown/new job where there is no deployment row
+     * available to lock yet.
+     */
+    await client.query(
+      'SELECT device_id FROM devices WHERE device_id = $1 FOR UPDATE',
+      [payload.device_id],
+    );
+
+    const existingResult = await client.query<FirmwareLogRow>(
+      `SELECT id, status, progress, last_message_id, last_seq_no,
+              last_boot_id
        FROM firmware_update_log
        WHERE job_id = $1 AND device_id = $2
        ORDER BY updated_at DESC
-       LIMIT 1`,
+       LIMIT 1
+       FOR UPDATE`,
       [jobId, payload.device_id],
     );
 
@@ -215,6 +229,7 @@ export const handleFirmware = async (
     updateDecision = decideFirmwareUpdate(existing, payload);
 
     if (!updateDecision.accept) {
+      await client.query('COMMIT');
       logger.info(
         {
           jobId,
@@ -231,7 +246,7 @@ export const handleFirmware = async (
     }
 
     if (!existing) {
-      await pool.query(
+      await client.query(
         `INSERT INTO firmware_update_log (
           job_id,
           device_id,
@@ -284,7 +299,7 @@ export const handleFirmware = async (
     } else {
       const shouldMarkStarted = payload.status !== 'assigned';
       const resetSequenceWatermark = updateDecision.reason === 'boot_seq_reset';
-      await pool.query(
+      await client.query(
         `UPDATE firmware_update_log
          SET status = $2::firmware_status_enum,
              progress = COALESCE($3, progress),
@@ -326,17 +341,14 @@ export const handleFirmware = async (
         ],
       );
     }
-  } catch (err) {
-    logger.error(
-      { err, deviceId: payload.device_id, jobId, event: 'firmware_status_log_failed' },
-      'Firmware status log failed',
-    );
-    return;
-  }
 
-  if (payload.status === 'success') {
-    try {
-      await pool.query(
+    if (payload.status === 'success') {
+      /*
+       * Keep firmware inventory and deployment terminal state atomic. A reader
+       * must never observe a committed OTA success paired with the old device
+       * firmware inventory merely because a second query failed later.
+       */
+      await client.query(
         `UPDATE devices
          SET firmware_version = $2,
              target_firmware_version = CASE
@@ -347,18 +359,22 @@ export const handleFirmware = async (
          WHERE device_id = $1`,
         [payload.device_id, payload.currentVersion, payload.targetVersion],
       );
-    } catch (err) {
-      logger.error(
-        {
-          err,
-          deviceId: payload.device_id,
-          jobId,
-          currentVersion: payload.currentVersion,
-          event: 'firmware_inventory_sync_failed',
-        },
-        'Firmware inventory sync failed after OTA success',
-      );
     }
+
+    await client.query('COMMIT');
+  } catch (err) {
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      // Preserve the original database error.
+    }
+    logger.error(
+      { err, deviceId: payload.device_id, jobId, event: 'firmware_status_log_failed' },
+      'Firmware status log failed',
+    );
+    return;
+  } finally {
+    client.release();
   }
 
   publishInternalEvent('firmware', {
