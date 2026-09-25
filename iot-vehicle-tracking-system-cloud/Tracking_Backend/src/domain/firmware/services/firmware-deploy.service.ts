@@ -6,6 +6,7 @@ import * as deviceCommandService from '@/domain/device/services/device-command.s
 import { appConfig, firmwareConfig } from '@/config/env';
 import { createNotFoundError, createValidationError } from '@/shared/utils/errors.util';
 import { publishEvent } from '@/infrastructure/realtime';
+import { logger } from '@/infrastructure/logger';
 import {
   OTA_IN_PROGRESS_STATES,
   OTA_TERMINAL_STATES,
@@ -307,6 +308,24 @@ export const deployFirmware = async (
     }
 
     deploymentMap.set(deployment.device_id, deployment);
+  }
+
+  const targetedDeviceIds = Array.from(
+    new Set([...dedupedByDevice.keys(), ...dispatchedDeviceIds]),
+  );
+  if (targetedDeviceIds.length > 0) {
+    try {
+      await firmwareRepo.setDeviceTargetFirmwareVersion(targetedDeviceIds, firmware.version);
+    } catch (error) {
+      // OTA commands may already be on the wire; inventory reconciliation must
+      // not misreport dispatch as failed just because the desired-state mirror failed.
+      logger.error('Failed to update device target firmware inventory', {
+        error,
+        firmwareId,
+        targetVersion: firmware.version,
+        deviceIds: targetedDeviceIds,
+      });
+    }
   }
 
   if (dispatchedDeviceIds.length > 0) {

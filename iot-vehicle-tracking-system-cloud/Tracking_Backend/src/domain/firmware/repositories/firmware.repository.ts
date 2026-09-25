@@ -189,6 +189,23 @@ export const createDeployments = async (
   );
 };
 
+export const setDeviceTargetFirmwareVersion = async (
+  deviceIds: string[],
+  targetVersion: string,
+): Promise<void> => {
+  if (deviceIds.length === 0) {
+    return;
+  }
+
+  await pool.query(
+    `UPDATE devices
+     SET target_firmware_version = $2,
+         updated_at = NOW()
+     WHERE device_id = ANY($1::text[])`,
+    [deviceIds, targetVersion],
+  );
+};
+
 export const findExistingDeviceIds = async (deviceIds: string[]): Promise<Set<string>> => {
   if (deviceIds.length === 0) {
     return new Set<string>();
