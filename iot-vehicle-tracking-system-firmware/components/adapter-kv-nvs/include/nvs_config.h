@@ -60,6 +60,17 @@ typedef struct {
 /** @brief Max length of the per-boot identifier string (incl. NUL). */
 #define TRACKER_SESSION_BOOT_ID_LEN 48
 
+/** @brief Number of recently accepted cloud commands retained across reconnect/reboot. */
+#define TRACKER_COMMAND_DEDUPE_CACHE_LEN 32U
+
+/**
+ * @brief Persistent application-level dedupe window for cloud command IDs.
+ */
+typedef struct {
+    uint64_t command_ids[TRACKER_COMMAND_DEDUPE_CACHE_LEN];
+    uint32_t cursor;
+} command_dedupe_context_t;
+
 /**
  * @brief Session-recovery context persisted across an unexpected reset.
  *
@@ -125,3 +136,17 @@ esp_err_t nvs_config_load_session_context(session_persist_context_t *out_context
  * @return ESP_OK on success, otherwise NVS error.
  */
 esp_err_t nvs_config_clear_session_context(void);
+
+/**
+ * @brief Persist the bounded recent-command dedupe window.
+ */
+esp_err_t nvs_config_save_command_dedupe_context(const command_dedupe_context_t *context);
+
+/**
+ * @brief Load the bounded recent-command dedupe window.
+ *
+ * @param out_context Output context, zeroed when no stored window exists.
+ * @param out_found Set true only when a valid current-format window was loaded.
+ */
+esp_err_t nvs_config_load_command_dedupe_context(command_dedupe_context_t *out_context,
+                                                  bool *out_found);
