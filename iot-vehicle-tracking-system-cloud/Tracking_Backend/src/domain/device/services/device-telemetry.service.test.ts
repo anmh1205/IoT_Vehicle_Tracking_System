@@ -83,6 +83,7 @@ describe('device-telemetry.service', () => {
     expect(sql).toContain('LIMIT 5000');
     expect(sql).toContain(') recent_points');
     expect(sql).toContain('ORDER BY telemetry_timestamp ASC');
+    expect(sql).toContain("context ? 'position_valid'");
   });
 
   it('returns exact session telemetry rows by session_id for route replay', async () => {
@@ -109,6 +110,7 @@ describe('device-telemetry.service', () => {
     expect(sql).toContain('e.session_id IS NULL');
     expect(sql).toContain("e.event_code = 'mqtt_bridge_rawdata'");
     expect(sql).toContain("context#>>'{raw_payload,data,latitude}'");
+    expect(sql).toContain("e.context ? 'position_valid'");
     expect(sql).toContain('LIMIT 10000');
     expect(params).toEqual(['TRACKER_001', 220]);
     expect(result).toEqual({

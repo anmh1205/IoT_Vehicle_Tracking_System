@@ -1,4 +1,8 @@
 import { pool } from '@/infrastructure/database/pool';
+import {
+  eventLogPositionExistsSql,
+  eventLogPositionValueSql,
+} from '@/shared/utils/event-log-telemetry-sql.util';
 import { findOne, findMany } from '@/infrastructure/database/queries';
 import { createNotFoundError } from '@/shared/utils/errors.util';
 import type { Vehicle } from '@/domain/vehicle/types/vehicle.types';
@@ -94,17 +98,16 @@ export const getVehicleStatus = async (id: number): Promise<VehicleStatusPublic>
     if (device) {
       const telemetry = await findOne<TelemetryRow>(
         `SELECT
-           COALESCE(NULLIF(context#>>'{raw_payload,data,latitude}', '')::float8, NULLIF(context->>'latitude', '')::float8) AS latitude,
-           COALESCE(NULLIF(context#>>'{raw_payload,data,longitude}', '')::float8, NULLIF(context->>'longitude', '')::float8) AS longitude,
-           COALESCE(NULLIF(context#>>'{raw_payload,data,speed}', '')::float8, NULLIF(context->>'speed', '')::float8) AS speed,
-           COALESCE(NULLIF(context#>>'{raw_payload,data,course}', '')::float8, NULLIF(context->>'course', '')::float8) AS course,
+           (${eventLogPositionValueSql('latitude')})::float8 AS latitude,
+           (${eventLogPositionValueSql('longitude')})::float8 AS longitude,
+           (${eventLogPositionValueSql('speed')})::float8 AS speed,
+           (${eventLogPositionValueSql('course')})::float8 AS course,
            COALESCE(NULLIF(context#>>'{raw_payload,data,device_battery}', '')::float8, NULLIF(context->>'device_battery', '')::float8) AS device_battery,
            server_timestamp
          FROM event_logs
          WHERE device_id = $1
            AND (
-             (context#>>'{raw_payload,data,latitude}') IS NOT NULL
-             OR context ? 'latitude'
+             ${eventLogPositionExistsSql('latitude')}
              OR (context#>>'{raw_payload,data,device_battery}') IS NOT NULL
              OR context ? 'device_battery'
              OR (context#>>'{raw_payload,data,course}') IS NOT NULL

@@ -182,6 +182,8 @@ describe('trip-waypoints.service', () => {
       expect(sql).toContain('COALESCE(device_timestamp, server_timestamp) AS telemetry_timestamp');
       expect(sql).toContain('COALESCE(device_timestamp, server_timestamp) BETWEEN $2 AND $3');
       expect(sql).toContain('ORDER BY telemetry_timestamp ASC, server_timestamp ASC');
+      expect(sql).toContain("context ? 'position_valid'");
+      expect(sql).toContain("context->>'position_valid'");
     });
 
     it('should merge lat/lon values by timestamp into waypoints', async () => {
