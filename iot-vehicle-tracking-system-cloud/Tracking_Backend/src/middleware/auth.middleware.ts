@@ -1,5 +1,5 @@
 import type { Response, NextFunction } from 'express';
-import type { AuthenticatedRequest } from '@/shared/types/common.types';
+import type { AuthenticatedRequest, UserRole } from '@/shared/types/common.types';
 import { isUserRole } from '@/shared/types/common.types';
 import { hashToken } from '@/shared/utils/crypto.util';
 import { createUnauthorizedError, createForbiddenError } from '@/shared/utils/errors.util';
@@ -33,25 +33,26 @@ const extractCookieToken = (req: AuthenticatedRequest): string | null => {
 const extractSessionToken = (req: AuthenticatedRequest): string | null =>
   extractBearerToken(req) ?? extractCookieToken(req);
 
-const ADMIN_ROLES = new Set(['root', 'admin']);
+export const requireRole = (...allowedRoles: UserRole[]) =>
+  (
+    req: AuthenticatedRequest,
+    _res: Response,
+    next: NextFunction,
+  ): void => {
+    if (!req.user) {
+      next(createUnauthorizedError('Authentication required'));
+      return;
+    }
 
-export const requireAdminRole = (
-  req: AuthenticatedRequest,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  if (!req.user) {
-    next(createUnauthorizedError('Authentication required'));
-    return;
-  }
+    if (!allowedRoles.includes(req.user.role)) {
+      next(createForbiddenError('Insufficient permissions'));
+      return;
+    }
 
-  if (!ADMIN_ROLES.has(req.user.role)) {
-    next(createForbiddenError('Admin access required'));
-    return;
-  }
+    next();
+  };
 
-  next();
-};
+export const requireAdminRole = requireRole('root', 'admin');
 
 export const requireAuth = async (
   req: AuthenticatedRequest,
