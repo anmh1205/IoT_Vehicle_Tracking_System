@@ -928,19 +928,36 @@ static bool state_machine_reconcile_stale_restored_session(void) {
  * before queue/session metadata is cleared so the closing boundary still
  * carries the active identifiers.
  */
-static void state_machine_commit_session_end(void) {
+static bool state_machine_commit_session_end(void) {
     if (state_machine_should_throttle_rawdata()) {
         ESP_LOGW(TAG,
                  "event=session_end_rawdata_force reason=closing_session action=throttle_bypass");
     }
-    state_machine_publish_rawdata();
-    state_machine_publish_status("stopped", "ended");
+    (void)state_machine_publish_rawdata();
+
+    /*
+     * The authoritative end boundary owns session teardown. If neither MQTT nor
+     * durable SD fallback accepts it, retain the complete active identity (RAM,
+     * session manager, offline queue and NVS) so the next hold interval can
+     * retry. Forgetting the identity here would make the cloud session
+     * impossible to close after a transport+storage outage.
+     */
+    if (!state_machine_publish_status("stopped", "ended")) {
+        ESP_LOGW(TAG,
+                 "event=session_end_deferred local=%lu canonical=%llu boot_id=%s reason=publish_not_durable",
+                 (unsigned long)s_session_id,
+                 (unsigned long long)s_canonical_session_id,
+                 s_session_boot_id);
+        return false;
+    }
+
     offline_queue_stop_session(true);
     offline_queue_set_session(0);
     session_mgr_mark_stopped();
     state_machine_clear_persisted_session();
     state_machine_reset_session_runtime();
     s_publish_status = TRACKER_PUBLISH_STATUS_STOPPED;
+    return true;
 }
 
 /**
@@ -1097,7 +1114,17 @@ static bool state_machine_handle_driving_ignition_boundary(uint64_t now_ms) {
         return false;
     }
 
-    state_machine_commit_session_end();
+    if (!state_machine_commit_session_end()) {
+        /*
+         * Back off end-boundary retries by the same OFF hold interval. The
+         * session remains logically active; if ignition returns in the meantime
+         * the normal branch above cancels this close attempt and tracking
+         * continues under the same still-open cloud session.
+         */
+        s_ignition_off_started_ms = now_ms;
+        return false;
+    }
+
     s_ignition_off_started_ms = 0U;
     return true;
 }
