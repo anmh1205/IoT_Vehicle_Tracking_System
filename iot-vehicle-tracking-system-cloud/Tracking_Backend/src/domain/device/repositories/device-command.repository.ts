@@ -171,6 +171,24 @@ export const updateCommandStatus = async (
   return result.rows[0] ? mapRow(result.rows[0]) : null;
 };
 
+export const failPendingCommandBeforeDispatch = async (
+  id: number,
+  response: string,
+): Promise<DeviceCommandRecord | null> => {
+  const result = await pool.query<DeviceCommandRow>(
+    `UPDATE device_commands
+     SET status = 'failed',
+         response = $2,
+         updated_at = NOW()
+     WHERE id = $1
+       AND status = 'pending'
+     RETURNING id, device_id, command, params, status, sent_at, acked_at, response`,
+    [id, response],
+  );
+
+  return result.rows[0] ? mapRow(result.rows[0]) : null;
+};
+
 export const observeRuntimeBootAndMarkStaleAcceptedIndeterminate = async (
   deviceId: string,
   currentBootId: string,
