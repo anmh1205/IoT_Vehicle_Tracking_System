@@ -534,6 +534,17 @@ export const DeviceDetailModalContainer = ({
 
   useRealtimeSubscription<any>({
     namespace: 'devices',
+    event: 'device:session_discarded',
+    enabled: open && !!devicePublicId,
+    handler: (payload) => {
+      const payloadId = String(payload?.deviceId ?? payload?.device_id ?? '');
+      if (payloadId && payloadId !== devicePublicId) return;
+      void refreshCurrent();
+    },
+  });
+
+  useRealtimeSubscription<any>({
+    namespace: 'devices',
     event: 'command:ack',
     enabled: open && !!devicePublicId,
     handler: (payload) => {

@@ -5,7 +5,7 @@ import type { Trip } from '@/domain/trip/types/trip.types';
 interface SessionBoundaryPayload {
   device_id: string;
   session_id: number;
-  action: 'started' | 'ended';
+  action: 'started' | 'ended' | 'discarded';
   occurred_at: string;
 }
 
@@ -129,6 +129,43 @@ const handleSessionEnded = async (
   );
 };
 
+const handleSessionDiscarded = async (
+  deviceId: string,
+  sessionId: number,
+  occurredAt: Date,
+): Promise<void> => {
+  const tripCode = buildAutoTripCode(deviceId, sessionId);
+  const trip = await findTripByCode(tripCode);
+
+  if (!trip) {
+    logger.debug(`Session-discard for ${tripCode} has no matching auto-trip; skipping`);
+    return;
+  }
+
+  if (trip.status !== 'in_progress') {
+    logger.debug(
+      `Session-discard for ${tripCode} ignored because trip status is "${trip.status}"`,
+    );
+    return;
+  }
+
+  const actualStart = trip.actual_start ? new Date(trip.actual_start) : null;
+  const actualEnd =
+    actualStart && occurredAt.getTime() < actualStart.getTime() ? actualStart : occurredAt;
+
+  await updateOne<Trip>(
+    `UPDATE trips
+     SET status = 'cancelled', actual_end = $2, updated_at = NOW()
+     WHERE id = $1 AND status = 'in_progress'
+     RETURNING *`,
+    [trip.id, actualEnd.toISOString()],
+  );
+
+  logger.info(
+    `Session ${sessionId} discarded; cancelled auto-trip "${tripCode}" at ${actualEnd.toISOString()}`,
+  );
+};
+
 /**
  * Keep automatic trips aligned with the firmware-authoritative device-session lifecycle.
  * Session ID is embedded in trip_code so QoS replay/duplicate delivery is idempotent.
@@ -152,6 +189,11 @@ export const handleSessionBoundaryEvent = async (
   try {
     if (action === 'started') {
       await handleSessionStarted(deviceId, sessionId, occurredAt);
+      return;
+    }
+
+    if (action === 'discarded') {
+      await handleSessionDiscarded(deviceId, sessionId, occurredAt);
       return;
     }
 

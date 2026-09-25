@@ -227,11 +227,11 @@ export const handleStatus = async (
           },
         );
 
-        if (completedSession.completedNow && !completedSession.discarded) {
+        if (completedSession.completedNow) {
           publishInternalEvent('session', {
             device_id: payload.device_id,
             session_id: historicalSessionId,
-            action: 'ended',
+            action: completedSession.discarded ? 'discarded' : 'ended',
             boundary_source: 'firmware',
             local_session_key: localSessionKey,
             canonical_session_id:
@@ -395,7 +395,7 @@ export const handleStatus = async (
         publishInternalEvent('session', {
           device_id: payload.device_id,
           session_id: sessionId,
-          action: 'ended',
+          action: completedSession.discarded ? 'discarded' : 'ended',
           boundary_source: 'firmware',
           local_session_key: localSessionKey,
           canonical_session_id: canonicalSessionId,
@@ -484,7 +484,7 @@ export const handleStatus = async (
       publishInternalEvent('session', {
         device_id: payload.device_id,
         session_id: sessionId,
-        action: 'ended',
+        action: completedSession.discarded ? 'discarded' : 'ended',
         boundary_source: SESSION_FALLBACK_BOUNDARY_SOURCE,
         local_session_key: localSessionKey,
         canonical_session_id: canonicalSessionId,

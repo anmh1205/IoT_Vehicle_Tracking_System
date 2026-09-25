@@ -113,6 +113,14 @@ export interface RealtimeEventMap {
     canonicalSessionId?: string | null;
     metadata?: RealtimeMetadata;
   };
+  'device:session_discarded': {
+    deviceId: string;
+    sessionId: number;
+    boundarySource?: string | null;
+    localSessionKey?: number | null;
+    canonicalSessionId?: string | null;
+    metadata?: RealtimeMetadata;
+  };
   'command:ack': {
     device_id: string;
     command_id: string;
