@@ -10,10 +10,11 @@ const logger = createLogger('device-command-service');
 
 let mqttClient: mqtt.MqttClient | null = null;
 let recoveryTimer: NodeJS.Timeout | null = null;
-let recoveryCutoff: Date | null = null;
 let recoveryPromise: Promise<void> | null = null;
+let dispatcherInitialized = false;
 
 const RECOVERY_INTERVAL_MS = 30_000;
+const RECOVERY_PENDING_GRACE_MS = RECOVERY_INTERVAL_MS;
 const RECOVERY_BATCH_LIMIT = 100;
 const REQUEST_LOCATION_EXPIRY_SECONDS = 120;
 const REBOOT_EXPIRY_SECONDS = 300;
@@ -88,10 +89,14 @@ const publishCommandRecord = async (
 };
 
 const recoverPendingCommandsWithClient = async (client: mqtt.MqttClient): Promise<void> => {
-  if (!recoveryCutoff || !client.connected) {
+  if (!client.connected) {
     return;
   }
 
+  // Use a rolling grace window instead of a process-start cutoff. This avoids
+  // racing a just-created command while still recovering rows that became stuck
+  // after this backend process had already started.
+  const recoveryCutoff = new Date(Date.now() - RECOVERY_PENDING_GRACE_MS);
   const pending = await deviceCommandRepo.listPendingCommandsBefore(
     recoveryCutoff,
     RECOVERY_BATCH_LIMIT,
@@ -116,11 +121,6 @@ const recoverPendingCommandsWithClient = async (client: mqtt.MqttClient): Promis
 
     try {
       await publishCommandRecord(client, command, remainingExpirySeconds);
-      await deviceCommandRepo.updateCommandStatus(command.id, 'sent');
-      logger.info('Recovered pending device command after backend restart', {
-        commandId: command.id,
-        deviceId: command.deviceId,
-      });
     } catch (error) {
       logger.warn('Pending device command recovery publish failed; keeping row pending', {
         commandId: command.id,
@@ -129,6 +129,26 @@ const recoverPendingCommandsWithClient = async (client: mqtt.MqttClient): Promis
       });
       // A transport-wide failure will usually affect later rows too. Stop this
       // bounded pass and retry on the next connect/interval tick.
+      break;
+    }
+
+    try {
+      await deviceCommandRepo.updateCommandStatus(command.id, 'sent');
+      logger.info('Recovered pending device command', {
+        commandId: command.id,
+        deviceId: command.deviceId,
+      });
+    } catch (error) {
+      /*
+       * Broker delivery already succeeded. Never fabricate a terminal failure
+       * because the bookkeeping write failed; leave the row pending so a later
+       * rolling recovery pass can retry safely with the same command_id.
+       */
+      logger.warn('Recovered command publish succeeded but sent status persistence failed', {
+        commandId: command.id,
+        deviceId: command.deviceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
       break;
     }
   }
@@ -206,7 +226,22 @@ export const sendCommand = async (
 
   try {
     await publishCommandRecord(client, command);
+  } catch (error) {
+    const response = error instanceof Error ? error.message : 'publish_failed';
+    try {
+      await deviceCommandRepo.updateCommandStatus(command.id, 'failed', response);
+    } catch (statusError) {
+      logger.error('Device command publish failed and failure status could not be persisted', {
+        commandId: command.id,
+        deviceId,
+        publishError: response,
+        statusError: statusError instanceof Error ? statusError.message : String(statusError),
+      });
+    }
+    throw error;
+  }
 
+  try {
     return (
       (await deviceCommandRepo.updateCommandStatus(command.id, 'sent')) ?? {
         ...command,
@@ -214,18 +249,29 @@ export const sendCommand = async (
       }
     );
   } catch (error) {
-    const response = error instanceof Error ? error.message : 'publish_failed';
-    await deviceCommandRepo.updateCommandStatus(command.id, 'failed', response);
-    throw error;
+    /*
+     * MQTT QoS1 dispatch has already succeeded. The durable DB row stays
+     * pending and rolling recovery will reconcile it; reporting terminal
+     * failure here would contradict the transport fact and block later ACKs.
+     */
+    logger.error('Device command dispatched but sent status persistence failed', {
+      commandId: command.id,
+      deviceId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return {
+      ...command,
+      status: 'sent',
+    };
   }
 };
 
 export const initDeviceCommandDispatcher = (): void => {
-  if (recoveryCutoff) {
+  if (dispatcherInitialized) {
     return;
   }
 
-  recoveryCutoff = new Date();
+  dispatcherInitialized = true;
   const client = getMqttClient();
   recoveryTimer = setInterval(() => {
     void runPendingCommandRecovery(client).catch((error) => {
@@ -254,7 +300,7 @@ export const closeDeviceCommandDispatcher = async (): Promise<void> => {
 
   const client = mqttClient;
   mqttClient = null;
-  recoveryCutoff = null;
+  dispatcherInitialized = false;
   recoveryPromise = null;
   if (!client) {
     return;
