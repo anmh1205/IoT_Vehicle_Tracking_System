@@ -162,7 +162,7 @@ const eventPayloadBaseSchema = z.object({
 const firmwareStatusPayloadBaseSchema = z.object({
   device_id: z.string().min(1),
   auth_token: z.string().min(1),
-  jobId: z.string().min(1),
+  jobId: z.string().max(80),
   status: z.enum([
     'assigned',
     'downloading',
