@@ -1183,8 +1183,6 @@ esp_err_t command_handler_process(const char *command_json,
         /*
          * Remember only accepted/staged commands. A transient queue-full or
          * lock/state rejection must remain retryable with the same command ID.
-         */
-        /*
          * Only mark the new ID dirty here. The app-core callback queues the
          * application-level acceptance ACK after this function returns.
          * The FSM later checkpoints this ring after that ACK queue drains and
