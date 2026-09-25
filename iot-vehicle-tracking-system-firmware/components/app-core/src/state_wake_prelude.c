@@ -266,8 +266,8 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
     // Vibration magnitude is only meaningful when the IMU is present; otherwise report zero motion.
     s_telemetry.imu_accel_delta_mps2 = s_imu_available ? imu_get_peak_accel_delta_mps2() : 0.0f;
 
+    uint64_t now_ms = util_uptime_ms();
     if (read_obd && s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
-        uint64_t now_ms = util_uptime_ms();
         size_t diag_query_count = 0;
         const tracker_obd_diag_query_t *diag_queries = state_machine_obd_diagnostic_queries(&diag_query_count);
 
@@ -311,11 +311,9 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
     }
 
     if (read_gnss && state_machine_can_poll_gnss()) {
-        uint64_t now_ms = util_uptime_ms();
         bool poll_due = (s_last_gnss_poll_ms == 0) ||
                         ((now_ms - s_last_gnss_poll_ms) >= TRACKER_GNSS_POLL_INTERVAL_MS);
         if (poll_due) {
-            // GNSS polls are rate-limited separately so the modem is not hammered every FSM iteration.
             s_last_gnss_poll_ms = now_ms;
             gnss_data_t gnss = {0};
             if (modem_gnss_get_location(&gnss) == ESP_OK) {
@@ -323,7 +321,8 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
                 s_gnss_poll_fail_streak = 0;
             } else {
                 s_gnss_poll_fail_streak += 1;
-                // Escalate from transient poll failures to a GNSS re-arm only after the streak crosses the configured threshold.
+                s_telemetry.gnss.fix_valid = false;
+                s_telemetry.gnss.timestamp_ms = 0;
                 if (s_gnss_poll_fail_streak >= TRACKER_GNSS_FAIL_REARM_THRESHOLD &&
                     state_machine_try_rearm_gnss("poll_fail_threshold")) {
                     s_gnss_poll_fail_streak = 0;
@@ -332,12 +331,9 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
         }
     }
 
-    // Guarantee a non-zero timestamp so downstream formatters always have something monotonic to serialize.
     if (s_telemetry.gnss.timestamp_ms == 0) {
-        s_telemetry.gnss.timestamp_ms = util_uptime_ms();
+        s_telemetry.gnss.timestamp_ms = now_ms;
     }
-
-    uint64_t now_ms = util_uptime_ms();
     bool obd_connected = s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx);
     const char *obd_ecu_state = obd_connected ? ble_obd_get_last_ecu_state_label(s_ble_ctx) : "disconnected";
     s_telemetry.obd_ble_connected = obd_connected;

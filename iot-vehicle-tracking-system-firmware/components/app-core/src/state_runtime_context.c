@@ -136,8 +136,6 @@ uint32_t s_imu_false_wake_count = 0;
 bool s_startup_system_check_log_once = false;
 /** @brief True once the user LED GPIO has been configured. */
 bool s_user_led_initialized = false;
-/** @brief Start timestamp of the current user LED blink cycle. */
-uint64_t s_user_led_cycle_started_ms = 0;
 /** @brief Optional override for the user LED state machine. */
 tracker_user_led_override_t s_user_led_override = TRACKER_USER_LED_OVERRIDE_NONE;
 /** @brief Last timestamp when hardware diagnostics were logged. */
@@ -308,7 +306,6 @@ void state_runtime_context_reset(const config_t *config) {
     s_imu_false_wake_count = 0;
     s_startup_system_check_log_once = false;
     s_user_led_initialized = false;
-    s_user_led_cycle_started_ms = 0;
     s_user_led_override = TRACKER_USER_LED_OVERRIDE_NONE;
     s_last_hw_diag_log_ms = 0;
     s_heartbeat_started_ms = 0;

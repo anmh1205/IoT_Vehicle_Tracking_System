@@ -130,9 +130,7 @@ static void led_ensure_initialized(void) {
         return;
     }
 
-    // Mark configured, seed the cycle origin, and start from a known-off state.
     s_user_led_initialized = true;
-    s_user_led_cycle_started_ms = util_uptime_ms();
     led_drive(false);
     ESP_LOGI(TAG, "event=led_initialized pin=%d active_level=%d",
              (int)PIN_USER_LED, (int)TRACKER_USER_LED_ACTIVE_LEVEL);
