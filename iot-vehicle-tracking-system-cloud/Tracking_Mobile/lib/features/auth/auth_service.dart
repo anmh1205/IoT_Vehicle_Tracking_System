@@ -8,5 +8,5 @@ class AuthService {
 
   Future<void> saveToken(String token) => _storage.saveAuthToken(token);
 
-  Future<void> clearToken() => _storage.clearAll();
+  Future<void> clearToken() => _storage.deleteAuthToken();
 }
