@@ -117,8 +117,6 @@ typedef struct {
 static QueueHandle_t s_command_ack_queue = NULL;
 /* Fresh local sessions retain their authoritative start marker until durable publish acceptance. */
 static bool s_session_start_boundary_pending = false;
-/* True once the current active-session identity has a durable NVS recovery record. */
-static bool s_session_identity_persisted = false;
 
 static const char *state_machine_command_ack_response(esp_err_t result, bool execution_result) {
     switch (result) {
@@ -1439,7 +1437,6 @@ esp_err_t state_machine_core_init(const config_t *config) {
     // Reset every shared runtime singleton before adapters start filling live state back in.
     state_runtime_context_reset(config);
     s_session_start_boundary_pending = false;
-    s_session_identity_persisted = false;
     util_copy_string(s_telemetry.obd_ecu_state, sizeof(s_telemetry.obd_ecu_state), "unknown");
     ESP_LOGI(TAG,
              "event=runtime_config device=%s mqtt_configured=%d mqtt_port=%u apn_configured=%d tracking=%us heartbeat=%us parked_wake=%us alarm=%us ign_hold_ms=%u sleep=%d imu_wake=%d ota_min_mv=%u",
