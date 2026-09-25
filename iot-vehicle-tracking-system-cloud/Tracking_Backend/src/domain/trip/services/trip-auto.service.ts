@@ -61,10 +61,22 @@ const handleSessionStarted = async (
 
   const existingActive = await findActiveTrip(vehicle.vehicle_id);
   if (existingActive) {
-    logger.warn(
-      `Session ${sessionId} started for vehicle "${vehicle.vehicle_id}" while trip "${existingActive.trip_code}" is still active; refusing to create an overlapping auto-trip`,
+    const existingStart = existingActive.actual_start
+      ? new Date(existingActive.actual_start)
+      : null;
+    const hasValidExistingStart =
+      existingStart !== null && Number.isFinite(existingStart.getTime());
+
+    if (!hasValidExistingStart || existingStart.getTime() <= occurredAt.getTime()) {
+      logger.warn(
+        `Session ${sessionId} started for vehicle "${vehicle.vehicle_id}" while trip "${existingActive.trip_code}" is still active; refusing to create an overlapping auto-trip`,
+      );
+      return;
+    }
+
+    logger.info(
+      `Session ${sessionId} start predates newer active trip "${existingActive.trip_code}"; reconstructing historical auto-trip`,
     );
-    return;
   }
 
   await insertOne<Trip>(
