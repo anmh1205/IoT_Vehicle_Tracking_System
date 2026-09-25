@@ -129,7 +129,38 @@ test('completeDeviceSession discards completed sessions without telemetry points
     'stopped',
   );
 
-  assert.deepEqual(result, { sessionId: 321, discarded: true });
+  assert.deepEqual(result, { sessionId: 321, discarded: true, completedNow: true });
   assert.ok(statements.some((sql) => /DELETE FROM device_sessions WHERE id = \$1/.test(sql)));
   assert.equal(statements.some((sql) => /SET total_runtime_seconds/.test(sql)), false);
+});
+
+test('completeDeviceSession reports duplicate completed boundaries as no-op', async (t) => {
+  const originalConnect = writablePool.connect;
+  const statements: string[] = [];
+
+  writablePool.connect = async () => ({
+    query: async (sql) => {
+      statements.push(sql);
+      if (/SELECT id, status, COALESCE\(data_points_count/.test(sql)) {
+        return { rows: [{ id: 654, status: 'completed', data_points_count: '10' }] };
+      }
+      return { rows: [] };
+    },
+    release: () => undefined,
+  });
+
+  t.after(() => {
+    writablePool.connect = originalConnect;
+  });
+
+  const result = await completeDeviceSession(
+    'TRACKER_001',
+    Date.parse('2026-05-10T10:44:04.000Z'),
+    654,
+    Date.parse('2026-05-10T10:44:04.000Z'),
+    'stopped',
+  );
+
+  assert.deepEqual(result, { sessionId: 654, discarded: false, completedNow: false });
+  assert.equal(statements.some((sql) => /UPDATE device_sessions\s+SET\s+status = 'completed'/.test(sql)), false);
 });
