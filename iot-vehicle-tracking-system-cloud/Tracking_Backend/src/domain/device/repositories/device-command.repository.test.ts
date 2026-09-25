@@ -1,6 +1,7 @@
 vi.mock('@/infrastructure/database/pool', () => ({
   pool: {
     query: vi.fn(),
+    connect: vi.fn(),
   },
 }));
 
@@ -16,28 +17,57 @@ describe('device-command.repository', () => {
     vi.resetAllMocks();
   });
 
-  it('keeps sent_at null while a command is only pending', async () => {
-    vi.mocked(pool.query).mockResolvedValue({
-      rows: [{
-        id: 11,
-        device_id: 'TRACKER_001',
-        command: 'reboot',
-        params: {},
-        status: 'pending',
-        sent_at: null,
-        acked_at: null,
-        response: null,
-      }],
-    } as any);
+  it('serializes admission and keeps sent_at null while a command is only pending', async () => {
+    const query = vi.fn()
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
+      .mockResolvedValueOnce({ rows: [{ device_id: 'TRACKER_001' }] }) // row lock
+      .mockResolvedValueOnce({ rows: [{ total: 0 }] }) // outstanding count
+      .mockResolvedValueOnce({
+        rows: [{
+          id: 11,
+          device_id: 'TRACKER_001',
+          command: 'reboot',
+          params: {},
+          status: 'pending',
+          sent_at: null,
+          acked_at: null,
+          response: null,
+        }],
+      })
+      .mockResolvedValueOnce({ rows: [] }); // COMMIT
+    const release = vi.fn();
+    vi.mocked(pool.connect).mockResolvedValue({ query, release } as any);
 
     const result = await createCommand({
       deviceId: 'TRACKER_001',
       command: 'reboot',
     });
 
-    const [sql] = vi.mocked(pool.query).mock.calls[0] ?? [];
-    expect(sql).not.toContain("NOW(), $4, $5");
-    expect(result.sentAt).toBeNull();
+    expect(query.mock.calls[1]?.[0]).toContain('FOR UPDATE');
+    expect(query.mock.calls[2]?.[0]).toContain("status IN ('pending', 'sent', 'accepted')");
+    expect(query.mock.calls[3]?.[0]).not.toContain("NOW(), $4, $5");
+    expect(result?.sentAt).toBeNull();
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects admission when the per-device non-terminal command cap is reached', async () => {
+    const query = vi.fn()
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ device_id: 'TRACKER_001' }] })
+      .mockResolvedValueOnce({ rows: [{ total: 8 }] })
+      .mockResolvedValueOnce({ rows: [] });
+    const release = vi.fn();
+    vi.mocked(pool.connect).mockResolvedValue({ query, release } as any);
+
+    const result = await createCommand({
+      deviceId: 'TRACKER_001',
+      command: 'reboot',
+    });
+
+    expect(result).toBeNull();
+    expect(query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO device_commands'))).toBe(false);
+    expect(query.mock.calls.some(([sql]) => sql === 'ROLLBACK')).toBe(true);
+    expect(release).toHaveBeenCalledTimes(1);
   });
 
   it('sets sent_at only when publish transitions the command to sent', async () => {
