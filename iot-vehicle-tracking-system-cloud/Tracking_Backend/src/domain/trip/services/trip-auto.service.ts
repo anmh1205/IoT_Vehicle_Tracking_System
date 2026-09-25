@@ -214,5 +214,6 @@ export const handleSessionBoundaryEvent = async (
     logger.error(
       `Failed to handle session ${action} for device "${deviceId}" / session ${sessionId}: ${err}`,
     );
+    throw err;
   }
 };
