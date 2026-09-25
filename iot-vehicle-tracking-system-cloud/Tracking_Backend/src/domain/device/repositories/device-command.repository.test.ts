@@ -8,6 +8,7 @@ vi.mock('@/infrastructure/database/pool', () => ({
 import { pool } from '@/infrastructure/database/pool';
 import {
   createCommand,
+  failPendingCommandBeforeDispatch,
   observeRuntimeBootAndMarkStaleAcceptedIndeterminate,
   listPendingCommandsBefore,
   updateCommandStatus,
@@ -82,6 +83,7 @@ describe('device-command.repository', () => {
         sent_at: null,
         acked_at: null,
         response: null,
+        created_at: new Date('2026-09-25T22:00:00.000Z'),
       }],
     } as any);
 
@@ -92,8 +94,25 @@ describe('device-command.repository', () => {
     expect(sql).toContain("WHERE status = 'pending'");
     expect(sql).toContain('created_at <= $1');
     expect(sql).toContain('ORDER BY created_at ASC, id ASC');
+    expect(sql).toContain('created_at');
     expect(params).toEqual([cutoff.toISOString(), 25]);
     expect(rows[0]?.id).toBe(21);
+    expect(rows[0]?.createdAt).toBe('2026-09-25T22:00:00.000Z');
+  });
+
+  it('expires a command only while it is still pending', async () => {
+    vi.mocked(pool.query).mockResolvedValue({ rows: [] } as any);
+
+    const result = await failPendingCommandBeforeDispatch(
+      22,
+      'command_expired_before_dispatch',
+    );
+
+    const [sql, params] = vi.mocked(pool.query).mock.calls[0] ?? [];
+    expect(sql).toContain("SET status = 'failed'");
+    expect(sql).toContain("AND status = 'pending'");
+    expect(params).toEqual([22, 'command_expired_before_dispatch']);
+    expect(result).toBeNull();
   });
 
   it('sets sent_at only when publish transitions the command to sent', async () => {

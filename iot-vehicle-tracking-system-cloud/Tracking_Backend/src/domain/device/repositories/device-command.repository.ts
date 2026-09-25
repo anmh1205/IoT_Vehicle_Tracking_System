@@ -15,6 +15,10 @@ export interface DeviceCommandRecord {
   response: string | null;
 }
 
+export interface PendingDeviceCommandRecord extends DeviceCommandRecord {
+  createdAt: string;
+}
+
 interface DeviceCommandRow {
   id: string | number;
   device_id: string;
@@ -24,6 +28,10 @@ interface DeviceCommandRow {
   sent_at: Date | null;
   acked_at: Date | null;
   response: string | null;
+}
+
+interface PendingDeviceCommandRow extends DeviceCommandRow {
+  created_at: Date;
 }
 
 const toRecord = (value: unknown): Record<string, unknown> => {
@@ -163,6 +171,24 @@ export const updateCommandStatus = async (
   return result.rows[0] ? mapRow(result.rows[0]) : null;
 };
 
+export const failPendingCommandBeforeDispatch = async (
+  id: number,
+  response: string,
+): Promise<DeviceCommandRecord | null> => {
+  const result = await pool.query<DeviceCommandRow>(
+    `UPDATE device_commands
+     SET status = 'failed',
+         response = $2,
+         updated_at = NOW()
+     WHERE id = $1
+       AND status = 'pending'
+     RETURNING id, device_id, command, params, status, sent_at, acked_at, response`,
+    [id, response],
+  );
+
+  return result.rows[0] ? mapRow(result.rows[0]) : null;
+};
+
 export const observeRuntimeBootAndMarkStaleAcceptedIndeterminate = async (
   deviceId: string,
   currentBootId: string,
@@ -199,10 +225,10 @@ export const observeRuntimeBootAndMarkStaleAcceptedIndeterminate = async (
 export const listPendingCommandsBefore = async (
   cutoff: Date,
   limit = 100,
-): Promise<DeviceCommandRecord[]> => {
+): Promise<PendingDeviceCommandRecord[]> => {
   const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 500);
-  const result = await pool.query<DeviceCommandRow>(
-    `SELECT id, device_id, command, params, status, sent_at, acked_at, response
+  const result = await pool.query<PendingDeviceCommandRow>(
+    `SELECT id, device_id, command, params, status, sent_at, acked_at, response, created_at
      FROM device_commands
      WHERE status = 'pending'
        AND created_at <= $1
@@ -211,7 +237,10 @@ export const listPendingCommandsBefore = async (
     [cutoff.toISOString(), safeLimit],
   );
 
-  return result.rows.map(mapRow);
+  return result.rows.map((row) => ({
+    ...mapRow(row),
+    createdAt: row.created_at.toISOString(),
+  }));
 };
 
 export const listDeviceCommands = async (deviceId: string, page: number, limit: number) => {

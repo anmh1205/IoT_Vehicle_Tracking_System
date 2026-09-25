@@ -1,6 +1,6 @@
-import mqtt from 'mqtt';
+import mqtt, { type IClientPublishOptions } from 'mqtt';
 
-import { mqttConfig } from '@/config/env';
+import { firmwareConfig, mqttConfig } from '@/config/env';
 import * as deviceCommandRepo from '@/domain/device/repositories/device-command.repository';
 import { createMqttClientId } from '@/infrastructure/mqtt-client-id.util';
 import { createLogger } from '@/infrastructure/logger';
@@ -15,10 +15,52 @@ let recoveryPromise: Promise<void> | null = null;
 
 const RECOVERY_INTERVAL_MS = 30_000;
 const RECOVERY_BATCH_LIMIT = 100;
+const REQUEST_LOCATION_EXPIRY_SECONDS = 120;
+const REBOOT_EXPIRY_SECONDS = 300;
+
+const getCommandExpirySeconds = (command: string): number | undefined => {
+  switch (command) {
+    case 'request_location':
+      return REQUEST_LOCATION_EXPIRY_SECONDS;
+    case 'reboot':
+      return REBOOT_EXPIRY_SECONDS;
+    case 'ota_update':
+    case 'manual_rollback':
+    case 'ota_rollback':
+      return Math.max(firmwareConfig.assignedTimeoutSec, 1);
+    default:
+      // update_config / enable_tracking are desired-state operations; session
+      // assignment is identity-bound and independently rejected when stale.
+      return undefined;
+  }
+};
+
+const getRemainingCommandExpirySeconds = (
+  command: deviceCommandRepo.PendingDeviceCommandRecord,
+  nowMs = Date.now(),
+): number | undefined => {
+  const expirySeconds = getCommandExpirySeconds(command.command);
+  if (expirySeconds === undefined) {
+    return undefined;
+  }
+
+  const createdAtMs = Date.parse(command.createdAt);
+  if (!Number.isFinite(createdAtMs)) {
+    return expirySeconds;
+  }
+
+  const elapsedMs = Math.max(nowMs - createdAtMs, 0);
+  const remainingMs = expirySeconds * 1000 - elapsedMs;
+  if (remainingMs <= 0) {
+    return 0;
+  }
+  return Math.max(1, Math.ceil(remainingMs / 1000));
+};
 
 const publishCommandRecord = async (
   client: mqtt.MqttClient,
   command: deviceCommandRepo.DeviceCommandRecord,
+  expirySeconds = getCommandExpirySeconds(command.command),
 ): Promise<void> => {
   const topic = `v1/${command.deviceId}/commands`;
   const message = JSON.stringify({
@@ -27,8 +69,15 @@ const publishCommandRecord = async (
     params: command.params ?? {},
   });
 
+  const publishOptions: IClientPublishOptions = { qos: 1, retain: false };
+  if (expirySeconds !== undefined) {
+    publishOptions.properties = {
+      messageExpiryInterval: expirySeconds,
+    };
+  }
+
   await new Promise<void>((resolve, reject) => {
-    client.publish(topic, message, { qos: 1, retain: false }, (err?: Error) => {
+    client.publish(topic, message, publishOptions, (err?: Error) => {
       if (err) {
         reject(err);
         return;
@@ -49,8 +98,24 @@ const recoverPendingCommandsWithClient = async (client: mqtt.MqttClient): Promis
   );
 
   for (const command of pending) {
+    const remainingExpirySeconds = getRemainingCommandExpirySeconds(command);
+    if (remainingExpirySeconds === 0) {
+      const expired = await deviceCommandRepo.failPendingCommandBeforeDispatch(
+        command.id,
+        'command_expired_before_dispatch',
+      );
+      if (expired) {
+        logger.warn('Expired pending device command without replaying stale intent', {
+          commandId: command.id,
+          deviceId: command.deviceId,
+          command: command.command,
+        });
+      }
+      continue;
+    }
+
     try {
-      await publishCommandRecord(client, command);
+      await publishCommandRecord(client, command, remainingExpirySeconds);
       await deviceCommandRepo.updateCommandStatus(command.id, 'sent');
       logger.info('Recovered pending device command after backend restart', {
         commandId: command.id,
@@ -94,6 +159,7 @@ const getMqttClient = (): mqtt.MqttClient => {
     clientId: createMqttClientId('backend-device-command'),
     reconnectPeriod: 5000,
     clean: true,
+    protocolVersion: 5,
     rejectUnauthorized: mqttConfig.rejectUnauthorized,
   });
 
