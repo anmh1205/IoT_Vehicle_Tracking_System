@@ -145,6 +145,17 @@ static const char *state_machine_command_ack_response(esp_err_t result, bool exe
 static void state_machine_command_callback(const char *topic, const char *payload) {
     (void)topic;
 
+    /*
+     * Reserve observability before accepting side effects. The action executor
+     * is already gated while this queue is non-empty, so available ACK capacity
+     * cannot be consumed by an execution-result ACK between this preflight and
+     * the enqueue below.
+     */
+    if (s_command_ack_queue == NULL || uxQueueSpacesAvailable(s_command_ack_queue) == 0U) {
+        ESP_LOGW(TAG, "event=command_rejected reason=ack_backpressure");
+        return;
+    }
+
     uint64_t command_id = 0U;
     bool deferred = false;
     esp_err_t process_result = command_handler_process(payload, &command_id, &deferred);
