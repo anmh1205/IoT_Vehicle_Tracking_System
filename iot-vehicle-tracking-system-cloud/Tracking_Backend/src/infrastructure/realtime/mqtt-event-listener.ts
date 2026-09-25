@@ -167,11 +167,15 @@ const processCommandAck = async (
 
   publishEvent('command:ack', {
     device_id: deviceId,
-    command_id: String(commandId ?? payload.command_id ?? payload.commandId ?? ''),
-    status,
-    response,
+    command_id: String(commandId),
+    status: updated.status,
+    response: updated.response,
   });
-  publishStatsUpdate('command:ack', payload, timestamp);
+  publishStatsUpdate('command:ack', {
+    ...payload,
+    status: updated.status,
+    response: updated.response,
+  }, timestamp);
 };
 
 const reconcileAcceptedCommandsForRuntimeBoot = async (
