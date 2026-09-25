@@ -195,6 +195,8 @@ test('ensureHistoricalDeviceSession never supersedes a newer running session', a
   );
 
   assert.deepEqual(result, { sessionId: 777, isNew: true, status: 'running' });
+  const insertSql = statements.find((sql) => /INSERT INTO device_sessions/.test(sql)) ?? '';
+  assert.match(insertSql, /0, \$2, \$2, NOW\(\)/);
   assert.equal(
     statements.some((sql) => /end_reason = COALESCE\(end_reason, 'superseded'\)/.test(sql)),
     false,
