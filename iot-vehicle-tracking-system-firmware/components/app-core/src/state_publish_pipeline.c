@@ -357,7 +357,7 @@ static void state_machine_fill_firmware_status(firmware_status_t *firmware,
  * Successful rawdata publish also resets the IMU delta window so the next
  * publish interval accumulates a fresh vibration peak in `m/s^2`.
  */
-void state_machine_publish_rawdata(void) {
+bool state_machine_publish_rawdata(void) {
     // Publish raw telemetry through the shared pipeline so fast-path data still gets uniform metadata and fallback handling.
     bool published = state_publish_via_pipeline("rawdata",
                                                 OFFLINE_RECORD_RAWDATA,
@@ -369,6 +369,7 @@ void state_machine_publish_rawdata(void) {
     if (published) {
         imu_reset_accel_delta_window();
     }
+    return published;
 }
 
 /**
