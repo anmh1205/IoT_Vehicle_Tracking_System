@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import { corsConfig } from '@/config/env';
 import { pool } from '@/infrastructure/database/pool';
 import { createLogger } from '@/infrastructure/logger';
+import { canAccessDeviceId } from '@/domain/device/services/device-access.service';
 import { socketAuthMiddleware } from './socket-auth.middleware';
 import { subscribeEvent } from './event-bus.util';
 import {
@@ -23,7 +24,6 @@ const WS_NAMESPACES: NamespaceKey[] = [
   'firmware',
 ];
 
-const GLOBAL_DEVICE_ACCESS_ROLES = new Set(['root', 'admin']);
 const SYSTEM_ADMIN_ROLES = new Set(['root', 'admin']);
 const SYSTEM_ADMIN_ROOM = 'role:system-admin';
 const MAX_DEVICE_ROOM_JOINS = 500;
@@ -62,20 +62,7 @@ const getDeviceIds = (payload: { deviceId?: unknown; deviceIds?: unknown } | str
 
 const canAccessDevice = async (socket: TypedSocket, deviceId: string): Promise<boolean> => {
   const user = socket.data.user;
-  if (!user) return false;
-
-  if (GLOBAL_DEVICE_ACCESS_ROLES.has(user.role) || user.deviceAccessMode === 'all') {
-    return true;
-  }
-
-  const result = await pool.query(
-    `SELECT 1
-     FROM user_device_access
-     WHERE user_id = $1 AND device_id = $2
-     LIMIT 1`,
-    [user.id, deviceId],
-  );
-  return (result.rowCount ?? 0) > 0;
+  return user ? canAccessDeviceId(user, deviceId) : false;
 };
 
 const canAccessSystemAdmin = (socket: TypedSocket): boolean => {
