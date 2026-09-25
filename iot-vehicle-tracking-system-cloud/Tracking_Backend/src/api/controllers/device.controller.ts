@@ -17,6 +17,7 @@ import * as deviceRuntimeService from '@/domain/device/services/device-runtime.s
 import * as deviceTelemetryService from '@/domain/device/services/device-telemetry.service';
 import * as deviceCommandService from '@/domain/device/services/device-command.service';
 import * as deviceErrorService from '@/domain/device/services/device-error.service';
+import * as deviceEventLogService from '@/domain/device/services/device-event-log.service';
 import * as firmwareRepo from '@/domain/firmware/repositories/firmware.repository';
 import * as firmwareDeployService from '@/domain/firmware/services/firmware-deploy.service';
 
@@ -135,6 +136,15 @@ export const getSessionTelemetry = asyncHandler(async (req: AuthenticatedRequest
 
   const data = await deviceTelemetryService.getSessionTelemetry(deviceId, sessionId);
   sendOk(res, data);
+});
+
+export const getEventLogs = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const deviceId = await resolveDeviceId(req.params.id);
+  const page = req.query.page ? Number.parseInt(req.query.page as string, 10) : 1;
+  const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : 20;
+
+  const result = await deviceEventLogService.listEventLogs(deviceId, page, limit);
+  sendOk(res, result);
 });
 
 export const sendCommand = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {

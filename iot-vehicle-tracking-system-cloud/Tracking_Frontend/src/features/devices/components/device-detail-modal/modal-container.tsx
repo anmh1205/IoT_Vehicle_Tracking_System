@@ -29,6 +29,7 @@ import type { DeviceDetailTab } from '@/features/devices/components/device-const
 import type { DeviceDetailModalPresentation, DeviceLinkedVehicle, DeviceWorkspaceActions, DeviceWorkspaceAlert } from './workspace-types';
 import type { MapInspectPanelPayload, MapInspectPanelTarget } from '@/features/map/types';
 import { buildAlertQueueHref } from '@/features/alerts/lib/alert-queue-route';
+import { resolveEventLogTimestamp } from '@/features/devices/lib/event-log-feed';
 
 const resolveTimestamp = (value: unknown): string | null => {
   if (typeof value === 'string' && value.length > 0) {
@@ -112,9 +113,7 @@ const buildRawFeed = (params: {
 
   const eventLogRows = params.eventLogs.map((row, index) => {
     const normalizedRow = toRecord(row) ?? {};
-    const timestamp = resolveTimestamp(
-      normalizedRow.server_timestamp ?? normalizedRow.created_at ?? normalizedRow.createdAt,
-    );
+    const timestamp = resolveEventLogTimestamp(normalizedRow);
     const diagnostics = extractDiagnosticsPayloadFromEventLog(normalizedRow);
     const isDiagnosticsRow = diagnostics !== null;
     const source: DeviceRawFeedRow['source'] = isDiagnosticsRow ? 'obd-diagnostic' : 'event-log';
@@ -374,7 +373,7 @@ export const DeviceDetailModalContainer = ({
   const linkedVehicleIdentifier = detail.data?.device?.vehicleId ?? device?.vehicleId ?? null;
   useDeviceRoom(devicePublicId, open && !!devicePublicId);
   const position = useDevicePositionSnapshot(devicePublicId, open);
-  const eventLogs = useDeviceEventLogs(devicePublicId, {
+  const eventLogs = useDeviceEventLogs(deviceId, {
     enabled: open && access.canViewSystemInfo,
     limit: 20,
   });
@@ -451,7 +450,7 @@ export const DeviceDetailModalContainer = ({
       queryClient.invalidateQueries({ queryKey: ['device-tracking-telemetry', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-session-telemetry', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-position-snapshot'] }),
-      queryClient.invalidateQueries({ queryKey: ['device-event-logs', devicePublicId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-event-logs', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-obd-alerts', devicePublicId] }),
       queryClient.invalidateQueries({ queryKey: ['device-linked-vehicle', linkedVehicleIdentifier] }),
       queryClient.invalidateQueries({ queryKey: ['device-workspace-alerts', devicePublicId] }),
@@ -479,7 +478,7 @@ export const DeviceDetailModalContainer = ({
         queryClient.invalidateQueries({ queryKey: ['device-sessions', deviceId] }),
         queryClient.invalidateQueries({ queryKey: ['device-runtime-chart', deviceId] }),
         queryClient.invalidateQueries({ queryKey: ['device-imu-accel-delta-chart', deviceId] }),
-        queryClient.invalidateQueries({ queryKey: ['device-event-logs', devicePublicId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-event-logs', deviceId] }),
         queryClient.invalidateQueries({ queryKey: ['device-obd-alerts', devicePublicId] }),
         queryClient.invalidateQueries({ queryKey: ['device-workspace-alerts', devicePublicId] }),
       );
