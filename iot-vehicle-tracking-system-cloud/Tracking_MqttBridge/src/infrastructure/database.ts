@@ -708,6 +708,7 @@ export const touchDeviceSession = async (params: {
   sessionId: number;
   deviceTimestampMs: number;
   serverTimestampMs?: number;
+  messageId?: string;
   imuAccelDeltaMps2?: number;
   vehicleBattery?: number;
   deviceBattery?: number;
@@ -720,12 +721,48 @@ export const touchDeviceSession = async (params: {
   const serverOccurredAt = toIsoTimestamp(params.serverTimestampMs ?? Date.now());
   const allowCompleted = params.allowCompleted === true;
   const updateDeviceState = params.updateDeviceState !== false;
+  const messageId = params.messageId?.trim() || null;
   const sessionStatusPredicate = allowCompleted
     ? "status IN ('running', 'completed')"
     : "status = 'running'";
+  const client = await pool.connect();
 
   try {
-    const touched = await pool.query(
+    await client.query('BEGIN');
+
+    if (messageId !== null) {
+      const claimed = await client.query(
+        `INSERT INTO device_session_telemetry_receipts (session_id, message_id)
+         VALUES ($1, $2)
+         ON CONFLICT (session_id, message_id) DO NOTHING
+         RETURNING 1`,
+        [params.sessionId, messageId],
+      );
+
+      if (claimed.rowCount === 0) {
+        await client.query('COMMIT');
+        logger.debug(
+          {
+            sessionId: params.sessionId,
+            deviceId: params.deviceId,
+            messageId,
+            event: 'duplicate_session_telemetry_ignored',
+          },
+          'Duplicate session telemetry ignored',
+        );
+        return;
+      }
+    }
+
+    /*
+     * Keep the legacy-schema fallback isolated behind a savepoint. PostgreSQL
+     * marks the transaction aborted after a missing-column error; rolling back
+     * only to this savepoint preserves the already-claimed message receipt.
+     */
+    await client.query('SAVEPOINT session_aggregate_schema');
+    let touched;
+    try {
+      touched = await client.query(
       `UPDATE device_sessions
        SET
          last_update = GREATEST(COALESCE(last_update, $2::timestamptz), $2::timestamptz),
@@ -816,39 +853,9 @@ export const touchDeviceSession = async (params: {
         params.deviceId,
       ],
     );
-
-    if (touched.rowCount === 0) {
-      logger.warn(
-        { sessionId: params.sessionId, deviceId: params.deviceId, event: 'touch_device_session_skipped', reason: 'session_not_touchable' },
-        'Touch device session skipped',
-      );
-      return;
-    }
-
-    if (!updateDeviceState) {
-      return;
-    }
-
-    await pool.query(
-      `UPDATE devices
-       SET current_status = 'running',
-           last_seen_at = GREATEST(COALESCE(last_seen_at, $2::timestamptz), $2::timestamptz),
-           last_latitude = COALESCE($3, last_latitude),
-           last_longitude = COALESCE($4, last_longitude),
-           last_speed = COALESCE($5, last_speed),
-           updated_at = NOW()
-       WHERE device_id = $1`,
-      [
-        params.deviceId,
-        serverOccurredAt,
-        params.latitude ?? null,
-        params.longitude ?? null,
-        params.speed ?? null,
-      ],
-    );
-  } catch (err) {
-    try {
-      const touched = await pool.query(
+    } catch {
+      await client.query('ROLLBACK TO SAVEPOINT session_aggregate_schema');
+      touched = await client.query(
         `UPDATE device_sessions
          SET
            last_update = GREATEST(COALESCE(last_update, $2::timestamptz), $2::timestamptz),
@@ -925,20 +932,26 @@ export const touchDeviceSession = async (params: {
           params.deviceId,
         ],
       );
+    }
+    await client.query('RELEASE SAVEPOINT session_aggregate_schema');
 
-      if (touched.rowCount === 0) {
-        logger.warn(
-          { sessionId: params.sessionId, deviceId: params.deviceId, event: 'touch_device_session_skipped', reason: 'session_not_touchable' },
-          'Touch device session skipped',
-        );
-        return;
-      }
+    if (touched.rowCount === 0) {
+      // Do not retain a receipt for a session that was not actually touchable.
+      await client.query('ROLLBACK');
+      logger.warn(
+        {
+          sessionId: params.sessionId,
+          deviceId: params.deviceId,
+          event: 'touch_device_session_skipped',
+          reason: 'session_not_touchable',
+        },
+        'Touch device session skipped',
+      );
+      return;
+    }
 
-      if (!updateDeviceState) {
-        return;
-      }
-
-      await pool.query(
+    if (updateDeviceState) {
+      await client.query(
         `UPDATE devices
          SET current_status = 'running',
              last_seen_at = GREATEST(COALESCE(last_seen_at, $2::timestamptz), $2::timestamptz),
@@ -955,13 +968,28 @@ export const touchDeviceSession = async (params: {
           params.speed ?? null,
         ],
       );
-    } catch (fallbackErr) {
-      logger.error(
-        { err: fallbackErr, sessionId: params.sessionId, deviceId: params.deviceId, event: 'touch_device_session_failed' },
-        'Touch device session failed',
-      );
-      throw fallbackErr;
     }
+
+    await client.query('COMMIT');
+  } catch (err) {
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      // Preserve the original database error.
+    }
+    logger.error(
+      {
+        err,
+        sessionId: params.sessionId,
+        deviceId: params.deviceId,
+        messageId,
+        event: 'touch_device_session_failed',
+      },
+      'Touch device session failed',
+    );
+    throw err;
+  } finally {
+    client.release();
   }
 };
 
