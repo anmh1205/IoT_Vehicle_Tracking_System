@@ -23,6 +23,16 @@
 typedef void (*ota_status_callback_t)(const firmware_status_t *status, void *user_ctx);
 
 /**
+ * @brief Commit durable post-boot confirmation state before boot promotion.
+ *
+ * Invoked only after the image has been fully verified and esp_ota_end()
+ * succeeded, but before esp_ota_set_boot_partition().
+ */
+typedef esp_err_t (*ota_preboot_commit_callback_t)(const ota_command_t *cmd,
+                                                   const firmware_status_t *status,
+                                                   void *user_ctx);
+
+/**
  * @brief Download, verify, and install a firmware image, then mark it bootable.
  *
  * Runs the full OTA pipeline over the modem HTTPS transport: selects the
@@ -37,6 +47,8 @@ typedef void (*ota_status_callback_t)(const firmware_status_t *status, void *use
  * @param[out] out_status Status object populated through every stage.
  * @param[in] status_callback Optional progress sink (may be NULL).
  * @param[in] status_callback_ctx Opaque context forwarded to @p status_callback.
+ * @param[in] preboot_commit_callback Optional durable-state gate invoked before boot promotion.
+ * @param[in] preboot_commit_ctx Opaque context forwarded to @p preboot_commit_callback.
  * @return ESP_OK when the image is verified and marked for next boot, else an
  *         ESP-IDF error code with @p out_status carrying the failure reason.
  */
@@ -45,7 +57,9 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
                                 const ota_command_t *cmd,
                                 firmware_status_t *out_status,
                                 ota_status_callback_t status_callback,
-                                void *status_callback_ctx);
+                                void *status_callback_ctx,
+                                ota_preboot_commit_callback_t preboot_commit_callback,
+                                void *preboot_commit_ctx);
 
 /**
  * @brief Switch the boot partition back to a known-good image.

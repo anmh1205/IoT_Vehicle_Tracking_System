@@ -762,7 +762,9 @@ static esp_err_t util_ota_finalize_image(util_ota_update_ctx_t *ctx,
                                          const ota_command_t *cmd,
                                          firmware_status_t *out_status,
                                          ota_status_callback_t status_callback,
-                                         void *status_callback_ctx) {
+                                         void *status_callback_ctx,
+                                         ota_preboot_commit_callback_t preboot_commit_callback,
+                                         void *preboot_commit_ctx) {
     if (ctx->transfer_mode_known && ctx->transfer_mode_hex &&
         ctx->read_offset != ((size_t)cmd->size * 2U)) {
         // In hex mode the modem reports wire bytes, so the final offset must be exactly twice the binary image length.
@@ -825,6 +827,22 @@ static esp_err_t util_ota_finalize_image(util_ota_update_ctx_t *ctx,
                         TRACKER_OTA_PROGRESS_INSTALLING,
                         status_callback,
                         status_callback_ctx);
+
+    /*
+     * Persist the complete post-boot confirmation contract before making the
+     * new image bootable. If this gate fails, the currently running partition
+     * remains the boot target and a reset cannot enter an uncorrelated image.
+     */
+    if (preboot_commit_callback != NULL) {
+        ctx->failure_code = TRACKER_OTA_ERROR_CONTEXT_PERSIST_FAILED;
+        err = preboot_commit_callback(cmd, out_status, preboot_commit_ctx);
+        if (err != ESP_OK) {
+            ESP_LOGE(UTIL_TAG,
+                     "OTA preboot context commit failed: %s",
+                     esp_err_to_name(err));
+            return err;
+        }
+    }
 
     ctx->failure_code = TRACKER_OTA_ERROR_SET_BOOT_PARTITION_FAILED;
     err = esp_ota_set_boot_partition(ctx->update_partition);
@@ -914,7 +932,9 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
                                 const ota_command_t *cmd,
                                 firmware_status_t *out_status,
                                 ota_status_callback_t status_callback,
-                                void *status_callback_ctx) {
+                                void *status_callback_ctx,
+                                ota_preboot_commit_callback_t preboot_commit_callback,
+                                void *preboot_commit_ctx) {
     // Apply OTA apply update in one place so this module keeps a single authoritative writer.
     ESP_RETURN_ON_NULL(cfg, ESP_ERR_INVALID_ARG, UTIL_TAG, "cfg is NULL");
     ESP_RETURN_ON_NULL(current_version, ESP_ERR_INVALID_ARG, UTIL_TAG, "current_version is NULL");
@@ -964,7 +984,9 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
                                           cmd,
                                           out_status,
                                           status_callback,
-                                          status_callback_ctx);
+                                          status_callback_ctx,
+                                          preboot_commit_callback,
+                                          preboot_commit_ctx);
     }
 
     // Always tear down resources; emits a terminal "failed" status when ctx.err != ESP_OK.

@@ -59,8 +59,10 @@
 #define TRACKER_OTA_ERROR_SHA256_MISMATCH "sha256_mismatch"
 #define TRACKER_OTA_ERROR_OTA_END_FAILED "ota_end_failed"
 #define TRACKER_OTA_ERROR_SET_BOOT_PARTITION_FAILED "set_boot_partition_failed"
+#define TRACKER_OTA_ERROR_CONTEXT_PERSIST_FAILED "confirm_context_persist_failed"
 #define TRACKER_OTA_ERROR_CONFIRM_TIMEOUT_EXCEEDED "confirm_timeout_exceeded"
 #define TRACKER_OTA_ERROR_CONFIRM_FAILED "confirm_failed"
+#define TRACKER_OTA_ERROR_CONFIRM_PARTITION_MISMATCH "confirm_partition_mismatch"
 #define TRACKER_OTA_ERROR_MANUAL_ROLLBACK_FAILED "manual_rollback_failed"
 #define TRACKER_OTA_ERROR_UNSAFE_RUNTIME_WINDOW "unsafe_runtime_window"
 

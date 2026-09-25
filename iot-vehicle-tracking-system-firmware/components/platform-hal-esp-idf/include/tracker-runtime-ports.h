@@ -22,6 +22,10 @@
 typedef void (*tracker_command_message_callback_t)(const char *topic, const char *payload);
 /** @brief Receive OTA progress/status events emitted during update execution. */
 typedef void (*tracker_ota_status_callback_t)(const firmware_status_t *status, void *user_ctx);
+/** @brief Persist post-boot OTA confirmation state before promoting the new partition. */
+typedef esp_err_t (*tracker_ota_preboot_commit_callback_t)(const ota_command_t *cmd,
+                                                           const firmware_status_t *status,
+                                                           void *user_ctx);
 /** @brief Receive one decoded OBD response frame from the OBD adapter. */
 typedef void (*tracker_obd_response_callback_t)(uint8_t mode,
                                                 int pid,
@@ -70,7 +74,9 @@ typedef struct {
                               const ota_command_t *cmd,      /* OTA command describing target image/URL. */
                               firmware_status_t *out_status, /* Out: resulting OTA status. */
                               tracker_ota_status_callback_t status_callback, /* Progress/status events. */
-                              void *status_callback_ctx);    /* Opaque context passed back to the callback. */
+                              void *status_callback_ctx,     /* Opaque context passed back to the status callback. */
+                              tracker_ota_preboot_commit_callback_t preboot_commit_callback, /* Durable pre-promotion gate. */
+                              void *preboot_commit_ctx);     /* Opaque context passed to the preboot gate. */
     esp_err_t (*manual_rollback)(firmware_status_t *out_status); /* Force a rollback to the previous OTA slot. */
 } ota_download_port_t;
 
