@@ -387,7 +387,7 @@ export const initMqttEventListener = (): void => {
     password: mqttConfig.password,
     clientId: createMqttClientId('backend-listener'),
     reconnectPeriod: 5000,
-    clean: true,
+    clean: false,
     rejectUnauthorized: mqttConfig.rejectUnauthorized,
   });
 
