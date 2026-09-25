@@ -560,16 +560,18 @@ export const initMqttEventListener = (): void => {
             metadata,
           });
           publishStatsUpdate('device:session_start', envelopePayload, data.timestamp);
-        } else if (action === 'ended') {
+        } else if (action === 'ended' || action === 'discarded') {
           const boundaryTimestamp =
             envelopePayload.timestamp == null ? data.timestamp : String(envelopePayload.timestamp);
           void handleSessionBoundaryEvent({
             device_id: String(envelopePayload.device_id ?? ''),
             session_id: sessionId,
-            action: 'ended',
+            action,
             occurred_at: boundaryTimestamp,
           });
-          publishEvent('device:session_end', {
+          const realtimeEvent =
+            action === 'discarded' ? 'device:session_discarded' : 'device:session_end';
+          publishEvent(realtimeEvent, {
             deviceId: String(envelopePayload.device_id ?? ''),
             sessionId,
             boundarySource:
@@ -583,7 +585,7 @@ export const initMqttEventListener = (): void => {
                 : String(envelopePayload.canonical_session_id),
             metadata,
           });
-          publishStatsUpdate('device:session_end', envelopePayload, data.timestamp);
+          publishStatsUpdate(realtimeEvent, envelopePayload, data.timestamp);
         }
         break;
       }
