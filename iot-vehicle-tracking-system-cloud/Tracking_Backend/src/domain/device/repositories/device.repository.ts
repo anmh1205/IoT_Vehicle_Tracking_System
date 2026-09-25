@@ -7,6 +7,11 @@ import {
 } from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
 import { hashToken } from '@/shared/utils/crypto.util';
+import {
+  eventLogLiveMutationSql,
+  eventLogPositionValueSql,
+  eventLogTelemetryTimestampSql,
+} from '@/shared/utils/event-log-telemetry-sql.util';
 import type {
   Device,
   DeviceListQuery,
@@ -90,15 +95,9 @@ const ALERT_SUMMARY_LATERAL = `LEFT JOIN LATERAL (
   WHERE a.device_id = d.device_id
 ) alerts ON true`;
 
-const EVENT_CONTEXT_SPEED_EXPR = `COALESCE(
-  NULLIF(el.context#>>'{raw_payload,data,speed}', '')::float8,
-  NULLIF(el.context->>'speed', '')::float8
-)`;
+const EVENT_CONTEXT_SPEED_EXPR = `(${eventLogPositionValueSql('speed', 'el')})::float8`;
 
-const EVENT_CONTEXT_COURSE_EXPR = `COALESCE(
-  NULLIF(el.context#>>'{raw_payload,data,course}', '')::float8,
-  NULLIF(el.context->>'course', '')::float8
-)`;
+const EVENT_CONTEXT_COURSE_EXPR = `(${eventLogPositionValueSql('course', 'el')})::float8`;
 
 const EVENT_CONTEXT_DEVICE_BATTERY_EXPR = `COALESCE(
   NULLIF(el.context#>>'{raw_payload,data,device_battery}', '')::float8,
@@ -544,8 +543,9 @@ export const findAllPositions = async (
        SELECT context
        FROM event_logs
        WHERE device_id = d.device_id
+         AND ${eventLogLiveMutationSql()}
          AND ${EVENT_CONTEXT_EXISTS_CONDITION}
-       ORDER BY server_timestamp DESC
+       ORDER BY ${eventLogTelemetryTimestampSql()} DESC, server_timestamp DESC, id DESC
        LIMIT 1
      ) el ON true
      ${ALERT_SUMMARY_LATERAL}
