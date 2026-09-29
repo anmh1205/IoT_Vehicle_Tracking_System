@@ -15,26 +15,13 @@ interface LogEntry {
  * Write a structured JSON log entry to VictoriaLogs via the jsonline endpoint.
  */
 export const writeLog = async (entry: LogEntry): Promise<void> => {
+  let response: Response;
   try {
-    const response = await fetch(INSERT_URL, {
+    response = await fetch(INSERT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/stream+json' },
       body: JSON.stringify(entry) + '\n',
     });
-
-    if (!response.ok) {
-      logger.error(
-        {
-          stream: entry.stream,
-          deviceId: entry.device_id,
-          eventType: entry.event_type,
-          status: response.status,
-          statusText: response.statusText,
-          event: 'victorialogs_write_rejected',
-        },
-        'VictoriaLogs write rejected',
-      );
-    }
   } catch (err) {
     logger.error(
       {
@@ -46,6 +33,26 @@ export const writeLog = async (entry: LogEntry): Promise<void> => {
       },
       'VictoriaLogs write failed',
     );
+    throw err;
+  }
+
+  if (!response.ok) {
+    const err = new Error(
+      `VictoriaLogs rejected write with ${response.status} ${response.statusText}`,
+    );
+    logger.error(
+      {
+        err,
+        stream: entry.stream,
+        deviceId: entry.device_id,
+        eventType: entry.event_type,
+        status: response.status,
+        statusText: response.statusText,
+        event: 'victorialogs_write_rejected',
+      },
+      'VictoriaLogs write rejected',
+    );
+    throw err;
   }
 };
 
