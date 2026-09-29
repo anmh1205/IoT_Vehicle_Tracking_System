@@ -1551,6 +1551,15 @@ esp_err_t state_machine_core_init(const config_t *config) {
     modem_lte_request_connect();
     ESP_RETURN_ON_FALSE(tracker_mqtt_init(&s_config) == ESP_OK, ESP_FAIL, TAG, "tracker_mqtt_init failed");
     ESP_RETURN_ON_FALSE(offline_queue_init() == ESP_OK, ESP_FAIL, TAG, "offline_queue_init failed");
+
+    /*
+     * Restore any firmware status that had only the NVS recovery fallback
+     * before the previous restart. Do this before OTA confirmation can publish
+     * a fresh boot status so the older authoritative outcome remains queued.
+     */
+    state_machine_restore_deferred_firmware_report();
+    state_machine_try_flush_deferred_firmware_report();
+
     // Session, command, and metrics subsystems reset after transport setup so they share the same boot baseline.
     telemetry_counters_reset();
     session_mgr_init();
