@@ -21,6 +21,8 @@
 
 static const char *TAG = "OTA_RUNTIME";
 static bool s_restart_after_command_ack = false;
+/* Confirm-timeout restart waits only when every durable report fallback failed. */
+static bool s_restart_after_firmware_report = false;
 static uint64_t s_ota_confirm_retry_after_ms = 0;
 #define OTA_CONFIRM_RESTORE_RETRY_MS 1000ULL
 
@@ -185,6 +187,20 @@ static esp_err_t state_machine_ota_preboot_commit_callback(const ota_command_t *
  */
 void state_machine_handle_pending_action(void) {
     /*
+     * A confirm-timeout restart is safety-critical and independent of command
+     * ACK delivery. Once the terminal firmware report is restart-safe (normal
+     * pipeline or NVS recovery blob), reboot immediately.
+     */
+    if (s_restart_after_firmware_report) {
+        if (!state_machine_firmware_report_restart_safe()) {
+            return;
+        }
+        s_restart_after_firmware_report = false;
+        esp_restart();
+        return;
+    }
+
+    /*
      * Deferred command side effects are serialized behind ACK transport.
      * If MQTT is down, the accepted/result ACK remains queued and the action
      * waits rather than becoming an unobservable state change.
@@ -194,6 +210,14 @@ void state_machine_handle_pending_action(void) {
     }
 
     if (s_restart_after_command_ack) {
+        /*
+         * Reboot/OTA/rollback command results already have their execution ACK
+         * queued. Also require any firmware lifecycle report produced by the
+         * action to be restart-safe before destroying RAM state.
+         */
+        if (!state_machine_firmware_report_restart_safe()) {
+            return;
+        }
         s_restart_after_command_ack = false;
         esp_restart();
         return;
@@ -345,7 +369,21 @@ void state_machine_try_confirm_running_firmware(void) {
                                                        g_rtc_context.ota_job_id,
                                                        g_rtc_context.ota_partition,
                                                        TRACKER_OTA_ERROR_CONFIRM_TIMEOUT_EXCEEDED);
-        esp_restart();
+        if (state_machine_firmware_report_restart_safe()) {
+            esp_restart();
+            return;
+        }
+
+        /*
+         * MQTT, SD and NVS all rejected the terminal timeout outcome. Keep the
+         * RAM report and retry transport/persistence in later wake loops; once
+         * it becomes restart-safe, state_machine_handle_pending_action()
+         * performs the required reboot.
+         */
+        s_restart_after_firmware_report = true;
+        ESP_LOGE(TAG,
+                 "event=ota_restart_deferred reason=terminal_report_not_durable error=%s",
+                 TRACKER_OTA_ERROR_CONFIRM_TIMEOUT_EXCEEDED);
         return;
     }
 
