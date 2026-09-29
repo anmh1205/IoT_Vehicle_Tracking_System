@@ -3,7 +3,7 @@ import { logger } from '@/infrastructure/logger';
 import { handleSessionBoundaryEvent } from './trip-auto.service';
 
 const RECONCILE_INTERVAL_MS = 60_000;
-const RECONCILE_BATCH_LIMIT = 100;
+const RECONCILE_BATCH_LIMIT = 250;
 
 interface SessionRepairRow {
   id: number;
@@ -17,7 +17,7 @@ interface SessionRepairRow {
 interface OrphanAutoTripRow {
   trip_code: string;
   device_id: string;
-  actual_start: Date | string | null;
+  occurred_at: Date | string;
 }
 
 let reconciliationTimer: NodeJS.Timeout | null = null;
@@ -58,18 +58,26 @@ const listSessionRepairs = (): Promise<SessionRepairRow[]> =>
      LEFT JOIN trips t
        ON t.trip_code = ('AUTO-' || s.device_id || '-SESSION-' || s.id::text)
      WHERE s.status IN ('running', 'completed')
+       AND EXISTS (
+         SELECT 1
+         FROM vehicles v
+         WHERE v.device_id = s.device_id
+       )
        AND (
          t.id IS NULL
          OR (s.status = 'completed' AND t.status = 'in_progress')
        )
-     ORDER BY COALESCE(s.session_end, s.session_start, s.created_at) ASC, s.id ASC
+     ORDER BY s.updated_at DESC, s.id DESC
      LIMIT $1`,
     [RECONCILE_BATCH_LIMIT],
   );
 
 const listOrphanAutoTrips = (): Promise<OrphanAutoTripRow[]> =>
   findMany<OrphanAutoTripRow>(
-    `SELECT t.trip_code, t.device_id, t.actual_start
+    `SELECT
+       t.trip_code,
+       t.device_id,
+       COALESCE(t.actual_start, t.updated_at, t.created_at) AS occurred_at
      FROM trips t
      LEFT JOIN device_sessions s
        ON t.trip_code = ('AUTO-' || s.device_id || '-SESSION-' || s.id::text)
@@ -125,7 +133,15 @@ const reconcileOrphanTrip = async (row: OrphanAutoTripRow): Promise<void> => {
     return;
   }
 
-  const occurredAt = toIso(row.actual_start) ?? new Date(0).toISOString();
+  const occurredAt = toIso(row.occurred_at);
+  if (!occurredAt) {
+    logger.warn('Auto-trip reconciliation skipped orphan with invalid timestamp', {
+      tripCode: row.trip_code,
+      deviceId: row.device_id,
+      occurredAt: row.occurred_at,
+    });
+    return;
+  }
   await handleSessionBoundaryEvent({
     device_id: row.device_id,
     session_id: sessionId,
