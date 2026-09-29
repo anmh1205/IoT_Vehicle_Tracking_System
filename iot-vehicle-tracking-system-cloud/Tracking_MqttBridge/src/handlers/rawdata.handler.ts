@@ -24,6 +24,7 @@ import { resolveLocalSessionKey } from '../utils/session-identity.util';
 import { normalizeRuntimeState, type RuntimeStateSnapshot } from '../types/device-state.types';
 import {
   hasAuthoritativeSessionIdentity,
+  hasTelemetryFallbackSessionContinuity,
   shouldEnsureSessionForTelemetry,
   shouldRetainSessionHistory,
   shouldAcceptLiveMutation,
@@ -962,11 +963,11 @@ export const handleRawData = async (
     previousStatus,
     persistedStatus: device.current_status,
   });
-  const hasFallbackIdentity =
-    sessionBootId !== undefined ||
-    localSessionKey !== undefined ||
-    previousState?.status === 'running' ||
-    device.current_status === 'running';
+  const hasFallbackIdentity = hasTelemetryFallbackSessionContinuity({
+    localSessionKey,
+    previousStatus: previousState?.status,
+    persistedStatus: device.current_status,
+  });
   const canCreateFallbackSession = shouldEnsureSessionForTelemetry({
     liveMutationAccepted: liveMutationDecision.accept,
     resolvedSessionId: sessionId,
