@@ -144,6 +144,110 @@ esp_err_t nvs_config_clear_ota_context(void) {
 }
 
 /**
+ * @brief Persist a deferred firmware status so it survives esp_restart/power loss.
+ */
+esp_err_t nvs_config_save_deferred_firmware_report(const firmware_status_t *report) {
+    if (report == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READWRITE, &handle);
+    ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to open NVS namespace");
+
+    err = nvs_set_blob(handle, TRACKER_NVS_FIRMWARE_REPORT_KEY, report, sizeof(*report));
+    if (err == ESP_OK) {
+        err = nvs_commit(handle);
+    }
+    nvs_close(handle);
+    return err;
+}
+
+/**
+ * @brief Restore the latest deferred firmware status from restart-safe NVS.
+ */
+esp_err_t nvs_config_load_deferred_firmware_report(firmware_status_t *out_report,
+                                                   bool *out_found) {
+    if (out_report == NULL || out_found == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    memset(out_report, 0, sizeof(*out_report));
+    *out_found = false;
+
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READONLY, &handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        return ESP_OK;
+    }
+    ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to open NVS namespace");
+
+    size_t stored_size = 0;
+    err = nvs_get_blob(handle, TRACKER_NVS_FIRMWARE_REPORT_KEY, NULL, &stored_size);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        nvs_close(handle);
+        return ESP_OK;
+    }
+    if (err != ESP_OK) {
+        nvs_close(handle);
+        return err;
+    }
+
+    if (stored_size != sizeof(*out_report)) {
+        nvs_close(handle);
+        ESP_LOGW(TAG,
+                 "Deferred firmware report size mismatch stored=%lu expected=%lu; clearing key",
+                 (unsigned long)stored_size,
+                 (unsigned long)sizeof(*out_report));
+        (void)nvs_config_clear_deferred_firmware_report();
+        return ESP_OK;
+    }
+
+    size_t required_size = sizeof(*out_report);
+    err = nvs_get_blob(handle,
+                       TRACKER_NVS_FIRMWARE_REPORT_KEY,
+                       out_report,
+                       &required_size);
+    nvs_close(handle);
+    if (err != ESP_OK) {
+        memset(out_report, 0, sizeof(*out_report));
+        return err;
+    }
+
+    out_report->status[sizeof(out_report->status) - 1] = '\0';
+    out_report->job_id[sizeof(out_report->job_id) - 1] = '\0';
+    out_report->target_version[sizeof(out_report->target_version) - 1] = '\0';
+    out_report->current_version[sizeof(out_report->current_version) - 1] = '\0';
+    out_report->partition[sizeof(out_report->partition) - 1] = '\0';
+    out_report->error[sizeof(out_report->error) - 1] = '\0';
+    *out_found = true;
+    return ESP_OK;
+}
+
+/**
+ * @brief Clear the restart-safe deferred firmware report.
+ */
+esp_err_t nvs_config_clear_deferred_firmware_report(void) {
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READWRITE, &handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        return ESP_OK;
+    }
+    ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to open NVS namespace");
+
+    err = nvs_erase_key(handle, TRACKER_NVS_FIRMWARE_REPORT_KEY);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        nvs_close(handle);
+        return ESP_OK;
+    }
+    if (err == ESP_OK) {
+        err = nvs_commit(handle);
+    }
+    nvs_close(handle);
+    return err;
+}
+
+/**
  * @brief Persist the recent cloud-command dedupe window to NVS.
  */
 esp_err_t nvs_config_save_command_dedupe_context(const command_dedupe_context_t *context) {
