@@ -600,10 +600,15 @@ void state_machine_try_flush_deferred_firmware_report(void) {
         return;
     }
 
-    if (!tracker_mqtt_is_connected() || s_ota_in_progress) {
+    if (s_ota_in_progress) {
         return;
     }
 
+    /*
+     * Retry through the full pipeline even while MQTT is still down. This lets
+     * a recovered SD card or NVS store make a RAM-only terminal report durable
+     * without waiting for network restoration.
+     */
     (void)state_machine_publish_firmware_payload(&s_deferred_firmware_report);
 }
 
