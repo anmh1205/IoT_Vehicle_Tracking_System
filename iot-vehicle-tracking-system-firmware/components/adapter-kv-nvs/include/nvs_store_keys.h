@@ -28,5 +28,8 @@
 /** @brief Key for the persistent recent cloud-command dedupe window. */
 #define TRACKER_NVS_COMMAND_DEDUPE_KEY "cmd_dedupe_v1"
 
+/** @brief Restart-safe recovery slot for the latest deferred firmware status. */
+#define TRACKER_NVS_FIRMWARE_REPORT_KEY "fw_report_v1"
+
 /** @brief Key for persisted enable_tracking desired state. */
 #define TRACKER_NVS_TRACKING_ENABLED_KEY "track_en_v1"
