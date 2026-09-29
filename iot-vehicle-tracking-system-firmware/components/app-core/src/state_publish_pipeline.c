@@ -8,6 +8,7 @@
 #include "data_formatter.h"
 #include "imu_lis3dsh.h"
 #include "mqtt_client.h"
+#include "nvs_config.h"
 #include "offline_queue.h"
 #include "state_machine_internal.h"
 #include "state_runtime_context.h"
@@ -67,6 +68,7 @@ typedef struct {
 } state_publish_event_args_t;
 
 static const char *TAG = "PUBLISH_PIPE";
+static bool s_deferred_firmware_report_nvs_persisted = false;
 
 /**
  * @brief Return whether the current session identity is safe to emit.
@@ -304,25 +306,55 @@ static void state_machine_defer_firmware_report(const firmware_status_t *firmwar
         return;
     }
 
+    const bool already_persisted =
+        s_deferred_firmware_report_nvs_persisted &&
+        state_machine_firmware_report_same_payload(firmware, &s_deferred_firmware_report);
+
     s_deferred_firmware_report = *firmware;
     s_deferred_firmware_report_pending = true;
+
+    if (already_persisted) {
+        ESP_LOGD(TAG,
+                 "event=firmware_status_deferred status=%s progress=%u job=%s durable=nvs_existing",
+                 firmware->status,
+                 (unsigned)firmware->progress,
+                 firmware->job_id);
+        return;
+    }
+
+    esp_err_t persist_err = nvs_config_save_deferred_firmware_report(firmware);
+    s_deferred_firmware_report_nvs_persisted = persist_err == ESP_OK;
+    if (persist_err != ESP_OK) {
+        ESP_LOGW(TAG,
+                 "event=firmware_status_deferred status=%s progress=%u job=%s durable=ram_only nvs_err=%s",
+                 firmware->status,
+                 (unsigned)firmware->progress,
+                 firmware->job_id,
+                 esp_err_to_name(persist_err));
+        return;
+    }
+
     ESP_LOGI(TAG,
-             "event=firmware_status_deferred status=%s progress=%u job=%s reason=mqtt_not_connected",
+             "event=firmware_status_deferred status=%s progress=%u job=%s durable=nvs",
              firmware->status,
              (unsigned)firmware->progress,
              firmware->job_id);
 }
 
-static bool state_machine_firmware_report_same_lineage(const firmware_status_t *left,
-                                                        const firmware_status_t *right) {
-    if (left == NULL || right == NULL) {
-        return false;
+static void state_machine_clear_deferred_firmware_report_recovery(void) {
+    if (!s_deferred_firmware_report_nvs_persisted) {
+        return;
     }
 
-    return strcmp(left->job_id, right->job_id) == 0 &&
-           strcmp(left->target_version, right->target_version) == 0;
+    esp_err_t clear_err = nvs_config_clear_deferred_firmware_report();
+    if (clear_err != ESP_OK) {
+        ESP_LOGW(TAG,
+                 "event=firmware_status_recovery_clear_failed err=%s",
+                 esp_err_to_name(clear_err));
+        return;
+    }
+    s_deferred_firmware_report_nvs_persisted = false;
 }
-
 
 /**
  * @brief Populate a firmware status struct from primitive OTA fields.
@@ -340,6 +372,21 @@ static bool state_machine_firmware_report_same_lineage(const firmware_status_t *
  * @param[in] partition Optional partition label.
  * @param[in] error Optional short error string.
  */
+static bool state_machine_firmware_report_same_payload(const firmware_status_t *left,
+                                                       const firmware_status_t *right) {
+    if (left == NULL || right == NULL) {
+        return false;
+    }
+
+    return left->progress == right->progress &&
+           strcmp(left->status, right->status) == 0 &&
+           strcmp(left->job_id, right->job_id) == 0 &&
+           strcmp(left->target_version, right->target_version) == 0 &&
+           strcmp(left->current_version, right->current_version) == 0 &&
+           strcmp(left->partition, right->partition) == 0 &&
+           strcmp(left->error, right->error) == 0;
+}
+
 static void state_machine_fill_firmware_status(firmware_status_t *firmware,
                                                const char *status,
                                                uint8_t progress,
@@ -452,27 +499,29 @@ bool state_machine_publish_firmware_payload(const firmware_status_t *firmware) {
     if (!accepted) {
         /*
          * Neither live MQTT nor durable SD fallback accepted the report.
-         * Preserve the latest OTA state in RAM so a later connected loop can
-         * retry instead of silently losing a terminal deployment outcome.
+         * Keep a RAM retry copy and commit the same report to NVS so a required
+         * restart cannot destroy the authoritative OTA outcome.
          */
         state_machine_defer_firmware_report(firmware);
-    } else if (
-        s_deferred_firmware_report_pending &&
-        state_machine_firmware_report_same_lineage(firmware, &s_deferred_firmware_report)
-    ) {
-        /*
-         * A newer status from the same OTA job has already reached MQTT or
-         * durable offline storage. The older RAM-only snapshot is now
-         * superseded and must never be replayed afterward.
-         */
-        ESP_LOGD(TAG,
-                 "event=firmware_status_deferred_superseded status=%s progress=%u job=%s",
-                 s_deferred_firmware_report.status,
-                 (unsigned)s_deferred_firmware_report.progress,
-                 s_deferred_firmware_report.job_id);
-        s_deferred_firmware_report_pending = false;
+        return false;
     }
-    return accepted;
+
+    if (state_machine_firmware_report_same_lineage(firmware, &s_deferred_firmware_report)) {
+        if (s_deferred_firmware_report_pending) {
+            /*
+             * A newer/equal status from the same OTA job has reached MQTT or
+             * durable SD storage. The RAM retry snapshot is superseded.
+             */
+            ESP_LOGD(TAG,
+                     "event=firmware_status_deferred_superseded status=%s progress=%u job=%s",
+                     s_deferred_firmware_report.status,
+                     (unsigned)s_deferred_firmware_report.progress,
+                     s_deferred_firmware_report.job_id);
+            s_deferred_firmware_report_pending = false;
+        }
+        state_machine_clear_deferred_firmware_report_recovery();
+    }
+    return true;
 }
 
 /**
@@ -535,7 +584,36 @@ void state_machine_try_flush_deferred_firmware_report(void) {
         return;
     }
 
-    if (state_machine_publish_firmware_payload(&s_deferred_firmware_report)) {
-        s_deferred_firmware_report_pending = false;
+    (void)state_machine_publish_firmware_payload(&s_deferred_firmware_report);
+}
+
+void state_machine_restore_deferred_firmware_report(void) {
+    firmware_status_t restored = {0};
+    bool found = false;
+    esp_err_t err = nvs_config_load_deferred_firmware_report(&restored, &found);
+    s_deferred_firmware_report_nvs_persisted = false;
+
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG,
+                 "event=firmware_status_recovery_load_failed err=%s",
+                 esp_err_to_name(err));
+        return;
     }
+    if (!found) {
+        return;
+    }
+
+    s_deferred_firmware_report = restored;
+    s_deferred_firmware_report_pending = true;
+    s_deferred_firmware_report_nvs_persisted = true;
+    ESP_LOGI(TAG,
+             "event=firmware_status_recovery_restored status=%s progress=%u job=%s",
+             restored.status,
+             (unsigned)restored.progress,
+             restored.job_id);
+}
+
+bool state_machine_firmware_report_restart_safe(void) {
+    return !s_deferred_firmware_report_pending ||
+           s_deferred_firmware_report_nvs_persisted;
 }
