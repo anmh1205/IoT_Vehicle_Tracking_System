@@ -985,7 +985,7 @@ export const handleRawData = async (
       startReason: 'telemetry_active',
     });
 
-    publishSupersededSessionEnds({
+    await publishSupersededSessionEnds({
       deviceId: payload.device_id,
       retiredSessionIds: ensuredSession.retiredSessionIds,
       timestampMs,
