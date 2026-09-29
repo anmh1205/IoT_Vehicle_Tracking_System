@@ -10,7 +10,7 @@ import {
 import { verifyDeviceToken } from '../services/device-auth.service';
 import { publishSupersededSessionEnds } from '../services/session-lifecycle.service';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
-import { publishInternalEvent } from '../publishers/internal-event.publisher';
+import { publishInternalEventDurable } from '../publishers/internal-event.publisher';
 import { publishSessionAssignment } from '../publishers/session-assignment.publisher';
 import {
   clearSession,
@@ -189,8 +189,8 @@ export const handleStatus = async (
         },
       );
 
-      if (historicalSession.isNew && historicalSession.sessionId !== null) {
-        publishInternalEvent('session', {
+      if (historicalSession.sessionId !== null && historicalSession.status === 'running') {
+        await publishInternalEventDurable('session', {
           device_id: payload.device_id,
           session_id: historicalSession.sessionId,
           action: 'started',
@@ -227,8 +227,8 @@ export const handleStatus = async (
           },
         );
 
-        if (completedSession.completedNow) {
-          publishInternalEvent('session', {
+        if (completedSession.sessionId !== null) {
+          await publishInternalEventDurable('session', {
             device_id: payload.device_id,
             session_id: historicalSessionId,
             action: completedSession.discarded ? 'discarded' : 'ended',
@@ -290,7 +290,7 @@ export const handleStatus = async (
       startReason: 'ignition_on',
     });
 
-    publishSupersededSessionEnds({
+    await publishSupersededSessionEnds({
       deviceId: payload.device_id,
       retiredSessionIds: ensuredSession.retiredSessionIds,
       timestampMs,
@@ -337,8 +337,8 @@ export const handleStatus = async (
       bootId: sessionBootId,
     });
 
-    if (ensuredSession.isNew) {
-      publishInternalEvent('session', {
+    {
+      await publishInternalEventDurable('session', {
         device_id: payload.device_id,
         session_id: sessionId,
         action: 'started',
@@ -403,8 +403,8 @@ export const handleStatus = async (
       });
       await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState, timestampMs);
 
-      if (sessionId && completedSession.completedNow) {
-        publishInternalEvent('session', {
+      if (sessionId && (completedSession.completedNow || !completedSession.discarded)) {
+        await publishInternalEventDurable('session', {
           device_id: payload.device_id,
           session_id: sessionId,
           action: completedSession.discarded ? 'discarded' : 'ended',
@@ -430,7 +430,7 @@ export const handleStatus = async (
       startReason,
     });
 
-    publishSupersededSessionEnds({
+    await publishSupersededSessionEnds({
       deviceId: payload.device_id,
       retiredSessionIds: ensuredSession.retiredSessionIds,
       timestampMs,
@@ -461,8 +461,8 @@ export const handleStatus = async (
       bootId: sessionBootId,
     });
 
-    if (ensuredSession.isNew) {
-      publishInternalEvent('session', {
+    {
+      await publishInternalEventDurable('session', {
         device_id: payload.device_id,
         session_id: sessionId,
         action: 'started',
@@ -503,8 +503,8 @@ export const handleStatus = async (
     });
     await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState, timestampMs);
 
-    if (sessionId && completedSession.completedNow) {
-      publishInternalEvent('session', {
+    if (sessionId && (completedSession.completedNow || !completedSession.discarded)) {
+      await publishInternalEventDurable('session', {
         device_id: payload.device_id,
         session_id: sessionId,
         action: completedSession.discarded ? 'discarded' : 'ended',
@@ -579,7 +579,7 @@ export const handleStatus = async (
     logger.error({ err, deviceId: payload.device_id, event: 'status_change_log_write_failed' }, 'Status change log write failed');
   });
 
-  publishInternalEvent('status', {
+  await publishInternalEventDurable('status', {
     device_id: payload.device_id,
     previous_status: previousStatus,
     current_status: effectiveStatus,

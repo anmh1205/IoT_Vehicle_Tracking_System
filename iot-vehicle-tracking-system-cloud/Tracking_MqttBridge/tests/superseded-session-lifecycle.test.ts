@@ -17,12 +17,12 @@ const lifecycleSource = readFileSync(
 
 test('superseded sessions emit ended lifecycle before a replacement start', () => {
   assert.equal(
-    (statusSource.match(/publishSupersededSessionEnds\(\{/g) ?? []).length,
+    (statusSource.match(/await publishSupersededSessionEnds\(\{/g) ?? []).length,
     2,
     'both authoritative-start and running-status fallback must reconcile retired sessions',
   );
   assert.equal(
-    (rawSource.match(/publishSupersededSessionEnds\(\{/g) ?? []).length,
+    (rawSource.match(/await publishSupersededSessionEnds\(\{/g) ?? []).length,
     1,
     'rawdata fallback must reconcile retired sessions',
   );

@@ -203,6 +203,7 @@ export const updateDeviceStatus = async (
     );
   } catch (err) {
     logger.error({ err, deviceId, event: 'update_device_status_failed' }, 'Update device status failed');
+    throw err;
   }
 };
 

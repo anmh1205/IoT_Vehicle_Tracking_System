@@ -2,7 +2,7 @@ import { firmwareStatusSchema } from '../validators/payload.validator';
 import { pool } from '../infrastructure/database';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { logger } from '../infrastructure/logger';
-import { publishInternalEvent } from '../publishers/internal-event.publisher';
+import { publishInternalEventDurable } from '../publishers/internal-event.publisher';
 import { verifyDeviceToken } from '../services/device-auth.service';
 
 const OTA_TERMINAL_STATUSES = new Set(['success', 'failed', 'rolled_back']);
@@ -164,7 +164,7 @@ export const handleFirmware = async (
         },
         'Firmware inventory sync failed',
       );
-      return;
+      throw err;
     }
 
     writeDeviceEvent(
@@ -242,6 +242,23 @@ export const handleFirmware = async (
         },
         'Ignored firmware update payload',
       );
+
+      if (updateDecision.reason === 'duplicate_message_id') {
+        await publishInternalEventDurable('firmware', {
+          jobId,
+          device_id: payload.device_id,
+          status: payload.status,
+          progress: payload.progress,
+          targetVersion: payload.targetVersion,
+          currentVersion: payload.currentVersion,
+          partition: payload.partition,
+          error: payload.error,
+          message_id: messageId,
+          schema_version: schemaVersion,
+          seq_no: seqNo,
+          boot_id: bootId,
+        });
+      }
       return;
     }
 
@@ -372,12 +389,12 @@ export const handleFirmware = async (
       { err, deviceId: payload.device_id, jobId, event: 'firmware_status_log_failed' },
       'Firmware status log failed',
     );
-    return;
+    throw err;
   } finally {
     client.release();
   }
 
-  publishInternalEvent('firmware', {
+  await publishInternalEventDurable('firmware', {
     jobId,
     device_id: payload.device_id,
     status: payload.status,
