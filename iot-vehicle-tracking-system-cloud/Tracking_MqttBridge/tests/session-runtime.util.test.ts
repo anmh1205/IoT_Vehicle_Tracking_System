@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   canUseRunningStatusForSession,
   hasAuthoritativeSessionIdentity,
+  hasTelemetryFallbackSessionContinuity,
   isEngineOffRuntimeState,
   normalizeStatusForSessionRuntime,
   shouldEnsureSessionForTelemetry,
@@ -133,6 +134,42 @@ test('anonymous engine-off telemetry is not retained as completed session histor
       hasAuthoritativeIdentity: false,
     }),
     false,
+  );
+});
+
+test('rawdata fallback continuity does not treat boot lineage as session identity', () => {
+  assert.equal(
+    hasTelemetryFallbackSessionContinuity({
+      localSessionKey: undefined,
+      previousStatus: 'offline',
+      persistedStatus: 'stopped',
+    }),
+    false,
+  );
+
+  assert.equal(
+    hasTelemetryFallbackSessionContinuity({
+      localSessionKey: 22,
+      previousStatus: 'offline',
+      persistedStatus: 'stopped',
+    }),
+    true,
+  );
+
+  assert.equal(
+    hasTelemetryFallbackSessionContinuity({
+      previousStatus: 'running',
+      persistedStatus: 'stopped',
+    }),
+    true,
+  );
+
+  assert.equal(
+    hasTelemetryFallbackSessionContinuity({
+      previousStatus: 'offline',
+      persistedStatus: 'running',
+    }),
+    true,
   );
 });
 

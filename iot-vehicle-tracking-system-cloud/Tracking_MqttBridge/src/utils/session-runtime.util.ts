@@ -37,6 +37,25 @@ export const shouldRetainSessionHistory = (params: {
   params.resolvedSessionId !== null &&
   params.hasAuthoritativeIdentity;
 
+export const hasTelemetryFallbackSessionContinuity = (params: {
+  localSessionKey?: number | null;
+  previousStatus?: string | null;
+  persistedStatus?: string | null;
+}): boolean => {
+  const localSessionKey = Number(params.localSessionKey);
+  if (Number.isSafeInteger(localSessionKey) && localSessionKey > 0) {
+    return true;
+  }
+
+  /*
+   * Runtime boot identity is transport ordering metadata, not proof that a
+   * session identity is durable. Fallback creation is therefore allowed only
+   * when the payload has a local session key or cloud state already knows the
+   * device is inside a running session.
+   */
+  return params.previousStatus === 'running' || params.persistedStatus === 'running';
+};
+
 export const shouldEnsureSessionForTelemetry = (params: {
   liveMutationAccepted: boolean;
   resolvedSessionId: number | null;
