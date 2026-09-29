@@ -590,7 +590,17 @@ void state_machine_publish_or_stage_firmware_status(const char *status,
  * @brief Flush one deferred firmware report once MQTT is connected again.
  */
 void state_machine_try_flush_deferred_firmware_report(void) {
-    if (!s_deferred_firmware_report_pending || !tracker_mqtt_is_connected() || s_ota_in_progress) {
+    if (!s_deferred_firmware_report_pending) {
+        /*
+         * A normal transport may already have accepted the report while the
+         * NVS erase failed transiently. Retry cleanup without re-publishing an
+         * already superseded payload.
+         */
+        state_machine_clear_deferred_firmware_report_recovery();
+        return;
+    }
+
+    if (!tracker_mqtt_is_connected() || s_ota_in_progress) {
         return;
     }
 
