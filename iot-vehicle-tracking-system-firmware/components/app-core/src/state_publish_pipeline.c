@@ -298,6 +298,31 @@ static bool state_publish_via_pipeline(const char *log_label,
     return persisted;
 }
 
+static bool state_machine_firmware_report_same_lineage(const firmware_status_t *left,
+                                                        const firmware_status_t *right) {
+    if (left == NULL || right == NULL) {
+        return false;
+    }
+
+    return strcmp(left->job_id, right->job_id) == 0 &&
+           strcmp(left->target_version, right->target_version) == 0;
+}
+
+static bool state_machine_firmware_report_same_payload(const firmware_status_t *left,
+                                                       const firmware_status_t *right) {
+    if (left == NULL || right == NULL) {
+        return false;
+    }
+
+    return left->progress == right->progress &&
+           strcmp(left->status, right->status) == 0 &&
+           strcmp(left->job_id, right->job_id) == 0 &&
+           strcmp(left->target_version, right->target_version) == 0 &&
+           strcmp(left->current_version, right->current_version) == 0 &&
+           strcmp(left->partition, right->partition) == 0 &&
+           strcmp(left->error, right->error) == 0;
+}
+
 /**
  * @brief Keep firmware status for the next connected publish opportunity.
  */
@@ -372,21 +397,6 @@ static void state_machine_clear_deferred_firmware_report_recovery(void) {
  * @param[in] partition Optional partition label.
  * @param[in] error Optional short error string.
  */
-static bool state_machine_firmware_report_same_payload(const firmware_status_t *left,
-                                                       const firmware_status_t *right) {
-    if (left == NULL || right == NULL) {
-        return false;
-    }
-
-    return left->progress == right->progress &&
-           strcmp(left->status, right->status) == 0 &&
-           strcmp(left->job_id, right->job_id) == 0 &&
-           strcmp(left->target_version, right->target_version) == 0 &&
-           strcmp(left->current_version, right->current_version) == 0 &&
-           strcmp(left->partition, right->partition) == 0 &&
-           strcmp(left->error, right->error) == 0;
-}
-
 static void state_machine_fill_firmware_status(firmware_status_t *firmware,
                                                const char *status,
                                                uint8_t progress,
