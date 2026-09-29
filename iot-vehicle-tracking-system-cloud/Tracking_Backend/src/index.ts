@@ -25,6 +25,10 @@ import {
   closeDeviceCommandDispatcher,
 } from '@/domain/device/services/device-command.service';
 import {
+  initAutoTripReconciler,
+  closeAutoTripReconciler,
+} from '@/domain/trip/services/trip-auto-reconciler.service';
+import {
   registerRealtime,
   closeSocketServer,
   getRealtimeHealthSnapshot,
@@ -115,6 +119,9 @@ app.use(errorHandler);
 // Start the durable device-command dispatcher before accepting API traffic.
 initDeviceCommandDispatcher();
 
+// Repair auto-trip drift from durable device-session state on startup and periodically.
+initAutoTripReconciler();
+
 // Start server
 const server = app.listen(appConfig.port, () => {
   logger.info(`Server started on port ${appConfig.port} (${appConfig.nodeEnv})`);
@@ -135,6 +142,8 @@ const gracefulShutdown = (signal: string) => {
     logger.info('MQTT event listener closed');
     await closeDeviceCommandDispatcher();
     logger.info('MQTT device command dispatcher closed');
+    await closeAutoTripReconciler();
+    logger.info('Auto-trip reconciler closed');
     await closeSocketServer();
     logger.info('WebSocket server closed');
     await closePool();
