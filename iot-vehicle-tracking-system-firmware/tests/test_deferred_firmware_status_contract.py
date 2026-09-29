@@ -115,3 +115,18 @@ def test_successful_newer_status_supersedes_pending_same_job_and_cleans_recovery
     assert "state_machine_firmware_report_same_lineage(firmware, &s_deferred_firmware_report)" in publish
     assert "s_deferred_firmware_report_pending = false;" in publish
     assert "state_machine_clear_deferred_firmware_report_recovery();" in publish
+
+def test_deferred_retry_can_recover_via_sd_without_mqtt():
+    flush = SOURCE.split("void state_machine_try_flush_deferred_firmware_report", 1)[1]
+    flush = flush.split("void state_machine_restore_deferred_firmware_report", 1)[0]
+    assert "tracker_mqtt_is_connected()" not in flush
+    assert "state_machine_publish_firmware_payload(&s_deferred_firmware_report)" in flush
+
+
+def test_firmware_report_helpers_are_defined_before_use():
+    lineage = SOURCE.index("static bool state_machine_firmware_report_same_lineage")
+    exact = SOURCE.index("static bool state_machine_firmware_report_same_payload")
+    defer = SOURCE.index("static void state_machine_defer_firmware_report")
+    publish = SOURCE.index("bool state_machine_publish_firmware_payload")
+    assert lineage < defer < publish
+    assert exact < defer < publish
