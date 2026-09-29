@@ -4,7 +4,7 @@ import { handleRawData } from './handlers/rawdata.handler';
 import { handleStatus } from './handlers/status.handler';
 import { handleEvent } from './handlers/event.handler';
 import { handleFirmware } from './handlers/firmware.handler';
-import { publishInternalEvent } from './publishers/internal-event.publisher';
+import { publishInternalEventDurable } from './publishers/internal-event.publisher';
 import { startBatchWriter, stopBatchWriter } from './services/batch-writer.service';
 import { startBridgeHealthServer, stopBridgeHealthServer } from './services/bridge-health.service';
 import { closePool } from './infrastructure/database';
@@ -50,7 +50,7 @@ const extractDeviceId = (topic: string): string | null => {
   return parts[1] ?? null;
 };
 
-const handleCommandAck = (deviceId: string, message: Buffer): void => {
+const handleCommandAck = async (deviceId: string, message: Buffer): Promise<void> => {
   let parsed: Record<string, unknown>;
   try {
     parsed = JSON.parse(message.toString()) as Record<string, unknown>;
@@ -74,7 +74,7 @@ const handleCommandAck = (deviceId: string, message: Buffer): void => {
     return;
   }
 
-  publishInternalEvent('command', {
+  await publishInternalEventDurable('command', {
     device_id: deviceId,
     command_id: String(commandId),
     status,
@@ -86,7 +86,7 @@ const handleCommandAck = (deviceId: string, message: Buffer): void => {
 /**
  * Route incoming MQTT messages to the appropriate handler based on topic suffix.
  */
-const routeMessage = (topic: string, message: Buffer): void => {
+const routeMessage = async (topic: string, message: Buffer): Promise<void> => {
   const deviceId = extractDeviceId(topic);
   if (!deviceId) {
     logger.warn({ topic, event: 'mqtt_topic_device_unresolved' }, 'MQTT topic device id unresolved');
@@ -97,32 +97,26 @@ const routeMessage = (topic: string, message: Buffer): void => {
 
   switch (suffix) {
     case 'rawdata':
-      handleRawData(deviceId, message).catch((err) => {
-        logger.error({ err, deviceId, event: 'rawdata_handler_failed' }, 'Rawdata handler failed');
-      });
-      break;
+      await handleRawData(deviceId, message);
+      return;
     case 'status':
-      handleStatus(deviceId, message).catch((err) => {
-        logger.error({ err, deviceId, event: 'status_handler_failed' }, 'Status handler failed');
-      });
-      break;
+      await handleStatus(deviceId, message);
+      return;
     case 'events':
-      handleEvent(deviceId, message).catch((err) => {
-        logger.error({ err, deviceId, event: 'event_handler_failed' }, 'Event handler failed');
-      });
-      break;
+      await handleEvent(deviceId, message);
+      return;
     case 'firmware':
-      handleFirmware(deviceId, message).catch((err) => {
-        logger.error({ err, deviceId, event: 'firmware_handler_failed' }, 'Firmware handler failed');
-      });
-      break;
+      await handleFirmware(deviceId, message);
+      return;
     case 'commands/ack':
-      handleCommandAck(deviceId, message);
-      break;
+      await handleCommandAck(deviceId, message);
+      return;
     default:
       logger.debug({ suffix, topic, event: 'mqtt_topic_suffix_unhandled' }, 'MQTT topic suffix ignored');
   }
 };
+
+const pendingMessageWork = new WeakMap<object, Promise<void>>();
 
 /**
  * Bootstrap the MQTT Bridge service.
@@ -142,9 +136,45 @@ const main = async (): Promise<void> => {
   bridgeHealthState.subscriptionsReady = true;
   bridgeHealthState.lastError = undefined;
 
-  client.on('message', (topic, message) => {
+  /*
+   * MQTT.js emits 'message' before it invokes handleMessage(), and QoS1 PUBACK
+   * is sent only after handleMessage's callback. Bind the source packet to the
+   * application work synchronously in the message listener so device-facing
+   * acknowledgement follows the critical Bridge side effect.
+   */
+  client.handleMessage = (packet, callback) => {
+    const work = pendingMessageWork.get(packet as object);
+    if (!work) {
+      callback();
+      return;
+    }
+
+    void work.then(
+      () => callback(),
+      (error) => callback(error instanceof Error ? error : new Error(String(error))),
+    );
+  };
+
+  client.on('message', (topic, message, packet) => {
     bridgeHealthState.lastMessageAt = new Date().toISOString();
-    routeMessage(topic, message);
+
+    const work = routeMessage(topic, message);
+    if (packet.qos === 1) {
+      const trackedWork = work.catch((err) => {
+        bridgeHealthState.lastError = err instanceof Error ? err.message : String(err);
+        logger.error(
+          { err, topic, packetId: packet.messageId, event: 'mqtt_qos1_handler_failed' },
+          'QoS1 device message handling failed; withholding PUBACK',
+        );
+        throw err;
+      });
+      pendingMessageWork.set(packet as object, trackedWork);
+      return;
+    }
+
+    void work.catch((err) => {
+      logger.error({ err, topic, event: 'mqtt_qos0_handler_failed' }, 'QoS0 device message handling failed');
+    });
   });
 
   logger.info({ event: 'bridge_started' }, 'MQTT bridge started');
