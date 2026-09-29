@@ -5,6 +5,7 @@
 
 #include "app_config.h"
 #include "esp_err.h"
+#include "ota_contract.h"
 
 /**
  * @file nvs_config.h
@@ -76,6 +77,25 @@ typedef struct {
     char previous_version[TRACKER_TARGET_VERSION_MAX_LEN]; /**< Prior version, used for rollback reporting. */
     char partition[TRACKER_PARTITION_MAX_LEN];         /**< OTA partition label holding the new image. */
 } ota_persist_context_t;
+
+/**
+ * @brief Persist the latest firmware-status report that still needs cloud delivery.
+ *
+ * This restart-safe fallback is used only when both live MQTT and the SD
+ * offline queue reject the same report.
+ */
+esp_err_t nvs_config_save_deferred_firmware_report(const firmware_status_t *report);
+
+/**
+ * @brief Load the restart-safe deferred firmware report, if one exists.
+ */
+esp_err_t nvs_config_load_deferred_firmware_report(firmware_status_t *out_report,
+                                                   bool *out_found);
+
+/**
+ * @brief Clear the restart-safe deferred firmware report after durable delivery.
+ */
+esp_err_t nvs_config_clear_deferred_firmware_report(void);
 
 /** @brief Max length of the per-boot identifier string (incl. NUL). */
 #define TRACKER_SESSION_BOOT_ID_LEN 48
