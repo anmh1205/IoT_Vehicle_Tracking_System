@@ -1,5 +1,5 @@
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
-import { publishInternalEvent } from '../publishers/internal-event.publisher';
+import { publishInternalEventDurable } from '../publishers/internal-event.publisher';
 import { logger } from '../infrastructure/logger';
 import { verifyDeviceToken } from '../services/device-auth.service';
 import { eventSchema } from '../validators/payload.validator';
@@ -72,8 +72,8 @@ export const handleEvent = async (
     );
   }
 
-  // Log to VictoriaLogs
-  writeDeviceEvent(
+  // QoS1 source events are not complete until the durable event log accepts them.
+  await writeDeviceEvent(
     payload.device_id,
     `device_${payload.event_type}`,
     payload.message ?? `Device ${payload.event_type} (code: ${payload.code ?? 'N/A'})`,
@@ -85,13 +85,11 @@ export const handleEvent = async (
       seq_no: seqNo,
       boot_id: bootId,
     },
-  ).catch((err) => {
-    logger.error({ err, deviceId: payload.device_id, event: 'device_event_log_write_failed' }, 'Device event log write failed');
-  });
+  );
 
   // Publish error/warning events as alerts for Backend consumption
   if (payload.event_type === 'error' || payload.event_type === 'warning') {
-    publishInternalEvent('alert', {
+    await publishInternalEventDurable('alert', {
       device_id: payload.device_id,
       alert_type: `device_${payload.event_type}`,
       code: payload.code,
