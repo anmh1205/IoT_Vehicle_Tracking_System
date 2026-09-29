@@ -79,3 +79,13 @@ void state_machine_publish_or_stage_firmware_status(const char *status,
  * Deferred reports are skipped while OTA is still mutating runtime state.
  */
 void state_machine_try_flush_deferred_firmware_report(void);
+
+/**
+ * @brief Restore a deferred firmware report committed to NVS before a restart.
+ */
+void state_machine_restore_deferred_firmware_report(void);
+
+/**
+ * @brief Return whether restart can occur without losing the deferred report.
+ */
+bool state_machine_firmware_report_restart_safe(void);
