@@ -332,6 +332,13 @@ static bool state_machine_firmware_report_same_lineage(const firmware_status_t *
 
 
 
+/*
+ * NVS recovery must not hold the entire tracker offline indefinitely when a
+ * recovery blob is incompatible or its flash read is temporarily unavailable.
+ */
+static bool s_firmware_report_restore_required = true;
+static uint64_t s_firmware_report_next_restore_ms = 0;
+
 /* Load the last firmware outcome before OTA confirmation can emit a new one. */
 esp_err_t state_machine_restore_deferred_firmware_report(void) {
     firmware_status_t restored = {0};
@@ -342,6 +349,7 @@ esp_err_t state_machine_restore_deferred_firmware_report(void) {
                  esp_err_to_name(err));
         return err;
     }
+    s_firmware_report_restore_required = false;
     if (found) {
         s_deferred_firmware_report = restored;
         s_deferred_firmware_report_pending = true;
@@ -569,7 +577,19 @@ void state_machine_publish_or_stage_firmware_status(const char *status,
  * @brief Flush one deferred firmware report once MQTT is connected again.
  */
 void state_machine_try_flush_deferred_firmware_report(void) {
-    if (!s_deferred_firmware_report_pending || !tracker_mqtt_is_connected() || s_ota_in_progress) {
+    if (!tracker_mqtt_is_connected() || s_ota_in_progress) {
+        return;
+    }
+
+    uint64_t now_ms = util_uptime_ms();
+    if (!s_deferred_firmware_report_pending &&
+        s_firmware_report_restore_required &&
+        now_ms >= s_firmware_report_next_restore_ms) {
+        s_firmware_report_next_restore_ms = now_ms + 30000U;
+        (void)state_machine_restore_deferred_firmware_report();
+    }
+
+    if (!s_deferred_firmware_report_pending) {
         return;
     }
 
