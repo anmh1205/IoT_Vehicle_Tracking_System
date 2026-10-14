@@ -25,6 +25,12 @@ export interface NotificationFilters {
   isRead?: boolean;
 }
 
+export interface NotificationAccessScope {
+  userId: number;
+  role: string;
+  deviceAccessMode: string;
+}
+
 export interface NotificationCounts {
   total: number;
   unreadCount: number;
@@ -54,6 +60,30 @@ const NOTIFICATION_LINK_JOINS = `LEFT JOIN devices d ON d.device_id = a.device_i
       v.id DESC
     LIMIT 1
   ) link ON true`;
+
+/**
+ * A limited user sees only alerts for currently assigned devices. A
+ * vehicle-only alert is resolved via the vehicle's current device.
+ * Unattributed/global alerts are restricted to all-access accounts until
+ * an explicit ownership policy can be implemented.
+ */
+const notificationVisibilityClause = (scope: NotificationAccessScope): string => {
+  if (scope.role === 'root' || scope.role === 'admin' || scope.deviceAccessMode === 'all') {
+    return 'TRUE';
+  }
+
+  return `EXISTS (
+    SELECT 1 FROM user_device_access uda
+    WHERE uda.user_id = $1 AND (
+      (a.device_id IS NOT NULL AND uda.device_id = a.device_id)
+      OR (a.device_id IS NULL AND a.vehicle_id IS NOT NULL AND EXISTS (
+        SELECT 1 FROM vehicles assigned_vehicle
+        WHERE assigned_vehicle.vehicle_id = a.vehicle_id
+          AND assigned_vehicle.device_id = uda.device_id
+      ))
+    )
+  )`;
+};
 
 const buildTypeClause = (
   type: NotificationType,
@@ -112,11 +142,12 @@ const buildTypeClause = (
 
 const buildFilterSql = (
   filters: NotificationFilters,
+  scope: NotificationAccessScope,
 ): {
   whereClause: string;
   values: unknown[];
 } => {
-  const conditions: string[] = ['state.hidden_at IS NULL'];
+  const conditions: string[] = ['state.hidden_at IS NULL', notificationVisibilityClause(scope)];
   const values: unknown[] = [];
   let paramIndex = 2;
 
@@ -159,12 +190,12 @@ const buildFilterSql = (
 };
 
 export const findNotificationPage = async (
-  userId: number,
+  scope: NotificationAccessScope,
   filters: NotificationFilters,
   limit: number,
   offset: number,
 ): Promise<NotificationRow[]> => {
-  const { whereClause, values } = buildFilterSql(filters);
+  const { whereClause, values } = buildFilterSql(filters, scope);
   const limitIndex = values.length + 2;
   const offsetIndex = limitIndex + 1;
 
@@ -205,15 +236,15 @@ export const findNotificationPage = async (
      ORDER BY a.created_at DESC
      LIMIT $${limitIndex}
      OFFSET $${offsetIndex}`,
-    [userId, ...values, limit, offset],
+    [scope.userId, ...values, limit, offset],
   );
 };
 
 export const getNotificationCounts = async (
-  userId: number,
+  scope: NotificationAccessScope,
   filters: NotificationFilters,
 ): Promise<NotificationCounts> => {
-  const { whereClause, values } = buildFilterSql(filters);
+  const { whereClause, values } = buildFilterSql(filters, scope);
   const row = await findOne<{
     total_count: number | string;
     unread_count: number | string;
@@ -226,7 +257,7 @@ export const getNotificationCounts = async (
      LEFT JOIN notification_states state
        ON state.user_id = $1 AND state.alert_id = a.id
      ${whereClause}`,
-    [userId, ...values],
+    [scope.userId, ...values],
   );
 
   return {
@@ -248,7 +279,7 @@ const NOTIFICATION_TYPE_SQL = `CASE
   ELSE 'alert'
 END`;
 
-export const getNotificationStats = async (userId: number): Promise<NotificationStats> => {
+export const getNotificationStats = async (scope: NotificationAccessScope): Promise<NotificationStats> => {
   const row = await findOne<{
     total_count: number | string;
     unread_count: number | string;
@@ -273,9 +304,9 @@ export const getNotificationStats = async (userId: number): Promise<Notification
        FROM alerts a
        LEFT JOIN notification_states state
          ON state.user_id = $1 AND state.alert_id = a.id
-       WHERE state.hidden_at IS NULL
+       WHERE state.hidden_at IS NULL AND ${notificationVisibilityClause(scope)}
      ) classified`,
-    [userId],
+    [scope.userId],
   );
 
   return {
@@ -291,44 +322,50 @@ export const getNotificationStats = async (userId: number): Promise<Notification
   };
 };
 
-export const markNotificationRead = async (userId: number, alertId: number): Promise<void> => {
-  await executeQuery(
-    `INSERT INTO notification_states (user_id, alert_id, is_read, read_at, updated_at)
-     VALUES ($1, $2, TRUE, NOW(), NOW())
-     ON CONFLICT (user_id, alert_id)
-     DO UPDATE SET
-       is_read = TRUE,
-       read_at = NOW(),
-       updated_at = NOW()`,
-    [userId, alertId],
-  );
-};
-
-export const markAllNotificationsRead = async (userId: number): Promise<void> => {
+export const markNotificationRead = async (scope: NotificationAccessScope, alertId: number): Promise<void> => {
   await executeQuery(
     `INSERT INTO notification_states (user_id, alert_id, is_read, read_at, updated_at)
      SELECT $1, a.id, TRUE, NOW(), NOW()
      FROM alerts a
+     WHERE a.id = $2 AND ${notificationVisibilityClause(scope)}
+     ON CONFLICT (user_id, alert_id)
+     DO UPDATE SET
+       is_read = TRUE,
+       read_at = NOW(),
+       updated_at = NOW()
+     WHERE notification_states.hidden_at IS NULL`,
+    [scope.userId, alertId],
+  );
+};
+
+export const markAllNotificationsRead = async (scope: NotificationAccessScope): Promise<void> => {
+  await executeQuery(
+    `INSERT INTO notification_states (user_id, alert_id, is_read, read_at, updated_at)
+     SELECT $1, a.id, TRUE, NOW(), NOW()
+     FROM alerts a
+     WHERE ${notificationVisibilityClause(scope)}
      ON CONFLICT (user_id, alert_id)
      DO UPDATE SET
        is_read = TRUE,
        read_at = COALESCE(notification_states.read_at, EXCLUDED.read_at),
        updated_at = NOW()
      WHERE notification_states.hidden_at IS NULL`,
-    [userId],
+    [scope.userId],
   );
 };
 
-export const hideNotification = async (userId: number, alertId: number): Promise<void> => {
+export const hideNotification = async (scope: NotificationAccessScope, alertId: number): Promise<void> => {
   await executeQuery(
     `INSERT INTO notification_states (user_id, alert_id, is_read, read_at, hidden_at, updated_at)
-     VALUES ($1, $2, TRUE, NOW(), NOW(), NOW())
+     SELECT $1, a.id, TRUE, NOW(), NOW(), NOW()
+     FROM alerts a
+     WHERE a.id = $2 AND ${notificationVisibilityClause(scope)}
      ON CONFLICT (user_id, alert_id)
      DO UPDATE SET
        is_read = TRUE,
        read_at = COALESCE(notification_states.read_at, NOW()),
        hidden_at = COALESCE(notification_states.hidden_at, NOW()),
        updated_at = NOW()`,
-    [userId, alertId],
+    [scope.userId, alertId],
   );
 };
