@@ -25,22 +25,9 @@ CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
 
--- -----------------------------------------------------------------------------
--- Seed: Default admin account
--- Username: admin  |  Password: Admin@2026  |  Role: admin
--- ⚠️ CHANGE PASSWORD IMMEDIATELY after first login in production!
--- -----------------------------------------------------------------------------
-INSERT INTO users (username, password_hash, full_name, role, device_access_mode, status, email)
-VALUES (
-    'admin',
-    '$2a$12$iZP02NlhuT/z5W8U7Q7eHOfydGsNPt1tnJFIIR5YGPpgyBmQaKrci',
-    'System Administrator',
-    'admin',
-    'all',
-    'active',
-    'admin@tracking.local'
-) ON CONFLICT (username) DO NOTHING;
-
+-- Bootstrap of the first admin is performed by 01a-bootstrap-admin.sh with
+-- a deployment-specific secret. No shared default privileged password is seeded.
+--
 CREATE TRIGGER trigger_users_updated_at
     BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
