@@ -1,7 +1,6 @@
 import {
   findOne,
   findMany,
-  insertOne,
   updateOne,
   deleteOne,
 } from '@/infrastructure/database/queries';
