@@ -37,10 +37,26 @@ export const subscribeToDeviceTopics = (client: MqttClient): Promise<void> => {
         return;
       }
 
-      if (granted) {
-        for (const g of granted) {
-          logger.info({ topic: g.topic, qos: g.qos, event: 'mqtt_topic_subscribed' }, 'MQTT topic subscribed');
+      // A successful network SUBACK may still deny individual topics (QoS 128)
+      // or downgrade a critical QoS1 subscription. Neither is a ready bridge.
+      const acknowledged = new Map((granted ?? []).map((grant) => [grant.topic, grant.qos]));
+      for (const [topic, request] of Object.entries(topicMap)) {
+        const grantedQos = acknowledged.get(topic);
+        if (grantedQos === undefined || grantedQos === 128 || grantedQos < request.qos) {
+          const failure = new Error(
+            `MQTT subscribe not granted: topic=${topic} requested=${request.qos} granted=${grantedQos ?? 'missing'}`,
+          );
+          logger.error(
+            { topic, requestedQos: request.qos, grantedQos, event: 'mqtt_subscribe_denied' },
+            'Required MQTT topic subscription denied or downgraded',
+          );
+          reject(failure);
+          return;
         }
+        logger.info(
+          { topic, qos: grantedQos, event: 'mqtt_topic_subscribed' },
+          'MQTT topic subscribed',
+        );
       }
 
       resolve();
