@@ -4,12 +4,18 @@ vi.mock('@/infrastructure/database/queries', () => ({
   findOne: vi.fn(),
 }));
 
-import { findMany, findOne } from '@/infrastructure/database/queries';
+import { executeQuery, findMany, findOne } from '@/infrastructure/database/queries';
 import {
   findNotificationPage,
   getNotificationCounts,
   getNotificationStats,
+  markNotificationRead,
+  markAllNotificationsRead,
+  hideNotification,
 } from './notification.repository';
+
+const globalScope = { userId: 7, role: 'admin', deviceAccessMode: 'all' };
+const assignedScope = { userId: 7, role: 'viewer', deviceAccessMode: 'assigned' };
 
 describe('notification.repository', () => {
   beforeEach(() => {
@@ -19,7 +25,7 @@ describe('notification.repository', () => {
   });
 
   it('casts alert_type before matching notification categories and paginates in SQL', async () => {
-    await findNotificationPage(1, { type: 'zone' }, 20, 0);
+    await findNotificationPage({ ...globalScope, userId: 1 }, { type: 'zone' }, 20, 0);
 
     const [sql, params] = vi.mocked(findMany).mock.calls[0] ?? [];
 
@@ -31,7 +37,7 @@ describe('notification.repository', () => {
   });
 
   it('keeps alert category placeholders aligned with pagination values', async () => {
-    await findNotificationPage(1, { type: 'alert' }, 25, 50);
+    await findNotificationPage({ ...globalScope, userId: 1 }, { type: 'alert' }, 25, 50);
 
     const [sql, params] = vi.mocked(findMany).mock.calls[0] ?? [];
 
@@ -55,7 +61,7 @@ describe('notification.repository', () => {
   });
 
   it('pushes read filtering before limit and offset', async () => {
-    await findNotificationPage(7, { isRead: false }, 10, 20);
+    await findNotificationPage(globalScope, { isRead: false }, 10, 20);
 
     const [sql, params] = vi.mocked(findMany).mock.calls[0] ?? [];
 
@@ -72,7 +78,7 @@ describe('notification.repository', () => {
     } as any);
 
     await expect(
-      getNotificationCounts(7, { type: 'system', isRead: false }),
+      getNotificationCounts(globalScope, { type: 'system', isRead: false }),
     ).resolves.toEqual({ total: 42, unreadCount: 12 });
 
     const [sql, params] = vi.mocked(findOne).mock.calls[0] ?? [];
@@ -101,7 +107,7 @@ describe('notification.repository', () => {
       zone_count: 2,
     } as any);
 
-    await expect(getNotificationStats(7)).resolves.toEqual({
+    await expect(getNotificationStats(globalScope)).resolves.toEqual({
       total: 10,
       unreadCount: 3,
       byType: {
@@ -120,4 +126,43 @@ describe('notification.repository', () => {
     expect(sql).not.toContain('JOIN vehicles');
     expect(params).toEqual([7]);
   });
+  it('restricts assigned users to alerts from currently granted devices', async () => {
+    await findNotificationPage(assignedScope, {}, 10, 0);
+    const [query, args] = vi.mocked(findMany).mock.calls[0] ?? [];
+    expect(query).toContain('EXISTS (');
+    expect(query).toContain('user_device_access uda');
+    expect(query).toContain('uda.user_id = $1');
+    expect(query).toContain('uda.device_id = a.device_id');
+    expect(query).toContain('a.device_id IS NULL AND a.vehicle_id IS NOT NULL');
+    expect(args).toEqual([7, 10, 0]);
+
+    await getNotificationCounts(assignedScope, {});
+    const [countQuery, countArgs] = vi.mocked(findOne).mock.calls[0] ?? [];
+    expect(countQuery).toContain('user_device_access uda');
+    expect(countArgs).toEqual([7]);
+  });
+
+  it('applies the access predicate to stats, read, hide and mark-all', async () => {
+    await getNotificationStats(assignedScope);
+    expect(vi.mocked(findOne).mock.calls[0]?.[0]).toContain('user_device_access uda');
+
+    await markNotificationRead(assignedScope, 99);
+    await hideNotification(assignedScope, 99);
+    await markAllNotificationsRead(assignedScope);
+    const mutations = vi.mocked(executeQuery).mock.calls;
+    expect(mutations).toHaveLength(3);
+    for (const [sql] of mutations) {
+      expect(sql).toContain('user_device_access uda');
+      expect(sql).toContain('FROM alerts a');
+    }
+    expect(mutations[0]?.[1]).toEqual([7, 99]);
+    expect(mutations[1]?.[1]).toEqual([7, 99]);
+    expect(mutations[2]?.[1]).toEqual([7]);
+  });
+
+  it('preserves global account access without joining assignment table', async () => {
+    await findNotificationPage(globalScope, {}, 10, 0);
+    expect(vi.mocked(findMany).mock.calls[0]?.[0]).not.toContain('user_device_access uda');
+  });
+
 });
