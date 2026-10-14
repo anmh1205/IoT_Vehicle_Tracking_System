@@ -870,9 +870,18 @@ export const touchDeviceSession = async (params: {
          END,
          device_battery_samples_count =
            COALESCE(device_battery_samples_count, 0) + CASE WHEN $5::numeric IS NULL THEN 0 ELSE 1 END,
-         last_latitude = COALESCE($6, last_latitude),
-         last_longitude = COALESCE($7, last_longitude),
-         last_speed = COALESCE($8, last_speed),
+         last_latitude = CASE
+           WHEN status = 'running' AND $2::timestamptz >= COALESCE(last_update, '-infinity'::timestamptz)
+             THEN COALESCE($6, last_latitude)
+           ELSE last_latitude END,
+         last_longitude = CASE
+           WHEN status = 'running' AND $2::timestamptz >= COALESCE(last_update, '-infinity'::timestamptz)
+             THEN COALESCE($7, last_longitude)
+           ELSE last_longitude END,
+         last_speed = CASE
+           WHEN status = 'running' AND $2::timestamptz >= COALESCE(last_update, '-infinity'::timestamptz)
+             THEN COALESCE($8, last_speed)
+           ELSE last_speed END,
          updated_at = NOW()
        WHERE id = $1 AND device_id = $9 AND ${sessionStatusPredicate}
        RETURNING id`,
@@ -957,9 +966,18 @@ export const touchDeviceSession = async (params: {
                2
              )
            END,
-           last_latitude = COALESCE($6, last_latitude),
-           last_longitude = COALESCE($7, last_longitude),
-           last_speed = COALESCE($8, last_speed),
+           last_latitude = CASE
+             WHEN status = 'running' AND $2::timestamptz >= COALESCE(last_update, '-infinity'::timestamptz)
+               THEN COALESCE($6, last_latitude)
+             ELSE last_latitude END,
+           last_longitude = CASE
+             WHEN status = 'running' AND $2::timestamptz >= COALESCE(last_update, '-infinity'::timestamptz)
+               THEN COALESCE($7, last_longitude)
+             ELSE last_longitude END,
+           last_speed = CASE
+             WHEN status = 'running' AND $2::timestamptz >= COALESCE(last_update, '-infinity'::timestamptz)
+               THEN COALESCE($8, last_speed)
+             ELSE last_speed END,
            updated_at = NOW()
          WHERE id = $1 AND device_id = $9 AND ${sessionStatusPredicate}
          RETURNING id`,
