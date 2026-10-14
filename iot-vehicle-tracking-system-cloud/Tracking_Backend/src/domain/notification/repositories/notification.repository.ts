@@ -253,7 +253,7 @@ export const getNotificationCounts = async (
         COUNT(*)::int AS total_count,
         COUNT(*) FILTER (WHERE COALESCE(state.is_read, FALSE) = FALSE)::int AS unread_count
      FROM alerts a
-     ${NOTIFICATION_LINK_JOINS}
+     ${filters.search?.trim() ? NOTIFICATION_LINK_JOINS : ''}
      LEFT JOIN notification_states state
        ON state.user_id = $1 AND state.alert_id = a.id
      ${whereClause}`,
