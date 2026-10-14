@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "app_config.h"
+#include "ota_contract.h"
 #include "esp_err.h"
 
 /**
@@ -170,3 +171,12 @@ esp_err_t nvs_config_save_command_dedupe_context(const command_dedupe_context_t 
  */
 esp_err_t nvs_config_load_command_dedupe_context(command_dedupe_context_t *out_context,
                                                   bool *out_found);
+
+/** Persist a firmware report rejected by both live and offline transports. */
+esp_err_t nvs_config_save_firmware_report(const firmware_status_t *report);
+
+/** Restore an unsent firmware report, if present; missing key is not an error. */
+esp_err_t nvs_config_load_firmware_report(firmware_status_t *out_report, bool *out_found);
+
+/** Clear a durable firmware report only after it is accepted by a transport. */
+esp_err_t nvs_config_clear_firmware_report(void);

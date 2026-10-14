@@ -1558,6 +1558,10 @@ esp_err_t state_machine_core_init(const config_t *config) {
     ESP_RETURN_ON_FALSE(command_handler_init(&s_config) == ESP_OK, ESP_FAIL, TAG, "command_handler_init failed");
     tracker_mqtt_set_command_callback(state_machine_command_callback);
 
+    // Recover deferred OTA outcomes before confirmation may emit a newer status.
+    // Retry init rather than silently discarding the only durable OTA outcome.
+    ESP_RETURN_ON_ERROR(state_machine_restore_deferred_firmware_report(),
+                        TAG, "firmware status recovery failed");
     // Confirmation owns persisted-context restore and fresh-boot status.
     // If NVS is temporarily unreadable, later FSM iterations retry safely.
     state_machine_try_confirm_running_firmware();

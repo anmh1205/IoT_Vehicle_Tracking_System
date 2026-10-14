@@ -22,6 +22,9 @@
 /** @brief Key for OTA update context (version, partition, rollback state). */
 #define TRACKER_NVS_OTA_CONTEXT_KEY "ota_ctx_v1"
 
+/** @brief Last firmware status rejected by both MQTT and the SD queue. */
+#define TRACKER_NVS_FIRMWARE_REPORT_KEY "fw_report_v1"
+
 /** @brief Key for active session recovery context. */
 #define TRACKER_NVS_SESSION_CONTEXT_KEY "session_ctx_v1"
 

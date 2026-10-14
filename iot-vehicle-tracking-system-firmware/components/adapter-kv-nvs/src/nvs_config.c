@@ -370,3 +370,87 @@ esp_err_t nvs_config_clear_session_context(void) {
     nvs_close(handle);
     return err;
 }
+
+/*
+ * The key is layout-versioned. A mismatched blob is not silently erased:
+ * discarding it would lose the only durable outcome of an OTA operation.
+ */
+esp_err_t nvs_config_save_firmware_report(const firmware_status_t *report) {
+    if (report == NULL || report->status[0] == '\0') {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READWRITE, &handle);
+    if (err != ESP_OK) {
+        return err;
+    }
+    err = nvs_set_blob(handle, TRACKER_NVS_FIRMWARE_REPORT_KEY, report, sizeof(*report));
+    if (err == ESP_OK) {
+        err = nvs_commit(handle);
+    }
+    nvs_close(handle);
+    return err;
+}
+
+esp_err_t nvs_config_load_firmware_report(firmware_status_t *out_report, bool *out_found) {
+    if (out_report == NULL || out_found == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    memset(out_report, 0, sizeof(*out_report));
+    *out_found = false;
+
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READONLY, &handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        return ESP_OK;
+    }
+    if (err != ESP_OK) {
+        return err;
+    }
+
+    size_t size = sizeof(*out_report);
+    err = nvs_get_blob(handle, TRACKER_NVS_FIRMWARE_REPORT_KEY, out_report, &size);
+    nvs_close(handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        return ESP_OK;
+    }
+    if (err != ESP_OK) {
+        return err;
+    }
+    if (size != sizeof(*out_report)) {
+        return ESP_ERR_INVALID_SIZE;
+    }
+
+    out_report->status[sizeof(out_report->status) - 1] = '\0';
+    out_report->job_id[sizeof(out_report->job_id) - 1] = '\0';
+    out_report->target_version[sizeof(out_report->target_version) - 1] = '\0';
+    out_report->current_version[sizeof(out_report->current_version) - 1] = '\0';
+    out_report->partition[sizeof(out_report->partition) - 1] = '\0';
+    out_report->error[sizeof(out_report->error) - 1] = '\0';
+    if (out_report->status[0] == '\0') {
+        return ESP_ERR_INVALID_STATE;
+    }
+    *out_found = true;
+    return ESP_OK;
+}
+
+esp_err_t nvs_config_clear_firmware_report(void) {
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READWRITE, &handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        return ESP_OK;
+    }
+    if (err != ESP_OK) {
+        return err;
+    }
+
+    err = nvs_erase_key(handle, TRACKER_NVS_FIRMWARE_REPORT_KEY);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        err = ESP_OK;
+    } else if (err == ESP_OK) {
+        err = nvs_commit(handle);
+    }
+    nvs_close(handle);
+    return err;
+}

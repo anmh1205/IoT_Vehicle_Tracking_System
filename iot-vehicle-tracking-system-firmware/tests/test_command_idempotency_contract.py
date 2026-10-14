@@ -8,7 +8,9 @@ CORE = (ROOT / "components/app-core/src/state_machine_core.c").read_text(encodin
 
 
 def test_recent_command_cache_is_bounded_and_larger_than_cloud_window():
-    assert "#define COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN 32U" in HANDLER
+    nvs_contract = (ROOT / "components/adapter-kv-nvs/include/nvs_config.h").read_text(encoding="utf-8")
+    assert "#define COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN TRACKER_COMMAND_DEDUPE_CACHE_LEN" in HANDLER
+    assert "#define TRACKER_COMMAND_DEDUPE_CACHE_LEN 32U" in nvs_contract
     assert "s_recent_command_ids[COMMAND_HANDLER_RECENT_COMMAND_CACHE_LEN]" in HANDLER
     assert "command_handler_is_recent_command_id" in HANDLER
     assert "command_handler_remember_command_id" in HANDLER
