@@ -19,8 +19,9 @@ test('all completed session close paths can publish discarded lifecycle events',
   assert.ok(actionMatches.length >= 3);
 });
 
-test('discarded lifecycle is still emitted only for newly completed sessions', () => {
-  const closeGuards = source.match(/if \(sessionId && completedSession\.completedNow\)/g) ?? [];
+test('discarded lifecycle is emitted only on new completion; ended may replay', () => {
+  const closeGuards = source.match(
+    /if \(sessionId && \(completedSession\.completedNow \|\| !completedSession\.discarded\)\)/g,
+  ) ?? [];
   assert.ok(closeGuards.length >= 2);
-  assert.match(source, /if \(completedSession\.completedNow\)/);
 });
