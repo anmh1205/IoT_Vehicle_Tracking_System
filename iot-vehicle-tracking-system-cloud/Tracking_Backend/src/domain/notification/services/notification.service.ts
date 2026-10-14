@@ -1,4 +1,5 @@
 import type {
+  NotificationAccessScope,
   NotificationRow,
   NotificationType,
 } from '@/domain/notification/repositories/notification.repository';
@@ -63,7 +64,7 @@ const buildNotificationItem = (row: NotificationRow): NotificationItem => ({
 });
 
 export const listNotifications = async (
-  userId: number,
+  scope: NotificationAccessScope,
   params: {
     page?: number;
     limit?: number;
@@ -82,6 +83,9 @@ export const listNotifications = async (
 }> => {
   const page = params.page ?? 1;
   const limit = params.limit ?? 20;
+  if (!Number.isSafeInteger(page) || page < 1 || !Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+    throw new Error('Invalid notification pagination');
+  }
   const offset = (page - 1) * limit;
   const filters = {
     type: params.type,
@@ -92,8 +96,8 @@ export const listNotifications = async (
   };
 
   const [rows, counts] = await Promise.all([
-    findNotificationPage(userId, filters, limit, offset),
-    getNotificationCounts(userId, filters),
+    findNotificationPage(scope, filters, limit, offset),
+    getNotificationCounts(scope, filters),
   ]);
 
   return {
@@ -105,8 +109,9 @@ export const listNotifications = async (
   };
 };
 
-export const markRead = async (userId: number, id: number): Promise<void> => {
-  await markNotificationRead(userId, id);
+export const markRead = async (scope: NotificationAccessScope, id: number): Promise<void> => {
+  await markNotificationRead(scope, id);
+  const userId = scope.userId;
   publishEvent('notification:updated', {
     user_id: userId,
     id,
@@ -114,8 +119,9 @@ export const markRead = async (userId: number, id: number): Promise<void> => {
   });
 };
 
-export const markAllRead = async (userId: number): Promise<void> => {
-  await markAllNotificationsRead(userId);
+export const markAllRead = async (scope: NotificationAccessScope): Promise<void> => {
+  await markAllNotificationsRead(scope);
+  const userId = scope.userId;
   publishEvent('notification:updated', {
     user_id: userId,
     unreadCount: 0,
@@ -123,8 +129,9 @@ export const markAllRead = async (userId: number): Promise<void> => {
   });
 };
 
-export const deleteNotification = async (userId: number, id: number): Promise<void> => {
-  await hideNotification(userId, id);
+export const deleteNotification = async (scope: NotificationAccessScope, id: number): Promise<void> => {
+  await hideNotification(scope, id);
+  const userId = scope.userId;
   publishEvent('notification:updated', {
     user_id: userId,
     id,
@@ -133,12 +140,12 @@ export const deleteNotification = async (userId: number, id: number): Promise<vo
 };
 
 export const getNotificationStats = async (
-  userId: number,
+  scope: NotificationAccessScope,
 ): Promise<{
   total: number;
   unreadCount: number;
   byType: Record<NotificationType, number>;
-}> => getNotificationStatsAggregate(userId);
+}> => getNotificationStatsAggregate(scope);
 
 export const registerPushToken = async (
   userId: number,
