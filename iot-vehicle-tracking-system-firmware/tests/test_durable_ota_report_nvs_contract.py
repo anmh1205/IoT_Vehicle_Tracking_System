@@ -46,3 +46,13 @@ def test_recovery_precedes_ota_confirmation():
     )
     assert "nvs_config_save_firmware_report(firmware)" in PIPELINE
     assert "nvs_config_load_firmware_report(&restored, &found)" in PIPELINE
+
+
+def test_corrupt_nvs_report_does_not_block_vehicle_runtime():
+    assert "firmware_restore_err = state_machine_restore_deferred_firmware_report()" in CORE
+    assert "if (firmware_restore_err != ESP_OK)" in CORE
+    assert "ESP_RETURN_ON_ERROR(state_machine_restore_deferred_firmware_report()" not in CORE
+    assert "s_firmware_report_restore_required = true" in PIPELINE
+    assert "s_firmware_report_next_restore_ms = now_ms + 30000U;" in PIPELINE
+    assert "now_ms >= s_firmware_report_next_restore_ms" in PIPELINE
+    assert "state_machine_restore_deferred_firmware_report();" in PIPELINE
