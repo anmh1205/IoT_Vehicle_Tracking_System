@@ -1,5 +1,6 @@
 import { pool } from '../infrastructure/database';
 import { logger } from '../infrastructure/logger';
+import { createRetryableBatchQueue } from './retryable-batch-queue';
 import type { RuntimeStateSnapshot } from '../types/device-state.types';
 
 interface DeviceUpdate {
@@ -15,42 +16,16 @@ interface DeviceUpdate {
 }
 
 const MAX_BUFFER_SIZE = 100;
+const MAX_PENDING_UPDATES = 1000;
 const FLUSH_INTERVAL_MS = 1000;
-const MAX_CONSECUTIVE_FAILURES = 3;
 
-let buffer: DeviceUpdate[] = [];
 let flushTimer: ReturnType<typeof setInterval> | null = null;
-let consecutiveFailures = 0;
-let isCircuitOpen = false;
 
 /**
- * Add an update to the batch buffer.
- * If the circuit breaker is open, data is dropped to prevent OOM.
+ * One transaction represents one batch. The retry queue owns the batch until
+ * COMMIT succeeds; failed database writes are never silently discarded.
  */
-export const addUpdate = (update: DeviceUpdate): void => {
-  if (isCircuitOpen) {
-    logger.warn(
-      { deviceId: update.deviceId, event: 'batch_write_dropped', reason: 'circuit_open' },
-      'Batch update dropped',
-    );
-    return;
-  }
-
-  buffer.push(update);
-
-  if (buffer.length >= MAX_BUFFER_SIZE) {
-    flush();
-  }
-};
-
-/**
- * Flush buffered updates to PostgreSQL in a single batch.
- */
-const flush = async (): Promise<void> => {
-  if (buffer.length === 0) return;
-
-  const batch = buffer.splice(0, buffer.length);
-
+const persistBatch = async (batch: readonly DeviceUpdate[]): Promise<void> => {
   try {
     const client = await pool.connect();
     try {
@@ -270,11 +245,6 @@ const flush = async (): Promise<void> => {
 
       await client.query('COMMIT');
 
-      consecutiveFailures = 0;
-      if (isCircuitOpen) {
-        isCircuitOpen = false;
-        logger.info({ event: 'batch_writer_circuit_closed' }, 'Batch writer circuit closed');
-      }
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
@@ -282,25 +252,45 @@ const flush = async (): Promise<void> => {
       client.release();
     }
   } catch (err) {
-    consecutiveFailures += 1;
-    logger.error(
-      { err, failures: consecutiveFailures, max: MAX_CONSECUTIVE_FAILURES, event: 'batch_write_failed' },
-      'Batch write failed',
-    );
-
-    if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-      isCircuitOpen = true;
-      logger.error(
-        {
-          failures: consecutiveFailures,
-          max: MAX_CONSECUTIVE_FAILURES,
-          event: 'batch_writer_circuit_open',
-          reason: 'consecutive_failures_exceeded',
-        },
-        'Batch writer circuit opened',
-      );
-    }
+    throw err;
   }
+};
+
+const batchQueue = createRetryableBatchQueue<DeviceUpdate>({
+  capacity: MAX_PENDING_UPDATES,
+  batchSize: MAX_BUFFER_SIZE,
+  writeBatch: persistBatch,
+  onDropped: (update) => {
+    logger.error(
+      { deviceId: update.deviceId, pendingLimit: MAX_PENDING_UPDATES,
+        event: 'batch_write_dropped', reason: 'memory_limit_exceeded' },
+      'Dropped live-state snapshot after prolonged database failure',
+    );
+  },
+  onFailure: (error, failures, retryMs) => {
+    logger.error(
+      { err: error, failures, retryMs, pending: batchQueue.pendingCount(),
+        event: 'batch_write_failed' },
+      'PostgreSQL batch failed; retained in memory for retry',
+    );
+  },
+  onRecovered: (previousFailures) => {
+    logger.info(
+      { previousFailures, event: 'batch_writer_recovered' },
+      'PostgreSQL batch writer recovered after retry',
+    );
+  },
+});
+
+export const addUpdate = (update: DeviceUpdate): void => {
+  batchQueue.enqueue(update);
+  if (batchQueue.pendingCount() >= MAX_BUFFER_SIZE) {
+    void batchQueue.flush();
+  }
+};
+
+const flush = async (): Promise<void> => {
+  await batchQueue.flush();
 };
 
 /**
@@ -330,6 +320,13 @@ export const stopBatchWriter = async (): Promise<void> => {
     flushTimer = null;
   }
 
-  await flush();
+  // Wait for any active commit; then attempt every remaining bounded batch.
+  // A failed commit is explicit: a volatile queue cannot promise durability.
+  while (batchQueue.pendingCount() > 0) {
+    const accepted = await batchQueue.flush(true);
+    if (!accepted) {
+      throw new Error('MQTT Bridge stopped with uncommitted device updates in memory');
+    }
+  }
   logger.info({ event: 'batch_writer_stopped' }, 'Batch writer stopped');
 };

@@ -15,10 +15,10 @@ test('critical QoS1 events are not skipped solely because MQTT is reconnecting',
 });
 
 test('publisher still drops low-value QoS0 events while offline', () => {
-  assert.match(source, /reason: 'qos0_offline_drop'/);
+  assert.match(source, /if \(!client\.connected && qos === 0\)\s*\{\s*return Promise\.reject/);
 });
 
 test('publisher distinguishes an absent client from a transient disconnect', () => {
   assert.match(source, /if \(!client\)/);
-  assert.match(source, /reason: 'client_missing'/);
+  assert.match(source, /if \(!client\)\s*\{\s*return Promise\.reject/);
 });
