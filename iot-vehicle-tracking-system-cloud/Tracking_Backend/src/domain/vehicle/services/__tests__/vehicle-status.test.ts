@@ -93,7 +93,7 @@ describe('vehicle-status.service', () => {
 
     vi.mocked(findMany).mockResolvedValue([alert]);
 
-    const result = await getVehicleStatus(1);
+    const result = await getVehicleStatus(1, { userId: 1, role: 'admin', deviceAccessMode: 'all' });
 
     expect(result.vehicleId).toBe('VH-001');
     expect(result.status).toBe('active');
@@ -136,7 +136,7 @@ describe('vehicle-status.service', () => {
 
     vi.mocked(findMany).mockResolvedValue([]);
 
-    const result = await getVehicleStatus(1);
+    const result = await getVehicleStatus(1, { userId: 1, role: 'admin', deviceAccessMode: 'all' });
 
     expect(result.device).toBeNull();
     expect(result.currentLocation).toBeNull();
@@ -157,7 +157,7 @@ describe('vehicle-status.service', () => {
 
     vi.mocked(findMany).mockResolvedValue([]);
 
-    const result = await getVehicleStatus(1);
+    const result = await getVehicleStatus(1, { userId: 1, role: 'admin', deviceAccessMode: 'all' });
 
     expect(result.currentLocation).toMatchObject({
       lat: 10.7769,
@@ -176,7 +176,7 @@ describe('vehicle-status.service', () => {
 
     vi.mocked(findMany).mockResolvedValue([]);
 
-    const result = await getVehicleStatus(1);
+    const result = await getVehicleStatus(1, { userId: 1, role: 'admin', deviceAccessMode: 'all' });
 
     expect(result.device).toBeNull();
     expect(result.currentLocation).toBeNull();
@@ -187,7 +187,7 @@ describe('vehicle-status.service', () => {
   it('should throw 404 ApiError for invalid vehicle ID', async () => {
     vi.mocked(findOne).mockResolvedValueOnce(null);
 
-    await expect(getVehicleStatus(9999)).rejects.toMatchObject({
+    await expect(getVehicleStatus(9999, { userId: 1, role: 'admin', deviceAccessMode: 'all' })).rejects.toMatchObject({
       name: 'ApiError',
       status: 404,
       message: 'Vehicle with ID 9999 not found',
@@ -207,7 +207,7 @@ describe('vehicle-status.service', () => {
 
     vi.mocked(findMany).mockResolvedValue([]);
 
-    const result = await getVehicleStatus(1);
+    const result = await getVehicleStatus(1, { userId: 1, role: 'admin', deviceAccessMode: 'all' });
 
     expect(result.currentTrip?.distanceKm).toBe(0);
   });
