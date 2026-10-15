@@ -218,7 +218,7 @@ const handleSessionDiscarded = async (
 
 /**
  * Keep automatic trips aligned with the firmware-authoritative device-session lifecycle.
- * Session ID is embedded in trip_code so QoS replay/duplicate delivery is idempotent.
+ * Device and session identity deterministically form trip_code so QoS replay is idempotent.
  */
 export const handleSessionBoundaryEvent = async (
   payload: SessionBoundaryPayload,
