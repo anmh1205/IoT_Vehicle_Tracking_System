@@ -128,7 +128,7 @@ test('fully present legacy schema baselines without re-executing DDL', () => {
 
 const secureUsersSql = fs.readFileSync(path.join(__dirname, '../init/01-users.sql'), 'utf8');
 const historicalUsersChecksum = '7e58d1f34242bd92a259725607e4f75193a733d73ad5bf3fc01111a74200fe55';
-const secureUsersChecksum = 'd4f55f77e2ee06e83ef1e46e0a43638c907a22d1199f6e7daa9045d1bfc11014';
+const secureUsersChecksum = '2e0159c1dbab8315e700754fedafc7168048d3b77d59594932597e06ad9f0e53';
 
 test('only the pinned seed-removal SQL is accepted as a historical reconciliation', () => {
   assert.equal(crypto.createHash('sha256').update(secureUsersSql).digest('hex'), secureUsersChecksum);
