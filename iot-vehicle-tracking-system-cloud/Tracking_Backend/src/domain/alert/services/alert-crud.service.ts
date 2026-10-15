@@ -1,5 +1,6 @@
 import { createNotFoundError, createValidationError } from '@/shared/utils/errors.util';
 import * as alertRepo from '@/domain/alert/repositories/alert.repository';
+import type { AlertAccessScope } from '@/domain/alert/repositories/alert.repository';
 import { logger } from '@/infrastructure/logger';
 import { publishEvent } from '@/infrastructure/realtime';
 import * as auditLog from '@/domain/audit/services/audit-log.service';
@@ -52,8 +53,8 @@ const toNotificationType = (alertType: string): string => {
   return 'alert';
 };
 
-export const getAlertById = async (id: number): Promise<AlertPublic> => {
-  const alert = await alertRepo.findById(id);
+export const getAlertById = async (id: number, scope: AlertAccessScope): Promise<AlertPublic> => {
+  const alert = await alertRepo.findByIdForScope(id, scope);
   if (!alert) {
     throw createNotFoundError(`Alert with ID ${id} not found`);
   }
