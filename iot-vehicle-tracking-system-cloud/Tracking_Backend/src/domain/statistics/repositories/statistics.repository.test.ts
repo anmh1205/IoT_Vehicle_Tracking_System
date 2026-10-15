@@ -71,11 +71,14 @@ describe('statistics SQL assigned-device authorization', () => {
 
   it('scopes both session totals and alert totals in the combined summary query', async () => {
     await statistics.getSummaryTotals(range, assigned);
-    expect(calls()).toHaveLength(2);
-    expect(calls()[1].sql).toContain('uda.device_id = device_sessions.device_id');
-    expect(calls()[1].sql).toContain('uda.device_id = alerts.device_id');
-    expect(calls()[1].sql).toContain('uda.user_id = $3');
-    expect(calls()[1].params).toEqual([range.from, range.to, 17]);
+    expect(calls()).toHaveLength(1);
+    const summary = calls()[0];
+    expect(summary.sql).toContain('JOIN eligible e ON e.device_id = s.device_id');
+    expect(summary.sql).toContain('MAX(end_at) OVER');
+    expect(summary.sql).toContain('FROM durations');
+    expect(summary.sql).toContain('uda.device_id = alerts.device_id');
+    expect(summary.sql).toContain('uda.user_id = $3');
+    expect(summary.params).toEqual([range.from, range.to, 17]);
   });
 
   it('scopes policy quotas and prevents unauthorized plate/maintenance disclosures', async () => {
