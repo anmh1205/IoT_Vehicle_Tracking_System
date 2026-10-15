@@ -367,11 +367,12 @@ export const getFleetTotalsLast30Days = async (actor: SessionUser) => {
        FROM durations`,
       [new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), new Date(), ...actorParams(actor)],
     ),
-    pool.query<{ speeding: string; zone: string; other: string }>(
+    pool.query<{ speeding: string; zone: string; harsh_braking: string; other: string }>(
       `SELECT
          COALESCE(SUM(CASE WHEN alert_type = 'speeding' THEN 1 ELSE 0 END), 0)::int AS speeding,
          COALESCE(SUM(CASE WHEN alert_type IN ('zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit') THEN 1 ELSE 0 END), 0)::int AS zone,
-         COALESCE(SUM(CASE WHEN alert_type NOT IN ('speeding', 'zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit') THEN 1 ELSE 0 END), 0)::int AS other
+         COALESCE(SUM(CASE WHEN alert_type::text = 'harsh_braking' THEN 1 ELSE 0 END), 0)::int AS harsh_braking,
+         COALESCE(SUM(CASE WHEN alert_type::text NOT IN ('speeding', 'zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit', 'harsh_braking') THEN 1 ELSE 0 END), 0)::int AS other
        FROM alerts
        WHERE created_at >= NOW() - INTERVAL '30 days'
          ${grantCondition(actor, 'alerts.device_id', 'alerts.vehicle_id', 1)}`,
