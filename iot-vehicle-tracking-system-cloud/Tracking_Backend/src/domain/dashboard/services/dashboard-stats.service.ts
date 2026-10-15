@@ -1,4 +1,5 @@
 import * as dashboardRepo from '@/domain/dashboard/repositories/dashboard.repository';
+import type { DashboardDeviceScope } from '@/domain/dashboard/repositories/dashboard.repository';
 import type {
   DashboardStats,
   ActivityEvent,
@@ -8,13 +9,13 @@ import type {
   DashboardFleetRuntimePoint,
 } from '@/domain/dashboard/types/dashboard.types';
 
-export const getStats = async (): Promise<DashboardStats> => {
+export const getStats = async (scope: DashboardDeviceScope): Promise<DashboardStats> => {
   const [statusCounts, runtimeToday, runtimeWeek, alertsCount, sessionsToday] = await Promise.all([
-    dashboardRepo.getDeviceStatusCounts(),
-    dashboardRepo.getTotalRuntimeToday(),
-    dashboardRepo.getTotalRuntimeWeek(),
-    dashboardRepo.getActiveAlertsCount(),
-    dashboardRepo.getSessionsToday(),
+    dashboardRepo.getDeviceStatusCounts(scope),
+    dashboardRepo.getTotalRuntimeToday(scope),
+    dashboardRepo.getTotalRuntimeWeek(scope),
+    dashboardRepo.getActiveAlertsCount(scope),
+    dashboardRepo.getSessionsToday(scope),
   ]);
 
   const totalDevices = Object.values(statusCounts).reduce((sum, value) => sum + value, 0);
@@ -35,11 +36,12 @@ export const getStats = async (): Promise<DashboardStats> => {
 
 export const getActivity = async (
   query: ActivityQuery,
+  scope: DashboardDeviceScope,
 ): Promise<{ events: ActivityEvent[]; total: number; page: number; limit: number }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 
-  const result = await dashboardRepo.getActivityEvents(query);
+  const result = await dashboardRepo.getActivityEvents(query, scope);
 
   const events: ActivityEvent[] = result.events.map((row) => ({
     id: row.id,
@@ -55,8 +57,8 @@ export const getActivity = async (
   return { events, total: result.total, page, limit };
 };
 
-export const getDeviceActivity = async (days: number): Promise<DashboardDeviceActivityPoint[]> => {
-  const rows = await dashboardRepo.getDeviceActivitySeries(days);
+export const getDeviceActivity = async (days: number, scope: DashboardDeviceScope): Promise<DashboardDeviceActivityPoint[]> => {
+  const rows = await dashboardRepo.getDeviceActivitySeries(days, scope);
   return rows.map((row) => ({
     label: row.label,
     running: Number.parseInt(row.running, 10) || 0,
@@ -65,8 +67,8 @@ export const getDeviceActivity = async (days: number): Promise<DashboardDeviceAc
   }));
 };
 
-export const getDeviceStatus = async (): Promise<DashboardDeviceStatusPoint[]> => {
-  const rows = await dashboardRepo.getDeviceStatusDistribution();
+export const getDeviceStatus = async (scope: DashboardDeviceScope): Promise<DashboardDeviceStatusPoint[]> => {
+  const rows = await dashboardRepo.getDeviceStatusDistribution(scope);
   return rows.map((row) => ({
     name: row.status_name,
     value: Number.parseInt(row.count, 10) || 0,
@@ -74,8 +76,8 @@ export const getDeviceStatus = async (): Promise<DashboardDeviceStatusPoint[]> =
   }));
 };
 
-export const getFleetRuntime = async (days: number): Promise<DashboardFleetRuntimePoint[]> => {
-  const rows = await dashboardRepo.getFleetRuntimeSeries(days);
+export const getFleetRuntime = async (days: number, scope: DashboardDeviceScope): Promise<DashboardFleetRuntimePoint[]> => {
+  const rows = await dashboardRepo.getFleetRuntimeSeries(days, scope);
   return rows.map((row) => ({
     label: row.label,
     runtime: Number.parseFloat(row.runtime_hours) || 0,
