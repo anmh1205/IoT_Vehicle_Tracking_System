@@ -324,3 +324,69 @@ export const getPolicyLimitsSummary = async (actor: SessionUser): Promise<Policy
   const result = await pool.query<PolicyLimitsRow>(query, actorParams(actor));
   return result.rows;
 };
+
+
+export const getFleetTotalsLast30Days = async (actor: SessionUser) => {
+  const [distanceFuel, runtime, violations] = await Promise.all([
+    pool.query<{ total_distance_km: string; total_fuel_liters: string }>(
+      `SELECT COALESCE(SUM(distance_km), 0)::float8 AS total_distance_km,
+              COALESCE(SUM(fuel_used_liters), 0)::float8 AS total_fuel_liters
+       FROM trips
+       WHERE COALESCE(actual_end, created_at) >= NOW() - INTERVAL '30 days'
+         ${grantCondition(actor, 'trips.device_id', 'trips.vehicle_id', 1)}`,
+      actorParams(actor),
+    ),
+    pool.query<{ active_time_seconds: string }>(
+      `SELECT COALESCE(SUM(uptime), 0)::int AS active_time_seconds
+       FROM device_sessions
+       WHERE COALESCE(server_session_start, created_at) >= NOW() - INTERVAL '30 days'
+         ${grantCondition(actor, 'device_sessions.device_id', null, 1)}`,
+      actorParams(actor),
+    ),
+    pool.query<{ speeding: string; zone: string; other: string }>(
+      `SELECT
+         COALESCE(SUM(CASE WHEN alert_type = 'speeding' THEN 1 ELSE 0 END), 0)::int AS speeding,
+         COALESCE(SUM(CASE WHEN alert_type IN ('zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit') THEN 1 ELSE 0 END), 0)::int AS zone,
+         COALESCE(SUM(CASE WHEN alert_type NOT IN ('speeding', 'zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit') THEN 1 ELSE 0 END), 0)::int AS other
+       FROM alerts
+       WHERE created_at >= NOW() - INTERVAL '30 days'
+         ${grantCondition(actor, 'alerts.device_id', 'alerts.vehicle_id', 1)}`,
+      actorParams(actor),
+    ),
+  ]);
+  return { distanceFuel: distanceFuel.rows[0], runtime: runtime.rows[0], violations: violations.rows[0] };
+};
+
+export const getMaintenanceTotalsAndVehicles = async (actor: SessionUser) => {
+  const [totals, vehicles] = await Promise.all([
+    pool.query<{ overdue: string; due_soon: string; upcoming: string }>(
+      `SELECT
+         COALESCE(SUM(CASE WHEN next_service_date < CURRENT_DATE AND status != 'completed' THEN 1 ELSE 0 END), 0)::int AS overdue,
+         COALESCE(SUM(CASE WHEN next_service_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days' THEN 1 ELSE 0 END), 0)::int AS due_soon,
+         COALESCE(SUM(CASE WHEN next_service_date > CURRENT_DATE + INTERVAL '7 days' THEN 1 ELSE 0 END), 0)::int AS upcoming
+       FROM maintenance
+       WHERE 1=1 ${grantCondition(actor, 'NULL', 'maintenance.vehicle_id', 1)}`,
+      actorParams(actor),
+    ),
+    pool.query<{ vehicle_id: string; plate: string | null; service_type: string; due_date: Date | string | null; status: string }>(
+      `SELECT
+         m.vehicle_id,
+         v.plate_number AS plate,
+         m.maintenance_type AS service_type,
+         m.next_service_date AS due_date,
+         CASE
+           WHEN m.next_service_date < CURRENT_DATE THEN 'overdue'
+           WHEN m.next_service_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'due_soon'
+           ELSE 'upcoming'
+         END AS status
+       FROM maintenance m
+       LEFT JOIN vehicles v ON v.vehicle_id = m.vehicle_id
+       WHERE m.next_service_date IS NOT NULL
+         ${grantCondition(actor, 'NULL', 'm.vehicle_id', 1)}
+       ORDER BY m.next_service_date ASC
+       LIMIT 50`,
+      actorParams(actor),
+    ),
+  ]);
+  return { totals: totals.rows[0], vehicles: vehicles.rows };
+};
