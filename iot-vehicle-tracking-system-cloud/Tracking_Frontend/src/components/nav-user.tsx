@@ -2,8 +2,7 @@
 
 import { ChevronDown, LogOut, UserCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { authServices } from '@/lib/api/auth';
-import { unregisterNativePushToken } from '@/lib/native-push';
+import { signOutSession } from '@/lib/session-signout';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { UserAvatar } from '@/components/common/user-avatar';
 import {
@@ -25,25 +24,13 @@ import {
 export const NavUser = () => {
   const { isMobile } = useSidebar();
   const router = useRouter();
-  const { user, clearAuth } = useAuthStore();
+  const { user } = useAuthStore();
   const displayName = user?.fullName || user?.username || 'Người dùng';
   const email = user?.email || user?.username || '';
 
   const handleLogout = async () => {
-    try {
-      await unregisterNativePushToken();
-    } catch {
-      // Best-effort: logout must continue even if native push cleanup fails.
-    }
-
-    try {
-      await authServices.logout();
-    } catch {
-      // Ignore and continue clearing client-side auth.
-    } finally {
-      clearAuth();
-      router.replace('/login?reason=signed-out');
-    }
+    const reason = await signOutSession();
+    router.replace(`/login?reason=${reason}`);
   };
 
   return (
