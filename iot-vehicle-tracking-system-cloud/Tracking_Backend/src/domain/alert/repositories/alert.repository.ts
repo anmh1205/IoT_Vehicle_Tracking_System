@@ -7,6 +7,30 @@ import {
 import { pool } from '@/infrastructure/database/pool';
 import type { Alert, AlertListQuery, CreateAlertInput } from '@/domain/alert/types/alert.types';
 
+export interface AlertAccessScope {
+  userId: number;
+  role: string;
+  deviceAccessMode: string;
+}
+
+/** Same current-grant policy used for notifications; global alerts stay private. */
+const alertVisibleTo = (scope: AlertAccessScope, userParam: number): string => {
+  if (scope.role === 'root' || scope.role === 'admin' || scope.deviceAccessMode === 'all') {
+    return 'TRUE';
+  }
+  return `EXISTS (
+    SELECT 1 FROM user_device_access uda
+    WHERE uda.user_id = $${userParam} AND (
+      (a.device_id IS NOT NULL AND a.device_id = uda.device_id)
+      OR (a.device_id IS NULL AND a.vehicle_id IS NOT NULL AND EXISTS (
+        SELECT 1 FROM vehicles allowed_vehicle
+        WHERE allowed_vehicle.vehicle_id = a.vehicle_id
+          AND allowed_vehicle.device_id = uda.device_id
+      ))
+    )
+  )`;
+};
+
 const ALERT_LINK_SELECT = `a.*,
   d.device_name,
   t.trip_code,
@@ -53,6 +77,7 @@ const OBD_MAINTENANCE_ALERT_CONDITION = `(a.alert_type = 'maintenance_due' AND (
 
 export const findAll = async (
   query: AlertListQuery,
+  scope: AlertAccessScope,
 ): Promise<{ alerts: Alert[]; total: number }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
@@ -61,6 +86,14 @@ export const findAll = async (
   const conditions: string[] = [];
   const params: unknown[] = [];
   let paramIndex = 1;
+
+  // Scope applies equally to the COUNT and paginated detail query, including
+  // when the caller supplies a deviceId or vehicleId filter.
+  conditions.push(alertVisibleTo(scope, paramIndex));
+  if (scope.role !== 'root' && scope.role !== 'admin' && scope.deviceAccessMode !== 'all') {
+    params.push(scope.userId);
+    paramIndex++;
+  }
 
   if (query.status) {
     conditions.push(`a.status = $${paramIndex++}`);
@@ -138,6 +171,17 @@ export const findById = async (id: number): Promise<Alert | null> =>
      ${ALERT_LINK_JOINS}
      WHERE a.id = $1`,
     [id],
+  );
+
+/** REST detail must include the same current-grant predicate as the list. */
+export const findByIdForScope = async (id: number, scope: AlertAccessScope): Promise<Alert | null> =>
+  findOne<Alert>(
+    `SELECT ${ALERT_LINK_SELECT}
+     FROM alerts a
+     ${ALERT_LINK_JOINS}
+     WHERE a.id = $1 AND ${alertVisibleTo(scope, 2)}`,
+    scope.role === 'root' || scope.role === 'admin' || scope.deviceAccessMode === 'all'
+      ? [id] : [id, scope.userId],
   );
 
 export const create = async (

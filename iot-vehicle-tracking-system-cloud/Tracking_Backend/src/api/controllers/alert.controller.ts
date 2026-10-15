@@ -10,6 +10,13 @@ import {
 } from '@/api/validators/alert.validator';
 import * as alertCrudService from '@/domain/alert/services/alert-crud.service';
 import * as alertListService from '@/domain/alert/services/alert-list.service';
+import type { AlertAccessScope } from '@/domain/alert/repositories/alert.repository';
+
+const accessScope = (req: AuthenticatedRequest): AlertAccessScope => ({
+  userId: req.user!.id,
+  role: req.user!.role,
+  deviceAccessMode: req.user!.deviceAccessMode,
+});
 
 export const listAlerts = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const parsed = alertListQuerySchema.safeParse(req.query);
@@ -17,7 +24,7 @@ export const listAlerts = asyncHandler(async (req: AuthenticatedRequest, res: Re
     throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
   }
 
-  const result = await alertListService.listAlerts(parsed.data);
+  const result = await alertListService.listAlerts(parsed.data, accessScope(req));
   sendOk(res, result);
 });
 
@@ -27,7 +34,7 @@ export const getAlert = asyncHandler(async (req: AuthenticatedRequest, res: Resp
     throw createValidationError('Invalid alert ID');
   }
 
-  const alert = await alertCrudService.getAlertById(id);
+  const alert = await alertCrudService.getAlertById(id, accessScope(req));
   sendOk(res, alert);
 });
 

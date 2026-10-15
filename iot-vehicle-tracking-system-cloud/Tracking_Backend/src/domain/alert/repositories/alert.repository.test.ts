@@ -17,6 +17,8 @@ import { pool } from '@/infrastructure/database/pool';
 import { findMany } from '@/infrastructure/database/queries';
 import { create, findAll } from './alert.repository';
 
+const administrativeScope = { userId: 1, role: 'admin', deviceAccessMode: 'all' };
+
 describe('alert.repository', () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -26,7 +28,7 @@ describe('alert.repository', () => {
     vi.mocked(pool.query).mockResolvedValue({ rows: [{ total: '0' }] } as any);
     vi.mocked(findMany).mockResolvedValue([]);
 
-    await findAll({ search: 'brake' });
+    await findAll({ search: 'brake' }, administrativeScope);
 
     const [countSql, countParams] = vi.mocked(pool.query).mock.calls[0] ?? [];
     const [listSql, listParams] = vi.mocked(findMany).mock.calls[0] ?? [];
@@ -41,7 +43,7 @@ describe('alert.repository', () => {
     vi.mocked(pool.query).mockResolvedValue({ rows: [{ total: '0' }] } as any);
     vi.mocked(findMany).mockResolvedValue([]);
 
-    await findAll({ source: 'obd' });
+    await findAll({ source: 'obd' }, administrativeScope);
 
     const [countSql, countParams] = vi.mocked(pool.query).mock.calls[0] ?? [];
     const [listSql, listParams] = vi.mocked(findMany).mock.calls[0] ?? [];
@@ -62,7 +64,7 @@ describe('alert.repository', () => {
     vi.mocked(pool.query).mockResolvedValue({ rows: [{ total: '0' }] } as any);
     vi.mocked(findMany).mockResolvedValue([]);
 
-    await findAll({ source: 'system' });
+    await findAll({ source: 'system' }, administrativeScope);
 
     const [countSql] = vi.mocked(pool.query).mock.calls[0] ?? [];
     const [listSql] = vi.mocked(findMany).mock.calls[0] ?? [];
