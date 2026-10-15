@@ -69,12 +69,22 @@ jobs:
         run: |
           docker network create tracking-network
           docker compose -f "$COMPOSE_FILE" up -d
-          for attempt in $(seq 1 90); do
+          ready=0
+          for attempt in $(seq 1 45); do
             if docker exec tracking-postgres psql -U postgres -d vehicle_tracking -Atc "SELECT username FROM users WHERE username='admin'" 2>/dev/null | grep -qx admin; then
+              ready=1
+              break
+            fi
+            if [ "$(docker inspect --format '{{.State.Running}}' tracking-postgres)" != 'true' ]; then
               break
             fi
             sleep 2
           done
+          if [ "$ready" != '1' ]; then
+            echo '::error::PostgreSQL did not finish initializing the secure admin'
+            docker logs --tail 200 tracking-postgres || true
+            exit 1
+          fi
 
           admin_count=$(docker exec tracking-postgres psql -U postgres -d vehicle_tracking -Atc "SELECT COUNT(*) FROM users WHERE username='admin'")
           test "$admin_count" = '1'
