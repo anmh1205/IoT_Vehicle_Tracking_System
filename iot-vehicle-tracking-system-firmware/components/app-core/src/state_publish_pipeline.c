@@ -8,6 +8,7 @@
 #include "data_formatter.h"
 #include "imu_lis3dsh.h"
 #include "mqtt_client.h"
+#include "nvs_config.h"
 #include "offline_queue.h"
 #include "state_machine_internal.h"
 #include "state_runtime_context.h"
@@ -306,6 +307,12 @@ static void state_machine_defer_firmware_report(const firmware_status_t *firmwar
 
     s_deferred_firmware_report = *firmware;
     s_deferred_firmware_report_pending = true;
+    esp_err_t persist_err = nvs_config_save_firmware_report(firmware);
+    if (persist_err != ESP_OK) {
+        ESP_LOGE(TAG,
+                 "event=firmware_status_nvs_persist_failed job=%s err=%s",
+                 firmware->job_id, esp_err_to_name(persist_err));
+    }
     ESP_LOGI(TAG,
              "event=firmware_status_deferred status=%s progress=%u job=%s reason=mqtt_not_connected",
              firmware->status,
@@ -323,6 +330,34 @@ static bool state_machine_firmware_report_same_lineage(const firmware_status_t *
            strcmp(left->target_version, right->target_version) == 0;
 }
 
+
+
+/*
+ * NVS recovery must not hold the entire tracker offline indefinitely when a
+ * recovery blob is incompatible or its flash read is temporarily unavailable.
+ */
+static bool s_firmware_report_restore_required = true;
+static uint64_t s_firmware_report_next_restore_ms = 0;
+
+/* Load the last firmware outcome before OTA confirmation can emit a new one. */
+esp_err_t state_machine_restore_deferred_firmware_report(void) {
+    firmware_status_t restored = {0};
+    bool found = false;
+    esp_err_t err = nvs_config_load_firmware_report(&restored, &found);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "event=firmware_status_nvs_restore_failed err=%s",
+                 esp_err_to_name(err));
+        return err;
+    }
+    s_firmware_report_restore_required = false;
+    if (found) {
+        s_deferred_firmware_report = restored;
+        s_deferred_firmware_report_pending = true;
+        ESP_LOGI(TAG, "event=firmware_status_nvs_restored job=%s status=%s",
+                 restored.job_id, restored.status);
+    }
+    return ESP_OK;
+}
 
 /**
  * @brief Populate a firmware status struct from primitive OTA fields.
@@ -470,7 +505,18 @@ bool state_machine_publish_firmware_payload(const firmware_status_t *firmware) {
                  s_deferred_firmware_report.status,
                  (unsigned)s_deferred_firmware_report.progress,
                  s_deferred_firmware_report.job_id);
-        s_deferred_firmware_report_pending = false;
+        esp_err_t clear_err = nvs_config_clear_firmware_report();
+        if (clear_err == ESP_OK) {
+            s_deferred_firmware_report_pending = false;
+        } else {
+            /*
+             * Do not forget an on-flash report before confirming its removal.
+             * Retain RAM state for retry and surface the storage failure.
+             */
+            ESP_LOGE(TAG,
+                     "event=firmware_status_nvs_clear_failed job=%s err=%s",
+                     firmware->job_id, esp_err_to_name(clear_err));
+        }
     }
     return accepted;
 }
@@ -531,11 +577,22 @@ void state_machine_publish_or_stage_firmware_status(const char *status,
  * @brief Flush one deferred firmware report once MQTT is connected again.
  */
 void state_machine_try_flush_deferred_firmware_report(void) {
-    if (!s_deferred_firmware_report_pending || !tracker_mqtt_is_connected() || s_ota_in_progress) {
+    if (!tracker_mqtt_is_connected() || s_ota_in_progress) {
         return;
     }
 
-    if (state_machine_publish_firmware_payload(&s_deferred_firmware_report)) {
-        s_deferred_firmware_report_pending = false;
+    uint64_t now_ms = util_uptime_ms();
+    if (!s_deferred_firmware_report_pending &&
+        s_firmware_report_restore_required &&
+        now_ms >= s_firmware_report_next_restore_ms) {
+        s_firmware_report_next_restore_ms = now_ms + 30000U;
+        (void)state_machine_restore_deferred_firmware_report();
     }
+
+    if (!s_deferred_firmware_report_pending) {
+        return;
+    }
+
+    /* The publish helper clears both RAM and NVS only after a durable accept. */
+    (void)state_machine_publish_firmware_payload(&s_deferred_firmware_report);
 }
