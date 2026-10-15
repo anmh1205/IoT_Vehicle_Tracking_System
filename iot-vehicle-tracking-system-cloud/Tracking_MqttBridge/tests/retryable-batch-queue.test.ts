@@ -162,3 +162,32 @@ test('a recovery observer failure must never replay a committed batch', async ()
   assert.equal(queue.pendingCount(), 0);
   assert.equal(attempts, 2);
 });
+
+
+test('capacity full of an in-flight transaction rejects the newer sample explicitly', async () => {
+  let release!: () => void;
+  const blocked = new Promise<void>((resolve) => { release = resolve; });
+  const saved: number[] = [];
+  const dropped: number[] = [];
+  const queue = createRetryableBatchQueue<number>({
+    capacity: 1,
+    batchSize: 1,
+    writeBatch: async ([value]) => {
+      await blocked;
+      saved.push(value);
+    },
+    onDropped: (value) => dropped.push(value),
+    onFailure: () => assert.fail('unexpected transaction failure'),
+  });
+
+  assert.equal(queue.enqueue(1), true);
+  const flush = queue.flush();
+  assert.equal(queue.pendingCount(), 1);
+  assert.equal(queue.enqueue(2), false);
+  assert.deepEqual(dropped, [2]);
+  assert.equal(queue.pendingCount(), 1);
+  release();
+  assert.equal(await flush, true);
+  assert.deepEqual(saved, [1]);
+  assert.equal(queue.pendingCount(), 0);
+});
