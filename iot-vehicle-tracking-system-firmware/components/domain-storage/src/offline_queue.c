@@ -647,6 +647,24 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
  * The replay loop intentionally publishes at most one record per tick to keep
  * recovery traffic cooperative with live publishes and modem bandwidth.
  */
+static void offline_queue_schedule_replay_retry(uint64_t now_ms, const char *step) {
+    telemetry_counters_inc_replay_retry();
+    retry_policy_t replay_policy = offline_queue_replay_retry_policy();
+    uint32_t delay_ms = retry_state_current_delay_ms(&s_ctx.replay_retry,
+                                                     &replay_policy,
+                                                     now_ms);
+    (void)retry_state_schedule(&s_ctx.replay_retry,
+                               &replay_policy,
+                               now_ms,
+                               ESP_FAIL);
+    ESP_LOGW(TAG,
+             "retry step=%s err=%s attempt=%lu next_delay_ms=%lu",
+             step,
+             esp_err_to_name(ESP_FAIL),
+             (unsigned long)s_ctx.replay_retry.attempts,
+             (unsigned long)delay_ms);
+}
+
 void offline_queue_replay_tick(void) {
     if (!s_ctx.initialized || !CONFIG_TRACKER_SD_REPLAY_ENABLE || !s_ctx.online) {
         return;
@@ -687,7 +705,9 @@ void offline_queue_replay_tick(void) {
 
     if (rec.critical && rec.seq <= meta.ack_seq_critical) {
         /* Metadata says this critical record was already committed earlier; skip duplicate replay. */
-        (void)sd_log_store_set_replay_seq(rec.seq + 1);
+        if (sd_log_store_set_replay_seq(rec.seq + 1) != ESP_OK) {
+            offline_queue_schedule_replay_retry(now_ms, "replay_skip_acked_cursor");
+        }
         return;
     }
 
@@ -704,7 +724,8 @@ void offline_queue_replay_tick(void) {
             retry_state_reset(&s_ctx.replay_retry);
             return;
         }
-        telemetry_counters_inc_replay_retry();
+        offline_queue_schedule_replay_retry(now_ms, "replay_drop_stale_obd_cursor");
+        return; // Never publish a stale record when the skip cursor could not be persisted.
     }
 
     if (offline_queue_is_stale_firmware_record(&rec)) {
@@ -717,7 +738,7 @@ void offline_queue_replay_tick(void) {
             retry_state_reset(&s_ctx.replay_retry);
             return;
         }
-        telemetry_counters_inc_replay_retry();
+        offline_queue_schedule_replay_retry(now_ms, "replay_skip_stale_firmware_cursor");
         return;
     }
 
@@ -727,20 +748,7 @@ void offline_queue_replay_tick(void) {
         return;
     }
 
-    telemetry_counters_inc_replay_retry();
-    retry_policy_t replay_policy = offline_queue_replay_retry_policy();
-    uint32_t delay_ms = retry_state_current_delay_ms(&s_ctx.replay_retry,
-                                                     &replay_policy,
-                                                     now_ms);
-    (void)retry_state_schedule(&s_ctx.replay_retry,
-                               &replay_policy,
-                               now_ms,
-                               ESP_FAIL);
-    ESP_LOGW(TAG,
-             "retry step=replay_publish err=%s attempt=%lu next_delay_ms=%lu",
-             esp_err_to_name(ESP_FAIL),
-             (unsigned long)s_ctx.replay_retry.attempts,
-             (unsigned long)delay_ms);
+    offline_queue_schedule_replay_retry(now_ms, "replay_publish");
 }
 
 /**
