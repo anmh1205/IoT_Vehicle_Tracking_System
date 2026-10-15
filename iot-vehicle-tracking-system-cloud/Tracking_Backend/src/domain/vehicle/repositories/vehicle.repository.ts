@@ -25,7 +25,7 @@ export const vehicleScopeIsGlobal = (scope: VehicleAccessScope): boolean =>
 export const vehicleVisibleTo = (scope: VehicleAccessScope, paramIndex: number): string =>
   vehicleScopeIsGlobal(scope) ? 'TRUE' : `EXISTS (
     SELECT 1 FROM user_device_access uda
-    WHERE uda.user_id = ${paramIndex}
+    WHERE uda.user_id = $${paramIndex}
       AND uda.device_id = v.device_id
   )`;
 
