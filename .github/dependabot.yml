@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /iot-vehicle-tracking-system-cloud/Tracking_Frontend
+    schedule:
+      interval: weekly
+      day: wednesday
+    open-pull-requests-limit: 5
+    groups:
+      security-patches:
+        applies-to: security-updates
+        patterns: ['*']
+  - package-ecosystem: npm
+    directory: /iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
+    schedule:
+      interval: weekly
+      day: wednesday
+    open-pull-requests-limit: 5
+    groups:
+      security-patches:
+        applies-to: security-updates
+        patterns: ['*']
