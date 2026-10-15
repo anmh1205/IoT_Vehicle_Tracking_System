@@ -133,6 +133,17 @@ function recordMigration(runner, filename, checksum, appliedMode) {
   runner.execSql(migrationReceiptSql(filename, checksum, appliedMode));
 }
 
+function rejectUnrotatedLegacyAdmin(runner) {
+  const legacyAdmin = runner.queryRows(
+    'SELECT username FROM users WHERE username = ' +
+    sqlLiteral('admin') + ' AND password_hash = ' + sqlLiteral(LEGACY_STATIC_ADMIN_HASH) +
+    ' LIMIT 1',
+  );
+  if (legacyAdmin.length > 0) {
+    throw new Error('Legacy default administrator credential is still active. Rotate the admin password before applying the secure bootstrap migration.');
+  }
+}
+
 function main() {
   const options = parseArgs(process.argv.slice(2));
   const baseDir = __dirname;
@@ -179,14 +190,7 @@ function main() {
 
         // The original schema may be retained, but the deployed default admin
         // MUST have been rotated before its old receipt can be reconciled.
-        const legacyAdmin = runner.queryRows(
-          'SELECT username FROM users WHERE username = ' +
-          sqlLiteral('admin') + ' AND password_hash = ' + sqlLiteral(LEGACY_STATIC_ADMIN_HASH) +
-          ' LIMIT 1',
-        );
-        if (legacyAdmin.length > 0) {
-          throw new Error('Legacy default administrator credential is still active. Rotate the admin password before applying the secure bootstrap migration.');
-        }
+        rejectUnrotatedLegacyAdmin(runner);
         console.log(`${options.dryRun ? 'plan' : 'reconcile'} ${fileName}: verified legacy admin seed removal; schema preserved`);
         if (!options.dryRun) {
           // Only the exact known data-seed removal may update an old receipt.
@@ -204,6 +208,12 @@ function main() {
         ? 'baseline'
         : 'executed';
     console.log(`${options.dryRun ? 'plan' : 'apply'} ${fileName}: ${appliedMode}`);
+    // Legacy installations without migration receipts must not silently
+    // baseline the new seed-free script while a known admin password survives.
+    if (legacyMode && fileName === '01-users.sql' && appliedMode === 'baseline' &&
+        catalog.tables.has('users')) {
+      rejectUnrotatedLegacyAdmin(runner);
+    }
     if (legacyMode && appliedMode === 'baseline') {
       const missing = missingSignatures(signatures, catalog);
       if (missing.length > 0) {
