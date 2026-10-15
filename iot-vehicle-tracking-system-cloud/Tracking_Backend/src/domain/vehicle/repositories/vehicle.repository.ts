@@ -13,6 +13,22 @@ import type {
   UpdateVehicleInput,
 } from '@/domain/vehicle/types/vehicle.types';
 
+export interface VehicleAccessScope {
+  userId: number;
+  role: string;
+  deviceAccessMode: string;
+}
+
+export const vehicleScopeIsGlobal = (scope: VehicleAccessScope): boolean =>
+  scope.role === 'root' || scope.role === 'admin' || scope.deviceAccessMode === 'all';
+
+export const vehicleVisibleTo = (scope: VehicleAccessScope, paramIndex: number): string =>
+  vehicleScopeIsGlobal(scope) ? 'TRUE' : `EXISTS (
+    SELECT 1 FROM user_device_access uda
+    WHERE uda.user_id = $${paramIndex}
+      AND uda.device_id = v.device_id
+  )`;
+
 const ALLOWED_SORT_COLUMNS: Record<string, string> = {
   vehicleId: 'vehicle_id',
   plateNumber: 'plate_number',
@@ -23,6 +39,7 @@ const ALLOWED_SORT_COLUMNS: Record<string, string> = {
 
 export const findAll = async (
   query: VehicleListQuery,
+  scope: VehicleAccessScope,
 ): Promise<{ vehicles: Vehicle[]; total: number }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
@@ -31,6 +48,12 @@ export const findAll = async (
   const conditions: string[] = [];
   const params: unknown[] = [];
   let paramIndex = 1;
+
+  conditions.push(vehicleVisibleTo(scope, paramIndex));
+  if (!vehicleScopeIsGlobal(scope)) {
+    params.push(scope.userId);
+    paramIndex++;
+  }
 
   if (query.status) {
     conditions.push(`v.status = $${paramIndex++}`);
@@ -96,6 +119,16 @@ export const findById = async (id: number): Promise<Vehicle | null> =>
      LEFT JOIN customers c ON c.id = v.customer_id
      WHERE v.id = $1`,
     [id],
+  );
+
+
+export const findByIdForScope = async (id: number, scope: VehicleAccessScope): Promise<Vehicle | null> =>
+  findOne<Vehicle>(
+    `SELECT v.*, c.customer_code, c.name AS customer_name
+     FROM vehicles v
+     LEFT JOIN customers c ON c.id = v.customer_id
+     WHERE v.id = $1 AND ${vehicleVisibleTo(scope, 2)}`,
+    vehicleScopeIsGlobal(scope) ? [id] : [id, scope.userId],
   );
 
 export const findByVehicleId = async (vehicleId: string): Promise<Vehicle | null> =>
