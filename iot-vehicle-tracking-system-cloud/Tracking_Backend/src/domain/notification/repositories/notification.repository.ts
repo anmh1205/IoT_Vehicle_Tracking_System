@@ -1,5 +1,5 @@
 import type { QueryResultRow } from 'pg';
-import { executeQuery, findMany } from '@/infrastructure/database/queries';
+import { executeQuery, findMany, findOne } from '@/infrastructure/database/queries';
 
 export type NotificationType = 'alert' | 'system' | 'export' | 'firmware' | 'zone';
 
@@ -22,6 +22,22 @@ export interface NotificationFilters {
   search?: string;
   from?: string;
   to?: string;
+  isRead?: boolean;
+}
+
+export interface NotificationAccessScope {
+  userId: number;
+  role: string;
+  deviceAccessMode: string;
+}
+
+export interface NotificationCounts {
+  total: number;
+  unreadCount: number;
+}
+
+export interface NotificationStats extends NotificationCounts {
+  byType: Record<NotificationType, number>;
 }
 
 const NOTIFICATION_LINK_JOINS = `LEFT JOIN devices d ON d.device_id = a.device_id
@@ -44,6 +60,30 @@ const NOTIFICATION_LINK_JOINS = `LEFT JOIN devices d ON d.device_id = a.device_i
       v.id DESC
     LIMIT 1
   ) link ON true`;
+
+/**
+ * A limited user sees only alerts for currently assigned devices. A
+ * vehicle-only alert is resolved via the vehicle's current device.
+ * Unattributed/global alerts are restricted to all-access accounts until
+ * an explicit ownership policy can be implemented.
+ */
+const notificationVisibilityClause = (scope: NotificationAccessScope): string => {
+  if (scope.role === 'root' || scope.role === 'admin' || scope.deviceAccessMode === 'all') {
+    return 'TRUE';
+  }
+
+  return `EXISTS (
+    SELECT 1 FROM user_device_access uda
+    WHERE uda.user_id = $1 AND (
+      (a.device_id IS NOT NULL AND uda.device_id = a.device_id)
+      OR (a.device_id IS NULL AND a.vehicle_id IS NOT NULL AND EXISTS (
+        SELECT 1 FROM vehicles assigned_vehicle
+        WHERE assigned_vehicle.vehicle_id = a.vehicle_id
+          AND assigned_vehicle.device_id = uda.device_id
+      ))
+    )
+  )`;
+};
 
 const buildTypeClause = (
   type: NotificationType,
@@ -102,11 +142,12 @@ const buildTypeClause = (
 
 const buildFilterSql = (
   filters: NotificationFilters,
+  scope: NotificationAccessScope,
 ): {
   whereClause: string;
   values: unknown[];
 } => {
-  const conditions: string[] = ['state.hidden_at IS NULL'];
+  const conditions: string[] = ['state.hidden_at IS NULL', notificationVisibilityClause(scope)];
   const values: unknown[] = [];
   let paramIndex = 2;
 
@@ -134,6 +175,12 @@ const buildFilterSql = (
   if (filters.to) {
     conditions.push(`a.created_at <= $${paramIndex}`);
     values.push(filters.to);
+    paramIndex += 1;
+  }
+
+  if (filters.isRead !== undefined) {
+    conditions.push(`COALESCE(state.is_read, FALSE) = $${paramIndex}`);
+    values.push(filters.isRead);
   }
 
   return {
@@ -142,11 +189,16 @@ const buildFilterSql = (
   };
 };
 
-export const findNotificationRows = async (
-  userId: number,
+export const findNotificationPage = async (
+  scope: NotificationAccessScope,
   filters: NotificationFilters,
+  limit: number,
+  offset: number,
 ): Promise<NotificationRow[]> => {
-  const { whereClause, values } = buildFilterSql(filters);
+  const { whereClause, values } = buildFilterSql(filters, scope);
+  const limitIndex = values.length + 2;
+  const offsetIndex = limitIndex + 1;
+
   return findMany<NotificationRow>(
     `SELECT
         a.id,
@@ -181,49 +233,139 @@ export const findNotificationRows = async (
      LEFT JOIN notification_states state
        ON state.user_id = $1 AND state.alert_id = a.id
      ${whereClause}
-     ORDER BY a.created_at DESC`,
-    [userId, ...values],
+     ORDER BY a.created_at DESC
+     LIMIT $${limitIndex}
+     OFFSET $${offsetIndex}`,
+    [scope.userId, ...values, limit, offset],
   );
 };
 
-export const markNotificationRead = async (userId: number, alertId: number): Promise<void> => {
-  await executeQuery(
-    `INSERT INTO notification_states (user_id, alert_id, is_read, read_at, updated_at)
-     VALUES ($1, $2, TRUE, NOW(), NOW())
-     ON CONFLICT (user_id, alert_id)
-     DO UPDATE SET
-       is_read = TRUE,
-       read_at = NOW(),
-       updated_at = NOW()`,
-    [userId, alertId],
+export const getNotificationCounts = async (
+  scope: NotificationAccessScope,
+  filters: NotificationFilters,
+): Promise<NotificationCounts> => {
+  const { whereClause, values } = buildFilterSql(filters, scope);
+  const row = await findOne<{
+    total_count: number | string;
+    unread_count: number | string;
+  }>(
+    `SELECT
+        COUNT(*)::int AS total_count,
+        COUNT(*) FILTER (WHERE COALESCE(state.is_read, FALSE) = FALSE)::int AS unread_count
+     FROM alerts a
+     ${filters.search?.trim() ? NOTIFICATION_LINK_JOINS : ''}
+     LEFT JOIN notification_states state
+       ON state.user_id = $1 AND state.alert_id = a.id
+     ${whereClause}`,
+    [scope.userId, ...values],
   );
+
+  return {
+    total: Number(row?.total_count ?? 0),
+    unreadCount: Number(row?.unread_count ?? 0),
+  };
 };
 
-export const markAllNotificationsRead = async (userId: number): Promise<void> => {
+const NOTIFICATION_TYPE_SQL = `CASE
+  WHEN a.alert_type::text ILIKE '%zone%' OR a.alert_type::text ILIKE '%geofence%' THEN 'zone'
+  WHEN a.alert_type::text ILIKE '%firmware%' THEN 'firmware'
+  WHEN a.alert_type::text ILIKE '%export%' THEN 'export'
+  WHEN (
+    a.alert_type::text ILIKE '%system%'
+    OR a.alert_type::text ILIKE '%offline%'
+    OR a.alert_type::text ILIKE '%database%'
+    OR a.alert_type::text ILIKE '%service%'
+  ) THEN 'system'
+  ELSE 'alert'
+END`;
+
+export const getNotificationStats = async (scope: NotificationAccessScope): Promise<NotificationStats> => {
+  const row = await findOne<{
+    total_count: number | string;
+    unread_count: number | string;
+    alert_count: number | string;
+    system_count: number | string;
+    export_count: number | string;
+    firmware_count: number | string;
+    zone_count: number | string;
+  }>(
+    `SELECT
+        COUNT(*)::int AS total_count,
+        COUNT(*) FILTER (WHERE is_read = FALSE)::int AS unread_count,
+        COUNT(*) FILTER (WHERE notification_type = 'alert')::int AS alert_count,
+        COUNT(*) FILTER (WHERE notification_type = 'system')::int AS system_count,
+        COUNT(*) FILTER (WHERE notification_type = 'export')::int AS export_count,
+        COUNT(*) FILTER (WHERE notification_type = 'firmware')::int AS firmware_count,
+        COUNT(*) FILTER (WHERE notification_type = 'zone')::int AS zone_count
+     FROM (
+       SELECT
+         ${NOTIFICATION_TYPE_SQL} AS notification_type,
+         COALESCE(state.is_read, FALSE) AS is_read
+       FROM alerts a
+       LEFT JOIN notification_states state
+         ON state.user_id = $1 AND state.alert_id = a.id
+       WHERE state.hidden_at IS NULL AND ${notificationVisibilityClause(scope)}
+     ) classified`,
+    [scope.userId],
+  );
+
+  return {
+    total: Number(row?.total_count ?? 0),
+    unreadCount: Number(row?.unread_count ?? 0),
+    byType: {
+      alert: Number(row?.alert_count ?? 0),
+      system: Number(row?.system_count ?? 0),
+      export: Number(row?.export_count ?? 0),
+      firmware: Number(row?.firmware_count ?? 0),
+      zone: Number(row?.zone_count ?? 0),
+    },
+  };
+};
+
+export const markNotificationRead = async (scope: NotificationAccessScope, alertId: number): Promise<void> => {
   await executeQuery(
     `INSERT INTO notification_states (user_id, alert_id, is_read, read_at, updated_at)
      SELECT $1, a.id, TRUE, NOW(), NOW()
      FROM alerts a
+     WHERE a.id = $2 AND ${notificationVisibilityClause(scope)}
+     ON CONFLICT (user_id, alert_id)
+     DO UPDATE SET
+       is_read = TRUE,
+       read_at = NOW(),
+       updated_at = NOW()
+     WHERE notification_states.hidden_at IS NULL`,
+    [scope.userId, alertId],
+  );
+};
+
+export const markAllNotificationsRead = async (scope: NotificationAccessScope): Promise<void> => {
+  await executeQuery(
+    `INSERT INTO notification_states (user_id, alert_id, is_read, read_at, updated_at)
+     SELECT $1, a.id, TRUE, NOW(), NOW()
+     FROM alerts a
+     WHERE ${notificationVisibilityClause(scope)}
      ON CONFLICT (user_id, alert_id)
      DO UPDATE SET
        is_read = TRUE,
        read_at = COALESCE(notification_states.read_at, EXCLUDED.read_at),
        updated_at = NOW()
      WHERE notification_states.hidden_at IS NULL`,
-    [userId],
+    [scope.userId],
   );
 };
 
-export const hideNotification = async (userId: number, alertId: number): Promise<void> => {
+export const hideNotification = async (scope: NotificationAccessScope, alertId: number): Promise<void> => {
   await executeQuery(
     `INSERT INTO notification_states (user_id, alert_id, is_read, read_at, hidden_at, updated_at)
-     VALUES ($1, $2, TRUE, NOW(), NOW(), NOW())
+     SELECT $1, a.id, TRUE, NOW(), NOW(), NOW()
+     FROM alerts a
+     WHERE a.id = $2 AND ${notificationVisibilityClause(scope)}
      ON CONFLICT (user_id, alert_id)
      DO UPDATE SET
        is_read = TRUE,
        read_at = COALESCE(notification_states.read_at, NOW()),
        hidden_at = COALESCE(notification_states.hidden_at, NOW()),
        updated_at = NOW()`,
-    [userId, alertId],
+    [scope.userId, alertId],
   );
 };
