@@ -17,6 +17,7 @@
 
 #include "ble_init.h"
 #include "ble_obd.h"
+#include "command_handler.h"
 #include "imu_lis3dsh.h"
 #include "modem_gnss.h"
 #include "modem_lte.h"
@@ -349,6 +350,22 @@ bool state_machine_can_enter_sleep(const char **out_reason) {
         }
         return false;
     }
+    /*
+     * Deep sleep discards the FreeRTOS command and ACK queues, whereas light
+     * sleep retains their RAM ownership. An accepted cloud command may no
+     * longer be replayed after MQTT QoS1 acknowledgement; never voluntarily
+     * discard its pending action or result before a durable handoff exists.
+     */
+    if (state_machine_resolve_sleep_mode(APP_STATE_SLEEP) == TRACKER_SLEEP_MODE_DEEP &&
+        (state_machine_has_pending_command_acks() ||
+         command_handler_has_pending_actions() ||
+         state_machine_has_pending_restart_after_ack())) {
+        if (out_reason != NULL) {
+            *out_reason = "volatile_cloud_command_pending";
+        }
+        return false;
+    }
+
     if (out_reason != NULL) {
         *out_reason = "ok";
     }
