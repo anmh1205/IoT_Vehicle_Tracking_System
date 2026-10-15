@@ -7,7 +7,7 @@ vi.mock('@/domain/device/services/device-access.service', () => ({
 }));
 
 import { findMany } from '@/infrastructure/database/queries';
-import { canAccessDeviceId } from '@/domain/device/services/device-access.service';
+import { canAccessDeviceId, hasGlobalDeviceAccess } from '@/domain/device/services/device-access.service';
 import type { SessionUser } from '@/shared/types/common.types';
 import { getTelemetryHistory } from './telemetry-history.service';
 
@@ -18,6 +18,9 @@ describe('telemetry-history.service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(canAccessDeviceId).mockResolvedValue(true);
+    vi.mocked(hasGlobalDeviceAccess).mockImplementation((actor) =>
+      actor.role === 'root' || actor.role === 'admin' || actor.deviceAccessMode === 'all',
+    );
   });
 
   it('filters, orders and timestamps history by device event time', async () => {
