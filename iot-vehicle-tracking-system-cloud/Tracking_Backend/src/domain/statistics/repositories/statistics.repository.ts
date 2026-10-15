@@ -8,6 +8,25 @@ import type {
   TripSummaryPoint,
 } from '@/domain/statistics/types/statistics.types';
 
+import type { SessionUser } from '@/shared/types/common.types';
+
+const requiresGrants = (actor: SessionUser): boolean =>
+  actor.role !== 'root' && actor.role !== 'admin' && actor.deviceAccessMode !== 'all';
+
+const grantCondition = (
+  actor: SessionUser, device: string, vehicle: string | null, parameter: number,
+): string => {
+  if (!requiresGrants(actor)) return '';
+  const vehicleMatch = vehicle
+    ? ` OR EXISTS (SELECT 1 FROM vehicles av WHERE av.vehicle_id = ${vehicle} AND av.device_id = uda.device_id)` +
+      ` OR EXISTS (SELECT 1 FROM devices ad WHERE ad.vehicle_id = ${vehicle} AND ad.device_id = uda.device_id)`
+    : '';
+  return ` AND EXISTS (SELECT 1 FROM user_device_access uda
+    WHERE uda.user_id = $${parameter}
+      AND (uda.device_id = ${device}${vehicleMatch}))`;
+};
+const actorParams = (actor: SessionUser): number[] => requiresGrants(actor) ? [actor.id] : [];
+
 const toBucketExpression = (interval: StatisticsInterval): string => {
   if (interval === 'month') return "DATE_TRUNC('month', ts)";
   if (interval === 'week') return "DATE_TRUNC('week', ts)";
@@ -44,13 +63,15 @@ const getDeviceSessionRuntimeExpression = async (): Promise<string> => {
 export const getFleetUsage = async (
   range: StatisticsDateRange,
   interval: StatisticsInterval,
+  actor: SessionUser,
 ): Promise<FleetUsagePoint[]> => {
   const step = toSeriesStep(interval);
   const bucketExpr = toBucketExpression(interval);
   const bucketFromSeries = bucketExpr.replace(/ts/g, 'series.ts');
 
   const totalResult = await pool.query<{ total: string }>(
-    'SELECT COUNT(*)::text as total FROM vehicles',
+    `SELECT COUNT(*)::text AS total FROM vehicles WHERE 1=1${grantCondition(actor, 'vehicles.device_id', null, 1)}`,
+    actorParams(actor),
   );
   const totalVehicles = parseInt(totalResult.rows[0]?.total ?? '0', 10);
 
@@ -63,7 +84,7 @@ export const getFleetUsage = async (
       COUNT(DISTINCT CASE WHEN sessions.id IS NOT NULL THEN vehicles.id END)::text AS active_vehicles
     FROM series
     LEFT JOIN vehicles
-      ON vehicles.device_id IS NOT NULL
+      ON vehicles.device_id IS NOT NULL${grantCondition(actor, 'vehicles.device_id', null, 4)}
     LEFT JOIN device_sessions sessions
       ON sessions.device_id = vehicles.device_id
      AND COALESCE(sessions.server_session_start, sessions.created_at) < (${bucketFromSeries} + $3::interval)
@@ -73,7 +94,7 @@ export const getFleetUsage = async (
     ORDER BY label ASC
   `;
 
-  const result = await pool.query<FleetUsageRow>(query, [range.from, range.to, step]);
+  const result = await pool.query<FleetUsageRow>(query, [range.from, range.to, step, ...actorParams(actor)]);
 
   return result.rows.map((row) => {
     const activeVehicles = parseInt(row.active_vehicles, 10);
@@ -90,7 +111,7 @@ interface DeviceUptimeRow {
   up_seconds: string;
 }
 
-export const getDeviceUptime = async (range: StatisticsDateRange): Promise<DeviceUptimeItem[]> => {
+export const getDeviceUptime = async (range: StatisticsDateRange, actor: SessionUser): Promise<DeviceUptimeItem[]> => {
   const totalSeconds = Math.max((range.to.getTime() - range.from.getTime()) / 1000, 1);
   const totalHours = totalSeconds / 3600;
 
@@ -112,11 +133,12 @@ export const getDeviceUptime = async (range: StatisticsDateRange): Promise<Devic
       ON s.device_id = d.device_id
       AND COALESCE(s.server_session_start, s.created_at) <= $2
       AND COALESCE(s.server_session_end, NOW()) >= $1
+    WHERE 1=1${grantCondition(actor, 'd.device_id', null, 3)}
     GROUP BY d.device_id
     ORDER BY d.device_id ASC
   `;
 
-  const result = await pool.query<DeviceUptimeRow>(query, [range.from, range.to]);
+  const result = await pool.query<DeviceUptimeRow>(query, [range.from, range.to, ...actorParams(actor)]);
   return result.rows.map((row) => {
     const upSeconds = Math.max(parseFloat(row.up_seconds), 0);
     const upHours = upSeconds / 3600;
@@ -141,6 +163,7 @@ interface AlertFrequencyRow {
 export const getAlertFrequency = async (
   range: StatisticsDateRange,
   interval: StatisticsInterval,
+  actor: SessionUser,
 ): Promise<AlertFrequencyPoint[]> => {
   const step = toSeriesStep(interval);
   const bucketExpr = toBucketExpression(interval);
@@ -157,7 +180,7 @@ export const getAlertFrequency = async (
         COUNT(*) FILTER (WHERE alert_type = 'device_offline')::text AS offline,
         COUNT(*) FILTER (WHERE alert_type NOT IN ('speeding', 'zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit', 'device_offline'))::text AS other
       FROM alerts
-      WHERE created_at BETWEEN $1 AND $2
+      WHERE created_at BETWEEN $1 AND $2${grantCondition(actor, 'alerts.device_id', 'alerts.vehicle_id', 4)}
       GROUP BY bucket
     )
     SELECT
@@ -171,7 +194,7 @@ export const getAlertFrequency = async (
     ORDER BY label ASC
   `;
 
-  const result = await pool.query<AlertFrequencyRow>(query, [range.from, range.to, step]);
+  const result = await pool.query<AlertFrequencyRow>(query, [range.from, range.to, step, ...actorParams(actor)]);
   return result.rows.map((row) => ({
     label: row.label.toISOString(),
     speeding: parseInt(row.speeding, 10),
@@ -207,6 +230,7 @@ interface PolicyLimitsRow {
 export const getTripSummary = async (
   range: StatisticsDateRange,
   interval: StatisticsInterval,
+  actor: SessionUser,
 ): Promise<TripSummaryPoint[]> => {
   const step = toSeriesStep(interval);
   const bucketExpr = toBucketExpression(interval);
@@ -222,7 +246,7 @@ export const getTripSummary = async (
         COALESCE(SUM(distance_km), 0)::text AS total_distance_km,
         COALESCE(AVG(EXTRACT(EPOCH FROM (COALESCE(actual_end, NOW()) - COALESCE(actual_start, planned_start, created_at))) / 60), 0)::text AS avg_duration_minutes
       FROM trips
-      WHERE COALESCE(actual_start, planned_start, created_at) BETWEEN $1 AND $2
+      WHERE COALESCE(actual_start, planned_start, created_at) BETWEEN $1 AND $2${grantCondition(actor, 'trips.device_id', 'trips.vehicle_id', 4)}
       GROUP BY bucket
     )
     SELECT
@@ -235,7 +259,7 @@ export const getTripSummary = async (
     ORDER BY label ASC
   `;
 
-  const result = await pool.query<TripSummaryRow>(query, [range.from, range.to, step]);
+  const result = await pool.query<TripSummaryRow>(query, [range.from, range.to, step, ...actorParams(actor)]);
   return result.rows.map((row) => ({
     label: row.label.toISOString(),
     totalTrips: parseInt(row.total_trips, 10),
@@ -246,6 +270,7 @@ export const getTripSummary = async (
 
 export const getSummaryTotals = async (
   range: StatisticsDateRange,
+  actor: SessionUser,
 ): Promise<{ totalRuntimeHours: number; totalSessions: number; totalAlerts: number }> => {
   const runtimeExpression = await getDeviceSessionRuntimeExpression();
   const query = `
@@ -254,12 +279,12 @@ export const getSummaryTotals = async (
         COALESCE(SUM(${runtimeExpression}), 0)::text AS total_runtime_seconds,
         COUNT(*)::text AS total_sessions
       FROM device_sessions
-      WHERE COALESCE(server_session_start, created_at) BETWEEN $1 AND $2
+      WHERE COALESCE(server_session_start, created_at) BETWEEN $1 AND $2${grantCondition(actor, 'device_sessions.device_id', null, 3)}
     ),
     alert_stats AS (
       SELECT COUNT(*)::text AS total_alerts
       FROM alerts
-      WHERE created_at BETWEEN $1 AND $2
+      WHERE created_at BETWEEN $1 AND $2${grantCondition(actor, 'alerts.device_id', 'alerts.vehicle_id', 3)}
     )
     SELECT
       ROUND((COALESCE(session_stats.total_runtime_seconds, '0')::numeric / 3600.0), 2)::text AS total_runtime_hours,
@@ -268,7 +293,7 @@ export const getSummaryTotals = async (
     FROM session_stats, alert_stats
   `;
 
-  const result = await pool.query<SummaryTotalsRow>(query, [range.from, range.to]);
+  const result = await pool.query<SummaryTotalsRow>(query, [range.from, range.to, ...actorParams(actor)]);
   const row = result.rows[0];
 
   return {
@@ -278,7 +303,7 @@ export const getSummaryTotals = async (
   };
 };
 
-export const getPolicyLimitsSummary = async (): Promise<PolicyLimitsRow[]> => {
+export const getPolicyLimitsSummary = async (actor: SessionUser): Promise<PolicyLimitsRow[]> => {
   const query = `
     SELECT
       s.vehicle_id,
@@ -291,11 +316,11 @@ export const getPolicyLimitsSummary = async (): Promise<PolicyLimitsRow[]> => {
     FROM vehicle_policy_state s
     JOIN vehicle_policies p ON p.id = s.policy_id
     WHERE p.policy_type = 'DISTANCE_QUOTA'
-      AND p.status = 'active'
+      AND p.status = 'active'${grantCondition(actor, 'NULL', 's.vehicle_id', 1)}
     ORDER BY s.updated_at DESC
     LIMIT 500
   `;
 
-  const result = await pool.query<PolicyLimitsRow>(query);
+  const result = await pool.query<PolicyLimitsRow>(query, actorParams(actor));
   return result.rows;
 };
