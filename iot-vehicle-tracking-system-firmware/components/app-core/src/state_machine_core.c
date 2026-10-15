@@ -1327,7 +1327,7 @@ static app_state_t state_machine_handle_alarm_state(void) {
     if (s_alarm_enter_ms == 0) {
         s_alarm_enter_ms = util_uptime_ms();
         s_imu_wake_count += 1U;
-        state_machine_publish_event("warning", 1001, "motion_detected");
+        state_machine_stage_motion_alarm();
     }
 
     uint64_t now_ms = util_uptime_ms();
@@ -1524,6 +1524,13 @@ esp_err_t state_machine_core_init(const config_t *config) {
     }
     // Boot metadata must exist before any publish path emits message IDs or firmware version fields.
     state_machine_init_boot_metadata();
+    // Restore the original occurrence identity before a new motion wake can
+    // replace it or a deep-sleep transition can discard its pending state.
+    esp_err_t motion_restore_err = state_machine_restore_pending_motion_alarm();
+    if (motion_restore_err != ESP_OK) {
+        ESP_LOGE(TAG, "event=motion_alarm_restore_unavailable err=%s",
+                 esp_err_to_name(motion_restore_err));
+    }
     s_state_entered_ms = util_uptime_ms();
     s_last_health_snapshot_log_ms = 0;
 
@@ -1581,6 +1588,7 @@ app_state_t state_machine_core_run(app_state_t current_state) {
     state_led_update(current_state);
     util_set_sleep_enabled(s_config.sleep_enabled);
     state_machine_publish_pending_command_acks();
+    state_machine_retry_pending_motion_alarm();
     state_machine_try_confirm_running_firmware();
 
     app_state_t next_state = current_state;

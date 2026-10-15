@@ -27,6 +27,7 @@
 #include "power_mgr.h"
 #include "session_mgr.h"
 #include "state_machine_internal.h"
+#include "state_publish_pipeline.h"
 #include "state_led_control.h"
 #include "state_obd_runtime.h"
 #include "state_runtime_context.h"
@@ -359,7 +360,8 @@ bool state_machine_can_enter_sleep(const char **out_reason) {
     if (state_machine_resolve_sleep_mode(APP_STATE_SLEEP) == TRACKER_SLEEP_MODE_DEEP &&
         (state_machine_has_pending_command_acks() ||
          command_handler_has_pending_actions() ||
-         state_machine_has_pending_restart_after_ack())) {
+         state_machine_has_pending_restart_after_ack() ||
+         state_machine_has_pending_motion_alarm())) {
         if (out_reason != NULL) {
             *out_reason = "volatile_cloud_command_pending";
         }
