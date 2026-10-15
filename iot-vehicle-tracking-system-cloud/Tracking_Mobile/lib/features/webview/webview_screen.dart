@@ -51,6 +51,11 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
     useShouldOverrideUrlLoading: true,
     mediaPlaybackRequiresUserGesture: false,
     javaScriptEnabled: true,
+    // Native JavaScript handlers must not be invoked by third-party iframes
+    // inside an otherwise trusted dashboard. Restrict enforcement in the
+    // WebView engine itself, not merely by checking the top-level URL in Dart.
+    javaScriptHandlersForMainFrameOnly: true,
+    javaScriptBridgeForMainFrameOnly: true,
     javaScriptCanOpenWindowsAutomatically: false,
     supportZoom: false,
     allowsInlineMediaPlayback: true,
