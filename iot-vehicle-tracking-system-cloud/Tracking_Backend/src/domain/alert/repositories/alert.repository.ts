@@ -277,3 +277,52 @@ export const dismiss = async (id: number): Promise<Alert | null> =>
 
 export const remove = async (id: number): Promise<boolean> =>
   deleteOne('DELETE FROM alerts WHERE id = $1', [id]);
+
+/**
+ * Atomic REST writes: the grant and the status transition must hold in the
+ * same UPDATE statement. The earlier read is only for user-friendly errors.
+ * This prevents acting on an unassigned alert after a separate authorization
+ * query or a concurrent status change.
+ */
+const mutationScopeParams = (scope: AlertAccessScope): number[] =>
+  scope.role === 'root' || scope.role === 'admin' || scope.deviceAccessMode === 'all'
+    ? [] : [scope.userId];
+
+export const acknowledgeForScope = async (
+  id: number, scope: AlertAccessScope,
+): Promise<Alert | null> =>
+  updateOne<Alert>(
+    `UPDATE alerts AS a
+      SET status = 'acknowledged',
+          acknowledged_by = $1, acknowledged_at = NOW(), updated_at = NOW()
+      WHERE a.id = $2 AND a.status = 'active'
+        AND ${alertVisibleTo(scope, 3)}
+      RETURNING a.*`,
+    [scope.userId, id, ...mutationScopeParams(scope)],
+  );
+
+export const resolveForScope = async (
+  id: number, scope: AlertAccessScope, resolutionNotes: string | null,
+): Promise<Alert | null> =>
+  updateOne<Alert>(
+    `UPDATE alerts AS a
+      SET status = 'resolved',
+          resolved_by = $1, resolved_at = NOW(),
+          resolution_notes = $2, updated_at = NOW()
+      WHERE a.id = $3 AND a.status IN ('active', 'acknowledged')
+        AND ${alertVisibleTo(scope, 4)}
+      RETURNING a.*`,
+    [scope.userId, resolutionNotes, id, ...mutationScopeParams(scope)],
+  );
+
+export const dismissForScope = async (
+  id: number, scope: AlertAccessScope,
+): Promise<Alert | null> =>
+  updateOne<Alert>(
+    `UPDATE alerts AS a
+      SET status = 'dismissed', updated_at = NOW()
+      WHERE a.id = $1 AND a.status <> 'resolved'
+        AND ${alertVisibleTo(scope, 2)}
+      RETURNING a.*`,
+    [id, ...mutationScopeParams(scope)],
+  );
