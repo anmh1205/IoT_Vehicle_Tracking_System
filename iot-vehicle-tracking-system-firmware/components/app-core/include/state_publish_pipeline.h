@@ -36,7 +36,7 @@ bool state_machine_publish_status(const char *status, const char *boundary_event
  * @param code Stable numeric event code.
  * @param message Short operator-facing diagnostic message.
  */
-void state_machine_publish_event(const char *event_type, int code, const char *message);
+bool state_machine_publish_event(const char *event_type, int code, const char *message);
 /**
  * @brief Publish one firmware-status payload immediately.
  *
@@ -83,3 +83,15 @@ void state_machine_try_flush_deferred_firmware_report(void);
 
 /** Restore a durable firmware outcome before evaluating OTA post-boot state. */
 esp_err_t state_machine_restore_deferred_firmware_report(void);
+
+/** Persist one motion occurrence before delivery; never replace a pending one. */
+void state_machine_stage_motion_alarm(void);
+
+/** Attempt original occurrence payload without allocating a new message ID. */
+void state_machine_retry_pending_motion_alarm(void);
+
+/** Restore an unsent motion occurrence from NVS on runtime initialization. */
+esp_err_t state_machine_restore_pending_motion_alarm(void);
+
+/** RAM-dropping sleep is unsafe while an event has not been durably accepted. */
+bool state_machine_has_pending_motion_alarm(void);
