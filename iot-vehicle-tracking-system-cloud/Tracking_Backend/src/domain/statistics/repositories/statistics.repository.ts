@@ -44,22 +44,6 @@ interface FleetUsageRow {
   active_vehicles: string;
 }
 
-const getDeviceSessionRuntimeExpression = async (): Promise<string> => {
-  const result = await pool.query<{ exists: boolean }>(
-    `SELECT EXISTS (
-       SELECT 1
-       FROM information_schema.columns
-       WHERE table_schema = 'public'
-         AND table_name = 'device_sessions'
-         AND column_name = 'total_runtime_seconds'
-     )`,
-  );
-
-  return result.rows[0]?.exists
-    ? 'COALESCE(total_runtime_seconds, uptime, 0)'
-    : 'COALESCE(uptime, EXTRACT(EPOCH FROM (COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at))), 0)';
-};
-
 export const getFleetUsage = async (
   range: StatisticsDateRange,
   interval: StatisticsInterval,
@@ -297,14 +281,21 @@ export const getSummaryTotals = async (
   range: StatisticsDateRange,
   actor: SessionUser,
 ): Promise<{ totalRuntimeHours: number; totalSessions: number; totalAlerts: number }> => {
-  const runtimeExpression = await getDeviceSessionRuntimeExpression();
-  const query = `
-    WITH session_stats AS (
-      SELECT
-        COALESCE(SUM(${runtimeExpression}), 0)::text AS total_runtime_seconds,
-        COUNT(*)::text AS total_sessions
-      FROM device_sessions
-      WHERE COALESCE(server_session_start, created_at) BETWEEN $1 AND $2${grantCondition(actor, 'device_sessions.device_id', null, 3)}
+  // A report's total duration must agree with the per-device uptime report:
+  // clip to the requested window and union overlapping intervals per device.
+  // Count sessions independently so overlapping records remain individually observable.
+  const query = `${sessionCoverageCte(actor)},
+    duration_stats AS (
+      SELECT COALESCE(SUM(up_seconds), 0)::numeric AS total_runtime_seconds
+      FROM durations
+    ),
+    session_stats AS (
+      SELECT COUNT(*)::text AS total_sessions
+      FROM device_sessions s
+      JOIN eligible e ON e.device_id = s.device_id
+      WHERE COALESCE(s.status::text, '') NOT IN ('failed', 'discarded')
+        AND COALESCE(s.server_session_start, s.created_at) < $2
+        AND COALESCE(s.server_session_end, NOW()) > $1
     ),
     alert_stats AS (
       SELECT COUNT(*)::text AS total_alerts
@@ -312,15 +303,16 @@ export const getSummaryTotals = async (
       WHERE created_at BETWEEN $1 AND $2${grantCondition(actor, 'alerts.device_id', 'alerts.vehicle_id', 3)}
     )
     SELECT
-      ROUND((COALESCE(session_stats.total_runtime_seconds, '0')::numeric / 3600.0), 2)::text AS total_runtime_hours,
-      COALESCE(session_stats.total_sessions, '0') AS total_sessions,
-      COALESCE(alert_stats.total_alerts, '0') AS total_alerts
-    FROM session_stats, alert_stats
+      ROUND(duration_stats.total_runtime_seconds / 3600.0, 2)::text AS total_runtime_hours,
+      session_stats.total_sessions,
+      alert_stats.total_alerts
+    FROM duration_stats CROSS JOIN session_stats CROSS JOIN alert_stats
   `;
 
-  const result = await pool.query<SummaryTotalsRow>(query, [range.from, range.to, ...actorParams(actor)]);
+  const result = await pool.query<SummaryTotalsRow>(query, [
+    range.from, range.to, ...actorParams(actor),
+  ]);
   const row = result.rows[0];
-
   return {
     totalRuntimeHours: Number.parseFloat(row?.total_runtime_hours ?? '0') || 0,
     totalSessions: Number.parseInt(row?.total_sessions ?? '0', 10) || 0,
