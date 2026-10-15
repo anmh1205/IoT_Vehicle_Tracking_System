@@ -17,14 +17,10 @@ def test_firmware_publish_retains_failed_report():
 
 
 def test_deferred_report_clears_only_after_accepted_publish():
-    expected = """if (state_machine_publish_firmware_payload(&s_deferred_firmware_report)) {
-        s_deferred_firmware_report_pending = false;
-    }"""
-    assert expected in SOURCE
-    assert (
-        "state_machine_publish_firmware_payload(&s_deferred_firmware_report);\n"
-        "    s_deferred_firmware_report_pending = false;"
-    ) not in SOURCE
+    assert "nvs_config_clear_firmware_report()" in SOURCE
+    assert "if (clear_err == ESP_OK)" in SOURCE
+    assert "s_deferred_firmware_report_pending = false;" in SOURCE
+    assert "(void)state_machine_publish_firmware_payload(&s_deferred_firmware_report);" in SOURCE
 
 
 def test_offline_firmware_status_still_uses_durable_pipeline():
