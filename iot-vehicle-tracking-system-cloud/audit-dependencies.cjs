@@ -13,6 +13,11 @@ for (const filename of process.argv.slice(2)) {
               ({ critical: 0, high: 1, moderate: 2, low: 3, info: 4 }[b[1].severity] ?? 5),
   );
   console.log('\nAUDIT', filename, 'counts=', JSON.stringify(counts));
+  if (filename.endsWith('npm-audit-production.json') &&
+      ((counts.critical ?? 0) > 0 || (counts.high ?? 0) > 0)) {
+    console.error('SECURITY GATE FAILED: high/critical production dependency advisories');
+    process.exitCode = 1;
+  }
   for (const [name, entry] of entries) {
     const advisories = (entry.via || []).filter((x) => typeof x !== 'string')
       .map((x) => ({ source: x.source, title: x.title, url: x.url, range: x.range }));
