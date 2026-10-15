@@ -111,43 +111,68 @@ interface DeviceUptimeRow {
   up_seconds: string;
 }
 
+/**
+ * Measures distinct per-device session coverage inside [from, to].
+ * Window MAX(previous end) avoids counting overlapping sessions twice.
+ * Device IDs come from the actor-scoped eligible CTE, never from a
+ * post-aggregation filter.
+ */
+const sessionCoverageCte = (actor: SessionUser): string => `
+  WITH eligible AS (
+    SELECT d.device_id
+    FROM devices d
+    WHERE 1=1${grantCondition(actor, 'd.device_id', null, 3)}
+  ),
+  clipped AS (
+    SELECT e.device_id,
+      GREATEST(COALESCE(s.server_session_start, s.created_at), $1::timestamptz) AS start_at,
+      LEAST(COALESCE(s.server_session_end, NOW()), $2::timestamptz) AS end_at
+    FROM eligible e
+    JOIN device_sessions s ON s.device_id = e.device_id
+    WHERE COALESCE(s.status::text, '') NOT IN ('failed', 'discarded')
+      AND COALESCE(s.server_session_start, s.created_at) < $2
+      AND COALESCE(s.server_session_end, NOW()) > $1
+  ),
+  ordered AS (
+    SELECT device_id, start_at, end_at,
+      MAX(end_at) OVER (
+        PARTITION BY device_id
+        ORDER BY start_at, end_at
+        ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+      ) AS previous_end
+    FROM clipped
+    WHERE end_at > start_at
+  ),
+  durations AS (
+    SELECT device_id,
+      SUM(GREATEST(
+        EXTRACT(EPOCH FROM (end_at - GREATEST(start_at, COALESCE(previous_end, start_at)))),
+        0
+      )) AS up_seconds
+    FROM ordered
+    GROUP BY device_id
+  )
+`;
+
 export const getDeviceUptime = async (range: StatisticsDateRange, actor: SessionUser): Promise<DeviceUptimeItem[]> => {
   const totalSeconds = Math.max((range.to.getTime() - range.from.getTime()) / 1000, 1);
   const totalHours = totalSeconds / 3600;
 
-  const query = `
-    SELECT
-      d.device_id,
-      COALESCE(SUM(
-        CASE
-          WHEN s.uptime IS NOT NULL THEN s.uptime
-          ELSE EXTRACT(
-            EPOCH FROM (
-              COALESCE(s.server_session_end, NOW()) - COALESCE(s.server_session_start, s.created_at)
-            )
-          )
-        END
-      ), 0)::text AS up_seconds
-    FROM devices d
-    LEFT JOIN device_sessions s
-      ON s.device_id = d.device_id
-      AND COALESCE(s.server_session_start, s.created_at) <= $2
-      AND COALESCE(s.server_session_end, NOW()) >= $1
-    WHERE 1=1${grantCondition(actor, 'd.device_id', null, 3)}
-    GROUP BY d.device_id
-    ORDER BY d.device_id ASC
-  `;
-
-  const result = await pool.query<DeviceUptimeRow>(query, [range.from, range.to, ...actorParams(actor)]);
+  const query = `${sessionCoverageCte(actor)}
+    SELECT e.device_id, COALESCE(d.up_seconds, 0)::text AS up_seconds
+    FROM eligible e
+    LEFT JOIN durations d ON d.device_id = e.device_id
+    ORDER BY e.device_id ASC`;
+  const result = await pool.query<DeviceUptimeRow>(
+    query, [range.from, range.to, ...actorParams(actor)],
+  );
   return result.rows.map((row) => {
-    const upSeconds = Math.max(parseFloat(row.up_seconds), 0);
-    const upHours = upSeconds / 3600;
-    const downHours = Math.max(totalHours - upHours, 0);
+    const upSeconds = Math.min(Math.max(Number.parseFloat(row.up_seconds) || 0, 0), totalSeconds);
     return {
       deviceId: row.device_id,
-      uptimePercent: Math.min(Math.round((upSeconds / totalSeconds) * 10000) / 100, 100),
+      uptimePercent: Math.round((upSeconds / totalSeconds) * 10000) / 100,
       totalHours: Math.round(totalHours * 100) / 100,
-      downHours: Math.round(downHours * 100) / 100,
+      downHours: Math.round(Math.max(totalSeconds - upSeconds, 0) / 3600 * 100) / 100,
     };
   });
 };
@@ -337,11 +362,10 @@ export const getFleetTotalsLast30Days = async (actor: SessionUser) => {
       actorParams(actor),
     ),
     pool.query<{ active_time_seconds: string }>(
-      `SELECT COALESCE(SUM(uptime), 0)::int AS active_time_seconds
-       FROM device_sessions
-       WHERE COALESCE(server_session_start, created_at) >= NOW() - INTERVAL '30 days'
-         ${grantCondition(actor, 'device_sessions.device_id', null, 1)}`,
-      actorParams(actor),
+      `${sessionCoverageCte(actor)}
+       SELECT COALESCE(SUM(up_seconds), 0)::text AS active_time_seconds
+       FROM durations`,
+      [new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), new Date(), ...actorParams(actor)],
     ),
     pool.query<{ speeding: string; zone: string; other: string }>(
       `SELECT
