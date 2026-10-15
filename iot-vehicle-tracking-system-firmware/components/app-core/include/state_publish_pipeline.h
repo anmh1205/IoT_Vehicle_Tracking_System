@@ -79,3 +79,6 @@ void state_machine_publish_or_stage_firmware_status(const char *status,
  * Deferred reports are skipped while OTA is still mutating runtime state.
  */
 void state_machine_try_flush_deferred_firmware_report(void);
+
+/** Restore a durable firmware outcome before evaluating OTA post-boot state. */
+esp_err_t state_machine_restore_deferred_firmware_report(void);
