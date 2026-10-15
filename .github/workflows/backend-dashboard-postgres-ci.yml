@@ -1,0 +1,49 @@
+name: Dashboard PostgreSQL Device Grants
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'iot-vehicle-tracking-system-cloud/Tracking_Backend/**'
+      - '.github/workflows/backend-dashboard-postgres-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  dashboard-grants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ivts_test
+          POSTGRES_PASSWORD: ivts_test_password
+          POSTGRES_DB: ivts_test_dashboard
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U ivts_test -d ivts_test_dashboard"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 15
+    defaults:
+      run:
+        working-directory: iot-vehicle-tracking-system-cloud/Tracking_Backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: iot-vehicle-tracking-system-cloud/Tracking_Backend/package-lock.json
+      - run: npm ci
+      - name: Test fleet-scoped dashboard SQL with real PostgreSQL
+        env:
+          IVTS_PG_INTEGRATION: '1'
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: ivts_test
+          PGPASSWORD: ivts_test_password
+          PGDATABASE: ivts_test_dashboard
+        run: npx vitest run src/domain/dashboard/repositories/dashboard.postgres.integration.test.ts
