@@ -86,7 +86,17 @@ jobs:
           test "$legacy" = 'f'
 
           docker compose -f "$COMPOSE_FILE" restart postgres
-          test "$(docker exec tracking-postgres psql -U postgres -d vehicle_tracking -Atc "SELECT COUNT(*) FROM users WHERE username='admin'")" = '1'
+          # A restarted database may not accept SQL on the very next scheduler
+          # tick; assert the result after readiness instead of racing startup.
+          restarted=0
+          for attempt in $(seq 1 45); do
+            if docker exec tracking-postgres psql -U postgres -d vehicle_tracking -Atc "SELECT COUNT(*) FROM users WHERE username='admin'" 2>/dev/null | grep -qx 1; then
+              restarted=1
+              break
+            fi
+            sleep 2
+          done
+          test "$restarted" = '1'
       - name: Clean up isolated PostGIS
         if: always()
         env:
