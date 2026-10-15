@@ -450,14 +450,14 @@ bool state_machine_publish_status(const char *status, const char *boundary_event
  * @param[in] code Numeric event code.
  * @param[in] message Human-readable event message.
  */
-void state_machine_publish_event(const char *event_type, int code, const char *message) {
+bool state_machine_publish_event(const char *event_type, int code, const char *message) {
     // Publish events through the shared pipeline so operator-facing diagnostics stay consistent online and offline.
     const state_publish_event_args_t args = {
         .event_type = event_type,
         .code = code,
         .message = message,
     };
-    (void)state_publish_via_pipeline("event",
+    return state_publish_via_pipeline("event",
                                      OFFLINE_RECORD_EVENT,
                                      &args,
                                      state_publish_format_event,
@@ -595,4 +595,139 @@ void state_machine_try_flush_deferred_firmware_report(void) {
 
     /* The publish helper clears both RAM and NVS only after a durable accept. */
     (void)state_machine_publish_firmware_payload(&s_deferred_firmware_report);
+}
+
+/*
+ * The event checkpoint stores occurrence metadata rather than the JSON body.
+ * This keeps auth tokens out of the NVS retry record and preserves message_id,
+ * original timestamp, seq_no and boot_id across failed publish and reboot.
+ */
+#define TRACKER_MOTION_ALARM_MAGIC UINT32_C(0x4D4F5431)
+#define TRACKER_MOTION_ALARM_RETRY_MS UINT64_C(5000)
+static tracker_motion_alarm_checkpoint_t s_motion_alarm_checkpoint;
+static bool s_motion_alarm_pending = false;
+static bool s_motion_alarm_in_nvs = false;
+static bool s_motion_alarm_delivery_accepted = false;
+static uint64_t s_motion_alarm_next_retry_ms = 0;
+
+bool state_machine_has_pending_motion_alarm(void) {
+    return s_motion_alarm_pending;
+}
+
+esp_err_t state_machine_restore_pending_motion_alarm(void) {
+    s_motion_alarm_pending = false;
+    s_motion_alarm_in_nvs = false;
+    s_motion_alarm_delivery_accepted = false;
+    s_motion_alarm_next_retry_ms = 0;
+    bool found = false;
+    esp_err_t err = nvs_config_load_motion_alarm(&s_motion_alarm_checkpoint, &found);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "event=motion_alarm_nvs_load_failed err=%s",
+                 esp_err_to_name(err));
+        return err;
+    }
+    s_motion_alarm_pending = found;
+    s_motion_alarm_in_nvs = found;
+    if (found) {
+        ESP_LOGW(TAG, "event=motion_alarm_restored mid=%s",
+                 s_motion_alarm_checkpoint.message_id);
+    }
+    return ESP_OK;
+}
+
+void state_machine_retry_pending_motion_alarm(void) {
+    if (!s_motion_alarm_pending) return;
+
+    uint64_t now_ms = util_uptime_ms();
+    if (s_motion_alarm_next_retry_ms != 0 && now_ms < s_motion_alarm_next_retry_ms) {
+        return;
+    }
+    s_motion_alarm_next_retry_ms = now_ms + TRACKER_MOTION_ALARM_RETRY_MS;
+
+    // Transient NVS write errors are retried while the occurrence stays in RAM.
+    if (!s_motion_alarm_in_nvs) {
+        esp_err_t err = nvs_config_save_motion_alarm(&s_motion_alarm_checkpoint);
+        s_motion_alarm_in_nvs = err == ESP_OK;
+        if (!s_motion_alarm_in_nvs) {
+            ESP_LOGE(TAG, "event=motion_alarm_nvs_write_failed err=%s",
+                     esp_err_to_name(err));
+        }
+    }
+
+    if (!s_motion_alarm_delivery_accepted) {
+        char *payload = data_format_event(&s_config,
+                                          "warning",
+                                          1001,
+                                          "motion_detected",
+                                          true,
+                                          s_motion_alarm_checkpoint.time_trusted,
+                                          s_motion_alarm_checkpoint.timestamp_ms,
+                                          s_motion_alarm_checkpoint.message_id,
+                                          s_motion_alarm_checkpoint.seq_no,
+                                          s_motion_alarm_checkpoint.boot_id);
+        if (payload == NULL) return;
+        bool live_connected = tracker_mqtt_is_connected();
+        bool accepted = false;
+        if (live_connected) {
+            accepted = tracker_mqtt_publish_event(payload) == ESP_OK;
+            if (accepted) {
+                telemetry_counters_inc_mqtt_publish_ok();
+            } else {
+                telemetry_counters_inc_mqtt_publish_fail();
+            }
+        }
+        if (!accepted) {
+            telemetry_counters_inc_mqtt_publish_fallback();
+            accepted = offline_queue_enqueue(OFFLINE_RECORD_EVENT, payload,
+                                             s_telemetry.gnss.fix_valid,
+                                             live_connected,
+                                             s_motion_alarm_checkpoint.time_trusted,
+                                             s_motion_alarm_checkpoint.timestamp_ms) == ESP_OK;
+        }
+        cJSON_free(payload);
+        if (!accepted) {
+            ESP_LOGW(TAG, "event=motion_alarm_pending_retry mid=%s",
+                     s_motion_alarm_checkpoint.message_id);
+            return;
+        }
+        s_motion_alarm_delivery_accepted = true;
+    }
+
+    // Clearing flash is separate from sending; never resend only because NVS
+    // erase/commit failed. Reboot duplicates retain the same message identity.
+    esp_err_t clear_err = s_motion_alarm_in_nvs
+        ? nvs_config_clear_motion_alarm() : ESP_OK;
+    if (clear_err != ESP_OK) {
+        ESP_LOGE(TAG, "event=motion_alarm_nvs_clear_failed err=%s",
+                 esp_err_to_name(clear_err));
+        return;
+    }
+    s_motion_alarm_pending = false;
+    s_motion_alarm_in_nvs = false;
+    s_motion_alarm_delivery_accepted = false;
+    s_motion_alarm_next_retry_ms = 0;
+}
+
+void state_machine_stage_motion_alarm(void) {
+    if (s_motion_alarm_pending) {
+        ESP_LOGW(TAG, "event=motion_alarm_occurrence_coalesced mid=%s",
+                 s_motion_alarm_checkpoint.message_id);
+        return;
+    }
+
+    state_machine_update_time_source();
+    memset(&s_motion_alarm_checkpoint, 0, sizeof(s_motion_alarm_checkpoint));
+    s_motion_alarm_checkpoint.magic = TRACKER_MOTION_ALARM_MAGIC;
+    s_motion_alarm_checkpoint.timestamp_ms = s_event_timestamp_ms;
+    s_motion_alarm_checkpoint.time_trusted = s_time_trusted;
+    s_motion_alarm_checkpoint.seq_no = state_machine_next_seq_no();
+    state_machine_fill_message_id(s_motion_alarm_checkpoint.message_id,
+                                  sizeof(s_motion_alarm_checkpoint.message_id));
+    util_copy_string(s_motion_alarm_checkpoint.boot_id,
+                     sizeof(s_motion_alarm_checkpoint.boot_id), s_boot_id);
+    s_motion_alarm_pending = true;
+    s_motion_alarm_in_nvs = false;
+    s_motion_alarm_delivery_accepted = false;
+    s_motion_alarm_next_retry_ms = 0;
+    state_machine_retry_pending_motion_alarm();
 }
