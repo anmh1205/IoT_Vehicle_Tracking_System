@@ -1,4 +1,7 @@
-import { findOne, insertOne, updateOne } from '@/infrastructure/database/queries';
+import { createHash } from 'node:crypto';
+import type { PoolClient } from 'pg';
+import { findOne, updateOne } from '@/infrastructure/database/queries';
+import { pool } from '@/infrastructure/database/pool';
 import { logger } from '@/infrastructure/logger';
 import type { Trip } from '@/domain/trip/types/trip.types';
 
@@ -13,8 +16,42 @@ interface VehicleIdentityRow {
   vehicle_id: string;
 }
 
-const buildAutoTripCode = (deviceId: string, sessionId: number): string =>
-  `AUTO-${deviceId}-SESSION-${sessionId}`;
+const buildAutoTripCode = (deviceId: string, sessionId: number): string => {
+  const legacyCode = `AUTO-${deviceId}-SESSION-${sessionId}`;
+  if (legacyCode.length <= 50) return legacyCode;
+
+  // Schema trip_code is VARCHAR(50); preserve existing short-code identity
+  // while using a collision-resistant deterministic identifier for long device IDs.
+  const digest = createHash('sha256').update(deviceId).update(':')
+    .update(String(sessionId)).digest('hex').slice(0, 40);
+  return `AUTO-${digest}`;
+};
+
+const withVehicleTripLock = async (
+  vehicleId: string,
+  action: (client: PoolClient) => Promise<void>,
+): Promise<void> => {
+  const client = await pool.connect();
+  let committed = false;
+  try {
+    await client.query('BEGIN');
+    // Same vehicle's session-start events serialize across backend replicas.
+    // PostgreSQL READ COMMITTED takes a fresh snapshot after this lock.
+    await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1::text, 0))', [vehicleId]);
+    await action(client);
+    await client.query('COMMIT');
+    committed = true;
+  } finally {
+    if (!committed) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (error) {
+        logger.error('Failed to roll back auto-trip transaction', { error });
+      }
+    }
+    client.release();
+  }
+};
 
 const parseOccurredAt = (value: string): Date | null => {
   const parsed = new Date(value);
@@ -30,15 +67,6 @@ const findVehicleByDevice = (deviceId: string): Promise<VehicleIdentityRow | nul
 const findTripByCode = (tripCode: string): Promise<Trip | null> =>
   findOne<Trip>('SELECT * FROM trips WHERE trip_code = $1 LIMIT 1', [tripCode]);
 
-const findActiveTrip = (vehicleId: string): Promise<Trip | null> =>
-  findOne<Trip>(
-    `SELECT * FROM trips
-     WHERE vehicle_id = $1 AND status = 'in_progress'
-     ORDER BY actual_start DESC, id DESC
-     LIMIT 1`,
-    [vehicleId],
-  );
-
 const handleSessionStarted = async (
   deviceId: string,
   sessionId: number,
@@ -53,50 +81,60 @@ const handleSessionStarted = async (
   }
 
   const tripCode = buildAutoTripCode(deviceId, sessionId);
-  const existingByCode = await findTripByCode(tripCode);
-  if (existingByCode) {
-    logger.debug(`Duplicate session-start for ${tripCode}; auto-trip already exists`);
-    return;
-  }
+  let inserted = false;
 
-  const existingActive = await findActiveTrip(vehicle.vehicle_id);
-  if (existingActive) {
-    const existingStart = existingActive.actual_start
-      ? new Date(existingActive.actual_start)
-      : null;
-    const hasValidExistingStart =
-      existingStart !== null && Number.isFinite(existingStart.getTime());
-
-    if (!hasValidExistingStart || existingStart.getTime() <= occurredAt.getTime()) {
-      logger.warn(
-        `Session ${sessionId} started for vehicle "${vehicle.vehicle_id}" while trip "${existingActive.trip_code}" is still active; refusing to create an overlapping auto-trip`,
-      );
+  await withVehicleTripLock(vehicle.vehicle_id, async (client) => {
+    const byCode = await client.query<Trip>(
+      'SELECT * FROM trips WHERE trip_code = $1 LIMIT 1',
+      [tripCode],
+    );
+    if (byCode.rows[0]) {
+      logger.debug(`Duplicate session-start for ${tripCode}; auto-trip already exists`);
       return;
     }
 
+    const activeResult = await client.query<Trip>(
+      `SELECT * FROM trips
+       WHERE vehicle_id = $1 AND status = 'in_progress'
+       ORDER BY actual_start DESC, id DESC LIMIT 1`,
+      [vehicle.vehicle_id],
+    );
+    const existingActive = activeResult.rows[0];
+    if (existingActive) {
+      const existingStart = existingActive.actual_start
+        ? new Date(existingActive.actual_start)
+        : null;
+      const hasValidExistingStart =
+        existingStart !== null && Number.isFinite(existingStart.getTime());
+
+      if (!hasValidExistingStart || existingStart.getTime() <= occurredAt.getTime()) {
+        logger.warn(
+          `Session ${sessionId} started for vehicle "${vehicle.vehicle_id}" while trip "${existingActive.trip_code}" is still active; refusing to create an overlapping auto-trip`,
+        );
+        return;
+      }
+
+      logger.info(
+        `Session ${sessionId} start predates newer active trip "${existingActive.trip_code}"; reconstructing historical auto-trip`,
+      );
+    }
+
+    const insertedResult = await client.query<Trip>(
+      `INSERT INTO trips (
+         trip_code, vehicle_id, device_id, status, actual_start, created_at, updated_at
+       ) VALUES ($1, $2, $3, 'in_progress', $4, NOW(), NOW())
+       ON CONFLICT (trip_code) DO NOTHING
+       RETURNING *`,
+      [tripCode, vehicle.vehicle_id, deviceId, occurredAt.toISOString()],
+    );
+    inserted = Boolean(insertedResult.rows[0]);
+  });
+
+  if (inserted) {
     logger.info(
-      `Session ${sessionId} start predates newer active trip "${existingActive.trip_code}"; reconstructing historical auto-trip`,
+      `Session ${sessionId} auto-started trip "${tripCode}" for vehicle "${vehicle.vehicle_id}" at ${occurredAt.toISOString()}`,
     );
   }
-
-  await insertOne<Trip>(
-    `INSERT INTO trips (
-       trip_code,
-       vehicle_id,
-       device_id,
-       status,
-       actual_start,
-       created_at,
-       updated_at
-     )
-     VALUES ($1, $2, $3, 'in_progress', $4, NOW(), NOW())
-     RETURNING *`,
-    [tripCode, vehicle.vehicle_id, deviceId, occurredAt.toISOString()],
-  );
-
-  logger.info(
-    `Session ${sessionId} auto-started trip "${tripCode}" for vehicle "${vehicle.vehicle_id}" at ${occurredAt.toISOString()}`,
-  );
 };
 
 const handleSessionEnded = async (
