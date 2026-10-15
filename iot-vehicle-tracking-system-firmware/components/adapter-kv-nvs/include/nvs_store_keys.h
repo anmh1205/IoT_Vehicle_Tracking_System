@@ -33,3 +33,6 @@
 
 /** @brief Key for persisted enable_tracking desired state. */
 #define TRACKER_NVS_TRACKING_ENABLED_KEY "track_en_v1"
+
+/** Persisted identity of a motion alert not yet durably accepted. */
+#define TRACKER_NVS_PENDING_MOTION_ALERT_KEY "motion_evt_v1"
