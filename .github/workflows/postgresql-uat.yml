@@ -85,6 +85,14 @@ jobs:
             !seen[$1]++ {print}
           ' /tmp/postgresql-env-raw > /tmp/postgresql-env-merged
 
+          # Fail before SSH deployment when the new initial-admin secret is
+          # missing or still the public template value.
+          bootstrap_secret="$(sed -n 's/^POSTGRES_BOOTSTRAP_ADMIN_PASSWORD=//p' /tmp/postgresql-env-merged | head -n 1)"
+          if [ "${#bootstrap_secret}" -lt 16 ] || [ "$bootstrap_secret" = 'CHANGE_ME_INITIAL_ADMIN_PASSWORD' ] || [ "$bootstrap_secret" = 'Admin@2026' ]; then
+            echo '::error::Provide a unique POSTGRES_BOOTSTRAP_ADMIN_PASSWORD in the UAT secret env file before deployment'
+            exit 1
+          fi
+
           {
             echo "SERVICE_ENV_CONTENT<<EOF"
             cat /tmp/postgresql-env-merged
