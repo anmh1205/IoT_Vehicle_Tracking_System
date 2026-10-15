@@ -8,6 +8,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_DB: ${POSTGRES_DB:-vehicle_tracking}
+      POSTGRES_BOOTSTRAP_ADMIN_PASSWORD: ${POSTGRES_BOOTSTRAP_ADMIN_PASSWORD:?A unique initial admin password is required}
     volumes:
       - ../Tracking_Data/Tracking_PostgreSQL/data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d
