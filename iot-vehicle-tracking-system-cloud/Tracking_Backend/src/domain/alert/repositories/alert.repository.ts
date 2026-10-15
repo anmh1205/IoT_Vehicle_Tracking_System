@@ -20,7 +20,7 @@ const alertVisibleTo = (scope: AlertAccessScope, userParam: number): string => {
   }
   return `EXISTS (
     SELECT 1 FROM user_device_access uda
-    WHERE uda.user_id = ${'
+    WHERE uda.user_id = $${userParam} AND (
       (a.device_id IS NOT NULL AND a.device_id = uda.device_id)
       OR (a.device_id IS NULL AND a.vehicle_id IS NOT NULL AND EXISTS (
         SELECT 1 FROM vehicles allowed_vehicle
