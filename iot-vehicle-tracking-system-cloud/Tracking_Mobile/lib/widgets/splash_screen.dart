@@ -4,12 +4,11 @@ import 'package:tracking_mobile/core/config/routes.dart';
 import 'package:tracking_mobile/core/utils/logger.dart';
 import 'package:tracking_mobile/features/auth/auth_provider.dart';
 import 'package:tracking_mobile/features/notifications/fcm_handler.dart';
-import 'package:tracking_mobile/features/offline/sync_service.dart';
 
 /// Splash screen shown on app launch.
 ///
-/// Restores the auth session, initializes FCM, starts the sync service,
-/// then navigates to the WebView screen.
+/// Restores native auth, initializes FCM, then opens the WebView.
+/// No offline-mutation sync worker is started because one does not exist.
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -39,9 +38,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     } catch (e) {
       Log.error('FCM init skipped: $e');
     }
-
-    // Start background sync listener
-    SyncService.instance.start();
 
     // Brief delay so the splash is visible
     await Future.delayed(const Duration(milliseconds: 800));
