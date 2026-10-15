@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { AlertTriangle, Download, Gauge, TimerReset, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { StatCard } from '@/components/common/stat-card';
@@ -57,12 +58,14 @@ export const StatisticsOverview = () => {
   );
   const uptimeData = useMemo(
     () =>
-      (uptimeQuery.data?.devices ?? []).map((row: any) => ({
+      (uptimeQuery.data?.devices ?? []).map((row) => ({
         label: String(row?.deviceId ?? row?.deviceName ?? '-'),
         uptimePercent: Number(row?.uptimePercent ?? 0),
       })),
     [uptimeQuery.data],
   );
+
+  const hasStatisticsError = summaryQuery.isError || fleetQuery.isError || uptimeQuery.isError;
 
   return (
     <div className="space-y-4">
@@ -119,28 +122,39 @@ export const StatisticsOverview = () => {
         </Button>
       </div>
 
+      {hasStatisticsError ? (
+        <Alert variant="destructive" role="alert">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Không thể tải dữ liệu thống kê</AlertTitle>
+          <AlertDescription>
+            Không thể xác minh dữ liệu trong khoảng thời gian đã chọn. Vui lòng thử lại;
+            hệ thống không thay thế dữ liệu thiếu bằng các con số ước tính.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Tổng thời gian hoạt động"
-          value={`${formatNumber(summaryQuery.data?.totalRuntimeHours ?? 0)}h`}
+          value={summaryQuery.isError ? '—' : `${formatNumber(summaryQuery.data?.totalRuntimeHours ?? 0)}h`}
           icon={<TimerReset className="h-4 w-4" />}
           isLoading={summaryQuery.isLoading}
         />
         <StatCard
           title="Độ ổn định kết nối"
-          value={`${formatNumber(summaryQuery.data?.averageUptimePercent ?? 0)}%`}
+          value={summaryQuery.isError ? '—' : `${formatNumber(summaryQuery.data?.averageUptimePercent ?? 0)}%`}
           icon={<TrendingUp className="h-4 w-4" />}
           isLoading={summaryQuery.isLoading}
         />
         <StatCard
           title="Tổng phiên"
-          value={summaryQuery.data?.totalSessions ?? 0}
+          value={summaryQuery.isError ? '—' : (summaryQuery.data?.totalSessions ?? 0)}
           icon={<Gauge className="h-4 w-4" />}
           isLoading={summaryQuery.isLoading}
         />
         <StatCard
           title="Tổng cảnh báo"
-          value={summaryQuery.data?.totalAlerts ?? 0}
+          value={summaryQuery.isError ? '—' : (summaryQuery.data?.totalAlerts ?? 0)}
           icon={<AlertTriangle className="h-4 w-4" />}
           isLoading={summaryQuery.isLoading}
         />
