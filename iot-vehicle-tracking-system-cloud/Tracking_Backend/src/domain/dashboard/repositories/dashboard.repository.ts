@@ -22,7 +22,7 @@ const scopedDeviceSql = (
   userParameter: number,
 ): string => isFleetWide(scope) ? 'TRUE' : `EXISTS (
   SELECT 1 FROM user_device_access uda
-  WHERE uda.user_id = ${userParameter} AND uda.device_id = ${deviceTable}.device_id
+  WHERE uda.user_id = $${userParameter} AND uda.device_id = ${deviceTable}.device_id
 )`;
 
 const scopedAlertSql = (scope: DashboardDeviceScope): string =>
