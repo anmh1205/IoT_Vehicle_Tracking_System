@@ -23,23 +23,18 @@
 static const char *TAG = "NVS_CONFIG";
 
 /**
- * @brief Initialize NVS flash storage.
+ * @brief Initialize the default NVS partition without destroying prior state.
  *
- * Initializes NVS. Handles version upgrade by erasing
- * if new version is found.
- *
- * @return ESP_OK on success, ESP_FAIL on error.
+ * NO_FREE_PAGES may represent recoverable namespace/GC pressure; NEW_VERSION
+ * may be a downgrade after OTA rollback. Neither error authorizes erasing
+ * credentials, persisted sessions, deduplication records or OTA recovery.
+ * Propagate the exact error and let bootstrap fail closed for service recovery.
  */
 esp_err_t nvs_config_init(void) {
-    // First attempt to bring up the default NVS partition.
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        // Either the partition is full of stale entries or it was written by a newer
-        // NVS format than this build understands. Both are unrecoverable in place,
-        // so erase the partition and re-initialize from a clean state.
-        ESP_LOGW(TAG, "NVS re-init required, erasing...");
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        err = nvs_flash_init();
+        ESP_LOGE(TAG, "event=nvs_init_incompatible err=%s action=preserve_partition",
+                 esp_err_to_name(err));
     }
     return err;
 }
@@ -195,10 +190,10 @@ esp_err_t nvs_config_load_command_dedupe_context(command_dedupe_context_t *out_c
     if (stored_size != sizeof(*out_context)) {
         nvs_close(handle);
         ESP_LOGW(TAG,
-                 "Command dedupe context size mismatch stored=%lu expected=%lu; ignoring",
+                 "Command dedupe context size mismatch stored=%lu expected=%lu; preserve replay guard",
                  (unsigned long)stored_size,
                  (unsigned long)sizeof(*out_context));
-        return ESP_OK;
+        return ESP_ERR_INVALID_SIZE;
     }
 
     size_t required_size = sizeof(*out_context);
@@ -323,12 +318,11 @@ esp_err_t nvs_config_load_session_context(session_persist_context_t *out_context
 
     if (stored_size != sizeof(*out_context)) {
         nvs_close(handle);
-        ESP_LOGW(TAG,
-                 "Session context size mismatch stored=%lu expected=%lu; clearing key",
+        ESP_LOGE(TAG,
+                 "Session context size mismatch stored=%lu expected=%lu; preserve recovery key",
                  (unsigned long)stored_size,
                  (unsigned long)sizeof(*out_context));
-        (void)nvs_config_clear_session_context();
-        return ESP_OK;
+        return ESP_ERR_INVALID_SIZE;
     }
 
     size_t required_size = sizeof(*out_context);

@@ -302,16 +302,19 @@ void app_core_bootstrap_run(void)
     esp_err_t err = nvs_config_init();
     if (err != ESP_OK)
     {
-        ESP_LOGW(TAG, "event=nvs_config_init_failed err=%s fallback=in_memory_defaults", esp_err_to_name(err));
+        ESP_LOGE(TAG, "event=nvs_config_init_failed err=%s action=halt_boot_preserve_storage", esp_err_to_name(err));
+        ESP_ERROR_CHECK(err);
+        return;
     }
 
-    // Load the runtime snapshot once at boot; if that fails, continue with compiled defaults.
+    // A missing/invalid persisted config must not be replaced with an assumed identity.
     config_t config = {0};
     err = nvs_config_load(&config);
     if (err != ESP_OK)
     {
-        ESP_LOGW(TAG, "event=nvs_config_load_failed err=%s fallback=compiled_defaults", esp_err_to_name(err));
-        app_config_set_defaults(&config);
+        ESP_LOGE(TAG, "event=nvs_config_load_failed err=%s action=halt_boot_preserve_storage", esp_err_to_name(err));
+        ESP_ERROR_CHECK(err);
+        return;
     }
 
     if (config.device_id[0] == '\0')
