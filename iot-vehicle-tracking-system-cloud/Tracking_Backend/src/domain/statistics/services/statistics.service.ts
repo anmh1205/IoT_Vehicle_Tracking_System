@@ -1,3 +1,4 @@
+import type { SessionUser } from '@/shared/types/common.types';
 import {
   getFleetUsage,
   getDeviceUptime,
@@ -5,6 +6,8 @@ import {
   getTripSummary,
   getSummaryTotals,
   getPolicyLimitsSummary,
+  getFleetTotalsLast30Days,
+  getMaintenanceTotalsAndVehicles,
 } from '@/domain/statistics/repositories/statistics.repository';
 import type {
   StatisticsDateRange,
@@ -13,6 +16,7 @@ import type {
   PolicyLimitsSummary,
 } from '@/domain/statistics/types/statistics.types';
 import { createValidationError } from '@/shared/utils/errors.util';
+import { isUndefinedTableError } from '@/shared/utils/postgres-error.util';
 
 const DEFAULT_RANGE_DAYS = 30;
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -64,11 +68,13 @@ export const getFleetUsageStats = async (params: {
   from?: string;
   to?: string;
   interval?: string;
-}) => {
+},
+  actor: SessionUser,
+) => {
   const range = parseRange(params.from, params.to);
   const interval = parseInterval(params.interval);
 
-  const data = await getFleetUsage(range, interval);
+  const data = await getFleetUsage(range, interval, actor);
   return {
     labels: data.map((item) => item.label),
     activeVehicles: data.map((item) => item.activeVehicles),
@@ -76,9 +82,11 @@ export const getFleetUsageStats = async (params: {
   };
 };
 
-export const getDeviceUptimeStats = async (params: { from?: string; to?: string }) => {
+export const getDeviceUptimeStats = async (params: { from?: string; to?: string },
+  actor: SessionUser,
+) => {
   const range = parseRange(params.from, params.to);
-  const devices = await getDeviceUptime(range);
+  const devices = await getDeviceUptime(range, actor);
   return { devices };
 };
 
@@ -86,11 +94,13 @@ export const getAlertFrequencyStats = async (params: {
   from?: string;
   to?: string;
   interval?: string;
-}) => {
+},
+  actor: SessionUser,
+) => {
   const range = parseRange(params.from, params.to);
   const interval = parseInterval(params.interval);
 
-  const data = await getAlertFrequency(range, interval);
+  const data = await getAlertFrequency(range, interval, actor);
   return {
     labels: data.map((item) => item.label),
     series: {
@@ -106,11 +116,13 @@ export const getTripSummaryStats = async (params: {
   from?: string;
   to?: string;
   interval?: string;
-}) => {
+},
+  actor: SessionUser,
+) => {
   const range = parseRange(params.from, params.to);
   const interval = parseInterval(params.interval);
 
-  const data = await getTripSummary(range, interval);
+  const data = await getTripSummary(range, interval, actor);
   return {
     labels: data.map((item) => item.label),
     totalTrips: data.map((item) => item.totalTrips),
@@ -122,10 +134,12 @@ export const getTripSummaryStats = async (params: {
 export const getSummaryStats = async (params: {
   from?: string;
   to?: string;
-}): Promise<StatisticsSummary> => {
+},
+  actor: SessionUser,
+): Promise<StatisticsSummary> => {
   const range = parseRange(params.from, params.to);
 
-  const [totals, uptime] = await Promise.all([getSummaryTotals(range), getDeviceUptime(range)]);
+  const [totals, uptime] = await Promise.all([getSummaryTotals(range, actor), getDeviceUptime(range, actor)]);
 
   const averageUptimePercent =
     uptime.length > 0
@@ -140,8 +154,8 @@ export const getSummaryStats = async (params: {
   };
 };
 
-export const getPolicyLimitsStats = async (): Promise<{ items: PolicyLimitsSummary[] }> => {
-  const rows = await getPolicyLimitsSummary();
+export const getPolicyLimitsStats = async (actor: SessionUser): Promise<{ items: PolicyLimitsSummary[] }> => {
+  const rows = await getPolicyLimitsSummary(actor);
   return {
     items: rows.map((row) => {
       const quotaLimitKm = Number.parseFloat(row.quota_limit_km ?? '0') || 0;
@@ -159,4 +173,46 @@ export const getPolicyLimitsStats = async (): Promise<{ items: PolicyLimitsSumma
       };
     }),
   };
+};
+
+export const getFleetStats = async (actor: SessionUser) => {
+  const { distanceFuel, runtime, violations } = await getFleetTotalsLast30Days(actor);
+  const totalDistanceKm = Number(distanceFuel?.total_distance_km ?? 0);
+  const totalFuelLiters = Number(distanceFuel?.total_fuel_liters ?? 0);
+  const activeTimeSeconds = Number(runtime?.active_time_seconds ?? 0);
+  // Historical idle-time estimate is tracked separately by #198.
+  const idleTimeSeconds = Math.max(Math.floor(activeTimeSeconds * 0.08), 0);
+  const avgEfficiency = totalFuelLiters > 0 ? totalDistanceKm / totalFuelLiters : 0;
+  const speeding = Number(violations?.speeding ?? 0);
+  const zone = Number(violations?.zone ?? 0);
+  const harshBraking = Number(violations?.other ?? 0);
+  const safetyScore = Math.max(0, 100 - speeding * 2 - harshBraking - zone);
+  return {
+    totalDistanceKm, totalFuelLiters, avgEfficiency, activeTimeSeconds,
+    idleTimeSeconds, safetyScore,
+    violations: { speeding, harshBraking, zone },
+  };
+};
+
+export const getMaintenanceStats = async (actor: SessionUser) => {
+  try {
+    const { totals, vehicles } = await getMaintenanceTotalsAndVehicles(actor);
+    return {
+      overdue: Number(totals?.overdue ?? 0),
+      dueSoon: Number(totals?.due_soon ?? 0),
+      upcoming: Number(totals?.upcoming ?? 0),
+      vehicles: vehicles.map((row) => ({
+        vehicleId: row.vehicle_id,
+        plate: row.plate,
+        serviceType: row.service_type,
+        dueDate: row.due_date ? new Date(row.due_date).toISOString().slice(0, 10) : null,
+        status: row.status,
+      })),
+    };
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      return { overdue: 0, dueSoon: 0, upcoming: 0, vehicles: [] };
+    }
+    throw error;
+  }
 };
