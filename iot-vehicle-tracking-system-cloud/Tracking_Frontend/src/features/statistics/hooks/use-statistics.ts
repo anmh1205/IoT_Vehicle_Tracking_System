@@ -39,11 +39,11 @@ export const useStatisticsSummary = (params: StatisticsParams) =>
 export const useFleetUtilization = (params: StatisticsParams) =>
   useQuery({
     queryKey: ['statistics', 'fleet-utilization', params],
-    queryFn: () => statisticsServices.getFleetUsage(params),
+    queryFn: () => statisticsServices.getFleetUsage({ ...params }),
   });
 
 export const useDeviceUptime = (params: StatisticsParams) =>
   useQuery({
     queryKey: ['statistics', 'device-uptime', params],
-    queryFn: () => statisticsServices.getDeviceUptime(params),
+    queryFn: () => statisticsServices.getDeviceUptime({ ...params }),
   });
