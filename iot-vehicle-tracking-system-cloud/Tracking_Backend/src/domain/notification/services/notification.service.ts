@@ -1,6 +1,12 @@
-import type { NotificationType } from '@/domain/notification/repositories/notification.repository';
+import type {
+  NotificationAccessScope,
+  NotificationRow,
+  NotificationType,
+} from '@/domain/notification/repositories/notification.repository';
 import {
-  findNotificationRows,
+  findNotificationPage,
+  getNotificationCounts,
+  getNotificationStats as getNotificationStatsAggregate,
   hideNotification,
   markAllNotificationsRead,
   markNotificationRead,
@@ -41,7 +47,7 @@ const toNotificationType = (alertType: string): NotificationType => {
   return 'alert';
 };
 
-const buildNotificationItem = (row: Awaited<ReturnType<typeof findNotificationRows>>[number]): NotificationItem => ({
+const buildNotificationItem = (row: NotificationRow): NotificationItem => ({
   id: row.id,
   type: toNotificationType(row.alert_type),
   title: row.title,
@@ -58,7 +64,7 @@ const buildNotificationItem = (row: Awaited<ReturnType<typeof findNotificationRo
 });
 
 export const listNotifications = async (
-  userId: number,
+  scope: NotificationAccessScope,
   params: {
     page?: number;
     limit?: number;
@@ -77,30 +83,35 @@ export const listNotifications = async (
 }> => {
   const page = params.page ?? 1;
   const limit = params.limit ?? 20;
+  if (!Number.isSafeInteger(page) || page < 1 || !Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+    throw new Error('Invalid notification pagination');
+  }
   const offset = (page - 1) * limit;
-
-  const rows = await findNotificationRows(userId, {
+  const filters = {
     type: params.type,
     search: params.search,
     from: params.from,
     to: params.to,
-  });
+    isRead: params.isRead,
+  };
 
-  const filteredItems = rows
-    .map(buildNotificationItem)
-    .filter((item) => (params.isRead === undefined ? true : item.isRead === params.isRead));
+  const [rows, counts] = await Promise.all([
+    findNotificationPage(scope, filters, limit, offset),
+    getNotificationCounts(scope, filters),
+  ]);
 
   return {
-    items: filteredItems.slice(offset, offset + limit),
-    unreadCount: filteredItems.reduce((count, item) => (item.isRead ? count : count + 1), 0),
-    total: filteredItems.length,
+    items: rows.map(buildNotificationItem),
+    unreadCount: counts.unreadCount,
+    total: counts.total,
     page,
     limit,
   };
 };
 
-export const markRead = async (userId: number, id: number): Promise<void> => {
-  await markNotificationRead(userId, id);
+export const markRead = async (scope: NotificationAccessScope, id: number): Promise<void> => {
+  await markNotificationRead(scope, id);
+  const userId = scope.userId;
   publishEvent('notification:updated', {
     user_id: userId,
     id,
@@ -108,8 +119,9 @@ export const markRead = async (userId: number, id: number): Promise<void> => {
   });
 };
 
-export const markAllRead = async (userId: number): Promise<void> => {
-  await markAllNotificationsRead(userId);
+export const markAllRead = async (scope: NotificationAccessScope): Promise<void> => {
+  await markAllNotificationsRead(scope);
+  const userId = scope.userId;
   publishEvent('notification:updated', {
     user_id: userId,
     unreadCount: 0,
@@ -117,8 +129,9 @@ export const markAllRead = async (userId: number): Promise<void> => {
   });
 };
 
-export const deleteNotification = async (userId: number, id: number): Promise<void> => {
-  await hideNotification(userId, id);
+export const deleteNotification = async (scope: NotificationAccessScope, id: number): Promise<void> => {
+  await hideNotification(scope, id);
+  const userId = scope.userId;
   publishEvent('notification:updated', {
     user_id: userId,
     id,
@@ -127,38 +140,12 @@ export const deleteNotification = async (userId: number, id: number): Promise<vo
 };
 
 export const getNotificationStats = async (
-  userId: number,
+  scope: NotificationAccessScope,
 ): Promise<{
   total: number;
   unreadCount: number;
   byType: Record<NotificationType, number>;
-}> => {
-  const rows = await findNotificationRows(userId, {});
-
-  const byType: Record<NotificationType, number> = {
-    alert: 0,
-    system: 0,
-    export: 0,
-    firmware: 0,
-    zone: 0,
-  };
-
-  let unreadCount = 0;
-  for (const row of rows) {
-    const type = toNotificationType(row.alert_type);
-    byType[type] += 1;
-    if (!row.is_read) {
-      unreadCount += 1;
-    }
-  }
-
-  return {
-    total: Object.values(byType).reduce((sum, count) => sum + count, 0),
-    unreadCount,
-    byType,
-  };
-};
-
+}> => getNotificationStatsAggregate(scope);
 
 export const registerPushToken = async (
   userId: number,
