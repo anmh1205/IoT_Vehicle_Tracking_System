@@ -20,7 +20,8 @@ def test_meta_recovery_never_promotes_partial_tmp_before_valid_backup():
     assert block.index("selected = SD_LOG_META_BAK_PATH") < block.index(
         "selected = SD_LOG_META_TMP_PATH"
     )
-    assert block.index("rename(selected, SD_LOG_META_PATH)") < block.index(
+    selected_branch = block.split("const char *selected = NULL;", 1)[1]
+    assert selected_branch.index("rename(selected, SD_LOG_META_PATH)") < selected_branch.index(
         "remove(SD_LOG_META_TMP_PATH)"
     )
 
@@ -34,7 +35,8 @@ def test_log_recovery_requires_full_record_scan_and_keeps_backup_on_failure():
     assert block.index("selected = SD_LOG_DATA_BAK_PATH") < block.index(
         "selected = SD_LOG_DATA_TMP_PATH"
     )
-    assert block.index("rename(selected, SD_LOG_DATA_PATH)") < block.index(
+    selected_branch = block.split("const char *selected = NULL;", 1)[1]
+    assert selected_branch.index("rename(selected, SD_LOG_DATA_PATH)") < selected_branch.index(
         "remove(SD_LOG_DATA_TMP_PATH)"
     )
     validator = SD_STORE.split("static bool sd_log_store_data_candidate_valid(", 1)[1].split(
