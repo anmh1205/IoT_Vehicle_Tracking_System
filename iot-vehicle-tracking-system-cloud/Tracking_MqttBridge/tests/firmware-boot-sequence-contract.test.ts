@@ -22,7 +22,7 @@ test('firmware update resets seq watermark when a new boot is accepted', () => {
 
 test('firmware lifecycle decision is serialized and committed before realtime publish', () => {
   const transactionStart = source.indexOf('let updateDecision: UpdateDecision');
-  const realtime = source.indexOf("publishInternalEvent('firmware'", transactionStart);
+  const realtime = source.lastIndexOf("await publishInternalEventDurable('firmware'");
   const transaction = source.slice(transactionStart, realtime);
 
   assert.ok(transactionStart >= 0);
@@ -43,7 +43,7 @@ test('firmware lifecycle decision is serialized and committed before realtime pu
 
 test('successful OTA inventory update shares the lifecycle transaction', () => {
   const transactionStart = source.indexOf('let updateDecision: UpdateDecision');
-  const realtime = source.indexOf("publishInternalEvent('firmware'", transactionStart);
+  const realtime = source.lastIndexOf("await publishInternalEventDurable('firmware'");
   const transaction = source.slice(transactionStart, realtime);
   const successBranch = transaction.indexOf("if (payload.status === 'success')");
   const inventoryUpdate = transaction.indexOf('SET firmware_version = $2', successBranch);
