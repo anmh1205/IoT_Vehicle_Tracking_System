@@ -190,10 +190,10 @@ esp_err_t nvs_config_load_command_dedupe_context(command_dedupe_context_t *out_c
     if (stored_size != sizeof(*out_context)) {
         nvs_close(handle);
         ESP_LOGW(TAG,
-                 "Command dedupe context size mismatch stored=%lu expected=%lu; ignoring",
+                 "Command dedupe context size mismatch stored=%lu expected=%lu; preserve replay guard",
                  (unsigned long)stored_size,
                  (unsigned long)sizeof(*out_context));
-        return ESP_OK;
+        return ESP_ERR_INVALID_SIZE;
     }
 
     size_t required_size = sizeof(*out_context);
@@ -318,12 +318,11 @@ esp_err_t nvs_config_load_session_context(session_persist_context_t *out_context
 
     if (stored_size != sizeof(*out_context)) {
         nvs_close(handle);
-        ESP_LOGW(TAG,
-                 "Session context size mismatch stored=%lu expected=%lu; clearing key",
+        ESP_LOGE(TAG,
+                 "Session context size mismatch stored=%lu expected=%lu; preserve recovery key",
                  (unsigned long)stored_size,
                  (unsigned long)sizeof(*out_context));
-        (void)nvs_config_clear_session_context();
-        return ESP_OK;
+        return ESP_ERR_INVALID_SIZE;
     }
 
     size_t required_size = sizeof(*out_context);
