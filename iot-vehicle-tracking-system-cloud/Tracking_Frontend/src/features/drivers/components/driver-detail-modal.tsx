@@ -159,7 +159,7 @@ export const DriverDetailModal = ({
       variant: 'default' as const,
       warning: '',
     };
-  }, [detail?.licenseExpiry]);
+  }, [detail]);
 
   const completeness = useMemo(() => {
     const requiredFields = [
