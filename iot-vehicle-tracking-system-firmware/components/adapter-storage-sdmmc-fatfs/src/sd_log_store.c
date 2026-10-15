@@ -271,7 +271,7 @@ static bool sd_log_store_data_candidate_valid(const char *path) {
         size_t size = strlen(line);
         // Rotation snapshots always end each complete persisted record in LF.
         // A partial tail must never win over an intact backup.
-        if (size == 0U || line[size - 1U] != '\\n') {
+        if (size == 0U || line[size - 1U] != '\n') {
             valid = false;
             break;
         }
