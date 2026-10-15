@@ -17,7 +17,7 @@ export const listViolations = asyncHandler(async (req: AuthenticatedRequest, res
     throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
   }
 
-  const result = await violationListService.listViolations(parsed.data);
+  const result = await violationListService.listViolations(parsed.data, req.user!);
   sendOk(res, result);
 });
 
@@ -27,7 +27,7 @@ export const getViolation = asyncHandler(async (req: AuthenticatedRequest, res: 
     throw createValidationError('Invalid violation ID');
   }
 
-  const violation = await violationCrudService.getViolationById(id);
+  const violation = await violationCrudService.getViolationById(id, req.user!);
   sendOk(res, violation);
 });
 
@@ -37,7 +37,7 @@ export const createViolation = asyncHandler(async (req: AuthenticatedRequest, re
     throw createValidationError('Invalid violation data', parsed.error.flatten().fieldErrors);
   }
 
-  const violation = await violationCrudService.createViolation(parsed.data);
+  const violation = await violationCrudService.createViolation(parsed.data, req.user!);
   sendCreated(res, violation);
 });
 
@@ -53,8 +53,7 @@ export const acknowledgeViolation = asyncHandler(
       throw createValidationError('Invalid acknowledge data', parsed.error.flatten().fieldErrors);
     }
 
-    const userId = req.user!.id;
-    const violation = await violationCrudService.acknowledgeViolation(id, userId, parsed.data);
+    const violation = await violationCrudService.acknowledgeViolation(id, req.user!, parsed.data);
     sendOk(res, violation);
   },
 );

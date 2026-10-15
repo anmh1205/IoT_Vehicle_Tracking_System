@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth } from '@/middleware/auth.middleware';
+import { requireAuth, requireRole } from '@/middleware/auth.middleware';
 import * as violationController from '@/api/controllers/violation.controller';
 
 const router = Router();
@@ -9,7 +9,7 @@ router.use(requireAuth);
 
 router.get('/', violationController.listViolations);
 router.get('/:id', violationController.getViolation);
-router.post('/', violationController.createViolation);
-router.put('/:id/acknowledge', violationController.acknowledgeViolation);
+router.post('/', requireRole('root', 'admin', 'manager', 'operator'), violationController.createViolation);
+router.put('/:id/acknowledge', requireRole('root', 'admin', 'manager', 'operator'), violationController.acknowledgeViolation);
 
 export default router;

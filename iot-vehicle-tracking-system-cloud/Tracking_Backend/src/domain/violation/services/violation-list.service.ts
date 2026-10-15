@@ -1,3 +1,4 @@
+import type { SessionUser } from '@/shared/types/common.types';
 import * as violationRepo from '@/domain/violation/repositories/violation.repository';
 import { sanitizeViolation } from '@/domain/violation/services/violation-crud.service';
 import type {
@@ -9,6 +10,7 @@ import { isUndefinedTableError } from '@/shared/utils/postgres-error.util';
 
 export const listViolations = async (
   query: ViolationListQuery,
+  actor: SessionUser,
 ): Promise<{
   items: ViolationPublic[];
   pagination: { page: number; limit: number; total: number; totalPages: number };
@@ -17,7 +19,7 @@ export const listViolations = async (
   const limit = query.limit ?? 20;
   let result: { violations: Violation[]; total: number };
   try {
-    result = await violationRepo.findAll(query);
+    result = await violationRepo.findAll(query, actor);
   } catch (error) {
     if (isUndefinedTableError(error)) {
       return {
