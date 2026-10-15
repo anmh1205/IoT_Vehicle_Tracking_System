@@ -1,0 +1,44 @@
+name: Temporary safe dependency lockfile refresh
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/refresh-lockfiles.yml'
+permissions:
+  contents: write
+jobs:
+  refresh:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'security/issue-225-dependency-updates'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: security/issue-225-dependency-updates
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Update frontend direct security fixes and compatible transitive dependencies
+        working-directory: iot-vehicle-tracking-system-cloud/Tracking_Frontend
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit next@16.4.1 eslint-config-next@16.4.1 axios@^1.20.0
+          npm update --package-lock-only --ignore-scripts --no-audit
+          npm audit fix --package-lock-only --ignore-scripts --no-fund || true
+      - name: Update MQTT Bridge compatible direct and transitive versions
+        working-directory: iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
+        run: |
+          npm update --package-lock-only --ignore-scripts --no-audit
+          npm audit fix --package-lock-only --ignore-scripts --no-fund || true
+      - name: Commit only reviewed-scope manifests and remove temporary updater
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/refresh-lockfiles.yml
+          git add iot-vehicle-tracking-system-cloud/Tracking_Frontend/package.json
+          git add iot-vehicle-tracking-system-cloud/Tracking_Frontend/package-lock.json
+          git add iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/package.json
+          git add iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/package-lock.json
+          git diff --cached --stat
+          git commit -m "security(deps): update compatible npm patches and Next 16.4.1"
+          git push origin HEAD:security/issue-225-dependency-updates
