@@ -205,11 +205,11 @@ const emitUserEvent = (
   payload: { user_id?: number | null },
 ): void => {
   const ns = server.of(`/${namespace}`);
-  if (payload.user_id) {
-    ns.to(`user:${payload.user_id}`).emit(event, payload);
-  } else {
-    ns.emit(event, payload);
+  if (!payload.user_id) {
+    log.warn('Skipped user-scoped realtime event without recipient', { event, namespace });
+    return;
   }
+  ns.to(`user:${payload.user_id}`).emit(event, payload);
   recordEventEmission(event);
 };
 
@@ -447,7 +447,7 @@ const registerEventBridges = (server: TypedIOServer): void => {
   });
 
   subscribeEvent('simulator:status', (payload) => {
-    server.of('/dashboard').emit('simulator:status', payload);
+    server.of('/dashboard').to(SYSTEM_ADMIN_ROOM).emit('simulator:status', payload);
     recordEventEmission('simulator:status');
   });
 
