@@ -56,8 +56,8 @@ jobs:
         run: node --test iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/scripts/apply-init-migrations.test.js
       - name: Reject placeholder admin secret before any database work
         run: |
-          bash -n iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/01a-bootstrap-admin.sh
-          if POSTGRES_BOOTSTRAP_ADMIN_PASSWORD=CHANGE_ME_INITIAL_ADMIN_PASSWORD bash iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/01a-bootstrap-admin.sh; then
+          bash -n iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/99-bootstrap-admin.sh
+          if POSTGRES_BOOTSTRAP_ADMIN_PASSWORD=CHANGE_ME_INITIAL_ADMIN_PASSWORD bash iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/99-bootstrap-admin.sh; then
             echo "::error::Insecure placeholder was accepted"
             exit 1
           fi
