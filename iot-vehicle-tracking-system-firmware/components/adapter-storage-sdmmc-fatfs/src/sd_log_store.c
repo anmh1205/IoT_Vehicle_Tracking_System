@@ -171,23 +171,28 @@ static esp_err_t sd_log_store_read_meta(void) {
     FILE *fp = fopen(SD_LOG_META_PATH, "rb");
     if (fp == NULL) {
         if (errno != ENOENT) {
-            ESP_LOGW(TAG,
-                     "open meta for read failed path=%s errno=%d (%s)",
-                     SD_LOG_META_PATH,
-                     errno,
-                     strerror(errno));
+            ESP_LOGE(TAG, "open queue metadata failed path=%s errno=%d",
+                     SD_LOG_META_PATH, errno);
             sd_log_store_mark_degraded();
+            return ESP_FAIL;
         }
         memset(&s_ctx.meta, 0, sizeof(s_ctx.meta));
-        return ESP_OK;
+        return ESP_OK; // Confirmed absent on first boot.
     }
 
     size_t read_len = fread(&s_ctx.meta, 1, sizeof(s_ctx.meta), fp);
+    bool failed_read = ferror(fp) != 0;
     fclose(fp);
-    if (read_len != sizeof(s_ctx.meta)) {
-        /* Partial metadata means we keep operating but treat it as degraded. */
-        memset(&s_ctx.meta, 0, sizeof(s_ctx.meta));
+    uint32_t next_after_write =
+        s_ctx.meta.write_seq == UINT32_MAX ? UINT32_MAX : s_ctx.meta.write_seq + 1U;
+    if (failed_read || read_len != sizeof(s_ctx.meta) ||
+        s_ctx.meta.ack_seq_critical > s_ctx.meta.write_seq ||
+        s_ctx.meta.replay_seq > next_after_write) {
+        // An incomplete/corrupt cursor must never silently reset replay state
+        // or authorize discarding the critical offline queue.
+        ESP_LOGE(TAG, "invalid queue metadata snapshot; preserve SD recovery state");
         sd_log_store_mark_degraded();
+        return ESP_ERR_INVALID_SIZE;
     }
     return ESP_OK;
 }
@@ -229,99 +234,160 @@ static esp_err_t sd_log_store_ensure_dirs(void) {
     return ESP_OK;
 }
 
+/*
+ * Candidate validation is only used when crash artifacts are present, not on
+ * every successful mount. Never treat a truncated *.tmp as a committed log.
+ * The main replay decoder verifies bounded syntax; a newer checksummed journal
+ * format and FAT fault injection remain outside this recovery hardening.
+ */
+static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *out_record);
+
+static bool sd_log_store_meta_candidate_valid(const char *path) {
+    struct stat st = {0};
+    if (stat(path, &st) != 0 || st.st_size != (off_t)sizeof(sd_log_meta_t)) {
+        return false;
+    }
+    FILE *fp = fopen(path, "rb");
+    if (fp == NULL) {
+        return false;
+    }
+    sd_log_meta_t candidate = {0};
+    size_t bytes = fread(&candidate, 1, sizeof(candidate), fp);
+    bool read_failed = ferror(fp) != 0;
+    fclose(fp);
+    if (read_failed || bytes != sizeof(candidate)) {
+        return false;
+    }
+    uint32_t next_after_write =
+        candidate.write_seq == UINT32_MAX ? UINT32_MAX : candidate.write_seq + 1U;
+    return candidate.ack_seq_critical <= candidate.write_seq &&
+           candidate.replay_seq <= next_after_write;
+}
+
+static bool sd_log_store_data_candidate_valid(const char *path) {
+    FILE *fp = fopen(path, "rb");
+    if (fp == NULL) {
+        return false;
+    }
+    char line[SD_LOG_LINE_MAX] = {0};
+    uint32_t last_sequence = 0;
+    bool valid = true;
+    while (fgets(line, sizeof(line), fp) != NULL) {
+        size_t size = strlen(line);
+        // Rotation snapshots always end each complete persisted record in LF.
+        // A partial tail must never win over an intact backup.
+        if (size == 0U || line[size - 1U] != '\n') {
+            valid = false;
+            break;
+        }
+        sd_log_record_t record = {0};
+        if (sd_log_store_parse_record(line, &record) != ESP_OK ||
+            record.seq == 0U || record.seq <= last_sequence) {
+            valid = false;
+            break;
+        }
+        last_sequence = record.seq;
+    }
+    if (ferror(fp) != 0) {
+        valid = false;
+    }
+    fclose(fp);
+    return valid;
+}
+
 static esp_err_t sd_log_store_recover_meta_if_needed(void) {
-    // Recover metadata from backup files here when the primary snapshot was interrupted mid-rotation.
-    struct stat meta_st = {0};
-    struct stat bak_st = {0};
-    struct stat tmp_st = {0};
+    struct stat st = {0};
+    bool has_live = stat(SD_LOG_META_PATH, &st) == 0;
+    bool has_bak = stat(SD_LOG_META_BAK_PATH, &st) == 0;
+    bool has_tmp = stat(SD_LOG_META_TMP_PATH, &st) == 0;
 
-    bool has_meta = stat(SD_LOG_META_PATH, &meta_st) == 0;
-    bool has_bak = stat(SD_LOG_META_BAK_PATH, &bak_st) == 0;
-    bool has_tmp = stat(SD_LOG_META_TMP_PATH, &tmp_st) == 0;
-
-    if (has_meta) {
-        /* Normal case: live file exists, so stale temp/backup can be discarded. */
-        if (has_tmp) {
-            remove(SD_LOG_META_TMP_PATH);
+    if (has_live) {
+        if (!sd_log_store_meta_candidate_valid(SD_LOG_META_PATH)) {
+            ESP_LOGE(TAG, "live queue metadata invalid; preserving recovery artifacts");
+            sd_log_store_mark_degraded();
+            return ESP_ERR_INVALID_SIZE;
         }
-        if (has_bak) {
-            remove(SD_LOG_META_BAK_PATH);
-        }
+        if (has_tmp) { remove(SD_LOG_META_TMP_PATH); }
+        if (has_bak) { remove(SD_LOG_META_BAK_PATH); }
         return ESP_OK;
     }
 
-    if (has_tmp) {
-        /* Crash may have happened after temp write but before promote to live. */
-        if (rename(SD_LOG_META_TMP_PATH, SD_LOG_META_PATH) != 0) {
-            remove(SD_LOG_META_TMP_PATH);
-            sd_log_store_mark_degraded();
-            return ESP_FAIL;
-        }
-        if (has_bak) {
-            remove(SD_LOG_META_BAK_PATH);
-        }
-        ESP_LOGW(TAG, "recover metadata from temp");
-        return ESP_OK;
+    if (!has_bak && !has_tmp) {
+        return ESP_OK; // First boot with no existing metadata snapshot.
     }
 
-    if (has_bak) {
-        /* Last fallback: restore the previous committed snapshot. */
-        if (rename(SD_LOG_META_BAK_PATH, SD_LOG_META_PATH) != 0) {
-            sd_log_store_mark_degraded();
-            return ESP_FAIL;
-        }
-        ESP_LOGW(TAG, "recover metadata from backup");
+    // Prefer the previous committed snapshot over an interrupted temp write.
+    const char *selected = NULL;
+    bool select_backup = has_bak && sd_log_store_meta_candidate_valid(SD_LOG_META_BAK_PATH);
+    if (select_backup) {
+        selected = SD_LOG_META_BAK_PATH;
+    } else if (has_tmp && sd_log_store_meta_candidate_valid(SD_LOG_META_TMP_PATH)) {
+        selected = SD_LOG_META_TMP_PATH;
+    }
+    if (selected == NULL) {
+        ESP_LOGE(TAG, "all metadata recovery candidates invalid; preserving backup and temp");
+        sd_log_store_mark_degraded();
+        return ESP_ERR_INVALID_SIZE;
     }
 
+    if (rename(selected, SD_LOG_META_PATH) != 0) {
+        sd_log_store_mark_degraded();
+        return ESP_FAIL;
+    }
+    // Only discard the losing temp after the selected snapshot was validated
+    // and promoted. Keep an invalid backup for diagnosis rather than erasing it.
+    if (select_backup && has_tmp) {
+        remove(SD_LOG_META_TMP_PATH);
+    }
+    ESP_LOGW(TAG, "recovered metadata from %s", select_backup ? "backup" : "validated temp");
     return ESP_OK;
 }
 
 static esp_err_t sd_log_store_recover_data_if_needed(void) {
-    // Recover the queue log here when a temp or backup file indicates an interrupted append or compaction pass.
     sd_log_store_reset_peek_cache();
+    struct stat st = {0};
+    bool has_live = stat(SD_LOG_DATA_PATH, &st) == 0;
+    bool has_bak = stat(SD_LOG_DATA_BAK_PATH, &st) == 0;
+    bool has_tmp = stat(SD_LOG_DATA_TMP_PATH, &st) == 0;
 
-    struct stat log_st = {0};
-    struct stat bak_st = {0};
-    struct stat tmp_st = {0};
-
-    bool has_log = stat(SD_LOG_DATA_PATH, &log_st) == 0;
-    bool has_bak = stat(SD_LOG_DATA_BAK_PATH, &bak_st) == 0;
-    bool has_tmp = stat(SD_LOG_DATA_TMP_PATH, &tmp_st) == 0;
-
-    if (has_log) {
-        /* Normal case: log exists, so stale temp/backup artifacts can be removed. */
-        if (has_tmp) {
-            remove(SD_LOG_DATA_TMP_PATH);
+    if (has_live) {
+        // Avoid a full data scan on every normal mount. When crash artifacts
+        // exist, refuse to delete them until the primary passes a full scan.
+        if ((has_bak || has_tmp) && !sd_log_store_data_candidate_valid(SD_LOG_DATA_PATH)) {
+            ESP_LOGE(TAG, "live queue log invalid; preserving backup and temp");
+            sd_log_store_mark_degraded();
+            return ESP_ERR_INVALID_SIZE;
         }
-        if (has_bak) {
-            remove(SD_LOG_DATA_BAK_PATH);
-        }
+        if (has_tmp) { remove(SD_LOG_DATA_TMP_PATH); }
+        if (has_bak) { remove(SD_LOG_DATA_BAK_PATH); }
         return ESP_OK;
     }
 
-    if (has_tmp) {
-        /* Compaction or append rotation may have been interrupted before promotion. */
-        if (rename(SD_LOG_DATA_TMP_PATH, SD_LOG_DATA_PATH) != 0) {
-            remove(SD_LOG_DATA_TMP_PATH);
-            sd_log_store_mark_degraded();
-            return ESP_FAIL;
-        }
-        if (has_bak) {
-            remove(SD_LOG_DATA_BAK_PATH);
-        }
-        ESP_LOGW(TAG, "recover queue.log from temp");
-        return ESP_OK;
+    if (!has_bak && !has_tmp) {
+        return ESP_OK; // Empty new SD store.
     }
 
-    if (has_bak) {
-        /* Restore the last known-good queue file if the live file disappeared. */
-        if (rename(SD_LOG_DATA_BAK_PATH, SD_LOG_DATA_PATH) != 0) {
-            sd_log_store_mark_degraded();
-            return ESP_FAIL;
-        }
-        ESP_LOGW(TAG, "recover queue.log from backup");
+    bool select_backup = has_bak && sd_log_store_data_candidate_valid(SD_LOG_DATA_BAK_PATH);
+    const char *selected = NULL;
+    if (select_backup) {
+        selected = SD_LOG_DATA_BAK_PATH;
+    } else if (has_tmp && sd_log_store_data_candidate_valid(SD_LOG_DATA_TMP_PATH)) {
+        selected = SD_LOG_DATA_TMP_PATH;
+    }
+    if (selected == NULL) {
+        ESP_LOGE(TAG, "all queue log recovery candidates invalid; preserving artifacts");
+        sd_log_store_mark_degraded();
+        return ESP_ERR_INVALID_SIZE;
     }
 
+    if (rename(selected, SD_LOG_DATA_PATH) != 0) {
+        sd_log_store_mark_degraded();
+        return ESP_FAIL;
+    }
+    if (select_backup && has_tmp) {
+        remove(SD_LOG_DATA_TMP_PATH);
+    }
+    ESP_LOGW(TAG, "recovered queue log from %s", select_backup ? "backup" : "validated temp");
     return ESP_OK;
 }
 
