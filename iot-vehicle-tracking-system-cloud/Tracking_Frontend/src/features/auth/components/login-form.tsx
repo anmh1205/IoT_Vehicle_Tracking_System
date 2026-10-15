@@ -33,6 +33,15 @@ export const LoginForm = () => {
     if (reason === 'signed-out') {
       return 'Bạn đã đăng xuất khỏi hệ thống.';
     }
+    if (reason === 'server-revocation-unconfirmed') {
+      return 'Đã xóa phiên trên ứng dụng, nhưng chưa xác nhận được thu hồi phiên trên máy chủ. Hãy kiểm tra kết nối và đổi mật khẩu nếu cần.';
+    }
+    if (reason === 'native-credential-clear-unconfirmed') {
+      return 'Đã yêu cầu đăng xuất máy chủ, nhưng không thể xác nhận xóa thông tin đăng nhập an toàn trên thiết bị. Không sử dụng chung thiết bị này cho đến khi xử lý.';
+    }
+    if (reason === 'logout-incomplete') {
+      return 'Chưa xác nhận được đăng xuất máy chủ hoặc xóa phiên trên thiết bị. Hãy thử lại khi có kết nối và kiểm tra bảo mật tài khoản.';
+    }
     return null;
   }, [reason]);
   const setAuth = useAuthStore((state) => state.setAuth);
