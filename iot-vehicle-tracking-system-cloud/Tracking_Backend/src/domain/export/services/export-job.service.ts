@@ -1,11 +1,12 @@
 import * as exportRepo from '@/domain/export/repositories/export.repository';
 import { processExport } from '@/domain/export/services/export-processing.service';
+import { isSupportedExportType } from '@/domain/export/services/export-file.service';
 import type {
   ExportJob,
   ExportJobPublic,
   CreateExportInput,
 } from '@/domain/export/types/export.types';
-import { createNotFoundError, createForbiddenError } from '@/shared/utils/errors.util';
+import { createNotFoundError, createForbiddenError, createValidationError } from '@/shared/utils/errors.util';
 import { isUndefinedTableError } from '@/shared/utils/postgres-error.util';
 
 const sanitizeExportJob = (job: ExportJob): ExportJobPublic => ({
@@ -36,6 +37,10 @@ export const createExport = async (
   userId: number,
   input: CreateExportInput,
 ): Promise<ExportJobPublic> => {
+  if (!isSupportedExportType(input.exportType)) {
+    throw createValidationError('Unsupported export type: ' + input.exportType);
+  }
+
   let job: ExportJob;
   try {
     job = await exportRepo.create(userId, input);
