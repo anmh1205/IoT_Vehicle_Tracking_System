@@ -779,7 +779,7 @@ esp_err_t ble_obd_send_raw(ble_obd_ctx_t *ctx, const char *command, uint32_t tim
     ctx->tx_data.expect_pid_header = false;
     ctx->tx_data.got_valid_payload = false;
     const size_t command_len = strlen(command);
-    ctx->tx_data.raw_pending = true;
+    ctx->tx_data.raw_pending = false;
     ctx->tx_data.raw_response_ok = false;
     ctx->tx_data.raw_is_at = command_len >= 2 &&
         toupper((unsigned char)command[0]) == 'A' &&
@@ -791,6 +791,7 @@ esp_err_t ble_obd_send_raw(ble_obd_ctx_t *ctx, const char *command, uint32_t tim
     while (xSemaphoreTake(ctx->response_sem, 0) == pdTRUE) {
     }
     ble_obd_response_reset(ctx);
+    ctx->tx_data.raw_pending = true;
 
     uint16_t tx_handle = ble_obd_tx_handle();
     if (tx_handle == 0) {
