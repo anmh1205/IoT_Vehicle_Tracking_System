@@ -25,6 +25,30 @@ void main() {
     }
   });
 
+  test('compares the parsed authority rather than URL text', () {
+    expect(
+      isTrustedWebOrigin(
+        'https://thingdock.dev/dashboard?redirect=https://evil.test/',
+        trusted,
+      ),
+      isTrue,
+    );
+    expect(
+      isTrustedWebOrigin(
+        'https://evil.test/dashboard?redirect=https://thingdock.dev/',
+        trusted,
+      ),
+      isFalse,
+    );
+    expect(
+      isTrustedWebOrigin(
+        'https://thingdock.dev:443@evil.test/dashboard',
+        trusted,
+      ),
+      isFalse,
+    );
+  });
+
   test('rejects scheme and non-equivalent port changes', () {
     for (final url in [
       'http://thingdock.dev/',
