@@ -75,4 +75,27 @@ describe('simulator production safety boundary', () => {
     expect(String(db.mock.calls[0][0])).toContain('SELECT device_id, auth_token');
     expect(publishEvent).not.toHaveBeenCalled();
   });
+
+  it('rejects active sessions without changing credentials or closing session rows', async () => {
+    vi.stubEnv('SIMULATOR_ISOLATED_TEST_MODE', 'true');
+    vi.stubEnv('SIMULATOR_ISOLATED_DATABASE', 'ivts_simulator_local');
+    vi.stubEnv('SIMULATOR_ISOLATED_BROKER_HOST', 'isolated-broker.local');
+
+    db.mockResolvedValueOnce({
+      rows: [{
+        device_id: 'SIM-TEST-01',
+        auth_token: 'existing-hash',
+        latitude: null,
+        longitude: null,
+      }],
+    } as never);
+    db.mockResolvedValueOnce({ rows: [{ id: 777 }] } as never);
+
+    await expect(startSimulation(input, 1)).rejects.toMatchObject({ status: 400 });
+    expect(db).toHaveBeenCalledTimes(2);
+    expect(db.mock.calls.some(([sql]) => /UPDATE\s+(devices|device_sessions)/i.test(String(sql))))
+      .toBe(false);
+    expect(publishEvent).not.toHaveBeenCalled();
+  });
+
 });
