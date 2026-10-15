@@ -3,9 +3,16 @@ import type { AuthenticatedRequest } from '@/shared/types/common.types';
 import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { sendOk } from '@/shared/utils/response.util';
 import * as dashboardStatsService from '@/domain/dashboard/services/dashboard-stats.service';
+import type { DashboardDeviceScope } from '@/domain/dashboard/repositories/dashboard.repository';
 
-export const getStats = asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
-  const stats = await dashboardStatsService.getStats();
+const scopeOf = (req: AuthenticatedRequest): DashboardDeviceScope => ({
+  userId: req.user!.id,
+  role: req.user!.role,
+  deviceAccessMode: req.user!.deviceAccessMode,
+});
+
+export const getStats = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const stats = await dashboardStatsService.getStats(scopeOf(req));
   sendOk(res, stats);
 });
 
@@ -18,23 +25,23 @@ export const getActivity = asyncHandler(async (req: AuthenticatedRequest, res: R
     severity: req.query.severity as string | undefined,
   };
 
-  const result = await dashboardStatsService.getActivity(query);
+  const result = await dashboardStatsService.getActivity(query, scopeOf(req));
   sendOk(res, result);
 });
 
 export const getDeviceActivity = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const days = req.query.days ? Number.parseInt(req.query.days as string, 10) : 7;
-  const items = await dashboardStatsService.getDeviceActivity(days);
+  const items = await dashboardStatsService.getDeviceActivity(days, scopeOf(req));
   sendOk(res, { items });
 });
 
-export const getDeviceStatus = asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
-  const items = await dashboardStatsService.getDeviceStatus();
+export const getDeviceStatus = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const items = await dashboardStatsService.getDeviceStatus(scopeOf(req));
   sendOk(res, { items });
 });
 
 export const getFleetRuntime = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const days = req.query.days ? Number.parseInt(req.query.days as string, 10) : 30;
-  const items = await dashboardStatsService.getFleetRuntime(days);
+  const items = await dashboardStatsService.getFleetRuntime(days, scopeOf(req));
   sendOk(res, { items });
 });
