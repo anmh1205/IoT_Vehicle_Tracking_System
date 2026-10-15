@@ -85,9 +85,9 @@ function hasAnyExistingSignature(signatures, catalog) {
   );
 }
 
-function signaturesFullyExist(signatures, catalog) {
-  return Object.entries(signatures).every(
-    ([kind, items]) => items.size === 0 || [...items].every((item) => catalog[kind].has(item)),
+function missingSignatures(signatures, catalog) {
+  return Object.entries(signatures).flatMap(([kind, items]) =>
+    [...items].filter((item) => !catalog[kind].has(item)).map((item) => kind + ':' + item),
   );
 }
 
@@ -107,15 +107,19 @@ function readRecordedMigrations(runner) {
   return new Map(rows.map(([filename, checksum, appliedMode]) => [filename, { checksum, appliedMode }]));
 }
 
-function recordMigration(runner, filename, checksum, appliedMode) {
-  runner.execSql(`
+function migrationReceiptSql(filename, checksum, appliedMode) {
+  return `
     INSERT INTO ${MIGRATION_TABLE} (filename, checksum, applied_mode)
     VALUES (${sqlLiteral(filename)}, ${sqlLiteral(checksum)}, ${sqlLiteral(appliedMode)})
     ON CONFLICT (filename) DO UPDATE
       SET checksum = EXCLUDED.checksum,
           applied_mode = EXCLUDED.applied_mode,
           applied_at = NOW();
-  `);
+  `;
+}
+
+function recordMigration(runner, filename, checksum, appliedMode) {
+  runner.execSql(migrationReceiptSql(filename, checksum, appliedMode));
 }
 
 function main() {
@@ -125,10 +129,13 @@ function main() {
   const { values: postgresEnv } = loadPostgresEnv(baseDir);
   const runner = createPostgresCommandRunner(postgresEnv, options.mode || undefined);
 
-  ensureMigrationTable(runner);
-  const recorded = readRecordedMigrations(runner);
-  const legacyMode = recorded.size === 0;
+  // A dry run must not create its own tracking table.
   let catalog = collectCatalog(runner);
+  if (!options.dryRun) ensureMigrationTable(runner);
+  const recorded = options.dryRun && !catalog.tables.has(MIGRATION_TABLE)
+    ? new Map()
+    : readRecordedMigrations(runner);
+  const legacyMode = recorded.size === 0;
   let baselineCount = 0;
   let executedCount = 0;
 
@@ -150,8 +157,10 @@ function main() {
     const checksum = hashText(sql);
     const existing = recorded.get(fileName);
     if (existing) {
-      const drift = existing.checksum !== checksum ? ' (checksum drift)' : '';
-      console.log(`skip ${fileName}: already recorded as ${existing.appliedMode}${drift}`);
+      if (existing.checksum !== checksum) {
+        throw new Error('Migration checksum drift: ' + fileName + '. Recorded=' + existing.checksum + ', current=' + checksum + '. Create a new migration instead of changing applied SQL.');
+      }
+      console.log(`skip ${fileName}: already recorded as ${existing.appliedMode}`);
       continue;
     }
 
@@ -161,18 +170,18 @@ function main() {
         ? 'baseline'
         : 'executed';
     console.log(`${options.dryRun ? 'plan' : 'apply'} ${fileName}: ${appliedMode}`);
-    if (legacyMode && appliedMode === 'baseline' && !signaturesFullyExist(signatures, catalog)) {
-      console.log(
-        `warn ${fileName}: partial legacy signature match detected, create a dedicated follow-up migration if missing objects matter.`,
-      );
+    if (legacyMode && appliedMode === 'baseline') {
+      const missing = missingSignatures(signatures, catalog);
+      if (missing.length > 0) {
+        throw new Error('Cannot baseline incomplete migration ' + fileName + '; missing ' + missing.slice(0, 20).join(', ') + '. Reconcile the schema before recording it.');
+      }
     }
 
     if (!options.dryRun && appliedMode === 'executed') {
-      runner.execSql(sql);
+      // One database transaction: the migration and its receipt either both persist or neither does.
+      runner.execSql('BEGIN;\n' + sql + '\n' + migrationReceiptSql(fileName, checksum, appliedMode) + '\nCOMMIT;');
       catalog = collectCatalog(runner);
-    }
-
-    if (!options.dryRun) {
+    } else if (!options.dryRun) {
       recordMigration(runner, fileName, checksum, appliedMode);
     }
 
