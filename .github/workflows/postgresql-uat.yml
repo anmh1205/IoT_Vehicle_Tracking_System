@@ -19,38 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Ensure VPS directories exist
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SSH_DEPLOY_IP }}
-          port: ${{ secrets.SSH_DEPLOY_PORT }}
-          username: ${{ secrets.SSH_DEPLOY_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            mkdir -p /opt/tracking/scripts/deploy
-            mkdir -p /opt/tracking/Tracking_PostgreSQL
-
-      - name: SCP config files to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_DEPLOY_IP }}
-          port: ${{ secrets.SSH_DEPLOY_PORT }}
-          username: ${{ secrets.SSH_DEPLOY_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/"
-          target: /opt/tracking/
-          strip_components: 1
-
-      - name: Upload deploy scripts to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_DEPLOY_IP }}
-          port: ${{ secrets.SSH_DEPLOY_PORT }}
-          username: ${{ secrets.SSH_DEPLOY_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "scripts/deploy/bootstrap-vps.sh,scripts/deploy/sync-postgres-schema.sh"
-          target: /opt/tracking/
-
       - name: Validate required deploy secrets
         env:
           SSH_DEPLOY_IP: ${{ secrets.SSH_DEPLOY_IP }}
@@ -98,6 +66,38 @@ jobs:
             cat /tmp/postgresql-env-merged
             echo "EOF"
           } >> "$GITHUB_ENV"
+
+      - name: Ensure VPS directories exist
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p /opt/tracking/scripts/deploy
+            mkdir -p /opt/tracking/Tracking_PostgreSQL
+
+      - name: SCP config files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/"
+          target: /opt/tracking/
+          strip_components: 1
+
+      - name: Upload deploy scripts to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "scripts/deploy/bootstrap-vps.sh,scripts/deploy/sync-postgres-schema.sh"
+          target: /opt/tracking/
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
