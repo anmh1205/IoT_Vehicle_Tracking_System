@@ -74,3 +74,34 @@ test('QoS0 remains best effort and failures are observable', async () => {
   await new Promise((resolve) => setImmediate(resolve));
   assert.match(errors.join(' '), /metrics offline/);
 });
+
+test('QoS1 error observer receives packet identity and application failure is not acknowledged', async () => {
+  const client = createFakeClient();
+  const errors: Array<{ topic: string; qos: number; messageId?: number; error: string }> = [];
+  installBridgeIngress(
+    client,
+    async () => { throw new Error('database commit failed'); },
+    {
+      onError: (error, topic, qos, messageId) => {
+        errors.push({ topic, qos, messageId, error: String(error) });
+      },
+    },
+  );
+  const incoming = packet(1, 101);
+  client.emit('message', 'v1/DEVICE-101/events', Buffer.from('{}'), incoming);
+  await assert.rejects(
+    () => new Promise<void>((resolve, reject) => {
+      client.handleMessage(incoming, (error?: Error) => {
+        if (error) reject(error);
+        else resolve();
+      });
+    }),
+    /database commit failed/,
+  );
+  assert.deepEqual(errors, [{
+    topic: 'v1/DEVICE-101/events',
+    qos: 1,
+    messageId: 101,
+    error: 'Error: database commit failed',
+  }]);
+});
