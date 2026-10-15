@@ -10,6 +10,7 @@ import 'package:tracking_mobile/core/utils/logger.dart';
 import 'package:tracking_mobile/features/auth/auth_provider.dart';
 import 'package:tracking_mobile/features/notifications/fcm_handler.dart';
 import 'package:tracking_mobile/features/webview/js_bridge.dart';
+import 'package:tracking_mobile/features/webview/trusted_web_origin.dart';
 import 'package:tracking_mobile/features/webview/webview_controller.dart';
 import 'package:tracking_mobile/widgets/error_view.dart';
 import 'package:tracking_mobile/widgets/loading_indicator.dart';
@@ -144,16 +145,22 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
   ) async {
     setState(() => _isLoading = false);
 
-    // Inject JS bridge script
+    // The URL from the callback may be stale after redirects. Inspect the
+    // controller's current top-level document before exposing native APIs.
+    if (!await _isTrustedCurrentPage(controller)) {
+      Log.warn('Skipped native bridge on an untrusted WebView page');
+      return;
+    }
     await JSBridge.inject(controller);
 
-    // Inject auth token if available
+    // Recheck after the asynchronous bridge operation. Serialize secrets as
+    // JSON rather than interpolating unescaped token characters into JS.
     final token = ref.read(authProvider).token;
-    if (token != null) {
+    if (token != null && await _isTrustedCurrentPage(controller)) {
       await controller.evaluateJavascript(
-        source: 'window.__NATIVE_AUTH_TOKEN__ = "$token";',
+        source: 'window.__NATIVE_AUTH_TOKEN__ = ${jsonEncode(token)};',
       );
-      Log.debug('Auth token injected into WebView');
+      Log.debug('Auth token injected into trusted WebView origin');
     }
 
     Log.info('Page loaded: $url');
@@ -188,8 +195,9 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
   ) async {
     final url = action.request.url?.toString() ?? '';
 
-    // Allow navigation within the web app domain
-    if (url.startsWith(AppConfig.webAppUrl) || url.startsWith('about:')) {
+    // Permit only the exact configured origin; about:blank has no native
+    // privileges and may be used by the WebView during initialization.
+    if (isTrustedWebOrigin(url, AppConfig.webAppUrl) || url == 'about:blank') {
       return NavigationActionPolicy.ALLOW;
     }
 
@@ -200,7 +208,7 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
 
   Future<void> _notifyFcmTokenChanged(String token) async {
     final controller = _controller;
-    if (controller == null) return;
+    if (controller == null || !await _isTrustedCurrentPage(controller)) return;
 
     final encodedToken = jsonEncode(token);
     await controller.evaluateJavascript(
@@ -210,6 +218,16 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
         }));
       ''',
     );
+  }
+
+  Future<bool> _isTrustedCurrentPage(InAppWebViewController controller) async {
+    try {
+      final currentUrl = (await controller.getUrl())?.toString();
+      return isTrustedWebOrigin(currentUrl, AppConfig.webAppUrl);
+    } catch (error) {
+      Log.warn('Unable to validate WebView origin: $error');
+      return false;
+    }
   }
 
   void _reload() {
