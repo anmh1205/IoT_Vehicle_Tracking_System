@@ -25,7 +25,7 @@ CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
 
--- Bootstrap of the first admin is performed by 01a-bootstrap-admin.sh with
+-- Bootstrap of the first admin is performed by 99-bootstrap-admin.sh with
 -- a deployment-specific secret. No shared default privileged password is seeded.
 --
 CREATE TRIGGER trigger_users_updated_at
