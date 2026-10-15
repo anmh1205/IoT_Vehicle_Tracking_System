@@ -14,7 +14,7 @@ vi.mock('@/infrastructure/database/pool', async () => {
 });
 
 import { pool } from '@/infrastructure/database/pool';
-import { findAll, findByIdForScope } from './alert.repository';
+import { findAll, findByIdForScope, acknowledgeForScope, resolveForScope, dismissForScope } from './alert.repository';
 
 const integration = process.env.IVTS_PG_INTEGRATION === '1' ? describe : describe.skip;
 const viewer = { userId: 101, role: 'viewer', deviceAccessMode: 'assigned' };
@@ -33,7 +33,9 @@ integration('alert REST repository grant isolation with real PostgreSQL', () => 
     await pool.query(`CREATE TABLE alerts(
       id bigint PRIMARY KEY, vehicle_id text, device_id text, trip_id bigint,
       geofence_id integer, alert_type text, source text, severity text,
-      status text, title text, message text, created_at timestamptz DEFAULT now())`);
+      status text, title text, message text, created_at timestamptz DEFAULT now(),
+      updated_at timestamptz DEFAULT now(), acknowledged_by integer, acknowledged_at timestamptz,
+      resolved_by integer, resolved_at timestamptz, resolution_notes text)`);
     await pool.query('CREATE TABLE user_device_access(user_id integer,device_id text)');
     await pool.query(`INSERT INTO devices(device_id,device_name) VALUES('D1','ONE'),('D2','TWO')`);
     await pool.query(`INSERT INTO vehicles(id,vehicle_id,device_id,plate_number,updated_at)
@@ -56,6 +58,27 @@ integration('alert REST repository grant isolation with real PostgreSQL', () => 
     expect(await findByIdForScope(4,viewer)).toBeNull();
     expect(Number((await findByIdForScope(3,viewer))?.id)).toBe(3);
     expect((await findAll({},admin)).total).toBe(4);
+  });
+
+  it('checks device access and state transitions atomically inside every mutating UPDATE', async () => {
+    const assigned = { ...viewer, role: 'operator' };
+    expect(await acknowledgeForScope(2, assigned)).toBeNull();
+    expect(await resolveForScope(4, assigned, 'not mine')).toBeNull();
+    expect(await dismissForScope(2, assigned)).toBeNull();
+    expect((await pool.query('SELECT status FROM alerts WHERE id IN (2, 4) ORDER BY id')).rows)
+      .toEqual([{ status: 'active' }, { status: 'active' }]);
+
+    const acknowledged = await acknowledgeForScope(1, assigned);
+    expect(acknowledged?.status).toBe('acknowledged');
+    // A second simultaneous request sees the committed state, not stale
+    // pre-authorization results that could duplicate acknowledgements.
+    expect(await acknowledgeForScope(1, assigned)).toBeNull();
+
+    const resolved = await resolveForScope(3, assigned, 'checked device');
+    expect(resolved?.status).toBe('resolved');
+    expect(await dismissForScope(3, assigned)).toBeNull();
+    expect((await dismissForScope(1, assigned))?.status).toBe('dismissed');
+    expect((await acknowledgeForScope(2, admin))?.status).toBe('acknowledged');
   });
 
   it('revokes access immediately when device grant is changed', async () => {
