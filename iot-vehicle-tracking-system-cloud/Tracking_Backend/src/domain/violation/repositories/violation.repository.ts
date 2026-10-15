@@ -1,4 +1,4 @@
-import { findOne, findMany, insertOne, updateOne } from '@/infrastructure/database/queries';
+import { findOne, findMany, updateOne } from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
 import type { SessionUser } from '@/shared/types/common.types';
 import type {
@@ -133,7 +133,7 @@ export const acknowledge = async (
   return updateOne<Violation>(
     `UPDATE violations SET acknowledged = TRUE, acknowledged_by = $1, acknowledged_at = NOW(),
       notes = COALESCE($2, notes), updated_at = NOW()
-     WHERE id = $3 AND acknowledged = FALSE${restricted ? " AND " + grantPredicate('violations.vehicle_id', '$4') : ''} RETURNING *`,
+     WHERE id = $3 AND acknowledged = FALSE${restricted ? ' AND ' + grantPredicate('violations.vehicle_id', '$4') : ''} RETURNING *`,
     [actor.id, data.notes ?? null, id, ...(restricted ? [actor.id] : [])],
   );
 };
