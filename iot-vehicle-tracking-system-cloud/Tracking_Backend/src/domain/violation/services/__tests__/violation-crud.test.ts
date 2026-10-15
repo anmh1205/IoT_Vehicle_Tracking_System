@@ -1,3 +1,4 @@
+import type { SessionUser } from '@/shared/types/common.types';
 import type {
   Violation,
   CreateViolationInput,
@@ -17,6 +18,9 @@ import {
 } from '../violation-crud.service';
 
 // -- Factory ------------------------------------------------------------------
+
+const ACTOR: SessionUser = { id: 10, username: 'admin', role: 'admin', deviceAccessMode: 'all' };
+const VIEWER: SessionUser = { id: 20, username: 'viewer', role: 'viewer', deviceAccessMode: 'assigned' };
 
 const NOW = new Date('2026-01-15T10:00:00.000Z');
 const UPDATED = new Date('2026-01-16T12:00:00.000Z');
@@ -57,9 +61,9 @@ describe('violation-crud.service', () => {
       const violation = makeViolation();
       vi.mocked(violationRepo.findById).mockResolvedValue(violation);
 
-      const result = await getViolationById(1);
+      const result = await getViolationById(1, ACTOR);
 
-      expect(violationRepo.findById).toHaveBeenCalledWith(1);
+      expect(violationRepo.findById).toHaveBeenCalledWith(1, ACTOR);
       expect(result).toMatchObject({
         id: 1,
         vehicleId: 'VH-001',
@@ -78,7 +82,7 @@ describe('violation-crud.service', () => {
       const violation = makeViolation({ acknowledged: true, acknowledged_at: ackDate, acknowledged_by: 5 });
       vi.mocked(violationRepo.findById).mockResolvedValue(violation);
 
-      const result = await getViolationById(1);
+      const result = await getViolationById(1, ACTOR);
 
       expect(result.acknowledgedAt).toBe(ackDate.toISOString());
       expect(result.acknowledgedBy).toBe(5);
@@ -87,7 +91,7 @@ describe('violation-crud.service', () => {
     it('should throw 404 ApiError when violation not found', async () => {
       vi.mocked(violationRepo.findById).mockResolvedValue(null);
 
-      await expect(getViolationById(999)).rejects.toMatchObject({
+      await expect(getViolationById(999, ACTOR)).rejects.toMatchObject({
         name: 'ApiError',
         status: 404,
         message: 'Violation with ID 999 not found',
@@ -112,9 +116,9 @@ describe('violation-crud.service', () => {
       const created = makeViolation();
       vi.mocked(violationRepo.create).mockResolvedValue(created);
 
-      const result = await createViolation(input);
+      const result = await createViolation(input, ACTOR);
 
-      expect(violationRepo.create).toHaveBeenCalledWith(input);
+      expect(violationRepo.create).toHaveBeenCalledWith(input, ACTOR);
       expect(result.id).toBe(1);
       expect(result.violationType).toBe('speeding');
       expect(result.vehicleId).toBe('VH-001');
@@ -123,7 +127,7 @@ describe('violation-crud.service', () => {
     it('should sanitize all fields to camelCase in returned object', async () => {
       vi.mocked(violationRepo.create).mockResolvedValue(makeViolation());
 
-      const result = await createViolation(input);
+      const result = await createViolation(input, ACTOR);
 
       expect(result).toHaveProperty('alertId');
       expect(result).toHaveProperty('driverId');
@@ -153,10 +157,10 @@ describe('violation-crud.service', () => {
       vi.mocked(violationRepo.findById).mockResolvedValue(existing);
       vi.mocked(violationRepo.acknowledge).mockResolvedValue(updated);
 
-      const result = await acknowledgeViolation(1, 10, ackInput);
+      const result = await acknowledgeViolation(1, ACTOR, ackInput);
 
-      expect(violationRepo.findById).toHaveBeenCalledWith(1);
-      expect(violationRepo.acknowledge).toHaveBeenCalledWith(1, 10, ackInput);
+      expect(violationRepo.findById).toHaveBeenCalledWith(1, ACTOR);
+      expect(violationRepo.acknowledge).toHaveBeenCalledWith(1, ACTOR, ackInput);
       expect(result.acknowledged).toBe(true);
       expect(result.acknowledgedBy).toBe(10);
       expect(result.acknowledgedAt).toBe(ackDate.toISOString());
@@ -168,7 +172,7 @@ describe('violation-crud.service', () => {
         makeViolation({ acknowledged: true }),
       );
 
-      await expect(acknowledgeViolation(1, 10, ackInput)).rejects.toMatchObject({
+      await expect(acknowledgeViolation(1, ACTOR, ackInput)).rejects.toMatchObject({
         name: 'ApiError',
         status: 400,
       });
@@ -179,7 +183,7 @@ describe('violation-crud.service', () => {
     it('should throw 404 ApiError when violation not found', async () => {
       vi.mocked(violationRepo.findById).mockResolvedValue(null);
 
-      await expect(acknowledgeViolation(999, 10, ackInput)).rejects.toMatchObject({
+      await expect(acknowledgeViolation(999, ACTOR, ackInput)).rejects.toMatchObject({
         name: 'ApiError',
         status: 404,
         message: 'Violation with ID 999 not found',
@@ -190,10 +194,29 @@ describe('violation-crud.service', () => {
       vi.mocked(violationRepo.findById).mockResolvedValue(makeViolation({ acknowledged: false }));
       vi.mocked(violationRepo.acknowledge).mockResolvedValue(null);
 
-      await expect(acknowledgeViolation(1, 10, ackInput)).rejects.toMatchObject({
+      await expect(acknowledgeViolation(1, ACTOR, ackInput)).rejects.toMatchObject({
         name: 'ApiError',
         status: 404,
       });
     });
   });
+  it('refuses unprivileged viewer incident creation before touching repository', async () => {
+    const input: CreateViolationInput = { vehicleId: 'VH-001', violationType: 'speeding' };
+    await expect(createViolation(input, VIEWER)).rejects.toMatchObject({ status: 403 });
+    expect(violationRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('refuses incident creation outside assigned vehicles when scoped INSERT affects no row', async () => {
+    const input: CreateViolationInput = { vehicleId: 'NOT-MINE', violationType: 'speeding' };
+    const restricted: SessionUser = { ...VIEWER, role: 'operator' };
+    vi.mocked(violationRepo.create).mockResolvedValue(null);
+    await expect(createViolation(input, restricted)).rejects.toMatchObject({ status: 403 });
+    expect(violationRepo.create).toHaveBeenCalledWith(input, restricted);
+  });
+
+  it('refuses unprivileged viewer acknowledgement before touching repository', async () => {
+    await expect(acknowledgeViolation(1, VIEWER, {})).rejects.toMatchObject({ status: 403 });
+    expect(violationRepo.acknowledge).not.toHaveBeenCalled();
+  });
+
 });
