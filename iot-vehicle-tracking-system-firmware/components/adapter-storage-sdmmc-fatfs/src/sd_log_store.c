@@ -171,23 +171,28 @@ static esp_err_t sd_log_store_read_meta(void) {
     FILE *fp = fopen(SD_LOG_META_PATH, "rb");
     if (fp == NULL) {
         if (errno != ENOENT) {
-            ESP_LOGW(TAG,
-                     "open meta for read failed path=%s errno=%d (%s)",
-                     SD_LOG_META_PATH,
-                     errno,
-                     strerror(errno));
+            ESP_LOGE(TAG, "open queue metadata failed path=%s errno=%d",
+                     SD_LOG_META_PATH, errno);
             sd_log_store_mark_degraded();
+            return ESP_FAIL;
         }
         memset(&s_ctx.meta, 0, sizeof(s_ctx.meta));
-        return ESP_OK;
+        return ESP_OK; // Confirmed absent on first boot.
     }
 
     size_t read_len = fread(&s_ctx.meta, 1, sizeof(s_ctx.meta), fp);
+    bool failed_read = ferror(fp) != 0;
     fclose(fp);
-    if (read_len != sizeof(s_ctx.meta)) {
-        /* Partial metadata means we keep operating but treat it as degraded. */
-        memset(&s_ctx.meta, 0, sizeof(s_ctx.meta));
+    uint32_t next_after_write =
+        s_ctx.meta.write_seq == UINT32_MAX ? UINT32_MAX : s_ctx.meta.write_seq + 1U;
+    if (failed_read || read_len != sizeof(s_ctx.meta) ||
+        s_ctx.meta.ack_seq_critical > s_ctx.meta.write_seq ||
+        s_ctx.meta.replay_seq > next_after_write) {
+        // An incomplete/corrupt cursor must never silently reset replay state
+        // or authorize discarding the critical offline queue.
+        ESP_LOGE(TAG, "invalid queue metadata snapshot; preserve SD recovery state");
         sd_log_store_mark_degraded();
+        return ESP_ERR_INVALID_SIZE;
     }
     return ESP_OK;
 }
