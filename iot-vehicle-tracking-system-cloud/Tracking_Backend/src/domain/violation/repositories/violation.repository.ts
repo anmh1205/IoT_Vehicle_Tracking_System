@@ -58,12 +58,12 @@ export const findAll = async (
   }
 
   if (query.acknowledged !== undefined) {
-    conditions.push(`acknowledged = ${paramIndex++}`);
+    conditions.push(`acknowledged = $${paramIndex++}`);
     params.push(query.acknowledged);
   }
 
   if (!hasGlobalScope(actor)) {
-    conditions.push(grantPredicate('vi.vehicle_id', `${paramIndex++}`));
+    conditions.push(grantPredicate('vi.vehicle_id', `$${paramIndex++}`));
     params.push(actor.id);
   }
 
