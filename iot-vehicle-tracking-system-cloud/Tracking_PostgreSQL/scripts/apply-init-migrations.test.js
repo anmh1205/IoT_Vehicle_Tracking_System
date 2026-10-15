@@ -176,3 +176,15 @@ test('even 01-users.sql does not permit arbitrary checksum drift', () => {
   assert.equal(result.failed, true);
   assert.match(result.errors.join(' '), /Migration checksum drift/);
 });
+
+test('legacy database without receipts also refuses the old default admin', () => {
+  const result = runScenario({
+    fileName: '01-users.sql',
+    sql: secureUsersSql,
+    existingTables: ['users'],
+    oldStaticCredential: true,
+  });
+  assert.equal(result.failed, true);
+  assert.match(result.errors.join(' '), /Rotate the admin password/);
+  assert.equal(result.writes.some((write) => write.includes("VALUES ('01-users.sql'")), false);
+});
