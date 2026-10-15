@@ -1,7 +1,6 @@
 /// IVTS Flutter currently provides cached read-only UI data, not durable
 /// offline mutation replay. The previous implementation silently accepted
 /// queued API requests and falsely logged successful synchronization.
-@Deprecated('Offline mutations are unsupported until durable authenticated replay is implemented')
 class SyncService {
   SyncService._();
 
