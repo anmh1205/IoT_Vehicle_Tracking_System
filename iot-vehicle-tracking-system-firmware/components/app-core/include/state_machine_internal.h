@@ -63,3 +63,6 @@ void state_machine_force_user_led_on(void);
 void state_machine_force_user_led_off(void);
 /** @brief Release any forced LED state and resume the normal state pattern. */
 void state_machine_resume_user_led_pattern(void);
+
+/** True when a deferred cloud-command reboot must not be lost on sleep. */
+bool state_machine_has_pending_restart_after_ack(void);
