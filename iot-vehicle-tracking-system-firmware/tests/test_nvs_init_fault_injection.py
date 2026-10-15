@@ -67,10 +67,11 @@ int main(void) {
     source = tmp_path / "nvs_init_test.c"
     binary = tmp_path / "nvs_init_test"
     source.write_text(harness, encoding="utf-8")
-    subprocess.run(
+    compilation = subprocess.run(
         [gcc, "-std=c11", "-Wall", "-Wextra", "-Werror",
          "-Wno-unused-function", str(source), "-o", str(binary)],
-        check=True, capture_output=True, text=True,
+        capture_output=True, text=True,
     )
+    assert compilation.returncode == 0, compilation.stderr
     result = subprocess.run([str(binary)], check=True, capture_output=True, text=True)
     assert "4 fault-injected states preserve storage" in result.stdout
