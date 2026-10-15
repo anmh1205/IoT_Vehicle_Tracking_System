@@ -1397,3 +1397,9 @@ bool command_handler_take_session_assignment(command_session_assignment_t *out_a
     command_handler_give_lock();
     return copied;
 }
+
+/** Non-consuming command queue guard used before any RAM-dropping sleep. */
+bool command_handler_has_pending_actions(void) {
+    return (s_action_queue != NULL && uxQueueMessagesWaiting(s_action_queue) > 0U) ||
+           atomic_load(&s_recent_command_persist_pending);
+}
