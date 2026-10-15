@@ -1,4 +1,7 @@
 import { findMany } from '@/infrastructure/database/queries';
+import { canAccessDeviceId, hasGlobalDeviceAccess } from '@/domain/device/services/device-access.service';
+import { createForbiddenError, createValidationError } from '@/shared/utils/errors.util';
+import type { SessionUser } from '@/shared/types/common.types';
 import { eventLogPositionValueSql } from '@/shared/utils/event-log-telemetry-sql.util';
 
 interface EventLogRow {
@@ -129,6 +132,7 @@ const readNormalizedPositionValue = (
 const NORMALIZED_POSITION_FIELDS = new Set(['latitude', 'longitude', 'speed', 'course']);
 
 export const getTelemetryHistory = async (params: {
+  actor: SessionUser;
   deviceId: string;
   from?: string;
   to?: string;
@@ -136,6 +140,14 @@ export const getTelemetryHistory = async (params: {
 }) => {
   const from = params.from ? new Date(params.from) : new Date(Date.now() - 24 * 60 * 60 * 1000);
   const to = params.to ? new Date(params.to) : new Date();
+  if (!Number.isFinite(from.getTime()) || !Number.isFinite(to.getTime()) || from > to) {
+    throw createValidationError('Invalid telemetry date range');
+  }
+
+  if (!(await canAccessDeviceId(params.actor, params.deviceId))) {
+    throw createForbiddenError('Device access denied');
+  }
+  const scoped = !hasGlobalDeviceAccess(params.actor);
   const fields = (params.fields ?? DEFAULT_FIELDS.join(','))
     .split(',')
     .map((item) => item.trim())
@@ -156,9 +168,10 @@ export const getTelemetryHistory = async (params: {
      FROM event_logs
      WHERE device_id = $1
        AND COALESCE(device_timestamp, server_timestamp) BETWEEN $2 AND $3
+       ${scoped ? 'AND EXISTS (SELECT 1 FROM user_device_access uda WHERE uda.user_id = $4 AND uda.device_id = event_logs.device_id)' : ''}
      ORDER BY telemetry_timestamp ASC, server_timestamp ASC, id ASC
      LIMIT 10000`,
-    [params.deviceId, from.toISOString(), to.toISOString()],
+    [params.deviceId, from.toISOString(), to.toISOString(), ...(scoped ? [params.actor.id] : [])],
   );
 
   const points = rows.map((row) => {

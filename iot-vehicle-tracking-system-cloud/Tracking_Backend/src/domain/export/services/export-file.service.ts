@@ -135,6 +135,9 @@ const EXPORT_CONFIGS: Record<string, ExportConfig> = {
   },
 };
 
+export const isSupportedExportType = (type: string): boolean =>
+  Object.prototype.hasOwnProperty.call(EXPORT_CONFIGS, type);
+
 const HEADER_FILL: ExcelJS.FillPattern = {
   type: 'pattern',
   pattern: 'solid',
