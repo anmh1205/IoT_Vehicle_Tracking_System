@@ -232,12 +232,17 @@ const persistBatch = async (batch: readonly DeviceUpdate[]): Promise<void> => {
                  last_longitude = COALESCE($3, last_longitude),
                  last_speed = COALESCE($4, last_speed),
                  updated_at = NOW()
-             WHERE id = $1`,
+             WHERE id = $1
+               AND device_id = $5
+               AND status = 'running'
+               AND to_timestamp($6 / 1000.0) >= COALESCE(last_update, '-infinity'::timestamptz)`,
             [
               update.sessionId,
               update.latitude ?? null,
               update.longitude ?? null,
               update.speed ?? null,
+              update.deviceId,
+              update.payloadTimestamp,
             ],
           );
         }
