@@ -14,10 +14,14 @@ vi.mock('@/domain/export/services/export-file.service', () => ({
 
 import * as exportRepo from '@/domain/export/repositories/export.repository';
 import { processExport } from '@/domain/export/services/export-processing.service';
+import { isSupportedExportType } from '@/domain/export/services/export-file.service';
 import { createExport } from './export-job.service';
 
 describe('export-job supported-type contract', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(isSupportedExportType).mockImplementation((type) => type === 'devices');
+  });
 
   it('rejects the unimplemented telemetry export synchronously and creates no job', async () => {
     await expect(createExport(1, { exportType: 'telemetry' })).rejects.toMatchObject({
