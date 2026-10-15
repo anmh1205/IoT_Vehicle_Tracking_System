@@ -444,3 +444,55 @@ esp_err_t nvs_config_clear_firmware_report(void) {
     nvs_close(handle);
     return err;
 }
+
+#define TRACKER_MOTION_ALARM_MAGIC UINT32_C(0x4D4F5431)
+
+esp_err_t nvs_config_save_motion_alarm(const tracker_motion_alarm_checkpoint_t *checkpoint) {
+    if (checkpoint == NULL || checkpoint->magic != TRACKER_MOTION_ALARM_MAGIC ||
+        checkpoint->message_id[0] == '\0' || checkpoint->boot_id[0] == '\0') {
+        return ESP_ERR_INVALID_ARG;
+    }
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READWRITE, &handle);
+    if (err != ESP_OK) return err;
+    err = nvs_set_blob(handle, TRACKER_NVS_PENDING_MOTION_ALERT_KEY,
+                       checkpoint, sizeof(*checkpoint));
+    if (err == ESP_OK) err = nvs_commit(handle);
+    nvs_close(handle);
+    return err;
+}
+
+esp_err_t nvs_config_load_motion_alarm(tracker_motion_alarm_checkpoint_t *out, bool *found) {
+    if (out == NULL || found == NULL) return ESP_ERR_INVALID_ARG;
+    memset(out, 0, sizeof(*out));
+    *found = false;
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READONLY, &handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) return ESP_OK;
+    if (err != ESP_OK) return err;
+    size_t size = sizeof(*out);
+    err = nvs_get_blob(handle, TRACKER_NVS_PENDING_MOTION_ALERT_KEY, out, &size);
+    nvs_close(handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) return ESP_OK;
+    if (err != ESP_OK) return err;
+    if (size != sizeof(*out) || out->magic != TRACKER_MOTION_ALARM_MAGIC ||
+        memchr(out->message_id, '\0', sizeof(out->message_id)) == NULL ||
+        memchr(out->boot_id, '\0', sizeof(out->boot_id)) == NULL ||
+        out->message_id[0] == '\0' || out->boot_id[0] == '\0') {
+        return ESP_ERR_INVALID_SIZE;
+    }
+    *found = true;
+    return ESP_OK;
+}
+
+esp_err_t nvs_config_clear_motion_alarm(void) {
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READWRITE, &handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) return ESP_OK;
+    if (err != ESP_OK) return err;
+    err = nvs_erase_key(handle, TRACKER_NVS_PENDING_MOTION_ALERT_KEY);
+    if (err == ESP_ERR_NVS_NOT_FOUND) err = ESP_OK;
+    else if (err == ESP_OK) err = nvs_commit(handle);
+    nvs_close(handle);
+    return err;
+}
