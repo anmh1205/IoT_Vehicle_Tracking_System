@@ -44,22 +44,6 @@ interface FleetUsageRow {
   active_vehicles: string;
 }
 
-const getDeviceSessionRuntimeExpression = async (): Promise<string> => {
-  const result = await pool.query<{ exists: boolean }>(
-    `SELECT EXISTS (
-       SELECT 1
-       FROM information_schema.columns
-       WHERE table_schema = 'public'
-         AND table_name = 'device_sessions'
-         AND column_name = 'total_runtime_seconds'
-     )`,
-  );
-
-  return result.rows[0]?.exists
-    ? 'COALESCE(total_runtime_seconds, uptime, 0)'
-    : 'COALESCE(uptime, EXTRACT(EPOCH FROM (COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at))), 0)';
-};
-
 export const getFleetUsage = async (
   range: StatisticsDateRange,
   interval: StatisticsInterval,
@@ -111,43 +95,68 @@ interface DeviceUptimeRow {
   up_seconds: string;
 }
 
+/**
+ * Measures distinct per-device session coverage inside [from, to].
+ * Window MAX(previous end) avoids counting overlapping sessions twice.
+ * Device IDs come from the actor-scoped eligible CTE, never from a
+ * post-aggregation filter.
+ */
+const sessionCoverageCte = (actor: SessionUser): string => `
+  WITH eligible AS (
+    SELECT d.device_id
+    FROM devices d
+    WHERE 1=1${grantCondition(actor, 'd.device_id', null, 3)}
+  ),
+  clipped AS (
+    SELECT e.device_id,
+      GREATEST(COALESCE(s.server_session_start, s.created_at), $1::timestamptz) AS start_at,
+      LEAST(COALESCE(s.server_session_end, NOW()), $2::timestamptz) AS end_at
+    FROM eligible e
+    JOIN device_sessions s ON s.device_id = e.device_id
+    WHERE COALESCE(s.status::text, '') NOT IN ('failed', 'discarded')
+      AND COALESCE(s.server_session_start, s.created_at) < $2
+      AND COALESCE(s.server_session_end, NOW()) > $1
+  ),
+  ordered AS (
+    SELECT device_id, start_at, end_at,
+      MAX(end_at) OVER (
+        PARTITION BY device_id
+        ORDER BY start_at, end_at
+        ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+      ) AS previous_end
+    FROM clipped
+    WHERE end_at > start_at
+  ),
+  durations AS (
+    SELECT device_id,
+      SUM(GREATEST(
+        EXTRACT(EPOCH FROM (end_at - GREATEST(start_at, COALESCE(previous_end, start_at)))),
+        0
+      )) AS up_seconds
+    FROM ordered
+    GROUP BY device_id
+  )
+`;
+
 export const getDeviceUptime = async (range: StatisticsDateRange, actor: SessionUser): Promise<DeviceUptimeItem[]> => {
   const totalSeconds = Math.max((range.to.getTime() - range.from.getTime()) / 1000, 1);
   const totalHours = totalSeconds / 3600;
 
-  const query = `
-    SELECT
-      d.device_id,
-      COALESCE(SUM(
-        CASE
-          WHEN s.uptime IS NOT NULL THEN s.uptime
-          ELSE EXTRACT(
-            EPOCH FROM (
-              COALESCE(s.server_session_end, NOW()) - COALESCE(s.server_session_start, s.created_at)
-            )
-          )
-        END
-      ), 0)::text AS up_seconds
-    FROM devices d
-    LEFT JOIN device_sessions s
-      ON s.device_id = d.device_id
-      AND COALESCE(s.server_session_start, s.created_at) <= $2
-      AND COALESCE(s.server_session_end, NOW()) >= $1
-    WHERE 1=1${grantCondition(actor, 'd.device_id', null, 3)}
-    GROUP BY d.device_id
-    ORDER BY d.device_id ASC
-  `;
-
-  const result = await pool.query<DeviceUptimeRow>(query, [range.from, range.to, ...actorParams(actor)]);
+  const query = `${sessionCoverageCte(actor)}
+    SELECT e.device_id, COALESCE(d.up_seconds, 0)::text AS up_seconds
+    FROM eligible e
+    LEFT JOIN durations d ON d.device_id = e.device_id
+    ORDER BY e.device_id ASC`;
+  const result = await pool.query<DeviceUptimeRow>(
+    query, [range.from, range.to, ...actorParams(actor)],
+  );
   return result.rows.map((row) => {
-    const upSeconds = Math.max(parseFloat(row.up_seconds), 0);
-    const upHours = upSeconds / 3600;
-    const downHours = Math.max(totalHours - upHours, 0);
+    const upSeconds = Math.min(Math.max(Number.parseFloat(row.up_seconds) || 0, 0), totalSeconds);
     return {
       deviceId: row.device_id,
-      uptimePercent: Math.min(Math.round((upSeconds / totalSeconds) * 10000) / 100, 100),
+      uptimePercent: Math.round((upSeconds / totalSeconds) * 10000) / 100,
       totalHours: Math.round(totalHours * 100) / 100,
-      downHours: Math.round(downHours * 100) / 100,
+      downHours: Math.round(Math.max(totalSeconds - upSeconds, 0) / 3600 * 100) / 100,
     };
   });
 };
@@ -272,14 +281,21 @@ export const getSummaryTotals = async (
   range: StatisticsDateRange,
   actor: SessionUser,
 ): Promise<{ totalRuntimeHours: number; totalSessions: number; totalAlerts: number }> => {
-  const runtimeExpression = await getDeviceSessionRuntimeExpression();
-  const query = `
-    WITH session_stats AS (
-      SELECT
-        COALESCE(SUM(${runtimeExpression}), 0)::text AS total_runtime_seconds,
-        COUNT(*)::text AS total_sessions
-      FROM device_sessions
-      WHERE COALESCE(server_session_start, created_at) BETWEEN $1 AND $2${grantCondition(actor, 'device_sessions.device_id', null, 3)}
+  // A report's total duration must agree with the per-device uptime report:
+  // clip to the requested window and union overlapping intervals per device.
+  // Count sessions independently so overlapping records remain individually observable.
+  const query = `${sessionCoverageCte(actor)},
+    duration_stats AS (
+      SELECT COALESCE(SUM(up_seconds), 0)::numeric AS total_runtime_seconds
+      FROM durations
+    ),
+    session_stats AS (
+      SELECT COUNT(*)::text AS total_sessions
+      FROM device_sessions s
+      JOIN eligible e ON e.device_id = s.device_id
+      WHERE COALESCE(s.status::text, '') NOT IN ('failed', 'discarded')
+        AND COALESCE(s.server_session_start, s.created_at) < $2
+        AND COALESCE(s.server_session_end, NOW()) > $1
     ),
     alert_stats AS (
       SELECT COUNT(*)::text AS total_alerts
@@ -287,15 +303,16 @@ export const getSummaryTotals = async (
       WHERE created_at BETWEEN $1 AND $2${grantCondition(actor, 'alerts.device_id', 'alerts.vehicle_id', 3)}
     )
     SELECT
-      ROUND((COALESCE(session_stats.total_runtime_seconds, '0')::numeric / 3600.0), 2)::text AS total_runtime_hours,
-      COALESCE(session_stats.total_sessions, '0') AS total_sessions,
-      COALESCE(alert_stats.total_alerts, '0') AS total_alerts
-    FROM session_stats, alert_stats
+      ROUND(duration_stats.total_runtime_seconds / 3600.0, 2)::text AS total_runtime_hours,
+      session_stats.total_sessions,
+      alert_stats.total_alerts
+    FROM duration_stats CROSS JOIN session_stats CROSS JOIN alert_stats
   `;
 
-  const result = await pool.query<SummaryTotalsRow>(query, [range.from, range.to, ...actorParams(actor)]);
+  const result = await pool.query<SummaryTotalsRow>(query, [
+    range.from, range.to, ...actorParams(actor),
+  ]);
   const row = result.rows[0];
-
   return {
     totalRuntimeHours: Number.parseFloat(row?.total_runtime_hours ?? '0') || 0,
     totalSessions: Number.parseInt(row?.total_sessions ?? '0', 10) || 0,
@@ -337,17 +354,17 @@ export const getFleetTotalsLast30Days = async (actor: SessionUser) => {
       actorParams(actor),
     ),
     pool.query<{ active_time_seconds: string }>(
-      `SELECT COALESCE(SUM(uptime), 0)::int AS active_time_seconds
-       FROM device_sessions
-       WHERE COALESCE(server_session_start, created_at) >= NOW() - INTERVAL '30 days'
-         ${grantCondition(actor, 'device_sessions.device_id', null, 1)}`,
-      actorParams(actor),
+      `${sessionCoverageCte(actor)}
+       SELECT COALESCE(SUM(up_seconds), 0)::text AS active_time_seconds
+       FROM durations`,
+      [new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), new Date(), ...actorParams(actor)],
     ),
-    pool.query<{ speeding: string; zone: string; other: string }>(
+    pool.query<{ speeding: string; zone: string; harsh_braking: string; other: string }>(
       `SELECT
          COALESCE(SUM(CASE WHEN alert_type = 'speeding' THEN 1 ELSE 0 END), 0)::int AS speeding,
          COALESCE(SUM(CASE WHEN alert_type IN ('zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit') THEN 1 ELSE 0 END), 0)::int AS zone,
-         COALESCE(SUM(CASE WHEN alert_type NOT IN ('speeding', 'zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit') THEN 1 ELSE 0 END), 0)::int AS other
+         COALESCE(SUM(CASE WHEN alert_type::text = 'harsh_braking' THEN 1 ELSE 0 END), 0)::int AS harsh_braking,
+         COALESCE(SUM(CASE WHEN alert_type::text NOT IN ('speeding', 'zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit', 'harsh_braking') THEN 1 ELSE 0 END), 0)::int AS other
        FROM alerts
        WHERE created_at >= NOW() - INTERVAL '30 days'
          ${grantCondition(actor, 'alerts.device_id', 'alerts.vehicle_id', 1)}`,

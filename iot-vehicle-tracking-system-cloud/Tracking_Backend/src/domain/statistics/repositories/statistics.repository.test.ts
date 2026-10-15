@@ -71,11 +71,14 @@ describe('statistics SQL assigned-device authorization', () => {
 
   it('scopes both session totals and alert totals in the combined summary query', async () => {
     await statistics.getSummaryTotals(range, assigned);
-    expect(calls()).toHaveLength(2);
-    expect(calls()[1].sql).toContain('uda.device_id = device_sessions.device_id');
-    expect(calls()[1].sql).toContain('uda.device_id = alerts.device_id');
-    expect(calls()[1].sql).toContain('uda.user_id = $3');
-    expect(calls()[1].params).toEqual([range.from, range.to, 17]);
+    expect(calls()).toHaveLength(1);
+    const summary = calls()[0];
+    expect(summary.sql).toContain('JOIN eligible e ON e.device_id = s.device_id');
+    expect(summary.sql).toContain('MAX(end_at) OVER');
+    expect(summary.sql).toContain('FROM durations');
+    expect(summary.sql).toContain('uda.device_id = alerts.device_id');
+    expect(summary.sql).toContain('uda.user_id = $3');
+    expect(summary.params).toEqual([range.from, range.to, 17]);
   });
 
   it('scopes policy quotas and prevents unauthorized plate/maintenance disclosures', async () => {
@@ -94,11 +97,35 @@ describe('statistics SQL assigned-device authorization', () => {
   it('scopes every component of 30-day fleet stats before totals are computed', async () => {
     await statistics.getFleetTotalsLast30Days(assigned);
     expect(calls()).toHaveLength(3);
-    for (const { sql, params } of calls()) {
-      expect(sql).toContain('user_device_access');
-      expect(sql).toContain('uda.user_id = $1');
-      expect(params).toEqual([17]);
-    }
+    const [trips, sessions, alerts] = calls();
+    expect(trips.sql).toContain('uda.user_id = $1');
+    expect(trips.params).toEqual([17]);
+    expect(sessions.sql).toContain('uda.user_id = $3');
+    expect(sessions.sql).toContain('MAX(end_at) OVER');
+    expect(sessions.params).toHaveLength(3);
+    expect(sessions.params[2]).toBe(17);
+    expect(alerts.sql).toContain('uda.user_id = $1');
+    expect(alerts.sql).toContain("alert_type::text = 'harsh_braking'");
+    expect(alerts.params).toEqual([17]);
+  });
+
+  it('computes device coverage only over clipped intervals with overlap union', async () => {
+    await statistics.getDeviceUptime(range, assigned);
+    const sql = calls()[0].sql;
+    expect(sql).toContain('GREATEST(COALESCE(s.server_session_start, s.created_at), $1::timestamptz)');
+    expect(sql).toContain('LEAST(COALESCE(s.server_session_end, NOW()), $2::timestamptz)');
+    expect(sql).toContain('MAX(end_at) OVER');
+    expect(sql).toContain('ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING');
+    expect(sql).toContain('GREATEST(start_at, COALESCE(previous_end, start_at))');
+    expect(sql).toContain('FROM eligible e');
+    expect(sql).toContain('user_device_access');
+  });
+
+  it('does not allow a malformed legacy uptime total to exceed the selected window', async () => {
+    query.mockResolvedValueOnce({ rows: [{ device_id: 'DEV-1', up_seconds: '999999999' }] } as never);
+    const result = await statistics.getDeviceUptime(range, assigned);
+    expect(result[0].uptimePercent).toBe(100);
+    expect(result[0].downHours).toBe(0);
   });
 
   it('allows root/admin global statistics without injecting artificial device grants', async () => {

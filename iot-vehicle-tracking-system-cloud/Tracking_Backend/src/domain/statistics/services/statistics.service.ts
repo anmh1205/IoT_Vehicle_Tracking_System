@@ -180,17 +180,19 @@ export const getFleetStats = async (actor: SessionUser) => {
   const totalDistanceKm = Number(distanceFuel?.total_distance_km ?? 0);
   const totalFuelLiters = Number(distanceFuel?.total_fuel_liters ?? 0);
   const activeTimeSeconds = Number(runtime?.active_time_seconds ?? 0);
-  // Historical idle-time estimate is tracked separately by #198.
-  const idleTimeSeconds = Math.max(Math.floor(activeTimeSeconds * 0.08), 0);
+  // Idle time cannot be derived from device-session duration; expose unknown, not an invented 8%.
+  const idleTimeSeconds: number | null = null;
   const avgEfficiency = totalFuelLiters > 0 ? totalDistanceKm / totalFuelLiters : 0;
   const speeding = Number(violations?.speeding ?? 0);
   const zone = Number(violations?.zone ?? 0);
-  const harshBraking = Number(violations?.other ?? 0);
-  const safetyScore = Math.max(0, 100 - speeding * 2 - harshBraking - zone);
+  const harshBraking = Number(violations?.harsh_braking ?? 0);
+  const other = Number(violations?.other ?? 0);
+  // A fleet safety score requires a validated policy, not arbitrary weighted event counts.
+  const safetyScore: number | null = null;
   return {
     totalDistanceKm, totalFuelLiters, avgEfficiency, activeTimeSeconds,
     idleTimeSeconds, safetyScore,
-    violations: { speeding, harshBraking, zone },
+    violations: { speeding, harshBraking, zone, other },
   };
 };
 
