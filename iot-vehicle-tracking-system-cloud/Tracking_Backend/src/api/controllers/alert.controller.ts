@@ -54,8 +54,7 @@ export const acknowledgeAlert = asyncHandler(async (req: AuthenticatedRequest, r
     throw createValidationError('Invalid alert ID');
   }
 
-  const userId = req.user!.id;
-  const alert = await alertCrudService.acknowledgeAlert(id, userId);
+  const alert = await alertCrudService.acknowledgeAlert(id, accessScope(req));
   sendOk(res, alert);
 });
 
@@ -70,10 +69,9 @@ export const resolveAlert = asyncHandler(async (req: AuthenticatedRequest, res: 
     throw createValidationError('Invalid resolve data', parsed.error.flatten().fieldErrors);
   }
 
-  const userId = req.user!.id;
   const alert = await alertCrudService.resolveAlert(
     id,
-    userId,
+    accessScope(req),
     parsed.data.resolutionNotes ?? null,
   );
   sendOk(res, alert);
@@ -85,7 +83,7 @@ export const dismissAlert = asyncHandler(async (req: AuthenticatedRequest, res: 
     throw createValidationError('Invalid alert ID');
   }
 
-  const alert = await alertCrudService.dismissAlert(id);
+  const alert = await alertCrudService.dismissAlert(id, accessScope(req));
   sendOk(res, alert);
 });
 
