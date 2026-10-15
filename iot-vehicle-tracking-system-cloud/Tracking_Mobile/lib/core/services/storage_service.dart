@@ -39,7 +39,7 @@ class StorageService {
       return await _storage.read(key: key);
     } catch (e) {
       Log.error('SecureStorage read failed for $key: $e');
-      return null;
+      rethrow;
     }
   }
 
@@ -48,6 +48,7 @@ class StorageService {
       await _storage.write(key: key, value: value);
     } catch (e) {
       Log.error('SecureStorage write failed for $key: $e');
+      rethrow;
     }
   }
 
@@ -56,6 +57,7 @@ class StorageService {
       await _storage.delete(key: key);
     } catch (e) {
       Log.error('SecureStorage delete failed for $key: $e');
+      rethrow;
     }
   }
 
@@ -66,6 +68,7 @@ class StorageService {
       Log.info('Secure storage cleared');
     } catch (e) {
       Log.error('SecureStorage clearAll failed: $e');
+      rethrow;
     }
   }
 }
