@@ -20,6 +20,7 @@ import { createExport } from './export-job.service';
 describe('export-job supported-type contract', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(processExport).mockResolvedValue(undefined);
     vi.mocked(isSupportedExportType).mockImplementation((type) => type === 'devices');
   });
 

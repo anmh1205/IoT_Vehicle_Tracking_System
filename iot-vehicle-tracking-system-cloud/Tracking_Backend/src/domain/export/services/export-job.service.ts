@@ -1,5 +1,8 @@
 import * as exportRepo from '@/domain/export/repositories/export.repository';
 import { processExport } from '@/domain/export/services/export-processing.service';
+import { createLogger } from '@/infrastructure/logger';
+
+const log = createLogger('export-job');
 import { isSupportedExportType } from '@/domain/export/services/export-file.service';
 import type {
   ExportJob,
@@ -52,7 +55,9 @@ export const createExport = async (
   }
 
   // Trigger async processing (fire-and-forget)
-  void processExport(job);
+  void processExport(job).catch((error: unknown) => {
+    log.error('Unhandled export job processing failure', { jobId: job.id, error });
+  });
 
   return sanitizeExportJob(job);
 };
