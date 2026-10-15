@@ -1,4 +1,5 @@
 import * as alertRepo from '@/domain/alert/repositories/alert.repository';
+import type { AlertAccessScope } from '@/domain/alert/repositories/alert.repository';
 import type { Alert, AlertListQuery, AlertPublic } from '@/domain/alert/types/alert.types';
 
 const sanitizeAlert = (a: Alert): AlertPublic => ({
@@ -34,6 +35,7 @@ const sanitizeAlert = (a: Alert): AlertPublic => ({
 
 export const listAlerts = async (
   query: AlertListQuery,
+  scope: AlertAccessScope,
 ): Promise<{
   items: AlertPublic[];
   pagination: { page: number; limit: number; total: number; totalPages: number };
@@ -41,7 +43,7 @@ export const listAlerts = async (
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 
-  const result = await alertRepo.findAll(query);
+  const result = await alertRepo.findAll(query, scope);
 
   return {
     items: result.alerts.map(sanitizeAlert),
