@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth, requireRole } from '@/middleware/auth.middleware';
 import * as maintenanceController from '@/api/controllers/maintenance.controller';
+import { requireAssignedAssetWrite } from '@/middleware/asset-grant.middleware';
 
 const router = Router();
 
@@ -12,8 +13,8 @@ router.use(requireAuth);
 
 router.get('/', maintenanceController.listMaintenance);
 router.get('/:id', maintenanceController.getMaintenance);
-router.post('/', requireAssetEditor, maintenanceController.createMaintenance);
-router.put('/:id', requireAssetEditor, maintenanceController.updateMaintenance);
+router.post('/', requireAssetEditor, requireAssignedAssetWrite({ requireBodyReference: true }), maintenanceController.createMaintenance);
+router.put('/:id', requireAssetEditor, requireAssignedAssetWrite({ existing: 'maintenanceRow' }), maintenanceController.updateMaintenance);
 router.delete('/:id', requireAssetAdmin, maintenanceController.deleteMaintenance);
 
 export default router;

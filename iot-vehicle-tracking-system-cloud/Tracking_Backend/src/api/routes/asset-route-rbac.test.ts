@@ -13,8 +13,8 @@ type Route = { path: string; methods: Record<string, boolean>; stack: Array<{ ha
 type RouterLayer = { route?: Route };
 
 const routes = [
-  [vehicle, 'post', '/import', 'operator'],
-  [vehicle, 'post', '/', 'operator'],
+  [vehicle, 'post', '/import', 'admin'],
+  [vehicle, 'post', '/', 'admin'],
   [vehicle, 'put', '/:id', 'operator'],
   [vehicle, 'delete', '/:id', 'admin'],
   [vehicle, 'put', '/:id/assign-device', 'admin'],
