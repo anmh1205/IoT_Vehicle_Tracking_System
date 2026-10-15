@@ -3,6 +3,40 @@ import { findMany } from '@/infrastructure/database/queries';
 import type { ActivityQuery } from '@/domain/dashboard/types/dashboard.types';
 import { isUndefinedColumnError } from '@/shared/utils/postgres-error.util';
 
+
+export interface DashboardDeviceScope {
+  userId: number;
+  role: string;
+  deviceAccessMode: string;
+}
+
+const isFleetWide = (scope: DashboardDeviceScope): boolean =>
+  scope.role === 'root' || scope.role === 'admin' || scope.deviceAccessMode === 'all';
+
+const scopeParams = (scope: DashboardDeviceScope): unknown[] =>
+  isFleetWide(scope) ? [] : [scope.userId];
+
+const scopedDeviceSql = (
+  scope: DashboardDeviceScope,
+  deviceTable: string,
+  userParameter: number,
+): string => isFleetWide(scope) ? 'TRUE' : `EXISTS (
+  SELECT 1 FROM user_device_access uda
+  WHERE uda.user_id = ${userParameter} AND uda.device_id = ${deviceTable}.device_id
+)`;
+
+const scopedAlertSql = (scope: DashboardDeviceScope): string =>
+  isFleetWide(scope) ? 'TRUE' : `EXISTS (
+    SELECT 1 FROM user_device_access uda
+    WHERE uda.user_id = $1 AND (
+      (alerts.device_id IS NOT NULL AND uda.device_id = alerts.device_id)
+      OR (alerts.device_id IS NULL AND alerts.vehicle_id IS NOT NULL AND EXISTS (
+        SELECT 1 FROM vehicles v WHERE v.vehicle_id = alerts.vehicle_id
+          AND v.device_id = uda.device_id
+      ))
+    )
+  )`;
+
 interface StatusCountRow {
   current_status: string;
   count: string;
@@ -45,9 +79,13 @@ interface FleetRuntimeRow {
   runtime_hours: string;
 }
 
-export const getDeviceStatusCounts = async (): Promise<Record<string, number>> => {
+export const getDeviceStatusCounts = async (scope: DashboardDeviceScope): Promise<Record<string, number>> => {
   const result = await pool.query<StatusCountRow>(
-    'SELECT COALESCE(current_status::text, \'unknown\') AS current_status, COUNT(*)::text as count FROM devices GROUP BY COALESCE(current_status::text, \'unknown\')',
+    `SELECT COALESCE(current_status::text, 'unknown') AS current_status,
+       COUNT(*)::text AS count FROM devices
+       WHERE ${scopedDeviceSql(scope, 'devices', 1)}
+       GROUP BY COALESCE(current_status::text, 'unknown')`,
+    scopeParams(scope),
   );
 
   const counts: Record<string, number> = {};
@@ -73,44 +111,53 @@ const getDeviceSessionRuntimeExpression = async (): Promise<string> => {
     : 'COALESCE(uptime, EXTRACT(EPOCH FROM (COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at))), 0)';
 };
 
-export const getTotalRuntimeToday = async (): Promise<number> => {
+export const getTotalRuntimeToday = async (scope: DashboardDeviceScope): Promise<number> => {
   const runtimeExpression = await getDeviceSessionRuntimeExpression();
   const result = await pool.query<SumRow>(
     `SELECT COALESCE(SUM(${runtimeExpression}), 0)::text as total
      FROM device_sessions
-     WHERE COALESCE(server_session_start, created_at) >= CURRENT_DATE`,
+     WHERE COALESCE(server_session_start, created_at) >= CURRENT_DATE
+       AND ${scopedDeviceSql(scope, 'device_sessions', 1)}`,
+    scopeParams(scope),
   );
   return parseInt(result.rows[0].total, 10);
 };
 
-export const getTotalRuntimeWeek = async (): Promise<number> => {
+export const getTotalRuntimeWeek = async (scope: DashboardDeviceScope): Promise<number> => {
   const runtimeExpression = await getDeviceSessionRuntimeExpression();
   const result = await pool.query<SumRow>(
     `SELECT COALESCE(SUM(${runtimeExpression}), 0)::text as total
      FROM device_sessions
-     WHERE COALESCE(server_session_start, created_at) >= CURRENT_DATE - INTERVAL '7 days'`,
+     WHERE COALESCE(server_session_start, created_at) >= CURRENT_DATE - INTERVAL '7 days'
+       AND ${scopedDeviceSql(scope, 'device_sessions', 1)}`,
+    scopeParams(scope),
   );
   return parseInt(result.rows[0].total, 10);
 };
 
-export const getActiveAlertsCount = async (): Promise<number> => {
+export const getActiveAlertsCount = async (scope: DashboardDeviceScope): Promise<number> => {
   const result = await pool.query<CountRow>(
-    `SELECT COUNT(*)::text as count FROM alerts WHERE status = 'active'`,
+    `SELECT COUNT(*)::text as count FROM alerts WHERE status = 'active'
+       AND ${scopedAlertSql(scope)}`,
+    scopeParams(scope),
   );
   return parseInt(result.rows[0].count, 10);
 };
 
-export const getSessionsToday = async (): Promise<number> => {
+export const getSessionsToday = async (scope: DashboardDeviceScope): Promise<number> => {
   const result = await pool.query<CountRow>(
     `SELECT COUNT(*)::text as count
      FROM device_sessions
-     WHERE server_session_start >= CURRENT_DATE`,
+     WHERE server_session_start >= CURRENT_DATE
+       AND ${scopedDeviceSql(scope, 'device_sessions', 1)}`,
+    scopeParams(scope),
   );
   return parseInt(result.rows[0].count, 10);
 };
 
 export const getActivityEvents = async (
   query: ActivityQuery,
+  scope: DashboardDeviceScope,
 ): Promise<{ events: EventLogRow[]; total: number }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
@@ -119,6 +166,11 @@ export const getActivityEvents = async (
   const conditions: string[] = [];
   const params: unknown[] = [];
   let paramIndex = 1;
+  conditions.push(scopedDeviceSql(scope, 'event_logs', paramIndex));
+  if (!isFleetWide(scope)) {
+    params.push(scope.userId);
+    paramIndex++;
+  }
 
   if (query.deviceId) {
     conditions.push(`device_id = $${paramIndex++}`);
@@ -154,7 +206,7 @@ export const getActivityEvents = async (
   return { events, total };
 };
 
-export const getDeviceActivitySeries = async (days: number): Promise<DeviceActivityRow[]> => {
+export const getDeviceActivitySeries = async (days: number, scope: DashboardDeviceScope): Promise<DeviceActivityRow[]> => {
   const safeDays = Math.max(1, Math.min(days, 90));
   const fromDate = new Date(Date.now() - (safeDays - 1) * 24 * 60 * 60 * 1000);
 
@@ -194,6 +246,7 @@ export const getDeviceActivitySeries = async (days: number): Promise<DeviceActiv
         )::text AS running
       FROM event_logs
       WHERE server_timestamp >= DATE_TRUNC('day', $1::timestamptz)
+        AND ${scopedDeviceSql(scope, 'event_logs', 2)}
       GROUP BY bucket
     )
     SELECT
@@ -206,15 +259,16 @@ export const getDeviceActivitySeries = async (days: number): Promise<DeviceActiv
     ORDER BY series.bucket ASC
   `;
 
-  const result = await pool.query<DeviceActivityRow>(query, [fromDate.toISOString()]);
+  const result = await pool.query<DeviceActivityRow>(query, [fromDate.toISOString(), ...scopeParams(scope)]);
   return result.rows;
 };
 
-export const getDeviceStatusDistribution = async (): Promise<DeviceStatusRow[]> => {
+export const getDeviceStatusDistribution = async (scope: DashboardDeviceScope): Promise<DeviceStatusRow[]> => {
   const query = `
     WITH grouped AS (
       SELECT LOWER(COALESCE(current_status::text, 'unknown')) AS status, COUNT(*)::text AS count
       FROM devices
+      WHERE ${scopedDeviceSql(scope, 'devices', 1)}
       GROUP BY LOWER(COALESCE(current_status::text, 'unknown'))
     )
     SELECT
@@ -239,11 +293,11 @@ export const getDeviceStatusDistribution = async (): Promise<DeviceStatusRow[]> 
     ORDER BY status_name ASC
   `;
 
-  const result = await pool.query<DeviceStatusRow>(query);
+  const result = await pool.query<DeviceStatusRow>(query, scopeParams(scope));
   return result.rows;
 };
 
-export const getFleetRuntimeSeries = async (days: number): Promise<FleetRuntimeRow[]> => {
+export const getFleetRuntimeSeries = async (days: number, scope: DashboardDeviceScope): Promise<FleetRuntimeRow[]> => {
   const safeDays = Math.max(1, Math.min(days, 180));
   const fromDate = new Date(Date.now() - (safeDays - 1) * 24 * 60 * 60 * 1000);
   const runtimeExpression = await getDeviceSessionRuntimeExpression();
@@ -262,6 +316,7 @@ export const getFleetRuntimeSeries = async (days: number): Promise<FleetRuntimeR
         COALESCE(SUM(${runtimeExpression}), 0)::text AS runtime_seconds
       FROM device_sessions
       WHERE COALESCE(server_session_start, created_at) >= DATE_TRUNC('day', $1::timestamptz)
+        AND ${scopedDeviceSql(scope, 'device_sessions', 2)}
       GROUP BY bucket
     )
     SELECT
@@ -273,7 +328,7 @@ export const getFleetRuntimeSeries = async (days: number): Promise<FleetRuntimeR
   `;
 
   try {
-    const result = await pool.query<FleetRuntimeRow>(query, [fromDate.toISOString()]);
+    const result = await pool.query<FleetRuntimeRow>(query, [fromDate.toISOString(), ...scopeParams(scope)]);
     return result.rows;
   } catch (error) {
     if (isUndefinedColumnError(error)) {
