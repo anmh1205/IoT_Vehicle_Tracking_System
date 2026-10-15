@@ -68,7 +68,15 @@ jobs:
       - name: Lint supported projects
         if: matrix.component != 'Tracking_MqttBridge'
         run: npm run lint
-      - run: npx tsc --noEmit
+      - name: Typecheck
+        run: |
+          if [ "$COMPONENT" = "Tracking_Frontend" ]; then
+            npm run typecheck
+          else
+            npx tsc --noEmit
+          fi
+        env:
+          COMPONENT: ${{ matrix.component }}
       - run: npm test
 
   mobile-quality:
