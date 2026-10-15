@@ -56,6 +56,26 @@ const getGuard = (router: Router, method: string, path: string): Handler => {
 };
 
 describe('REST write route authorization', () => {
+  const roleOrder = ['viewer', 'operator', 'manager', 'admin', 'root'] as const;
+
+  for (const [router, method, path, minimumRole] of routes) {
+    it(`${method.toUpperCase()} ${path} enforces the entire role privilege matrix`, () => {
+      const guard = getGuard(router, method, path);
+      const threshold = roleOrder.indexOf(minimumRole);
+
+      for (const role of roleOrder) {
+        const next = vi.fn();
+        guard({ user: { role } }, {}, next);
+        if (roleOrder.indexOf(role) >= threshold) {
+          expect(next, `${role} should be allowed on ${method.toUpperCase()} ${path}`).toHaveBeenCalledWith();
+        } else {
+          expect(next, `${role} must be denied on ${method.toUpperCase()} ${path}`).toHaveBeenCalledOnce();
+          expect(next.mock.calls[0]?.[0]).toBeInstanceOf(Error);
+        }
+      }
+    });
+  }
+
   for (const [router, method, path, minimumRole] of routes) {
     it(`${method.toUpperCase()} ${path} denies viewers and allows its configured editor role`, () => {
       const guard = getGuard(router, method, path);
