@@ -13,6 +13,8 @@ function runScenario({
   existingTables = [],
   recorded = [],
   failExecution = false,
+  fileName = '01-example.sql',
+  oldStaticCredential = false,
 } = {}) {
   const writes = [];
   const errors = [];
@@ -22,6 +24,7 @@ function runScenario({
     mode: 'mock',
     queryRows(query) {
       if (query.includes('SELECT filename, checksum, applied_mode')) return recorded;
+      if (query.includes('SELECT username FROM users')) return oldStaticCredential ? [['admin']] : [];
       if (query.includes('information_schema.tables')) return [...tables].map((name) => [name]);
       return [];
     },
@@ -31,7 +34,7 @@ function runScenario({
     },
   };
   const fakeFs = {
-    readdirSync: () => ['01-example.sql'],
+    readdirSync: () => [fileName],
     readFileSync: () => sql,
   };
   const customRequire = (name) => {
@@ -121,4 +124,55 @@ test('fully present legacy schema baselines without re-executing DDL', () => {
   assert.equal(result.failed, false);
   assert.equal(result.writes.filter((write) => write.includes('BEGIN;')).length, 0);
   assert.equal(result.writes.filter((write) => write.includes("VALUES ('01-example.sql'")).length, 1);
+});
+
+const secureUsersSql = fs.readFileSync(path.join(__dirname, '../init/01-users.sql'), 'utf8');
+const historicalUsersChecksum = '7e58d1f34242bd92a259725607e4f75193a733d73ad5bf3fc01111a74200fe55';
+const secureUsersChecksum = 'd4f55f77e2ee06e83ef1e46e0a43638c907a22d1199f6e7daa9045d1bfc11014';
+
+test('only the pinned seed-removal SQL is accepted as a historical reconciliation', () => {
+  assert.equal(crypto.createHash('sha256').update(secureUsersSql).digest('hex'), secureUsersChecksum);
+  const result = runScenario({
+    fileName: '01-users.sql',
+    sql: secureUsersSql,
+    recorded: [['01-users.sql', historicalUsersChecksum, 'executed']],
+  });
+  assert.equal(result.failed, false);
+  assert.match(result.logs.join(' '), /reconcile 01-users.sql/);
+  assert.equal(result.writes.some((write) => write.includes('BEGIN;')), false);
+  assert.equal(result.writes.filter((write) => write.includes(secureUsersChecksum)).length, 1);
+});
+
+test('known privileged seed blocks existing installation until operator rotates password', () => {
+  const result = runScenario({
+    fileName: '01-users.sql',
+    sql: secureUsersSql,
+    recorded: [['01-users.sql', historicalUsersChecksum, 'executed']],
+    oldStaticCredential: true,
+  });
+  assert.equal(result.failed, true);
+  assert.match(result.errors.join(' '), /Rotate the admin password/);
+  assert.equal(result.writes.some((write) => write.includes(secureUsersChecksum)), false);
+});
+
+test('dry-run reports planned seed reconciliation without writes', () => {
+  const result = runScenario({
+    fileName: '01-users.sql',
+    sql: secureUsersSql,
+    recorded: [['01-users.sql', historicalUsersChecksum, 'baseline']],
+    dryRun: true,
+  });
+  assert.equal(result.failed, false);
+  assert.match(result.logs.join(' '), /plan 01-users.sql/);
+  assert.deepEqual(result.writes, []);
+});
+
+test('even 01-users.sql does not permit arbitrary checksum drift', () => {
+  const result = runScenario({
+    fileName: '01-users.sql',
+    sql: secureUsersSql + '\n-- unexpected modification',
+    recorded: [['01-users.sql', historicalUsersChecksum, 'executed']],
+  });
+  assert.equal(result.failed, true);
+  assert.match(result.errors.join(' '), /Migration checksum drift/);
 });
