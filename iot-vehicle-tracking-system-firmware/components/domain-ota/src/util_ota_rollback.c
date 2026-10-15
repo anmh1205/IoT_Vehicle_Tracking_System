@@ -6,64 +6,81 @@
 
 /**
  * @file util_ota_rollback.c
- * @brief Manual OTA rollback helpers behind the public util facade.
- * This translation unit belongs to the OTA domain layer and keeps domain rules, staging helpers, and policy decisions separate from transport and board adapters.
+ * @brief Select a verified fallback image without discarding the OTA job lineage.
  */
-
 
 /**
- * @brief Trigger manual rollback to previous partition.
- *
- * Picks a safe boot target using a priority fallback chain so the device always
- * has somewhere to boot after a bad update:
- *   1. If running on ota_0, prefer the ota_1 slot (the other OTA image).
- *   2. Otherwise prefer the factory image (known-good baseline).
- *   3. As a last resort, fall back to ota_0.
- * The chosen partition label is recorded in @p out_status and marked as the next
- * boot partition; the caller is responsible for the actual reset.
- *
- * @param[out] out_status Receives status "rolled_back" plus the target label.
- * @return ESP_OK when a boot partition was selected, ESP_ERR_NOT_FOUND when no
- *         usable partition exists, or an esp_ota error from set_boot_partition.
+ * A rollback must never select the running image or an OTA slot not confirmed
+ * ESP_OTA_IMG_VALID. esp_ota_set_boot_partition additionally validates that
+ * the candidate contains a bootable image; failed candidates are skipped.
  */
-esp_err_t util_ota_trigger_manual_rollback(firmware_status_t *out_status) {
-    ESP_RETURN_ON_NULL(out_status, ESP_ERR_INVALID_ARG, UTIL_TAG, "out_status is NULL");
+static esp_err_t try_rollback_candidate(const esp_partition_t *candidate,
+                                        const esp_partition_t *running,
+                                        firmware_status_t *out_status) {
+    if (candidate == NULL || candidate == running) {
+        return ESP_ERR_NOT_FOUND;
+    }
 
-    // Pre-fill the status as a completed rollback; only the partition label varies per branch.
-    memset(out_status, 0, sizeof(*out_status));
-    util_copy_string(out_status->status, sizeof(out_status->status), TRACKER_OTA_STATUS_ROLLED_BACK);
-    out_status->progress = TRACKER_OTA_PROGRESS_DONE;
-
-    // Case 1: currently running ota_0, so the previous image lives in ota_1.
-    const esp_partition_t *running = esp_ota_get_running_partition();
-    if (running != NULL && !util_string_empty(running->label) && strcmp(running->label, "ota_0") == 0) {
-        const esp_partition_t *rollback = esp_partition_find_first(ESP_PARTITION_TYPE_APP,
-                                                                   ESP_PARTITION_SUBTYPE_APP_OTA_1,
-                                                                   NULL);
-        if (rollback != NULL) {
-            util_fill_partition_label(rollback, out_status->partition, sizeof(out_status->partition));
-            return esp_ota_set_boot_partition(rollback);
+    if (candidate->subtype != ESP_PARTITION_SUBTYPE_APP_FACTORY) {
+        esp_ota_img_states_t state = ESP_OTA_IMG_UNDEFINED;
+        if (esp_ota_get_state_partition(candidate, &state) != ESP_OK ||
+            state != ESP_OTA_IMG_VALID) {
+            return ESP_ERR_INVALID_STATE;
         }
     }
 
-    // Case 2: prefer the factory image as a guaranteed known-good baseline.
-    const esp_partition_t *factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP,
-                                                              ESP_PARTITION_SUBTYPE_APP_FACTORY,
-                                                              NULL);
-    if (factory != NULL) {
-        util_fill_partition_label(factory, out_status->partition, sizeof(out_status->partition));
-        return esp_ota_set_boot_partition(factory);
+    esp_err_t err = esp_ota_set_boot_partition(candidate);
+    if (err != ESP_OK) {
+        return err;
     }
 
-    // Case 3: last-resort fallback to ota_0 when no factory image is present.
-    const esp_partition_t *ota0 = esp_partition_find_first(ESP_PARTITION_TYPE_APP,
-                                                           ESP_PARTITION_SUBTYPE_APP_OTA_0,
-                                                           NULL);
-    if (ota0 != NULL) {
-        util_fill_partition_label(ota0, out_status->partition, sizeof(out_status->partition));
-        return esp_ota_set_boot_partition(ota0);
+    // Only the rollback selector's fields are modified. The caller owns
+    // job_id, target_version, current_version and diagnostic lineage.
+    util_fill_partition_label(candidate, out_status->partition, sizeof(out_status->partition));
+    util_copy_string(out_status->status, sizeof(out_status->status), TRACKER_OTA_STATUS_ROLLED_BACK);
+    out_status->progress = TRACKER_OTA_PROGRESS_DONE;
+    return ESP_OK;
+}
+
+esp_err_t util_ota_trigger_manual_rollback(firmware_status_t *out_status) {
+    ESP_RETURN_ON_NULL(out_status, ESP_ERR_INVALID_ARG, UTIL_TAG, "out_status is NULL");
+
+    const esp_partition_t *running = esp_ota_get_running_partition();
+    if (running == NULL) {
+        return ESP_ERR_INVALID_STATE;
     }
 
-    // No bootable app partition found at all.
-    return ESP_ERR_NOT_FOUND;
+    // An OTA image only rolls back to an independently verified alternate OTA
+    // image or to the factory image. Factory is not assumed to be the previous
+    // application version: its bootability is checked by ESP-IDF.
+    esp_err_t last_err = ESP_ERR_NOT_FOUND;
+    if (running->subtype == ESP_PARTITION_SUBTYPE_APP_OTA_0 ||
+        running->subtype == ESP_PARTITION_SUBTYPE_APP_OTA_1) {
+        const esp_partition_subtype_t other_subtype =
+            running->subtype == ESP_PARTITION_SUBTYPE_APP_OTA_0
+                ? ESP_PARTITION_SUBTYPE_APP_OTA_1
+                : ESP_PARTITION_SUBTYPE_APP_OTA_0;
+        const esp_partition_t *other = esp_partition_find_first(
+            ESP_PARTITION_TYPE_APP, other_subtype, NULL);
+        last_err = try_rollback_candidate(other, running, out_status);
+        if (last_err == ESP_OK) {
+            return ESP_OK;
+        }
+    }
+
+    if (running->subtype != ESP_PARTITION_SUBTYPE_APP_FACTORY) {
+        const esp_partition_t *factory = esp_partition_find_first(
+            ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
+        esp_err_t factory_err = try_rollback_candidate(factory, running, out_status);
+        if (factory_err == ESP_OK) {
+            return ESP_OK;
+        }
+        if (factory_err != ESP_ERR_NOT_FOUND) {
+            last_err = factory_err;
+        }
+    }
+
+    // There is no verified fallback. Preserve the caller's original status and
+    // metadata so the app-core can publish a correlated failed rollback report.
+    return last_err;
 }
