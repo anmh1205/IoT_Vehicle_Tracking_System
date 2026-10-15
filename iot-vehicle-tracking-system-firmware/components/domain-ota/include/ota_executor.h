@@ -64,12 +64,15 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
 /**
  * @brief Switch the boot partition back to a known-good image.
  *
- * Picks a safe fallback target in priority order: the alternate OTA slot when
- * running from ota_0, otherwise the factory app, otherwise ota_0. Used to
- * recover from a bad update without requiring a fresh download.
+ * Only selects a confirmed-valid alternate OTA image (ota_0/ota_1), or
+ * a factory image whose bootability ESP-IDF accepts. Never selects the
+ * currently running image or assumes that an unknown OTA slot is valid.
  *
- * @param[out] out_status Status object describing the rollback outcome/partition.
- * @return ESP_OK when a boot partition was set, ESP_ERR_NOT_FOUND when no
- *         rollback target exists, or another ESP-IDF error code.
+ * Caller-provided job_id, target_version and current_version are preserved.
+ * Status, progress and partition are updated only after boot promotion succeeds.
+ *
+ * @param[in,out] out_status Caller-initialized status and job lineage.
+ * @return ESP_OK when a verified fallback boot partition was selected, or
+ *         an ESP-IDF error when no valid fallback could be selected.
  */
 esp_err_t util_ota_trigger_manual_rollback(firmware_status_t *out_status);
