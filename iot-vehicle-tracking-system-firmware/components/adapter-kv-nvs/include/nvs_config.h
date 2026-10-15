@@ -17,14 +17,21 @@
 
 
 /**
- * @brief Initialize NVS flash storage subsystem.
+ * @brief Initialize NVS without automatically erasing the default partition.
  *
- * @return ESP_OK on success, otherwise an ESP-IDF error code.
+ * NO_FREE_PAGES and NEW_VERSION_FOUND are surfaced as errors so the caller
+ * can stop boot rather than lose provisioning, OTA or session-recovery data.
+ *
+ * @return ESP_OK on success, otherwise the NVS initialization error.
  */
 esp_err_t nvs_config_init(void);
 
 /**
- * @brief Load runtime config from NVS (and write defaults when missing/invalid).
+ * @brief Load runtime config, migrating known layouts; preserve invalid data.
+ *
+ * A truly absent namespace on blank flash may be initialized with defaults.
+ * Missing config inside an existing namespace, unknown blob layouts and
+ * semantically invalid config are errors, never destructive auto-repair.
  *
  * @param config Output config object.
  *
