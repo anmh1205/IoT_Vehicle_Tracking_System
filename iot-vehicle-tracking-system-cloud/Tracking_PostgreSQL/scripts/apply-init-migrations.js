@@ -13,7 +13,7 @@ const MIGRATION_TABLE = 'init_schema_migrations';
 const LEGACY_ADMIN_SEED_RECONCILIATION = Object.freeze({
   filename: '01-users.sql',
   fromChecksum: '7e58d1f34242bd92a259725607e4f75193a733d73ad5bf3fc01111a74200fe55',
-  toChecksum: 'd4f55f77e2ee06e83ef1e46e0a43638c907a22d1199f6e7daa9045d1bfc11014',
+  toChecksum: '2e0159c1dbab8315e700754fedafc7168048d3b77d59594932597e06ad9f0e53',
 });
 const LEGACY_STATIC_ADMIN_HASH = '$2a$12$iZP02NlhuT/z5W8U7Q7eHOfydGsNPt1tnJFIIR5YGPpgyBmQaKrci';
 
