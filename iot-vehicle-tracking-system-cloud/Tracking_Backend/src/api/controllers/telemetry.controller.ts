@@ -2,9 +2,8 @@ import type { Response } from 'express';
 import type { AuthenticatedRequest } from '@/shared/types/common.types';
 import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { createValidationError } from '@/shared/utils/errors.util';
-import { sendOk, sendAccepted } from '@/shared/utils/response.util';
+import { sendOk } from '@/shared/utils/response.util';
 import * as telemetryHistoryService from '@/domain/telemetry/services/telemetry-history.service';
-import * as exportJobService from '@/domain/export/services/export-job.service';
 
 export const getHistory = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const deviceId = req.query.deviceId as string | undefined;
@@ -13,6 +12,7 @@ export const getHistory = asyncHandler(async (req: AuthenticatedRequest, res: Re
   }
 
   const data = await telemetryHistoryService.getTelemetryHistory({
+    actor: req.user!,
     deviceId,
     from: req.query.from as string | undefined,
     to: req.query.to as string | undefined,
@@ -21,28 +21,8 @@ export const getHistory = asyncHandler(async (req: AuthenticatedRequest, res: Re
   sendOk(res, data);
 });
 
-export const createExport = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user!.id;
-  const { deviceIds, from, to, format } = req.body as {
-    deviceIds?: string[];
-    from?: string;
-    to?: string;
-    format?: string;
-  };
-
-  if (!deviceIds || deviceIds.length === 0) {
-    throw createValidationError('deviceIds is required');
-  }
-
-  const job = await exportJobService.createExport(userId, {
-    exportType: 'telemetry',
-    filters: {
-      deviceIds,
-      from: from ?? null,
-      to: to ?? null,
-      format: format ?? 'csv',
-    },
-  });
-
-  sendAccepted(res, { jobId: job.id, status: job.status });
+// The async export processor has no telemetry handler. Fail synchronously instead of
+// persisting a job that is guaranteed to fail after a misleading HTTP 202 response.
+export const createExport = asyncHandler(async (_req: AuthenticatedRequest, _res: Response) => {
+  throw createValidationError('Telemetry export is not supported; use the authorized history endpoint');
 });
