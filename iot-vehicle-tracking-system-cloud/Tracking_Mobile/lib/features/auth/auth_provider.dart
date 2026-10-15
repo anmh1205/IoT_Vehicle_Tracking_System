@@ -24,20 +24,28 @@ class AuthState {
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier() : super(const AuthState());
+  AuthNotifier({AuthService? authService})
+      : _authService = authService ?? AuthService(),
+        super(const AuthState());
 
-  final _authService = AuthService();
+  final AuthService _authService;
 
   /// Attempt to restore a saved session on app start.
   Future<void> restoreSession() async {
     state = state.copyWith(isLoading: true);
-    final token = await _authService.getSavedToken();
-    if (token != null) {
-      state = AuthState(token: token);
-      Log.info('Session restored from secure storage');
-    } else {
+    try {
+      final token = await _authService.getSavedToken();
+      if (token != null) {
+        state = AuthState(token: token);
+        Log.info('Session restored from secure storage');
+      } else {
+        state = const AuthState();
+        Log.info('No saved session found');
+      }
+    } catch (error) {
       state = const AuthState();
-      Log.info('No saved session found');
+      Log.error('Failed to restore native auth session: $error');
+      rethrow;
     }
   }
 

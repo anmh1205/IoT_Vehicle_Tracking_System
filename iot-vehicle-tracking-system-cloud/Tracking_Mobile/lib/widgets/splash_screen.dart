@@ -25,8 +25,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   Future<void> _initialize() async {
-    // Restore saved auth session
-    await ref.read(authProvider.notifier).restoreSession();
+    // A secure-storage read failure must not leave the app stuck on splash.
+    // AuthNotifier reports the error rather than treating it as "no token".
+    try {
+      await ref.read(authProvider.notifier).restoreSession();
+    } catch (error) {
+      Log.error('Native auth restoration unavailable: $error');
+    }
 
     // Initialize Firebase Cloud Messaging
     try {

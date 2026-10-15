@@ -27,7 +27,7 @@ class JSBridge {
         },
 
         saveToken: function(token) {
-          window.flutter_inappwebview.callHandler('saveToken', token);
+          return window.flutter_inappwebview.callHandler('saveToken', token);
         },
 
         getDeviceInfo: function() {
@@ -35,7 +35,7 @@ class JSBridge {
         },
 
         logout: function() {
-          window.flutter_inappwebview.callHandler('logout');
+          return window.flutter_inappwebview.callHandler('logout');
         },
 
         getCurrentLocation: function() {
