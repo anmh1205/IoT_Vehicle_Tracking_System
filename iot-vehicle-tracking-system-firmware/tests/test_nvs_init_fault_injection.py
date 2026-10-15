@@ -41,7 +41,7 @@ typedef int esp_err_t;
 #define ESP_ERR_NVS_NO_FREE_PAGES 100
 #define ESP_ERR_NVS_NEW_VERSION_FOUND 101
 #define ESP_FAIL 102
-#define ESP_LOGE(...) ((void)0)
+#define ESP_LOGE(tag, ...) ((void)(tag))
 static const char *TAG = "NVS";
 static esp_err_t requested_result;
 static int init_calls;
