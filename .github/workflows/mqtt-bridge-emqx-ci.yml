@@ -1,0 +1,41 @@
+name: MQTT Bridge EMQX Persistent Replay
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/**'
+      - '.github/workflows/mqtt-bridge-emqx-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  emqx-persistent-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      emqx:
+        image: emqx/emqx:5.8.8
+        ports:
+          - 1883:1883
+        options: >-
+          --health-cmd "emqx ctl status"
+          --health-interval 4s
+          --health-timeout 4s
+          --health-retries 35
+    defaults:
+      run:
+        working-directory: iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/package-lock.json
+      - run: npm ci
+      - name: Verify persistent-session QoS1 EMQX replay with pre-connect handlers
+        env:
+          IVTS_EMQX_INTEGRATION: '1'
+        run: npx tsx --test tests/emqx-persistent-replay.integration.test.ts
