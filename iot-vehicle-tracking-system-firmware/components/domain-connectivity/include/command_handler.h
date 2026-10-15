@@ -135,3 +135,6 @@ bool command_handler_take_ota_command(ota_command_t *out_cmd);
  * @return false when no assignment is pending.
  */
 bool command_handler_take_session_assignment(command_session_assignment_t *out_assignment);
+
+/** True while an unexecuted action or dedupe checkpoint occupies volatile state. */
+bool command_handler_has_pending_actions(void);
