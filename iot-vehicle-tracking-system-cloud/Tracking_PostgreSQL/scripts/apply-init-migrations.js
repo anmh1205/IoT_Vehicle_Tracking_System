@@ -7,6 +7,17 @@ const { createPostgresCommandRunner } = require('./postgres-command-runner');
 
 const MIGRATION_TABLE = 'init_schema_migrations';
 
+// The sole permitted legacy checksum rewrite removes an embedded, globally
+// known administrator password. Both input and output byte hashes are pinned.
+// Any other historical DDL edit must still fail checksum validation.
+const LEGACY_ADMIN_SEED_RECONCILIATION = Object.freeze({
+  filename: '01-users.sql',
+  fromChecksum: '7e58d1f34242bd92a259725607e4f75193a733d73ad5bf3fc01111a74200fe55',
+  toChecksum: 'd4f55f77e2ee06e83ef1e46e0a43638c907a22d1199f6e7daa9045d1bfc11014',
+});
+const LEGACY_STATIC_ADMIN_HASH = '$2a$12$iZP02NlhuT/z5W8U7Q7eHOfydGsNPt1tnJFIIR5YGPpgyBmQaKrci';
+
+
 function parseArgs(argv) {
   const options = { dryRun: false, mode: '', target: '' };
   for (let index = 0; index < argv.length; index += 1) {
@@ -158,7 +169,30 @@ function main() {
     const existing = recorded.get(fileName);
     if (existing) {
       if (existing.checksum !== checksum) {
-        throw new Error('Migration checksum drift: ' + fileName + '. Recorded=' + existing.checksum + ', current=' + checksum + '. Create a new migration instead of changing applied SQL.');
+        const isKnownSeedRemoval =
+          fileName === LEGACY_ADMIN_SEED_RECONCILIATION.filename &&
+          existing.checksum === LEGACY_ADMIN_SEED_RECONCILIATION.fromChecksum &&
+          checksum === LEGACY_ADMIN_SEED_RECONCILIATION.toChecksum;
+        if (!isKnownSeedRemoval) {
+          throw new Error('Migration checksum drift: ' + fileName + '. Recorded=' + existing.checksum + ', current=' + checksum + '. Create a new migration instead of changing applied SQL.');
+        }
+
+        // The original schema may be retained, but the deployed default admin
+        // MUST have been rotated before its old receipt can be reconciled.
+        const legacyAdmin = runner.queryRows(
+          'SELECT username FROM users WHERE username = ' +
+          sqlLiteral('admin') + ' AND password_hash = ' + sqlLiteral(LEGACY_STATIC_ADMIN_HASH) +
+          ' LIMIT 1',
+        );
+        if (legacyAdmin.length > 0) {
+          throw new Error('Legacy default administrator credential is still active. Rotate the admin password before applying the secure bootstrap migration.');
+        }
+        console.log(`${options.dryRun ? 'plan' : 'reconcile'} ${fileName}: verified legacy admin seed removal; schema preserved`);
+        if (!options.dryRun) {
+          // Only the exact known data-seed removal may update an old receipt.
+          recordMigration(runner, fileName, checksum, existing.appliedMode);
+        }
+        continue;
       }
       console.log(`skip ${fileName}: already recorded as ${existing.appliedMode}`);
       continue;
