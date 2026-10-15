@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { authServices } from '@/lib/api/auth';
+import { saveNativeAuthToken } from '@/lib/native-auth';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { loginSchema, type LoginFormValues } from '@/lib/validations/auth.schema';
@@ -54,6 +55,25 @@ export const LoginForm = () => {
         username: values.username,
         password: values.password,
       });
+      try {
+        await saveNativeAuthToken(data.token);
+      } catch {
+        // A native app cannot report a persistent login if secure storage failed.
+        // Revoke the just-issued server session before exposing authenticated UI.
+        let serverRevoked = false;
+        try {
+          await authServices.logout();
+          serverRevoked = true;
+        } catch {
+          // An unavailable server must not be described as a completed logout.
+        }
+        setErrorMessage(
+          serverRevoked
+            ? 'Không thể lưu phiên đăng nhập an toàn trên thiết bị. Vui lòng thử lại.'
+            : 'Không thể lưu phiên trên thiết bị và chưa xác nhận được thu hồi phiên máy chủ. Vui lòng kiểm tra kết nối và đăng nhập lại.',
+        );
+        return;
+      }
       setAuth(
         {
           ...data.user,
