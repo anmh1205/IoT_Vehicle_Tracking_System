@@ -27,6 +27,7 @@
 #include "power_mgr.h"
 #include "session_mgr.h"
 #include "state_machine_internal.h"
+#include "state_publish_pipeline.h"
 #include "state_led_control.h"
 #include "state_obd_runtime.h"
 #include "state_runtime_context.h"
