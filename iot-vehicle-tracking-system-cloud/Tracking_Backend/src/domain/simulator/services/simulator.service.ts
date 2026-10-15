@@ -2,9 +2,9 @@ import { randomUUID } from 'node:crypto';
 import mqtt from 'mqtt';
 import { pool } from '@/infrastructure/database/pool';
 import { logger } from '@/infrastructure/logger';
-import { mqttConfig } from '@/config/env';
+import { appConfig, dbConfig, mqttConfig } from '@/config/env';
 import { hashToken } from '@/shared/utils/crypto.util';
-import { createValidationError } from '@/shared/utils/errors.util';
+import { createValidationError, createForbiddenError } from '@/shared/utils/errors.util';
 import { publishEvent } from '@/infrastructure/realtime';
 import type {
   SimulatorPoint,
@@ -769,11 +769,35 @@ const executeTickSafely = async (): Promise<void> => {
   }
 };
 
+/**
+ * Legacy MQTT simulator impersonates real device identities and temporarily
+ * replaces their auth_token hashes. It must never reach a real deployment.
+ * This is a fail-closed mitigation until the simulator has separate identities,
+ * database and broker namespaces and can no longer mutate live devices.
+ */
 export const startSimulation = async (
   input: SimulatorStartInput,
   userId: number,
 ): Promise<SimulatorStatus> => {
+  const explicitlyIsolated =
+    !appConfig.isProduction &&
+    (appConfig.nodeEnv === 'development' || appConfig.nodeEnv === 'test') &&
+    process.env.SIMULATOR_ISOLATED_TEST_MODE === 'true' &&
+    dbConfig.database.startsWith('ivts_simulator_') &&
+    process.env.SIMULATOR_ISOLATED_DATABASE === dbConfig.database &&
+    Boolean(process.env.SIMULATOR_ISOLATED_BROKER_HOST) &&
+    process.env.SIMULATOR_ISOLATED_BROKER_HOST === mqttConfig.host;
+
+  if (!explicitlyIsolated) {
+    throw createForbiddenError(
+      'Device impersonation simulator is disabled: use a dedicated isolated test database and MQTT broker',
+    );
+  }
+
   const deviceIds = dedupeDeviceIds(input.deviceIds);
+  if (!deviceIds.every((deviceId) => deviceId.startsWith('SIM-'))) {
+    throw createForbiddenError('Simulator may only use dedicated SIM- device identities');
+  }
   if (deviceIds.length === 0) {
     throw createValidationError('deviceIds must contain at least one device');
   }
