@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IVTS fleet dashboard
 
-## Getting Started
+This is the **Next.js web frontend** for the IoT Vehicle Tracking System. It is not the unmodified `create-next-app` starter. The backend API, MQTT Bridge, EMQX and PostgreSQL run as separate services; see the [monorepo README](../../README.md) and [architecture](../../docs/system-architecture.md) for the complete system.
 
-First, run the development server:
+## Local development
+
+Prerequisites: Node.js 20 (or a compatible newer version), npm, and an accessible IVTS Backend. The development server uses **port 4001**.
 
 ```bash
+cd iot-vehicle-tracking-system-cloud/Tracking_Frontend
+npm ci
+# Configure this component's .env / .env.example for the API origin.
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:4001`. API base URL handling lives in `src/lib/api/base-url.ts` and `src/lib/api/client.ts`. Do not hardcode API hostnames or credentials in UI components.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Code map
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app/`: application routes and layouts, including the fleet dashboard.
+- `src/features/`: feature-specific screens, hooks and presentation logic.
+- `src/lib/api/`: API clients, response envelopes, error handling and auth refresh.
+- `src/lib/stores/`: client state.
+- `src/components/`: reusable interface components.
+- `tests/`: Node/TypeScript unit and contract tests.
 
-## Learn More
+Keep data permissions on the server; hiding UI controls is not authorization. Statistics must distinguish genuine zero counts, no observations and API errors. Do not display fabricated historical metrics when a query fails. The Flutter WebView shell has a separate native auth/notification bridge that requires explicit origin and token-lifecycle handling.
 
-To learn more about Next.js, take a look at the following resources:
+## Checks before opening a PR
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+# Or: npm run verify
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+UAT image building and deployment are defined in the repository-root workflow `.github/workflows/frontend-uat.yml`. The frontend Docker and Compose files live in this directory; the primary runtime services are independently deployed. Follow the monorepo's environment and CI documentation rather than using generic Vercel starter instructions.
