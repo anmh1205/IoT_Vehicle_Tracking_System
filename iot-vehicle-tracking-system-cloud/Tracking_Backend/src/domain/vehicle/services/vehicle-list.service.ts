@@ -1,4 +1,5 @@
 import * as vehicleRepo from '@/domain/vehicle/repositories/vehicle.repository';
+import type { VehicleAccessScope } from '@/domain/vehicle/repositories/vehicle.repository';
 import type {
   Vehicle,
   VehicleListQuery,
@@ -35,6 +36,7 @@ const sanitizeVehicle = (v: Vehicle): VehiclePublic => ({
 
 export const listVehicles = async (
   query: VehicleListQuery,
+  scope: VehicleAccessScope,
 ): Promise<{
   items: VehiclePublic[];
   pagination: { page: number; limit: number; total: number; totalPages: number };
@@ -42,7 +44,7 @@ export const listVehicles = async (
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 
-  const result = await vehicleRepo.findAll(query);
+  const result = await vehicleRepo.findAll(query, scope);
 
   return {
     items: result.vehicles.map(sanitizeVehicle),
