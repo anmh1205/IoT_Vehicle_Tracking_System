@@ -1,4 +1,5 @@
 #include "ble_obd.h"
+#include "elm327_reply.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -69,6 +70,10 @@ struct ble_obd_ctx {
         bool expect_obd_response;
         /* True once the current transaction yields a valid OBD payload. */
         bool got_valid_payload;
+        bool raw_pending;
+        bool raw_response_ok;
+        bool raw_is_reset;
+        bool raw_is_at;
     } tx_data;
     struct {
         /* Aggregated notify chunks for current transaction. */
@@ -77,6 +82,7 @@ struct ble_obd_ctx {
         size_t len;
         /* True if any chunk in current transaction contains '?'. */
         bool has_error;
+        bool overflowed;
     } rx_data;
     struct {
         /* Count of OBD requests sent through rxtx path. */
@@ -453,6 +459,7 @@ static void ble_obd_response_reset(ble_obd_ctx_t *ctx) {
     memset(ctx->rx_data.buf, 0, sizeof(ctx->rx_data.buf));
     ctx->rx_data.len = 0;
     ctx->rx_data.has_error = false;
+    ctx->rx_data.overflowed = false;
 }
 
 /**
@@ -501,6 +508,10 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
     if (ctx == NULL || data == NULL || len == 0) {
         return;
     }
+    // Discard unsolicited/late prompts unless a request is awaiting completion.
+    if (!ctx->tx_data.expect_obd_response && !ctx->tx_data.raw_pending) {
+        return;
+    }
 
     /* Append chunk to transaction buffer for fragmented notifications. */
     size_t free_space = sizeof(ctx->rx_data.buf) - 1 - ctx->rx_data.len;
@@ -512,6 +523,7 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
     }
     if (append_len < len) {
         ctx->diag.rx_overflow++;
+        ctx->rx_data.overflowed = true;
     }
 
     // Prompt detection decides when the accumulated RX buffer is complete enough to parse and release the waiter.
@@ -553,7 +565,14 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
         }
     }
 
-    if (ctx->tx_data.expect_obd_response) {
+    if (ctx->tx_data.raw_pending) {
+        ctx->tx_data.raw_response_ok =
+            !ctx->rx_data.overflowed &&
+            elm327_reply_valid(ctx->rx_data.buf,
+                               ctx->tx_data.raw_is_reset,
+                               ctx->tx_data.raw_is_at);
+        ctx->tx_data.raw_pending = false;
+    } else if (ctx->tx_data.expect_obd_response) {
         ble_obd_response_state_t response_state =
             ble_obd_classify_response_state(ctx, has_valid_obd);
         ctx->last_response_state = response_state;
@@ -759,27 +778,41 @@ esp_err_t ble_obd_send_raw(ble_obd_ctx_t *ctx, const char *command, uint32_t tim
     ctx->tx_data.expect_obd_response = false;
     ctx->tx_data.expect_pid_header = false;
     ctx->tx_data.got_valid_payload = false;
+    const size_t command_len = strlen(command);
+    ctx->tx_data.raw_pending = false;
+    ctx->tx_data.raw_response_ok = false;
+    ctx->tx_data.raw_is_at = command_len >= 2 &&
+        toupper((unsigned char)command[0]) == 'A' &&
+        toupper((unsigned char)command[1]) == 'T';
+    ctx->tx_data.raw_is_reset = ctx->tx_data.raw_is_at && command_len >= 3 &&
+        toupper((unsigned char)command[2]) == 'Z';
 
     /* Drain stale semaphore tokens from prior operations. */
     while (xSemaphoreTake(ctx->response_sem, 0) == pdTRUE) {
     }
     ble_obd_response_reset(ctx);
+    ctx->tx_data.raw_pending = true;
 
     uint16_t tx_handle = ble_obd_tx_handle();
     if (tx_handle == 0) {
+        ctx->tx_data.raw_pending = false;
         xSemaphoreGive(ctx->api_mutex);
         return ESP_ERR_INVALID_STATE;
     }
 
-    ble_mgr_status_t status = ble_mgr_send(ctx->mgr_ctx, tx_handle, command, strlen(command));
+    ble_mgr_status_t status = ble_mgr_send(ctx->mgr_ctx, tx_handle, command, command_len);
     if (status != BLE_MGR_E_OK) {
+        ctx->tx_data.raw_pending = false;
         xSemaphoreGive(ctx->api_mutex);
         return ESP_FAIL;
     }
 
     BaseType_t has_response = xSemaphoreTake(ctx->response_sem, pdMS_TO_TICKS(timeout_ms));
+    const bool accepted = has_response == pdTRUE && ctx->tx_data.raw_response_ok;
+    ctx->tx_data.raw_pending = false;
+    ctx->tx_data.raw_response_ok = false;
     xSemaphoreGive(ctx->api_mutex);
-    return has_response == pdTRUE ? ESP_OK : ESP_ERR_TIMEOUT;
+    return has_response != pdTRUE ? ESP_ERR_TIMEOUT : (accepted ? ESP_OK : ESP_FAIL);
 }
 
 /**
@@ -804,6 +837,8 @@ static int ble_obd_execute_request(ble_obd_ctx_t *ctx,
     }
 
     ctx->diag.rxtx_total++;
+    ctx->tx_data.raw_pending = false;
+    ctx->tx_data.raw_response_ok = false;
     ctx->tx_data.expect_obd_response = true;
     ctx->tx_data.expect_pid_header = expect_pid_header;
     ctx->tx_data.got_valid_payload = false;
@@ -871,14 +906,14 @@ esp_err_t ble_obd_elm327_init(ble_obd_ctx_t *ctx) {
     ESP_RETURN_ON_NULL(ctx, ESP_ERR_INVALID_ARG, TAG, "ctx is NULL");
 
     /* Baseline ELM327 setup: reset, disable echo/linefeed/spaces, hide headers,
-     * then force ISO 15765-4 CAN 11-bit/500k (protocol 6). */
+     * then autodetect the ECU protocol (ATSP0). */
     const char *commands[] = {
         "ATZ\r",    /* Full reset of the adapter. */
         "ATE0\r",   /* Echo off so responses omit the sent command. */
         "ATL0\r",   /* Linefeeds off. */
         "ATS0\r",   /* Spaces off in hex output. */
         "ATH0\r",   /* Headers off; only data bytes returned. */
-        "ATSP6\r",  /* Select protocol 6 (CAN 11-bit, 500 kbps). */
+        "ATSP0\r",  /* Autodetect the vehicle protocol. */
     };
 
     /* Per-command timeouts; ATZ needs the longest as it reboots the adapter. */
