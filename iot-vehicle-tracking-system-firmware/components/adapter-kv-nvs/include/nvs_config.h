@@ -187,3 +187,18 @@ esp_err_t nvs_config_load_firmware_report(firmware_status_t *out_report, bool *o
 
 /** Clear a durable firmware report only after it is accepted by a transport. */
 esp_err_t nvs_config_clear_firmware_report(void);
+
+/** Versioned identity of one unsent motion warning; data_formatter regenerates
+ * the MQTT body using the active config, keeping bearer tokens out of this blob. */
+typedef struct {
+    uint32_t magic;
+    uint32_t seq_no;
+    uint64_t timestamp_ms;
+    bool time_trusted;
+    char message_id[37];
+    char boot_id[48];
+} tracker_motion_alarm_checkpoint_t;
+
+esp_err_t nvs_config_save_motion_alarm(const tracker_motion_alarm_checkpoint_t *checkpoint);
+esp_err_t nvs_config_load_motion_alarm(tracker_motion_alarm_checkpoint_t *out, bool *found);
+esp_err_t nvs_config_clear_motion_alarm(void);
