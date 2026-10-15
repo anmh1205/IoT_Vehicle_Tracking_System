@@ -1,0 +1,43 @@
+name: PostgreSQL Port Exposure Policy
+
+on:
+  pull_request:
+    branches: [main, uat]
+    paths:
+      - 'iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/**'
+      - '.github/workflows/postgresql-port-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-compose-bind-address:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PostgreSQL default binds only to loopback
+        env:
+          POSTGRES_PASSWORD: ci-only-not-a-real-password
+        run: |
+          docker compose -f iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/docker-compose.yml config --format json > "$RUNNER_TEMP/postgres-default.json"
+          python3 - <<'PY'
+          import json, os
+          with open(os.environ['RUNNER_TEMP'] + '/postgres-default.json', encoding='utf-8') as f:
+              document = json.load(f)
+          ports = document['services']['postgres']['ports']
+          assert len(ports) == 1, ports
+          assert ports[0]['host_ip'] == '127.0.0.1', ports
+          assert ports[0]['published'] == '5432', ports
+          PY
+      - name: PostgreSQL explicit bind override is respected
+        env:
+          POSTGRES_PASSWORD: ci-only-not-a-real-password
+          POSTGRES_BIND_ADDRESS: 127.0.0.2
+        run: |
+          docker compose -f iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/docker-compose.yml config --format json > "$RUNNER_TEMP/postgres-override.json"
+          python3 - <<'PY'
+          import json, os
+          with open(os.environ['RUNNER_TEMP'] + '/postgres-override.json', encoding='utf-8') as f:
+              document = json.load(f)
+          assert document['services']['postgres']['ports'][0]['host_ip'] == '127.0.0.2'
+          PY
