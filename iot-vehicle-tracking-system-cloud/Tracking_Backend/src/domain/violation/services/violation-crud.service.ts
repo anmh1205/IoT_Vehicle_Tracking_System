@@ -1,7 +1,8 @@
-import { createNotFoundError, createValidationError } from '@/shared/utils/errors.util';
+import { createNotFoundError, createValidationError, createForbiddenError } from '@/shared/utils/errors.util';
 import * as violationRepo from '@/domain/violation/repositories/violation.repository';
 import { logger } from '@/infrastructure/logger';
 import { publishEvent } from '@/infrastructure/realtime/event-bus.util';
+import type { SessionUser } from '@/shared/types/common.types';
 import type {
   Violation,
   ViolationPublic,
@@ -30,16 +31,18 @@ export const sanitizeViolation = (v: Violation): ViolationPublic => ({
   updatedAt: v.updated_at.toISOString(),
 });
 
-export const getViolationById = async (id: number): Promise<ViolationPublic> => {
-  const violation = await violationRepo.findById(id);
+export const getViolationById = async (id: number, actor: SessionUser): Promise<ViolationPublic> => {
+  const violation = await violationRepo.findById(id, actor);
   if (!violation) {
     throw createNotFoundError(`Violation with ID ${id} not found`);
   }
   return sanitizeViolation(violation);
 };
 
-export const createViolation = async (input: CreateViolationInput): Promise<ViolationPublic> => {
-  const violation = await violationRepo.create(input);
+export const createViolation = async (input: CreateViolationInput, actor: SessionUser): Promise<ViolationPublic> => {
+  if (actor.role === 'viewer') throw createForbiddenError('Insufficient permissions');
+  const violation = await violationRepo.create(input, actor);
+  if (!violation) throw createForbiddenError('Vehicle access denied');
   logger.info(`Violation "${input.violationType}" created for vehicle "${input.vehicleId}"`);
   const result = sanitizeViolation(violation);
   publishEvent('violation:new', {
@@ -62,10 +65,11 @@ export const createViolation = async (input: CreateViolationInput): Promise<Viol
 
 export const acknowledgeViolation = async (
   id: number,
-  userId: number,
+  actor: SessionUser,
   data: AcknowledgeViolationInput,
 ): Promise<ViolationPublic> => {
-  const existing = await violationRepo.findById(id);
+  if (actor.role === 'viewer') throw createForbiddenError('Insufficient permissions');
+  const existing = await violationRepo.findById(id, actor);
   if (!existing) {
     throw createNotFoundError(`Violation with ID ${id} not found`);
   }
@@ -74,12 +78,12 @@ export const acknowledgeViolation = async (
     throw createValidationError(`Violation ${id} has already been acknowledged`);
   }
 
-  const updated = await violationRepo.acknowledge(id, userId, data);
+  const updated = await violationRepo.acknowledge(id, actor, data);
   if (!updated) {
     throw createNotFoundError(`Violation with ID ${id} not found`);
   }
 
-  logger.info(`Violation ${id} acknowledged by user ${userId}`);
+  logger.info(`Violation ${id} acknowledged by user ${actor.id}`);
   const result = sanitizeViolation(updated);
   publishEvent('violation:updated', {
     id: updated.id,
