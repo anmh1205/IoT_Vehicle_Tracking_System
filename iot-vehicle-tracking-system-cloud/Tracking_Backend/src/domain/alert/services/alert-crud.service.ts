@@ -120,8 +120,9 @@ export const createAlert = async (input: CreateAlertInput): Promise<AlertPublic>
   return result;
 };
 
-export const acknowledgeAlert = async (id: number, userId: number): Promise<AlertPublic> => {
-  const existing = await alertRepo.findById(id);
+export const acknowledgeAlert = async (id: number, scope: AlertAccessScope): Promise<AlertPublic> => {
+  const userId = scope.userId;
+  const existing = await alertRepo.findByIdForScope(id, scope);
   if (!existing) {
     throw createNotFoundError(`Alert with ID ${id} not found`);
   }
@@ -132,7 +133,7 @@ export const acknowledgeAlert = async (id: number, userId: number): Promise<Aler
     );
   }
 
-  const updated = await alertRepo.acknowledge(id, userId);
+  const updated = await alertRepo.acknowledgeForScope(id, scope);
   if (!updated) {
     throw createNotFoundError(`Alert with ID ${id} not found`);
   }
@@ -168,10 +169,11 @@ export const acknowledgeAlert = async (id: number, userId: number): Promise<Aler
 
 export const resolveAlert = async (
   id: number,
-  userId: number,
+  scope: AlertAccessScope,
   resolutionNotes: string | null,
 ): Promise<AlertPublic> => {
-  const existing = await alertRepo.findById(id);
+  const userId = scope.userId;
+  const existing = await alertRepo.findByIdForScope(id, scope);
   if (!existing) {
     throw createNotFoundError(`Alert with ID ${id} not found`);
   }
@@ -182,7 +184,7 @@ export const resolveAlert = async (
     );
   }
 
-  const updated = await alertRepo.resolve(id, userId, resolutionNotes);
+  const updated = await alertRepo.resolveForScope(id, scope, resolutionNotes);
   if (!updated) {
     throw createNotFoundError(`Alert with ID ${id} not found`);
   }
@@ -216,8 +218,8 @@ export const resolveAlert = async (
   return result;
 };
 
-export const dismissAlert = async (id: number): Promise<AlertPublic> => {
-  const existing = await alertRepo.findById(id);
+export const dismissAlert = async (id: number, scope: AlertAccessScope): Promise<AlertPublic> => {
+  const existing = await alertRepo.findByIdForScope(id, scope);
   if (!existing) {
     throw createNotFoundError(`Alert with ID ${id} not found`);
   }
@@ -226,7 +228,7 @@ export const dismissAlert = async (id: number): Promise<AlertPublic> => {
     throw createValidationError('Cannot dismiss a resolved alert');
   }
 
-  const updated = await alertRepo.dismiss(id);
+  const updated = await alertRepo.dismissForScope(id, scope);
   if (!updated) {
     throw createNotFoundError(`Alert with ID ${id} not found`);
   }
