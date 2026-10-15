@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
 
   # WebView
-  flutter_inappwebview: ^6.2.0
+  flutter_inappwebview: 6.2.0-beta.2
 
   # State Management
   flutter_riverpod: ^2.4.0
