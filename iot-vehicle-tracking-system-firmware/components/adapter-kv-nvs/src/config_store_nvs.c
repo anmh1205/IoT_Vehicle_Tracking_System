@@ -169,10 +169,12 @@ esp_err_t config_store_nvs_load(config_t *config) {
     size_t stored_size = 0;
     err = nvs_get_blob(handle, TRACKER_NVS_CONFIG_KEY, NULL, &stored_size);
     if (err == ESP_ERR_NVS_NOT_FOUND) {
-        // Namespace exists but config key does not: persist defaults.
+        // An existing namespace with a missing config can reflect interrupted
+        // provisioning or partial data loss. Do not silently create a new
+        // device identity or auth token over the remaining recovery state.
         nvs_close(handle);
-        ESP_LOGW(TAG, "Config not found, writing defaults");
-        return config_store_nvs_save(config);
+        ESP_LOGE(TAG, "event=missing_config_in_existing_namespace action=preserve_nvs");
+        return ESP_ERR_INVALID_STATE;
     }
     if (err != ESP_OK) {
         nvs_close(handle);
@@ -199,22 +201,21 @@ esp_err_t config_store_nvs_load(config_t *config) {
     } else {
         // Unknown size: neither current nor known-legacy layout, so the blob is unusable.
         nvs_close(handle);
-        ESP_LOGW(TAG,
-                 "Config size mismatch in NVS stored=%lu expected=%lu (or legacy=%lu), rewriting defaults",
+        ESP_LOGE(TAG,
+                 "Config size mismatch in NVS stored=%lu expected=%lu (or legacy=%lu), preserving blob",
                  (unsigned long)stored_size,
                  (unsigned long)sizeof(*config),
                  (unsigned long)sizeof(config_v1_t));
-        app_config_set_defaults(config);
-        return config_store_nvs_save(config);
+        return ESP_ERR_INVALID_SIZE;
     }
     nvs_close(handle); // Read complete; release handle before validation/fixups.
 
     ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to read config blob");
     if (!app_config_is_valid(config)) {
-        // Semantically invalid contents (even if the size matched): fall back to defaults.
-        ESP_LOGW(TAG, "Invalid config in NVS, restoring defaults");
-        app_config_set_defaults(config);
-        return config_store_nvs_save(config);
+        // An invalid persisted identity or token requires explicit recovery.
+        // Overwriting a readable blob destroys evidence and may deprovision a field unit.
+        ESP_LOGE(TAG, "event=nvs_config_invalid action=preserve_blob");
+        return ESP_ERR_INVALID_STATE;
     }
 
     // Post-load fixups migrate a few known bad legacy values even when the blob shape itself was readable.
