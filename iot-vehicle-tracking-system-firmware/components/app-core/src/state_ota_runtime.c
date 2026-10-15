@@ -491,3 +491,8 @@ esp_err_t state_machine_process_ota_command(command_action_t action, bool *out_r
     }
     return apply_err;
 }
+
+/** Protect a deferred reboot whose ACK lifecycle has not yet completed. */
+bool state_machine_has_pending_restart_after_ack(void) {
+    return s_restart_after_command_ack;
+}
