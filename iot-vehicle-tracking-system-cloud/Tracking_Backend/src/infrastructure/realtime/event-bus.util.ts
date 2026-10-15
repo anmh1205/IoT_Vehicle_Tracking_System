@@ -226,7 +226,7 @@ export interface RealtimeEventMap {
     createdAt: string;
   };
   'notification:updated': {
-    user_id?: number | null;
+    user_id: number;
     id?: number;
     ids?: number[];
     unreadCount?: number;
