@@ -5,9 +5,15 @@ import { sendOk } from '@/shared/utils/response.util';
 import { createValidationError } from '@/shared/utils/errors.util';
 import * as notificationService from '@/domain/notification/services/notification.service';
 import { pushTokenSchema } from '@/api/validators/notification.validator';
+import type { NotificationAccessScope } from '@/domain/notification/repositories/notification.repository';
+
+const notificationScope = (req: AuthenticatedRequest): NotificationAccessScope => ({
+  userId: req.user!.id,
+  role: req.user!.role,
+  deviceAccessMode: req.user!.deviceAccessMode,
+});
 
 export const listNotifications = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user!.id;
   const page = req.query.page ? Number.parseInt(req.query.page as string, 10) : 1;
   const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : 20;
   const type = req.query.type as
@@ -23,7 +29,14 @@ export const listNotifications = asyncHandler(async (req: AuthenticatedRequest, 
   const from = req.query.from as string | undefined;
   const to = req.query.to as string | undefined;
 
-  const result = await notificationService.listNotifications(userId, {
+  if (!Number.isSafeInteger(page) || page < 1 || !Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+    throw createValidationError('Invalid notification pagination (page >= 1, limit 1..100)');
+  }
+  if (req.query.isRead !== undefined && !['true', 'false'].includes(String(req.query.isRead).toLowerCase())) {
+    throw createValidationError('Invalid isRead filter');
+  }
+
+  const result = await notificationService.listNotifications(notificationScope(req), {
     page,
     limit,
     isRead,
@@ -36,36 +49,32 @@ export const listNotifications = asyncHandler(async (req: AuthenticatedRequest, 
 });
 
 export const markRead = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user!.id;
   const id = Number.parseInt(req.params.id, 10);
   if (Number.isNaN(id)) {
     throw createValidationError('Invalid notification ID');
   }
 
-  await notificationService.markRead(userId, id);
+  await notificationService.markRead(notificationScope(req), id);
   sendOk(res, { success: true });
 });
 
 export const markAllRead = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user!.id;
-  await notificationService.markAllRead(userId);
+  await notificationService.markAllRead(notificationScope(req));
   sendOk(res, { success: true });
 });
 
 export const deleteNotification = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user!.id;
   const id = Number.parseInt(req.params.id, 10);
   if (Number.isNaN(id)) {
     throw createValidationError('Invalid notification ID');
   }
 
-  await notificationService.deleteNotification(userId, id);
+  await notificationService.deleteNotification(notificationScope(req), id);
   sendOk(res, { success: true });
 });
 
 export const getStats = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user!.id;
-  const stats = await notificationService.getNotificationStats(userId);
+  const stats = await notificationService.getNotificationStats(notificationScope(req));
   sendOk(res, stats);
 });
 
