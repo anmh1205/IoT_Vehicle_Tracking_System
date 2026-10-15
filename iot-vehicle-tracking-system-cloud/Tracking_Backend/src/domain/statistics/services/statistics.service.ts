@@ -1,3 +1,4 @@
+import type { SessionUser } from '@/shared/types/common.types';
 import {
   getFleetUsage,
   getDeviceUptime,
@@ -64,11 +65,13 @@ export const getFleetUsageStats = async (params: {
   from?: string;
   to?: string;
   interval?: string;
-}) => {
+},
+  actor: SessionUser,
+) => {
   const range = parseRange(params.from, params.to);
   const interval = parseInterval(params.interval);
 
-  const data = await getFleetUsage(range, interval);
+  const data = await getFleetUsage(range, interval, actor);
   return {
     labels: data.map((item) => item.label),
     activeVehicles: data.map((item) => item.activeVehicles),
@@ -76,9 +79,11 @@ export const getFleetUsageStats = async (params: {
   };
 };
 
-export const getDeviceUptimeStats = async (params: { from?: string; to?: string }) => {
+export const getDeviceUptimeStats = async (params: { from?: string; to?: string },
+  actor: SessionUser,
+) => {
   const range = parseRange(params.from, params.to);
-  const devices = await getDeviceUptime(range);
+  const devices = await getDeviceUptime(range, actor);
   return { devices };
 };
 
@@ -86,11 +91,13 @@ export const getAlertFrequencyStats = async (params: {
   from?: string;
   to?: string;
   interval?: string;
-}) => {
+},
+  actor: SessionUser,
+) => {
   const range = parseRange(params.from, params.to);
   const interval = parseInterval(params.interval);
 
-  const data = await getAlertFrequency(range, interval);
+  const data = await getAlertFrequency(range, interval, actor);
   return {
     labels: data.map((item) => item.label),
     series: {
@@ -106,11 +113,13 @@ export const getTripSummaryStats = async (params: {
   from?: string;
   to?: string;
   interval?: string;
-}) => {
+},
+  actor: SessionUser,
+) => {
   const range = parseRange(params.from, params.to);
   const interval = parseInterval(params.interval);
 
-  const data = await getTripSummary(range, interval);
+  const data = await getTripSummary(range, interval, actor);
   return {
     labels: data.map((item) => item.label),
     totalTrips: data.map((item) => item.totalTrips),
@@ -122,10 +131,12 @@ export const getTripSummaryStats = async (params: {
 export const getSummaryStats = async (params: {
   from?: string;
   to?: string;
-}): Promise<StatisticsSummary> => {
+},
+  actor: SessionUser,
+): Promise<StatisticsSummary> => {
   const range = parseRange(params.from, params.to);
 
-  const [totals, uptime] = await Promise.all([getSummaryTotals(range), getDeviceUptime(range)]);
+  const [totals, uptime] = await Promise.all([getSummaryTotals(range, actor), getDeviceUptime(range, actor)]);
 
   const averageUptimePercent =
     uptime.length > 0
@@ -140,8 +151,8 @@ export const getSummaryStats = async (params: {
   };
 };
 
-export const getPolicyLimitsStats = async (): Promise<{ items: PolicyLimitsSummary[] }> => {
-  const rows = await getPolicyLimitsSummary();
+export const getPolicyLimitsStats = async (actor: SessionUser): Promise<{ items: PolicyLimitsSummary[] }> => {
+  const rows = await getPolicyLimitsSummary(actor);
   return {
     items: rows.map((row) => {
       const quotaLimitKm = Number.parseFloat(row.quota_limit_km ?? '0') || 0;
