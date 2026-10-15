@@ -1,4 +1,4 @@
-name: PostgreSQL Port Exposure Policy
+name: PostgreSQL Security Bootstrap and Port Policy
 
 on:
   pull_request:
@@ -18,6 +18,7 @@ jobs:
       - name: PostgreSQL default binds only to loopback
         env:
           POSTGRES_PASSWORD: ci-only-not-a-real-password
+          POSTGRES_BOOTSTRAP_ADMIN_PASSWORD: ci-unique-bootstrap-password-for-tests
         run: |
           docker compose -f iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/docker-compose.yml config --format json > "$RUNNER_TEMP/postgres-default.json"
           python3 - <<'PY'
@@ -32,6 +33,7 @@ jobs:
       - name: PostgreSQL explicit bind override is respected
         env:
           POSTGRES_PASSWORD: ci-only-not-a-real-password
+          POSTGRES_BOOTSTRAP_ADMIN_PASSWORD: ci-unique-bootstrap-password-for-tests
           POSTGRES_BIND_ADDRESS: 127.0.0.2
         run: |
           docker compose -f iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/docker-compose.yml config --format json > "$RUNNER_TEMP/postgres-override.json"
@@ -41,3 +43,55 @@ jobs:
               document = json.load(f)
           assert document['services']['postgres']['ports'][0]['host_ip'] == '127.0.0.2'
           PY
+
+  validate-bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Migration regression tests
+        run: node --test iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/scripts/apply-init-migrations.test.js
+      - name: Reject placeholder admin secret before any database work
+        run: |
+          bash -n iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/01a-bootstrap-admin.sh
+          if POSTGRES_BOOTSTRAP_ADMIN_PASSWORD=CHANGE_ME_INITIAL_ADMIN_PASSWORD bash iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/01a-bootstrap-admin.sh; then
+            echo "::error::Insecure placeholder was accepted"
+            exit 1
+          fi
+      - name: Boot fresh isolated PostGIS and verify first-admin credentials
+        env:
+          POSTGRES_PASSWORD: ci-only-postgres-password
+          POSTGRES_BOOTSTRAP_ADMIN_PASSWORD: ci-unique-bootstrap-password-for-tests
+          COMPOSE_FILE: iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/docker-compose.yml
+        run: |
+          docker network create tracking-network
+          docker compose -f "$COMPOSE_FILE" up -d
+          for attempt in $(seq 1 90); do
+            if docker exec tracking-postgres psql -U postgres -d vehicle_tracking -Atc "SELECT username FROM users WHERE username='admin'" 2>/dev/null | grep -qx admin; then
+              break
+            fi
+            sleep 2
+          done
+
+          admin_count=$(docker exec tracking-postgres psql -U postgres -d vehicle_tracking -Atc "SELECT COUNT(*) FROM users WHERE username='admin'")
+          test "$admin_count" = '1'
+
+          valid=$(docker exec tracking-postgres psql -U postgres -d vehicle_tracking -Atc "SELECT password_hash = crypt('ci-unique-bootstrap-password-for-tests', password_hash) FROM users WHERE username='admin'")
+          test "$valid" = 't'
+
+          legacy=$(docker exec tracking-postgres psql -U postgres -d vehicle_tracking -Atc "SELECT password_hash = crypt('Admin@2026', password_hash) FROM users WHERE username='admin'")
+          test "$legacy" = 'f'
+
+          docker compose -f "$COMPOSE_FILE" restart postgres
+          test "$(docker exec tracking-postgres psql -U postgres -d vehicle_tracking -Atc "SELECT COUNT(*) FROM users WHERE username='admin'")" = '1'
+      - name: Clean up isolated PostGIS
+        if: always()
+        env:
+          POSTGRES_PASSWORD: ci-only-postgres-password
+          POSTGRES_BOOTSTRAP_ADMIN_PASSWORD: ci-unique-bootstrap-password-for-tests
+        run: |
+          docker compose -f iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/docker-compose.yml down --remove-orphans || true
+          docker network rm tracking-network || true
