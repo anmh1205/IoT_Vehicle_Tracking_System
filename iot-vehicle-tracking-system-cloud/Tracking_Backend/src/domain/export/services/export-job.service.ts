@@ -3,12 +3,13 @@ import { processExport } from '@/domain/export/services/export-processing.servic
 import { createLogger } from '@/infrastructure/logger';
 
 const log = createLogger('export-job');
+import { isSupportedExportType } from '@/domain/export/services/export-file.service';
 import type {
   ExportJob,
   ExportJobPublic,
   CreateExportInput,
 } from '@/domain/export/types/export.types';
-import { createNotFoundError, createForbiddenError } from '@/shared/utils/errors.util';
+import { createNotFoundError, createForbiddenError, createValidationError } from '@/shared/utils/errors.util';
 import { isUndefinedTableError } from '@/shared/utils/postgres-error.util';
 
 const sanitizeExportJob = (job: ExportJob): ExportJobPublic => ({
@@ -39,6 +40,10 @@ export const createExport = async (
   userId: number,
   input: CreateExportInput,
 ): Promise<ExportJobPublic> => {
+  if (!isSupportedExportType(input.exportType)) {
+    throw createValidationError('Unsupported export type: ' + input.exportType);
+  }
+
   let job: ExportJob;
   try {
     job = await exportRepo.create(userId, input);
@@ -49,9 +54,7 @@ export const createExport = async (
     throw error;
   }
 
-  // Background processing is best-effort. Always observe rejection: the
-  // database transition to 'processing' may itself fail before processExport's
-  // internal catch block is entered.
+  // Trigger async processing (fire-and-forget)
   void processExport(job).catch((error: unknown) => {
     log.error('Unhandled export job processing failure', { jobId: job.id, error });
   });
