@@ -13,6 +13,13 @@ import * as vehicleCrudService from '@/domain/vehicle/services/vehicle-crud.serv
 import * as vehicleListService from '@/domain/vehicle/services/vehicle-list.service';
 import * as vehicleAssignmentService from '@/domain/vehicle/services/vehicle-assignment.service';
 import * as vehicleStatusService from '@/domain/vehicle/services/vehicle-status.service';
+import type { VehicleAccessScope } from '@/domain/vehicle/repositories/vehicle.repository';
+
+const scopeOf = (req: AuthenticatedRequest): VehicleAccessScope => ({
+  userId: req.user!.id,
+  role: req.user!.role,
+  deviceAccessMode: req.user!.deviceAccessMode,
+});
 
 export const listVehicles = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const parsed = vehicleListQuerySchema.safeParse(req.query);
@@ -20,7 +27,7 @@ export const listVehicles = asyncHandler(async (req: AuthenticatedRequest, res: 
     throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
   }
 
-  const result = await vehicleListService.listVehicles(parsed.data);
+  const result = await vehicleListService.listVehicles(parsed.data, scopeOf(req));
   sendOk(res, result);
 });
 
@@ -30,7 +37,7 @@ export const getVehicle = asyncHandler(async (req: AuthenticatedRequest, res: Re
     throw createValidationError('Invalid vehicle ID');
   }
 
-  const vehicle = await vehicleCrudService.getVehicleById(id);
+  const vehicle = await vehicleCrudService.getVehicleById(id, scopeOf(req));
   sendOk(res, vehicle);
 });
 
@@ -178,6 +185,6 @@ export const getVehicleStatus = asyncHandler(async (req: AuthenticatedRequest, r
     throw createValidationError('Invalid vehicle ID');
   }
 
-  const status = await vehicleStatusService.getVehicleStatus(id);
+  const status = await vehicleStatusService.getVehicleStatus(id, scopeOf(req));
   sendOk(res, status);
 });
