@@ -425,60 +425,6 @@ const publishSimulatorStatus = (status: SimulatorStatus): void => {
   publishEvent('simulator:status', { ...status, preview });
 };
 
-const closeSimulatorOwnedSession = async (sessionId: number, deviceId: string): Promise<void> => {
-  const nowIso = new Date().toISOString();
-  const stopCorrelationId = `simulator-stop:${randomUUID()}`;
-
-  let runtimeSeconds = 0;
-
-  try {
-    const updateResult = await pool.query<{ runtime_seconds: string | number }>(
-      `UPDATE device_sessions
-       SET
-         status = 'completed',
-         server_session_end = $2,
-         session_end = $2,
-         last_update = $2,
-         uptime = GREATEST(EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int, 0),
-         total_runtime_seconds = GREATEST(EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int, 0),
-         end_correlation_id = $3,
-         updated_at = NOW()
-       WHERE id = $1
-       RETURNING COALESCE(total_runtime_seconds, uptime, 0)::text AS runtime_seconds`,
-      [sessionId, nowIso, stopCorrelationId],
-    );
-
-    runtimeSeconds = Number.parseInt(String(updateResult.rows[0]?.runtime_seconds ?? '0'), 10);
-  } catch {
-    const updateResult = await pool.query<{ runtime_seconds: string | number }>(
-      `UPDATE device_sessions
-       SET
-         status = 'completed',
-         server_session_end = $2,
-         session_end = $2,
-         last_update = $2,
-         uptime = GREATEST(EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int, 0),
-         end_correlation_id = $3,
-         updated_at = NOW()
-       WHERE id = $1
-       RETURNING COALESCE(uptime, 0)::text AS runtime_seconds`,
-      [sessionId, nowIso, stopCorrelationId],
-    );
-
-    runtimeSeconds = Number.parseInt(String(updateResult.rows[0]?.runtime_seconds ?? '0'), 10);
-  }
-
-  await pool.query(
-    `UPDATE devices
-     SET
-       current_status = 'stopped',
-       total_runtime_seconds = COALESCE(total_runtime_seconds, 0) + $2,
-       updated_at = NOW()
-     WHERE device_id = $1`,
-    [deviceId, Math.max(0, runtimeSeconds)],
-  );
-};
-
 const restoreSimulatorAuthTokens = async (
   devices: DeviceSimulatorRuntime[],
   reason: string,
@@ -539,7 +485,13 @@ const stopSimulationInternal = async (reason: string): Promise<SimulatorStatus> 
 
       const activeSessionId = activeSessionResult.rows[0]?.id ?? null;
       if (activeSessionId !== null) {
-        await closeSimulatorOwnedSession(activeSessionId, device.deviceId);
+        // Do not complete an unrelated session or alter its runtime totals.
+        // This is particularly important after process restarts or a real
+        // device reconnects in the isolated broker.
+        logger.warn('Simulator stop skipped device with active session', {
+          deviceId: device.deviceId,
+          sessionId: activeSessionId,
+        });
         continue;
       }
 
@@ -836,8 +788,11 @@ export const startSimulation = async (
       [row.device_id],
     );
     const activeSessionId = activeSessionResult.rows[0]?.id ?? null;
+    // A running session may belong to an independently connected physical
+    // or test device. Even in the isolated environment, never close or
+    // impersonate a device that has any active session.
     if (activeSessionId !== null) {
-      await closeSimulatorOwnedSession(activeSessionId, row.device_id);
+      throw createValidationError('Cannot simulate an identity with an active device session');
     }
 
     const parsedLatitude = toFiniteNumber(row.latitude);
