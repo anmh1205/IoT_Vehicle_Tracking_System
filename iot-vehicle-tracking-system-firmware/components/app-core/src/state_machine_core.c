@@ -1558,6 +1558,13 @@ esp_err_t state_machine_core_init(const config_t *config) {
     ESP_RETURN_ON_FALSE(command_handler_init(&s_config) == ESP_OK, ESP_FAIL, TAG, "command_handler_init failed");
     tracker_mqtt_set_command_callback(state_machine_command_callback);
 
+    // NVS recovery failure must not strand the vehicle in the boot retry loop.
+    // The publish pipeline retries recovery after MQTT reconnects.
+    esp_err_t firmware_restore_err = state_machine_restore_deferred_firmware_report();
+    if (firmware_restore_err != ESP_OK) {
+        ESP_LOGW(TAG, "event=firmware_status_restore_deferred err=%s fallback=runtime_recovery",
+                 esp_err_to_name(firmware_restore_err));
+    }
     // Confirmation owns persisted-context restore and fresh-boot status.
     // If NVS is temporarily unreadable, later FSM iterations retry safely.
     state_machine_try_confirm_running_firmware();
