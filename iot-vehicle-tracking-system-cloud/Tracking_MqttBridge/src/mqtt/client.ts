@@ -11,7 +11,7 @@ const CLIENT_ID = 'mqtt-bridge-production';
  * Connect to EMQX broker with persistent session.
  * Supports both MQTT and MQTTS based on config.
  */
-export const connectMqtt = (): Promise<MqttClient> => {
+export const connectMqtt = (onClientCreated?: (client: MqttClient) => void): Promise<MqttClient> => {
   return new Promise((resolve, reject) => {
     const protocol = mqttConfig.useTls ? 'mqtts' : 'mqtt';
     const port = mqttConfig.useTls ? mqttConfig.tlsPort : mqttConfig.port;
@@ -47,6 +47,16 @@ export const connectMqtt = (): Promise<MqttClient> => {
 
     logger.info({ brokerUrl, clientId: CLIENT_ID, event: 'mqtt_connecting' }, 'MQTT connection starting');
     client = mqtt.connect(brokerUrl, options);
+
+    // Install application listeners before the broker can replay a queued QoS1
+    // PUBLISH from a persistent session. A post-connect listener is too late.
+    try {
+      onClientCreated?.(client);
+    } catch (error) {
+      client.end(true);
+      reject(error);
+      return;
+    }
 
     client.on('connect', () => {
       logger.info({ brokerUrl, clientId: CLIENT_ID, event: 'mqtt_connected' }, 'MQTT connected');

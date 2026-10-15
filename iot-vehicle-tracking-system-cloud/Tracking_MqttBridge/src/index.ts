@@ -1,5 +1,6 @@
 import { connectMqtt, disconnectMqtt, getClient } from './mqtt/client';
 import { subscribeToDeviceTopics } from './mqtt/subscriptions';
+import { installBridgeIngress } from './mqtt/ingress';
 import { handleRawData } from './handlers/rawdata.handler';
 import { handleStatus } from './handlers/status.handler';
 import { handleEvent } from './handlers/event.handler';
@@ -116,8 +117,6 @@ const routeMessage = async (topic: string, message: Buffer): Promise<void> => {
   }
 };
 
-const pendingMessageWork = new WeakMap<object, Promise<void>>();
-
 /**
  * Bootstrap the MQTT Bridge service.
  */
@@ -130,52 +129,26 @@ const main = async (): Promise<void> => {
     getSnapshot: getBridgeHealthSnapshot,
   });
 
-  const client = await connectMqtt();
+  // The MQTT connection may deliver queued QoS1 packets as soon as the
+  // persistent session is resumed. Register app processing before that point.
+  const client = await connectMqtt((createdClient) => {
+    installBridgeIngress(createdClient, routeMessage, {
+      onReceived: () => {
+        bridgeHealthState.lastMessageAt = new Date().toISOString();
+      },
+      onError: (err, topic, qos, packetId) => {
+        bridgeHealthState.lastError = err instanceof Error ? err.message : String(err);
+        logger.error(
+          { err, topic, qos, packetId, event: 'mqtt_handler_failed' },
+          'MQTT device message processing failed',
+        );
+      },
+    });
+  });
 
   await subscribeToDeviceTopics(client);
   bridgeHealthState.subscriptionsReady = true;
   bridgeHealthState.lastError = undefined;
-
-  /*
-   * MQTT.js emits 'message' before it invokes handleMessage(), and QoS1 PUBACK
-   * is sent only after handleMessage's callback. Bind the source packet to the
-   * application work synchronously in the message listener so device-facing
-   * acknowledgement follows the critical Bridge side effect.
-   */
-  client.handleMessage = (packet, callback) => {
-    const work = pendingMessageWork.get(packet as object);
-    if (!work) {
-      callback();
-      return;
-    }
-
-    void work.then(
-      () => callback(),
-      (error) => callback(error instanceof Error ? error : new Error(String(error))),
-    );
-  };
-
-  client.on('message', (topic, message, packet) => {
-    bridgeHealthState.lastMessageAt = new Date().toISOString();
-
-    const work = routeMessage(topic, message);
-    if (packet.qos === 1) {
-      const trackedWork = work.catch((err) => {
-        bridgeHealthState.lastError = err instanceof Error ? err.message : String(err);
-        logger.error(
-          { err, topic, packetId: packet.messageId, event: 'mqtt_qos1_handler_failed' },
-          'QoS1 device message handling failed; withholding PUBACK',
-        );
-        throw err;
-      });
-      pendingMessageWork.set(packet as object, trackedWork);
-      return;
-    }
-
-    void work.catch((err) => {
-      logger.error({ err, topic, event: 'mqtt_qos0_handler_failed' }, 'QoS0 device message handling failed');
-    });
-  });
 
   logger.info({ event: 'bridge_started' }, 'MQTT bridge started');
 };

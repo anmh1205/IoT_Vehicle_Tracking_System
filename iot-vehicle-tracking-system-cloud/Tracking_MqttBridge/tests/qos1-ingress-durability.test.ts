@@ -6,6 +6,14 @@ const indexSource = readFileSync(
   new URL('../src/index.ts', import.meta.url),
   'utf8',
 );
+const ingressSource = readFileSync(
+  new URL('../src/mqtt/ingress.ts', import.meta.url),
+  'utf8',
+);
+const clientSource = readFileSync(
+  new URL('../src/mqtt/client.ts', import.meta.url),
+  'utf8',
+);
 const publisherSource = readFileSync(
   new URL('../src/publishers/internal-event.publisher.ts', import.meta.url),
   'utf8',
@@ -31,13 +39,15 @@ const victoriaLogsSource = readFileSync(
   'utf8',
 );
 
-test('device QoS1 PUBACK waits for registered application work', () => {
-  assert.match(indexSource, /const pendingMessageWork = new WeakMap/);
-  assert.match(indexSource, /client\.handleMessage = \(packet, callback\) =>/);
-  assert.match(indexSource, /pendingMessageWork\.get\(packet as object\)/);
-  assert.match(indexSource, /packet\.qos === 1/);
-  assert.match(indexSource, /pendingMessageWork\.set\(packet as object, trackedWork\)/);
-  assert.match(indexSource, /\(error\) => callback\(error instanceof Error/);
+test('device QoS1 PUBACK waits for application work installed before connect', () => {
+  assert.match(ingressSource, /client\.handleMessage = \(packet, callback\) =>/);
+  assert.match(ingressSource, /pending\.get\(packet as object\)/);
+  assert.match(ingressSource, /pending\.set\(/);
+  assert.match(ingressSource, /packet\.qos > 0/);
+  assert.match(clientSource, /onClientCreated\?\.\(client\)/);
+  const registration = indexSource.indexOf('installBridgeIngress(createdClient');
+  const subscription = indexSource.indexOf('await subscribeToDeviceTopics(client)');
+  assert.ok(registration > 0 && subscription > registration);
 });
 
 test('critical device routes are awaited instead of fire-and-forget', () => {
