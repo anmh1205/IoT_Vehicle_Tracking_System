@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { saveNativeAuthToken } from '@/lib/native-auth';
 import type { InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { User } from '@/lib/stores/auth-store';
@@ -50,8 +51,14 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
       refreshPromise = apiClient
         .post('/auth/refresh')
-        .then((response) => {
+        .then(async (response) => {
           const payload = unwrap<{ user: User; token: string | null }>(response.data);
+          if (payload.token) {
+            // Native credentials must rotate with the refreshed backend session.
+            // Reject on secure-storage failure instead of leaving an old token
+            // stored while the web session silently advances.
+            await saveNativeAuthToken(payload.token);
+          }
           useAuthStore.getState().setAuth(payload.user, payload.token);
         })
         .finally(() => {

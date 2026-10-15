@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { authServices } from '@/lib/api/auth';
+import { saveNativeAuthToken } from '@/lib/native-auth';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { loginSchema, type LoginFormValues } from '@/lib/validations/auth.schema';
@@ -31,6 +32,15 @@ export const LoginForm = () => {
     }
     if (reason === 'signed-out') {
       return 'Bạn đã đăng xuất khỏi hệ thống.';
+    }
+    if (reason === 'server-revocation-unconfirmed') {
+      return 'Đã xóa phiên trên ứng dụng, nhưng chưa xác nhận được thu hồi phiên trên máy chủ. Hãy kiểm tra kết nối và đổi mật khẩu nếu cần.';
+    }
+    if (reason === 'native-credential-clear-unconfirmed') {
+      return 'Đã yêu cầu đăng xuất máy chủ, nhưng không thể xác nhận xóa thông tin đăng nhập an toàn trên thiết bị. Không sử dụng chung thiết bị này cho đến khi xử lý.';
+    }
+    if (reason === 'logout-incomplete') {
+      return 'Chưa xác nhận được đăng xuất máy chủ hoặc xóa phiên trên thiết bị. Hãy thử lại khi có kết nối và kiểm tra bảo mật tài khoản.';
     }
     return null;
   }, [reason]);
@@ -54,6 +64,25 @@ export const LoginForm = () => {
         username: values.username,
         password: values.password,
       });
+      try {
+        await saveNativeAuthToken(data.token);
+      } catch {
+        // A native app cannot report a persistent login if secure storage failed.
+        // Revoke the just-issued server session before exposing authenticated UI.
+        let serverRevoked = false;
+        try {
+          await authServices.logout();
+          serverRevoked = true;
+        } catch {
+          // An unavailable server must not be described as a completed logout.
+        }
+        setErrorMessage(
+          serverRevoked
+            ? 'Không thể lưu phiên đăng nhập an toàn trên thiết bị. Vui lòng thử lại.'
+            : 'Không thể lưu phiên trên thiết bị và chưa xác nhận được thu hồi phiên máy chủ. Vui lòng kiểm tra kết nối và đăng nhập lại.',
+        );
+        return;
+      }
       setAuth(
         {
           ...data.user,
