@@ -96,7 +96,7 @@ export const assignVehicle = asyncHandler(async (req: AuthenticatedRequest, res:
     );
   }
 
-  const result = await geofenceCrudService.assignVehicleToGeofence(id, parsed.data.vehicleId);
+  const result = await geofenceCrudService.assignVehicleToGeofence(id, parsed.data.vehicleId, policyScope(req));
   sendCreated(res, result);
 });
 
@@ -111,7 +111,7 @@ export const unassignVehicle = asyncHandler(async (req: AuthenticatedRequest, re
     throw createValidationError('Vehicle ID is required');
   }
 
-  const result = await geofenceCrudService.unassignVehicleFromGeofence(geofenceId, vehicleId);
+  const result = await geofenceCrudService.unassignVehicleFromGeofence(geofenceId, vehicleId, policyScope(req));
   sendOk(res, result);
 });
 
