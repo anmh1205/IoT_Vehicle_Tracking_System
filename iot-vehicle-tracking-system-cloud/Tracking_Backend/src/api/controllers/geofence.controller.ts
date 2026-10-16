@@ -218,7 +218,7 @@ export const listVehiclePolicyStates = asyncHandler(async (req: AuthenticatedReq
     throw createValidationError('Vehicle ID is required');
   }
 
-  const states = await vehiclePolicyCrudService.listVehiclePolicyStates(vehicleId);
+  const states = await vehiclePolicyCrudService.listVehiclePolicyStates(vehicleId, policyScope(req));
   sendOk(res, { items: states });
 });
 
