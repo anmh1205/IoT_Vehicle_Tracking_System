@@ -214,7 +214,7 @@ static void state_machine_command_callback(const char *topic, const char *payloa
  * @brief Publish a bounded number of pending command ACKs outside the RX callback.
  */
 static void state_machine_publish_pending_command_acks(void) {
-    if (s_command_ack_queue == NULL || !tracker_mqtt_is_connected()) {
+    if (s_command_ack_queue == NULL || !s_runtime_ports->mqtt->is_connected()) {
         return;
     }
 
@@ -332,7 +332,7 @@ uint64_t state_machine_alarm_timeout_ms(void) {
  * @return true if should throttle, false otherwise.
  */
 bool state_machine_should_throttle_rawdata(void) {
-    return !tracker_mqtt_is_connected() && offline_queue_should_throttle_rawdata();
+    return !s_runtime_ports->mqtt->is_connected() && offline_queue_should_throttle_rawdata();
 }
 
 /**
@@ -580,7 +580,7 @@ void state_machine_sync_runtime_axes(app_state_t app_state) {
  * @return true when the network is currently ready for heartbeat publishing.
  */
 bool state_machine_network_ready_for_heartbeat_publish(void) {
-    return !s_modem_low_power_pending_wakeup && tracker_mqtt_is_connected();
+    return !s_modem_low_power_pending_wakeup && s_runtime_ports->mqtt->is_connected();
 }
 
 /**
@@ -676,7 +676,7 @@ static void state_machine_log_health_snapshot(uint64_t now_ms, bool force) {
              "event=health_snapshot uptime_s=%llu state=%s mqtt_connected=%d mqtt_ok=%lu mqtt_fail=%lu mqtt_fallback=%lu queue_depth=%lu replay_ok=%lu replay_retry=%lu replay_drop=%lu sd_fail=%lu quota_hit=%lu lte_recovery_start=%lu lte_recovery_ok=%lu lte_recovery_fail=%lu obd_ok=%lu obd_timeout=%lu obd_invalid=%lu ota_http_start=%lu ota_http_ok=%lu ota_http_fail=%lu",
              (unsigned long long)(now_ms / 1000ULL),
              state_machine_app_state_name(s_runtime_state_hint),
-             tracker_mqtt_is_connected() ? 1 : 0,
+             s_runtime_ports->mqtt->is_connected() ? 1 : 0,
              (unsigned long)counters.mqtt_publish_ok,
              (unsigned long)counters.mqtt_publish_fail,
              (unsigned long)counters.mqtt_publish_fallback,
@@ -731,7 +731,7 @@ static void state_machine_log_transition(app_state_t from, app_state_t to, uint6
  * @return true when MQTT is connected and device battery is above the OTA threshold.
  */
 bool state_machine_ota_start_is_safe(void) {
-    if (!tracker_mqtt_is_connected()) {
+    if (!s_runtime_ports->mqtt->is_connected()) {
         ESP_LOGW(TAG, "event=ota_start_blocked reason=mqtt_not_connected");
         return false;
     }
@@ -1316,7 +1316,7 @@ static app_state_t state_machine_handle_driving_state(void) {
         (void)state_machine_publish_rawdata();
     }
 
-    if (modem_lte_is_initialized()) {
+    if (s_runtime_ports->modem->is_initialized()) {
         // BLE OBD retries are meaningful only after modem/LTE bring-up reached a usable baseline.
         state_machine_try_connect_ble();
     }
@@ -1346,7 +1346,7 @@ static app_state_t state_machine_handle_alarm_state(void) {
     if ((now_ms - s_last_raw_publish_ms) >= state_machine_alarm_interval_ms()) {
         state_machine_publish_rawdata();
     }
-    if (modem_lte_is_initialized()) {
+    if (s_runtime_ports->modem->is_initialized()) {
         state_machine_try_connect_ble();
     }
     if (s_telemetry.ignition) {
@@ -1398,7 +1398,7 @@ static app_state_t state_machine_handle_heartbeat_state(void) {
         return APP_STATE_DRIVING;
     }
     bool heartbeat_timeout = (now_ms - s_heartbeat_started_ms) >= TRACKER_HEARTBEAT_ACTIVE_WINDOW_MS;
-    bool obd_connected = s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx);
+    bool obd_connected = s_ble_ctx != NULL && s_runtime_ports->obd_reader->is_connected(s_ble_ctx);
     bool gnss_publish_ready = !s_gnss_started || s_telemetry.gnss.fix_valid || heartbeat_timeout;
     bool network_ready = state_machine_network_ready_for_heartbeat_publish();
     if (!s_heartbeat_raw_published &&
@@ -1608,7 +1608,7 @@ app_state_t state_machine_core_run(app_state_t current_state) {
     switch (current_state) {
         case APP_STATE_INIT:
             s_runtime_state_hint = APP_STATE_INIT;
-            offline_queue_set_online(tracker_mqtt_is_connected());
+            offline_queue_set_online(s_runtime_ports->mqtt->is_connected());
             next_state = APP_STATE_CHECK_IGN;
             break;
         case APP_STATE_CHECK_IGN:
