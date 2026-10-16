@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /// Accept only the configured application's exact HTTP(S) origin.
 ///
 /// Paths, query strings and fragments may vary within the trusted origin.
@@ -57,4 +59,17 @@ bool isTrustedNativeBridgeCaller({
   return isMainFrame &&
       isTrustedWebOrigin(origin, appUrl) &&
       isTrustedWebOrigin(requestUrl, appUrl);
+}
+
+/// Guard injected JS in the document itself against navigation/redirect races.
+/// Native callbacks still enforce their own trusted top-frame/caller checks.
+String? trustedBridgeInjectionSource(String appUrl, String bridgeScript) {
+  if (!isTrustedWebOrigin(appUrl, appUrl)) return null;
+  final originLiteral = jsonEncode(Uri.parse(appUrl).origin);
+  return '''
+    (function() {
+      if (window.top !== window || window.location.origin !== $originLiteral) return;
+      $bridgeScript
+    })();
+  ''';
 }
