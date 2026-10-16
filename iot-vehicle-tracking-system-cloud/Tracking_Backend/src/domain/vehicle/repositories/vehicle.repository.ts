@@ -162,7 +162,9 @@ export const create = async (input: CreateVehicleInput): Promise<Vehicle> =>
     ],
   );
 
-export const update = async (id: number, input: UpdateVehicleInput): Promise<Vehicle | null> => {
+export const update = async (
+  id: number, input: UpdateVehicleInput, scope: VehicleAccessScope,
+): Promise<Vehicle | null> => {
   const setClauses: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -240,13 +242,19 @@ export const update = async (id: number, input: UpdateVehicleInput): Promise<Veh
     values.push(input.notes);
   }
 
-  if (setClauses.length === 0) return findById(id);
+  if (setClauses.length === 0) return findByIdForScope(id, scope);
 
-  setClauses.push(`updated_at = NOW()`);
+  setClauses.push('updated_at = NOW()');
   values.push(id);
+  const targetParam = paramIndex++;
+  const visibility = vehicleVisibleTo(scope, paramIndex);
+  if (!vehicleScopeIsGlobal(scope)) values.push(scope.userId);
 
+  // The live grant is evaluated inside the UPDATE statement, so revocation
+  // between HTTP middleware and mutation cannot authorize a later write.
   return updateOne<Vehicle>(
-    `UPDATE vehicles SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+    `UPDATE vehicles AS v SET ${setClauses.join(', ')}
+     WHERE v.id = $${targetParam} AND ${visibility} RETURNING v.*`,
     values,
   );
 };
