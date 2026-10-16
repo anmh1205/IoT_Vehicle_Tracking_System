@@ -3,6 +3,7 @@ import { logger } from '@/infrastructure/logger';
 import { publishEvent } from '@/infrastructure/realtime';
 import * as vehicleAllowedZoneRepo from '@/domain/geofence/repositories/vehicle-allowed-zone.repository';
 import * as vehicleRepo from '@/domain/vehicle/repositories/vehicle.repository';
+import type { GeofenceAccessScope } from '@/domain/geofence/repositories/vehicle-policy.repository';
 import type {
   UpsertVehicleAllowedZoneInput,
   VehicleAllowedZone,
@@ -50,9 +51,9 @@ const toPublic = (zone: VehicleAllowedZone): VehicleAllowedZonePublic => ({
 });
 
 const buildVehiclePositionPreview = async (
-  vehicleId: string,
+  vehicleId: string, scope: GeofenceAccessScope,
 ): Promise<VehicleAllowedZonePreviewCenterPublic> => {
-  const snapshot = await vehicleAllowedZoneRepo.getVehiclePositionSnapshot(vehicleId);
+  const snapshot = await vehicleAllowedZoneRepo.getVehiclePositionSnapshot(vehicleId, scope);
   if (!snapshot) {
     throw createNotFoundError(`Vehicle with ID ${vehicleId} not found`);
   }
@@ -98,19 +99,20 @@ const buildVehiclePositionPreview = async (
 };
 
 export const getVehicleAllowedZone = async (
-  vehicleId: string,
+  vehicleId: string, scope: GeofenceAccessScope,
 ): Promise<VehicleAllowedZonePublic | null> => {
-  const zone = await vehicleAllowedZoneRepo.getActiveZoneByVehicleId(vehicleId);
+  const zone = await vehicleAllowedZoneRepo.getActiveZoneByVehicleId(vehicleId, scope);
   return zone ? toPublic(zone as VehicleAllowedZone) : null;
 };
 
 export const previewVehicleAllowedZoneCenter = async (
-  vehicleId: string,
-): Promise<VehicleAllowedZonePreviewCenterPublic> => buildVehiclePositionPreview(vehicleId);
+  vehicleId: string, scope: GeofenceAccessScope,
+): Promise<VehicleAllowedZonePreviewCenterPublic> => buildVehiclePositionPreview(vehicleId, scope);
 
 export const upsertVehicleAllowedZone = async (
   vehicleId: string,
   input: UpsertVehicleAllowedZoneInput,
+  scope: GeofenceAccessScope,
   actorId?: number,
 ): Promise<VehicleAllowedZonePublic> => {
   if (input.centerSource === 'map_pick') {
@@ -122,7 +124,7 @@ export const upsertVehicleAllowedZone = async (
 
   const preview =
     input.centerSource === 'vehicle_position'
-      ? await buildVehiclePositionPreview(vehicleId)
+      ? await buildVehiclePositionPreview(vehicleId, scope)
       : null;
 
   const zone = await vehicleAllowedZoneRepo.upsertActiveZone({
@@ -136,7 +138,10 @@ export const upsertVehicleAllowedZone = async (
     cooldownSec: input.cooldownSec ?? 300,
     sourceWarning: preview?.warning ?? null,
     actorId,
+    scope,
   });
+
+  if (!zone) throw createNotFoundError('Vehicle not found or allowed-zone access denied');
 
   logger.info('Vehicle allowed zone upserted', {
     vehicleId,
@@ -158,9 +163,10 @@ export const upsertVehicleAllowedZone = async (
 
 export const disableVehicleAllowedZone = async (
   vehicleId: string,
+  scope: GeofenceAccessScope,
   actorId?: number,
 ): Promise<{ success: true }> => {
-  const zone = await vehicleAllowedZoneRepo.disableActiveZone(vehicleId, actorId);
+  const zone = await vehicleAllowedZoneRepo.disableActiveZone(vehicleId, scope, actorId);
   if (!zone) {
     throw createNotFoundError(`Active allowed zone for vehicle ${vehicleId} not found`);
   }
