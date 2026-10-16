@@ -13,12 +13,13 @@ describe('vehicle-allowed-zone.repository', () => {
   });
 
   it('uses latest device coordinates when building a legacy allowed-zone preview', async () => {
-    await getVehiclePositionSnapshot('XE-TEST');
+    await getVehiclePositionSnapshot('XE-TEST', { userId: 101, role: 'operator', deviceAccessMode: 'assigned' });
 
     const [sql, params] = vi.mocked(findOne).mock.calls[0] ?? [];
 
     expect(sql).toContain('COALESCE(d.last_latitude, d.latitude)::double precision AS latitude');
     expect(sql).toContain('COALESCE(d.last_longitude, d.longitude)::double precision AS longitude');
-    expect(params).toEqual(['XE-TEST']);
+    expect(params).toEqual(['XE-TEST', false, 101]);
+    expect(sql).toContain('user_device_access');
   });
 });
