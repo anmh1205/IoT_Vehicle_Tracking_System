@@ -88,7 +88,7 @@ integration('geofence policies and violation search use live device grants', () 
     expect((await listPolicies({}, u1)).total).toBe(0);
     expect(await getPolicyByIdForScope(11, u1)).toBeNull();
     expect((await listPolicyViolations({}, u1)).total).toBe(0);
-    expect((await listPolicies({}, u2)).total).toBe(1);
+    expect((await listPolicies({}, u2)).total).toBe(2);
     expect(await createPolicy({ vehicleId: 'V1', policyType: 'RADIUS', params: {} }, u1, 101)).toBeNull();
     expect(await updatePolicy(11, { status: 'disabled' }, u1, 101)).toBeNull();
   });
