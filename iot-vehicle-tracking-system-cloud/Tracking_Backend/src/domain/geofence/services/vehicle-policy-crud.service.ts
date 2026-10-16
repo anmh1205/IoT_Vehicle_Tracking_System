@@ -129,13 +129,14 @@ export const listVehiclePolicyStates = async (vehicleId: string): Promise<Vehicl
 
 export const listVehiclePolicyViolations = async (
   query: VehiclePolicyViolationQuery,
+  scope: GeofenceAccessScope,
 ): Promise<{
   items: VehiclePolicyViolationPublic[];
   pagination: { page: number; limit: number; total: number; totalPages: number };
 }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
-  const result = await policyViolationRepo.listPolicyViolations(query);
+  const result = await policyViolationRepo.listPolicyViolations(query, scope);
 
   return {
     items: result.violations.map((item) => ({
