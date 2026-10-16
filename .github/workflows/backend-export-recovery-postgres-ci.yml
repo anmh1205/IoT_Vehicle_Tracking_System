@@ -43,4 +43,4 @@ jobs:
           PGUSER: ivts_test
           PGPASSWORD: ivts_test_password
           PGDATABASE: ivts_test_exports
-        run: npx vitest run src/domain/export/services/export.postgres.integration.test.ts
+        run: npx vitest run src/domain/export/services/export.postgres.integration.test.ts src/domain/export/services/export-scope.postgres.integration.test.ts
