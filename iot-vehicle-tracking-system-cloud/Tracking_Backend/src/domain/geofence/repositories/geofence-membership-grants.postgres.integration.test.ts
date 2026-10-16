@@ -59,6 +59,18 @@ integration('geofence membership SQL authorization', () => {
     expect(foreign.rows[0].name).toBe('Other');
     expect(await updateGeofence(13, {}, assigned)).toBeNull();
   });
+  it('cannot change another creator zone or an already cross-fleet shared zone', async () => {
+    // V1 is U1's vehicle, but geofence 13 belongs to U2.
+    expect(await assignVehicle(13, 'V1', assigned)).toBe(0);
+    expect(await unassignVehicle(13, 'V2', assigned)).toBe(false);
+    // U1 created geofence 14, but it also contains foreign V2.
+    expect(await assignVehicle(14, 'V1', assigned)).toBe(0);
+    expect(await unassignVehicle(14, 'V1', assigned)).toBe(false);
+    expect(await assignVehicle(12, 'V1', assigned)).toBe(1);
+    expect(await assignVehicle(13, 'V1', admin)).toBe(1);
+    const member = await pool.query("SELECT count(*)::int total FROM geofence_vehicles WHERE geofence_id=14");
+    expect(member.rows[0].total).toBe(2);
+  });
   it('revocation is enforced inside the subsequent membership SQL operation', async () => {
     await pool.query("DELETE FROM user_device_access WHERE user_id=101 AND device_id='D1'");
     expect(await assignVehicle(11, 'V1', assigned)).toBe(0);
