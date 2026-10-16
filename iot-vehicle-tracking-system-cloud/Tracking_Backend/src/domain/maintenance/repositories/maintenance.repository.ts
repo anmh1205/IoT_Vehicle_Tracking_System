@@ -115,6 +115,7 @@ export const create = async (
 export const update = async (
   id: number,
   input: UpdateMaintenanceInput,
+  scope: MaintenanceReadScope,
 ): Promise<Maintenance | null> => {
   const setClauses: string[] = [];
   const values: unknown[] = [];
@@ -169,13 +170,19 @@ export const update = async (
     values.push(input.status);
   }
 
-  if (setClauses.length === 0) return findById(id);
+  if (setClauses.length === 0) return findByIdForScope(id, scope);
 
-  setClauses.push(`updated_at = NOW()`);
+  setClauses.push('updated_at = NOW()');
   values.push(id);
+  const targetIndex = paramIndex++;
+  const grantPredicate = maintenanceVisibleTo(scope, paramIndex);
+  if (!allMaintenance(scope)) values.push(scope.userId);
 
+  // Evaluate the actor's live grant within this UPDATE. An access revocation
+  // between middleware and the database write must not mutate the record.
   return updateOne<Maintenance>(
-    `UPDATE maintenance SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+    `UPDATE maintenance SET ${setClauses.join(', ')}
+     WHERE id = $${targetIndex} AND ${grantPredicate} RETURNING *`,
     values,
   );
 };
