@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import mqtt from 'mqtt';
 import { pool } from '@/infrastructure/database/pool';
 import { logger } from '@/infrastructure/logger';
-import { appConfig, dbConfig, mqttConfig } from '@/config/env';
+import { mqttConfig } from '@/config/env';
 import { hashToken } from '@/shared/utils/crypto.util';
 import { createValidationError, createForbiddenError } from '@/shared/utils/errors.util';
 import { publishEvent } from '@/infrastructure/realtime';
