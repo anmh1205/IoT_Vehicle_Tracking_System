@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useCreateExport } from '@/hooks/mutations/use-create-export';
 import {
   useDeviceUptime,
   useFleetUtilization,
@@ -46,7 +45,6 @@ export const StatisticsOverview = () => {
   const summaryQuery = useStatisticsSummary(params);
   const fleetQuery = useFleetUtilization(params);
   const uptimeQuery = useDeviceUptime(params);
-  const exportMutation = useCreateExport();
   const fleetData = useMemo(
     () =>
       (fleetQuery.data?.labels ?? []).map((label: string, index: number) => ({
@@ -110,15 +108,11 @@ export const StatisticsOverview = () => {
         <Button
           className="w-full lg:ml-auto lg:w-auto"
           variant="outline"
-          onClick={() =>
-            exportMutation.mutate({
-              exportType: 'statistics',
-              filters: params,
-            })
-          }
+          disabled
+          title="Chưa hỗ trợ xuất báo cáo thống kê theo khoảng thời gian"
         >
           <Download className="mr-2 h-4 w-4" />
-          Xuất báo cáo
+          Xuất báo cáo (chưa hỗ trợ)
         </Button>
       </div>
 
