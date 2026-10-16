@@ -44,7 +44,7 @@ export const createMaintenance = asyncHandler(async (req: AuthenticatedRequest, 
   }
 
   const createdBy = req.user?.id;
-  const record = await maintenanceCrudService.createMaintenance(parsed.data, createdBy);
+  const record = await maintenanceCrudService.createMaintenance(parsed.data, actorScope(req), createdBy);
   sendCreated(res, record);
 });
 
