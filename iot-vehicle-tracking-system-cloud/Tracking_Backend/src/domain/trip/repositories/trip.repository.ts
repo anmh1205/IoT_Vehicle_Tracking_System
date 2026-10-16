@@ -1,7 +1,6 @@
 import {
   findOne,
   findMany,
-  insertOne,
   updateOne,
   deleteOne,
 } from '@/infrastructure/database/queries';
@@ -123,10 +122,27 @@ export const findById = async (id: number): Promise<Trip | null> =>
 export const findByTripCode = async (tripCode: string): Promise<Trip | null> =>
   findOne<Trip>('SELECT * FROM trips WHERE trip_code = $1', [tripCode]);
 
-export const create = async (input: CreateTripInput): Promise<Trip> =>
-  insertOne<Trip>(
+export const create = async (input: CreateTripInput, scope: TripReadScope): Promise<Trip | null> =>
+  findOne<Trip>(
     `INSERT INTO trips (trip_code, vehicle_id, device_id, driver_name, driver_phone, start_location, end_location, planned_start, planned_end, notes, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+     SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW()
+     WHERE (
+       $11::boolean OR (
+         ($2::text IS NOT NULL OR $3::text IS NOT NULL)
+         AND ($2::text IS NULL OR EXISTS (
+           SELECT 1 FROM vehicles v
+           JOIN user_device_access uda ON uda.device_id = v.device_id
+           WHERE v.vehicle_id = $2 AND uda.user_id = $12
+         ))
+         AND ($3::text IS NULL OR EXISTS (
+           SELECT 1 FROM user_device_access uda
+           WHERE uda.user_id = $12 AND uda.device_id = $3
+         ))
+       )
+     )
+       AND ($2::text IS NULL OR $3::text IS NULL OR EXISTS (
+         SELECT 1 FROM vehicles v WHERE v.vehicle_id = $2 AND v.device_id = $3
+       ))
      RETURNING *`,
     [
       input.tripCode,
@@ -139,9 +155,10 @@ export const create = async (input: CreateTripInput): Promise<Trip> =>
       input.plannedStart ?? null,
       input.plannedEnd ?? null,
       input.notes ?? null,
+      fullFleet(scope),
+      scope.userId,
     ],
   );
-
 export const update = async (id: number, input: UpdateTripInput, scope: TripReadScope): Promise<Trip | null> => {
   const setClauses: string[] = [];
   const values: unknown[] = [];
