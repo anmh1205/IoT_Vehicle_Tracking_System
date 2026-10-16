@@ -4,16 +4,17 @@ import * as customerController from '@/api/controllers/customer.controller';
 
 const router = Router();
 
-const requireAssetManager = requireRole('root', 'admin', 'manager');
+// Driver/customer records contain fleet-wide PII with no stable per-device grant.
+// Block assigned roles until SQL object-grant constraints are available.
 const requireAssetAdmin = requireRole('root', 'admin');
 
 // All customer routes require authentication
 router.use(requireAuth);
 
-router.get('/', customerController.listCustomers);
-router.get('/:id', customerController.getCustomer);
-router.post('/', requireAssetManager, customerController.createCustomer);
-router.put('/:id', requireAssetManager, customerController.updateCustomer);
+router.get('/', requireAssetAdmin, customerController.listCustomers);
+router.get('/:id', requireAssetAdmin, customerController.getCustomer);
+router.post('/', requireAssetAdmin, requireAssetAdmin, customerController.createCustomer);
+router.put('/:id', requireAssetAdmin, requireAssetAdmin, customerController.updateCustomer);
 router.delete('/:id', requireAssetAdmin, customerController.deleteCustomer);
 
 export default router;
