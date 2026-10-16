@@ -34,11 +34,18 @@ integration('durable export recovery and global scope against PostgreSQL', () =>
       status text, filters jsonb, file_path text,
       created_at timestamptz DEFAULT now(), completed_at timestamptz
     )`);
+    await pool.query('CREATE TABLE user_device_access(user_id integer, device_id text)');
+    await pool.query(`INSERT INTO user_device_access(user_id,device_id) VALUES (4,'D1')`);
     await pool.query(`INSERT INTO users(id,role,status) VALUES
-      (1,'admin','active'),(2,'operator','active'),(3,'root','disabled')`);
+      (1,'admin','active'),(2,'operator','active'),(3,'root','disabled'),
+      (4,'manager','active'),(5,'viewer','active')`);
     await pool.query(`INSERT INTO export_jobs(id,user_id,export_type,status)
       VALUES (11,1,'vehicles','pending'),(12,1,'alerts','processing'),
              (13,2,'devices','pending'),(14,3,'trips','pending')`);
+    await pool.query(`INSERT INTO export_jobs(id,user_id,export_type,status,filters)
+      VALUES (15,4,'devices','pending','{"deviceId":"D1"}'::jsonb),
+             (16,4,'devices','pending','{"deviceId":"D2"}'::jsonb),
+             (17,5,'devices','pending','{"deviceId":"D1"}'::jsonb)`);
   });
   afterAll(async () => { await pool.end(); });
 
@@ -64,6 +71,21 @@ integration('durable export recovery and global scope against PostgreSQL', () =>
       expect((await repository.findById(id))?.status).toBe('failed');
       expect(vi.mocked(generateExcelFile).mock.calls.some((call) => call[1] === id)).toBe(false);
     }
+  });
+
+  it('accepts only an active manager with a fresh device grant and rejects revoked or viewer exports', async () => {
+    await processExport((await repository.findById(15))!);
+    expect((await repository.findById(15))?.status).toBe('completed');
+    expect(vi.mocked(generateExcelFile).mock.calls.some((call) =>
+      call[1] === 15 && call[2]?.deviceId === 'D1' && call[2]?.userId === 4)).toBe(true);
+
+    for (const id of [16, 17]) {
+      await processExport((await repository.findById(id))!);
+      expect((await repository.findById(id))?.status).toBe('failed');
+      expect(vi.mocked(generateExcelFile).mock.calls.some((call) => call[1] === id)).toBe(false);
+    }
+    await pool.query('DELETE FROM user_device_access WHERE user_id = 4 AND device_id = $1', ['D1']);
+    expect(await repository.hasActiveDeviceGrantOwner(4, 'D1')).toBe(false);
   });
 
   it('a completed job is never reprocessed by a later recovery scan', async () => {

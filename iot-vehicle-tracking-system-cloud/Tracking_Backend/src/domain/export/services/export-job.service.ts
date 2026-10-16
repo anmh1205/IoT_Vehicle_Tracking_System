@@ -130,3 +130,62 @@ export const closeExportRecoveryWorker = async (): Promise<void> => {
   recoveryTimer = null;
   if (recoveryRun) await recoveryRun;
 };
+
+
+/** Only one canonical device reference is accepted; no ignored extra scopes. */
+const normalizeScopedDeviceId = (raw: unknown): string => {
+  if (typeof raw !== 'string' || !/^[A-Za-z0-9._:-]{1,96}$/.test(raw)) {
+    throw createValidationError('A valid deviceId is required for a scoped Excel export');
+  }
+  return raw;
+};
+
+/**
+ * Ordinary managers/operators may export only one currently granted device.
+ * The worker and every SQL data page recheck current database authorization.
+ */
+export const createScopedDeviceExport = async (
+  userId: number,
+  input: { deviceId: unknown },
+): Promise<ExportJobPublic> => {
+  const deviceId = normalizeScopedDeviceId(input.deviceId);
+  if (!await exportRepo.hasActiveDeviceGrantOwner(userId, deviceId)) {
+    throw createForbiddenError('Device export access denied');
+  }
+  const job = await exportRepo.create(userId, { exportType: 'devices', filters: { deviceId } });
+  void processExport(job).catch((error: unknown) => {
+    log.error('Scoped export background processing failed', { jobId: job.id, error });
+  });
+  return { ...sanitizeExportJob(job), filePath: null };
+};
+
+const getAuthorizedScopedDeviceJob = async (id: number, userId: number): Promise<ExportJob> => {
+  const job = await exportRepo.findById(id);
+  if (!job || job.user_id !== userId || job.export_type !== 'devices' ||
+      job.filters === null || Object.keys(job.filters).length !== 1) {
+    throw createNotFoundError('Scoped export not found');
+  }
+  const deviceId = job.filters.deviceId;
+  if (typeof deviceId !== 'string' ||
+      !await exportRepo.hasActiveDeviceGrantOwner(userId, deviceId)) {
+    throw createForbiddenError('Device export grant no longer valid');
+  }
+  return job;
+};
+
+export const getScopedDeviceExportStatus = async (
+  id: number, userId: number,
+): Promise<ExportJobPublic> => {
+  const job = await getAuthorizedScopedDeviceJob(id, userId);
+  return { ...sanitizeExportJob(job), filePath: null };
+};
+
+export const getScopedDeviceExportDownload = async (
+  id: number, userId: number,
+): Promise<{ path: string; exportType: string }> => {
+  const job = await getAuthorizedScopedDeviceJob(id, userId);
+  if (job.status !== 'completed' || !job.file_path) {
+    throw createNotFoundError('Device export is not ready');
+  }
+  return { path: job.file_path, exportType: job.export_type };
+};

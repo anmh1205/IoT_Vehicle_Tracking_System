@@ -43,14 +43,23 @@ export const processExport = async (job: ExportJob): Promise<void> => {
     const current = await exportRepo.findById(job.id);
     if (!current || current.status === 'completed' || current.status === 'failed') return;
 
-    // In particular, do not resurrect a full-fleet export when the initiating
-    // administrator has been disabled or demoted since job creation.
-    if (!(await exportRepo.hasPrivilegedActiveOwner(current.user_id))) {
+    // Filter scope is a security boundary, not optional UI metadata. A malformed
+    // filter must never fall back to the unfiltered full-fleet export path.
+    const scopedDeviceId = current.filters?.deviceId;
+    const scoped = current.filters !== null;
+    const validScoped = scoped &&
+      current.export_type === 'devices' &&
+      typeof scopedDeviceId === 'string' &&
+      Object.keys(current.filters!).length === 1 &&
+      /^[A-Za-z0-9._:-]{1,96}$/.test(scopedDeviceId);
+
+    const authorized = scoped
+      ? Boolean(validScoped && await exportRepo.hasActiveDeviceGrantOwner(current.user_id, scopedDeviceId as string))
+      : await exportRepo.hasPrivilegedActiveOwner(current.user_id);
+    if (!authorized) {
       await exportRepo.updateStatus(current.id, 'failed');
       publishExportProgress(current, 100, 'failed');
-      log.warn('Export job rejected because owner no longer has administrator access', {
-        jobId: current.id,
-      });
+      log.warn('Export rejected: owner grant revoked or filter scope invalid', { jobId: current.id });
       return;
     }
 
@@ -58,7 +67,8 @@ export const processExport = async (job: ExportJob): Promise<void> => {
     try {
       await exportRepo.updateStatus(current.id, 'processing');
       publishExportProgress(current, 10, 'processing');
-      generatedFile = await generateExcelFile(current.export_type, current.id);
+      generatedFile = await generateExcelFile(current.export_type, current.id,
+        validScoped ? { deviceId: scopedDeviceId as string, userId: current.user_id } : undefined);
       publishExportProgress(current, 90, 'processing');
 
       const committed = await exportRepo.updateStatus(current.id, 'completed', generatedFile);

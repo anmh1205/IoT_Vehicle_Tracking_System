@@ -162,22 +162,43 @@ const HEADER_ALIGNMENT: Partial<ExcelJS.Alignment> = {
 export const EXPORT_MAX_ROWS = 10_000;
 export const EXPORT_PAGE_SIZE = 500;
 
-const selectPage = (query: string): string => {
+export interface DeviceExportScope {
+  deviceId: string;
+  userId: number;
+}
+
+const selectPage = (query: string, deviceScope?: DeviceExportScope): string => {
   const suffix = ' ORDER BY created_at DESC';
   if (!query.endsWith(suffix)) {
     throw new Error('Export query lacks expected deterministic base ordering');
   }
+  // The live SQL grant and row restriction MUST be in the same SELECT.
+  // Revocation between job enqueue and the next page cannot read other devices.
+  const scopePredicate = deviceScope
+    ? ` AND device_id = $3 AND EXISTS (
+         SELECT 1 FROM user_device_access uda
+         JOIN users u ON u.id = uda.user_id
+         WHERE uda.user_id = $4 AND uda.device_id = $3
+           AND u.status = 'active' AND u.role IN ('root','admin','manager','operator')
+       )`
+    : '';
   return query.slice(0, -suffix.length)
-    + ' WHERE id < $1 ORDER BY id DESC LIMIT $2';
+    + ` WHERE id < $1${scopePredicate} ORDER BY id DESC LIMIT $2`;
 };
 
 export const generateExcelFile = async (
   exportType: string,
   jobId: number,
+  deviceScope?: DeviceExportScope,
 ): Promise<string> => {
   const config = EXPORT_CONFIGS[exportType];
   if (!config) {
     throw new Error(`Unsupported export type: ${exportType}`);
+  }
+  if (deviceScope && (exportType !== 'devices' ||
+      !/^[A-Za-z0-9._:-]{1,96}$/.test(deviceScope.deviceId) ||
+      !Number.isSafeInteger(deviceScope.userId) || deviceScope.userId <= 0)) {
+    throw new Error('Invalid scoped export; refusing unfiltered fallback');
   }
   mkdirSync(EXPORTS_DIR, { recursive: true });
   const filePath = path.join(EXPORTS_DIR, `${exportType}_${jobId}_${Date.now()}.xlsx`);
@@ -208,19 +229,21 @@ export const generateExcelFile = async (
   let fallback = false;
   try {
     while (emitted <= EXPORT_MAX_ROWS) {
-      const query = selectPage(fallback ? config.fallbackQuery! : config.query);
+      const query = selectPage(fallback ? config.fallbackQuery! : config.query, deviceScope);
       let page: Record<string, unknown>[];
       try {
         page = await findMany<Record<string, unknown>>(query, [
           lastId,
           Math.min(EXPORT_PAGE_SIZE, EXPORT_MAX_ROWS + 1 - emitted),
+          ...(deviceScope ? [deviceScope.deviceId, deviceScope.userId] : []),
         ]);
       } catch (error) {
         if (!config.fallbackQuery || fallback || emitted > 0) throw error;
         fallback = true;
-        page = await findMany<Record<string, unknown>>(selectPage(config.fallbackQuery), [
+        page = await findMany<Record<string, unknown>>(selectPage(config.fallbackQuery, deviceScope), [
           lastId,
           Math.min(EXPORT_PAGE_SIZE, EXPORT_MAX_ROWS + 1 - emitted),
+          ...(deviceScope ? [deviceScope.deviceId, deviceScope.userId] : []),
         ]);
       }
       if (page.length === 0) break;

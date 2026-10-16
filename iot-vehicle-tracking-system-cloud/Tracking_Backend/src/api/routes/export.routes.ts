@@ -9,6 +9,11 @@ router.use(requireAuth);
 // administrators may request or retrieve those unscoped datasets.
 const requireFleetExport = requireRole('root', 'admin');
 
+// Scoped device export routes use fresh SQL grants in the service/worker.
+router.post('/device', exportController.createScopedDeviceExport);
+router.get('/device/:id', exportController.getScopedDeviceExportStatus);
+router.get('/device/:id/download', exportController.downloadScopedDeviceExport);
+
 router.get('/', requireFleetExport, exportController.listExports);
 router.post('/', requireFleetExport, exportController.createExport);
 router.get('/:id', requireFleetExport, exportController.getExportStatus);
