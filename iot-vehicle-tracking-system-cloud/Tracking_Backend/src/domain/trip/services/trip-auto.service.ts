@@ -9,6 +9,17 @@ interface SessionBoundaryPayload {
   occurred_at: string;
 }
 
+const buildAutoTripCode = (deviceId: string, sessionId: number): string => {
+  const legacyCode = `AUTO-${deviceId}-SESSION-${sessionId}`;
+  if (legacyCode.length <= 50) return legacyCode;
+
+  // Schema trip_code is VARCHAR(50); preserve existing short-code identity
+  // while using a collision-resistant deterministic identifier for long device IDs.
+  const digest = createHash('sha256').update(deviceId).update(':')
+    .update(String(sessionId)).digest('hex').slice(0, 40);
+  return `AUTO-${digest}`;
+};
+
 const parseOccurredAt = (value: string): Date | null => {
   const parsed = new Date(value);
   return Number.isFinite(parsed.getTime()) ? parsed : null;
