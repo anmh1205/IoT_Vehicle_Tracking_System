@@ -58,8 +58,10 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
     javaScriptBridgeForMainFrameOnly: true,
     // Deny all native handlers unless the caller's origin exactly matches the
     // configured dashboard. Native enforcement also rejects hostile iframes.
-    javaScriptHandlersOriginAllowList: nativeBridgeOriginAllowList(
-      AppConfig.webAppUrl, isAndroid: Platform.isAndroid,
+    // Handler allowlists are regex on both Android and iOS. Bridge origin
+    // rules are platform-specific and must be constructed independently.
+    javaScriptHandlersOriginAllowList: nativeHandlerOriginAllowList(
+      AppConfig.webAppUrl,
     ),
     javaScriptBridgeOriginAllowList: nativeBridgeOriginAllowList(
       AppConfig.webAppUrl, isAndroid: Platform.isAndroid,
