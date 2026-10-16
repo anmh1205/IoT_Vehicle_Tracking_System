@@ -49,11 +49,16 @@ export const getMaintenanceById = async (id: number, scope: MaintenanceReadScope
 
 export const createMaintenance = async (
   input: CreateMaintenanceInput,
+  scope: MaintenanceReadScope,
   createdBy?: number,
 ): Promise<MaintenancePublic> => {
   let record: Maintenance;
   try {
-    record = await maintenanceRepo.create(input, createdBy);
+    const created = await maintenanceRepo.create(input, scope, createdBy);
+    if (!created) {
+      throw createNotFoundError('Vehicle not found or maintenance creation not authorized');
+    }
+    record = created;
   } catch (error) {
     if (isUndefinedTableError(error)) {
       throw createNotFoundError('Maintenance module is not initialized');
