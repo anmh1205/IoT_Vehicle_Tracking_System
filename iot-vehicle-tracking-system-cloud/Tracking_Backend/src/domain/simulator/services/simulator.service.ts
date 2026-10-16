@@ -6,6 +6,10 @@ import { appConfig, dbConfig, mqttConfig } from '@/config/env';
 import { hashToken } from '@/shared/utils/crypto.util';
 import { createValidationError, createForbiddenError } from '@/shared/utils/errors.util';
 import { publishEvent } from '@/infrastructure/realtime';
+import {
+  simulatorDatabaseIsIsolated, swapSimulatorCredentialLeases,
+  restoreSimulatorCredentialLeases,
+} from '@/domain/simulator/repositories/simulator-auth-lease.repository';
 import type {
   SimulatorPoint,
   SimulatorStartInput,
@@ -443,24 +447,35 @@ const restoreSimulatorAuthTokens = async (
   devices: DeviceSimulatorRuntime[],
   reason: string,
 ): Promise<void> => {
-  await Promise.all(
-    devices.map(async (device) => {
-      try {
-        await pool.query(
-          `UPDATE devices
-           SET auth_token = $3, updated_at = NOW()
-           WHERE device_id = $1 AND auth_token = $2`,
-          [device.deviceId, device.simulatorAuthTokenHash, device.originalAuthToken],
-        );
-      } catch (error) {
-        logger.error('Failed to restore device auth token after simulator state change', {
-          reason,
-          deviceId: device.deviceId,
-          error: (error as Error).message,
-        });
-      }
-    }),
-  );
+  try {
+    await restoreSimulatorCredentialLeases(devices.map((device) => device.deviceId));
+  } catch (error) {
+    logger.error('Failed to restore durable simulator credentials', {
+      reason,
+      deviceIds: devices.map((device) => device.deviceId),
+      error: (error as Error).message,
+    });
+    throw error; // Keep the persistent lease for next startup recovery.
+  }
+};
+
+let startupRecovery: Promise<void> | null = null;
+
+/** Recover orphaned SIM credentials from an interrupted simulator process.
+ * A single-flight promise coordinates requests with the startup recovery.
+ */
+export const recoverOrphanedSimulatorCredentials = (): Promise<void> => {
+  if (!simulatorDatabaseIsIsolated() || runningSimulation) return Promise.resolve();
+  if (startupRecovery) return startupRecovery;
+  startupRecovery = (async () => {
+    const restored = await restoreSimulatorCredentialLeases();
+    if (restored > 0) {
+      logger.warn('Recovered orphaned SIM credentials after simulator restart', {
+        recoveredDeviceCount: restored,
+      });
+    }
+  })().finally(() => { startupRecovery = null; });
+  return startupRecovery;
 };
 
 const stopSimulationInternal = async (reason: string): Promise<SimulatorStatus> => {
@@ -738,14 +753,7 @@ export const startSimulation = async (
   input: SimulatorStartInput,
   userId: number,
 ): Promise<SimulatorStatus> => {
-  const explicitlyIsolated =
-    !appConfig.isProduction &&
-    (appConfig.nodeEnv === 'development' || appConfig.nodeEnv === 'test') &&
-    process.env.SIMULATOR_ISOLATED_TEST_MODE === 'true' &&
-    dbConfig.database.startsWith('ivts_simulator_') &&
-    process.env.SIMULATOR_ISOLATED_DATABASE === dbConfig.database &&
-    Boolean(process.env.SIMULATOR_ISOLATED_BROKER_HOST) &&
-    process.env.SIMULATOR_ISOLATED_BROKER_HOST === mqttConfig.host;
+  const explicitlyIsolated = simulatorDatabaseIsIsolated();
 
   if (!explicitlyIsolated) {
     throw createForbiddenError(
@@ -764,6 +772,8 @@ export const startSimulation = async (
   if (runningSimulation) {
     await stopSimulationInternal('restarted');
   }
+
+  await recoverOrphanedSimulatorCredentials();
 
   const devicesResult = await pool.query<DeviceLookupRow>(
     `SELECT device_id, auth_token, latitude, longitude
@@ -826,16 +836,13 @@ export const startSimulation = async (
     });
   }
 
-  await Promise.all(
-    runtimes.map((device) =>
-      pool.query(
-        `UPDATE devices
-         SET auth_token = $2, updated_at = NOW()
-         WHERE device_id = $1`,
-        [device.deviceId, device.simulatorAuthTokenHash],
-      ),
-    ),
-  );
+  // Either all SIM device hashes and their persistent recovery leases commit,
+  // or the entire multi-device attempt rolls back.
+  await swapSimulatorCredentialLeases(runtimes.map((device) => ({
+    deviceId: device.deviceId,
+    originalAuthTokenHash: device.originalAuthToken,
+    simulatorAuthTokenHash: device.simulatorAuthTokenHash,
+  })));
 
   const startedAt = new Date();
   const expiresAt = new Date(startedAt.getTime() + input.durationMin * 60_000);
