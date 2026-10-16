@@ -76,6 +76,21 @@ void main() {
     expect(isTrustedWebOrigin('https://thingdock.dev/', 'file:///app'), isFalse);
     expect(isTrustedWebOrigin('https://thingdock.dev/', 'https://u@thingdock.dev'), isFalse);
   });
+  test('bridge injection checks the actual top-frame origin inside the page', () {
+    const nativeApi = 'window.NativeBridge = { isNativeApp: true };';
+    final source = trustedBridgeInjectionSource(trusted, nativeApi);
+    expect(source, isNotNull);
+    expect(source, contains('window.top !== window'));
+    expect(source, contains('window.location.origin !== "https://thingdock.dev"'));
+    expect(source, contains(nativeApi));
+    expect(source, isNot(contains('window.__NATIVE_AUTH_TOKEN__')));
+
+    // Untrusted configuration must fail closed before generating script.
+    expect(trustedBridgeInjectionSource('file:///index.html', nativeApi), isNull);
+    expect(trustedBridgeInjectionSource('https://user@thingdock.dev', nativeApi), isNull);
+    expect(trustedBridgeInjectionSource('javascript:alert(1)', nativeApi), isNull);
+  });
+
   test('native allowlist is an exact Android origin, never a host wildcard', () {
     expect(
       nativeBridgeOriginAllowList(trusted, isAndroid: true),
