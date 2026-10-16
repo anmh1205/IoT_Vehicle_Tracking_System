@@ -16,11 +16,6 @@ const disconnect = (client: MqttClient | null): Promise<void> => new Promise((re
   if (!client) { resolve(); return; }
   client.end(true, {}, resolve);
 });
-const acked = (client: MqttClient, id: number): Promise<void> => new Promise((resolve) => {
-  client.on('packetsend', (packet) => {
-    if (packet.cmd === 'puback' && packet.messageId === id) resolve();
-  });
-});
 
 integration('EMQX PUBACK follows real committed PostgreSQL handler work, never an uncommitted INSERT', {
   timeout: 45_000,
