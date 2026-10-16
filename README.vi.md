@@ -1,10 +1,12 @@
 # Hệ thống Theo dõi Phương tiện IoT
 
-Monorepo theo dõi đội xe IoT thời gian thực: firmware thiết bị, ingestion MQTT, backend API, dashboard web, mobile shell và stack quan sát hệ thống.
+Nền tảng giám sát phương tiện từ thiết bị đến cloud, hướng đến nhu cầu vận hành của các đơn vị cho thuê xe tự lái: theo dõi vị trí, dữ liệu vận hành, sự kiện bất thường và các tác vụ quản lý thiết bị từ xa. Repository bao gồm firmware, đường nhận dữ liệu MQTT, backend API, dashboard web, ứng dụng di động và các dịch vụ quan sát hệ thống.
+
+Mục tiêu của hệ thống là giúp đơn vị quản lý biết xe đang ở đâu, vận hành ra sao, khi nào cần xử lý cảnh báo và có những dữ liệu nào hỗ trợ quyết định bảo trì. Các chức năng phụ thuộc vào phần cứng, loại xe và cấu hình triển khai; repository không khẳng định mọi xe đều hỗ trợ đọc ECU hay điều khiển từ xa.
 
 Ngôn ngữ: [English](README.md) | Tiếng Việt
 
-**Lần xác thực gần nhất:** 2026-03-24
+**Mốc xác thực tài liệu đã ghi nhận:** 2026-03-24 (mốc lịch sử, không phải xác nhận bản build hiện tại)
 **Nhánh triển khai chính:** `uat` (các dịch vụ runtime)
 **Mô hình triển khai:** Docker Compose tách theo từng service + mạng external dùng chung `tracking-network`
 
