@@ -62,7 +62,7 @@ export const updateVehicle = asyncHandler(async (req: AuthenticatedRequest, res:
     throw createValidationError('Invalid vehicle data', parsed.error.flatten().fieldErrors);
   }
 
-  const vehicle = await vehicleCrudService.updateVehicle(id, parsed.data);
+  const vehicle = await vehicleCrudService.updateVehicle(id, parsed.data, scopeOf(req));
   sendOk(res, vehicle);
 });
 
