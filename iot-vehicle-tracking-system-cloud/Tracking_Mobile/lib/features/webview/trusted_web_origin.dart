@@ -44,7 +44,7 @@ Set<String> nativeBridgeOriginAllowList(
   final origin = '${uri.scheme}://${uri.host}$portSuffix';
   if (isAndroid) return <String>{origin};
   final escapedOrigin = RegExp.escape(origin);
-  return <String>{"^$escapedOrigin\$"};
+  return <String>{'^$escapedOrigin\$'};
 }
 
 /// Validate calling frame independently from the displayed top frame.
