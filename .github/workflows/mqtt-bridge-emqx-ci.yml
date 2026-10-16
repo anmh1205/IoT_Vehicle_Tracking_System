@@ -19,6 +19,7 @@ jobs:
         image: emqx/emqx:5.8.8
         ports:
           - 1883:1883
+          - 18083:18083
         options: >-
           --health-cmd "emqx ctl status"
           --health-interval 4s
@@ -39,3 +40,8 @@ jobs:
         env:
           IVTS_EMQX_INTEGRATION: '1'
         run: npx tsx --test tests/emqx-persistent-replay.integration.test.ts
+      - name: Verify real EMQX ACL denial and reconnect recovery
+        env:
+          IVTS_EMQX_INTEGRATION: '1'
+          IVTS_EMQX_TEST_ADMIN_PASSWORD: public
+        run: npx tsx --test tests/emqx-acl-recovery.integration.test.ts
