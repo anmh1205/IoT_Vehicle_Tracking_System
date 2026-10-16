@@ -139,10 +139,10 @@ esp_err_t config_store_nvs_save(const config_t *config) {
  *
  * Resolution order:
  *  1. Seed @p config with compiled defaults (safe baseline for every path below).
- *  2. If the namespace/key is missing, write defaults back and return them.
+ *  2. If the namespace/key is missing, do not synthesize persisted credentials; require provisioning.
  *  3. If the stored blob matches the current size, read it directly.
  *  4. If it matches the legacy v1 size, expand it onto defaults (size-based migration).
- *  5. Any other size is treated as corrupt: rewrite defaults.
+ *  5. Any other size is treated as corrupt: preserve the existing blob and return an error.
  *  6. Validate, then apply targeted post-load fixups for known-bad legacy values.
  * When anything is migrated or repaired, the corrected config is written back so
  * the next boot reads a clean current-format blob.
@@ -159,9 +159,11 @@ esp_err_t config_store_nvs_load(config_t *config) {
     nvs_handle_t handle = 0;
     esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READONLY, &handle);
     if (err == ESP_ERR_NVS_NOT_FOUND) {
-        // First boot (or erased flash): no namespace yet, so seed it with defaults.
-        ESP_LOGW(TAG, "NVS namespace not found, writing defaults");
-        return config_store_nvs_save(config);
+        // Truly blank flash is unprovisioned. Never turn compiled placeholder
+        // identity/token values into a persisted device credential. Preserve
+        // the virgin partition and require explicit provisioning.
+        ESP_LOGW(TAG, "event=nvs_namespace_absent action=provisioning_required_no_write");
+        return ESP_ERR_NOT_FOUND;
     }
     ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to open NVS namespace");
 
