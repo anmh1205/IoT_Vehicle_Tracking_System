@@ -249,8 +249,15 @@ export const generateExcelFile = async (
     log.info(`Completed bounded export type=${exportType} row_count=${emitted}`);
     return filePath;
   } catch (error) {
-    // Streaming writer can have left an incomplete file; never expose it via
-    // a "completed" export job, even when an SQL read/serialization fails.
+    // Close the XLSX writer BEFORE unlinking the partial file. On Linux, an
+    // open writer can keep appending/recreate the path after a premature rm.
+    try {
+      sheet.commit();
+      await workbook.commit();
+    } catch (closeError) {
+      log.error('Could not finalize failed export stream', { jobId, closeError });
+    }
+    // An overflow/error must never leave a downloadable partial fleet file.
     await rm(filePath, { force: true }).catch((cleanupError: unknown) => {
       log.error('Failed to remove partial export file', { jobId, cleanupError });
     });
