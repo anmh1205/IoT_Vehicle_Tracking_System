@@ -13,7 +13,8 @@ vi.mock('@/config/env', () => ({
 import { pool } from '@/infrastructure/database/pool';
 import { appConfig } from '@/config/env';
 import { publishEvent } from '@/infrastructure/realtime';
-import { startSimulation, clearRetainedSimulatorStatus } from './simulator.service';
+import { startSimulation, clearRetainedSimulatorStatus, resolveSimulatorDeviceToken } from './simulator.service';
+import { hashToken } from '@/shared/utils/crypto.util';
 
 const input: SimulatorStartInput = {
   deviceIds: ['SIM-TEST-01'], intervalSec: 5, durationMin: 1,
@@ -107,6 +108,40 @@ describe('simulator production safety boundary', () => {
     expect(db.mock.calls.some(([sql]) => /UPDATE\s+(devices|device_sessions)/i.test(String(sql))))
       .toBe(false);
     expect(publishEvent).not.toHaveBeenCalled();
+  });
+
+  it('accepts only pre-provisioned SIM test credentials matching the database hash', () => {
+    const token = 'isolated-device-token-01';
+    vi.stubEnv('SIMULATOR_DEVICE_TOKENS_JSON', JSON.stringify({ 'SIM-TEST-01': token }));
+    expect(resolveSimulatorDeviceToken('SIM-TEST-01', hashToken(token))).toBe(token);
+    expect(() => resolveSimulatorDeviceToken('SIM-TEST-01', hashToken('different-token')))
+      .toThrow(/credentials do not match/i);
+    expect(() => resolveSimulatorDeviceToken('SIM-OTHER', hashToken(token)))
+      .toThrow(/credentials do not match/i);
+  });
+
+  it('rejects malformed or missing simulator credential configuration', () => {
+    expect(() => resolveSimulatorDeviceToken('SIM-TEST-01', hashToken('secret')))
+      .toThrow(/pre-provisioned/i);
+    vi.stubEnv('SIMULATOR_DEVICE_TOKENS_JSON', '{bad-json');
+    expect(() => resolveSimulatorDeviceToken('SIM-TEST-01', hashToken('secret')))
+      .toThrow(/Invalid simulator device credential/i);
+    vi.stubEnv('SIMULATOR_DEVICE_TOKENS_JSON', '[]');
+    expect(() => resolveSimulatorDeviceToken('SIM-TEST-01', hashToken('secret')))
+      .toThrow(/Invalid simulator device credential/i);
+  });
+
+  it('denies simulator start without pre-provisioned token before any credential updates', async () => {
+    vi.stubEnv('SIMULATOR_ISOLATED_TEST_MODE', 'true');
+    vi.stubEnv('SIMULATOR_ISOLATED_DATABASE', 'ivts_simulator_local');
+    vi.stubEnv('SIMULATOR_ISOLATED_BROKER_HOST', 'isolated-broker.local');
+    db.mockResolvedValueOnce({ rows: [{
+      device_id: 'SIM-TEST-01', auth_token: hashToken('original-secret'),
+      latitude: null, longitude: null,
+    }] } as never);
+    db.mockResolvedValueOnce({ rows: [] } as never);
+    await expect(startSimulation(input, 1)).rejects.toMatchObject({ status: 403 });
+    expect(db.mock.calls.some(([sql]) => /UPDATE\s+devices/i.test(String(sql)))).toBe(false);
   });
 
 });
