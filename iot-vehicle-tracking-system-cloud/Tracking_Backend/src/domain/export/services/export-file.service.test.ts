@@ -34,8 +34,8 @@ describe('bounded streaming full-fleet exports', () => {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filename);
     const rows = workbook.getWorksheet('Vehicles')!;
-    expect(rows.getRow(2).getCell('vehicleId').value).toBe('V9');
-    expect(rows.getRow(3).getCell('vehicleId').value).toBe('V7');
+    expect(rows.getRow(2).getCell(2).value).toBe('V9');
+    expect(rows.getRow(3).getCell(2).value).toBe('V7');
   });
 
   it('fails instead of silently truncating a fleet larger than safety limit', async () => {
