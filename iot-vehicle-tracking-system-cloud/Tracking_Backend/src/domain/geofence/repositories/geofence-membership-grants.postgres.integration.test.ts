@@ -40,7 +40,7 @@ integration('geofence membership SQL authorization', () => {
     expect(await assignVehicle(11, 'V1', assigned)).toBe(1);
     expect(await assignVehicle(11, 'V1', assigned)).toBe(1);
     expect(await assignVehicle(11, 'V2', admin)).toBe(1);
-    const list = await pool.query('SELECT vehicle_id FROM geofence_vehicles ORDER BY vehicle_id');
+    const list = await pool.query('SELECT vehicle_id FROM geofence_vehicles WHERE geofence_id=11 ORDER BY vehicle_id');
     expect(list.rows.map((r) => r.vehicle_id)).toEqual(['V1','V2']);
   });
 
@@ -64,7 +64,7 @@ integration('geofence membership SQL authorization', () => {
     expect(await assignVehicle(11, 'V1', assigned)).toBe(0);
     expect(await unassignVehicle(11, 'V1', assigned)).toBe(false);
     expect(await updateGeofence(12, { name: 'After revoke' }, assigned)).toBeNull();
-    const row = await pool.query("SELECT count(*)::int AS total FROM geofence_vehicles WHERE vehicle_id='V1'");
+    const row = await pool.query("SELECT count(*)::int AS total FROM geofence_vehicles WHERE geofence_id=11 AND vehicle_id='V1'");
     expect(row.rows[0].total).toBe(1);
     expect(await unassignVehicle(11, 'V1', admin)).toBe(true);
   });
