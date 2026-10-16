@@ -2,6 +2,7 @@ import {
   createNotFoundError,
   createConflictError,
   createValidationError,
+  createForbiddenError,
 } from '@/shared/utils/errors.util';
 import * as tripRepo from '@/domain/trip/repositories/trip.repository';
 import type { TripReadScope } from '@/domain/trip/repositories/trip.repository';
@@ -60,13 +61,21 @@ export const createTrip = async (input: CreateTripInput): Promise<TripPublic> =>
   return sanitizeTrip(trip);
 };
 
-export const updateTrip = async (id: number, input: UpdateTripInput): Promise<TripPublic> => {
-  const existing = await tripRepo.findById(id);
+export const updateTrip = async (
+  id: number, input: UpdateTripInput, scope: TripReadScope,
+): Promise<TripPublic> => {
+  // Until a cross-asset reassignment policy is modeled, fail closed for
+  // operators/managers even when they have all-device read access.
+  if (scope.role !== 'root' && scope.role !== 'admin' &&
+      (input.deviceId !== undefined || input.vehicleId !== undefined)) {
+    throw createForbiddenError('Only administrators can reassign a trip asset');
+  }
+  const existing = await tripRepo.findByIdForScope(id, scope);
   if (!existing) {
     throw createNotFoundError(`Trip with ID ${id} not found`);
   }
 
-  const updated = await tripRepo.update(id, input);
+  const updated = await tripRepo.update(id, input, scope);
   if (!updated) {
     throw createNotFoundError(`Trip with ID ${id} not found`);
   }
@@ -85,8 +94,8 @@ export const deleteTrip = async (id: number): Promise<void> => {
   logger.info(`Trip "${existing.trip_code}" deleted successfully`);
 };
 
-export const startTrip = async (id: number): Promise<TripPublic> => {
-  const existing = await tripRepo.findById(id);
+export const startTrip = async (id: number, scope: TripReadScope): Promise<TripPublic> => {
+  const existing = await tripRepo.findByIdForScope(id, scope);
   if (!existing) {
     throw createNotFoundError(`Trip with ID ${id} not found`);
   }
@@ -97,7 +106,7 @@ export const startTrip = async (id: number): Promise<TripPublic> => {
     );
   }
 
-  const updated = await tripRepo.startTrip(id);
+  const updated = await tripRepo.startTrip(id, scope);
   if (!updated) {
     throw createNotFoundError(`Trip with ID ${id} not found`);
   }
@@ -106,8 +115,8 @@ export const startTrip = async (id: number): Promise<TripPublic> => {
   return sanitizeTrip(updated);
 };
 
-export const endTrip = async (id: number): Promise<TripPublic> => {
-  const existing = await tripRepo.findById(id);
+export const endTrip = async (id: number, scope: TripReadScope): Promise<TripPublic> => {
+  const existing = await tripRepo.findByIdForScope(id, scope);
   if (!existing) {
     throw createNotFoundError(`Trip with ID ${id} not found`);
   }
@@ -132,7 +141,7 @@ export const endTrip = async (id: number): Promise<TripPublic> => {
           startLongitude: summary.startLon,
           endLatitude: summary.endLat,
           endLongitude: summary.endLon,
-        });
+        }, scope);
         logger.info(`Trip "${existing.trip_code}" ended with stats: ${summary.distanceKm}km, ${summary.durationMinutes}min`);
       }
     } catch (err) {
@@ -142,7 +151,7 @@ export const endTrip = async (id: number): Promise<TripPublic> => {
 
   // Fallback: end without stats if VM query failed or no device/waypoints
   if (!updated) {
-    updated = await tripRepo.endTrip(id);
+    updated = await tripRepo.endTrip(id, scope);
   }
 
   if (!updated) {
