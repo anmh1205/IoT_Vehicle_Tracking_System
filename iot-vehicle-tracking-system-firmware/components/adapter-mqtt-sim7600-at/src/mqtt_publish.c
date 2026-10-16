@@ -1,5 +1,6 @@
 #include "mqtt_internal.h"
 
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -93,8 +94,6 @@ static const char *tracker_mqtt_topic_class(const char *topic) {
  * @return Locally-assigned message ID (>= 0) on success, -1 on any failure or
  *         when the session is not connected.
  */
-#include <limits.h>
-
 /* Keep the synthetic modem publish sequence positive without signed overflow.
  * This ID is local correlation only, NOT a broker-assigned QoS packet ID. */
 static int tracker_mqtt_next_local_publish_id(void) {
