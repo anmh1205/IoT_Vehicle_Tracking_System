@@ -6,6 +6,7 @@
 #include "fsm_types.h"
 #include "rtc_context.h"
 #include "telemetry_model.h"
+#include "tracker-runtime-ports.h"
 
 /**
  * @file app_state.h
@@ -28,6 +29,12 @@ extern rtc_context_t g_rtc_context;
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t state_machine_init(const config_t *config);
+
+/**
+ * @brief Bind bootstrap-wired adapters to the runtime before any FSM init.
+ * @return ESP_OK if the complete port registry is valid.
+ */
+esp_err_t state_machine_bind_runtime_ports(const tracker_runtime_ports_t *ports);
 
 /**
  * @brief Execute one state-machine iteration and return next state.
