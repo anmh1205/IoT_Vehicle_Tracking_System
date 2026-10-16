@@ -19,6 +19,7 @@ import routes from '@/api/routes';
 import healthRoutes from '@/api/routes/health.routes';
 import metricsRoutes from '@/api/routes/metrics.routes';
 import { logger } from '@/infrastructure/logger';
+import { recoverOrphanedSimulatorCredentials } from '@/domain/simulator/services/simulator.service';
 import { initExportRecoveryWorker, closeExportRecoveryWorker } from '@/domain/export/services/export-job.service';
 import { closePool } from '@/infrastructure/database/pool';
 import {
@@ -125,6 +126,11 @@ initAutoTripReconciler();
 
 // Resume crash-interrupted, privilege-checked export jobs from durable SQL.
 initExportRecoveryWorker();
+
+// Only touches the explicitly configured isolated SIM test database/broker.
+void recoverOrphanedSimulatorCredentials().catch((error: unknown) => {
+  logger.error('SIM credential recovery failed; test simulator must remain unavailable', { error });
+});
 
 // Start server
 const server = app.listen(appConfig.port, () => {
