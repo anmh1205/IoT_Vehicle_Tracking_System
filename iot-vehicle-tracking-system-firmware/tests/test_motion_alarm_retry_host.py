@@ -50,7 +50,6 @@ def test_actual_motion_alarm_c_retries_across_broker_sd_nvs_failures(tmp_path: P
 typedef int esp_err_t;
 #define ESP_LOGE(...) ((void)0)
 #define ESP_LOGW(...) ((void)0)
-#define UINT64_C(value) value##ULL
 #define OFFLINE_RECORD_EVENT 1
 #define TRACKER_MOTION_ALARM_MAGIC 0x4D4F5431U
 #define TRACKER_MOTION_ALARM_RETRY_MS 5000ULL
