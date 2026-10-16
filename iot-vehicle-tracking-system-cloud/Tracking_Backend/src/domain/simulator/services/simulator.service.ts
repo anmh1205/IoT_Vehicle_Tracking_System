@@ -203,6 +203,8 @@ const endMqttClient = (client: SimulatorMqttClient): Promise<void> =>
     client.end(false, () => resolve());
   });
 
+// Never retain a simulator authentication token in broker status state.
+// A restart must not expose an old test credential via retained messages.
 const publishDeviceStatus = (
   client: SimulatorMqttClient,
   device: DeviceSimulatorRuntime,
@@ -219,7 +221,7 @@ const publishDeviceStatus = (
       timestamp,
       metadata: createPayloadMetadata(device, timestamp, DEFAULT_SCHEMA_VERSION),
     },
-    { qos: 1, retain: true },
+    { qos: 1, retain: false },
   );
 
 const buildDiagnostics = (
