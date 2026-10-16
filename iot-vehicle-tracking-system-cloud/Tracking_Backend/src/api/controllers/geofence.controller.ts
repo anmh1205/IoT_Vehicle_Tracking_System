@@ -228,7 +228,7 @@ export const listVehiclePolicyViolations = asyncHandler(
       throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
     }
 
-    const result = await vehiclePolicyCrudService.listVehiclePolicyViolations(parsed.data);
+    const result = await vehiclePolicyCrudService.listVehiclePolicyViolations(parsed.data, policyScope(req));
     sendOk(res, result);
   },
 );
