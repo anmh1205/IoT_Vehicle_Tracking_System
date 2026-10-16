@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -7,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tracking_mobile/core/config/app_config.dart';
 import 'package:tracking_mobile/core/services/connectivity_service.dart';
 import 'package:tracking_mobile/core/utils/logger.dart';
-import 'package:tracking_mobile/features/auth/auth_provider.dart';
 import 'package:tracking_mobile/features/notifications/fcm_handler.dart';
 import 'package:tracking_mobile/features/webview/js_bridge.dart';
 import 'package:tracking_mobile/features/webview/trusted_web_origin.dart';
@@ -56,6 +56,14 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
     // WebView engine itself, not merely by checking the top-level URL in Dart.
     javaScriptHandlersForMainFrameOnly: true,
     javaScriptBridgeForMainFrameOnly: true,
+    // Deny all native handlers unless the caller's origin exactly matches the
+    // configured dashboard. Native enforcement also rejects hostile iframes.
+    javaScriptHandlersOriginAllowList: nativeBridgeOriginAllowList(
+      AppConfig.webAppUrl, isAndroid: Platform.isAndroid,
+    ),
+    javaScriptBridgeOriginAllowList: nativeBridgeOriginAllowList(
+      AppConfig.webAppUrl, isAndroid: Platform.isAndroid,
+    ),
     javaScriptCanOpenWindowsAutomatically: false,
     supportZoom: false,
     allowsInlineMediaPlayback: true,
@@ -158,15 +166,9 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
     }
     await JSBridge.inject(controller);
 
-    // Recheck after the asynchronous bridge operation. Serialize secrets as
-    // JSON rather than interpolating unescaped token characters into JS.
-    final token = ref.read(authProvider).token;
-    if (token != null && await _isTrustedCurrentPage(controller)) {
-      await controller.evaluateJavascript(
-        source: 'window.__NATIVE_AUTH_TOKEN__ = ${jsonEncode(token)};',
-      );
-      Log.debug('Auth token injected into trusted WebView origin');
-    }
+    // Native credentials stay in secure storage. Do not expose bearer
+    // tokens as writable/readable page globals, even on a trusted origin.
+    // The web login flow persists credentials through NativeBridge.saveToken.
 
     Log.info('Page loaded: $url');
   }
