@@ -166,7 +166,7 @@ export const getVehicleAllowedZone = asyncHandler(async (req: AuthenticatedReque
     throw createValidationError('Vehicle ID is required');
   }
 
-  const zone = await vehicleAllowedZoneService.getVehicleAllowedZone(vehicleId);
+  const zone = await vehicleAllowedZoneService.getVehicleAllowedZone(vehicleId, policyScope(req));
   sendOk(res, zone);
 });
 
@@ -177,7 +177,7 @@ export const previewVehicleAllowedZoneCenter = asyncHandler(
       throw createValidationError('Vehicle ID is required');
     }
 
-    const preview = await vehicleAllowedZoneService.previewVehicleAllowedZoneCenter(vehicleId);
+    const preview = await vehicleAllowedZoneService.previewVehicleAllowedZoneCenter(vehicleId, policyScope(req));
     sendOk(res, preview);
   },
 );
@@ -196,6 +196,7 @@ export const upsertVehicleAllowedZone = asyncHandler(async (req: AuthenticatedRe
   const zone = await vehicleAllowedZoneService.upsertVehicleAllowedZone(
     vehicleId,
     parsed.data,
+    policyScope(req),
     req.user?.id,
   );
   sendOk(res, zone);
@@ -207,7 +208,7 @@ export const deleteVehicleAllowedZone = asyncHandler(async (req: AuthenticatedRe
     throw createValidationError('Vehicle ID is required');
   }
 
-  const result = await vehicleAllowedZoneService.disableVehicleAllowedZone(vehicleId, req.user?.id);
+  const result = await vehicleAllowedZoneService.disableVehicleAllowedZone(vehicleId, policyScope(req), req.user?.id);
   sendOk(res, result);
 });
 
