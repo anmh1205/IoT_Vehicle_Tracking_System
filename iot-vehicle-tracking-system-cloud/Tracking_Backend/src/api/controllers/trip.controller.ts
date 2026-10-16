@@ -44,7 +44,7 @@ export const createTrip = asyncHandler(async (req: AuthenticatedRequest, res: Re
     throw createValidationError('Invalid trip data', parsed.error.flatten().fieldErrors);
   }
 
-  const trip = await tripCrudService.createTrip(parsed.data);
+  const trip = await tripCrudService.createTrip(parsed.data, actorScope(req));
   sendCreated(res, trip);
 });
 
