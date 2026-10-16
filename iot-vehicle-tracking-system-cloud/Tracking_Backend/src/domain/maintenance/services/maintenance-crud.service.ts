@@ -67,10 +67,11 @@ export const createMaintenance = async (
 export const updateMaintenance = async (
   id: number,
   input: UpdateMaintenanceInput,
+  scope: MaintenanceReadScope,
 ): Promise<MaintenancePublic> => {
   let existing: Maintenance | null;
   try {
-    existing = await maintenanceRepo.findById(id);
+    existing = await maintenanceRepo.findByIdForScope(id, scope);
   } catch (error) {
     if (isUndefinedTableError(error)) {
       throw createNotFoundError('Maintenance module is not initialized');
@@ -84,7 +85,7 @@ export const updateMaintenance = async (
 
   let updated: Maintenance | null;
   try {
-    updated = await maintenanceRepo.update(id, input);
+    updated = await maintenanceRepo.update(id, input, scope);
   } catch (error) {
     if (isUndefinedTableError(error)) {
       throw createNotFoundError('Maintenance module is not initialized');

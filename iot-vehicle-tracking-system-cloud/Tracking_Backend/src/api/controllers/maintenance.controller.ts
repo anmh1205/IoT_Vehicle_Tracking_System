@@ -59,7 +59,7 @@ export const updateMaintenance = asyncHandler(async (req: AuthenticatedRequest, 
     throw createValidationError('Invalid maintenance data', parsed.error.flatten().fieldErrors);
   }
 
-  const record = await maintenanceCrudService.updateMaintenance(id, parsed.data);
+  const record = await maintenanceCrudService.updateMaintenance(id, parsed.data, actorScope(req));
   sendOk(res, record);
 });
 
