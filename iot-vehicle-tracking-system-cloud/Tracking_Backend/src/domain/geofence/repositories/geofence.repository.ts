@@ -15,52 +15,68 @@ import type {
   UpdateGeofenceInput,
 } from '@/domain/geofence/types/geofence.types';
 
+export const geofenceVisibleTo = (scope: GeofenceAccessScope, bind: string): string =>
+  geofenceGlobalScope(scope) ? 'TRUE' : `(
+    g.created_by = ${bind} OR EXISTS (
+      SELECT 1 FROM geofence_vehicles gv
+      JOIN vehicles v ON v.vehicle_id = gv.vehicle_id
+      JOIN user_device_access uda ON uda.device_id = v.device_id
+      WHERE gv.geofence_id = g.id AND uda.user_id = ${bind}
+    )
+  )`;
+
 export const findAll = async (
-  query: GeofenceListQuery,
+  query: GeofenceListQuery, scope: GeofenceAccessScope,
 ): Promise<{ geofences: Geofence[]; total: number }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
   const offset = (page - 1) * limit;
-
-  const conditions: string[] = [];
   const params: unknown[] = [];
   let paramIndex = 1;
-
-  if (query.isActive !== undefined) {
-    conditions.push(`is_active = $${paramIndex++}`);
-    params.push(query.isActive);
-  }
-
-  if (query.geofenceType) {
-    conditions.push(`geofence_type = $${paramIndex++}`);
-    params.push(query.geofenceType);
-  }
-
-  if (query.search) {
-    conditions.push(`(name ILIKE $${paramIndex} OR description ILIKE $${paramIndex})`);
-    params.push(`%${query.search}%`);
+  const scopeBind = '$' + paramIndex;
+  const conditions: string[] = [geofenceVisibleTo(scope, scopeBind)];
+  if (!geofenceGlobalScope(scope)) {
+    params.push(scope.userId);
     paramIndex++;
   }
 
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-  const countResult = await pool.query(
-    `SELECT COUNT(*) as total FROM geofences ${whereClause}`,
-    params,
+  if (query.isActive !== undefined) {
+    conditions.push(`g.is_active = $${paramIndex++}`);
+    params.push(query.isActive);
+  }
+  if (query.geofenceType) {
+    conditions.push(`g.geofence_type = $${paramIndex++}`);
+    params.push(query.geofenceType);
+  }
+  if (query.search) {
+    conditions.push(`(g.name ILIKE $${paramIndex} OR g.description ILIKE $${paramIndex})`);
+    params.push(`%${query.search}%`);
+    paramIndex++;
+  }
+  const whereClause = `WHERE ${conditions.join(' AND ')}`;
+  const count = await pool.query(
+    `SELECT COUNT(*) AS total FROM geofences g ${whereClause}`, params,
   );
-  const total = parseInt(countResult.rows[0].total, 10);
-
+  const total = Number.parseInt(count.rows[0].total, 10);
   const geofences = await findMany<Geofence>(
-    `SELECT * FROM geofences ${whereClause} ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+    `SELECT g.* FROM geofences g ${whereClause}
+     ORDER BY g.created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
-
   return { geofences, total };
 };
 
+export const findByIdForScope = async (
+  id: number, scope: GeofenceAccessScope,
+): Promise<Geofence | null> =>
+  findOne<Geofence>(
+    `SELECT g.* FROM geofences g
+     WHERE g.id = $1 AND ${geofenceVisibleTo(scope, '$2')}`,
+    geofenceGlobalScope(scope) ? [id] : [id, scope.userId],
+  );
+
 export const findById = async (id: number): Promise<Geofence | null> =>
   findOne<Geofence>('SELECT * FROM geofences WHERE id = $1', [id]);
-
 export const create = async (input: CreateGeofenceInput, createdBy?: number): Promise<Geofence> =>
   insertOne<Geofence>(
     `INSERT INTO geofences (name, description, geofence_type, center_latitude, center_longitude, radius_meters, coordinates, trigger_on, notify_email, notify_push, color, created_by, created_at, updated_at)
@@ -187,4 +203,16 @@ export const findVehiclesByGeofenceId = async (
   findMany<{ vehicle_id: string }>(
     'SELECT vehicle_id FROM geofence_vehicles WHERE geofence_id = $1',
     [geofenceId],
+  );
+
+export const findVehiclesByGeofenceIdForScope = async (
+  geofenceId: number, scope: GeofenceAccessScope,
+): Promise<{ vehicle_id: string }[]> =>
+  findMany<{ vehicle_id: string }>(
+    `SELECT gv.vehicle_id FROM geofence_vehicles gv
+     WHERE gv.geofence_id = $1 AND ($2::boolean OR EXISTS (
+       SELECT 1 FROM vehicles v JOIN user_device_access uda ON uda.device_id = v.device_id
+       WHERE v.vehicle_id = gv.vehicle_id AND uda.user_id = $3
+     ))`,
+    [geofenceId, geofenceGlobalScope(scope), scope.userId],
   );
