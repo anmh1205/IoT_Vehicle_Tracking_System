@@ -25,3 +25,36 @@ bool isTrustedWebOrigin(String? candidateUrl, String appUrl) {
       candidate.host == configured.host &&
       candidate.port == configured.port;
 }
+
+/// Provide native-enforced allowed origins for the WebView bridge.
+/// Android uses exact origin rules; iOS uses anchored escaped regex patterns.
+Set<String> nativeBridgeOriginAllowList(
+  String appUrl, {
+  required bool isAndroid,
+}) {
+  final uri = Uri.tryParse(appUrl);
+  if (uri == null ||
+      (uri.scheme != 'http' && uri.scheme != 'https') ||
+      uri.host.isEmpty ||
+      uri.userInfo.isNotEmpty) {
+    return <String>{};
+  }
+  final defaultPort = uri.scheme == 'https' ? 443 : 80;
+  final portSuffix = uri.port == defaultPort ? '' : ':${uri.port}';
+  final origin = '${uri.scheme}://${uri.host}$portSuffix';
+  if (isAndroid) return <String>{origin};
+  final escapedOrigin = RegExp.escape(origin);
+  return <String>{'^$escapedOrigin\$'};
+}
+
+/// Validate calling frame independently from the displayed top frame.
+bool isTrustedNativeBridgeCaller({
+  required bool isMainFrame,
+  required String? origin,
+  required String? requestUrl,
+  required String appUrl,
+}) {
+  return isMainFrame &&
+      isTrustedWebOrigin(origin, appUrl) &&
+      isTrustedWebOrigin(requestUrl, appUrl);
+}

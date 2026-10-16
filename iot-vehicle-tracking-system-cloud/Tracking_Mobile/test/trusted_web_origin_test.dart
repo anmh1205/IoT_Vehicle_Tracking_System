@@ -76,4 +76,64 @@ void main() {
     expect(isTrustedWebOrigin('https://thingdock.dev/', 'file:///app'), isFalse);
     expect(isTrustedWebOrigin('https://thingdock.dev/', 'https://u@thingdock.dev'), isFalse);
   });
+  test('native allowlist is an exact Android origin, never a host wildcard', () {
+    expect(
+      nativeBridgeOriginAllowList(trusted, isAndroid: true),
+      <String>{'https://thingdock.dev'},
+    );
+    expect(
+      nativeBridgeOriginAllowList(
+        'http://localhost:3002/app', isAndroid: true,
+      ),
+      <String>{'http://localhost:3002'},
+    );
+    expect(
+      nativeBridgeOriginAllowList('file:///app', isAndroid: true),
+      isEmpty,
+    );
+  });
+
+  test('Apple native origin regex is anchored and escapes host characters', () {
+    final patterns = nativeBridgeOriginAllowList(trusted, isAndroid: false);
+    expect(patterns, hasLength(1));
+    final allow = RegExp(patterns.single);
+    expect(allow.hasMatch('https://thingdock.dev'), isTrue);
+    for (final origin in <String>[
+      'https://thingdock.dev.attacker.test',
+      'https://thingdockXdev',
+      'https://thingdock.dev@attacker.test',
+      'http://thingdock.dev',
+      'https://thingdock.dev:444',
+      'https://attacker.test/https://thingdock.dev',
+    ]) {
+      expect(allow.hasMatch(origin), isFalse, reason: origin);
+    }
+  });
+
+  test('native callback requires trustworthy origin, frame and request URL', () {
+    bool allowed({
+      required bool mainFrame,
+      required String? origin,
+      required String? request,
+    }) => isTrustedNativeBridgeCaller(
+      isMainFrame: mainFrame,
+      origin: origin,
+      requestUrl: request,
+      appUrl: trusted,
+    );
+
+    expect(allowed(mainFrame: true, origin: 'https://thingdock.dev',
+      request: 'https://thingdock.dev/app'), isTrue);
+    expect(allowed(mainFrame: false, origin: 'https://thingdock.dev',
+      request: 'https://thingdock.dev/app'), isFalse);
+    expect(allowed(mainFrame: true, origin: 'https://evil.test',
+      request: 'https://thingdock.dev/app'), isFalse);
+    expect(allowed(mainFrame: true, origin: 'https://thingdock.dev',
+      request: 'https://evil.test/frame'), isFalse);
+    expect(allowed(mainFrame: true, origin: null,
+      request: 'https://thingdock.dev/app'), isFalse);
+    expect(allowed(mainFrame: true, origin: 'https://thingdock.dev',
+      request: null), isFalse);
+  });
+
 }
