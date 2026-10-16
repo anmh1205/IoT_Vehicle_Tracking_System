@@ -63,7 +63,12 @@ integration('EMQX ACL denial degrades subscriptions, then reconnect with restore
 
   // Only this disposable broker is used. Remove the default permissive file
   // authorizer so a later source cannot short-circuit the client-specific ACL.
-  const sources = await callApi('/authorization/sources', token) as Array<{ type: string }>;
+  const response = await callApi('/authorization/sources', token) as
+    | Array<{ type: string }>
+    | { sources?: Array<{ type: string }>; data?: Array<{ type: string }> };
+  // EMQX versions may wrap the list in a top-level data/sources property.
+  const sources = Array.isArray(response) ? response : (response.sources ?? response.data);
+  assert.ok(Array.isArray(sources), 'Unexpected EMQX authorization source listing');
   for (const source of sources) {
     if (source.type !== 'built_in_database') {
       await callApi(`/authorization/sources/${encodeURIComponent(source.type)}`, token, 'DELETE');
