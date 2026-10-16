@@ -16,6 +16,7 @@ vi.mock('@/infrastructure/database/pool', async () => {
 import { pool } from '@/infrastructure/database/pool';
 import { listPolicies, getPolicyByIdForScope } from './vehicle-policy.repository';
 import { listPolicyViolations } from './vehicle-policy-violation.repository';
+import { findAll as listGeofences, findByIdForScope as getGeofenceForActor, findVehiclesByGeofenceIdForScope as scopedMemberships } from './geofence.repository';
 
 const integration = process.env.IVTS_PG_INTEGRATION === '1' ? describe : describe.skip;
 const u1 = { userId: 101, role: 'viewer', deviceAccessMode: 'assigned' };
@@ -38,6 +39,10 @@ integration('geofence policies and violation search use live device grants', () 
       detected_at timestamptz, confirmed_at timestamptz, resolved_at timestamptz,
       evidence_json jsonb, dedupe_key text, correlation_id text,
       created_at timestamptz DEFAULT NOW(), updated_at timestamptz DEFAULT NOW())`);
+    await pool.query('CREATE TEMP TABLE geofences(id integer PRIMARY KEY,created_by int,created_at timestamptz DEFAULT NOW(),is_active bool DEFAULT TRUE,geofence_type text,name text,description text)');
+    await pool.query('CREATE TEMP TABLE geofence_vehicles(geofence_id int,vehicle_id text)');
+    await pool.query("INSERT INTO geofences(id,created_by,name) VALUES(31,101,'Shared'),(32,102,'Foreign'),(33,101,'Own empty')");
+    await pool.query("INSERT INTO geofence_vehicles VALUES(31,'V1'),(31,'V2'),(32,'V2')");
     await pool.query("INSERT INTO user_device_access VALUES(101,'D1'),(102,'D2')");
     await pool.query("INSERT INTO vehicles VALUES('V1','D1'),('V2','D2')");
     await pool.query(`INSERT INTO vehicle_policies(id,vehicle_id,policy_type,status,params_json)
@@ -72,9 +77,23 @@ integration('geofence policies and violation search use live device grants', () 
     expect((await listPolicyViolations({}, admin)).total).toBe(2);
   });
 
+  it('restricts geofence list, detail and membership identity to actor grants', async () => {
+    const visible = await listGeofences({}, u1);
+    expect(visible.total).toBe(2);
+    expect(visible.geofences.map((g) => g.id).sort()).toEqual([31, 33]);
+    expect((await listGeofences({}, admin)).total).toBe(3);
+    expect((await listGeofences({ search: 'Foreign' }, u1)).total).toBe(0);
+    expect(await getGeofenceForActor(32, u1)).toBeNull();
+    expect((await getGeofenceForActor(31, u1))?.id).toBe(31);
+    expect((await scopedMemberships(31, u1)).map((x) => x.vehicle_id)).toEqual(['V1']);
+    expect((await scopedMemberships(31, admin)).map((x) => x.vehicle_id).sort()).toEqual(['V1','V2']);
+    expect((await listGeofences({}, u2)).total).toBe(2);
+  });
   it('immediately hides policies and violations after permission revocation', async () => {
     await pool.query("DELETE FROM user_device_access WHERE user_id=101 AND device_id='D1'");
     expect((await listPolicies({}, u1)).total).toBe(0);
+    expect((await scopedMemberships(31, u1))).toEqual([]);
+    expect((await listGeofences({}, u1)).total).toBe(2); // Own empty and owned shared zone remain visible
     expect(await getPolicyByIdForScope(11, u1)).toBeNull();
     expect((await listPolicyViolations({}, u1)).total).toBe(0);
     expect((await listPolicies({}, u2)).total).toBe(1);
