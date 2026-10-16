@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 import path from 'node:path';
 import { mkdirSync } from 'node:fs';
+import { rm } from 'node:fs/promises';
 import { findMany } from '@/infrastructure/database/queries';
 import { createLogger } from '@/infrastructure/logger';
 
@@ -155,6 +156,21 @@ const HEADER_ALIGNMENT: Partial<ExcelJS.Alignment> = {
   horizontal: 'center',
 };
 
+
+/** Bounded streaming export. Reaching this limit fails the job rather than
+ * silently truncating vehicle location or PII datasets. */
+export const EXPORT_MAX_ROWS = 10_000;
+export const EXPORT_PAGE_SIZE = 500;
+
+const selectPage = (query: string): string => {
+  const suffix = ' ORDER BY created_at DESC';
+  if (!query.endsWith(suffix)) {
+    throw new Error('Export query lacks expected deterministic base ordering');
+  }
+  return query.slice(0, -suffix.length)
+    + ' WHERE id < $1 ORDER BY id DESC LIMIT $2';
+};
+
 export const generateExcelFile = async (
   exportType: string,
   jobId: number,
@@ -163,28 +179,21 @@ export const generateExcelFile = async (
   if (!config) {
     throw new Error(`Unsupported export type: ${exportType}`);
   }
-
   mkdirSync(EXPORTS_DIR, { recursive: true });
+  const filePath = path.join(EXPORTS_DIR, `${exportType}_${jobId}_${Date.now()}.xlsx`);
 
-  let rows: Record<string, unknown>[];
-  try {
-    rows = await findMany<Record<string, unknown>>(config.query);
-  } catch (error) {
-    if (!config.fallbackQuery) {
-      throw error;
-    }
-    rows = await findMany<Record<string, unknown>>(config.fallbackQuery);
-  }
-  log.info(`Fetched ${rows.length} rows for export type "${exportType}"`);
-
-  const workbook = new ExcelJS.Workbook();
+  // WorkbookWriter flushes rows immediately, avoiding the memory-intensive
+  // in-memory worksheet used before for an entire fleet PII export.
+  const workbook = new ExcelJS.stream.xlsx.WorkbookWriter({
+    filename: filePath,
+    useStyles: true,
+    useSharedStrings: false,
+  });
   workbook.creator = 'IoT Vehicle Tracking System';
   workbook.created = new Date();
-
   const sheet = workbook.addWorksheet(config.sheetName);
   sheet.columns = config.columns;
 
-  // Style header row
   const headerRow = sheet.getRow(1);
   headerRow.eachCell((cell) => {
     cell.fill = HEADER_FILL;
@@ -192,23 +201,59 @@ export const generateExcelFile = async (
     cell.alignment = HEADER_ALIGNMENT;
   });
   headerRow.height = 24;
+  headerRow.commit();
 
-  // Add data rows with date formatting
-  for (const row of rows) {
-    const values: Record<string, unknown> = {};
-    for (const col of config.columns) {
-      const val = row[col.key];
-      values[col.key] = val instanceof Date ? val.toISOString() : (val ?? '');
+  let lastId: string | number = '9223372036854775807';
+  let emitted = 0;
+  let fallback = false;
+  try {
+    while (emitted <= EXPORT_MAX_ROWS) {
+      const query = selectPage(fallback ? config.fallbackQuery! : config.query);
+      let page: Record<string, unknown>[];
+      try {
+        page = await findMany<Record<string, unknown>>(query, [
+          lastId,
+          Math.min(EXPORT_PAGE_SIZE, EXPORT_MAX_ROWS + 1 - emitted),
+        ]);
+      } catch (error) {
+        if (!config.fallbackQuery || fallback || emitted > 0) throw error;
+        fallback = true;
+        page = await findMany<Record<string, unknown>>(selectPage(config.fallbackQuery), [
+          lastId,
+          Math.min(EXPORT_PAGE_SIZE, EXPORT_MAX_ROWS + 1 - emitted),
+        ]);
+      }
+      if (page.length === 0) break;
+      for (const row of page) {
+        if (emitted >= EXPORT_MAX_ROWS) {
+          throw new Error(`Export exceeds the ${EXPORT_MAX_ROWS} row safety limit; narrow its scope`);
+        }
+        const id = row.id;
+        if ((typeof id !== 'string' && typeof id !== 'number') ||
+            !/^\d+$/.test(String(id)) || Number(id) <= 0) {
+          throw new Error('Export requires a stable positive numeric row ID');
+        }
+        const values: Record<string, unknown> = {};
+        for (const col of config.columns) {
+          const val = row[col.key];
+          values[col.key] = val instanceof Date ? val.toISOString() : (val ?? '');
+        }
+        sheet.addRow(values).commit();
+        lastId = id;
+        emitted += 1;
+      }
+      if (page.length < EXPORT_PAGE_SIZE) break;
     }
-    sheet.addRow(values);
+    sheet.commit();
+    await workbook.commit();
+    log.info(`Completed bounded export type=${exportType} row_count=${emitted}`);
+    return filePath;
+  } catch (error) {
+    // Streaming writer can have left an incomplete file; never expose it via
+    // a "completed" export job, even when an SQL read/serialization fails.
+    await rm(filePath, { force: true }).catch((cleanupError: unknown) => {
+      log.error('Failed to remove partial export file', { jobId, cleanupError });
+    });
+    throw error;
   }
-
-  const timestamp = Date.now();
-  const fileName = `${exportType}_${jobId}_${timestamp}.xlsx`;
-  const filePath = path.join(EXPORTS_DIR, fileName);
-
-  await workbook.xlsx.writeFile(filePath);
-  log.info(`Excel file written: ${filePath}`);
-
-  return filePath;
 };
