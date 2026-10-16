@@ -246,8 +246,8 @@ export const updateVehiclePolicy = async (
   return sanitizeVehiclePolicy(updated);
 };
 
-export const listVehiclePolicyStates = async (vehicleId: string): Promise<VehiclePolicyStatePublic[]> => {
-  const states = await policyStateRepo.listPolicyStatesByVehicle(vehicleId);
+export const listVehiclePolicyStates = async (vehicleId: string, scope: GeofenceAccessScope): Promise<VehiclePolicyStatePublic[]> => {
+  const states = await policyStateRepo.listPolicyStatesByVehicleForScope(vehicleId, scope);
   return states.map(sanitizePolicyState);
 };
 
