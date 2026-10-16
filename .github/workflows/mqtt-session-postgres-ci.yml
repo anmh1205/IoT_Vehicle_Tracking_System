@@ -47,4 +47,4 @@ jobs:
           PGUSER: ivts_test
           PGPASSWORD: ivts_test_password
           PGDATABASE: ivts_test
-        run: npx tsx --test tests/session-last-position-postgres.integration.test.ts
+        run: npx tsx --test tests/session-last-position-postgres.integration.test.ts tests/device-auth-postgres.integration.test.ts
