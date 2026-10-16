@@ -55,3 +55,41 @@ def test_truncated_cursor_no_longer_resets_and_continues_as_success():
     assert "s_ctx.meta.ack_seq_critical > s_ctx.meta.write_seq" in block
     assert "return ESP_ERR_INVALID_SIZE;" in block
     assert "invalid queue metadata snapshot" in block
+
+
+def test_gc_aborts_without_promoting_any_subset_after_corrupt_or_unreadable_input():
+    gc = SD_STORE.split("esp_err_t sd_log_store_gc_if_needed(void) {", 1)[1].split(
+        "esp_err_t sd_log_store_get_stats(", 1
+    )[0]
+    assert "bool invalid_record = false;" in gc
+    assert "if (!sd_log_store_line_complete(line)) {" in gc
+    assert "if (sd_log_store_parse_record(line, &rec) != ESP_OK) {" in gc
+    fail_closed = "if (invalid_record || ferror(in)) {"
+    assert fail_closed in gc
+    assert gc.index(fail_closed) < gc.index("rename(SD_LOG_DATA_PATH, SD_LOG_DATA_BAK_PATH)")
+    discard_block = gc.split(fail_closed, 1)[1].split("if (fflush(out)", 1)[0]
+    assert "remove(SD_LOG_DATA_TMP_PATH);" in discard_block
+    assert "return ESP_ERR_INVALID_SIZE;" in discard_block
+
+
+def test_metadata_append_and_gc_require_flush_success_before_promotion():
+    meta = SD_STORE.split("static esp_err_t sd_log_store_write_meta_snapshot(", 1)[1].split(
+        "static esp_err_t sd_log_store_read_meta(", 1
+    )[0]
+    append = SD_STORE.split("esp_err_t sd_log_store_append(", 1)[1].split(
+        "esp_err_t sd_log_store_get_meta(", 1
+    )[0]
+    gc = SD_STORE.split("esp_err_t sd_log_store_gc_if_needed(void) {", 1)[1].split(
+        "esp_err_t sd_log_store_get_stats(", 1
+    )[0]
+    for block, flush, sync in (
+        (meta, "if (fflush(fp) != 0)", "if (fsync(fileno(fp)) != 0)"),
+        (append, "if (fflush(fp) != 0)", "if (fsync(fileno(fp)) != 0)"),
+        (gc, "if (fflush(out) != 0)", "if (fsync(fileno(out)) != 0)"),
+    ):
+        assert block.index(flush) < block.index(sync)
+        assert "sd_log_store_mark_degraded();" in block[block.index(flush):block.index(sync)]
+    assert "if (fclose(fp) != 0)" in meta
+    assert "if (fclose(fp) != 0)" in append
+    assert "if (fclose(out) != 0)" in gc
+    assert "if (fclose(in) != 0)" in gc
