@@ -1,4 +1,4 @@
-import { createNotFoundError, createConflictError } from '@/shared/utils/errors.util';
+import { createNotFoundError, createConflictError, createForbiddenError } from '@/shared/utils/errors.util';
 import * as vehicleRepo from '@/domain/vehicle/repositories/vehicle.repository';
 import type { VehicleAccessScope } from '@/domain/vehicle/repositories/vehicle.repository';
 import { logger } from '@/infrastructure/logger';
@@ -69,13 +69,20 @@ export const createVehicle = async (input: CreateVehicleInput): Promise<VehicleP
 export const updateVehicle = async (
   id: number,
   input: UpdateVehicleInput,
+  scope: VehicleAccessScope,
 ): Promise<VehiclePublic> => {
-  const existing = await vehicleRepo.findById(id);
+  // No scoped customer ownership model exists yet; prevent assigning an
+  // arbitrary cross-fleet customer or switching device identity.
+  if (!vehicleRepo.vehicleScopeIsGlobal(scope) &&
+      (input.deviceId !== undefined || input.customerId !== undefined)) {
+    throw createForbiddenError('Only administrators can change vehicle ownership associations');
+  }
+  const existing = await vehicleRepo.findByIdForScope(id, scope);
   if (!existing) {
     throw createNotFoundError(`Vehicle with ID ${id} not found`);
   }
 
-  const updated = await vehicleRepo.update(id, input);
+  const updated = await vehicleRepo.update(id, input, scope);
   if (!updated) {
     throw createNotFoundError(`Vehicle with ID ${id} not found`);
   }
@@ -89,7 +96,7 @@ export const updateVehicle = async (
     entityId: String(id),
   });
 
-  const hydrated = await vehicleRepo.findById(id);
+  const hydrated = await vehicleRepo.findByIdForScope(id, scope);
   return sanitizeVehicle(hydrated ?? updated);
 };
 
