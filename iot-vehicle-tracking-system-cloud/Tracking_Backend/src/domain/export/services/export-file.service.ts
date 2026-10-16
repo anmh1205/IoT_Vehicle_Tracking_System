@@ -207,7 +207,7 @@ export const generateExcelFile = async (
   let emitted = 0;
   let fallback = false;
   try {
-    while (true) {
+    while (emitted <= EXPORT_MAX_ROWS) {
       const query = selectPage(fallback ? config.fallbackQuery! : config.query);
       let page: Record<string, unknown>[];
       try {
