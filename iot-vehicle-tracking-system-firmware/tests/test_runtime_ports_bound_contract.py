@@ -21,7 +21,7 @@ def test_bootstrap_binds_registry_before_first_fsm_init():
 
 
 def test_binding_validates_and_init_fails_closed_without_it():
-    bind = CORE.split("esp_err_t state_machine_core_bind_ports(", 1)[1].split("}", 1)[0]
+    bind = CORE.split("esp_err_t state_machine_core_bind_ports(", 1)[1].split("esp_err_t state_machine_core_init(", 1)[0]
     assert "tracker_runtime_ports_validate(ports)" in bind
     assert "if (err != ESP_OK)" in bind
     assert "s_runtime_ports = ports;" in bind
