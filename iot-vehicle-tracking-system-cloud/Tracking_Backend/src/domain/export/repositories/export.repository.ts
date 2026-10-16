@@ -53,3 +53,23 @@ export const hasPrivilegedActiveOwner = async (userId: number): Promise<boolean>
   );
   return owner !== null;
 };
+
+
+/**
+ * A scoped export requires an active manager/operator (or privileged user)
+ * with a CURRENT explicit grant for this exact device. Never rely on a
+ * previously cached deviceAccessMode claim for a PII export.
+ */
+export const hasActiveDeviceGrantOwner = async (userId: number, deviceId: string): Promise<boolean> => {
+  const owner = await findOne<{ id: number }>(
+    `SELECT u.id
+     FROM users u
+     JOIN user_device_access uda ON uda.user_id = u.id
+     WHERE u.id = $1 AND u.status = 'active'
+       AND u.role IN ('root', 'admin', 'manager', 'operator')
+       AND uda.device_id = $2
+     LIMIT 1`,
+    [userId, deviceId],
+  );
+  return owner !== null;
+};
