@@ -6,6 +6,21 @@ import type {
   VehiclePolicyListQuery,
 } from '@/domain/geofence/types/geofence.types';
 
+export interface GeofenceAccessScope {
+  userId: number;
+  role: string;
+  deviceAccessMode: string;
+}
+
+export const geofenceGlobalScope = (scope: GeofenceAccessScope): boolean =>
+  scope.role === 'root' || scope.role === 'admin' || scope.deviceAccessMode === 'all';
+
+export const vehiclePolicyVisibleTo = (scope: GeofenceAccessScope, param: number): string =>
+  geofenceGlobalScope(scope) ? 'TRUE' : `EXISTS (
+    SELECT 1 FROM vehicles v JOIN user_device_access uda ON uda.device_id = v.device_id
+    WHERE v.vehicle_id = p.vehicle_id AND uda.user_id = ${param}
+  )`;
+
 const parseDate = (value?: string): string | null => {
   if (!value) return null;
   const parsed = new Date(value);
@@ -17,6 +32,7 @@ const parseDate = (value?: string): string | null => {
 
 export const listPolicies = async (
   query: VehiclePolicyListQuery,
+  scope: GeofenceAccessScope,
 ): Promise<{ policies: VehiclePolicy[]; total: number }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
@@ -25,35 +41,48 @@ export const listPolicies = async (
   const conditions: string[] = [];
   const params: unknown[] = [];
   let paramIndex = 1;
+  conditions.push(vehiclePolicyVisibleTo(scope, paramIndex));
+  if (!geofenceGlobalScope(scope)) {
+    params.push(scope.userId);
+    paramIndex++;
+  }
 
   if (query.vehicleId) {
-    conditions.push(`vehicle_id = $${paramIndex++}`);
+    conditions.push(`p.vehicle_id = $${paramIndex++}`);
     params.push(query.vehicleId);
   }
   if (query.policyType) {
-    conditions.push(`policy_type = $${paramIndex++}`);
+    conditions.push(`p.policy_type = $${paramIndex++}`);
     params.push(query.policyType);
   }
   if (query.status) {
-    conditions.push(`status = $${paramIndex++}`);
+    conditions.push(`p.status = $${paramIndex++}`);
     params.push(query.status);
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
   const totalResult = await findOne<{ total: string }>(
-    `SELECT COUNT(*)::text as total FROM vehicle_policies ${whereClause}`,
+    `SELECT COUNT(*)::text as total FROM vehicle_policies p ${whereClause}`,
     params,
   );
   const total = Number.parseInt(totalResult?.total ?? '0', 10);
 
   const policies = await findMany<VehiclePolicy>(
-    `SELECT * FROM vehicle_policies ${whereClause} ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+    `SELECT p.* FROM vehicle_policies p ${whereClause} ORDER BY p.created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
 
   return { policies, total };
 };
+
+export const getPolicyByIdForScope = async (
+  id: number, scope: GeofenceAccessScope,
+): Promise<VehiclePolicy | null> =>
+  findOne<VehiclePolicy>(
+    `SELECT p.* FROM vehicle_policies p WHERE p.id = $1 AND ${vehiclePolicyVisibleTo(scope, 2)}`,
+    geofenceGlobalScope(scope) ? [id] : [id, scope.userId],
+  );
 
 export const getPolicyById = async (id: number): Promise<VehiclePolicy | null> =>
   findOne<VehiclePolicy>('SELECT * FROM vehicle_policies WHERE id = $1', [id]);
