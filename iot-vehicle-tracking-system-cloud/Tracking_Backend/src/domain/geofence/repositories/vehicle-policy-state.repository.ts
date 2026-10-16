@@ -1,5 +1,6 @@
 import { findMany, findOne } from '@/infrastructure/database/queries';
 import type { VehiclePolicyState } from '@/domain/geofence/types/geofence.types';
+import { geofenceGlobalScope, type GeofenceAccessScope } from './vehicle-policy.repository';
 
 export type PolicyStateWithType = VehiclePolicyState & {
   policy_type: 'ADMIN_BOUNDARY' | 'RADIUS' | 'DISTANCE_QUOTA';
@@ -70,6 +71,22 @@ export const upsertPolicyState = async (params: {
     ],
   );
 
+export const listPolicyStatesByVehicleForScope = async (
+  vehicleId: string, scope: GeofenceAccessScope,
+): Promise<PolicyStateWithType[]> =>
+  findMany<PolicyStateWithType>(
+    `SELECT s.*, p.policy_type
+     FROM vehicle_policy_state s
+     JOIN vehicle_policies p ON p.id = s.policy_id AND p.vehicle_id = s.vehicle_id
+     WHERE s.vehicle_id = $1 AND p.status = 'active'
+       AND ($2::boolean OR EXISTS (
+         SELECT 1 FROM vehicles v
+         JOIN user_device_access uda ON uda.device_id = v.device_id
+         WHERE v.vehicle_id = s.vehicle_id AND uda.user_id = $3
+       ))
+     ORDER BY s.updated_at DESC`,
+    [vehicleId, geofenceGlobalScope(scope), scope.userId],
+  );
 export const listPolicyStatesByVehicle = async (
   vehicleId: string,
 ): Promise<PolicyStateWithType[]> =>
