@@ -1,5 +1,6 @@
 import { pool } from '@/infrastructure/database/pool';
 import { findMany, findOne, insertOne } from '@/infrastructure/database/queries';
+import { geofenceGlobalScope, type GeofenceAccessScope } from './vehicle-policy.repository';
 import type {
   VehiclePolicyViolation,
   VehiclePolicyViolationQuery,
@@ -7,6 +8,7 @@ import type {
 
 export const listPolicyViolations = async (
   query: VehiclePolicyViolationQuery,
+  scope: GeofenceAccessScope,
 ): Promise<{ violations: VehiclePolicyViolation[]; total: number }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
@@ -15,6 +17,14 @@ export const listPolicyViolations = async (
   const conditions: string[] = ['policy_id IS NOT NULL'];
   const params: unknown[] = [];
   let paramIndex = 1;
+  if (!geofenceGlobalScope(scope)) {
+    conditions.push(`EXISTS (
+      SELECT 1 FROM vehicles permitted
+      JOIN user_device_access uda ON uda.device_id = permitted.device_id
+      WHERE permitted.vehicle_id = violations.vehicle_id AND uda.user_id = ${paramIndex++}
+    )`);
+    params.push(scope.userId);
+  }
 
   if (query.vehicleId) {
     conditions.push(`vehicle_id = $${paramIndex++}`);
