@@ -4,6 +4,7 @@ import {
   createValidationError,
 } from '@/shared/utils/errors.util';
 import * as tripRepo from '@/domain/trip/repositories/trip.repository';
+import type { TripReadScope } from '@/domain/trip/repositories/trip.repository';
 import { getWaypoints, computeRouteSummary } from '@/domain/trip/services/trip-waypoints.service';
 import { logger } from '@/infrastructure/logger';
 import type {
@@ -40,8 +41,8 @@ const sanitizeTrip = (t: Trip): TripPublic => ({
   updatedAt: t.updated_at.toISOString(),
 });
 
-export const getTripById = async (id: number): Promise<TripPublic> => {
-  const trip = await tripRepo.findById(id);
+export const getTripById = async (id: number, scope: TripReadScope): Promise<TripPublic> => {
+  const trip = await tripRepo.findByIdForScope(id, scope);
   if (!trip) {
     throw createNotFoundError(`Trip with ID ${id} not found`);
   }

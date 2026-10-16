@@ -10,6 +10,12 @@ import {
 } from '@/api/validators/maintenance.validator';
 import * as maintenanceCrudService from '@/domain/maintenance/services/maintenance-crud.service';
 import * as maintenanceListService from '@/domain/maintenance/services/maintenance-list.service';
+import type { MaintenanceReadScope } from '@/domain/maintenance/repositories/maintenance.repository';
+const actorScope = (req: AuthenticatedRequest): MaintenanceReadScope => ({
+  userId: req.user!.id, role: req.user!.role,
+  deviceAccessMode: req.user!.deviceAccessMode,
+});
+
 
 export const listMaintenance = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const parsed = maintenanceListQuerySchema.safeParse(req.query);
@@ -17,7 +23,7 @@ export const listMaintenance = asyncHandler(async (req: AuthenticatedRequest, re
     throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
   }
 
-  const result = await maintenanceListService.listMaintenance(parsed.data);
+  const result = await maintenanceListService.listMaintenance(parsed.data, actorScope(req));
   sendOk(res, result);
 });
 
@@ -27,7 +33,7 @@ export const getMaintenance = asyncHandler(async (req: AuthenticatedRequest, res
     throw createValidationError('Invalid maintenance ID');
   }
 
-  const record = await maintenanceCrudService.getMaintenanceById(id);
+  const record = await maintenanceCrudService.getMaintenanceById(id, actorScope(req));
   sendOk(res, record);
 });
 

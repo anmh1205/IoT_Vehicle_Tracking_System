@@ -1,5 +1,6 @@
 import { createNotFoundError } from '@/shared/utils/errors.util';
 import * as maintenanceRepo from '@/domain/maintenance/repositories/maintenance.repository';
+import type { MaintenanceReadScope } from '@/domain/maintenance/repositories/maintenance.repository';
 import { logger } from '@/infrastructure/logger';
 import { isUndefinedTableError } from '@/shared/utils/postgres-error.util';
 import type {
@@ -29,10 +30,10 @@ const sanitizeMaintenance = (m: Maintenance): MaintenancePublic => ({
   updatedAt: m.updated_at.toISOString(),
 });
 
-export const getMaintenanceById = async (id: number): Promise<MaintenancePublic> => {
+export const getMaintenanceById = async (id: number, scope: MaintenanceReadScope): Promise<MaintenancePublic> => {
   let record: Maintenance | null;
   try {
-    record = await maintenanceRepo.findById(id);
+    record = await maintenanceRepo.findByIdForScope(id, scope);
   } catch (error) {
     if (isUndefinedTableError(error)) {
       throw createNotFoundError('Maintenance module is not initialized');
