@@ -1,4 +1,5 @@
 import * as tripRepo from '@/domain/trip/repositories/trip.repository';
+import type { TripReadScope } from '@/domain/trip/repositories/trip.repository';
 import type { Trip, TripListQuery, TripPublic } from '@/domain/trip/types/trip.types';
 
 const sanitizeTrip = (t: Trip): TripPublic => ({
@@ -30,6 +31,7 @@ const sanitizeTrip = (t: Trip): TripPublic => ({
 
 export const listTrips = async (
   query: TripListQuery,
+  scope: TripReadScope,
 ): Promise<{
   items: TripPublic[];
   pagination: { page: number; limit: number; total: number; totalPages: number };
@@ -37,7 +39,7 @@ export const listTrips = async (
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 
-  const result = await tripRepo.findAll(query);
+  const result = await tripRepo.findAll(query, scope);
 
   return {
     items: result.trips.map(sanitizeTrip),
