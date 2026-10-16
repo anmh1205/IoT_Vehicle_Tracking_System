@@ -7,6 +7,7 @@ import {
   executeQuery,
 } from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
+import { geofenceGlobalScope, type GeofenceAccessScope } from './vehicle-policy.repository';
 import type {
   Geofence,
   GeofenceListQuery,
@@ -153,18 +154,33 @@ export const update = async (id: number, input: UpdateGeofenceInput): Promise<Ge
 export const remove = async (id: number): Promise<boolean> =>
   deleteOne('DELETE FROM geofences WHERE id = $1', [id]);
 
-export const assignVehicle = async (geofenceId: number, vehicleId: string): Promise<number> =>
+export const assignVehicle = async (
+  geofenceId: number, vehicleId: string, scope: GeofenceAccessScope,
+): Promise<number> =>
   executeQuery(
-    `INSERT INTO geofence_vehicles (geofence_id, vehicle_id, created_at) VALUES ($1, $2, NOW()) ON CONFLICT DO NOTHING`,
-    [geofenceId, vehicleId],
+    `INSERT INTO geofence_vehicles (geofence_id, vehicle_id, assigned_at)
+     SELECT g.id, v.vehicle_id, NOW()
+     FROM geofences g JOIN vehicles v ON v.vehicle_id = $2
+     WHERE g.id = $1 AND ($3::boolean OR EXISTS (
+       SELECT 1 FROM user_device_access uda
+       WHERE uda.user_id = $4 AND uda.device_id = v.device_id
+     )) ON CONFLICT (geofence_id, vehicle_id)
+     DO UPDATE SET assigned_at = geofence_vehicles.assigned_at`,
+    [geofenceId, vehicleId, geofenceGlobalScope(scope), scope.userId],
   );
 
-export const unassignVehicle = async (geofenceId: number, vehicleId: string): Promise<boolean> =>
-  deleteOne('DELETE FROM geofence_vehicles WHERE geofence_id = $1 AND vehicle_id = $2', [
-    geofenceId,
-    vehicleId,
-  ]);
-
+export const unassignVehicle = async (
+  geofenceId: number, vehicleId: string, scope: GeofenceAccessScope,
+): Promise<boolean> =>
+  deleteOne(
+    `DELETE FROM geofence_vehicles gv
+     WHERE gv.geofence_id = $1 AND gv.vehicle_id = $2
+       AND ($3::boolean OR EXISTS (
+         SELECT 1 FROM vehicles v JOIN user_device_access uda ON uda.device_id = v.device_id
+         WHERE v.vehicle_id = gv.vehicle_id AND uda.user_id = $4
+       ))`,
+    [geofenceId, vehicleId, geofenceGlobalScope(scope), scope.userId],
+  );
 export const findVehiclesByGeofenceId = async (
   geofenceId: number,
 ): Promise<{ vehicle_id: string }[]> =>
