@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { requireAuth, requireRole } from '@/middleware/auth.middleware';
 import * as geofenceController from '@/api/controllers/geofence.controller';
-import { requireAssignedVehicleRoute } from '@/middleware/asset-grant.middleware';
+import { requireAssignedVehicleRoute, requireAssignedAssetWrite } from '@/middleware/asset-grant.middleware';
 
 const router = Router();
 
@@ -29,7 +29,7 @@ router.get('/:id', geofenceController.getGeofence);
 router.post('/', requireAssetManager, geofenceController.createGeofence);
 router.put('/:id', requireAssetManager, geofenceController.updateGeofence);
 router.delete('/:id', requireAssetAdmin, geofenceController.deleteGeofence);
-router.post('/:id/vehicles', requireAssetManager, geofenceController.assignVehicle);
-router.delete('/:id/vehicles/:vehicleId', requireAssetManager, geofenceController.unassignVehicle);
+router.post('/:id/vehicles', requireAssetManager, requireAssignedAssetWrite({ requireBodyReference: true }), geofenceController.assignVehicle);
+router.delete('/:id/vehicles/:vehicleId', requireAssetManager, requireAssignedVehicleRoute, geofenceController.unassignVehicle);
 
 export default router;

@@ -66,6 +66,20 @@ describe('asset mutation barrier for assigned roles', () => {
     expect(hasAssetGrant).not.toHaveBeenCalled();
   });
 
+  it('checks geofence membership POST body vehicleId against current asset grant', async () => {
+    vi.mocked(hasAssetGrant).mockResolvedValue(false);
+    const denied = await runGuard(
+      { requireBodyReference: true }, 'manager', 'assigned', undefined, { vehicleId: 'V2' },
+    );
+    expect(hasAssetGrant).toHaveBeenCalledWith(101, 'vehicleId', 'V2');
+    expect(denied.mock.calls[0]?.[0]).toMatchObject({ status: 403 });
+
+    vi.mocked(hasAssetGrant).mockResolvedValue(true);
+    const permitted = await runGuard(
+      { requireBodyReference: true }, 'manager', 'assigned', undefined, { vehicleId: 'V1' },
+    );
+    expect(permitted).toHaveBeenCalledWith();
+  });
   it('permits root/admin and explicit fleet-wide access without grant lookups', async () => {
     for (const role of ['root', 'admin'] as const) {
       expect(await runGuard({ existing:'tripRow' }, role, 'assigned', '50')).toHaveBeenCalledWith();
