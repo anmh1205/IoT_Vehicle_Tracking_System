@@ -18,13 +18,14 @@ export const listPolicyViolations = async (
   const params: unknown[] = [];
   let paramIndex = 1;
   if (!geofenceGlobalScope(scope)) {
-    const grantBind = '
+    const grantBind = String.fromCharCode(36) + paramIndex++;
+    conditions.push(`EXISTS (
+      SELECT 1 FROM vehicles permitted
       JOIN user_device_access uda ON uda.device_id = permitted.device_id
       WHERE permitted.vehicle_id = violations.vehicle_id AND uda.user_id = ${grantBind}
     )`);
     params.push(scope.userId);
   }
-
   if (query.vehicleId) {
     conditions.push(`vehicle_id = $${paramIndex++}`);
     params.push(query.vehicleId);
