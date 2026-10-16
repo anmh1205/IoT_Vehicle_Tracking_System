@@ -1,5 +1,6 @@
 import type { QueryResultRow } from 'pg';
-import { findOne, insertOne } from '@/infrastructure/database/queries';
+import { findOne } from '@/infrastructure/database/queries';
+import { geofenceGlobalScope, type GeofenceAccessScope } from './vehicle-policy.repository';
 
 export interface VehicleAllowedZoneRow extends QueryResultRow {
   id: number;
@@ -45,22 +46,27 @@ interface UpsertVehicleAllowedZoneParams {
   cooldownSec: number;
   sourceWarning: unknown | null;
   actorId?: number;
+  scope: GeofenceAccessScope;
 }
 
 export const getActiveZoneByVehicleId = async (
-  vehicleId: string,
+  vehicleId: string, scope: GeofenceAccessScope,
 ): Promise<VehicleAllowedZoneRow | null> =>
   findOne<VehicleAllowedZoneRow>(
-    `SELECT *
-     FROM vehicle_allowed_zones
-     WHERE vehicle_id = $1 AND status = 'active'`,
-    [vehicleId],
+    `SELECT z.*
+     FROM vehicle_allowed_zones z
+     WHERE z.vehicle_id = $1 AND z.status = 'active'
+       AND ($2::boolean OR EXISTS (
+         SELECT 1 FROM vehicles v JOIN user_device_access uda ON uda.device_id = v.device_id
+         WHERE v.vehicle_id = z.vehicle_id AND uda.user_id = $3
+       ))`,
+    [vehicleId, geofenceGlobalScope(scope), scope.userId],
   );
 
 export const upsertActiveZone = async (
   params: UpsertVehicleAllowedZoneParams,
-): Promise<VehicleAllowedZoneRow> =>
-  insertOne<VehicleAllowedZoneRow>(
+): Promise<VehicleAllowedZoneRow | null> =>
+  findOne<VehicleAllowedZoneRow>(
     `INSERT INTO vehicle_allowed_zones (
       vehicle_id,
       zone_type,
@@ -82,8 +88,11 @@ export const upsertActiveZone = async (
       updated_by,
       created_at,
       updated_at
-    ) VALUES (
+    ) SELECT
       $1, 'circle', $2, $3, $4, $5, $6, 'active', 'unknown', NULL, NULL, NULL, NULL, $7, $8, $9::jsonb, $10, $10, NOW(), NOW()
+    WHERE $11::boolean OR EXISTS (
+      SELECT 1 FROM vehicles v JOIN user_device_access uda ON uda.device_id = v.device_id
+      WHERE v.vehicle_id = $1 AND uda.user_id = $12
     )
     ON CONFLICT (vehicle_id)
     DO UPDATE SET
@@ -104,6 +113,10 @@ export const upsertActiveZone = async (
       source_warning_json = EXCLUDED.source_warning_json,
       updated_by = EXCLUDED.updated_by,
       updated_at = NOW()
+    WHERE $11::boolean OR EXISTS (
+      SELECT 1 FROM vehicles v JOIN user_device_access uda ON uda.device_id = v.device_id
+      WHERE v.vehicle_id = vehicle_allowed_zones.vehicle_id AND uda.user_id = $12
+    )
     RETURNING *`,
     [
       params.vehicleId,
@@ -116,23 +129,30 @@ export const upsertActiveZone = async (
       params.cooldownSec,
       params.sourceWarning ? JSON.stringify(params.sourceWarning) : null,
       params.actorId ?? null,
+      geofenceGlobalScope(params.scope),
+      params.scope.userId,
     ],
   );
 
 export const disableActiveZone = async (
   vehicleId: string,
+  scope: GeofenceAccessScope,
   actorId?: number,
 ): Promise<VehicleAllowedZoneRow | null> =>
   findOne<VehicleAllowedZoneRow>(
     `UPDATE vehicle_allowed_zones
      SET status = 'disabled', updated_by = $2, updated_at = NOW()
      WHERE vehicle_id = $1 AND status = 'active'
+       AND ($3::boolean OR EXISTS (
+         SELECT 1 FROM vehicles v JOIN user_device_access uda ON uda.device_id = v.device_id
+         WHERE v.vehicle_id = vehicle_allowed_zones.vehicle_id AND uda.user_id = $4
+       ))
      RETURNING *`,
-    [vehicleId, actorId ?? null],
+    [vehicleId, actorId ?? null, geofenceGlobalScope(scope), scope.userId],
   );
 
 export const getVehiclePositionSnapshot = async (
-  vehicleId: string,
+  vehicleId: string, scope: GeofenceAccessScope,
 ): Promise<VehiclePositionSnapshotRow | null> =>
   findOne<VehiclePositionSnapshotRow>(
     `SELECT
@@ -144,6 +164,10 @@ export const getVehiclePositionSnapshot = async (
        d.last_seen_at
      FROM vehicles v
      LEFT JOIN devices d ON d.device_id = v.device_id
-     WHERE v.vehicle_id = $1`,
-    [vehicleId],
+     WHERE v.vehicle_id = $1
+       AND ($2::boolean OR EXISTS (
+         SELECT 1 FROM user_device_access uda
+         WHERE uda.user_id = $3 AND uda.device_id = v.device_id
+       ))`,
+    [vehicleId, geofenceGlobalScope(scope), scope.userId],
   );
