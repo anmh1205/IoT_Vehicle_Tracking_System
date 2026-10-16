@@ -34,3 +34,22 @@ export const updateStatus = async (
     id,
   ]);
 };
+
+/** Crash-recoverable jobs remain in PostgreSQL, never in an in-memory queue. */
+export const findRecoverable = async (limit = 25): Promise<ExportJob[]> =>
+  findMany<ExportJob>(
+    `SELECT * FROM export_jobs
+     WHERE status IN ('pending', 'processing')
+     ORDER BY created_at ASC, id ASC LIMIT $1`,
+    [Math.min(Math.max(1, limit), 100)],
+  );
+
+/** A user can lose their global-export authority while a job is queued. */
+export const hasPrivilegedActiveOwner = async (userId: number): Promise<boolean> => {
+  const owner = await findOne<{ id: number }>(
+    `SELECT id FROM users WHERE id = $1 AND status = 'active'
+      AND role IN ('root', 'admin') LIMIT 1`,
+    [userId],
+  );
+  return owner !== null;
+};

@@ -19,6 +19,7 @@ import routes from '@/api/routes';
 import healthRoutes from '@/api/routes/health.routes';
 import metricsRoutes from '@/api/routes/metrics.routes';
 import { logger } from '@/infrastructure/logger';
+import { initExportRecoveryWorker, closeExportRecoveryWorker } from '@/domain/export/services/export-job.service';
 import { closePool } from '@/infrastructure/database/pool';
 import {
   initDeviceCommandDispatcher,
@@ -122,6 +123,9 @@ initDeviceCommandDispatcher();
 // Repair auto-trip drift from durable device-session state on startup and periodically.
 initAutoTripReconciler();
 
+// Resume crash-interrupted, privilege-checked export jobs from durable SQL.
+initExportRecoveryWorker();
+
 // Start server
 const server = app.listen(appConfig.port, () => {
   logger.info(`Server started on port ${appConfig.port} (${appConfig.nodeEnv})`);
@@ -143,6 +147,7 @@ const gracefulShutdown = (signal: string) => {
     await closeDeviceCommandDispatcher();
     logger.info('MQTT device command dispatcher closed');
     await closeAutoTripReconciler();
+    await closeExportRecoveryWorker();
     logger.info('Auto-trip reconciler closed');
     await closeSocketServer();
     logger.info('WebSocket server closed');

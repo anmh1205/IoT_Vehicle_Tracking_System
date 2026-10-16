@@ -77,3 +77,49 @@ export const getExportStatus = async (id: number, userId: number): Promise<Expor
   if (job.user_id !== userId) throw createForbiddenError('Access denied to this export job');
   return sanitizeExportJob(job);
 };
+
+/** Recover work after unclean process death without overloading the database.
+ * The per-job advisory lock in processExport coordinates multiple backends. */
+const EXPORT_RECOVERY_INTERVAL_MS = 60_000;
+let recoveryTimer: ReturnType<typeof setInterval> | null = null;
+let recoveryRun: Promise<void> | null = null;
+
+export const recoverExportJobs = (): Promise<void> => {
+  if (recoveryRun) return recoveryRun;
+  recoveryRun = (async () => {
+    let jobs: ExportJob[];
+    try {
+      jobs = await exportRepo.findRecoverable(25);
+    } catch (error) {
+      if (isUndefinedTableError(error)) return;
+      throw error;
+    }
+    for (const job of jobs) {
+      try {
+        await processExport(job);
+      } catch (error) {
+        log.error('Recoverable export job failed to execute', { jobId: job.id, error });
+      }
+    }
+  })().finally(() => { recoveryRun = null; });
+  return recoveryRun;
+};
+
+export const initExportRecoveryWorker = (): void => {
+  if (recoveryTimer) return;
+  void recoverExportJobs().catch((error: unknown) => {
+    log.error('Initial export recovery scan failed', { error });
+  });
+  recoveryTimer = setInterval(() => {
+    void recoverExportJobs().catch((error: unknown) => {
+      log.error('Export recovery scan failed', { error });
+    });
+  }, EXPORT_RECOVERY_INTERVAL_MS);
+  recoveryTimer.unref();
+};
+
+export const closeExportRecoveryWorker = async (): Promise<void> => {
+  if (recoveryTimer) clearInterval(recoveryTimer);
+  recoveryTimer = null;
+  if (recoveryRun) await recoveryRun;
+};
