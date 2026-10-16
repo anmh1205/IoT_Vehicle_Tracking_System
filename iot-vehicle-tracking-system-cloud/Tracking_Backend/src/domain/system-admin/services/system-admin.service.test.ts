@@ -30,6 +30,10 @@ describe('system-admin table browser', () => {
     vi.resetAllMocks();
   });
 
+  it('rejects unknown table names before querying SQL', async () => {
+    await expect(queryTable('devices; DROP TABLE users', {})).rejects.toMatchObject({ status: 400 });
+    expect(pool.query).not.toHaveBeenCalled();
+  });
   it('hides sensitive columns from metadata', async () => {
     vi.mocked(pool.query).mockResolvedValueOnce({ rows: tableColumns } as any);
 
