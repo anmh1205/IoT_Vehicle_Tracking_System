@@ -68,7 +68,7 @@ export const updateGeofence = asyncHandler(async (req: AuthenticatedRequest, res
     throw createValidationError('Invalid geofence data', parsed.error.flatten().fieldErrors);
   }
 
-  const geofence = await geofenceCrudService.updateGeofence(id, parsed.data);
+  const geofence = await geofenceCrudService.updateGeofence(id, parsed.data, policyScope(req));
   sendOk(res, geofence);
 });
 
