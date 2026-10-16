@@ -81,7 +81,11 @@ static int host_rename(const char *from, const char *to) {
                     strcmp(to, SD_LOG_DATA_PATH) == 0);
     bool quarantine = (strcmp(to, SD_LOG_META_CORRUPT_PATH) == 0 ||
                        strcmp(to, SD_LOG_DATA_CORRUPT_PATH) == 0);
-    if ((promote && fail_primary_promotion) || (quarantine && fail_quarantine_move)) return -1;
+    bool rollback_from_quarantine =
+        strcmp(from, SD_LOG_META_CORRUPT_PATH) == 0 ||
+        strcmp(from, SD_LOG_DATA_CORRUPT_PATH) == 0;
+    if ((promote && fail_primary_promotion && !rollback_from_quarantine) ||
+        (quarantine && fail_quarantine_move)) return -1;
     return rename(from, to);
 }
 #define rename host_rename
