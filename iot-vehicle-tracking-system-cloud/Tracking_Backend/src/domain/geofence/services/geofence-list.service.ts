@@ -1,4 +1,5 @@
 import * as geofenceRepo from '@/domain/geofence/repositories/geofence.repository';
+import type { GeofenceAccessScope } from '@/domain/geofence/repositories/vehicle-policy.repository';
 import type {
   Geofence,
   GeofenceListQuery,
@@ -28,6 +29,7 @@ const sanitizeGeofence = (g: Geofence): GeofencePublic => ({
 
 export const listGeofences = async (
   query: GeofenceListQuery,
+  scope: GeofenceAccessScope,
 ): Promise<{
   items: GeofencePublic[];
   pagination: { page: number; limit: number; total: number; totalPages: number };
@@ -35,10 +37,10 @@ export const listGeofences = async (
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 
-  const result = await geofenceRepo.findAll(query);
+  const result = await geofenceRepo.findAll(query, scope);
   const items = await Promise.all(
     result.geofences.map(async (geofence) => {
-      const vehicleIds = await geofenceRepo.findVehiclesByGeofenceId(geofence.id);
+      const vehicleIds = await geofenceRepo.findVehiclesByGeofenceIdForScope(geofence.id, scope);
       return {
         ...sanitizeGeofence(geofence),
         vehicleIds: vehicleIds.map((row) => row.vehicle_id),
