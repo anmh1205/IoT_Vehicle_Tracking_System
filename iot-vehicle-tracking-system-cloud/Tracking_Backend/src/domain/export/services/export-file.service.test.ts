@@ -61,6 +61,32 @@ describe('bounded streaming full-fleet exports', () => {
     expect(vi.mocked(findMany).mock.calls.at(-1)?.[1]?.[1]).toBe(1);
   });
 
+  it('binds a selected device AND its current SQL grant into each streamed page', async () => {
+    vi.mocked(findMany).mockResolvedValueOnce([
+      { id: 91, device_id: 'D1', device_name: 'Assigned tracker' },
+    ] as never);
+    const file = await generateExcelFile('devices', 921, { deviceId: 'D1', userId: 2 });
+    generated.push(file);
+    const [query, params] = vi.mocked(findMany).mock.calls[0];
+    expect(query).toContain('device_id = $3');
+    expect(query).toContain('JOIN users u ON u.id = uda.user_id');
+    expect(query).toContain('uda.user_id = $4');
+    expect(query).toContain("u.status = 'active'");
+    expect(params).toEqual(['9223372036854775807', EXPORT_PAGE_SIZE, 'D1', 2]);
+
+    const book = new ExcelJS.Workbook();
+    await book.xlsx.readFile(file);
+    expect(book.getWorksheet('Devices')!.getRow(2).getCell(2).value).toBe('D1');
+  });
+
+  it('refuses unknown or non-device scopes before touching data', async () => {
+    await expect(generateExcelFile('vehicles', 922, { deviceId: 'D1', userId: 2 }))
+      .rejects.toThrow('Invalid scoped export');
+    await expect(generateExcelFile('devices', 923, { deviceId: '../x', userId: 2 }))
+      .rejects.toThrow('Invalid scoped export');
+    expect(findMany).not.toHaveBeenCalled();
+  });
+
   it('refuses unsupported table names before creating a workbook', async () => {
     await expect(generateExcelFile('secrets', 918)).rejects.toThrow('Unsupported export type');
     expect(findMany).not.toHaveBeenCalled();
