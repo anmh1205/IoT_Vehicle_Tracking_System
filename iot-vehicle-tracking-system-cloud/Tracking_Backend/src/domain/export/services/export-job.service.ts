@@ -44,6 +44,13 @@ export const createExport = async (
     throw createValidationError('Unsupported export type: ' + input.exportType);
   }
 
+  // All supported export SQL currently selects the full fleet. Reject any
+  // requested device/date/format scope instead of silently exporting more
+  // personal or location data than the operator explicitly selected.
+  if (input.filters != null) {
+    throw createValidationError('Filtered exports are not supported. Request an unfiltered Excel export explicitly.');
+  }
+
   let job: ExportJob;
   try {
     job = await exportRepo.create(userId, input);
