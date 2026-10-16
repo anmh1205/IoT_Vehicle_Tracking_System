@@ -62,9 +62,6 @@ const ExportForm = ({
 }) => {
   const [form, setForm] = useState({
     exportType: 'devices',
-    format: 'csv',
-    from: '',
-    to: '',
   });
   const createMutation = useCreateExport({
     onSuccess: () => {
@@ -92,45 +89,14 @@ const ExportForm = ({
                 <SelectItem value="alerts">Cảnh báo</SelectItem>
                 <SelectItem value="trips">Chuyến đi</SelectItem>
                 <SelectItem value="maintenance">Bảo trì</SelectItem>
-                <SelectItem value="statistics">Thống kê</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="export-format">Định dạng tệp</Label>
-            <Select value={form.format} onValueChange={(value) => setForm((state) => ({ ...state, format: value }))}>
-              <SelectTrigger id="export-format">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="csv">CSV</SelectItem>
-                <SelectItem value="excel">Excel</SelectItem>
-                <SelectItem value="pdf">PDF</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="export-form-from-date">Từ ngày</Label>
-              <Input
-                id="export-form-from-date"
-                type="date"
-                value={form.from}
-                onChange={(event) => setForm((state) => ({ ...state, from: event.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="export-form-to-date">Đến ngày</Label>
-              <Input
-                id="export-form-to-date"
-                type="date"
-                value={form.to}
-                onChange={(event) => setForm((state) => ({ ...state, to: event.target.value }))}
-              />
-            </div>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Hiện chỉ hỗ trợ tệp Excel (.xlsx) chứa dữ liệu toàn đội xe.
+            Chưa hỗ trợ lọc theo thiết bị hoặc thời gian.
+          </p>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -138,16 +104,7 @@ const ExportForm = ({
           </Button>
           <Button
             disabled={createMutation.isPending}
-            onClick={() =>
-              createMutation.mutate({
-                exportType: form.exportType,
-                filters: {
-                  format: form.format,
-                  from: form.from || undefined,
-                  to: form.to || undefined,
-                },
-              })
-            }
+            onClick={() => createMutation.mutate({ exportType: form.exportType })}
           >
             Tạo yêu cầu
           </Button>
