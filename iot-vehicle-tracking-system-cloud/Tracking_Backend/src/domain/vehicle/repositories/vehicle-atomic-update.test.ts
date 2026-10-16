@@ -8,7 +8,10 @@ vi.mock('@/infrastructure/database/queries', () => ({
 vi.mock('@/infrastructure/database/pool', () => ({ pool: { query: vi.fn() } }));
 
 import { updateOne, findOne } from '@/infrastructure/database/queries';
+vi.mock('@/infrastructure/logger', () => ({ logger: { info: vi.fn() } }));
+vi.mock('@/domain/audit/services/audit-log.service', () => ({ record: vi.fn() }));
 import { update } from './vehicle.repository';
+import { updateVehicle } from '@/domain/vehicle/services/vehicle-crud.service';
 
 const operator: VehicleAccessScope = {
   userId: 42, role: 'operator', deviceAccessMode: 'assigned',
@@ -42,5 +45,14 @@ describe('vehicle write grant is checked in the mutation statement', () => {
     const [sql, params] = vi.mocked(findOne).mock.calls.at(-1)!;
     expect(sql).toContain('user_device_access uda');
     expect(params).toEqual([19, 42]);
+  });
+  it('denies manager/operator device and customer reassignment even with all-device mode', async () => {
+    vi.mocked(updateOne).mockClear();
+    const globalOperator = { ...operator, deviceAccessMode: 'all' };
+    await expect(updateVehicle(19, { deviceId: 'D2' }, globalOperator))
+      .rejects.toMatchObject({ status: 403 });
+    await expect(updateVehicle(19, { customerId: 800 }, globalOperator))
+      .rejects.toMatchObject({ status: 403 });
+    expect(updateOne).not.toHaveBeenCalled();
   });
 });
