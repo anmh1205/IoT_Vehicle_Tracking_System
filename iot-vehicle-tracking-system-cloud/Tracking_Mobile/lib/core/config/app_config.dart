@@ -25,22 +25,30 @@ class AppConfig {
     defaultValue: false,
   );
 
-  static bool get _isLocalWebApp =>
-      webAppUrl.contains('localhost') || webAppUrl.contains('127.0.0.1');
-  static bool get _isLocalApi =>
-      apiBaseUrl.contains('localhost') || apiBaseUrl.contains('127.0.0.1');
-  static bool get _isLocalWs => wsUrl.contains('localhost') || wsUrl.contains('127.0.0.1');
-
   static bool get hasSecureProductionConfig {
     if (!isProduction) return true;
-
-    final secureWeb = webAppUrl.startsWith('https://');
-    final secureApi = apiBaseUrl.startsWith('https://');
-    final secureWs = wsUrl.startsWith('wss://');
-
-    return (secureWeb || _isLocalWebApp) && (secureApi || _isLocalApi) && (secureWs || _isLocalWs);
+    return isApprovedProductionUrl(webAppUrl, secureScheme: 'https') &&
+        isApprovedProductionUrl(apiBaseUrl, secureScheme: 'https') &&
+        isApprovedProductionUrl(wsUrl, secureScheme: 'wss');
   }
-
   /// User-Agent suffix injected into WebView so the frontend can detect native app.
   static const String userAgentSuffix = 'TrackingMobileApp/1.0';
+}
+
+/// Permit secure transport to any valid host, or cleartext only to exact
+/// loopback endpoints used for local development/diagnostics.
+/// URL prefixes or a substring such as '?next=localhost' are never evidence
+/// that a remote destination is trustworthy.
+bool isApprovedProductionUrl(String rawUrl, {required String secureScheme}) {
+  final uri = Uri.tryParse(rawUrl);
+  if (uri == null || !uri.hasAuthority || uri.host.isEmpty || uri.userInfo.isNotEmpty) {
+    return false;
+  }
+  if (uri.scheme == secureScheme) return true;
+  final insecureScheme = secureScheme == 'wss' ? 'ws' : 'http';
+  if (uri.scheme != insecureScheme) return false;
+  return uri.host == 'localhost' ||
+      uri.host == '127.0.0.1' ||
+      uri.host == '::1' ||
+      uri.host == '[::1]';
 }
