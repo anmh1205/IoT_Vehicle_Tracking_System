@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -57,22 +56,14 @@ class JSBridge {
 
   /// Inject the bridge script into the current page.
   static Future<void> inject(InAppWebViewController controller) async {
-    final configured = Uri.tryParse(AppConfig.webAppUrl);
-    if (configured == null || !isTrustedWebOrigin(configured.toString(), AppConfig.webAppUrl)) {
+    // Use the shared, regression-tested origin policy for the injected script.
+    // The script checks its own top-level origin to close navigation races.
+    final source = trustedBridgeInjectionSource(AppConfig.webAppUrl, _bridgeScript);
+    if (source == null) {
       Log.warn('Skipping JS bridge: invalid configured origin');
       return;
     }
-
-    // Re-check in the exact document executing this JavaScript, not just the
-    // URL read asynchronously by onLoadStop. A redirect can win that race.
-    // Also guard against unexpected subframe execution.
-    final trustedOrigin = jsonEncode(configured.origin);
-    await controller.evaluateJavascript(source: '''
-      (function() {
-        if (window.top !== window || window.location.origin !== $trustedOrigin) return;
-        $_bridgeScript
-      })();
-    ''');
+    await controller.evaluateJavascript(source: source);
     Log.debug('JS Bridge injection attempted on trusted origin');
   }
 
