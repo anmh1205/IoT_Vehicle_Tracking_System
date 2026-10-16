@@ -10,6 +10,12 @@ import {
 } from '@/api/validators/trip.validator';
 import * as tripCrudService from '@/domain/trip/services/trip-crud.service';
 import * as tripListService from '@/domain/trip/services/trip-list.service';
+import type { TripReadScope } from '@/domain/trip/repositories/trip.repository';
+const actorScope = (req: AuthenticatedRequest): TripReadScope => ({
+  userId: req.user!.id, role: req.user!.role,
+  deviceAccessMode: req.user!.deviceAccessMode,
+});
+
 import { getWaypoints, computeRouteSummary } from '@/domain/trip/services/trip-waypoints.service';
 
 export const listTrips = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
@@ -18,7 +24,7 @@ export const listTrips = asyncHandler(async (req: AuthenticatedRequest, res: Res
     throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
   }
 
-  const result = await tripListService.listTrips(parsed.data);
+  const result = await tripListService.listTrips(parsed.data, actorScope(req));
   sendOk(res, result);
 });
 
@@ -28,7 +34,7 @@ export const getTrip = asyncHandler(async (req: AuthenticatedRequest, res: Respo
     throw createValidationError('Invalid trip ID');
   }
 
-  const trip = await tripCrudService.getTripById(id);
+  const trip = await tripCrudService.getTripById(id, actorScope(req));
   sendOk(res, trip);
 });
 
@@ -105,7 +111,7 @@ export const getTripTelemetry = asyncHandler(async (req: AuthenticatedRequest, r
   const intervalParam = typeof req.query.interval === 'string' ? req.query.interval : '15s';
   const step = ALLOWED_INTERVALS[intervalParam] ?? '15s';
 
-  const trip = await tripCrudService.getTripById(id);
+  const trip = await tripCrudService.getTripById(id, actorScope(req));
 
   // Need device_id and time range to query waypoints from VictoriaMetrics
   if (!trip.deviceId) {
