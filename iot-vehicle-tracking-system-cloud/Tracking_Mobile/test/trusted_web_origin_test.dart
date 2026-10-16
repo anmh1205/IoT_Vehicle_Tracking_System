@@ -125,6 +125,38 @@ void main() {
     }
   });
 
+  test('native JavaScript handler allowlist is anchored regex on both platforms', () {
+    final patterns = nativeHandlerOriginAllowList(trusted);
+    expect(patterns, hasLength(1));
+    final allowed = RegExp(patterns.single);
+    expect(allowed.hasMatch('https://thingdock.dev'), isTrue);
+
+    // An Android literal bridge origin must not double as an unanchored
+    // handler regex; the latter could match spoofed hostname prefixes.
+    expect(patterns, isNot(nativeBridgeOriginAllowList(trusted, isAndroid: true)));
+    for (final origin in <String>[
+      'https://thingdock.dev.evil.example',
+      'https://thingdockXdev',
+      'https://thingdock.dev@evil.example',
+      'https://other.test/https://thingdock.dev',
+      'http://thingdock.dev',
+      'https://thingdock.dev:444',
+      'https://thingdock.dev:443.attacker.example',
+      'https://thingdock.dev/path',
+    ]) {
+      expect(allowed.hasMatch(origin), isFalse, reason: origin);
+    }
+
+    final local = nativeHandlerOriginAllowList('http://localhost:3002/app');
+    expect(local, hasLength(1));
+    final localRule = RegExp(local.single);
+    expect(localRule.hasMatch('http://localhost:3002'), isTrue);
+    expect(localRule.hasMatch('http://localhost:3003'), isFalse);
+    expect(localRule.hasMatch('http://localhostX3002'), isFalse);
+    expect(nativeHandlerOriginAllowList('file:///app'), isEmpty);
+    expect(nativeHandlerOriginAllowList('https://x@thingdock.dev'), isEmpty);
+  });
+
   test('native callback requires trustworthy origin, frame and request URL', () {
     bool allowed({
       required bool mainFrame,
