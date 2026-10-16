@@ -1,7 +1,6 @@
 import {
   findOne,
   findMany,
-  insertOne,
   updateOne,
   deleteOne,
 } from '@/infrastructure/database/queries';
@@ -90,11 +89,17 @@ export const findById = async (id: number): Promise<Maintenance | null> =>
 
 export const create = async (
   input: CreateMaintenanceInput,
+  scope: MaintenanceReadScope,
   createdBy?: number,
-): Promise<Maintenance> =>
-  insertOne<Maintenance>(
+): Promise<Maintenance | null> =>
+  findOne<Maintenance>(
     `INSERT INTO maintenance (vehicle_id, maintenance_type, title, description, scheduled_date, mileage_at_service, next_service_mileage, next_service_date, cost, service_provider, notes, created_by, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
+     SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW()
+     WHERE $13::boolean OR EXISTS (
+       SELECT 1 FROM vehicles AS v
+       JOIN user_device_access AS uda ON uda.device_id = v.device_id
+       WHERE v.vehicle_id = $1 AND uda.user_id = $14
+     )
      RETURNING *`,
     [
       input.vehicleId,
@@ -109,6 +114,8 @@ export const create = async (
       input.serviceProvider ?? null,
       input.notes ?? null,
       createdBy ?? null,
+      allMaintenance(scope),
+      scope.userId,
     ],
   );
 
