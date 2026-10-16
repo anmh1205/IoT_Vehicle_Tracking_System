@@ -42,20 +42,22 @@ const sanitizeGeofence = (g: Geofence): GeofencePublic => ({
   updatedAt: g.updated_at.toISOString(),
 });
 
-const hydrateVehicleIds = async (geofence: Geofence): Promise<GeofencePublic> => {
-  const vehicleIds = await geofenceRepo.findVehiclesByGeofenceId(geofence.id);
+const hydrateVehicleIds = async (geofence: Geofence, scope?: GeofenceAccessScope): Promise<GeofencePublic> => {
+  const vehicleIds = scope
+    ? await geofenceRepo.findVehiclesByGeofenceIdForScope(geofence.id, scope)
+    : await geofenceRepo.findVehiclesByGeofenceId(geofence.id);
   return {
     ...sanitizeGeofence(geofence),
     vehicleIds: vehicleIds.map((row) => row.vehicle_id),
   };
 };
 
-export const getGeofenceById = async (id: number): Promise<GeofencePublic> => {
-  const geofence = await geofenceRepo.findById(id);
+export const getGeofenceById = async (id: number, scope: GeofenceAccessScope): Promise<GeofencePublic> => {
+  const geofence = await geofenceRepo.findByIdForScope(id, scope);
   if (!geofence) {
     throw createNotFoundError(`Vùng với ID ${id} không tồn tại`);
   }
-  return hydrateVehicleIds(geofence);
+  return hydrateVehicleIds(geofence, scope);
 };
 
 export const createGeofence = async (
