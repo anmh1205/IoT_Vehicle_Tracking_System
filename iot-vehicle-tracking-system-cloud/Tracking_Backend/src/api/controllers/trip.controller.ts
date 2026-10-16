@@ -59,7 +59,7 @@ export const updateTrip = asyncHandler(async (req: AuthenticatedRequest, res: Re
     throw createValidationError('Invalid trip data', parsed.error.flatten().fieldErrors);
   }
 
-  const trip = await tripCrudService.updateTrip(id, parsed.data);
+  const trip = await tripCrudService.updateTrip(id, parsed.data, actorScope(req));
   sendOk(res, trip);
 });
 
@@ -79,7 +79,7 @@ export const startTrip = asyncHandler(async (req: AuthenticatedRequest, res: Res
     throw createValidationError('Invalid trip ID');
   }
 
-  const trip = await tripCrudService.startTrip(id);
+  const trip = await tripCrudService.startTrip(id, actorScope(req));
   sendOk(res, trip);
 });
 
@@ -89,7 +89,7 @@ export const endTrip = asyncHandler(async (req: AuthenticatedRequest, res: Respo
     throw createValidationError('Invalid trip ID');
   }
 
-  const trip = await tripCrudService.endTrip(id);
+  const trip = await tripCrudService.endTrip(id, actorScope(req));
   sendOk(res, trip);
 });
 
