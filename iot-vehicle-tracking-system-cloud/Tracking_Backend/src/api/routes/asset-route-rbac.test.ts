@@ -28,11 +28,15 @@ const routes = [
   [maintenance, 'post', '/', 'operator'],
   [maintenance, 'put', '/:id', 'operator'],
   [maintenance, 'delete', '/:id', 'admin'],
-  [driver, 'post', '/', 'manager'],
-  [driver, 'put', '/:id', 'manager'],
+  [driver, 'get', '/', 'admin'],
+  [driver, 'get', '/:id', 'admin'],
+  [driver, 'post', '/', 'admin'],
+  [driver, 'put', '/:id', 'admin'],
   [driver, 'delete', '/:id', 'admin'],
-  [customer, 'post', '/', 'manager'],
-  [customer, 'put', '/:id', 'manager'],
+  [customer, 'get', '/', 'admin'],
+  [customer, 'get', '/:id', 'admin'],
+  [customer, 'post', '/', 'admin'],
+  [customer, 'put', '/:id', 'admin'],
   [customer, 'delete', '/:id', 'admin'],
   [geofence, 'post', '/policies', 'manager'],
   [geofence, 'put', '/policies/:policyId', 'manager'],
@@ -55,7 +59,7 @@ const getGuard = (router: Router, method: string, path: string): Handler => {
   return route!.stack[0].handle;
 };
 
-describe('REST write route authorization', () => {
+describe('REST personal-data read and write route authorization', () => {
   const roleOrder = ['viewer', 'operator', 'manager', 'admin', 'root'] as const;
 
   for (const [router, method, path, minimumRole] of routes) {
