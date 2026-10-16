@@ -165,15 +165,16 @@ export const update = async (id: number, input: UpdateTripInput, scope: TripRead
   let paramIndex = 1;
   let nextVehicleExpr = 't.vehicle_id';
   let nextDeviceExpr = 't.device_id';
+  const bindParam = (i: number): string => '$' + i;
 
   if (input.vehicleId !== undefined) {
-    nextVehicleExpr = `${paramIndex}::text`;
-    setClauses.push(`vehicle_id = ${paramIndex++}`);
+    nextVehicleExpr = `${bindParam(paramIndex)}::text`;
+    setClauses.push(`vehicle_id = ${bindParam(paramIndex++)}`);
     values.push(input.vehicleId);
   }
   if (input.deviceId !== undefined) {
-    nextDeviceExpr = `${paramIndex}::text`;
-    setClauses.push(`device_id = ${paramIndex++}`);
+    nextDeviceExpr = `${bindParam(paramIndex)}::text`;
+    setClauses.push(`device_id = ${bindParam(paramIndex++)}`);
     values.push(input.deviceId);
   }
   if (input.driverName !== undefined) {
@@ -224,7 +225,7 @@ export const update = async (id: number, input: UpdateTripInput, scope: TripRead
   )`;
   return updateOne<Trip>(
     `UPDATE trips AS t SET ${setClauses.join(', ')}
-     WHERE t.id = ${idParam} AND ${grant} AND ${consistentPair} RETURNING t.*`,
+     WHERE t.id = ${bindParam(idParam)} AND ${grant} AND ${consistentPair} RETURNING t.*`,
     values,
   );
 };
