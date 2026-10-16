@@ -1,10 +1,12 @@
 # IoT Vehicle Tracking System
 
-Real-time IoT fleet tracking monorepo: device firmware, MQTT ingestion, backend API, web dashboard, mobile shell, and observability stack.
+A device-to-cloud vehicle monitoring platform designed around the operational needs of self-drive rental fleets: vehicle location, operating telemetry, event visibility, and remote-management workflows. The repository combines embedded firmware, MQTT ingestion, backend APIs, a web dashboard, a mobile client, and observability services.
+
+The goal is to help a fleet operator understand where a vehicle is, how it is operating, when action may be needed, and what data is available for maintenance decisions. Capabilities vary by vehicle, connected hardware, and deployment configuration; the repository is not a claim of universal ECU access or remote actuation support.
 
 Language: English | [Tiếng Việt](README.vi.md)
 
-**Last validated:** 2026-03-24
+**Documentation validation recorded:** 2026-03-24 (historical reference; not a current build guarantee)
 **Primary deployment branch:** `uat` (runtime services)
 **Deployment model:** per-service Docker Compose + shared external network `tracking-network`
 
