@@ -1,5 +1,6 @@
-import { Pool } from 'pg';
-import { dbConfig } from '../config/env';
+import { pool } from './pool';
+import { findAuthenticatedDevice, type AuthenticatedDeviceRow } from '../repositories/device-auth.repository';
+export { pool } from './pool';
 import { logger } from './logger';
 import type { RuntimeStateSnapshot } from '../types/device-state.types';
 import {
@@ -7,14 +8,6 @@ import {
   hasSessionIdentityConflict,
 } from '../utils/session-identity.util';
 
-export const pool = new Pool({
-  host: dbConfig.host,
-  port: dbConfig.port,
-  user: dbConfig.user,
-  password: dbConfig.password,
-  database: dbConfig.database,
-  max: 20,
-});
 
 export const query = <T extends object = Record<string, unknown>>(
   text: string,
@@ -22,16 +15,6 @@ export const query = <T extends object = Record<string, unknown>>(
 ) => pool.query<T>(text, params);
 
 export const closePool = () => pool.end();
-
-interface DeviceRow {
-  id: string;
-  device_id: string;
-  vehicle_id: string | null;
-  current_status: string;
-  last_seen_at: string | null;
-  state_updated_at: string | null;
-  payload_updated_at: string | null;
-}
 
 interface DeviceSessionRow {
   id: number;
@@ -87,24 +70,14 @@ const toOptionalPositiveInt = (value: string | number | null | undefined): numbe
 export const validateDevice = async (
   deviceId: string,
   authToken: string,
-): Promise<DeviceRow | null> => {
+): Promise<AuthenticatedDeviceRow | null> => {
   try {
-    const result = await pool.query<DeviceRow>(
-      `SELECT id, device_id, vehicle_id, current_status
-            , last_seen_at, state_updated_at, payload_updated_at
-       FROM devices
-       WHERE device_id = $1
-         AND auth_token = encode(sha256($2::bytea), 'hex')
-         AND is_active = true`,
-      [deviceId, authToken],
-    );
-    return result.rows[0] ?? null;
+    return await findAuthenticatedDevice(deviceId, authToken);
   } catch (err) {
     logger.error({ err, deviceId, event: 'validate_device_failed' }, 'Validate device failed');
     return null;
   }
 };
-
 /**
  * Update device status and last_seen_at timestamp.
  */

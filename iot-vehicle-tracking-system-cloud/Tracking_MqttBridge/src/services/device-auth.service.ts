@@ -1,15 +1,5 @@
-import { pool } from '../infrastructure/database';
+import { findAuthenticatedDevice, type AuthenticatedDeviceRow } from '../repositories/device-auth.repository';
 import { logger } from '../infrastructure/logger';
-
-interface AuthenticatedDevice {
-  id: string;
-  device_id: string;
-  vehicle_id: string | null;
-  current_status: string;
-  last_seen_at: string | null;
-  state_updated_at: string | null;
-  payload_updated_at: string | null;
-}
 
 /**
  * Verify a device by checking device_id exists and auth_token hash matches.
@@ -19,18 +9,9 @@ interface AuthenticatedDevice {
 export const verifyDeviceToken = async (
   deviceId: string,
   authToken: string,
-): Promise<AuthenticatedDevice | null> => {
+): Promise<AuthenticatedDeviceRow | null> => {
   try {
-    const result = await pool.query<AuthenticatedDevice>(
-      `SELECT id, device_id, vehicle_id, current_status
-            , last_seen_at, state_updated_at, payload_updated_at
-       FROM devices
-       WHERE device_id = $1
-         AND auth_token = encode(sha256($2::bytea), 'hex')
-         AND is_active = true`,
-      [deviceId, authToken],
-    );
-    return result.rows[0] ?? null;
+    return await findAuthenticatedDevice(deviceId, authToken);
   } catch (err) {
     logger.error({ err, deviceId, event: 'device_auth_verification_failed' }, 'Device auth verification failed');
     throw err;
