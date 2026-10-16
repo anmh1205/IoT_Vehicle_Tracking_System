@@ -206,7 +206,7 @@ export const assignVehicle = async (
      WHERE g.id = $1 AND ($3::boolean OR EXISTS (
        SELECT 1 FROM user_device_access uda
        WHERE uda.user_id = $4 AND uda.device_id = v.device_id
-     )) ON CONFLICT (geofence_id, vehicle_id)
+     )) AND ${geofenceMutationGuard('$3', '$4')} ON CONFLICT (geofence_id, vehicle_id)
      DO UPDATE SET assigned_at = geofence_vehicles.assigned_at`,
     [geofenceId, vehicleId, geofenceGlobalScope(scope), scope.userId],
   );
@@ -220,6 +220,10 @@ export const unassignVehicle = async (
        AND ($3::boolean OR EXISTS (
          SELECT 1 FROM vehicles v JOIN user_device_access uda ON uda.device_id = v.device_id
          WHERE v.vehicle_id = gv.vehicle_id AND uda.user_id = $4
+       ))
+       AND ($3::boolean OR EXISTS (
+         SELECT 1 FROM geofences g
+         WHERE g.id = gv.geofence_id AND ${geofenceMutationGuard('$3', '$4')}
        ))`,
     [geofenceId, vehicleId, geofenceGlobalScope(scope), scope.userId],
   );
