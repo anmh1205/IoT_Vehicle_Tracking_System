@@ -46,8 +46,9 @@ test('device QoS1 PUBACK waits for application work installed before connect', (
   assert.match(ingressSource, /packet\.qos > 0/);
   assert.match(clientSource, /onClientCreated\?\.\(client\)/);
   const registration = indexSource.indexOf('installBridgeIngress(createdClient');
-  const subscription = indexSource.indexOf('await subscribeToDeviceTopics(client)');
-  assert.ok(registration > 0 && subscription > registration);
+  const subscription = indexSource.indexOf('initialSubscriptions.ready = trackDeviceSubscriptions(createdClient');
+  const initialReady = indexSource.indexOf('await initialSubscriptions.ready');
+  assert.ok(registration > 0 && subscription > registration && initialReady > subscription);
 });
 
 test('critical device routes are awaited instead of fire-and-forget', () => {

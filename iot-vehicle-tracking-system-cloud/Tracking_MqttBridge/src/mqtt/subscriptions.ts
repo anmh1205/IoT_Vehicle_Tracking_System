@@ -63,3 +63,55 @@ export const subscribeToDeviceTopics = (client: MqttClient): Promise<void> => {
     });
   });
 };
+
+
+/**
+ * Verify broker SUBACK grants after *every* connection, not just bootstrap.
+ * With clean:false the broker may lose a persistent session, and MQTT.js
+ * reconnecting alone does not establish that critical topics remain granted.
+ * Call before the initial connection can emit a replayed message.
+ */
+export const trackDeviceSubscriptions = (
+  client: MqttClient,
+  onState: (ready: boolean, error?: Error) => void,
+): Promise<void> => {
+  let epoch = 0;
+  let initialSettled = false;
+  let resolveInitial!: () => void;
+  let rejectInitial!: (error: Error) => void;
+  const initialReady = new Promise<void>((resolve, reject) => {
+    resolveInitial = resolve;
+    rejectInitial = reject;
+  });
+
+  client.on('close', () => {
+    epoch += 1;
+    onState(false);
+  });
+
+  client.on('connect', () => {
+    const currentEpoch = ++epoch;
+    onState(false);
+    void subscribeToDeviceTopics(client).then(
+      () => {
+        if (currentEpoch !== epoch) return; // Old socket/grant is stale.
+        onState(true);
+        if (!initialSettled) {
+          initialSettled = true;
+          resolveInitial();
+        }
+      },
+      (reason: unknown) => {
+        if (currentEpoch !== epoch) return;
+        const error = reason instanceof Error ? reason : new Error(String(reason));
+        onState(false, error);
+        if (!initialSettled) {
+          initialSettled = true;
+          rejectInitial(error);
+        }
+      },
+    );
+  });
+
+  return initialReady;
+};

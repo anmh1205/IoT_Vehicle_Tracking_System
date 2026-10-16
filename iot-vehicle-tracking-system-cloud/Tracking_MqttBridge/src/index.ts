@@ -1,5 +1,5 @@
 import { connectMqtt, disconnectMqtt, getClient } from './mqtt/client';
-import { subscribeToDeviceTopics } from './mqtt/subscriptions';
+import { trackDeviceSubscriptions } from './mqtt/subscriptions';
 import { installBridgeIngress } from './mqtt/ingress';
 import { handleRawData } from './handlers/rawdata.handler';
 import { handleStatus } from './handlers/status.handler';
@@ -131,7 +131,8 @@ const main = async (): Promise<void> => {
 
   // The MQTT connection may deliver queued QoS1 packets as soon as the
   // persistent session is resumed. Register app processing before that point.
-  const client = await connectMqtt((createdClient) => {
+  const initialSubscriptions: { ready: Promise<void> | null } = { ready: null };
+  await connectMqtt((createdClient) => {
     installBridgeIngress(createdClient, routeMessage, {
       onReceived: () => {
         bridgeHealthState.lastMessageAt = new Date().toISOString();
@@ -144,11 +145,23 @@ const main = async (): Promise<void> => {
         );
       },
     });
+    // Revalidate broker ACL/grants on every reconnect before reporting healthy.
+    initialSubscriptions.ready = trackDeviceSubscriptions(createdClient, (ready, error) => {
+      bridgeHealthState.subscriptionsReady = ready;
+      if (error) {
+        bridgeHealthState.lastError = error.message;
+        logger.error({ err: error, event: 'mqtt_reconnect_suback_denied' },
+          'Critical MQTT subscription is not granted');
+      } else if (ready) {
+        bridgeHealthState.lastError = undefined;
+      }
+    });
   });
 
-  await subscribeToDeviceTopics(client);
-  bridgeHealthState.subscriptionsReady = true;
-  bridgeHealthState.lastError = undefined;
+  if (initialSubscriptions.ready === null) {
+    throw new Error('MQTT subscription monitor was not initialized');
+  }
+  await initialSubscriptions.ready;
 
   logger.info({ event: 'bridge_started' }, 'MQTT bridge started');
 };
