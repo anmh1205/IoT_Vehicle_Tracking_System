@@ -1,5 +1,6 @@
 import { createNotFoundError, createConflictError } from '@/shared/utils/errors.util';
 import * as vehicleRepo from '@/domain/vehicle/repositories/vehicle.repository';
+import type { VehicleAccessScope } from '@/domain/vehicle/repositories/vehicle.repository';
 import { logger } from '@/infrastructure/logger';
 import * as auditLog from '@/domain/audit/services/audit-log.service';
 import type {
@@ -37,8 +38,8 @@ const sanitizeVehicle = (v: Vehicle): VehiclePublic => ({
   updatedAt: v.updated_at.toISOString(),
 });
 
-export const getVehicleById = async (id: number): Promise<VehiclePublic> => {
-  const vehicle = await vehicleRepo.findById(id);
+export const getVehicleById = async (id: number, scope: VehicleAccessScope): Promise<VehiclePublic> => {
+  const vehicle = await vehicleRepo.findByIdForScope(id, scope);
   if (!vehicle) {
     throw createNotFoundError(`Vehicle with ID ${id} not found`);
   }

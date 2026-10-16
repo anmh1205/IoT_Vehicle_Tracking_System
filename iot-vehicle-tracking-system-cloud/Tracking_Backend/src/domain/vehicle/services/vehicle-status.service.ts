@@ -8,6 +8,7 @@ import {
 import { findOne, findMany } from '@/infrastructure/database/queries';
 import { createNotFoundError } from '@/shared/utils/errors.util';
 import type { Vehicle } from '@/domain/vehicle/types/vehicle.types';
+import { vehicleVisibleTo, vehicleScopeIsGlobal, type VehicleAccessScope } from '@/domain/vehicle/repositories/vehicle.repository';
 
 /** Real-time device row from devices table */
 interface DeviceRow {
@@ -73,9 +74,13 @@ export interface VehicleStatusPublic {
  * Aggregate real-time status for a vehicle:
  * vehicle info + device status + active trip + recent active alerts.
  */
-export const getVehicleStatus = async (id: number): Promise<VehicleStatusPublic> => {
+export const getVehicleStatus = async (id: number, scope: VehicleAccessScope): Promise<VehicleStatusPublic> => {
   // 1. Vehicle info
-  const vehicle = await findOne<Vehicle>('SELECT * FROM vehicles WHERE id = $1', [id]);
+  const vehicle = await findOne<Vehicle>(
+    `SELECT v.* FROM vehicles v
+     WHERE v.id = $1 AND ${vehicleVisibleTo(scope, 2)}`,
+    vehicleScopeIsGlobal(scope) ? [id] : [id, scope.userId],
+  );
   if (!vehicle) {
     throw createNotFoundError(`Vehicle with ID ${id} not found`);
   }

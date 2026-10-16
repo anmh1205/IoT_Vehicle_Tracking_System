@@ -44,7 +44,7 @@ describe('vehicle-status.service latest telemetry', () => {
 
     vi.mocked(findMany).mockResolvedValue([]);
 
-    const result = await getVehicleStatus(9);
+    const result = await getVehicleStatus(9, { userId: 1, role: 'admin', deviceAccessMode: 'all' });
 
     const [telemetrySql] = vi.mocked(findOne).mock.calls[2];
     expect(telemetrySql).toContain("COALESCE((context->>'live_mutation')::boolean, true)");
