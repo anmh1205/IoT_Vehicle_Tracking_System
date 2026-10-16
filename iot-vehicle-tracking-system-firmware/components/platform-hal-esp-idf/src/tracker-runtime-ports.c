@@ -34,10 +34,12 @@ esp_err_t tracker_runtime_ports_validate(const tracker_runtime_ports_t *ports) {
     ESP_RETURN_ON_NULL(ports->modem, ESP_ERR_INVALID_ARG, TAG, "modem port missing");
     ESP_RETURN_ON_NULL(ports->modem->set_apn, ESP_ERR_INVALID_ARG, TAG, "modem set_apn missing");
     ESP_RETURN_ON_NULL(ports->modem->request_connect, ESP_ERR_INVALID_ARG, TAG, "modem request_connect missing");
+    ESP_RETURN_ON_NULL(ports->modem->is_initialized, ESP_ERR_INVALID_ARG, TAG, "modem is_initialized missing");
 
     // MQTT port: init brings the client up; publish and the command-callback setter drive telemetry/commands.
     ESP_RETURN_ON_NULL(ports->mqtt, ESP_ERR_INVALID_ARG, TAG, "mqtt port missing");
     ESP_RETURN_ON_NULL(ports->mqtt->init, ESP_ERR_INVALID_ARG, TAG, "mqtt init missing");
+    ESP_RETURN_ON_NULL(ports->mqtt->is_connected, ESP_ERR_INVALID_ARG, TAG, "mqtt is_connected missing");
     ESP_RETURN_ON_NULL(ports->mqtt->publish, ESP_ERR_INVALID_ARG, TAG, "mqtt publish missing");
     ESP_RETURN_ON_NULL(ports->mqtt->set_command_callback,
                        ESP_ERR_INVALID_ARG,
@@ -71,6 +73,7 @@ esp_err_t tracker_runtime_ports_validate(const tracker_runtime_ports_t *ports) {
     ESP_RETURN_ON_NULL(ports->obd_reader, ESP_ERR_INVALID_ARG, TAG, "obd port missing");
     ESP_RETURN_ON_NULL(ports->obd_reader->connect, ESP_ERR_INVALID_ARG, TAG, "obd connect missing");
     ESP_RETURN_ON_NULL(ports->obd_reader->disconnect, ESP_ERR_INVALID_ARG, TAG, "obd disconnect missing");
+    ESP_RETURN_ON_NULL(ports->obd_reader->is_connected, ESP_ERR_INVALID_ARG, TAG, "obd is_connected missing");
 
     // Power-control port: init configures modem power GPIOs; power_on is the minimum required action.
     ESP_RETURN_ON_NULL(ports->power_control, ESP_ERR_INVALID_ARG, TAG, "power port missing");
