@@ -15,11 +15,14 @@ export interface GeofenceAccessScope {
 export const geofenceGlobalScope = (scope: GeofenceAccessScope): boolean =>
   scope.role === 'root' || scope.role === 'admin' || scope.deviceAccessMode === 'all';
 
-export const vehiclePolicyVisibleTo = (scope: GeofenceAccessScope, param: number): string =>
-  geofenceGlobalScope(scope) ? 'TRUE' : `EXISTS (
+export const vehiclePolicyVisibleTo = (scope: GeofenceAccessScope, param: number): string => {
+  if (geofenceGlobalScope(scope)) return 'TRUE';
+  const bind = '$' + param;
+  return `EXISTS (
     SELECT 1 FROM vehicles v JOIN user_device_access uda ON uda.device_id = v.device_id
-    WHERE v.vehicle_id = p.vehicle_id AND uda.user_id = ${param}
+    WHERE v.vehicle_id = p.vehicle_id AND uda.user_id = ${bind}
   )`;
+};
 
 const parseDate = (value?: string): string | null => {
   if (!value) return null;
