@@ -40,12 +40,15 @@
 #define SD_LOG_META_TMP_PATH SD_LOG_META_DIR "/queue.tmp"
 /* Previous metadata snapshot kept as rollback backup during rotation. */
 #define SD_LOG_META_BAK_PATH SD_LOG_META_DIR "/queue.bak"
+/* Quarantine invalid primary without erasing evidence or overwriting a prior quarantine. */
+#define SD_LOG_META_CORRUPT_PATH SD_LOG_META_DIR "/queue.corrupt"
 /* Live append-only queue data file (one record per line). */
 #define SD_LOG_DATA_PATH SD_LOG_LOG_DIR "/queue.log"
 /* Staging file for compacted queue data before promotion. */
 #define SD_LOG_DATA_TMP_PATH SD_LOG_LOG_DIR "/queue.tmp"
 /* Previous queue data file kept as rollback backup during compaction. */
 #define SD_LOG_DATA_BAK_PATH SD_LOG_LOG_DIR "/queue.bak"
+#define SD_LOG_DATA_CORRUPT_PATH SD_LOG_LOG_DIR "/queue.corrupt"
 /* Max log line buffer: payload capacity plus headroom for the pipe-delimited header fields. */
 #define SD_LOG_LINE_MAX (SD_LOG_RECORD_PAYLOAD_MAX_LEN + 256U)
 
@@ -305,6 +308,37 @@ static bool sd_log_store_data_candidate_valid(const char *path) {
     return valid;
 }
 
+
+/* Recover a validated snapshot while preserving an invalid live primary for
+ * diagnostics. Fail closed if quarantine is already occupied; never overwrite
+ * it or delete the last valid backup. Interrupted promotion is restartable:
+ * after moving the primary away, a valid backup/temp remains discoverable. */
+static esp_err_t sd_log_store_replace_corrupt_live(
+    const char *live_path, const char *corrupt_path, const char *validated_path) {
+    struct stat st = {0};
+    if (stat(corrupt_path, &st) == 0) {
+        ESP_LOGE(TAG, "corrupt queue quarantine already exists; refusing overwrite");
+        sd_log_store_mark_degraded();
+        return ESP_ERR_INVALID_STATE;
+    }
+    if (rename(live_path, corrupt_path) != 0) {
+        ESP_LOGE(TAG, "unable to quarantine invalid queue primary");
+        sd_log_store_mark_degraded();
+        return ESP_FAIL;
+    }
+    if (rename(validated_path, live_path) != 0) {
+        // Best-effort rollback. Even when that fails, the good validated
+        // candidate stays untouched and can be recovered on the next boot.
+        if (rename(corrupt_path, live_path) != 0) {
+            ESP_LOGE(TAG, "queue primary rollback failed; recovery artifacts preserved");
+        }
+        sd_log_store_mark_degraded();
+        return ESP_FAIL;
+    }
+    ESP_LOGW(TAG, "invalid queue primary quarantined; validated snapshot promoted");
+    return ESP_OK;
+}
+
 static esp_err_t sd_log_store_recover_meta_if_needed(void) {
     struct stat st = {0};
     bool has_live = stat(SD_LOG_META_PATH, &st) == 0;
@@ -312,10 +346,21 @@ static esp_err_t sd_log_store_recover_meta_if_needed(void) {
     bool has_tmp = stat(SD_LOG_META_TMP_PATH, &st) == 0;
 
     if (has_live) {
-        if (!sd_log_store_meta_candidate_valid(SD_LOG_META_PATH)) {
-            ESP_LOGE(TAG, "live queue metadata invalid; preserving recovery artifacts");
-            sd_log_store_mark_degraded();
-            return ESP_ERR_INVALID_SIZE;
+        if ((has_bak || has_tmp) && !sd_log_store_meta_candidate_valid(SD_LOG_META_PATH)) {
+            // Recover only from a fully validated candidate; the corrupt live
+            // file is quarantined rather than overwritten or discarded.
+            const char *candidate =
+                has_bak && sd_log_store_meta_candidate_valid(SD_LOG_META_BAK_PATH)
+                    ? SD_LOG_META_BAK_PATH
+                    : has_tmp && sd_log_store_meta_candidate_valid(SD_LOG_META_TMP_PATH)
+                        ? SD_LOG_META_TMP_PATH : NULL;
+            if (candidate == NULL) {
+                ESP_LOGE(TAG, "live metadata corrupt and recovery candidates invalid");
+                sd_log_store_mark_degraded();
+                return ESP_ERR_INVALID_SIZE;
+            }
+            return sd_log_store_replace_corrupt_live(
+                SD_LOG_META_PATH, SD_LOG_META_CORRUPT_PATH, candidate);
         }
         if (has_tmp) { remove(SD_LOG_META_TMP_PATH); }
         if (has_bak) { remove(SD_LOG_META_BAK_PATH); }
@@ -361,12 +406,21 @@ static esp_err_t sd_log_store_recover_data_if_needed(void) {
     bool has_tmp = stat(SD_LOG_DATA_TMP_PATH, &st) == 0;
 
     if (has_live) {
-        // Avoid a full data scan on every normal mount. When crash artifacts
-        // exist, refuse to delete them until the primary passes a full scan.
+        // Avoid a full scan on a clean normal mount. Crash artifacts require
+        // validation of the primary before cleaning any recovery candidate.
         if ((has_bak || has_tmp) && !sd_log_store_data_candidate_valid(SD_LOG_DATA_PATH)) {
-            ESP_LOGE(TAG, "live queue log invalid; preserving backup and temp");
-            sd_log_store_mark_degraded();
-            return ESP_ERR_INVALID_SIZE;
+            const char *candidate =
+                has_bak && sd_log_store_data_candidate_valid(SD_LOG_DATA_BAK_PATH)
+                    ? SD_LOG_DATA_BAK_PATH
+                    : has_tmp && sd_log_store_data_candidate_valid(SD_LOG_DATA_TMP_PATH)
+                        ? SD_LOG_DATA_TMP_PATH : NULL;
+            if (candidate == NULL) {
+                ESP_LOGE(TAG, "live queue log corrupt and recovery candidates invalid");
+                sd_log_store_mark_degraded();
+                return ESP_ERR_INVALID_SIZE;
+            }
+            return sd_log_store_replace_corrupt_live(
+                SD_LOG_DATA_PATH, SD_LOG_DATA_CORRUPT_PATH, candidate);
         }
         if (has_tmp) { remove(SD_LOG_DATA_TMP_PATH); }
         if (has_bak) { remove(SD_LOG_DATA_BAK_PATH); }
