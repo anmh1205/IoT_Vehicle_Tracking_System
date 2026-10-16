@@ -70,4 +70,17 @@ export const exportServices = {
     apiClient.get(`/exports/${id}`).then((response) => toExportJob(unwrap<any>(response.data))),
 
   downloadUrl: (id: number | string) => toApiUrl(`/exports/${id}/download`),
+
+  /** Explicitly bounded to one currently assigned device and XLSX only. */
+  createScopedDevice: (deviceId: string): Promise<ExportJob> =>
+    apiClient.post('/exports/device', { deviceId })
+      .then((response) => toExportJob(unwrap<any>(response.data))),
+
+  getScopedDevice: (id: number): Promise<ExportJob> =>
+    apiClient.get(`/exports/device/${id}`)
+      .then((response) => toExportJob(unwrap<any>(response.data))),
+
+  downloadScopedDevice: (id: number): Promise<Blob> =>
+    apiClient.get(`/exports/device/${id}/download`, { responseType: 'blob' })
+      .then((response) => response.data as Blob),
 };
