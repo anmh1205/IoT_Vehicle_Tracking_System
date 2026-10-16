@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth, requireRole } from '@/middleware/auth.middleware';
 import * as geofenceController from '@/api/controllers/geofence.controller';
+import { requireAssignedVehicleRoute } from '@/middleware/asset-grant.middleware';
 
 const router = Router();
 
@@ -16,14 +17,14 @@ router.get('/policies/:policyId', geofenceController.getVehiclePolicy);
 router.post('/policies', requireAssetManager, geofenceController.createVehiclePolicy);
 router.put('/policies/:policyId', requireAssetManager, geofenceController.updateVehiclePolicy);
 router.get('/policy-violations', geofenceController.listVehiclePolicyViolations);
-router.get('/vehicles/:vehicleId/allowed-zone', geofenceController.getVehicleAllowedZone);
+router.get('/vehicles/:vehicleId/allowed-zone', requireAssignedVehicleRoute, geofenceController.getVehicleAllowedZone);
 router.post(
   '/vehicles/:vehicleId/allowed-zone/preview-center',
-  geofenceController.previewVehicleAllowedZoneCenter,
+  requireAssignedVehicleRoute, geofenceController.previewVehicleAllowedZoneCenter,
 );
-router.put('/vehicles/:vehicleId/allowed-zone', requireAssetManager, geofenceController.upsertVehicleAllowedZone);
+router.put('/vehicles/:vehicleId/allowed-zone', requireAssetManager, requireAssignedVehicleRoute, geofenceController.upsertVehicleAllowedZone);
 router.delete('/vehicles/:vehicleId/allowed-zone', requireAssetAdmin, geofenceController.deleteVehicleAllowedZone);
-router.get('/vehicles/:vehicleId/policy-states', geofenceController.listVehiclePolicyStates);
+router.get('/vehicles/:vehicleId/policy-states', requireAssignedVehicleRoute, geofenceController.listVehiclePolicyStates);
 router.get('/:id', geofenceController.getGeofence);
 router.post('/', requireAssetManager, geofenceController.createGeofence);
 router.put('/:id', requireAssetManager, geofenceController.updateGeofence);

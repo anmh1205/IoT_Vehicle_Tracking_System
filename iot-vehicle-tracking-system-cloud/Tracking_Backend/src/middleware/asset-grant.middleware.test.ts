@@ -6,7 +6,7 @@ vi.mock('@/domain/asset/repositories/asset-grant.repository', () => ({
   hasAssetGrant: vi.fn(),
 }));
 import { hasAssetGrant } from '@/domain/asset/repositories/asset-grant.repository';
-import { requireAssignedAssetWrite } from './asset-grant.middleware';
+import { requireAssignedAssetWrite, requireAssignedVehicleRoute } from './asset-grant.middleware';
 
 const runGuard = async (
   policy: Parameters<typeof requireAssignedAssetWrite>[0],
@@ -71,6 +71,41 @@ describe('asset mutation barrier for assigned roles', () => {
       expect(await runGuard({ existing:'tripRow' }, role, 'assigned', '50')).toHaveBeenCalledWith();
     }
     expect(await runGuard({ existing:'tripRow' }, 'manager', 'all', '50')).toHaveBeenCalledWith();
+    expect(hasAssetGrant).not.toHaveBeenCalled();
+  });
+});
+
+describe('vehicle-id based geofence and location preview routes', () => {
+  const check = async (role: string, mode: string, vehicleId: string | undefined) => {
+    const next = vi.fn() as NextFunction;
+    const req = { user: { id: 101, role, deviceAccessMode: mode },
+      params: vehicleId === undefined ? {} : { vehicleId } } as unknown as AuthenticatedRequest;
+    await requireAssignedVehicleRoute(req, {} as Response, next);
+    return next;
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(hasAssetGrant).mockResolvedValue(true);
+  });
+
+  it('allows assigned vehicle preview only after checking its live grant', async () => {
+    const next = await check('viewer', 'assigned', 'V1');
+    expect(hasAssetGrant).toHaveBeenCalledWith(101, 'vehicleId', 'V1');
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  it('rejects another fleet vehicle and absent route identity', async () => {
+    vi.mocked(hasAssetGrant).mockResolvedValue(false);
+    const foreign = await check('manager', 'assigned', 'V2');
+    expect(foreign.mock.calls[0]?.[0]).toMatchObject({ status: 403 });
+    const missing = await check('viewer', 'assigned', undefined);
+    expect(missing.mock.calls[0]?.[0]).toMatchObject({ status: 403 });
+  });
+
+  it('retains global admin and explicit fleet-wide view behavior', async () => {
+    expect(await check('admin', 'assigned', 'V1')).toHaveBeenCalledWith();
+    expect(await check('operator', 'all', 'V2')).toHaveBeenCalledWith();
     expect(hasAssetGrant).not.toHaveBeenCalled();
   });
 });

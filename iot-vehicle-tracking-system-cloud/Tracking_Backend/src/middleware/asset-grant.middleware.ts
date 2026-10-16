@@ -75,3 +75,32 @@ export const requireAssignedAssetWrite = (policy: AssetWritePolicy) =>
       next(error);
     }
   };
+
+/**
+ * Guard vehicle-scoped endpoints that use a public vehicleId path parameter.
+ * Particularly important for location previews and geofence-policy state.
+ * The mutation repository still needs an atomic SQL grant check before write.
+ */
+export const requireAssignedVehicleRoute = async (
+  req: AuthenticatedRequest, _res: Response, next: NextFunction,
+): Promise<void> => {
+  try {
+    const actor = req.user;
+    if (!actor) throw createUnauthorizedError('Authentication required');
+    const vehicleId = req.params.vehicleId;
+    if (typeof vehicleId !== 'string' || !vehicleId.trim()) {
+      throw createForbiddenError('Vehicle access denied');
+    }
+    if (actor.role === 'root' || actor.role === 'admin' || actor.deviceAccessMode === 'all') {
+      next();
+      return;
+    }
+    if (!Number.isSafeInteger(actor.id) || actor.id <= 0 ||
+        !await hasAssetGrant(actor.id, 'vehicleId', vehicleId)) {
+      throw createForbiddenError('Vehicle access denied');
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
