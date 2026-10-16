@@ -158,13 +158,14 @@ export const assignVehicle = async (
   geofenceId: number, vehicleId: string, scope: GeofenceAccessScope,
 ): Promise<number> =>
   executeQuery(
-    `INSERT INTO geofence_vehicles (geofence_id, vehicle_id, created_at)
+    `INSERT INTO geofence_vehicles (geofence_id, vehicle_id, assigned_at)
      SELECT g.id, v.vehicle_id, NOW()
      FROM geofences g JOIN vehicles v ON v.vehicle_id = $2
      WHERE g.id = $1 AND ($3::boolean OR EXISTS (
        SELECT 1 FROM user_device_access uda
        WHERE uda.user_id = $4 AND uda.device_id = v.device_id
-     )) ON CONFLICT DO NOTHING`,
+     )) ON CONFLICT (geofence_id, vehicle_id)
+     DO UPDATE SET assigned_at = geofence_vehicles.assigned_at`,
     [geofenceId, vehicleId, geofenceGlobalScope(scope), scope.userId],
   );
 
