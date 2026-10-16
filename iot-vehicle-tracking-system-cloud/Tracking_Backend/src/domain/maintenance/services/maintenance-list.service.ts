@@ -1,4 +1,5 @@
 import * as maintenanceRepo from '@/domain/maintenance/repositories/maintenance.repository';
+import type { MaintenanceReadScope } from '@/domain/maintenance/repositories/maintenance.repository';
 import type {
   Maintenance,
   MaintenanceListQuery,
@@ -28,6 +29,7 @@ const sanitizeMaintenance = (m: Maintenance): MaintenancePublic => ({
 
 export const listMaintenance = async (
   query: MaintenanceListQuery,
+  scope: MaintenanceReadScope,
 ): Promise<{
   items: MaintenancePublic[];
   pagination: { page: number; limit: number; total: number; totalPages: number };
@@ -36,7 +38,7 @@ export const listMaintenance = async (
   const limit = query.limit ?? 20;
   let result: { records: Maintenance[]; total: number };
   try {
-    result = await maintenanceRepo.findAll(query);
+    result = await maintenanceRepo.findAll(query, scope);
   } catch (error) {
     if (isUndefinedTableError(error)) {
       return {
