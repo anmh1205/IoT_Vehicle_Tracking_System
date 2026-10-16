@@ -53,6 +53,19 @@ integration('atomic trip lifecycle and device grants in actual PostgreSQL', () =
     expect((await update(12, { notes: 'admin' }, admin))?.notes).toBe('admin');
   });
 
+  it('rejects inconsistent admin reassignment using the post-update asset pair', async () => {
+    expect(await update(11, { vehicleId: 'V1', deviceId: 'D2' }, admin)).toBeNull();
+    expect(await update(11, { vehicleId: 'V2' }, admin)).toBeNull();
+    expect(await update(11, { deviceId: 'D2' }, admin)).toBeNull();
+    const old = await pool.query('SELECT vehicle_id,device_id FROM trips WHERE id=11');
+    expect(old.rows[0]).toMatchObject({ vehicle_id: 'V1', device_id: 'D1' });
+
+    const changed = await update(11, { vehicleId: 'V2', deviceId: 'D2' }, admin);
+    expect(changed?.vehicle_id).toBe('V2');
+    expect(changed?.device_id).toBe('D2');
+    const restored = await update(11, { vehicleId: 'V1', deviceId: 'D1' }, admin);
+    expect(restored?.device_id).toBe('D1');
+  });
   it('permits only a granted planned trip to start, once', async () => {
     expect(await startTrip(12, u1)).toBeNull();
     expect((await startTrip(11, u1))?.status).toBe('in_progress');
