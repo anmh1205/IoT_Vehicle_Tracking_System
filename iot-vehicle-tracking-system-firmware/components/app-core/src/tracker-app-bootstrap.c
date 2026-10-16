@@ -292,7 +292,7 @@ static void tracker_main_relax_task_wdt_for_field_validation(void)
 void app_core_bootstrap_run(void)
 {
     // Fail fast if any required adapter port was not wired into app-core correctly.
-    ESP_ERROR_CHECK(tracker_runtime_ports_validate(&s_runtime_ports));
+    ESP_ERROR_CHECK(state_machine_bind_runtime_ports(&s_runtime_ports));
 
     // Keep firmware logs readable while still surfacing NimBLE warnings during bring-up.
     esp_log_level_set("*", ESP_LOG_INFO);
