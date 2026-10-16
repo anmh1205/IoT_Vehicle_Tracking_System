@@ -46,4 +46,5 @@ jobs:
           PGUSER: ivts_test
           PGPASSWORD: ivts_test_password
           PGDATABASE: ivts_test_assets
-        run: npx vitest run src/domain/asset/repositories/asset-grant.postgres.integration.test.ts
+        run: |
+          npx vitest run src/domain/asset/repositories/asset-grant.postgres.integration.test.ts src/domain/trip/repositories/trip-atomic-grants.postgres.integration.test.ts
