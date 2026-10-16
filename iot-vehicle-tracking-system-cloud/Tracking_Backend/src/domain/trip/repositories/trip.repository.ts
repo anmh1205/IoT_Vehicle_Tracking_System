@@ -13,6 +13,28 @@ import type {
   UpdateTripInput,
 } from '@/domain/trip/types/trip.types';
 
+export interface TripReadScope {
+  userId: number;
+  role: string;
+  deviceAccessMode: string;
+}
+
+const fullFleet = (actor: TripReadScope): boolean =>
+  actor.role === 'root' || actor.role === 'admin' || actor.deviceAccessMode === 'all';
+
+const tripVisibleTo = (actor: TripReadScope, param: number): string =>
+  fullFleet(actor) ? 'TRUE' : `EXISTS (
+    SELECT 1 FROM user_device_access uda
+    WHERE uda.user_id = ${param}
+      AND (t.device_id IS NULL OR t.device_id = uda.device_id)
+      AND (t.vehicle_id IS NULL OR EXISTS (
+        SELECT 1 FROM vehicles allowed_vehicle
+        WHERE allowed_vehicle.vehicle_id = t.vehicle_id
+          AND allowed_vehicle.device_id = uda.device_id
+      ))
+      AND (t.device_id IS NOT NULL OR t.vehicle_id IS NOT NULL)
+  )`;
+
 const ALLOWED_SORT_COLUMNS: Record<string, string> = {
   tripCode: 't.trip_code',
   status: 't.status',
@@ -35,7 +57,7 @@ const TRIP_SELECT_CLAUSE = `
   ${TRIP_FROM_CLAUSE}
 `;
 
-export const findAll = async (query: TripListQuery): Promise<{ trips: Trip[]; total: number }> => {
+export const findAll = async (query: TripListQuery, scope: TripReadScope): Promise<{ trips: Trip[]; total: number }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
   const offset = (page - 1) * limit;
@@ -43,6 +65,11 @@ export const findAll = async (query: TripListQuery): Promise<{ trips: Trip[]; to
   const conditions: string[] = [];
   const params: unknown[] = [];
   let paramIndex = 1;
+  conditions.push(tripVisibleTo(scope, paramIndex));
+  if (!fullFleet(scope)) {
+    params.push(scope.userId);
+    paramIndex++;
+  }
 
   if (query.status) {
     conditions.push(`t.status = $${paramIndex++}`);
@@ -81,6 +108,14 @@ export const findAll = async (query: TripListQuery): Promise<{ trips: Trip[]; to
 
   return { trips, total };
 };
+
+export const findByIdForScope = async (
+  id: number, scope: TripReadScope,
+): Promise<Trip | null> =>
+  findOne<Trip>(
+    `${TRIP_SELECT_CLAUSE} WHERE t.id = $1 AND ${tripVisibleTo(scope, 2)}`,
+    fullFleet(scope) ? [id] : [id, scope.userId],
+  );
 
 export const findById = async (id: number): Promise<Trip | null> =>
   findOne<Trip>(`${TRIP_SELECT_CLAUSE} WHERE t.id = $1`, [id]);
