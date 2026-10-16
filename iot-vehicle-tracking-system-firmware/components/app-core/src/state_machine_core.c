@@ -85,6 +85,18 @@ RTC_DATA_ATTR rtc_context_t g_rtc_context = {
 };
 
 static const char *TAG = STATE_MACHINE_TAG;
+
+/* Bound once at bootstrap; orchestration now uses injected transport services. */
+static const tracker_runtime_ports_t *s_runtime_ports = NULL;
+
+esp_err_t state_machine_core_bind_ports(const tracker_runtime_ports_t *ports) {
+    esp_err_t err = tracker_runtime_ports_validate(ports);
+    if (err != ESP_OK) {
+        return err;
+    }
+    s_runtime_ports = ports;
+    return ESP_OK;
+}
 /* Timestamp when current state was entered (for dwell time calculation). */
 static uint64_t s_state_entered_ms = 0;
 /* Timestamp of last health snapshot log. */
@@ -1478,6 +1490,7 @@ static app_state_t state_machine_handle_sleep_state(void) {
  */
 esp_err_t state_machine_core_init(const config_t *config) {
     ESP_RETURN_ON_NULL(config, ESP_ERR_INVALID_ARG, TAG, "config is NULL");
+    ESP_RETURN_ON_NULL(s_runtime_ports, ESP_ERR_INVALID_STATE, TAG, "runtime ports not bound");
 
     // Reset every shared runtime singleton before adapters start filling live state back in.
     state_runtime_context_reset(config);
@@ -1539,31 +1552,31 @@ esp_err_t state_machine_core_init(const config_t *config) {
     if (!state_machine_imu_runtime_enabled()) {
         ESP_LOGW(TAG, "event=imu_wake_disabled reason=config fallback=timer_only");
     }
-    ESP_RETURN_ON_FALSE(power_mgr_init() == ESP_OK, ESP_FAIL, TAG, "power_mgr_init failed");
+    ESP_RETURN_ON_FALSE(s_runtime_ports->power_control->init() == ESP_OK, ESP_FAIL, TAG, "power_mgr_init failed");
 
     // RTC failure is non-fatal because uptime-based fallback timestamps still let the tracker run.
-    esp_err_t rtc_init_err = rtc_ds3231m_init();
+    esp_err_t rtc_init_err = s_runtime_ports->rtc_clock->init();
     if (rtc_init_err != ESP_OK) {
         ESP_LOGW(TAG, "event=rtc_init_failed err=%s fallback=uptime_timebase", esp_err_to_name(rtc_init_err));
     }
 
     bool rtc_available = false;
     bool rtc_time_valid = false;
-    if (rtc_ds3231m_get_health(&rtc_available, &rtc_time_valid) == ESP_OK) {
+    if (s_runtime_ports->rtc_clock->get_health(&rtc_available, &rtc_time_valid) == ESP_OK) {
         ESP_LOGI(TAG, "event=rtc_health available=%d valid=%d", rtc_available ? 1 : 0, rtc_time_valid ? 1 : 0);
     }
 
     // Seed modem, MQTT, and offline buffering before the FSM starts publishing or consuming commands.
-    modem_lte_set_apn(s_config.apn);
-    modem_lte_request_connect();
-    ESP_RETURN_ON_FALSE(tracker_mqtt_init(&s_config) == ESP_OK, ESP_FAIL, TAG, "tracker_mqtt_init failed");
-    ESP_RETURN_ON_FALSE(offline_queue_init() == ESP_OK, ESP_FAIL, TAG, "offline_queue_init failed");
+    s_runtime_ports->modem->set_apn(s_config.apn);
+    s_runtime_ports->modem->request_connect();
+    ESP_RETURN_ON_FALSE(s_runtime_ports->mqtt->init(&s_config) == ESP_OK, ESP_FAIL, TAG, "tracker_mqtt_init failed");
+    ESP_RETURN_ON_FALSE(s_runtime_ports->storage_queue->init() == ESP_OK, ESP_FAIL, TAG, "offline_queue_init failed");
     // Session, command, and metrics subsystems reset after transport setup so they share the same boot baseline.
     telemetry_counters_reset();
     session_mgr_init();
     state_machine_restore_session_context_from_nvs();
     ESP_RETURN_ON_FALSE(command_handler_init(&s_config) == ESP_OK, ESP_FAIL, TAG, "command_handler_init failed");
-    tracker_mqtt_set_command_callback(state_machine_command_callback);
+    s_runtime_ports->mqtt->set_command_callback(state_machine_command_callback);
 
     // NVS recovery failure must not strand the vehicle in the boot retry loop.
     // The publish pipeline retries recovery after MQTT reconnects.
