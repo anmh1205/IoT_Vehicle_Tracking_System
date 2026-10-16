@@ -56,3 +56,49 @@ export const downloadExport = asyncHandler(async (req: AuthenticatedRequest, res
   res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
   res.download(job.filePath, fileName);
 });
+
+
+const scopedJobId = (raw: unknown): number => {
+  if (typeof raw !== 'string' || !/^[1-9][0-9]*$/.test(raw)) {
+    throw createValidationError('Invalid scoped export job ID');
+  }
+  const id = Number(raw);
+  if (!Number.isSafeInteger(id)) throw createValidationError('Invalid scoped export job ID');
+  return id;
+};
+
+/** Explicitly scoped route, independent from administrator-only full-fleet API. */
+export const createScopedDeviceExport = asyncHandler(async (
+  req: AuthenticatedRequest, res: Response,
+) => {
+  if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body) ||
+      Object.keys(req.body).length !== 1) {
+    throw createValidationError('Only deviceId is supported for scoped exports');
+  }
+  const job = await exportJobService.createScopedDeviceExport(req.user!.id, {
+    deviceId: req.body.deviceId,
+  });
+  sendCreated(res, job);
+});
+
+export const getScopedDeviceExportStatus = asyncHandler(async (
+  req: AuthenticatedRequest, res: Response,
+) => {
+  const job = await exportJobService.getScopedDeviceExportStatus(
+    scopedJobId(req.params.id), req.user!.id,
+  );
+  sendOk(res, job);
+});
+
+export const downloadScopedDeviceExport = asyncHandler(async (
+  req: AuthenticatedRequest, res: Response,
+) => {
+  const id = scopedJobId(req.params.id);
+  const file = await exportJobService.getScopedDeviceExportDownload(id, req.user!.id);
+  if (!existsSync(file.path)) {
+    throw createNotFoundError('Device export file not found on disk');
+  }
+  const name = `device_export_${id}.xlsx`;
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.download(file.path, name);
+});
