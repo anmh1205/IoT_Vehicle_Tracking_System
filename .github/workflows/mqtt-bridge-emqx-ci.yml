@@ -25,6 +25,19 @@ jobs:
           --health-interval 4s
           --health-timeout 4s
           --health-retries 35
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ivts_test
+          POSTGRES_PASSWORD: ivts_test_password
+          POSTGRES_DB: ivts_test_ingress
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ivts_test -d ivts_test_ingress"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 15
     defaults:
       run:
         working-directory: iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
@@ -40,6 +53,17 @@ jobs:
         env:
           IVTS_EMQX_INTEGRATION: '1'
         run: npx tsx --test tests/emqx-persistent-replay.integration.test.ts
+      - name: Verify source QoS1 PUBACK follows committed PostgreSQL work
+        env:
+          IVTS_EMQX_INTEGRATION: '1'
+          IVTS_PG_INTEGRATION: '1'
+          IVTS_INGRESS_TEST_ISOLATED: '1'
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: ivts_test
+          PGPASSWORD: ivts_test_password
+          PGDATABASE: ivts_test_ingress
+        run: npx tsx --test tests/emqx-puback-after-postgres.integration.test.ts
       - name: Verify real EMQX ACL denial and reconnect recovery
         env:
           IVTS_EMQX_INTEGRATION: '1'
