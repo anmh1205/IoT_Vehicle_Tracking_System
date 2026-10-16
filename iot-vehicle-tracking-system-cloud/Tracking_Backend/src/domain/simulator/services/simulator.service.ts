@@ -15,8 +15,6 @@ import type {
 interface DeviceSimulatorRuntime {
   deviceId: string;
   authToken: string;
-  simulatorAuthTokenHash: string;
-  originalAuthToken: string;
   lat: number;
   lon: number;
   heading: number;
@@ -439,30 +437,6 @@ const publishSimulatorStatus = (status: SimulatorStatus): void => {
   publishEvent('simulator:status', { ...status, preview });
 };
 
-const restoreSimulatorAuthTokens = async (
-  devices: DeviceSimulatorRuntime[],
-  reason: string,
-): Promise<void> => {
-  await Promise.all(
-    devices.map(async (device) => {
-      try {
-        await pool.query(
-          `UPDATE devices
-           SET auth_token = $3, updated_at = NOW()
-           WHERE device_id = $1 AND auth_token = $2`,
-          [device.deviceId, device.simulatorAuthTokenHash, device.originalAuthToken],
-        );
-      } catch (error) {
-        logger.error('Failed to restore device auth token after simulator state change', {
-          reason,
-          deviceId: device.deviceId,
-          error: (error as Error).message,
-        });
-      }
-    }),
-  );
-};
-
 const stopSimulationInternal = async (reason: string): Promise<SimulatorStatus> => {
   if (!runningSimulation) {
     return toStatus(lastSnapshot, false);
@@ -522,8 +496,6 @@ const stopSimulationInternal = async (reason: string): Promise<SimulatorStatus> 
       });
     }
   }
-
-  await restoreSimulatorAuthTokens(current.devices, reason);
 
   for (const device of current.devices) {
     try {
@@ -728,11 +700,37 @@ const executeTickSafely = async (): Promise<void> => {
   }
 };
 
+
 /**
- * Legacy MQTT simulator impersonates real device identities and temporarily
- * replaces their auth_token hashes. It must never reach a real deployment.
- * This is a fail-closed mitigation until the simulator has separate identities,
- * database and broker namespaces and can no longer mutate live devices.
+ * Simulator credentials are pre-provisioned exclusively in its isolated test
+ * database. Never overwrite a stored device credential to impersonate it.
+ * An absent/invalid mapping fails before the MQTT client can connect.
+ */
+export const resolveSimulatorDeviceToken = (deviceId: string, storedHash: string): string => {
+  const raw = process.env.SIMULATOR_DEVICE_TOKENS_JSON;
+  if (!raw) {
+    throw createForbiddenError('Simulator requires pre-provisioned test-device credentials');
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw) as unknown;
+  } catch {
+    throw createForbiddenError('Invalid simulator device credential configuration');
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw createForbiddenError('Invalid simulator device credential configuration');
+  }
+  const token = (parsed as Record<string, unknown>)[deviceId];
+  if (typeof token !== 'string' || token.length === 0 ||
+      hashToken(token) !== storedHash) {
+    throw createForbiddenError('Simulator credentials do not match dedicated test device');
+  }
+  return token;
+};
+/**
+ * This diagnostic simulator is available only with explicit isolated test DB,
+ * broker, SIM-prefixed identities and pre-provisioned credentials. It never
+ * rotates any device credential, and cannot run in production.
  */
 export const startSimulation = async (
   input: SimulatorStartInput,
@@ -808,13 +806,11 @@ export const startSimulation = async (
     const initialLat = parsedLatitude ?? roundTo(input.lat + randomBetween(-0.0005, 0.0005), 6);
     const initialLon = parsedLongitude ?? roundTo(input.lon + randomBetween(-0.0005, 0.0005), 6);
 
-    const simulatorAuthToken = `sim-${randomUUID()}`;
+    const simulatorAuthToken = resolveSimulatorDeviceToken(row.device_id, row.auth_token);
 
     runtimes.push({
       deviceId: row.device_id,
       authToken: simulatorAuthToken,
-      simulatorAuthTokenHash: hashToken(simulatorAuthToken),
-      originalAuthToken: row.auth_token,
       lat: initialLat,
       lon: initialLon,
       heading: normalizeHeading(randomBetween(0, 359)),
@@ -825,17 +821,6 @@ export const startSimulation = async (
       bootId: createBootId(row.device_id),
     });
   }
-
-  await Promise.all(
-    runtimes.map((device) =>
-      pool.query(
-        `UPDATE devices
-         SET auth_token = $2, updated_at = NOW()
-         WHERE device_id = $1`,
-        [device.deviceId, device.simulatorAuthTokenHash],
-      ),
-    ),
-  );
 
   const startedAt = new Date();
   const expiresAt = new Date(startedAt.getTime() + input.durationMin * 60_000);
@@ -853,7 +838,6 @@ export const startSimulation = async (
     if (mqttClient) {
       await endMqttClient(mqttClient);
     }
-    await restoreSimulatorAuthTokens(runtimes, 'start_failed');
     throw error;
   }
 
