@@ -25,6 +25,9 @@
  */
 esp_err_t state_machine_core_init(const config_t *config);
 
+/** @brief Validate and install the port registry consumed by core initialization. */
+esp_err_t state_machine_core_bind_ports(const tracker_runtime_ports_t *ports);
+
 /**
  * @brief Execute exactly one cooperative iteration of the tracker FSM.
  *
