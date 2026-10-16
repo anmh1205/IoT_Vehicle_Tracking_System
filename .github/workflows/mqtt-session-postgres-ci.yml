@@ -47,4 +47,10 @@ jobs:
           PGUSER: ivts_test
           PGPASSWORD: ivts_test_password
           PGDATABASE: ivts_test
-        run: npx tsx --test tests/session-last-position-postgres.integration.test.ts tests/device-auth-postgres.integration.test.ts
+          POSTGRESQL_HOST: 127.0.0.1
+          POSTGRESQL_PORT: '5432'
+          POSTGRESQL_USER: ivts_test
+          POSTGRESQL_PASSWORD: ivts_test_password
+          POSTGRESQL_DATABASE: ivts_test
+          IVTS_AUTH_ISOLATED_DATABASE: '1'
+        run: npx tsx --test tests/session-last-position-postgres.integration.test.ts tests/device-auth-postgres.integration.test.ts tests/device-auth-entrypoints-postgres.integration.test.ts
