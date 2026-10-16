@@ -13,7 +13,7 @@ vi.mock('@/config/env', () => ({
 import { pool } from '@/infrastructure/database/pool';
 import { appConfig } from '@/config/env';
 import { publishEvent } from '@/infrastructure/realtime';
-import { startSimulation } from './simulator.service';
+import { startSimulation, clearRetainedSimulatorStatus } from './simulator.service';
 
 const input: SimulatorStartInput = {
   deviceIds: ['SIM-TEST-01'], intervalSec: 5, durationMin: 1,
@@ -33,6 +33,17 @@ describe('simulator production safety boundary', () => {
     vi.stubEnv('SIMULATOR_ISOLATED_BROKER_HOST', '');
   });
   afterEach(() => vi.unstubAllEnvs());
+
+  it('deletes retained simulator status without sending the original hashed device credential', async () => {
+    const publish = vi.fn((topic: string, payload: string,
+      options: { qos: number; retain?: boolean },
+      callback: (error?: Error | null) => void) => callback(null));
+    await clearRetainedSimulatorStatus({ publish } as never, 'SIM-TEST-01');
+    expect(publish).toHaveBeenCalledWith(
+      'v1/SIM-TEST-01/status', '', { qos: 1, retain: true }, expect.any(Function),
+    );
+    expect(publish.mock.calls[0][1]).toBe('');
+  });
 
   it('denies by default before any device lookup or credential write', async () => {
     await expect(startSimulation(input, 1)).rejects.toMatchObject({ status: 403 });

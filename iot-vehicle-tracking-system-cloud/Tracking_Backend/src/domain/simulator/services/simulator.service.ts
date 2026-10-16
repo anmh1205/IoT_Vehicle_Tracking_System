@@ -185,6 +185,21 @@ const publishMqttMessage = (
     });
   });
 
+/**
+ * MQTT retained messages are removed with an empty retained publication.
+ * Never publish the original DB password/hash as an MQTT auth_token.
+ */
+export const clearRetainedSimulatorStatus = (
+  client: SimulatorMqttClient,
+  deviceId: string,
+): Promise<void> =>
+  new Promise((resolve, reject) => {
+    client.publish(`v1/${deviceId}/status`, '', { qos: 1, retain: true }, (error) => {
+      if (error) reject(error);
+      else resolve();
+    });
+  });
+
 const endMqttClient = (client: SimulatorMqttClient): Promise<void> =>
   new Promise((resolve) => {
     client.end(false, () => resolve());
@@ -195,14 +210,13 @@ const publishDeviceStatus = (
   device: DeviceSimulatorRuntime,
   status: 'running' | 'stopped',
   timestamp: number,
-  authTokenOverride?: string,
 ): Promise<void> =>
   publishMqttMessage(
     client,
     `v1/${device.deviceId}/status`,
     {
       device_id: device.deviceId,
-      auth_token: authTokenOverride ?? device.authToken,
+      auth_token: device.authToken,
       status,
       timestamp,
       metadata: createPayloadMetadata(device, timestamp, DEFAULT_SCHEMA_VERSION),
@@ -511,18 +525,11 @@ const stopSimulationInternal = async (reason: string): Promise<SimulatorStatus> 
 
   await restoreSimulatorAuthTokens(current.devices, reason);
 
-  const finalRetainedTimestamp = Date.now();
   for (const device of current.devices) {
     try {
-      await publishDeviceStatus(
-        current.mqttClient,
-        device,
-        'stopped',
-        finalRetainedTimestamp,
-        device.originalAuthToken,
-      );
+      await clearRetainedSimulatorStatus(current.mqttClient, device.deviceId);
     } catch (error) {
-      logger.error('Failed to overwrite retained simulator stop status after auth restore', {
+      logger.error('Failed to remove retained simulator status after auth restore', {
         deviceId: device.deviceId,
         error: (error as Error).message,
       });
