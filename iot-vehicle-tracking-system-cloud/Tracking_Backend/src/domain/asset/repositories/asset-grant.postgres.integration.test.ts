@@ -15,6 +15,7 @@ vi.mock('@/infrastructure/database/pool', async () => {
 import { pool } from '@/infrastructure/database/pool';
 import { hasAssetGrant } from './asset-grant.repository';
 import { update as updateVehicleRow } from '@/domain/vehicle/repositories/vehicle.repository';
+import { update as updateMaintenanceRow } from '@/domain/maintenance/repositories/maintenance.repository';
 
 const integration = process.env.IVTS_PG_INTEGRATION === '1' ? describe : describe.skip;
 integration('real SQL asset grant checks', () => {
@@ -25,7 +26,7 @@ integration('real SQL asset grant checks', () => {
     await pool.query('CREATE TABLE user_device_access(user_id integer,device_id text)');
     await pool.query('CREATE TABLE vehicles(id integer PRIMARY KEY,vehicle_id text,device_id text,notes text,updated_at timestamptz DEFAULT NOW())');
     await pool.query('CREATE TABLE trips(id integer PRIMARY KEY,vehicle_id text,device_id text)');
-    await pool.query('CREATE TABLE maintenance(id integer PRIMARY KEY,vehicle_id text)');
+    await pool.query('CREATE TABLE maintenance(id integer PRIMARY KEY,vehicle_id text,notes text,updated_at timestamptz DEFAULT NOW())');
     await pool.query("INSERT INTO user_device_access(user_id,device_id) VALUES(101,'D1'),(102,'D2')");
     await pool.query("INSERT INTO vehicles(id,vehicle_id,device_id) VALUES(1,'V1','D1'),(2,'V2','D2')");
     await pool.query("INSERT INTO trips(id,vehicle_id,device_id) VALUES(11,'V1',NULL),(12,'V2','D2')");
@@ -58,6 +59,19 @@ integration('real SQL asset grant checks', () => {
     const own = await updateVehicleRow(1, { notes: 'allowed fleet edit' }, u1);
     expect(own?.notes).toBe('allowed fleet edit');
   });
+  it('allows maintenance writes only when the actor has a live vehicle grant', async () => {
+    const u1 = { userId: 101, role: 'operator', deviceAccessMode: 'assigned' };
+    const denied = await updateMaintenanceRow(22, { notes: 'cross-tenant attempt' }, u1);
+    expect(denied).toBeNull();
+    const foreign = await pool.query('SELECT notes FROM maintenance WHERE id=22');
+    expect(foreign.rows[0].notes).toBeNull();
+
+    const own = await updateMaintenanceRow(21, { notes: 'service completed' }, u1);
+    expect(own?.notes).toBe('service completed');
+    const admin = { userId: 1, role: 'admin', deviceAccessMode: 'all' };
+    expect((await updateMaintenanceRow(22, { notes: 'admin edit' }, admin))?.notes).toBe('admin edit');
+  });
+
   it('enforces revocation on the next SQL mutation guard', async () => {
     await pool.query("DELETE FROM user_device_access WHERE user_id=101 AND device_id='D1'");
     expect(await hasAssetGrant(101, 'vehicleRow', 1)).toBe(false);
@@ -66,5 +80,9 @@ integration('real SQL asset grant checks', () => {
     expect(row.rows[0].notes).toBe('allowed fleet edit');
     expect(await hasAssetGrant(101, 'tripRow', 11)).toBe(false);
     expect(await hasAssetGrant(101, 'maintenanceRow', 21)).toBe(false);
+    expect(await updateMaintenanceRow(21, { notes: 'edit after revoke' },
+      { userId: 101, role: 'operator', deviceAccessMode: 'assigned' })).toBeNull();
+    const maintenance = await pool.query('SELECT notes FROM maintenance WHERE id=21');
+    expect(maintenance.rows[0].notes).toBe('service completed');
   });
 });
