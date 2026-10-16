@@ -123,6 +123,9 @@ static ble_obd_response_state_t ble_obd_classify_response_state(
     ble_obd_ctx_t *ctx, bool valid) {
     (void)ctx; return valid ? BLE_OBD_RESPONSE_STATE_LIVE : BLE_OBD_RESPONSE_STATE_ERROR;
 }
+static const char *ble_obd_response_state_to_string(ble_obd_response_state_t state) {
+    (void)state; return "host";
+}
 static void telemetry_counters_inc_obd_read_ok(void) {}
 static void telemetry_counters_inc_obd_invalid_response(void) {}
 static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t handle, void *ctx);
