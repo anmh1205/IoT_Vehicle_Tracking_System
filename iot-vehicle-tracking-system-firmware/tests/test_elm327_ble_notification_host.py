@@ -55,7 +55,10 @@ def test_real_ble_notification_assembly_and_raw_at_failure_paths(tmp_path: Path)
 #define ESP_ERR_TIMEOUT (-2)
 #define ESP_ERR_INVALID_STATE (-3)
 #define ESP_ERR_INVALID_ARG (-4)
-#define ESP_LOGW(...) ((void)0)
+static void host_log(const char *tag, const char *format, ...) {
+    (void)tag; (void)format;
+}
+#define ESP_LOGW(...) host_log(__VA_ARGS__)
 #define ESP_RETURN_ON_NULL(value, code, tag, ...) do { if (!(value)) return code; } while (0)
 #define BLE_MGR_E_OK 0
 #define BLE_MGR_E_FAIL 1
