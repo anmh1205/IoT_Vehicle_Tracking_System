@@ -25,7 +25,7 @@ const fullFleet = (actor: TripReadScope): boolean =>
 const tripVisibleTo = (actor: TripReadScope, param: number): string =>
   fullFleet(actor) ? 'TRUE' : `EXISTS (
     SELECT 1 FROM user_device_access uda
-    WHERE uda.user_id = ${param}
+    WHERE uda.user_id = $${param}
       AND (t.device_id IS NULL OR t.device_id = uda.device_id)
       AND (t.vehicle_id IS NULL OR EXISTS (
         SELECT 1 FROM vehicles allowed_vehicle
