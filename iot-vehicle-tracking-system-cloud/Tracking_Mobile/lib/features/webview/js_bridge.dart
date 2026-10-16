@@ -72,14 +72,24 @@ class JSBridge {
     }
   }
 
+  // Validate the calling frame as well as the current top-level document.
+  static bool _hasTrustedCaller(JavaScriptHandlerFunctionData data) {
+    return isTrustedNativeBridgeCaller(
+      isMainFrame: data.isMainFrame,
+      origin: data.origin.toString(),
+      requestUrl: data.requestUrl.toString(),
+      appUrl: AppConfig.webAppUrl,
+    );
+  }
+
   /// Register native handler callbacks on the WebView controller.
   static void register(InAppWebViewController controller, WidgetRef ref) {
     controller.addJavaScriptHandler(
       handlerName: 'showNotification',
-      callback: (args) async {
-        if (!await _hasTrustedTopFrame(controller)) return;
-        final title = args.isNotEmpty ? args[0].toString() : 'Notification';
-        final body = args.length > 1 ? args[1].toString() : '';
+      callback: (JavaScriptHandlerFunctionData data) async {
+        if (!_hasTrustedCaller(data) || !await _hasTrustedTopFrame(controller)) return;
+        final title = data.args.isNotEmpty ? data.args[0].toString() : 'Notification';
+        final body = data.args.length > 1 ? data.args[1].toString() : '';
         NotificationService.show(title: title, body: body);
         Log.info('Native notification: $title');
       },
@@ -87,10 +97,10 @@ class JSBridge {
 
     controller.addJavaScriptHandler(
       handlerName: 'saveToken',
-      callback: (args) async {
-        if (!await _hasTrustedTopFrame(controller)) return;
-        if (args.isNotEmpty) {
-          final token = args[0].toString();
+      callback: (JavaScriptHandlerFunctionData data) async {
+        if (!_hasTrustedCaller(data) || !await _hasTrustedTopFrame(controller)) return;
+        if (data.args.isNotEmpty) {
+          final token = data.args[0].toString();
           await ref.read(authProvider.notifier).login(token);
           Log.info('Auth token saved from web app');
         }
@@ -99,8 +109,8 @@ class JSBridge {
 
     controller.addJavaScriptHandler(
       handlerName: 'getDeviceInfo',
-      callback: (_) async {
-        if (!await _hasTrustedTopFrame(controller)) return null;
+      callback: (JavaScriptHandlerFunctionData data) async {
+        if (!_hasTrustedCaller(data) || !await _hasTrustedTopFrame(controller)) return null;
         return {
           'platform': Platform.isIOS ? 'ios' : 'android',
           'isNativeApp': true,
@@ -111,8 +121,8 @@ class JSBridge {
 
     controller.addJavaScriptHandler(
       handlerName: 'logout',
-      callback: (_) async {
-        if (!await _hasTrustedTopFrame(controller)) return;
+      callback: (JavaScriptHandlerFunctionData data) async {
+        if (!_hasTrustedCaller(data) || !await _hasTrustedTopFrame(controller)) return;
         await ref.read(authProvider.notifier).logout();
         Log.info('Logout triggered from web app');
       },
@@ -120,8 +130,8 @@ class JSBridge {
 
     controller.addJavaScriptHandler(
       handlerName: 'getCurrentLocation',
-      callback: (_) async {
-        if (!await _hasTrustedTopFrame(controller)) return null;
+      callback: (JavaScriptHandlerFunctionData data) async {
+        if (!_hasTrustedCaller(data) || !await _hasTrustedTopFrame(controller)) return null;
         // Placeholder - location permission and service integration
         // would be added in a future iteration.
         return {'latitude': 0.0, 'longitude': 0.0, 'available': false};
@@ -130,8 +140,8 @@ class JSBridge {
 
     controller.addJavaScriptHandler(
       handlerName: 'getFcmToken',
-      callback: (_) async {
-        if (!await _hasTrustedTopFrame(controller)) return null;
+      callback: (JavaScriptHandlerFunctionData data) async {
+        if (!_hasTrustedCaller(data) || !await _hasTrustedTopFrame(controller)) return null;
         final token = await StorageService.instance.getFcmToken();
         return token;
       },
