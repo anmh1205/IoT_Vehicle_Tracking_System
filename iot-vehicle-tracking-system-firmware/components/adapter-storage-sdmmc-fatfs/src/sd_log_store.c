@@ -134,7 +134,13 @@ static esp_err_t sd_log_store_write_meta_snapshot(const sd_log_meta_t *meta) {
         return ESP_FAIL;
     }
 
-    fflush(fp);
+    if (fflush(fp) != 0) {
+        fclose(fp);
+        remove(SD_LOG_META_TMP_PATH);
+        telemetry_counters_inc_sd_write_fail();
+        sd_log_store_mark_degraded();
+        return ESP_FAIL;
+    }
     if (fsync(fileno(fp)) != 0) {
         fclose(fp);
         remove(SD_LOG_META_TMP_PATH);
@@ -142,8 +148,12 @@ static esp_err_t sd_log_store_write_meta_snapshot(const sd_log_meta_t *meta) {
         sd_log_store_mark_degraded();
         return ESP_FAIL;
     }
-
-    fclose(fp);
+    if (fclose(fp) != 0) {
+        remove(SD_LOG_META_TMP_PATH);
+        telemetry_counters_inc_sd_write_fail();
+        sd_log_store_mark_degraded();
+        return ESP_FAIL;
+    }
 
     remove(SD_LOG_META_BAK_PATH);
     if (rename(SD_LOG_META_PATH, SD_LOG_META_BAK_PATH) != 0 && errno != ENOENT) {
@@ -445,12 +455,13 @@ static bool sd_log_store_line_complete(const char *line) {
     }
 
     /*
-     * fgets returns a partial line when the on-disk record exceeds our bounded
-     * buffer. Treat that as corruption and discard the remainder so the parser
-     * never replays a truncated JSON payload.
+     * Every committed append ends in LF. fgets also returns a short fragment
+     * without LF when an interrupted write left a truncated final record;
+     * its header can still parse, so accepting it would replay partial JSON.
+     * Require LF for every replayed record, even at EOF.
      */
     size_t len = strlen(line);
-    return len == 0U || line[len - 1U] == '\n' || len < (SD_LOG_LINE_MAX - 1U);
+    return len > 0U && line[len - 1U] == '\n';
 }
 
 static void sd_log_store_discard_line_remainder(FILE *fp) {
@@ -767,15 +778,23 @@ esp_err_t sd_log_store_append(const sd_log_record_t *record) {
         return ESP_FAIL;
     }
 
-    fflush(fp);
+    if (fflush(fp) != 0) {
+        fclose(fp);
+        telemetry_counters_inc_sd_write_fail();
+        sd_log_store_mark_degraded();
+        return ESP_FAIL;
+    }
     if (fsync(fileno(fp)) != 0) {
         fclose(fp);
         telemetry_counters_inc_sd_fsync_fail();
         sd_log_store_mark_degraded();
         return ESP_FAIL;
     }
-
-    fclose(fp);
+    if (fclose(fp) != 0) {
+        telemetry_counters_inc_sd_write_fail();
+        sd_log_store_mark_degraded();
+        return ESP_FAIL;
+    }
     telemetry_counters_inc_sd_write_ok();
 
     /*
@@ -940,17 +959,18 @@ esp_err_t sd_log_store_gc_if_needed(void) {
     }
 
     char line[SD_LOG_LINE_MAX] = {0};
+    bool invalid_record = false;
     while (fgets(line, sizeof(line), in) != NULL) {
-        // Re-parse each persisted line through the normal record decoder before deciding whether to keep it.
+        // Compaction may discard acknowledged noncritical records, but cannot
+        // silently delete an unknown or malformed critical record.
         if (!sd_log_store_line_complete(line)) {
-            sd_log_store_discard_line_remainder(in);
-            telemetry_counters_inc_replay_drop();
-            continue;
+            invalid_record = true;
+            break;
         }
         sd_log_record_t rec = {0};
         if (sd_log_store_parse_record(line, &rec) != ESP_OK) {
-            telemetry_counters_inc_replay_drop();
-            continue;
+            invalid_record = true;
+            break;
         }
         /*
          * Critical records stay until the ACK watermark passes them.
@@ -969,7 +989,25 @@ esp_err_t sd_log_store_gc_if_needed(void) {
         }
     }
 
-    fflush(out);
+    if (invalid_record || ferror(in)) {
+        // Preserve the original log and any critical records when a source
+        // read fails or even one entry is malformed. Do not promote a subset.
+        fclose(out);
+        fclose(in);
+        remove(SD_LOG_DATA_TMP_PATH);
+        ESP_LOGE(TAG, "gc aborted: source log incomplete or unreadable");
+        sd_log_store_mark_degraded();
+        return ESP_ERR_INVALID_SIZE;
+    }
+
+    if (fflush(out) != 0) {
+        fclose(out);
+        fclose(in);
+        remove(SD_LOG_DATA_TMP_PATH);
+        telemetry_counters_inc_sd_write_fail();
+        sd_log_store_mark_degraded();
+        return ESP_FAIL;
+    }
     if (fsync(fileno(out)) != 0) {
         fclose(out);
         fclose(in);
@@ -978,8 +1016,18 @@ esp_err_t sd_log_store_gc_if_needed(void) {
         sd_log_store_mark_degraded();
         return ESP_FAIL;
     }
-    fclose(out);
-    fclose(in);
+    if (fclose(out) != 0) {
+        fclose(in);
+        remove(SD_LOG_DATA_TMP_PATH);
+        telemetry_counters_inc_sd_write_fail();
+        sd_log_store_mark_degraded();
+        return ESP_FAIL;
+    }
+    if (fclose(in) != 0) {
+        remove(SD_LOG_DATA_TMP_PATH);
+        sd_log_store_mark_degraded();
+        return ESP_FAIL;
+    }
 
     /* Promote compacted file with the same temp/backup rotation strategy as metadata. */
     remove(SD_LOG_DATA_BAK_PATH);
