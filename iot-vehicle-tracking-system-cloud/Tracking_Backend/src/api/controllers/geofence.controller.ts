@@ -141,7 +141,7 @@ export const createVehiclePolicy = asyncHandler(async (req: AuthenticatedRequest
     throw createValidationError('Invalid policy data', parsed.error.flatten().fieldErrors);
   }
 
-  const policy = await vehiclePolicyCrudService.createVehiclePolicy(parsed.data, req.user?.id);
+  const policy = await vehiclePolicyCrudService.createVehiclePolicy(parsed.data, policyScope(req), req.user?.id);
   sendCreated(res, policy);
 });
 
@@ -156,7 +156,7 @@ export const updateVehiclePolicy = asyncHandler(async (req: AuthenticatedRequest
     throw createValidationError('Invalid policy data', parsed.error.flatten().fieldErrors);
   }
 
-  const policy = await vehiclePolicyCrudService.updateVehiclePolicy(id, parsed.data, req.user?.id);
+  const policy = await vehiclePolicyCrudService.updateVehiclePolicy(id, parsed.data, policyScope(req), req.user?.id);
   sendOk(res, policy);
 });
 

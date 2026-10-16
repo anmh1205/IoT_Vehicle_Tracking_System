@@ -1,4 +1,4 @@
-import { findMany, findOne, insertOne, updateOne } from '@/infrastructure/database/queries';
+import { findMany, findOne, updateOne } from '@/infrastructure/database/queries';
 import type {
   CreateVehiclePolicyInput,
   UpdateVehiclePolicyInput,
@@ -104,13 +104,17 @@ export const listActivePoliciesByVehicle = async (vehicleId: string): Promise<Ve
 
 export const createPolicy = async (
   input: CreateVehiclePolicyInput,
+  scope: GeofenceAccessScope,
   actorId?: number,
-): Promise<VehiclePolicy> =>
-  insertOne<VehiclePolicy>(
+): Promise<VehiclePolicy | null> =>
+  findOne<VehiclePolicy>(
     `INSERT INTO vehicle_policies (
       vehicle_id, policy_type, status, params_json, effective_from, effective_to, created_by, updated_by, created_at, updated_at
-    ) VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7, $7, NOW(), NOW())
-     RETURNING *`,
+    ) SELECT $1, $2, $3, $4::jsonb, $5, $6, $7, $7, NOW(), NOW()
+      WHERE $8::boolean OR EXISTS (
+        SELECT 1 FROM vehicles v JOIN user_device_access uda ON uda.device_id = v.device_id
+        WHERE v.vehicle_id = $1 AND uda.user_id = $9
+      ) RETURNING *`,
     [
       input.vehicleId,
       input.policyType,
@@ -119,12 +123,14 @@ export const createPolicy = async (
       parseDate(input.effectiveFrom),
       parseDate(input.effectiveTo),
       actorId ?? null,
+      geofenceGlobalScope(scope),
+      scope.userId,
     ],
   );
-
 export const updatePolicy = async (
   id: number,
   input: UpdateVehiclePolicyInput,
+  scope: GeofenceAccessScope,
   actorId?: number,
 ): Promise<VehiclePolicy | null> => {
   const clauses: string[] = [];
@@ -149,16 +155,21 @@ export const updatePolicy = async (
   }
 
   if (clauses.length === 0) {
-    return getPolicyById(id);
+    return getPolicyByIdForScope(id, scope);
   }
 
   clauses.push(`updated_by = $${paramIndex++}`);
   params.push(actorId ?? null);
   clauses.push('updated_at = NOW()');
   params.push(id);
+  const targetParam = paramIndex++;
+  const predicate = vehiclePolicyVisibleTo(scope, paramIndex);
+  if (!geofenceGlobalScope(scope)) params.push(scope.userId);
+  const bind = '$' + targetParam;
 
   return updateOne<VehiclePolicy>(
-    `UPDATE vehicle_policies SET ${clauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+    `UPDATE vehicle_policies AS p SET ${clauses.join(', ')}
+     WHERE p.id = ${bind} AND ${predicate} RETURNING p.*`,
     params,
   );
 };
