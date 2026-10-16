@@ -1,5 +1,6 @@
 import { createNotFoundError } from '@/shared/utils/errors.util';
 import * as vehiclePolicyRepo from '@/domain/geofence/repositories/vehicle-policy.repository';
+import type { GeofenceAccessScope } from '@/domain/geofence/repositories/vehicle-policy.repository';
 import * as policyStateRepo from '@/domain/geofence/repositories/vehicle-policy-state.repository';
 import * as policyViolationRepo from '@/domain/geofence/repositories/vehicle-policy-violation.repository';
 import type {
@@ -49,13 +50,14 @@ const sanitizePolicyState = (state: PolicyStateWithType): VehiclePolicyStatePubl
 
 export const listVehiclePolicies = async (
   query: VehiclePolicyListQuery,
+  scope: GeofenceAccessScope,
 ): Promise<{
   items: VehiclePolicyPublic[];
   pagination: { page: number; limit: number; total: number; totalPages: number };
 }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
-  const result = await vehiclePolicyRepo.listPolicies(query);
+  const result = await vehiclePolicyRepo.listPolicies(query, scope);
 
   return {
     items: result.policies.map(sanitizeVehiclePolicy),
@@ -68,8 +70,8 @@ export const listVehiclePolicies = async (
   };
 };
 
-export const getVehiclePolicyById = async (id: number): Promise<VehiclePolicyPublic> => {
-  const policy = await vehiclePolicyRepo.getPolicyById(id);
+export const getVehiclePolicyById = async (id: number, scope: GeofenceAccessScope): Promise<VehiclePolicyPublic> => {
+  const policy = await vehiclePolicyRepo.getPolicyByIdForScope(id, scope);
   if (!policy) {
     throw createNotFoundError(`Policy with ID ${id} not found`);
   }
