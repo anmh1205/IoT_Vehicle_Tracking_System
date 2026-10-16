@@ -49,6 +49,12 @@ Set<String> nativeBridgeOriginAllowList(
   return <String>{'^$escapedOrigin\$'};
 }
 
+/// Native JavaScript **handler** origin rules are regular expressions on both
+/// Android and iOS. They must not reuse the Android WebView bridge's literal
+/// origin rule, which could behave like an unanchored, unescaped regex.
+Set<String> nativeHandlerOriginAllowList(String appUrl) =>
+    nativeBridgeOriginAllowList(appUrl, isAndroid: false);
+
 /// Validate calling frame independently from the displayed top frame.
 bool isTrustedNativeBridgeCaller({
   required bool isMainFrame,
