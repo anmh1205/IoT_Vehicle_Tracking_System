@@ -18,6 +18,13 @@ import * as geofenceCrudService from '@/domain/geofence/services/geofence-crud.s
 import * as geofenceListService from '@/domain/geofence/services/geofence-list.service';
 import * as vehiclePolicyCrudService from '@/domain/geofence/services/vehicle-policy-crud.service';
 import * as vehicleAllowedZoneService from '@/domain/geofence/services/vehicle-allowed-zone.service';
+import type { GeofenceAccessScope } from '@/domain/geofence/repositories/vehicle-policy.repository';
+
+const policyScope = (req: AuthenticatedRequest): GeofenceAccessScope => ({
+  userId: req.user!.id,
+  role: req.user!.role,
+  deviceAccessMode: req.user!.deviceAccessMode,
+});
 
 export const listGeofences = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const parsed = geofenceListQuerySchema.safeParse(req.query);
@@ -114,7 +121,7 @@ export const listVehiclePolicies = asyncHandler(async (req: AuthenticatedRequest
     throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
   }
 
-  const result = await vehiclePolicyCrudService.listVehiclePolicies(parsed.data);
+  const result = await vehiclePolicyCrudService.listVehiclePolicies(parsed.data, policyScope(req));
   sendOk(res, result);
 });
 
@@ -124,7 +131,7 @@ export const getVehiclePolicy = asyncHandler(async (req: AuthenticatedRequest, r
     throw createValidationError('Invalid policy ID');
   }
 
-  const policy = await vehiclePolicyCrudService.getVehiclePolicyById(id);
+  const policy = await vehiclePolicyCrudService.getVehiclePolicyById(id, policyScope(req));
   sendOk(res, policy);
 });
 
@@ -221,7 +228,7 @@ export const listVehiclePolicyViolations = asyncHandler(
       throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
     }
 
-    const result = await vehiclePolicyCrudService.listVehiclePolicyViolations(parsed.data);
+    const result = await vehiclePolicyCrudService.listVehiclePolicyViolations(parsed.data, policyScope(req));
     sendOk(res, result);
   },
 );
