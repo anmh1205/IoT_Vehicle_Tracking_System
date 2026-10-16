@@ -1,5 +1,6 @@
 #include "mqtt_internal.h"
 
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -93,6 +94,17 @@ static const char *tracker_mqtt_topic_class(const char *topic) {
  * @return Locally-assigned message ID (>= 0) on success, -1 on any failure or
  *         when the session is not connected.
  */
+/* Keep the synthetic modem publish sequence positive without signed overflow.
+ * This ID is local correlation only, NOT a broker-assigned QoS packet ID. */
+static int tracker_mqtt_next_local_publish_id(void) {
+    if (s_next_msg_id <= 0) {
+        s_next_msg_id = 1;
+    }
+    const int current_id = s_next_msg_id;
+    s_next_msg_id = current_id == INT_MAX ? 1 : current_id + 1;
+    return current_id;
+}
+
 int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *payload, int qos) {
     // Drive one full modem publish transaction here so topic/payload staging and PUB result handling stay in one place.
     ESP_RETURN_ON_FALSE(s_connected, -1, TRACKER_MQTT_TAG, "MQTT not connected");
@@ -203,12 +215,9 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
         }
     }
 
-    // The modem path does not return a broker message ID, so track one locally for higher-level correlation.
-    int msg_id = s_next_msg_id++;
-    if (s_next_msg_id <= 0) {
-        s_next_msg_id = 1; // wrap back to 1 so IDs stay positive after int overflow
-    }
-    return msg_id;
+    // The modem does not report a broker packet ID. Return a local
+    // correlation ID without overflowing signed int at the rollover boundary.
+    return tracker_mqtt_next_local_publish_id();
 }
 
 /**
