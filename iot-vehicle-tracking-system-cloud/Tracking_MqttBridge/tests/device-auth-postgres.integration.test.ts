@@ -42,23 +42,27 @@ integrationTest('real PostgreSQL requires the raw device secret, never a stolen 
       [digest],
     );
 
+    // Both public entrypoints must use the same repository verifier query.
     for (const [file, fn] of [
       ['../src/infrastructure/database.ts', 'validateDevice'],
       ['../src/services/device-auth.service.ts', 'verifyDeviceToken'],
     ]) {
-      const sql = readAuthQuery(file, fn);
-      assert.match(sql, /auth_token = encode\(sha256\(\$2::bytea\), 'hex'\)/);
-      assert.doesNotMatch(sql, /OR\s+auth_token\s*=/i);
-      assert.doesNotMatch(sql, /\$3\b/, 'query must bind only deviceId and raw token');
-      assert.match(sql, /is_active\s*=\s*true/i);
-      assert.equal((await client.query(sql, ['DEV-1', secret])).rowCount, 1);
-      assert.equal((await client.query(sql, ['DEV-1', digest])).rowCount, 0);
-      assert.equal((await client.query(sql, ['DEV-1', 'wrong-secret'])).rowCount, 0);
-      assert.equal((await client.query(sql, ['DEV-unknown', secret])).rowCount, 0);
-      await client.query("UPDATE devices SET is_active=FALSE WHERE device_id='DEV-1'");
-      assert.equal((await client.query(sql, ['DEV-1', secret])).rowCount, 0);
-      await client.query("UPDATE devices SET is_active=TRUE WHERE device_id='DEV-1'");
+      const wrapper = readFileSync(new URL(file, import.meta.url), 'utf8');
+      const start = wrapper.indexOf(`export const ${fn}`);
+      assert.ok(start >= 0, `${fn} is missing`);
+      assert.match(wrapper.slice(start, start + 550), /findAuthenticatedDevice\(deviceId, authToken\)/);
     }
+    const sql = readAuthQuery('../src/repositories/device-auth.repository.ts', 'findAuthenticatedDevice');
+    assert.match(sql, /auth_token = encode\(sha256\(\$2::bytea\), 'hex'\)/);
+    assert.doesNotMatch(sql, /OR\s+auth_token\s*=/i);
+    assert.doesNotMatch(sql, /\$3\b/);
+    assert.match(sql, /is_active\s*=\s*true/i);
+    assert.equal((await client.query(sql, ['DEV-1', secret])).rowCount, 1);
+    assert.equal((await client.query(sql, ['DEV-1', digest])).rowCount, 0);
+    assert.equal((await client.query(sql, ['DEV-1', 'wrong-secret'])).rowCount, 0);
+    assert.equal((await client.query(sql, ['DEV-unknown', secret])).rowCount, 0);
+    await client.query("UPDATE devices SET is_active=FALSE WHERE device_id='DEV-1'");
+    assert.equal((await client.query(sql, ['DEV-1', secret])).rowCount, 0);
   } finally {
     try { await client.query('ROLLBACK'); }
     finally { client.release(); await pool.end(); }
