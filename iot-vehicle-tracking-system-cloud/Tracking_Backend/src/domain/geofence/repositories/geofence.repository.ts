@@ -82,7 +82,28 @@ export const create = async (input: CreateGeofenceInput, createdBy?: number): Pr
     ],
   );
 
-export const update = async (id: number, input: UpdateGeofenceInput): Promise<Geofence | null> => {
+// A manager may edit only a geofence they created and only while they have
+// current rights to every vehicle affected by it. Shared cross-fleet zones
+// therefore require a full-fleet actor (or an administrator) to change.
+const geofenceMutationGuard = (globalBind: string, userBind: string): string => `(
+  ${globalBind}::boolean OR (
+    g.created_by = ${userBind} AND NOT EXISTS (
+      SELECT 1 FROM geofence_vehicles gv
+      WHERE gv.geofence_id = g.id AND NOT EXISTS (
+        SELECT 1 FROM vehicles v JOIN user_device_access uda ON uda.device_id = v.device_id
+        WHERE v.vehicle_id = gv.vehicle_id AND uda.user_id = ${userBind}
+      )
+    )
+  )
+)`;
+
+export const findByIdForWriteScope = async (
+  id: number, scope: GeofenceAccessScope,
+): Promise<Geofence | null> => findOne<Geofence>(
+  `SELECT g.* FROM geofences g WHERE g.id = $1 AND ${geofenceMutationGuard('$2', '$3')}`,
+  [id, geofenceGlobalScope(scope), scope.userId],
+);
+export const update = async (id: number, input: UpdateGeofenceInput, scope: GeofenceAccessScope): Promise<Geofence | null> => {
   const setClauses: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -140,13 +161,18 @@ export const update = async (id: number, input: UpdateGeofenceInput): Promise<Ge
     values.push(input.displayHidden);
   }
 
-  if (setClauses.length === 0) return findById(id);
+  if (setClauses.length === 0) return findByIdForWriteScope(id, scope);
 
-  setClauses.push(`updated_at = NOW()`);
+  setClauses.push('updated_at = NOW()');
   values.push(id);
-
+  const targetBind = '$' + paramIndex++;
+  const globalBind = '$' + paramIndex++;
+  const userBind = '$' + paramIndex;
+  values.push(geofenceGlobalScope(scope), scope.userId);
+  const grant = geofenceMutationGuard(globalBind, userBind);
   return updateOne<Geofence>(
-    `UPDATE geofences SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+    `UPDATE geofences AS g SET ${setClauses.join(', ')}
+     WHERE g.id = ${targetBind} AND ${grant} RETURNING g.*`,
     values,
   );
 };
