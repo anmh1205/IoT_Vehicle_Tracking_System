@@ -15,6 +15,10 @@
  * @param[in] config Pointer to runtime configuration (used to setup adapters).
  * @return ESP_OK on success, error code otherwise.
  */
+esp_err_t state_machine_bind_runtime_ports(const tracker_runtime_ports_t *ports) {
+    return state_machine_core_bind_ports(ports);
+}
+
 esp_err_t state_machine_init(const config_t *config) {
     // Keep the public API thin and hand initialization off to the shared core implementation.
     return state_machine_core_init(config);
