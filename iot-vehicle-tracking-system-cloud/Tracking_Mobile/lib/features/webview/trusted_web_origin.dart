@@ -26,11 +26,8 @@ bool isTrustedWebOrigin(String? candidateUrl, String appUrl) {
       candidate.port == configured.port;
 }
 
-/// Provide a native-enforced allowlist for the Flutter InAppWebView bridge.
-///
-/// Android expects exact scheme/host/port origin rules. On Apple platforms
-/// the plugin interprets rules as regular expressions, so anchor and escape
-/// every metacharacter to avoid matching attacker-controlled suffixes.
+/// Provide native-enforced allowed origins for the WebView bridge.
+/// Android uses exact origin rules; iOS uses anchored escaped regex patterns.
 Set<String> nativeBridgeOriginAllowList(
   String appUrl, {
   required bool isAndroid,
@@ -40,41 +37,17 @@ Set<String> nativeBridgeOriginAllowList(
       (uri.scheme != 'http' && uri.scheme != 'https') ||
       uri.host.isEmpty ||
       uri.userInfo.isNotEmpty) {
-    return <String>{}; // Empty set means deny all.
+    return <String>{};
   }
-
   final defaultPort = uri.scheme == 'https' ? 443 : 80;
   final portSuffix = uri.port == defaultPort ? '' : ':${uri.port}';
   final origin = '${uri.scheme}://${uri.host}$portSuffix';
-
   if (isAndroid) return <String>{origin};
   final escapedOrigin = RegExp.escape(origin);
-  return <String>{'^$escapedOrigin\
+  return <String>{"^$escapedOrigin\$"};
 }
 
-/// Authenticate the *calling frame* in addition to the displayed top frame.
-///
-/// A trusted top-level page may contain hostile cross-origin iframes, and a
-/// navigation race can invalidate a previously accepted URL. An opaque or
-/// unreported frame origin must never be granted native privileges.
-bool isTrustedNativeBridgeCaller({
-  required bool isMainFrame,
-  required String? origin,
-  required String? requestUrl,
-  required String appUrl,
-}) {
-  return isMainFrame &&
-      isTrustedWebOrigin(origin, appUrl) &&
-      isTrustedWebOrigin(requestUrl, appUrl);
-}
-};
-}
-
-/// Authenticate the *calling frame* in addition to the displayed top frame.
-///
-/// A trusted top-level page may contain hostile cross-origin iframes, and a
-/// navigation race can invalidate a previously accepted URL. An opaque or
-/// unreported frame origin must never be granted native privileges.
+/// Validate calling frame independently from the displayed top frame.
 bool isTrustedNativeBridgeCaller({
   required bool isMainFrame,
   required String? origin,
