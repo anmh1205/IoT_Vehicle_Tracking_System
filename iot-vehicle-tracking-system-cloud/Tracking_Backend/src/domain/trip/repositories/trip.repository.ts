@@ -142,7 +142,7 @@ export const create = async (input: CreateTripInput): Promise<Trip> =>
     ],
   );
 
-export const update = async (id: number, input: UpdateTripInput): Promise<Trip | null> => {
+export const update = async (id: number, input: UpdateTripInput, scope: TripReadScope): Promise<Trip | null> => {
   const setClauses: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -184,30 +184,35 @@ export const update = async (id: number, input: UpdateTripInput): Promise<Trip |
     values.push(input.notes);
   }
 
-  if (setClauses.length === 0) return findById(id);
+  if (setClauses.length === 0) return findByIdForScope(id, scope);
 
-  setClauses.push(`updated_at = NOW()`);
+  setClauses.push('updated_at = NOW()');
   values.push(id);
-
+  const idParam = paramIndex++;
+  const grant = tripVisibleTo(scope, paramIndex);
+  if (!fullFleet(scope)) values.push(scope.userId);
   return updateOne<Trip>(
-    `UPDATE trips SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+    `UPDATE trips AS t SET ${setClauses.join(', ')}
+     WHERE t.id = $${idParam} AND ${grant} RETURNING t.*`,
     values,
   );
 };
 
-export const startTrip = async (id: number): Promise<Trip | null> =>
+export const startTrip = async (id: number, scope: TripReadScope): Promise<Trip | null> =>
   updateOne<Trip>(
-    `UPDATE trips SET actual_start = NOW(), status = 'in_progress', updated_at = NOW() WHERE id = $1 RETURNING *`,
-    [id],
+    `UPDATE trips AS t SET actual_start = NOW(), status = 'in_progress', updated_at = NOW()
+     WHERE t.id = $1 AND t.status = 'planned' AND ${tripVisibleTo(scope, 2)} RETURNING t.*`,
+    fullFleet(scope) ? [id] : [id, scope.userId],
   );
 
-export const endTrip = async (id: number): Promise<Trip | null> =>
+export const endTrip = async (id: number, scope: TripReadScope): Promise<Trip | null> =>
   updateOne<Trip>(
-    `UPDATE trips SET actual_end = NOW(), status = 'completed', updated_at = NOW() WHERE id = $1 RETURNING *`,
-    [id],
+    `UPDATE trips AS t SET actual_end = NOW(), status = 'completed', updated_at = NOW()
+     WHERE t.id = $1 AND t.status = 'in_progress' AND ${tripVisibleTo(scope, 2)} RETURNING t.*`,
+    fullFleet(scope) ? [id] : [id, scope.userId],
   );
 
-/** End trip with computed route stats from VictoriaMetrics waypoints */
+/** End trip with computed route stats. Authorization and state are atomic. */
 export const endTripWithStats = async (
   id: number,
   stats: {
@@ -217,9 +222,10 @@ export const endTripWithStats = async (
     endLatitude: number | null;
     endLongitude: number | null;
   },
+  scope: TripReadScope,
 ): Promise<Trip | null> =>
   updateOne<Trip>(
-    `UPDATE trips SET
+    `UPDATE trips AS t SET
        actual_end = NOW(),
        status = 'completed',
        distance_km = $2,
@@ -228,8 +234,11 @@ export const endTripWithStats = async (
        end_latitude = COALESCE($5, end_latitude),
        end_longitude = COALESCE($6, end_longitude),
        updated_at = NOW()
-     WHERE id = $1 RETURNING *`,
-    [id, stats.distanceKm, stats.startLatitude, stats.startLongitude, stats.endLatitude, stats.endLongitude],
+     WHERE t.id = $1 AND t.status = 'in_progress'
+       AND ${tripVisibleTo(scope, 7)} RETURNING t.*`,
+    fullFleet(scope)
+      ? [id, stats.distanceKm, stats.startLatitude, stats.startLongitude, stats.endLatitude, stats.endLongitude]
+      : [id, stats.distanceKm, stats.startLatitude, stats.startLongitude, stats.endLatitude, stats.endLongitude, scope.userId],
   );
 
 export const remove = async (id: number): Promise<boolean> =>
