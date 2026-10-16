@@ -25,3 +25,44 @@ bool isTrustedWebOrigin(String? candidateUrl, String appUrl) {
       candidate.host == configured.host &&
       candidate.port == configured.port;
 }
+
+/// Provide a native-enforced allowlist for the Flutter InAppWebView bridge.
+///
+/// Android expects exact scheme/host/port origin rules. On Apple platforms
+/// the plugin interprets rules as regular expressions, so anchor and escape
+/// every metacharacter to avoid matching attacker-controlled suffixes.
+Set<String> nativeBridgeOriginAllowList(
+  String appUrl, {
+  required bool isAndroid,
+}) {
+  final uri = Uri.tryParse(appUrl);
+  if (uri == null ||
+      (uri.scheme != 'http' && uri.scheme != 'https') ||
+      uri.host.isEmpty ||
+      uri.userInfo.isNotEmpty) {
+    return <String>{}; // Empty set means deny all.
+  }
+
+  final defaultPort = uri.scheme == 'https' ? 443 : 80;
+  final portSuffix = uri.port == defaultPort ? '' : ':${uri.port}';
+  final origin = '${uri.scheme}://${uri.host}$portSuffix';
+
+  if (isAndroid) return <String>{origin};
+  return <String>{'^' + RegExp.escape(origin) + r'$'};
+}
+
+/// Authenticate the *calling frame* in addition to the displayed top frame.
+///
+/// A trusted top-level page may contain hostile cross-origin iframes, and a
+/// navigation race can invalidate a previously accepted URL. An opaque or
+/// unreported frame origin must never be granted native privileges.
+bool isTrustedNativeBridgeCaller({
+  required bool isMainFrame,
+  required String? origin,
+  required String? requestUrl,
+  required String appUrl,
+}) {
+  return isMainFrame &&
+      isTrustedWebOrigin(origin, appUrl) &&
+      isTrustedWebOrigin(requestUrl, appUrl);
+}
