@@ -50,13 +50,16 @@ export const getTripById = async (id: number, scope: TripReadScope): Promise<Tri
   return sanitizeTrip(trip);
 };
 
-export const createTrip = async (input: CreateTripInput): Promise<TripPublic> => {
+export const createTrip = async (input: CreateTripInput, scope: TripReadScope): Promise<TripPublic> => {
   const existing = await tripRepo.findByTripCode(input.tripCode);
   if (existing) {
     throw createConflictError(`Trip with code "${input.tripCode}" already exists`);
   }
 
-  const trip = await tripRepo.create(input);
+  const trip = await tripRepo.create(input, scope);
+  if (!trip) {
+    throw createNotFoundError('Trip asset not found or access denied');
+  }
   logger.info(`Trip "${input.tripCode}" created successfully`);
   return sanitizeTrip(trip);
 };
