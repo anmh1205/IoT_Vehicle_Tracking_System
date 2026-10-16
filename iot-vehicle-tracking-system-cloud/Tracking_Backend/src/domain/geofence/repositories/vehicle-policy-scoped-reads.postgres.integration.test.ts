@@ -111,6 +111,8 @@ integration('geofence policies and violation search use live device grants', () 
     expect((await listGeofences({}, u2)).total).toBe(2);
   });
   it('SQL-restricts policy states and rejects state rows with mismatched policy ownership', async () => {
+    // Prior policy-update test may pause V2; exercise this query with V2 active.
+    await pool.query("UPDATE vehicle_policies SET status='active' WHERE id=12");
     const own = await listPolicyStatesByVehicleForScope('V1', u1);
     expect(own.map((x) => x.id)).toEqual([41]);
     expect(await listPolicyStatesByVehicleForScope('V2', u1)).toEqual([]);
