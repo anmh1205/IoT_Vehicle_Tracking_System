@@ -48,7 +48,26 @@ Set<String> nativeBridgeOriginAllowList(
   final origin = '${uri.scheme}://${uri.host}$portSuffix';
 
   if (isAndroid) return <String>{origin};
-  return <String>{'^' + RegExp.escape(origin) + r'$'};
+  final escapedOrigin = RegExp.escape(origin);
+  return <String>{'^$escapedOrigin\
+}
+
+/// Authenticate the *calling frame* in addition to the displayed top frame.
+///
+/// A trusted top-level page may contain hostile cross-origin iframes, and a
+/// navigation race can invalidate a previously accepted URL. An opaque or
+/// unreported frame origin must never be granted native privileges.
+bool isTrustedNativeBridgeCaller({
+  required bool isMainFrame,
+  required String? origin,
+  required String? requestUrl,
+  required String appUrl,
+}) {
+  return isMainFrame &&
+      isTrustedWebOrigin(origin, appUrl) &&
+      isTrustedWebOrigin(requestUrl, appUrl);
+}
+};
 }
 
 /// Authenticate the *calling frame* in addition to the displayed top frame.
