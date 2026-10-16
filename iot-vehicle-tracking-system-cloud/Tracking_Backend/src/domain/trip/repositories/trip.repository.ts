@@ -163,13 +163,17 @@ export const update = async (id: number, input: UpdateTripInput, scope: TripRead
   const setClauses: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
+  let nextVehicleExpr = 't.vehicle_id';
+  let nextDeviceExpr = 't.device_id';
 
   if (input.vehicleId !== undefined) {
-    setClauses.push(`vehicle_id = $${paramIndex++}`);
+    nextVehicleExpr = `${paramIndex}::text`;
+    setClauses.push(`vehicle_id = ${paramIndex++}`);
     values.push(input.vehicleId);
   }
   if (input.deviceId !== undefined) {
-    setClauses.push(`device_id = $${paramIndex++}`);
+    nextDeviceExpr = `${paramIndex}::text`;
+    setClauses.push(`device_id = ${paramIndex++}`);
     values.push(input.deviceId);
   }
   if (input.driverName !== undefined) {
@@ -208,9 +212,19 @@ export const update = async (id: number, input: UpdateTripInput, scope: TripRead
   const idParam = paramIndex++;
   const grant = tripVisibleTo(scope, paramIndex);
   if (!fullFleet(scope)) values.push(scope.userId);
+  // Validate the effective post-write pairing inside the same SQL statement.
+  // If either reference is unchanged, read it from the row being updated.
+  // This also constrains privileged administrator reassignment.
+  const consistentPair = `(
+    ${nextVehicleExpr} IS NULL OR ${nextDeviceExpr} IS NULL OR EXISTS (
+      SELECT 1 FROM vehicles matched
+      WHERE matched.vehicle_id = ${nextVehicleExpr}
+        AND matched.device_id = ${nextDeviceExpr}
+    )
+  )`;
   return updateOne<Trip>(
     `UPDATE trips AS t SET ${setClauses.join(', ')}
-     WHERE t.id = $${idParam} AND ${grant} RETURNING t.*`,
+     WHERE t.id = ${idParam} AND ${grant} AND ${consistentPair} RETURNING t.*`,
     values,
   );
 };
