@@ -193,9 +193,11 @@ export const getVehiclePolicyById = async (id: number, scope: GeofenceAccessScop
 
 export const createVehiclePolicy = async (
   input: CreateVehiclePolicyInput,
+  scope: GeofenceAccessScope,
   actorId?: number,
 ): Promise<VehiclePolicyPublic> => {
-  const policy = await vehiclePolicyRepo.createPolicy(input, actorId);
+  const policy = await vehiclePolicyRepo.createPolicy(input, scope, actorId);
+  if (!policy) throw createNotFoundError('Vehicle not found or policy creation denied');
   await policyViolationRepo.upsertPolicyAudit({
     actorId: actorId ?? null,
     action: 'policy.create',
@@ -211,14 +213,15 @@ export const createVehiclePolicy = async (
 export const updateVehiclePolicy = async (
   id: number,
   input: UpdateVehiclePolicyInput,
+  scope: GeofenceAccessScope,
   actorId?: number,
 ): Promise<VehiclePolicyPublic> => {
-  const before = await vehiclePolicyRepo.getPolicyById(id);
+  const before = await vehiclePolicyRepo.getPolicyByIdForScope(id, scope);
   if (!before) {
     throw createNotFoundError(`Policy with ID ${id} not found`);
   }
 
-  const updated = await vehiclePolicyRepo.updatePolicy(id, input, actorId);
+  const updated = await vehiclePolicyRepo.updatePolicy(id, input, scope, actorId);
   if (!updated) {
     throw createNotFoundError(`Policy with ID ${id} not found`);
   }
