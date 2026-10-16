@@ -70,19 +70,20 @@ export const createGeofence = async (
 export const updateGeofence = async (
   id: number,
   input: UpdateGeofenceInput,
+  scope: GeofenceAccessScope,
 ): Promise<GeofencePublic> => {
-  const existing = await geofenceRepo.findById(id);
+  const existing = await geofenceRepo.findByIdForWriteScope(id, scope);
   if (!existing) {
     throw createNotFoundError(`Vùng với ID ${id} không tồn tại`);
   }
 
-  const updated = await geofenceRepo.update(id, input);
+  const updated = await geofenceRepo.update(id, input, scope);
   if (!updated) {
     throw createNotFoundError(`Vùng với ID ${id} không tồn tại`);
   }
 
   logger.info(`Zone "${existing.name}" updated successfully`);
-  return hydrateVehicleIds(updated);
+  return hydrateVehicleIds(updated, scope);
 };
 
 export const deleteGeofence = async (id: number): Promise<void> => {
