@@ -32,7 +32,7 @@ export const listGeofences = asyncHandler(async (req: AuthenticatedRequest, res:
     throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
   }
 
-  const result = await geofenceListService.listGeofences(parsed.data);
+  const result = await geofenceListService.listGeofences(parsed.data, policyScope(req));
   sendOk(res, result);
 });
 
@@ -42,7 +42,7 @@ export const getGeofence = asyncHandler(async (req: AuthenticatedRequest, res: R
     throw createValidationError('Invalid geofence ID');
   }
 
-  const geofence = await geofenceCrudService.getGeofenceById(id);
+  const geofence = await geofenceCrudService.getGeofenceById(id, policyScope(req));
   sendOk(res, geofence);
 });
 
