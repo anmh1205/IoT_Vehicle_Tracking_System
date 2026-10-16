@@ -445,12 +445,13 @@ static bool sd_log_store_line_complete(const char *line) {
     }
 
     /*
-     * fgets returns a partial line when the on-disk record exceeds our bounded
-     * buffer. Treat that as corruption and discard the remainder so the parser
-     * never replays a truncated JSON payload.
+     * Every committed append ends in LF. fgets also returns a short fragment
+     * without LF when an interrupted write left a truncated final record;
+     * its header can still parse, so accepting it would replay partial JSON.
+     * Require LF for every replayed record, even at EOF.
      */
     size_t len = strlen(line);
-    return len == 0U || line[len - 1U] == '\n' || len < (SD_LOG_LINE_MAX - 1U);
+    return len > 0U && line[len - 1U] == '\n';
 }
 
 static void sd_log_store_discard_line_remainder(FILE *fp) {
