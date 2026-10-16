@@ -81,8 +81,8 @@ const toOptionalPositiveInt = (value: string | number | null | undefined): numbe
 
 /**
  * Validate device by checking device_id and comparing auth_token.
- * Devices normally send the raw token; internal simulators may already have
- * the SHA-256 value stored in devices.auth_token.
+ * Only the original raw token authenticates. A database verifier hash is never
+ * accepted as a reusable bearer credential, including for simulators.
  */
 export const validateDevice = async (
   deviceId: string,
@@ -94,12 +94,9 @@ export const validateDevice = async (
             , last_seen_at, state_updated_at, payload_updated_at
        FROM devices
        WHERE device_id = $1
-         AND (
-           auth_token = encode(sha256($2::bytea), 'hex')
-           OR auth_token = $3
-         )
+         AND auth_token = encode(sha256($2::bytea), 'hex')
          AND is_active = true`,
-      [deviceId, authToken, authToken],
+      [deviceId, authToken],
     );
     return result.rows[0] ?? null;
   } catch (err) {
