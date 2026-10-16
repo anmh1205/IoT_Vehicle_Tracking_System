@@ -128,7 +128,7 @@ describe('trip-auto.service', () => {
     await handleSessionBoundaryEvent(boundary('ended'));
     expect(updateOne).toHaveBeenCalledOnce();
     const [, params] = vi.mocked(updateOne).mock.calls[0];
-    expect(params).toEqual([9, '2026-09-25T02:00:00.000Z']);
+    expect(params).toEqual([9, 'completed', '2026-09-25T02:00:00.000Z']);
   });
 
   it('cancels only the auto-trip of a discarded session', async () => {
@@ -138,7 +138,8 @@ describe('trip-auto.service', () => {
     });
     vi.mocked(updateOne).mockResolvedValue({ id: 12 } as never);
     await handleSessionBoundaryEvent(boundary('discarded'));
-    expect(String(vi.mocked(updateOne).mock.calls[0][0])).toContain("status = 'cancelled'");
+    expect(String(vi.mocked(updateOne).mock.calls[0][0])).toContain('status = $2');
+    expect(vi.mocked(updateOne).mock.calls[0][1]?.[1]).toBe('cancelled');
   });
 
   it('does not close an unrelated trip for delayed session-end', async () => {
@@ -154,6 +155,6 @@ describe('trip-auto.service', () => {
     });
     vi.mocked(updateOne).mockResolvedValue({ id: 9 } as never);
     await handleSessionBoundaryEvent(boundary('ended', 42, '2026-09-25T01:59:00.000Z'));
-    expect(vi.mocked(updateOne).mock.calls[0][1]).toEqual([9, '2026-09-25T02:00:00.000Z']);
+    expect(vi.mocked(updateOne).mock.calls[0][1]).toEqual([9, 'completed', '2026-09-25T02:00:00.000Z']);
   });
 });
