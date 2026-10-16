@@ -73,7 +73,7 @@ export const updateVehicle = async (
 ): Promise<VehiclePublic> => {
   // No scoped customer ownership model exists yet; prevent assigning an
   // arbitrary cross-fleet customer or switching device identity.
-  if (!vehicleRepo.vehicleScopeIsGlobal(scope) &&
+  if (scope.role !== 'root' && scope.role !== 'admin' &&
       (input.deviceId !== undefined || input.customerId !== undefined)) {
     throw createForbiddenError('Only administrators can change vehicle ownership associations');
   }
