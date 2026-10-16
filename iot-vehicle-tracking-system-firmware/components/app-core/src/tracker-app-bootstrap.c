@@ -1,5 +1,7 @@
 #include "tracker-app-bootstrap.h"
 
+#include <string.h>
+
 #include "app_state.h"
 
 #include "freertos/FreeRTOS.h"
@@ -31,6 +33,14 @@
 
 /* Logging tag for main application module. */
 static const char *TAG = "TRACKER_MAIN";
+
+/* A placeholder is not a provisioned identity, even if every string is nonempty. */
+static bool tracker_boot_has_provisioned_identity(const config_t *config) {
+    return config != NULL &&
+           app_config_is_valid(config) &&
+           strcmp(config->device_id, "TRACKER_001") != 0 &&
+           strcmp(config->auth_token, "provisioning-required") != 0;
+}
 
 /** Init retry state: tracks attempt count and next-allowed time for state_machine_init(). */
 static retry_state_t s_init_retry = {0};
@@ -303,7 +313,7 @@ void app_core_bootstrap_run(void)
     if (err != ESP_OK)
     {
         ESP_LOGE(TAG, "event=nvs_config_init_failed err=%s action=halt_boot_preserve_storage", esp_err_to_name(err));
-        ESP_ERROR_CHECK(err);
+        // Stay idle for inspection/service instead of rebooting into an error loop.
         return;
     }
 
@@ -312,21 +322,9 @@ void app_core_bootstrap_run(void)
     err = nvs_config_load(&config);
     if (err != ESP_OK)
     {
-        ESP_LOGE(TAG, "event=nvs_config_load_failed err=%s action=halt_boot_preserve_storage", esp_err_to_name(err));
-        ESP_ERROR_CHECK(err);
+        ESP_LOGE(TAG, "event=nvs_config_load_failed err=%s action=halt_boot_preserve_storage_provisioning_required",
+                 esp_err_to_name(err));
         return;
-    }
-
-    if (config.device_id[0] == '\0')
-    {
-        ESP_LOGE(TAG, "event=missing_device_id action=fallback_to_defaults");
-        app_config_set_defaults(&config);
-    }
-
-    if (config.auth_token[0] == '\0')
-    {
-        ESP_LOGW(TAG, "event=missing_auth_token action=fallback_to_defaults");
-        app_config_set_defaults(&config);
     }
 #if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_TRACKER_FIELD_VALIDATION_FORCE_IMU_WAKE
     // Validation builds can force IMU wake so parked-motion acceptance tests stay reproducible.
@@ -382,6 +380,11 @@ void app_core_bootstrap_run(void)
     config.command_subscribe_enabled = true;
 #endif
 #endif
+    if (!tracker_boot_has_provisioned_identity(&config))
+    {
+        ESP_LOGE(TAG, "event=unprovisioned_or_invalid_identity action=halt_boot_no_modem_no_mqtt");
+        return;
+    }
 #if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_ESP_TASK_WDT_EN
     // Relax the task watchdog only after config overrides are known for this boot profile.
     tracker_main_relax_task_wdt_for_field_validation();
