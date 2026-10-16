@@ -230,7 +230,7 @@ export const generateExcelFile = async (
         }
         const id = row.id;
         if ((typeof id !== 'string' && typeof id !== 'number') ||
-            !/^\\d+$/.test(String(id)) || Number(id) <= 0) {
+            !/^\d+$/.test(String(id)) || Number(id) <= 0) {
           throw new Error('Export requires a stable positive numeric row ID');
         }
         const values: Record<string, unknown> = {};
