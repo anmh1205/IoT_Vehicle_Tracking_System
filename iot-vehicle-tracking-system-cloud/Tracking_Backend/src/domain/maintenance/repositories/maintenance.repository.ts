@@ -13,8 +13,25 @@ import type {
   UpdateMaintenanceInput,
 } from '@/domain/maintenance/types/maintenance.types';
 
+export interface MaintenanceReadScope {
+  userId: number;
+  role: string;
+  deviceAccessMode: string;
+}
+const allMaintenance = (scope: MaintenanceReadScope): boolean =>
+  scope.role === 'root' || scope.role === 'admin' || scope.deviceAccessMode === 'all';
+
+const maintenanceVisibleTo = (scope: MaintenanceReadScope, param: number): string =>
+  allMaintenance(scope) ? 'TRUE' : `EXISTS (
+    SELECT 1 FROM vehicles grant_vehicle
+    JOIN user_device_access uda ON uda.device_id = grant_vehicle.device_id
+    WHERE uda.user_id = $${param}
+      AND grant_vehicle.vehicle_id = maintenance.vehicle_id
+  )`;
+
 export const findAll = async (
   query: MaintenanceListQuery,
+  scope: MaintenanceReadScope,
 ): Promise<{ records: Maintenance[]; total: number }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
@@ -23,6 +40,11 @@ export const findAll = async (
   const conditions: string[] = [];
   const params: unknown[] = [];
   let paramIndex = 1;
+  conditions.push(maintenanceVisibleTo(scope, paramIndex));
+  if (!allMaintenance(scope)) {
+    params.push(scope.userId);
+    paramIndex++;
+  }
 
   if (query.status) {
     conditions.push(`status = $${paramIndex++}`);
@@ -54,6 +76,14 @@ export const findAll = async (
 
   return { records, total };
 };
+
+export const findByIdForScope = async (
+  id: number, scope: MaintenanceReadScope,
+): Promise<Maintenance | null> =>
+  findOne<Maintenance>(
+    `SELECT * FROM maintenance WHERE id = $1 AND ${maintenanceVisibleTo(scope, 2)}`,
+    allMaintenance(scope) ? [id] : [id, scope.userId],
+  );
 
 export const findById = async (id: number): Promise<Maintenance | null> =>
   findOne<Maintenance>('SELECT * FROM maintenance WHERE id = $1', [id]);
