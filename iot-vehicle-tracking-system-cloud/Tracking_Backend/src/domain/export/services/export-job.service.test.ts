@@ -32,6 +32,16 @@ describe('export-job supported-type contract', () => {
     expect(processExport).not.toHaveBeenCalled();
   });
 
+  it('rejects unsupported device/date/format filters rather than exporting an unscoped fleet', async () => {
+    await expect(createExport(1, {
+      exportType: 'devices',
+      filters: { deviceId: 'D1', from: '2026-01-01', format: 'csv' },
+    })).rejects.toMatchObject({ status: 400 });
+    await expect(createExport(1, { exportType: 'devices', filters: {} })).rejects.toMatchObject({ status: 400 });
+    expect(exportRepo.create).not.toHaveBeenCalled();
+    expect(processExport).not.toHaveBeenCalled();
+  });
+
   it('accepts a supported export type for the existing job processor', async () => {
     const job = {
       id: 51,
