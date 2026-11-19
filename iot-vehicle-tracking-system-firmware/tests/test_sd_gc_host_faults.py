@@ -62,7 +62,9 @@ typedef struct { uint32_t seq; unsigned char critical; } sd_log_record_t;
 static struct {
     bool mounted;
     struct { uint32_t ack_seq_critical; } meta;
-} s_ctx = {.mounted = true};
+    bool gc_watermark_attempted;
+    uint32_t gc_attempt_ack_seq;
+} s_ctx = {.mounted = true, .meta = {.ack_seq_critical = 1}};
 static bool degraded, force_flush_failure, force_read_error;
 static int cache_resets;
 static esp_err_t sd_log_store_get_stats(sd_log_stats_t *stats) {
@@ -106,6 +108,9 @@ static void clear_files(void) {
     remove(SD_LOG_DATA_BAK_PATH);
     degraded = false;
     cache_resets = 0;
+    s_ctx.gc_watermark_attempted = false;
+    s_ctx.gc_attempt_ack_seq = 0;
+    s_ctx.meta.ack_seq_critical = 1;
 }
 static void write_log(const char *value) {
     FILE *stream = fopen(SD_LOG_DATA_PATH, "wb");
