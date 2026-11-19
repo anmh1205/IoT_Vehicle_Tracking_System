@@ -24,6 +24,9 @@ def test_lis3dsh_uses_sm1_not_lis3dh_interrupt_bank():
     assert "LIS3DSH_MASK1_A_REG" in sm1
     assert "LIS3DSH_SETT1_REG" in sm1
     assert "LIS3DSH_ST1_1_REG" in sm1
+    assert "imu_write_reg(LIS3DSH_ST1_1_REG, 0x05)" in sm1
+    assert "imu_write_reg(LIS3DSH_ST1_2_REG, 0x11)" in sm1
+    assert "imu_write_reg(LIS3DSH_SETT1_REG, 0x00)" in sm1
     assert "IMU_INT1_CFG_REG" not in sm1
     assert "IMU_INT1_THS_REG" not in sm1
     assert "LIS3DSH_OUTS1_REG : IMU_INT1_SRC_REG" in IMU

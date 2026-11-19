@@ -474,9 +474,10 @@ esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_
     if (imu_is_lis3dsh()) {
         /*
          * LIS3DSH has no LIS3DH INT1_CFG/THS/DURATION registers.
-         * Use the SM1 threshold detector on acceleration differences (RADI).
-         * STM AN3393: 0x05=GNTH1, 0x88=OUTC, 0x11=CONT.
-         * OUTS1 clears the latched INT1 condition.
+         * Follow ST application note AN3393 section 9.2 wake-up sequence:
+         * ST1_1 = 0x05 (NOP | GNTH1), ST1_2 = 0x11 (CONT).
+         * OUTS1 clears the latched INT1 condition. The sensor output
+         * requires on-board validation to set a threshold above gravity/noise.
          */
         if (duration_ms != 0) {
             ESP_LOGW(TAG, "event=imu_sm1_duration_unqualified requested_ms=%u", (unsigned)duration_ms);
@@ -491,14 +492,14 @@ esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_
                             ESP_FAIL, TAG, "LIS3DSH SM1 threshold failed");
         ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_MASK1_A_REG, 0xFC) == ESP_OK,
                             ESP_FAIL, TAG, "LIS3DSH SM1 mask failed");
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_SETT1_REG, 0x11) == ESP_OK,
-                            ESP_FAIL, TAG, "LIS3DSH SM1 diff/interrupt settings failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_SETT1_REG, 0x00) == ESP_OK,
+                            ESP_FAIL, TAG, "LIS3DSH SM1 default detection settings failed");
         ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_ST1_1_REG, 0x05) == ESP_OK,
                             ESP_FAIL, TAG, "LIS3DSH GNTH1 state failed");
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_ST1_2_REG, 0x88) == ESP_OK,
-                            ESP_FAIL, TAG, "LIS3DSH OUTC state failed");
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_ST1_3_REG, 0x11) == ESP_OK,
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_ST1_2_REG, 0x11) == ESP_OK,
                             ESP_FAIL, TAG, "LIS3DSH CONT state failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_ST1_3_REG, 0x00) == ESP_OK,
+                            ESP_FAIL, TAG, "LIS3DSH unused state reset failed");
         ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_CTRL_REG1, 0x01) == ESP_OK,
                             ESP_FAIL, TAG, "LIS3DSH SM1 enable failed");
         return imu_clear_motion_interrupt();
