@@ -3,6 +3,10 @@ import { pool } from '@/infrastructure/database/pool';
 export type DeviceCommandStatus = 'pending' | 'sent' | 'accepted' | 'indeterminate' | 'acknowledged' | 'failed';
 
 export const MAX_OUTSTANDING_DEVICE_COMMANDS = 8;
+/* MQTT command messages expire within 300s; allow grace for delivery and ACK delays. */
+const SENT_COMMAND_TIMEOUT_MINUTES = 15;
+/* Accepted commands may perform longer operations such as OTA updates. */
+const ACCEPTED_COMMAND_TIMEOUT_HOURS = 24;
 
 export interface DeviceCommandRecord {
   id: number;
@@ -51,6 +55,27 @@ const mapRow = (row: DeviceCommandRow): DeviceCommandRecord => ({
   ackedAt: row.acked_at?.toISOString() ?? null,
   response: row.response,
 });
+
+/**
+ * Expire non-terminal commands whose broker delivery/processing window ended.
+ * 'indeterminate' preserves the possibility of a late acknowledged/failed ACK.
+ * This must also run before admission to avoid permanently exhausting the cap.
+ */
+export const expireOutstandingDeviceCommands = async (deviceId?: string): Promise<number> => {
+  const result = await pool.query(
+    `UPDATE device_commands
+     SET status = 'indeterminate',
+         response = COALESCE(response, 'command_outcome_unknown_after_ttl'),
+         updated_at = NOW()
+     WHERE ($1::varchar IS NULL OR device_id = $1::varchar)
+       AND (
+         (status = 'sent' AND COALESCE(sent_at, updated_at) < NOW() - ($2::int * INTERVAL '1 minute'))
+         OR (status = 'accepted' AND updated_at < NOW() - ($3::int * INTERVAL '1 hour'))
+       )`,
+    [deviceId ?? null, SENT_COMMAND_TIMEOUT_MINUTES, ACCEPTED_COMMAND_TIMEOUT_HOURS],
+  );
+  return result.rowCount ?? 0;
+};
 
 export const createCommand = async (input: {
   deviceId: string;

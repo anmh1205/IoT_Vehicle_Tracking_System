@@ -208,6 +208,8 @@ export const sendCommand = async (
   payload: { command: string; params?: Record<string, unknown> },
   options?: { actorUserId?: number; correlationId?: string },
 ): Promise<deviceCommandRepo.DeviceCommandRecord> => {
+  // Release commands whose MQTT message expiry/ACK window has elapsed before checking the cap.
+  await deviceCommandRepo.expireOutstandingDeviceCommands(deviceId);
   const command = await deviceCommandRepo.createCommand({
     deviceId,
     command: payload.command,
@@ -274,6 +276,12 @@ export const initDeviceCommandDispatcher = (): void => {
   dispatcherInitialized = true;
   const client = getMqttClient();
   recoveryTimer = setInterval(() => {
+    // Expiry must continue even if the broker is disconnected for hours.
+    void deviceCommandRepo.expireOutstandingDeviceCommands().catch((error) => {
+      logger.error('Periodic outstanding device command expiry failed', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    });
     void runPendingCommandRecovery(client).catch((error) => {
       logger.error('Periodic pending device command recovery failed', {
         error: error instanceof Error ? error.message : String(error),

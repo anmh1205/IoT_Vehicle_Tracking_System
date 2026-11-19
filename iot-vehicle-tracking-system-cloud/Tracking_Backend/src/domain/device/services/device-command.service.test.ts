@@ -9,6 +9,7 @@ vi.mock('@/domain/device/repositories/device-command.repository', () => ({
   createCommand: vi.fn(),
   failPendingCommandBeforeDispatch: vi.fn(),
   listPendingCommandsBefore: vi.fn(),
+  expireOutstandingDeviceCommands: vi.fn().mockResolvedValue(0),
   updateCommandStatus: vi.fn(),
   listDeviceCommands: vi.fn(),
 }));
@@ -236,6 +237,7 @@ describe('device-command.service', () => {
     vi.mocked(deviceCommandRepo.updateCommandStatus).mockResolvedValue(null);
 
     await sendCommand('TRACKER_001', { command: 'reboot' });
+    expect(deviceCommandRepo.expireOutstandingDeviceCommands).toHaveBeenCalledWith('TRACKER_001');
 
     expect(mqtt.connect).toHaveBeenCalledWith(
       expect.any(String),

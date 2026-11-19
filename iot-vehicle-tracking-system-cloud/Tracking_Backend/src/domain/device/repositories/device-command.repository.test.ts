@@ -8,6 +8,7 @@ vi.mock('@/infrastructure/database/pool', () => ({
 import { pool } from '@/infrastructure/database/pool';
 import {
   createCommand,
+  expireOutstandingDeviceCommands,
   failPendingCommandBeforeDispatch,
   observeRuntimeBootAndMarkStaleAcceptedIndeterminate,
   listPendingCommandsBefore,
@@ -17,6 +18,19 @@ import {
 describe('device-command.repository', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+  });
+
+  it('expires stuck sent/accepted commands but preserves late-ACK-capable indeterminate status', async () => {
+    vi.mocked(pool.query).mockResolvedValue({ rowCount: 3, rows: [] } as any);
+    const count = await expireOutstandingDeviceCommands('TRACKER_001');
+    expect(count).toBe(3);
+    expect(pool.query).toHaveBeenCalledWith(
+      expect.stringContaining("status = 'indeterminate'"),
+      ['TRACKER_001', 15, 24],
+    );
+    const sql = vi.mocked(pool.query).mock.calls[0][0] as string;
+    expect(sql).toContain("status = 'sent'");
+    expect(sql).toContain("status = 'accepted'");
   });
 
   it('serializes admission and keeps sent_at null while a command is only pending', async () => {
