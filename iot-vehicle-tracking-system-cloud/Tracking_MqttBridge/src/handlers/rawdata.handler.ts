@@ -22,6 +22,7 @@ import { logger } from '../infrastructure/logger';
 import { maxTimestampMs, normalizePayloadTimestamp, parseIsoTimestampMs } from '../utils/timestamp.util';
 import { resolveLocalSessionKey } from '../utils/session-identity.util';
 import { normalizeRuntimeState, type RuntimeStateSnapshot } from '../types/device-state.types';
+import { resolveBootClockTimestamp } from '../utils/boot-clock.util';
 import {
   hasAuthoritativeSessionIdentity,
   hasTelemetryFallbackSessionContinuity,
@@ -864,13 +865,24 @@ export const handleRawData = async (
     return;
   }
 
-  const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
-    payload.timestamp,
-    payload.metadata?.sent_at,
-  );
+  const normalizedTimestamp = normalizePayloadTimestamp(payload.timestamp, payload.metadata?.sent_at);
+  const bootClock = await resolveBootClockTimestamp({
+    deviceId: payload.device_id,
+    bootId: bootId ?? null,
+    uptimeMs: payload.uptime_ms ?? payload.uptime ?? null,
+    timestampTrusted: payload.timestamp_trusted,
+    timestampMs: normalizedTimestamp.timestampMs,
+    timestampSource: normalizedTimestamp.source,
+    receivedAtMs,
+  });
+  const timestampMs = bootClock.timestampMs;
+  const timestampSource: string = bootClock.source;
+  const timeQuality = timestampSource === 'boot_anchor' ? 'reanchored'
+    : payload.timestamp_trusted === false ? 'untrusted'
+      : (timestampSource === 'server_now' ? 'receive_time' : 'device_time');
   const persistedWatermarkMs = parseIsoTimestampMs(device.payload_updated_at);
 
-  if (timestampSource !== 'payload') {
+  if (timestampSource !== 'payload' && timestampSource !== 'boot_anchor') {
     logger.warn(
       {
         deviceId: payload.device_id,
@@ -1147,7 +1159,7 @@ export const handleRawData = async (
     longitude: effectiveLongitude,
     speed: effectiveSpeed,
     diagnostics: normalizedDiagnostics ?? null,
-    time_quality: payload.timestamp_trusted === false ? 'untrusted' : (timestampSource === 'server_now' ? 'receive_time' : 'device_time'),
+    time_quality: timeQuality,
     capture_uptime_ms: payload.uptime_ms ?? payload.uptime ?? null,
   }).catch((err) => {
     logger.error({ err, deviceId: payload.device_id, event: 'rawdata_event_log_write_failed' }, 'Telemetry event log write failed');
@@ -1299,7 +1311,7 @@ export const handleRawData = async (
       runtime_boot_id: metadataBootId,
       live_mutation: shouldMutateLiveState,
       historical_session_append: shouldAppendHistoricalSessionTelemetry,
-      time_quality: payload.timestamp_trusted === false ? 'untrusted' : (timestampSource === 'server_now' ? 'receive_time' : 'device_time'),
+      time_quality: timeQuality,
       capture_uptime_ms: payload.uptime_ms ?? payload.uptime ?? undefined,
       stale_reason: shouldRetainStaleSessionTelemetry ? liveMutationDecision.reason : undefined,
       timestamp: new Date(timestampMs).toISOString(),
