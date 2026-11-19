@@ -42,6 +42,11 @@ typedef struct {
     float course_deg;
     /** Number of tracked satellites (aggregated). */
     uint8_t satellites;
+    /* SIM7600 +CGNSSINFO quality; never interpret missing DOP as zero. */
+    float pdop;
+    float hdop;
+    float vdop;
+    bool dop_valid;
     /** Timestamp in milliseconds. */
     uint64_t timestamp_ms;
     /** True when modem reports valid fix. */

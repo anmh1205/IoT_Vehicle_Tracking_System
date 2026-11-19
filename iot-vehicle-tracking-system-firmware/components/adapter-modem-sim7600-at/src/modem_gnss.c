@@ -511,6 +511,21 @@ static modem_gnss_read_result_t modem_gnss_send_and_parse(gnss_data_t *data) {
         ? (float)(modem_gnss_safe_atof(fields[11]) * 1.852) : 0.0f;
     data->course_deg = (field_count > 12 && fields[12][0] != '\0')
         ? (float)modem_gnss_safe_atof(fields[12]) : 0.0f;
+    /* CGNSSINFO fields 13/14/15 are PDOP/HDOP/VDOP. */
+    if (field_count > 15 && fields[13][0] != '\0' &&
+        fields[14][0] != '\0' && fields[15][0] != '\0') {
+        const double pdop = modem_gnss_safe_atof(fields[13]);
+        const double hdop = modem_gnss_safe_atof(fields[14]);
+        const double vdop = modem_gnss_safe_atof(fields[15]);
+        if (isfinite(pdop) && isfinite(hdop) && isfinite(vdop) &&
+            pdop > 0.0 && hdop > 0.0 && vdop > 0.0 &&
+            pdop < 100.0 && hdop < 100.0 && vdop < 100.0) {
+            data->pdop = (float)pdop;
+            data->hdop = (float)hdop;
+            data->vdop = (float)vdop;
+            data->dop_valid = true;
+        }
+    }
     return MODEM_GNSS_READ_OK;
 }
 

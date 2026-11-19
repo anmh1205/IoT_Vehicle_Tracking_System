@@ -1120,6 +1120,9 @@ export const handleRawData = async (
     obd_sample_age_ms: normalizedObdSampleAgeMs,
     obd_connect_fail_count_5m: toFiniteNumber(diagnostics?.channel?.connect_fail_count_5m),
     obd_reported_dtc_count: toFiniteNumber(diagnostics?.reported_dtc_count),
+    gnss_pdop: diagnostics?.gnss?.pdop,
+    gnss_hdop: diagnostics?.gnss?.hdop,
+    gnss_vdop: diagnostics?.gnss?.vdop,
     obd_dtc_stored_count: diagnostics?.dtc ? storedDtcCodes.length : undefined,
     obd_dtc_pending_count: diagnostics?.dtc ? pendingDtcCodes.length : undefined,
     obd_dtc_permanent_count: diagnostics?.dtc ? permanentDtcCodes.length : undefined,
@@ -1144,6 +1147,8 @@ export const handleRawData = async (
     longitude: effectiveLongitude,
     speed: effectiveSpeed,
     diagnostics: normalizedDiagnostics ?? null,
+    time_quality: payload.timestamp_trusted === false ? 'untrusted' : (timestampSource === 'server_now' ? 'receive_time' : 'device_time'),
+    capture_uptime_ms: payload.uptime_ms ?? payload.uptime ?? null,
   }).catch((err) => {
     logger.error({ err, deviceId: payload.device_id, event: 'rawdata_event_log_write_failed' }, 'Telemetry event log write failed');
   });
@@ -1294,6 +1299,8 @@ export const handleRawData = async (
       runtime_boot_id: metadataBootId,
       live_mutation: shouldMutateLiveState,
       historical_session_append: shouldAppendHistoricalSessionTelemetry,
+      time_quality: payload.timestamp_trusted === false ? 'untrusted' : (timestampSource === 'server_now' ? 'receive_time' : 'device_time'),
+      capture_uptime_ms: payload.uptime_ms ?? payload.uptime ?? undefined,
       stale_reason: shouldRetainStaleSessionTelemetry ? liveMutationDecision.reason : undefined,
       timestamp: new Date(timestampMs).toISOString(),
     });

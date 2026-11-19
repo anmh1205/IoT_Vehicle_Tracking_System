@@ -426,6 +426,11 @@ static void data_formatter_add_diagnostics(cJSON *root, const telemetry_t *telem
     if (telemetry->gnss.query_mode != GNSS_QUERY_MODE_CGPSINFO) {
         cJSON_AddNumberToObject(gnss_diag, "satellites_reported", telemetry->gnss.satellites);
     }
+    if (telemetry->gnss.fix_valid && telemetry->gnss.dop_valid) {
+        cJSON_AddNumberToObject(gnss_diag, "pdop", telemetry->gnss.pdop);
+        cJSON_AddNumberToObject(gnss_diag, "hdop", telemetry->gnss.hdop);
+        cJSON_AddNumberToObject(gnss_diag, "vdop", telemetry->gnss.vdop);
+    }
 
     ESP_LOGI("DATA_FMT", "event=gnss_diag_added mode=%s fix=%d sat=%u",
              gnss_mode_label, telemetry->gnss.fix_valid ? 1 : 0,
@@ -595,6 +600,7 @@ char *data_format_rawdata(const config_t *cfg,
     cJSON_AddNumberToObject(root, "timestamp", (double)effective_ts_ms);
     cJSON_AddBoolToObject(root, "timestamp_trusted", timestamp_trusted);
     cJSON_AddNumberToObject(root, "uptime", (double)util_uptime_ms());
+    cJSON_AddNumberToObject(root, "uptime_ms", (double)util_uptime_ms());
 
     /* Nested telemetry object. */
     cJSON_AddNumberToObject(data, "imu_accel_delta_mps2", telemetry->imu_accel_delta_mps2);
@@ -684,6 +690,7 @@ char *data_format_status(const config_t *cfg,
     cJSON_AddStringToObject(root, "status", status);
     cJSON_AddNumberToObject(root, "timestamp", (double)effective_ts_ms);
     cJSON_AddBoolToObject(root, "timestamp_trusted", timestamp_trusted);
+    cJSON_AddNumberToObject(root, "uptime_ms", (double)util_uptime_ms());
     if (session_id > 0) {
         cJSON_AddNumberToObject(root, "session_id", session_id);
     }
