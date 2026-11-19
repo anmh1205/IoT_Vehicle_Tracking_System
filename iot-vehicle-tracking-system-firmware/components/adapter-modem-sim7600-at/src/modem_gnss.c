@@ -89,69 +89,6 @@ static SemaphoreHandle_t s_gnss_mutex = NULL;
 #define GNSS_UNLOCK() do { if (s_gnss_mutex) xSemaphoreGive(s_gnss_mutex); } while (0)
 
 /**
- * @brief Convert modem UTC timestamp string to milliseconds.
- *
- * Input format example: `20260221153045.123`.
- * Uses manual UTC conversion to avoid mktime() timezone dependency.
- *
- * @param utc_string UTC timestamp string from modem.
- *
- * @return Parsed epoch milliseconds (UTC), or uptime fallback on parse failure.
- */
-static uint64_t modem_gnss_parse_timestamp(const char *utc_string) {
-    // Need at least YYYYMMDDhhmmss (14 chars); shorter strings fall back to monotonic uptime.
-    if (utc_string == NULL || strlen(utc_string) < 14) {
-        return util_uptime_ms();
-    }
-
-    int year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0;
-    char fractional[4] = {0};
-
-    // CGNSINF timestamp layout: YYYYMMDDhhmmss.sss (fractional seconds optional).
-    sscanf(utc_string,
-           "%4d%2d%2d%2d%2d%2d.%3s",
-           &year, &month, &day, &hour, &minute, &second, fractional);
-
-    // Reject impossible calendar/clock fields rather than emitting a bogus epoch.
-    if (year < 1970 || month < 1 || month > 12 || day < 1 || day > 31 ||
-        hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
-        return util_uptime_ms();
-    }
-
-    /* Manual UTC epoch calculation — avoids mktime() timezone dependency. */
-    uint64_t days = 0;
-    // Sum whole days for every full year since 1970, accounting for leap years.
-    for (int y = 1970; y < year; ++y) {
-        days += ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)) ? 366ULL : 365ULL;
-    }
-    static const uint8_t mdays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    // Add days for each elapsed month this year, adding the leap day in February when applicable.
-    for (int m = 1; m < month; ++m) {
-        days += mdays[m - 1];
-        if (m == 2 && ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))) {
-            days += 1;
-        }
-    }
-    days += (uint64_t)(day - 1);  // Days elapsed within the current month.
-
-    // Convert accumulated days + time-of-day into seconds since the Unix epoch.
-    uint64_t epoch_s = days * 86400ULL + (uint64_t)hour * 3600ULL +
-                       (uint64_t)minute * 60ULL + (uint64_t)second;
-
-    // Parse optional fractional seconds (milliseconds), clamping out-of-range values.
-    long frac_ms = 0;
-    if (fractional[0] != '\0') {
-        char *end = NULL;
-        frac_ms = strtol(fractional, &end, 10);
-        if (frac_ms < 0 || frac_ms > 999) {
-            frac_ms = 0;
-        }
-    }
-
-    return epoch_s * 1000ULL + (uint64_t)frac_ms;
-}
-
-/**
  * @brief Check if log is due based on throttle interval.
  *
  * @param last_log_ms Last log timestamp.
@@ -457,18 +394,11 @@ static modem_gnss_read_result_t modem_gnss_send_cgpsinfo_and_parse(gnss_data_t *
         return MODEM_GNSS_READ_PARSE_FAIL;
     }
 
-    // CGPSINFO fallback does not report constellation count. The previous behavior
-    // hardcoded satellites=1 to indicate "fix valid". This kept compatibility with
-    // cloud consumers that gate on satellites>0, but it misled diagnostics by
-    // making fallback fixes indistinguishable from real CGNSINF fixes.
-    //
-    // Compromise: keep satellites=1 as a contract minimum so cloud filtering still
-    // works, but emit a fallback marker via diagnostics so operators can detect
-    // when the device is stuck on the simpler query path.
+    // CGPSINFO does not report satellite counts. An unknown count must not be fabricated.
     data->fix_valid = true;
     data->latitude = latitude;
     data->longitude = longitude;
-    data->satellites = 1;
+    data->satellites = 0; /* Unknown in CGPSINFO; formatter omits this field. */
     data->query_mode = GNSS_QUERY_MODE_CGPSINFO;
     data->timestamp_ms = (field_count > 5) ? modem_gnss_parse_cgpsinfo_timestamp(fields[4], fields[5]) : util_uptime_ms();
     data->speed_kmh = (field_count > 7 && fields[7] != NULL && fields[7][0] != '\0') ? (float)(modem_gnss_safe_atof(fields[7]) * 1.852f) : 0.0f;
@@ -482,59 +412,47 @@ static modem_gnss_read_result_t modem_gnss_send_cgpsinfo_and_parse(gnss_data_t *
 }
 
 /**
- * @brief Run the primary CGNSINF query path and parse its CSV reply.
+ * @brief Parse the SIM7600 CGNSSINFO report (not the SIM7000 CGNSINF format).
  *
- * CGNSINF returns richer data (separate GPS/GLONASS satellite counts, course).
- * Performs coordinate-range validation to reject obvious modem garbage.
- *
- * @param data Output GNSS sample.
- * @return Read result classification (OK / transport fail / parse fail).
+ * Fields: mode, GPS SVs, GLONASS SVs, BEIDOU SVs, NMEA latitude, N/S,
+ * NMEA longitude, E/W, date, UTC time, altitude, speed(knots), course, DOP.
  */
 static modem_gnss_read_result_t modem_gnss_send_and_parse(gnss_data_t *data) {
     char response[512] = {0};
-    bool transport_ok = false;
     esp_err_t last_err = ESP_FAIL;
-
     for (uint32_t attempt = 0; attempt <= MODEM_GNSS_QUERY_SOFT_RETRY_COUNT; ++attempt) {
-        // Retry the richer CGNSINF query a few times before demoting the failure into fallback logic above this helper.
         memset(response, 0, sizeof(response));
-        last_err = modem_at_send("AT+CGNSINF\r",
+        last_err = modem_at_send("AT+CGNSSINFO\r",
                                  response,
                                  sizeof(response),
                                  MODEM_GNSS_QUERY_TIMEOUT_MS);
-
-        ESP_LOGD(TAG, "event=gnss_primary_query_attempt attempt=%lu cmd=AT+CGNSINF", (unsigned long)(attempt + 1U));
-        modem_gnss_log_command_response("AT+CGNSINF", last_err, response);
-
+        modem_gnss_log_command_response("AT+CGNSSINFO", last_err, response);
         if (last_err == ESP_OK) {
-            transport_ok = true;
             break;
         }
     }
-
-    if (!transport_ok) {
+    if (last_err != ESP_OK) {
         return MODEM_GNSS_READ_TRANSPORT_FAIL;
     }
-
-    char *marker = strstr(response, "+CGNSINF:");
+    char *marker = strstr(response, "+CGNSSINFO:");
     if (marker == NULL) {
-        ESP_LOGW(TAG, "event=gnss_parse_failed reason=cgnsinf_marker_missing");
+        ESP_LOGW(TAG, "event=gnss_parse_failed reason=cgnssinfo_marker_missing");
         return MODEM_GNSS_READ_PARSE_FAIL;
     }
-
     char *line_end = strstr(marker, "\r\n");
     if (line_end != NULL) {
         *line_end = '\0';
     }
-
+    char *payload = marker + strlen("+CGNSSINFO:");
+    while (*payload == ' ' || *payload == '\t') {
+        ++payload;
+    }
     char line[512] = {0};
-    util_copy_string(line, sizeof(line), marker + strlen("+CGNSINF: "));
-
-    char *fields[20] = {0};
+    util_copy_string(line, sizeof(line), payload);
+    char *fields[16] = {0};
     size_t field_count = 0;
     char *cursor = line;
     while (field_count < ARRAY_SIZE(fields)) {
-        // Split the modem CSV in-place so field indexes keep matching the SIM7600 response contract.
         fields[field_count++] = cursor;
         char *comma = strchr(cursor, ',');
         if (comma == NULL) {
@@ -544,43 +462,44 @@ static modem_gnss_read_result_t modem_gnss_send_and_parse(gnss_data_t *data) {
         cursor = comma + 1;
     }
 
-    if (field_count < 5) {
-        ESP_LOGW(TAG, "event=gnss_parse_failed reason=field_count field_count=%u", (unsigned)field_count);
+    if (field_count < 8) {
+        ESP_LOGW(TAG, "event=gnss_parse_failed reason=cgnssinfo_field_count fields=%u", (unsigned)field_count);
         return MODEM_GNSS_READ_PARSE_FAIL;
     }
-
     memset(data, 0, sizeof(*data));
-    data->fix_valid = field_count > 1 && fields[1] != NULL && modem_gnss_safe_atoi(fields[1]) == 1;
-    data->latitude = field_count > 3 && fields[3] != NULL ? modem_gnss_safe_atof(fields[3]) : 0.0;
-    data->longitude = field_count > 4 && fields[4] != NULL ? modem_gnss_safe_atof(fields[4]) : 0.0;
-    data->speed_kmh = field_count > 6 && fields[6] != NULL ? (float)modem_gnss_safe_atof(fields[6]) : 0.0f;
+    data->query_mode = GNSS_QUERY_MODE_CGNSINF; /* Legacy internal name for rich SIM7600 GNSS mode. */
+    data->timestamp_ms = (field_count > 9)
+        ? modem_gnss_parse_cgpsinfo_timestamp(fields[8], fields[9]) : util_uptime_ms();
 
-    /* Validate coordinate ranges to reject modem garbage data. */
-    if (data->fix_valid) {
-        if (data->latitude < -90.0 || data->latitude > 90.0 ||
-            data->longitude < -180.0 || data->longitude > 180.0) {
-            ESP_LOGW(TAG, "event=gnss_coordinate_out_of_range lat=%.6f lon=%.6f",
-                     data->latitude, data->longitude);
-            data->fix_valid = false;
-            data->latitude = 0.0;
-            data->longitude = 0.0;
-        }
+    /* SIM7600 mode 2/3 indicates a 2D/3D position fix. */
+    int mode = modem_gnss_safe_atoi(fields[0]);
+    if (mode < 2 ||
+        fields[4] == NULL || fields[4][0] == '\0' ||
+        fields[5] == NULL || fields[5][0] == '\0' ||
+        fields[6] == NULL || fields[6][0] == '\0' ||
+        fields[7] == NULL || fields[7][0] == '\0') {
+        return MODEM_GNSS_READ_OK; /* GNSS alive without a position fix. */
     }
-    data->course_deg = field_count > 7 && fields[7] != NULL ? (float)modem_gnss_safe_atof(fields[7]) : 0.0f;
-
-    int sat_gps = field_count > 14 && fields[14] != NULL ? modem_gnss_safe_atoi(fields[14]) : 0;
-    int sat_glonass = field_count > 15 && fields[15] != NULL ? modem_gnss_safe_atoi(fields[15]) : 0;
-    data->satellites = (uint8_t)(sat_gps + sat_glonass);
-    data->timestamp_ms = field_count > 2 && fields[2] != NULL ? modem_gnss_parse_timestamp(fields[2]) : util_uptime_ms();
-
-    if (!data->fix_valid) {
-        // Clear stale coordinates whenever the modem explicitly says the fix bit is down.
-        data->latitude = 0.0;
-        data->longitude = 0.0;
-        data->satellites = 0;
+    double lat = 0.0;
+    double lon = 0.0;
+    if (!modem_gnss_parse_nmea_degrees(fields[4], fields[5][0], &lat) ||
+        !modem_gnss_parse_nmea_degrees(fields[6], fields[7][0], &lon) ||
+        lat < -90.0 || lat > 90.0 || lon < -180.0 || lon > 180.0) {
+        ESP_LOGW(TAG, "event=gnss_parse_failed reason=cgnssinfo_invalid_coordinates");
+        return MODEM_GNSS_READ_PARSE_FAIL;
     }
-
-    data->query_mode = GNSS_QUERY_MODE_CGNSINF;
+    const int sv_gps = modem_gnss_safe_atoi(fields[1]);
+    const int sv_glonass = modem_gnss_safe_atoi(fields[2]);
+    const int sv_beidou = modem_gnss_safe_atoi(fields[3]);
+    const int sv_count = sv_gps + sv_glonass + sv_beidou;
+    data->fix_valid = true;
+    data->latitude = lat;
+    data->longitude = lon;
+    data->satellites = (uint8_t)util_clamp_int(sv_count, 0, 255);
+    data->speed_kmh = (field_count > 11 && fields[11][0] != '\0')
+        ? (float)(modem_gnss_safe_atof(fields[11]) * 1.852) : 0.0f;
+    data->course_deg = (field_count > 12 && fields[12][0] != '\0')
+        ? (float)modem_gnss_safe_atof(fields[12]) : 0.0f;
     return MODEM_GNSS_READ_OK;
 }
 
@@ -678,89 +597,43 @@ esp_err_t modem_gnss_power_on(void) {
     bool known_power_off = s_last_power_off_ms != 0 && now_ms >= s_last_power_off_ms;
     uint64_t off_duration_ms = known_power_off ? (now_ms - s_last_power_off_ms) : 0;
 
-    // Every fresh power-on attempt clears any prior fallback/backoff bias so the modem gets another chance at the primary query path.
     s_use_cgps_query_only = false;
     s_cgnsinf_fail_streak = 0;
     s_cgnsinf_backoff_until_ms = 0;
-
     ESP_LOGI(TAG, "event=gnss_power_on_start");
 
     if (!known_power_off) {
-        // First try to resume an already-running GNSS engine to avoid unnecessary mode churn on warm boots.
-        esp_err_t resume_err = modem_at_send("AT+CGNSPWR?\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
-        modem_gnss_log_command_response("AT+CGNSPWR?", resume_err, response);
-        if (resume_err == ESP_OK && strstr(response, "+CGNSPWR: 1") != NULL) {
-            s_gnss_powered = true;
-            s_use_cgps_query_only = false;
-            modem_gnss_arm_query_ready_window("cgnspwr_state_resume", false, 0, true);
-            ESP_LOGI(TAG, "event=gnss_power_on_reuse source=CGNSPWR query_mode=CGNSINF");
-            GNSS_UNLOCK();
-            return ESP_OK;
-        }
-
-        memset(response, 0, sizeof(response));
-        resume_err = modem_at_send("AT+CGPS?\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
+        // Resume an already-powered SIM7600 GNSS engine on warm ESP32 boots.
+        esp_err_t resume_err = modem_at_send("AT+CGPS?\r", response, sizeof(response),
+                                            MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
         modem_gnss_log_command_response("AT+CGPS?", resume_err, response);
         if (resume_err == ESP_OK && strstr(response, "+CGPS: 1") != NULL) {
             s_gnss_powered = true;
-            s_use_cgps_query_only = true;
             modem_gnss_arm_query_ready_window("cgps_state_resume", false, 0, true);
-            ESP_LOGI(TAG, "event=gnss_power_on_reuse source=CGPS query_mode=CGPSINFO");
             GNSS_UNLOCK();
             return ESP_OK;
         }
     }
-
-    // Preferred path: enable the newer CGNS engine and keep the richer CGNSINF query mode.
     memset(response, 0, sizeof(response));
-    esp_err_t err = modem_at_send("AT+CGNSPWR=1\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
-    modem_gnss_log_command_response("AT+CGNSPWR=1", err, response);
-    if (err == ESP_OK && strstr(response, "OK") != NULL) {
-        s_gnss_powered = true;
-        s_use_cgps_query_only = false;
-        modem_gnss_arm_query_ready_window("cgnspwr_start", known_power_off, off_duration_ms, false);
-        ESP_LOGI(TAG, "event=gnss_power_on_ok source=CGNSPWR_SET query_mode=CGNSINF");
-        GNSS_UNLOCK();
-        return ESP_OK;
-    }
-
-    memset(response, 0, sizeof(response));
-    err = modem_at_send("AT+CGNSPWR?\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
-    modem_gnss_log_command_response("AT+CGNSPWR?", err, response);
-    if (err == ESP_OK && strstr(response, "+CGNSPWR: 1") != NULL) {
-        s_gnss_powered = true;
-        s_use_cgps_query_only = false;
-        modem_gnss_arm_query_ready_window("cgnspwr_state", known_power_off, off_duration_ms, !known_power_off);
-        ESP_LOGI(TAG, "event=gnss_power_on_ok source=CGNSPWR_QUERY query_mode=CGNSINF");
-        GNSS_UNLOCK();
-        return ESP_OK;
-    }
-
-    // Legacy CGPS commands stay as compatibility fallback for modem firmware that rejects the CGNS family.
-    memset(response, 0, sizeof(response));
-    err = modem_at_send("AT+CGPS=1\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
+    esp_err_t err = modem_at_send("AT+CGPS=1\r", response, sizeof(response),
+                                  MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
     modem_gnss_log_command_response("AT+CGPS=1", err, response);
     if (err == ESP_OK && strstr(response, "OK") != NULL) {
         s_gnss_powered = true;
-        s_use_cgps_query_only = true;
         modem_gnss_arm_query_ready_window("cgps_start", known_power_off, off_duration_ms, false);
-        ESP_LOGI(TAG, "event=gnss_power_on_ok source=CGPS_SET query_mode=CGPSINFO");
         GNSS_UNLOCK();
         return ESP_OK;
     }
-
+    // A command timeout is inconclusive: check whether the GNSS engine actually started.
     memset(response, 0, sizeof(response));
     err = modem_at_send("AT+CGPS?\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
     modem_gnss_log_command_response("AT+CGPS?", err, response);
     if (err == ESP_OK && strstr(response, "+CGPS: 1") != NULL) {
         s_gnss_powered = true;
-        s_use_cgps_query_only = true;
         modem_gnss_arm_query_ready_window("cgps_state", known_power_off, off_duration_ms, !known_power_off);
-        ESP_LOGI(TAG, "event=gnss_power_on_ok source=CGPS_QUERY query_mode=CGPSINFO");
         GNSS_UNLOCK();
         return ESP_OK;
     }
-
     ESP_LOGW(TAG, "event=gnss_power_on_failed");
     GNSS_UNLOCK();
     return ESP_FAIL;
@@ -773,25 +646,12 @@ esp_err_t modem_gnss_power_on(void) {
  */
 esp_err_t modem_gnss_power_off(void) {
     GNSS_LOCK();
-    esp_err_t err = modem_at_send_expect("AT+CGNSPWR=0\r", "OK", MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
+    esp_err_t err = modem_at_send_expect("AT+CGPS=0\r", "OK", MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
     if (err == ESP_OK) {
         s_gnss_powered = false;
         s_query_ready_ms = 0;
         s_last_power_off_ms = util_uptime_ms();
-        GNSS_UNLOCK();
-        return ESP_OK;
     }
-
-    err = modem_at_send_expect("AT+CGPS=0\r", "OK", MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
-    if (err == ESP_OK) {
-        s_gnss_powered = false;
-        s_query_ready_ms = 0;
-        s_last_power_off_ms = util_uptime_ms();
-        ESP_LOGW(TAG, "event=gnss_power_off_ok source=CGPS");
-        GNSS_UNLOCK();
-        return ESP_OK;
-    }
-
     GNSS_UNLOCK();
     return err;
 }
@@ -848,7 +708,7 @@ esp_err_t modem_gnss_get_location(gnss_data_t *data) {
         } else {
             s_cgnsinf_fail_streak += 1;
             telemetry_counters_inc_gnss_cgnsinf_fail();
-            // Repeated primary-query failures trigger a cooldown so we stop hammering AT+CGNSINF on unstable modems.
+            // Repeated primary-query failures trigger a cooldown so we stop hammering AT+CGNSSINFO on unstable modems.
             if (s_cgnsinf_fail_streak >= MODEM_GNSS_QUERY_PRIMARY_BACKOFF_FAIL_THRESHOLD) {
                 s_cgnsinf_backoff_until_ms = now_ms + MODEM_GNSS_QUERY_PRIMARY_BACKOFF_COOLDOWN_MS;
                 ESP_LOGW(TAG,
@@ -936,7 +796,7 @@ esp_err_t modem_gnss_get_location(gnss_data_t *data) {
     }
 
     s_query_fail_streak = 0;
-    if (data->fix_valid && data->latitude != 0.0 && data->longitude != 0.0 && data->satellites > 0) {
+    if (data->fix_valid) {
         // A complete fix resets the no-fix streak and reinforces the success streak used by diagnostics.
         s_fix_success_streak += 1;
         s_no_fix_streak = 0;

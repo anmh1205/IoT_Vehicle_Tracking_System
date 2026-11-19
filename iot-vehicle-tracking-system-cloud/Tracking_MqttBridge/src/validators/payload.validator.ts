@@ -122,7 +122,7 @@ const rawDataPayloadBaseSchema = z.object({
       permanent: z.array(diagnosticDtcCodeSchema).optional(),
     }).optional(),
     gnss: z.object({
-      query_mode: z.enum(['unknown', 'cgnsinf', 'cgpsinfo_fallback']).optional(),
+      query_mode: z.enum(['unknown', 'cgnssinfo', 'cgnsinf', 'cgpsinfo_fallback']).optional(),
       fix_valid: z.boolean().optional(),
       satellites_reported: z.number().int().nonnegative().optional(),
     }).optional(),

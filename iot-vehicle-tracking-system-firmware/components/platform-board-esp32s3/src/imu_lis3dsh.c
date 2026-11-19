@@ -63,14 +63,24 @@
 #define LIS3DSH_CTRL_REG4 0x20
 /* LIS3DSH CTRL_REG5: anti-alias bandwidth + full-scale select. */
 #define LIS3DSH_CTRL_REG5 0x24
-/* Interrupt-1 configuration register (axis/event enable), shared layout. */
+/* LIS3DH-only interrupt-1 configuration register (not present on LIS3DSH). */
 #define IMU_INT1_CFG_REG 0x30
-/* Interrupt-1 source/status register; reading it clears latched interrupts. */
+/* LIS3DH-only interrupt source/status register. */
 #define IMU_INT1_SRC_REG 0x31
-/* Interrupt-1 threshold register (motion trigger level). */
+/* LIS3DH-only interrupt threshold register. */
 #define IMU_INT1_THS_REG 0x32
-/* Interrupt-1 duration register (debounce/min-event time). */
+/* LIS3DH-only interrupt duration register. */
 #define IMU_INT1_DURATION_REG 0x33
+/* LIS3DSH motion detection uses the programmable SM1, not LIS3DH's INT1_CFG. */
+#define LIS3DSH_CTRL_REG1 0x21
+#define LIS3DSH_CTRL_REG3 0x23
+#define LIS3DSH_ST1_1_REG 0x40
+#define LIS3DSH_ST1_2_REG 0x41
+#define LIS3DSH_ST1_3_REG 0x42
+#define LIS3DSH_THRS1_1_REG 0x57
+#define LIS3DSH_MASK1_A_REG 0x5A
+#define LIS3DSH_SETT1_REG 0x5B
+#define LIS3DSH_OUTS1_REG 0x5F
 /* Per-transfer I2C timeout to avoid blocking the caller indefinitely. */
 #define IMU_I2C_XFER_TIMEOUT_MS 20U
 /* Cooldown applied after repeated read failures to let the bus recover. */
@@ -463,27 +473,48 @@ esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_
 
     if (imu_is_lis3dsh()) {
         /*
-         * LIS3DSH uses a different register map than LIS3DH for interrupt config.
-         * CTRL_REG3 (0x23): INT1_EN=1, IEA=1 (active-high), IEL=0 (latched)
-         * INT1_CFG/THS/DURATION registers (0x30-0x33) are shared with LIS3DH.
-         * Threshold unit for LIS3DSH at FS=+/-2g: 1 LSB = 16mg (same as LIS3DH).
+         * LIS3DSH has no LIS3DH INT1_CFG/THS/DURATION registers.
+         * Use the SM1 threshold detector on acceleration differences (RADI).
+         * STM AN3393: 0x05=GNTH1, 0x88=OUTC, 0x11=CONT.
+         * OUTS1 clears the latched INT1 condition.
          */
-        /* CTRL_REG3: enable INT1, active-high output */
-        // 0x48: INT1 enable + active-high level; latched/non-latched per IEL bit kept at the datasheet default.
-        ESP_RETURN_ON_FALSE(imu_write_reg(0x23, 0x48) == ESP_OK, ESP_FAIL, TAG, "LIS3DSH CTRL_REG3 write failed");
-        /* Ensure CTRL_REG5 full-scale stays at +/-2g for consistent threshold scaling */
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_CTRL_REG5, 0x00) == ESP_OK, ESP_FAIL, TAG, "LIS3DSH CTRL_REG5 write failed");
-    } else {
-        /* Keep runtime ODR aligned with the interrupt generator configuration. */
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG1, 0x27) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG1 write failed");
-        /* Enable high-pass filtering on interrupt 1 to reject static gravity. */
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG2, 0x01) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG2 write failed");
-        /* Route IA1 interrupt generator to INT1 pin. */
-        // 0x40: I1_IA1 bit set so the interrupt-generator-1 activity is driven onto the physical INT1 pin.
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG3, 0x40) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG3 write failed");
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG4, 0x88) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG4 write failed");
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG5, 0x00) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG5 write failed");
+        if (duration_ms != 0) {
+            ESP_LOGW(TAG, "event=imu_sm1_duration_unqualified requested_ms=%u", (unsigned)duration_ms);
+        }
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_CTRL_REG1, 0x00) == ESP_OK,
+                            ESP_FAIL, TAG, "LIS3DSH SM1 disable failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_CTRL_REG3, 0x48) == ESP_OK,
+                            ESP_FAIL, TAG, "LIS3DSH INT1 route failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_CTRL_REG5, 0x00) == ESP_OK,
+                            ESP_FAIL, TAG, "LIS3DSH full-scale write failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_THRS1_1_REG, threshold) == ESP_OK,
+                            ESP_FAIL, TAG, "LIS3DSH SM1 threshold failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_MASK1_A_REG, 0xFC) == ESP_OK,
+                            ESP_FAIL, TAG, "LIS3DSH SM1 mask failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_SETT1_REG, 0x11) == ESP_OK,
+                            ESP_FAIL, TAG, "LIS3DSH SM1 diff/interrupt settings failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_ST1_1_REG, 0x05) == ESP_OK,
+                            ESP_FAIL, TAG, "LIS3DSH GNTH1 state failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_ST1_2_REG, 0x88) == ESP_OK,
+                            ESP_FAIL, TAG, "LIS3DSH OUTC state failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_ST1_3_REG, 0x11) == ESP_OK,
+                            ESP_FAIL, TAG, "LIS3DSH CONT state failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DSH_CTRL_REG1, 0x01) == ESP_OK,
+                            ESP_FAIL, TAG, "LIS3DSH SM1 enable failed");
+        return imu_clear_motion_interrupt();
     }
+
+    /* Legacy LIS3DH has a separate interrupt-generator register bank. */
+    ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG1, 0x27) == ESP_OK,
+                        ESP_FAIL, TAG, "CTRL_REG1 write failed");
+    ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG2, 0x01) == ESP_OK,
+                        ESP_FAIL, TAG, "CTRL_REG2 write failed");
+    ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG3, 0x40) == ESP_OK,
+                        ESP_FAIL, TAG, "CTRL_REG3 write failed");
+    ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG4, 0x88) == ESP_OK,
+                        ESP_FAIL, TAG, "CTRL_REG4 write failed");
+    ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG5, 0x00) == ESP_OK,
+                        ESP_FAIL, TAG, "CTRL_REG5 write failed");
     ESP_RETURN_ON_FALSE(imu_write_reg(IMU_INT1_CFG_REG, 0x2A) == ESP_OK, ESP_FAIL, TAG, "INT1_CFG write failed");
     // INT1_CFG=0x2A enables OR-combined high events on X/Y/Z (XHIE|YHIE|ZHIE) for omnidirectional motion.
     ESP_RETURN_ON_FALSE(imu_write_reg(IMU_INT1_THS_REG, threshold) == ESP_OK, ESP_FAIL, TAG, "INT1_THS write failed");
@@ -505,8 +536,8 @@ esp_err_t imu_clear_motion_interrupt(void) {
     ESP_RETURN_ON_NULL(s_dev_handle, ESP_ERR_INVALID_STATE, TAG, "IMU not initialized");
 
     uint8_t src = 0;
-    // Reading INT1_SRC latches-clears the pending interrupt source bits inside the IMU.
-    return imu_read_reg(IMU_INT1_SRC_REG, &src);
+    // LIS3DSH clears SM1's latched interrupt via OUTS1 (0x5F), not LIS3DH INT1_SRC (0x31).
+    return imu_read_reg(imu_is_lis3dsh() ? LIS3DSH_OUTS1_REG : IMU_INT1_SRC_REG, &src);
 }
 
 /**

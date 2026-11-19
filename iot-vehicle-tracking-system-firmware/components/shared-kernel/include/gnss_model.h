@@ -17,14 +17,14 @@
  * @brief Which modem AT command produced a given GNSS fix.
  *
  * Recorded so downstream consumers know how trustworthy the satellite count is:
- * the CGNSINF path reports a real constellation count while the CGPSINFO
- * fallback only approximates it.
+ * the CGNSSINFO path reports actual constellation counts while CGPSINFO
+ * does not provide a count.
  */
 typedef enum {
     GNSS_QUERY_MODE_UNKNOWN = 0,  /**< Source not set yet (no fix decoded). */
-    /** Primary path: AT+CGNSINF with full constellation count. */
+    /** Primary SIM7600 path: AT+CGNSSINFO (enum retained for compatibility). */
     GNSS_QUERY_MODE_CGNSINF,
-    /** Fallback path: AT+CGPSINFO; no constellation count, satellites is approximate. */
+    /** Fallback path: AT+CGPSINFO; no constellation count is reported. */
     GNSS_QUERY_MODE_CGPSINFO,
 } gnss_query_mode_t;
 
