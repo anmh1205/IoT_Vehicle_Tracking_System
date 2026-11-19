@@ -1134,7 +1134,7 @@ export const handleRawData = async (
 
   // A QoS1 replay must not receive PUBACK until the historical metrics write succeeds.
   // The ingress callback propagates this error to MQTT.js so the broker can retry.
-  await writeDeviceTelemetry(payload.device_id, metricsData, timestampMs);
+  await writeDeviceTelemetry(payload.device_id, metricsData, timestampMs, messageId);
 
   // 5. Write to VictoriaLogs
   writeDeviceEvent(payload.device_id, 'rawdata', 'Device telemetry received', {

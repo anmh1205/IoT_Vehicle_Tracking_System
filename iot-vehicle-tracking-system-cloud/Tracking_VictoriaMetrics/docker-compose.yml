@@ -5,7 +5,8 @@ services:
     image: victoriametrics/victoria-metrics:v1.96.0
     container_name: tracking-victoriametrics
     command:
-      - "-retentionPeriod=30d"
+      - "-retentionPeriod=${TRACKING_VM_RETENTION_PERIOD:-365d}"
+      - "-dedup.minScrapeInterval=1ms"
       - "-storageDataPath=/storage"
       - "-httpListenAddr=:8428"
       - "-search.latencyOffset=0s"

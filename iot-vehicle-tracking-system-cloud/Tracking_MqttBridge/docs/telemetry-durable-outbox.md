@@ -1,0 +1,9 @@
+# Persistent telemetry-metric recovery (SV-02, SV-09)
+
+Apply `Tracking_PostgreSQL/init/31-telemetry-metric-outbox.sql` to any **existing** PostgreSQL deployment BEFORE updating MQTT Bridge containers. New PostgreSQL clusters run this file as an initialization script; existing volumes do not rerun init scripts. Grant the bridge DB role INSERT/SELECT/DELETE/UPDATE on the table and USAGE on its sequence if the deployment uses a restricted role.
+
+The bridge now durably inserts a per-message telemetry metric batch into PostgreSQL before attempting VictoriaMetrics import. MQTT QoS1 only acknowledges after the VM HTTP import succeeds. A crash, disconnect, or VM outage leaves an outbox row for a later worker to replay. Each row is keyed by (device_id,message_id) when the firmware sends metadata.message_id; older packets with no ID are staged separately and should be migrated to the current firmware. In production, monitor the backlog (number of rows and oldest created_at) and set alerts before disk pressure. The outbox must be backed up with the application database.
+
+Metrics retention defaults to 365 days and is configurable via `TRACKING_VM_RETENTION_PERIOD`. Provision disk for the desired period and test capacity; changing the flag does not restore already-expired history. `-dedup.minScrapeInterval=1ms` deduplicates same-timestamp raw time series during reads, but may not eliminate physically stored copies, so query consistency does not imply zero storage amplification. Duplicate message IDs with different payloads are considered protocol violations; the first staged payload wins.
+
+Acceptance requires a real PostgreSQL + VictoriaMetrics outage/restart test: disconnect VM, ingest QoS1 records, confirm outbox row survives bridge restart, restore VM, verify records and outbox drain, and verify sampled history at 31+ days. These integration conditions have not been reproduced solely by CI contract checks.

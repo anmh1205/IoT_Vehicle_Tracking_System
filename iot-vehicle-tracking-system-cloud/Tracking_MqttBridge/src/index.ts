@@ -9,6 +9,7 @@ import { publishInternalEventDurable } from './publishers/internal-event.publish
 import { startBatchWriter, stopBatchWriter } from './services/batch-writer.service';
 import { startBridgeHealthServer, stopBridgeHealthServer } from './services/bridge-health.service';
 import { closePool } from './infrastructure/database';
+import { startTelemetryMetricOutbox, stopTelemetryMetricOutbox } from './infrastructure/victoriametrics';
 import { logger } from './infrastructure/logger';
 import { appConfig } from './config/env';
 
@@ -124,6 +125,7 @@ const main = async (): Promise<void> => {
   logger.info({ event: 'bridge_starting', healthPort: appConfig.healthPort }, 'MQTT bridge starting');
 
   startBatchWriter();
+  startTelemetryMetricOutbox();
   await startBridgeHealthServer({
     port: appConfig.healthPort,
     getSnapshot: getBridgeHealthSnapshot,
@@ -184,6 +186,12 @@ const shutdown = async (signal: string): Promise<void> => {
     await stopBatchWriter();
   } catch (err) {
     logger.error({ err, event: 'bridge_shutdown_batch_writer_failed' }, 'Batch writer stop failed during shutdown');
+  }
+
+  try {
+    await stopTelemetryMetricOutbox();
+  } catch (err) {
+    logger.error({ err, event: 'bridge_shutdown_outbox_drain_failed' }, 'Outbox worker shutdown failed');
   }
 
   try {
