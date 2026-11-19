@@ -82,6 +82,9 @@ typedef struct {
     uint32_t peek_cache_min_seq;
     /** File offset after the last successfully parsed replay record. */
     long peek_cache_offset;
+    /** Avoid repeated full-file GC when no additional records can be reclaimed. */
+    bool gc_watermark_attempted;
+    uint32_t gc_attempt_ack_seq;
 } sd_log_store_ctx_t;
 
 static sd_log_store_ctx_t s_ctx;
@@ -993,11 +996,28 @@ esp_err_t sd_log_store_gc_if_needed(void) {
 
     size_t hard_limit = (stats.quota_bytes * (size_t)CONFIG_TRACKER_SD_LOG_HARD_QUOTA_PERCENT) / 100U;
     if (stats.bytes_used <= hard_limit) {
-        // Stay append-only until the hard quota is crossed; normal replay movement does not rewrite the log eagerly.
+        // Crossing the quota again after a successful drain starts a fresh GC epoch.
+        s_ctx.gc_watermark_attempted = false;
         return ESP_OK;
     }
 
+    /*
+     * Nothing can be reclaimed until an ACK watermark has advanced.
+     * With no progress, rewriting the entire queue on every append wears out
+     * the SD card, stalls the heartbeat and still leaves the quota exceeded.
+     */
+    if (s_ctx.gc_watermark_attempted &&
+        s_ctx.gc_attempt_ack_seq == s_ctx.meta.ack_seq_critical) {
+        return ESP_OK;
+    }
+    s_ctx.gc_watermark_attempted = true;
+    s_ctx.gc_attempt_ack_seq = s_ctx.meta.ack_seq_critical;
     telemetry_counters_inc_quota_hit();
+    if (s_ctx.meta.ack_seq_critical == 0U) {
+        ESP_LOGW(TAG, "event=sd_quota_no_ack bytes_used=%u hard_limit=%u",
+                 (unsigned)stats.bytes_used, (unsigned)hard_limit);
+        return ESP_OK;
+    }
 
     FILE *in = fopen(SD_LOG_DATA_PATH, "rb");
     if (in == NULL) {
