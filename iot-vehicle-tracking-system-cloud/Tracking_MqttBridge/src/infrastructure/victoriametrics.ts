@@ -76,21 +76,13 @@ export const writeDeviceTelemetry = async (
     });
 
     if (!response.ok) {
-      logger.error(
-        {
-          deviceId,
-          lineCount: lines.length,
-          status: response.status,
-          statusText: response.statusText,
-          event: 'victoriametrics_batch_write_rejected',
-        },
-        'VictoriaMetrics batch write rejected',
-      );
+      throw new Error(`VictoriaMetrics rejected telemetry import status=${response.status}`);
     }
   } catch (err) {
     logger.error(
       { err, deviceId, lineCount: lines.length, event: 'victoriametrics_batch_write_failed' },
-      'VictoriaMetrics batch write failed',
+      'VictoriaMetrics batch write failed; MQTT QoS1 must not acknowledge this telemetry',
     );
+    throw err;
   }
 };

@@ -1129,9 +1129,9 @@ export const handleRawData = async (
     metricsData.uptime = payload.uptime;
   }
 
-  writeDeviceTelemetry(payload.device_id, metricsData, timestampMs).catch((err) => {
-    logger.error({ err, deviceId: payload.device_id, event: 'rawdata_metrics_write_failed' }, 'Telemetry metrics write failed');
-  });
+  // A QoS1 replay must not receive PUBACK until the historical metrics write succeeds.
+  // The ingress callback propagates this error to MQTT.js so the broker can retry.
+  await writeDeviceTelemetry(payload.device_id, metricsData, timestampMs);
 
   // 5. Write to VictoriaLogs
   writeDeviceEvent(payload.device_id, 'rawdata', 'Device telemetry received', {
