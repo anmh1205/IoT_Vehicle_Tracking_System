@@ -141,7 +141,7 @@ static char *state_publish_format_status(const config_t *cfg,
                                         const char *boot_id) {
     // Format status publishes with boundary metadata so lifecycle transitions can be reconstructed server-side.
     const state_publish_status_args_t *args = (const state_publish_status_args_t *)format_arg;
-    return data_format_status(cfg,
+    char *payload = data_format_status(cfg,
                               args->status,
                               args->session_id,
                               telemetry,
@@ -155,6 +155,17 @@ static char *state_publish_format_status(const config_t *cfg,
                               state_publish_effective_canonical_session_id(),
                               state_publish_effective_session_boot_id(),
                               args->boundary_event);
+    if (payload == NULL || s_prev_last_seq_no == 0U) return payload;
+    cJSON *root = cJSON_Parse(payload);
+    if (root == NULL) return payload;
+    cJSON_AddStringToObject(root, "prev_boot_id", s_prev_boot_id);
+    cJSON_AddNumberToObject(root, "prev_last_seq_no", s_prev_last_seq_no);
+    cJSON_AddStringToObject(root, "prev_seq_quality", s_prev_seq_source);
+    char *augmented = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    if (augmented == NULL) return payload;
+    cJSON_free(payload);
+    return augmented;
 }
 
 static char *state_publish_format_event(const config_t *cfg,

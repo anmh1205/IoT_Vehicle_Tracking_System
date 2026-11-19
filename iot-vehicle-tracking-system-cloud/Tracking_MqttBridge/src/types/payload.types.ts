@@ -139,6 +139,11 @@ export interface StatusPayload {
   canonical_session_id?: string;
   boot_id?: string;
   boundary_event?: BoundaryEvent;
+  timestamp_trusted?: boolean;
+  uptime_ms?: number;
+  prev_boot_id?: string;
+  prev_last_seq_no?: number;
+  prev_seq_quality?: 'rtc_exact' | 'nvs_lower_bound';
   timestamp: number;
   state?: {
     ignition_state?: IgnitionState;

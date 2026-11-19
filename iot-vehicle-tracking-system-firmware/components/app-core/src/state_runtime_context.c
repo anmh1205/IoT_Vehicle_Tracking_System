@@ -152,6 +152,10 @@ char s_current_version[TRACKER_TARGET_VERSION_MAX_LEN] = {0};
 uint32_t s_metadata_seq_no = 0;
 /** @brief Boot identifier shared across payloads from this boot. */
 char s_boot_id[TRACKER_BOOT_ID_LEN] = {0};
+/** Final attempted sequence of previous warm boot or durable NVS lower-bound. */
+uint32_t s_prev_last_seq_no = 0;
+char s_prev_boot_id[TRACKER_BOOT_ID_LEN] = {0};
+const char *s_prev_seq_source = "unavailable";
 /** @brief Tracks whether an OBD failure alert was emitted recently. */
 bool s_obd_fail_alert_emitted = false;
 /** @brief Last OBD failure alert code that was emitted. */
@@ -316,6 +320,9 @@ void state_runtime_context_reset(const config_t *config) {
     memset(s_current_version, 0, sizeof(s_current_version));
     s_metadata_seq_no = 0;
     memset(s_boot_id, 0, sizeof(s_boot_id));
+    s_prev_last_seq_no = 0;
+    memset(s_prev_boot_id, 0, sizeof(s_prev_boot_id));
+    s_prev_seq_source = "unavailable";
     // Session and OTA-reporting state is cleared last so later publish code cannot accidentally reuse stale identifiers.
     s_obd_fail_alert_emitted = false;
     s_last_obd_fail_alert_code = 0;

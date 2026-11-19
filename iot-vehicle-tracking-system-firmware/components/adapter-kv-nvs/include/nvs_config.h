@@ -88,6 +88,14 @@ typedef struct {
 /** @brief Max length of the per-boot identifier string (incl. NUL). */
 #define TRACKER_SESSION_BOOT_ID_LEN 48
 
+typedef struct {
+    uint32_t last_seq_no;
+    char boot_id[TRACKER_SESSION_BOOT_ID_LEN];
+} tracker_boot_seq_checkpoint_t;
+
+esp_err_t nvs_config_save_boot_seq(const tracker_boot_seq_checkpoint_t *checkpoint);
+esp_err_t nvs_config_load_boot_seq(tracker_boot_seq_checkpoint_t *checkpoint, bool *found);
+
 /** @brief Number of recently accepted cloud commands retained across reconnect/reboot. */
 #define TRACKER_COMMAND_DEDUPE_CACHE_LEN 32U
 
