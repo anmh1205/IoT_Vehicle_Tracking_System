@@ -6,6 +6,7 @@
 #include "freertos/task.h"
 
 #include "esp_log.h"
+#include "nvs.h"
 
 #include "ble_util.h"
 #include "obd.h"
@@ -21,6 +22,8 @@
 
 
 static const char *TAG = "OBD_RUNTIME";
+#define OBD_MAC_NVS_NAMESPACE "ivts_obd"
+#define OBD_MAC_NVS_KEY "adapter_mac"
 /* Flag to prevent repeated BLE skip warnings in field validation mode. */
 static bool s_field_validation_ble_skip_logged = false;
 
@@ -52,8 +55,47 @@ static bool state_machine_has_rtc_ble_mac(void) {
  * @brief Forget the retained BLE adapter MAC hint stored in RTC memory.
  */
 static void state_machine_clear_rtc_ble_mac(void) {
-    // Reset the retained adapter hint when it is proven stale so later wakes can fall back to discovery.
+    // A stale preferred MAC must be cleared in both RTC memory and persistent storage.
     memset(g_rtc_context.ble_mac, 0, sizeof(g_rtc_context.ble_mac));
+    nvs_handle_t nvs = 0;
+    if (nvs_open(OBD_MAC_NVS_NAMESPACE, NVS_READWRITE, &nvs) == ESP_OK) {
+        esp_err_t err = nvs_erase_key(nvs, OBD_MAC_NVS_KEY);
+        if (err == ESP_OK) {
+            err = nvs_commit(nvs);
+        }
+        if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) {
+            ESP_LOGW(TAG, "event=ble_mac_nvs_clear_failed err=%s", esp_err_to_name(err));
+        }
+        nvs_close(nvs);
+    }
+}
+
+/** Restore a previously validated BLE adapter address after a full power cut. */
+static bool state_machine_load_ble_mac_from_nvs(void) {
+    if (state_machine_has_rtc_ble_mac()) {
+        return true;
+    }
+    nvs_handle_t nvs = 0;
+    if (nvs_open(OBD_MAC_NVS_NAMESPACE, NVS_READONLY, &nvs) != ESP_OK) {
+        return false;
+    }
+    uint8_t stored[sizeof(g_rtc_context.ble_mac)] = {0};
+    size_t len = sizeof(stored);
+    esp_err_t err = nvs_get_blob(nvs, OBD_MAC_NVS_KEY, stored, &len);
+    nvs_close(nvs);
+    if (err != ESP_OK || len != sizeof(stored)) {
+        return false;
+    }
+    bool nonzero = false;
+    for (size_t i = 0; i < sizeof(stored); ++i) {
+        nonzero = nonzero || stored[i] != 0;
+    }
+    if (!nonzero) {
+        return false;
+    }
+    memcpy(g_rtc_context.ble_mac, stored, sizeof(stored));
+    ESP_LOGI(TAG, "event=ble_reconnect_hint_restored source=nvs");
+    return true;
 }
 
 /**
@@ -92,6 +134,25 @@ static bool state_machine_store_rtc_ble_mac_string(const char *address) {
     }
 
     memcpy(g_rtc_context.ble_mac, parsed_addr.val, sizeof(parsed_addr.val));
+    nvs_handle_t nvs = 0;
+    esp_err_t err = nvs_open(OBD_MAC_NVS_NAMESPACE, NVS_READWRITE, &nvs);
+    if (err == ESP_OK) {
+        uint8_t existing[sizeof(parsed_addr.val)] = {0};
+        size_t len = sizeof(existing);
+        esp_err_t read_err = nvs_get_blob(nvs, OBD_MAC_NVS_KEY, existing, &len);
+        // NVS writes only when the adapter identity changes; cold boots do not wear flash.
+        if (read_err != ESP_OK || len != sizeof(existing) ||
+            memcmp(existing, parsed_addr.val, sizeof(existing)) != 0) {
+            err = nvs_set_blob(nvs, OBD_MAC_NVS_KEY, parsed_addr.val, sizeof(parsed_addr.val));
+            if (err == ESP_OK) {
+                err = nvs_commit(nvs);
+            }
+        }
+        nvs_close(nvs);
+    }
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "event=ble_mac_nvs_save_failed err=%s", esp_err_to_name(err));
+    }
     return true;
 }
 
@@ -118,6 +179,9 @@ static bool state_machine_resolve_preferred_ble_mac(char out[TRACKER_MAC_ADDR_ST
         return true;
     }
 
+    if (!state_machine_has_rtc_ble_mac()) {
+        (void)state_machine_load_ble_mac_from_nvs();
+    }
     if (!state_machine_copy_rtc_ble_mac_string(out)) {
         return false;
     }
