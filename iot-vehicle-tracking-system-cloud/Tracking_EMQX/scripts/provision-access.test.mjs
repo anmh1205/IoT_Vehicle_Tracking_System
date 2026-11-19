@@ -24,7 +24,7 @@ test('existing permissive authorizer aborts before user ACL or credential mutati
   const called = [];
   const responses = [
     { token: 'test-token' },
-    [],
+    [{ mechanism: 'password_based', backend: 'built_in_database', enable: true }],
     [{ type: 'file', enable: true }],
   ];
   const transport = async (url, options) => {
