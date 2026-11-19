@@ -1,5 +1,6 @@
 #include "modem_gnss.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -281,22 +282,32 @@ static bool modem_gnss_parse_nmea_degrees(const char *value, char hemisphere, do
     if (value == NULL || out_decimal == NULL || value[0] == '\0') {
         return false;
     }
-
-    double raw = modem_gnss_safe_atof(value);
-    if (raw <= 0.0) {
-        return false;  // Empty/zero coordinate means no usable fix component.
+    if (hemisphere != 'N' && hemisphere != 'n' &&
+        hemisphere != 'S' && hemisphere != 's' &&
+        hemisphere != 'E' && hemisphere != 'e' &&
+        hemisphere != 'W' && hemisphere != 'w') {
+        return false;
     }
-
-    // Split the combined ddmm.mmmm value: integer degrees are the hundreds part, the rest is minutes.
+    char *end = NULL;
+    double raw = strtod(value, &end);
+    while (end != NULL && (*end == ' ' || *end == '\t')) {
+        ++end;
+    }
+    if (end == value || (end != NULL && *end != '\0') ||
+        !isfinite(raw) || raw < 0.0) {
+        return false;
+    }
+    // NMEA coordinates are DDMM.mmmm/DDDMM.mmmm, including legal 0-degree axes.
     int degrees = (int)(raw / 100.0);
     double minutes = raw - ((double)degrees * 100.0);
-    double decimal = (double)degrees + (minutes / 60.0);  // 60 minutes per degree.
-
-    // Southern / Western hemispheres are negative in decimal-degree convention.
-    if (hemisphere == 'S' || hemisphere == 's' || hemisphere == 'W' || hemisphere == 'w') {
+    if (minutes < 0.0 || minutes >= 60.0) {
+        return false;
+    }
+    double decimal = (double)degrees + (minutes / 60.0);
+    if (hemisphere == 'S' || hemisphere == 's' ||
+        hemisphere == 'W' || hemisphere == 'w') {
         decimal = -decimal;
     }
-
     *out_decimal = decimal;
     return true;
 }
@@ -304,7 +315,7 @@ static bool modem_gnss_parse_nmea_degrees(const char *value, char hemisphere, do
 /**
  * @brief Run the legacy CGPSINFO query path and parse its NMEA-style CSV reply.
  *
- * Used as the simpler fallback when CGNSINF is unavailable or has been demoted.
+ * Used as the simpler fallback when CGNSSINFO is unavailable or has been demoted.
  * Distinguishes transport failure (no usable reply) from parse failure (reply but
  * malformed) and from a valid "alive but no fix" frame.
  *

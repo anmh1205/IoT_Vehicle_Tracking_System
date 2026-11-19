@@ -68,7 +68,7 @@ export interface RawDiagnosticsDtc {
   permanent?: string[];
 }
 
-export type GnssQueryMode = 'unknown' | 'cgnsinf' | 'cgpsinfo_fallback';
+export type GnssQueryMode = 'unknown' | 'cgnssinfo' | 'cgnsinf' | 'cgpsinfo_fallback';
 
 export interface RawDiagnosticsGnss {
   query_mode?: GnssQueryMode;
