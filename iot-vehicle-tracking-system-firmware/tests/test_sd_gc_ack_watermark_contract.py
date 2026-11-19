@@ -19,3 +19,11 @@ def test_gc_prioritizes_critical_even_without_ack_watermark():
     assert "rec.critical == 0 && evict_noncritical_bytes > 0U" in function
     assert "telemetry_counters_inc_quota_evicted_noncritical" in function
     assert "sd_quota_critical_only_overflow" in function
+
+
+def test_gc_retains_post_compaction_watermark_to_avoid_critical_only_rewrite_loop():
+    function = SOURCE.split("esp_err_t sd_log_store_gc_if_needed(void) {", 1)[1]
+    assert "s_ctx.gc_watermark_attempted = true;" in function
+    assert "compacted_stat" in function
+    assert "s_ctx.gc_attempt_bytes_used = (size_t)compacted_stat.st_size;" in function
+    assert "s_ctx.gc_watermark_attempted = false;" in function  # under limit

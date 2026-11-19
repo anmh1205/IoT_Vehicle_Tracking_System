@@ -1158,7 +1158,19 @@ esp_err_t sd_log_store_gc_if_needed(void) {
     remove(SD_LOG_DATA_BAK_PATH);
     // Any offset cached against the old file layout becomes invalid once the compacted file is promoted.
     sd_log_store_reset_peek_cache();
-    s_ctx.gc_watermark_attempted = false;
+    /*
+     * Preserve the successful-GC watermark until new broker ACKs arrive or
+     * at least 64 KiB of fresh data accumulates. Otherwise a critical-only
+     * queue above quota would rewrite the whole log on EVERY new append.
+     */
+    struct stat compacted_stat = {0};
+    s_ctx.gc_watermark_attempted = true;
+    s_ctx.gc_attempt_ack_seq = s_ctx.meta.ack_seq_critical;
+    if (stat(SD_LOG_DATA_PATH, &compacted_stat) == 0 && compacted_stat.st_size >= 0) {
+        s_ctx.gc_attempt_bytes_used = (size_t)compacted_stat.st_size;
+    } else {
+        s_ctx.gc_attempt_bytes_used = stats.bytes_used;
+    }
     if (evicted_records > 0U) {
         ESP_LOGW(TAG, "event=sd_quota_noncritical_eviction records=%u bytes_before=%u hard_limit=%u",
                  (unsigned)evicted_records, (unsigned)stats.bytes_used, (unsigned)hard_limit);
