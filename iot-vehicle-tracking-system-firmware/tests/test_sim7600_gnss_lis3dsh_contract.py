@@ -30,3 +30,4 @@ def test_lis3dsh_uses_sm1_not_lis3dh_interrupt_bank():
     assert "IMU_INT1_CFG_REG" not in sm1
     assert "IMU_INT1_THS_REG" not in sm1
     assert "LIS3DSH_OUTS1_REG : IMU_INT1_SRC_REG" in IMU
+    assert "imu_configure_motion_interrupt(uint16_t threshold_mg" in IMU

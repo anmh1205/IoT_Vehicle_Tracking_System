@@ -461,10 +461,10 @@ fail:
  *
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
-esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_ms) {
+esp_err_t imu_configure_motion_interrupt(uint16_t threshold_mg, uint8_t duration_ms) {
     ESP_RETURN_ON_NULL(s_dev_handle, ESP_ERR_INVALID_STATE, TAG, "IMU not initialized");
 
-    /* LIS3DH threshold unit ~16mg/LSB in +/-2g mode. */
+    /* +/-2g threshold unit is approximately 16mg/LSB on both supported variants. */
     // Convert the requested mg threshold to register LSBs (round up), clamped to the 1..127 valid range.
     uint8_t threshold = (uint8_t)util_clamp_int((int)((threshold_mg + 15U) / 16U), 1, 127);
     /* Duration LSB ~= 100ms at 10 Hz ODR. */

@@ -223,7 +223,10 @@ void state_machine_bootstrap_imu(void) {
     if (imu_err == ESP_OK) {
         s_imu_available = true;
         retry_state_reset(&s_imu_bootstrap_retry);
-        esp_err_t motion_cfg_err = imu_configure_motion_interrupt(120, 200);
+        /* LIS3DSH SM1 uses absolute acceleration: 120 mg is below static gravity
+         * and would trigger INT1 even when parked. 1360 mg is the AN3393
+         * section 9.2 reference wake threshold (0x55 at +/-2g). Tune on board. */
+        esp_err_t motion_cfg_err = imu_configure_motion_interrupt(1360, 200);
         if (motion_cfg_err != ESP_OK) {
             ESP_LOGW(TAG, "event=imu_motion_interrupt_config_failed err=%s", esp_err_to_name(motion_cfg_err));
         } else {

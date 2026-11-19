@@ -30,17 +30,19 @@ esp_err_t imu_init(void);
 /**
  * @brief Configure LIS3DSH motion interrupt threshold and duration.
  *
- * Sets the on-chip motion detector so the INT1 line asserts when acceleration
- * exceeds @p threshold_mg for at least @p duration_ms. Used to wake the MCU
- * from sleep on vehicle movement.
+ * Sets the on-chip threshold detector for INT1 motion wake.
+ * LIS3DSH SM1 currently implements threshold-only detection; its duration
+ * parameter is not yet supported and must be verified/calibrated on hardware.
  *
- * @param threshold_mg Motion threshold in milli-g (quantized to ~16 mg/LSB).
+ * @param threshold_mg Absolute acceleration threshold in milli-g (~16 mg/LSB).
+ *                     On LIS3DSH with raw acceleration this must exceed static
+ *                     gravity (~1000 mg) to avoid continuously asserted INT1.
  * @param duration_ms Minimum persistence time in milliseconds (~100 ms/LSB).
  *
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  * @note Requires imu_init() to have run first (returns ESP_ERR_INVALID_STATE otherwise).
  */
-esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_ms);
+esp_err_t imu_configure_motion_interrupt(uint16_t threshold_mg, uint8_t duration_ms);
 
 /**
  * @brief Read digital state of configured interrupt pin.
@@ -54,8 +56,8 @@ bool imu_motion_detected(void);
 /**
  * @brief Clear the active motion interrupt source in the IMU.
  *
- * Reads INT1_SRC, which latches-clears the pending interrupt flags so the INT1
- * line can de-assert and re-arm for the next motion event.
+ * Reads LIS3DSH OUTS1 (or legacy LIS3DH INT1_SRC) to clear its latched
+ * interrupt so INT1 can de-assert and re-arm.
  *
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
