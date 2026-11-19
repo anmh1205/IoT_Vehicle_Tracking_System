@@ -42,6 +42,7 @@ def test_gc_preserves_original_on_corrupt_tail_read_failure_and_flush_failure(tm
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #define SD_LOG_DATA_PATH $DATA
 #define SD_LOG_DATA_TMP_PATH $TEMP
 #define SD_LOG_DATA_BAK_PATH $BACKUP
