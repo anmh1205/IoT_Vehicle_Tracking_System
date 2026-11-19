@@ -110,6 +110,8 @@ static uint64_t s_last_health_snapshot_log_ms = 0;
 #endif
 
 #define TRACKER_HEALTH_SNAPSHOT_INTERVAL_MS 60000ULL
+/* Bounded additional awake time for parked QoS1 backlog replay. */
+#define TRACKER_HEARTBEAT_REPLAY_GRACE_MS 10000ULL
 
 /**
  * @brief Forward incoming MQTT command payloads into the command handler.
@@ -1263,7 +1265,7 @@ static app_state_t state_machine_handle_check_ign_state(void) {
     }
 
     // Refresh wake-time peripherals first so the debounce path sees a current ignition sample.
-    state_machine_run_wake_prelude(false);
+    state_machine_run_wake_prelude(true);
     uint64_t now_ms = util_uptime_ms();
     session_mgr_on_ignition_sample(s_telemetry.ignition, now_ms);
     if (!session_mgr_has_stable_ignition()) {
@@ -1380,7 +1382,7 @@ static app_state_t state_machine_handle_heartbeat_state(void) {
     }
 
     // Heartbeat wake uses the lightweight prelude instead of the full driving bootstrap.
-    state_machine_run_wake_prelude(false);
+    state_machine_run_wake_prelude(true);
     uint64_t now_ms = util_uptime_ms();
     session_mgr_on_ignition_sample(s_telemetry.ignition, now_ms);
     if (s_telemetry.ignition && command_handler_is_tracking_enabled()) {
@@ -1428,6 +1430,15 @@ static app_state_t state_machine_handle_heartbeat_state(void) {
 
         state_machine_publish_status("heartbeat", "none");
         s_heartbeat_raw_published = true;
+    }
+
+    /* Continue replay only while online and within a bounded heartbeat grace period. */
+    if ((s_heartbeat_raw_published || heartbeat_timeout) &&
+        s_runtime_ports->mqtt->is_connected() &&
+        offline_queue_depth() > 0U &&
+        (now_ms - s_heartbeat_started_ms) <
+            (TRACKER_HEARTBEAT_ACTIVE_WINDOW_MS + TRACKER_HEARTBEAT_REPLAY_GRACE_MS)) {
+        return APP_STATE_HEARTBEAT;
     }
 
     if (s_heartbeat_raw_published || heartbeat_timeout) {

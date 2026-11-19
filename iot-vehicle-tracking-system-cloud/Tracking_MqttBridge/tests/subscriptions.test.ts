@@ -19,7 +19,7 @@ test('subscribeToDeviceTopics subscribes to every device topic with expected QoS
   await subscribeToDeviceTopics(client);
 
   assert.deepEqual(subscribedTopics, {
-    [DEVICE_TOPICS.RAW_DATA]: { qos: 0 },
+    [DEVICE_TOPICS.RAW_DATA]: { qos: 1 },
     [DEVICE_TOPICS.STATUS]: { qos: 1 },
     [DEVICE_TOPICS.EVENTS]: { qos: 1 },
     [DEVICE_TOPICS.FIRMWARE]: { qos: 1 },

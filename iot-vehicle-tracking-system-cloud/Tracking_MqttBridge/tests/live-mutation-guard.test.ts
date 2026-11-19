@@ -13,6 +13,26 @@ test('accepts live mutation when no watermark exists', () => {
   assert.equal(decision.watermarkMs, null);
 });
 
+test('untrusted replay cannot rewind live state, even with newer server receive time', () => {
+  const decision = shouldAcceptLiveMutation({
+    incomingTimestampMs: 300_000,
+    timestampTrusted: false,
+    incomingRuntimeBootId: 'previous-boot',
+    cachedRuntimeBootId: 'current-boot',
+    persistedWatermarkMs: 200_000,
+  });
+  assert.deepEqual(decision, { accept: false, reason: 'untrusted_device_time', watermarkMs: 200_000 });
+});
+
+test('explicitly trusted telemetry remains eligible for live mutation', () => {
+  const decision = shouldAcceptLiveMutation({
+    incomingTimestampMs: 300_000,
+    timestampTrusted: true,
+    persistedWatermarkMs: 200_000,
+  });
+  assert.equal(decision.accept, true);
+});
+
 test('rejects stale timestamp behind persisted watermark', () => {
   const decision = shouldAcceptLiveMutation({
     incomingTimestampMs: 100_000,

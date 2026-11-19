@@ -447,7 +447,8 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
     offline_record_type_t type = (offline_record_type_t)rec->type;
     const char *topic = offline_queue_topic_from_type(type);
     const char *topic_class = offline_queue_type_name(type);
-    int qos = rec->critical ? 1 : 0;
+    /* All SD replay records require the modem's QoS1 publish confirmation. */
+    int qos = 1;
     char payload_scratch[sizeof(rec->payload)] = {0};
     const char *payload = offline_queue_payload_for_publish(rec, payload_scratch, sizeof(payload_scratch));
     int msg_id = tracker_mqtt_publish_with_msg_id(topic, payload, qos);
@@ -461,28 +462,15 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
         return ESP_FAIL;
     }
 
-    if (qos == 0) {
-        /* QoS0 has no broker ACK; advancing replay_seq immediately is intentional. */
-        telemetry_counters_inc_replay_success();
-        ESP_LOGD(TAG,
-                 "replay publish ok seq=%lu topic_class=%s qos=%d msg_id=%d",
-                 (unsigned long)rec->seq,
-                 topic_class,
-                 qos,
-                 msg_id);
-        // Move the cursor one past this record so the next tick reads the following entry.
-        return sd_log_store_set_replay_seq(rec->seq + 1);
-    }
-
     telemetry_counters_inc_replay_success();
-    // Critical/QoS1 records only advance once their durable ACK watermark and replay cursor move together.
+    // All replay records advance only once QoS1 publish confirmation has been received.
     ESP_LOGD(TAG,
              "replay publish accepted seq=%lu topic_class=%s qos=%d msg_id=%d",
              (unsigned long)rec->seq,
              topic_class,
              qos,
              msg_id);
-    // Atomically record the critical ACK watermark (rec->seq) and advance replay (rec->seq + 1).
+    // Persist the broker-confirmed watermark and replay cursor together, including non-critical rows.
     return sd_log_store_ack_critical_and_advance_replay(rec->seq, rec->seq + 1);
 }
 

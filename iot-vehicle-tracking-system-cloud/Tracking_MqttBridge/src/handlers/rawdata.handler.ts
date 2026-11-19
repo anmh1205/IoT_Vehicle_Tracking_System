@@ -908,6 +908,7 @@ export const handleRawData = async (
   const payloadCanonicalSessionId = payload.canonical_session_id ?? null;
   const liveMutationDecision = shouldAcceptLiveMutation({
     incomingTimestampMs: timestampMs,
+    timestampTrusted: payload.timestamp_trusted,
     incomingSeqNo: seqNo,
     incomingRuntimeBootId: metadataBootId ?? sessionBootId,
     incomingSessionBootId: sessionBootId,

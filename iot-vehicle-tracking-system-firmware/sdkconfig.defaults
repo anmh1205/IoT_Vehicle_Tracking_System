@@ -33,5 +33,5 @@ CONFIG_TRACKER_IGNITION_DEBOUNCE_MS=1500
 CONFIG_TRACKER_IGNITION_OFF_DRAIN_MS=3000
 
 # partitions.csv occupies over 4 MiB; ESP-IDF's 2 MiB default cannot build
-# these factory + dual-OTA partitions. Target hardware must have >= 8 MiB flash.
-CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
+# these factory + dual-OTA partitions. Board W25Q128 provides 16 MiB flash.
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
