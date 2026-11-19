@@ -34,6 +34,7 @@ describe('device-command.service', () => {
   beforeEach(async () => {
     await closeDeviceCommandDispatcher();
     vi.resetAllMocks();
+    vi.mocked(deviceCommandRepo.expireOutstandingDeviceCommands).mockResolvedValue(0);
     vi.useRealTimers();
   });
 
