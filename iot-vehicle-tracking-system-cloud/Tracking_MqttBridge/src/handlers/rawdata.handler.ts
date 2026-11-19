@@ -19,6 +19,7 @@ import { addUpdate } from '../services/batch-writer.service';
 import { publishSupersededSessionEnds } from '../services/session-lifecycle.service';
 import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
+import { pool } from '../infrastructure/pool';
 import { maxTimestampMs, normalizePayloadTimestamp, parseIsoTimestampMs } from '../utils/timestamp.util';
 import { resolveLocalSessionKey } from '../utils/session-identity.util';
 import { normalizeRuntimeState, type RuntimeStateSnapshot } from '../types/device-state.types';
@@ -272,13 +273,24 @@ const isLikelyActiveSessionTelemetry = (params: {
 
 const getRuleKey = (deviceId: string, ruleId: string) => `${deviceId}:${ruleId}`;
 
-const canEmitRule = (deviceId: string, ruleId: string, timestampMs: number): boolean => {
+/** The in-memory map is only a fast path; PostgreSQL alerts are the durable cooldown source. */
+const canEmitRule = async (deviceId: string, ruleId: string, title: string): Promise<boolean> => {
   const key = getRuleKey(deviceId, ruleId);
-  const blockedUntil = ruleCooldownUntil.get(key) ?? 0;
-  if (timestampMs < blockedUntil) {
+  const now = Date.now();
+  if (now < (ruleCooldownUntil.get(key) ?? 0)) return false;
+
+  const recent = await pool.query<{ last_emitted_at: Date | null }>(
+    `SELECT MAX(created_at) AS last_emitted_at FROM alerts
+      WHERE device_id = $1 AND title = $2
+        AND created_at > NOW() - INTERVAL '15 minutes'`,
+    [deviceId, title],
+  );
+  const lastEmittedMs = recent.rows[0]?.last_emitted_at?.getTime() ?? 0;
+  if (lastEmittedMs > 0 && now < lastEmittedMs + OBD_RULE_COOLDOWN_MS) {
+    ruleCooldownUntil.set(key, lastEmittedMs + OBD_RULE_COOLDOWN_MS);
     return false;
   }
-  ruleCooldownUntil.set(key, timestampMs + OBD_RULE_COOLDOWN_MS);
+  ruleCooldownUntil.set(key, now + OBD_RULE_COOLDOWN_MS);
   return true;
 };
 
@@ -528,7 +540,7 @@ const evaluateObdDtcRules = async (
     'Auto-resolved by mqtt bridge: DTC cleared or superseded by latest OBD snapshot.',
   );
 
-  dtcBuckets.forEach((buckets, code) => {
+  for (const [code, buckets] of dtcBuckets) {
     const rule = resolveDtcDefinition(code, buckets);
     const isPendingOnly =
       buckets.size === 1 && buckets.has('pending') && !buckets.has('stored') && !buckets.has('permanent');
@@ -549,11 +561,11 @@ const evaluateObdDtcRules = async (
     const title = `OBD: DTC ${code}`;
 
     if (existingActiveTitles.has(title)) {
-      return;
+      continue;
     }
 
-    if (!canEmitRule(context.deviceId, ruleId, context.timestampMs)) {
-      return;
+    if (!await canEmitRule(context.deviceId, ruleId, title)) {
+      continue;
     }
 
     publishObdMaintenanceAlert(context, {
@@ -567,7 +579,7 @@ const evaluateObdDtcRules = async (
       milOn,
       evidence: bucketLabel,
     });
-  });
+  }
 };
 
 const syncObdConnectionWarnings = async (
@@ -612,7 +624,7 @@ const syncHighImuAccelDeltaAlert = async (
     return;
   }
 
-  if (!canEmitRule(context.deviceId, HIGH_IMU_ACCEL_DELTA_ALERT_TITLE, context.timestampMs)) {
+  if (!await canEmitRule(context.deviceId, HIGH_IMU_ACCEL_DELTA_ALERT_TITLE, HIGH_IMU_ACCEL_DELTA_ALERT_TITLE)) {
     return;
   }
 
@@ -648,7 +660,7 @@ const syncHighImuAccelDeltaAlert = async (
   );
 };
 
-const evaluateObdMaintenanceRules = (
+const evaluateObdMaintenanceRules = async (
   diagnostics: RawDiagnostics | undefined,
   context: ObdAlertContext,
   fallbackVehicleBattery: number | undefined,
@@ -709,16 +721,17 @@ const evaluateObdMaintenanceRules = (
     activeRuleTitles.add('OBD: Voltage risk under load');
   }
 
-  return syncActiveMaintenanceAlertsByTitle(
+  const existingActiveTitles = await syncActiveMaintenanceAlertsByTitle(
     context.deviceId,
     Array.from(OBD_RULE_MAINTENANCE_TITLES),
     Array.from(activeRuleTitles),
     'Auto-resolved by mqtt bridge: OBD maintenance condition cleared in latest telemetry snapshot.',
-  ).then((existingActiveTitles) => {
+  );
+  {
     if (
       channelUnstableActive &&
       !existingActiveTitles.has('OBD: Channel unstable') &&
-      canEmitRule(context.deviceId, 'obd_channel_unstable', context.timestampMs)
+      await canEmitRule(context.deviceId, 'obd_channel_unstable', 'OBD: Channel unstable')
     ) {
       publishObdMaintenanceAlert(context, {
         ruleId: 'obd_channel_unstable',
@@ -734,7 +747,7 @@ const evaluateObdMaintenanceRules = (
     if (
       coolantRiskActive &&
       !existingActiveTitles.has('OBD: Coolant risk pattern') &&
-      canEmitRule(context.deviceId, 'coolant_risk_pattern', context.timestampMs)
+      await canEmitRule(context.deviceId, 'coolant_risk_pattern', 'OBD: Coolant risk pattern')
     ) {
       publishObdMaintenanceAlert(context, {
         ruleId: 'coolant_risk_pattern',
@@ -750,7 +763,7 @@ const evaluateObdMaintenanceRules = (
     if (
       idleAnomalyEligible &&
       !existingActiveTitles.has('OBD: Idle-load anomaly') &&
-      canEmitRule(context.deviceId, 'idle_load_anomaly', context.timestampMs)
+      await canEmitRule(context.deviceId, 'idle_load_anomaly', 'OBD: Idle-load anomaly')
     ) {
       publishObdMaintenanceAlert(context, {
         ruleId: 'idle_load_anomaly',
@@ -766,7 +779,7 @@ const evaluateObdMaintenanceRules = (
     if (
       voltageRiskActive &&
       !existingActiveTitles.has('OBD: Voltage risk under load') &&
-      canEmitRule(context.deviceId, 'voltage_risk_combined', context.timestampMs)
+      await canEmitRule(context.deviceId, 'voltage_risk_combined', 'OBD: Voltage risk under load')
     ) {
       publishObdMaintenanceAlert(context, {
         ruleId: 'voltage_risk_combined',
@@ -778,7 +791,7 @@ const evaluateObdMaintenanceRules = (
         value: vehicleBattery,
       });
     }
-  });
+  }
 };
 
 /**
