@@ -74,12 +74,14 @@ export const writeDeviceTelemetry = async (
    * A duplicate message_id is a no-op, so broker replay never adds a second
    * durable task. The worker can recover after process/VM restarts. */
   const body = lines.join('\n') + '\n';
-  await pool.query(
+  const enqueued = await pool.query<{ id: string }>(
     `INSERT INTO telemetry_metric_outbox (device_id, message_id, line_payload, occurred_at)
      VALUES ($1, $2, $3, to_timestamp($4::double precision / 1000))
-     ON CONFLICT (device_id, message_id) DO NOTHING`,
+     ON CONFLICT (device_id, message_id) DO NOTHING
+     RETURNING id`,
     [deviceId, messageId ?? null, body, timestampMs],
   );
+  const enqueuedId = enqueued.rows[0]?.id;
 
   try {
     const response = await fetch(IMPORT_URL, {
@@ -92,15 +94,14 @@ export const writeDeviceTelemetry = async (
       throw new Error(`VictoriaMetrics rejected telemetry import status=${response.status}`);
     }
     /* Keep the row on SQL failure: repeated delivery is safe under 1ms VM dedup. */
-    if (messageId) {
+    if (enqueuedId) {
+      // Match the exact inserted row; identical legacy payloads may coexist.
+      await pool.query('DELETE FROM telemetry_metric_outbox WHERE id = $1', [enqueuedId]);
+    } else if (messageId) {
+      // A QoS1 redelivery can race the recovery worker for the same ID.
       await pool.query(
         'DELETE FROM telemetry_metric_outbox WHERE device_id = $1 AND message_id = $2',
         [deviceId, messageId],
-      );
-    } else {
-      await pool.query(
-        'DELETE FROM telemetry_metric_outbox WHERE device_id = $1 AND message_id IS NULL AND line_payload = $2',
-        [deviceId, body],
       );
     }
   } catch (err) {
