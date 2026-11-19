@@ -36,3 +36,6 @@
 
 /** Persisted identity of a motion alert not yet durably accepted. */
 #define TRACKER_NVS_PENDING_MOTION_ALERT_KEY "motion_evt_v1"
+
+/** Wear-bounded sequence checkpoint to detect lost tail after complete power loss. */
+#define TRACKER_NVS_BOOT_SEQ_KEY "boot_seq_v1"

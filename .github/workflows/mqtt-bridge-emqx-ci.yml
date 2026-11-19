@@ -64,6 +64,8 @@ jobs:
           PGPASSWORD: ivts_test_password
           PGDATABASE: ivts_test_ingress
         run: npx tsx --test tests/emqx-puback-after-postgres.integration.test.ts
+      - name: Verify production ACL bootstrap rule isolation
+        run: node --test ../Tracking_EMQX/scripts/provision-access.test.mjs
       - name: Verify real EMQX ACL denial and reconnect recovery
         env:
           IVTS_EMQX_INTEGRATION: '1'

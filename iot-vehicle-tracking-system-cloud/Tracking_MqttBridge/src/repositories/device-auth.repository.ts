@@ -21,7 +21,7 @@ export const findAuthenticatedDevice = async (
           , last_seen_at, state_updated_at, payload_updated_at
      FROM devices
      WHERE device_id = $1
-       AND auth_token = encode(sha256($2::bytea), 'hex')
+       AND auth_token = encode(sha256(convert_to($2, 'UTF8')), 'hex')
        AND is_active = true`,
     [deviceId, rawToken],
   );

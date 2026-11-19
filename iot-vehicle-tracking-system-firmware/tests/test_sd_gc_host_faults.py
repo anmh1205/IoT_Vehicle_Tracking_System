@@ -42,6 +42,7 @@ def test_gc_preserves_original_on_corrupt_tail_read_failure_and_flush_failure(tm
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #define SD_LOG_DATA_PATH $DATA
 #define SD_LOG_DATA_TMP_PATH $TEMP
 #define SD_LOG_DATA_BAK_PATH $BACKUP
@@ -62,15 +63,19 @@ typedef struct { uint32_t seq; unsigned char critical; } sd_log_record_t;
 static struct {
     bool mounted;
     struct { uint32_t ack_seq_critical; } meta;
-} s_ctx = {.mounted = true};
+    bool gc_watermark_attempted;
+    uint32_t gc_attempt_ack_seq;
+    size_t gc_attempt_bytes_used;
+} s_ctx = {.mounted = true, .meta = {.ack_seq_critical = 1}};
 static bool degraded, force_flush_failure, force_read_error;
-static int cache_resets;
+static int cache_resets, evicted_count;
 static esp_err_t sd_log_store_get_stats(sd_log_stats_t *stats) {
     stats->bytes_used = 300;
     stats->quota_bytes = 100;
     return ESP_OK;
 }
 static void telemetry_counters_inc_quota_hit(void) {}
+static void telemetry_counters_inc_quota_evicted_noncritical(void) { ++evicted_count; }
 static void telemetry_counters_inc_sd_write_fail(void) {}
 static void telemetry_counters_inc_sd_fsync_fail(void) {}
 static void sd_log_store_mark_degraded(void) { degraded = true; }
@@ -78,9 +83,10 @@ static void sd_log_store_reset_peek_cache(void) { ++cache_resets; }
 static esp_err_t sd_log_store_parse_record(
     const char *line, sd_log_record_t *record) {
     const char *delim = strchr(line, '|');
-    if (delim == NULL || strcmp(delim, "|VALID\n") != 0) return ESP_FAIL;
+    if (delim == NULL || (strcmp(delim, "|VALID\n") != 0 &&
+                          strcmp(delim, "|RAW\n") != 0)) return ESP_FAIL;
     record->seq = (uint32_t)strtoul(line, NULL, 10);
-    record->critical = 1;
+    record->critical = strcmp(delim, "|VALID\n") == 0 ? 1 : 0;
     return ESP_OK;
 }
 static int host_flush(FILE *stream) {
@@ -106,6 +112,11 @@ static void clear_files(void) {
     remove(SD_LOG_DATA_BAK_PATH);
     degraded = false;
     cache_resets = 0;
+    evicted_count = 0;
+    s_ctx.gc_watermark_attempted = false;
+    s_ctx.gc_attempt_bytes_used = 0;
+    s_ctx.gc_attempt_ack_seq = 0;
+    s_ctx.meta.ack_seq_critical = 1;
 }
 static void write_log(const char *value) {
     FILE *stream = fopen(SD_LOG_DATA_PATH, "wb");
@@ -162,6 +173,22 @@ int main(void) {
     assert_log_equal("1|VALID\n2|VALID\n");
     assert_no_staging();
     assert(cache_resets == 1);
+
+    // At 50-byte hard quota, preserve the 8-byte CRITICAL record.  Evict
+    // exactly one 6-byte RAW record from oldest to newest to fit 50 bytes.
+    clear_files();
+    write_log("1|VALID\n2|RAW\n3|RAW\n4|RAW\n5|RAW\n6|RAW\n7|RAW\n8|RAW\n9|RAW\n");
+    assert(sd_log_store_gc_if_needed() == ESP_OK);
+    assert_log_equal("1|VALID\n3|RAW\n4|RAW\n5|RAW\n6|RAW\n7|RAW\n8|RAW\n9|RAW\n");
+    assert(evicted_count == 1);
+    assert(cache_resets == 1);
+
+    // On critical-only saturation, never discard unacknowledged alerts.
+    clear_files();
+    write_log("1|VALID\n2|VALID\n3|VALID\n4|VALID\n5|VALID\n6|VALID\n7|VALID\n");
+    assert(sd_log_store_gc_if_needed() == ESP_OK);
+    assert_log_equal("1|VALID\n2|VALID\n3|VALID\n4|VALID\n5|VALID\n6|VALID\n7|VALID\n");
+    assert(evicted_count == 0);
     clear_files();
     return 0;
 }

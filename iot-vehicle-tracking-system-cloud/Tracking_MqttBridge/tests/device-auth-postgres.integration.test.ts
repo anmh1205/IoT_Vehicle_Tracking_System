@@ -53,13 +53,20 @@ integrationTest('real PostgreSQL requires the raw device secret, never a stolen 
       assert.match(wrapper.slice(start, start + 550), /findAuthenticatedDevice\(deviceId, authToken\)/);
     }
     const sql = readAuthQuery('../src/repositories/device-auth.repository.ts', 'findAuthenticatedDevice');
-    assert.match(sql, /auth_token = encode\(sha256\(\$2::bytea\), 'hex'\)/);
+    assert.match(sql, /auth_token = encode\(sha256\(convert_to\(\$2, 'UTF8'\)\), 'hex'\)/);
     assert.doesNotMatch(sql, /OR\s+auth_token\s*=/i);
     assert.doesNotMatch(sql, /\$3\b/);
     assert.match(sql, /is_active\s*=\s*true/i);
     assert.equal((await client.query(sql, ['DEV-1', secret])).rowCount, 1);
     assert.equal((await client.query(sql, ['DEV-1', digest])).rowCount, 0);
     assert.equal((await client.query(sql, ['DEV-1', 'wrong-secret'])).rowCount, 0);
+    const escapedSecret = String.raw`raw\\field\\device-secret`;
+    await client.query('UPDATE devices SET auth_token=$1 WHERE device_id=$2', [
+      createHash('sha256').update(escapedSecret).digest('hex'), 'DEV-1',
+    ]);
+    assert.equal((await client.query(sql, ['DEV-1', escapedSecret])).rowCount, 1);
+    assert.equal((await client.query(sql, ['DEV-1', secret])).rowCount, 0);
+    await client.query('UPDATE devices SET auth_token=$1 WHERE device_id=$2', [digest, 'DEV-1']);
     assert.equal((await client.query(sql, ['DEV-unknown', secret])).rowCount, 0);
     await client.query("UPDATE devices SET is_active=FALSE WHERE device_id='DEV-1'");
     assert.equal((await client.query(sql, ['DEV-1', secret])).rowCount, 0);

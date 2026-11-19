@@ -8,6 +8,7 @@
 #include "freertos/task.h"
 
 #include "esp_log.h"
+#include "esp_system.h"
 #include "esp_ota_ops.h"
 #include "esp_sleep.h"
 #include "esp_task_wdt.h"
@@ -434,8 +435,9 @@ void app_core_bootstrap_run(void)
     }
 
     ESP_LOGI(TAG,
-             "event=boot_summary boot_count=%lu wakeup=%d initial_state=%d",
+             "event=boot_summary boot_count=%lu reset_reason=%d wakeup=%d initial_state=%d",
              (unsigned long)g_rtc_context.boot_count,
+             (int)esp_reset_reason(),
              (int)wakeup,
              (int)state);
 

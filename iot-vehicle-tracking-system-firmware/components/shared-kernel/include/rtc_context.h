@@ -46,4 +46,7 @@ typedef struct {
     char ota_previous_version[TRACKER_TARGET_VERSION_MAX_LEN];
     /** Partition label of downloaded image. */
     char ota_partition[TRACKER_PARTITION_MAX_LEN];
+    /** Last attempted publish sequence from this boot (retained across deep sleep/warm reset). */
+    uint32_t last_metadata_seq_no;
+    char last_metadata_boot_id[48];
 } rtc_context_t;

@@ -1,6 +1,7 @@
 #include "state_wake_prelude.h"
 
 #include <string.h>
+#include <math.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -31,6 +32,65 @@
 
 
 static const char *TAG = "WAKE_PRELUDE";
+
+/*
+ * FW-07: track external vehicle rail independently from tracker backup battery.
+ * A low sample must persist before raising a critical lost-power event. Neither
+ * "ignition off" nor low 12V during cranking is itself proof of power removal.
+ */
+#define VEHICLE_POWER_LOST_THRESHOLD_V 8.0f
+#define VEHICLE_POWER_RESTORE_THRESHOLD_V 9.0f
+#define VEHICLE_POWER_CONFIRM_MS 1200ULL
+#define EVENT_EXTERNAL_POWER_LOST 3001
+#define EVENT_EXTERNAL_POWER_RESTORED 3002
+
+static bool s_power_initialized;
+static bool s_power_present;
+static bool s_power_candidate;
+static uint64_t s_power_candidate_since_ms;
+static bool s_adc_ignition_latched;
+
+static void state_machine_monitor_vehicle_power(uint64_t now_ms) {
+    const float volts = s_telemetry.vehicle_battery;
+    if (!isfinite(volts) || volts < 0.0f || volts > 35.0f) {
+        // ADC transport/calibration failure is not a physical power-loss event.
+        s_power_candidate_since_ms = 0;
+        return;
+    }
+
+    if (!s_power_initialized) {
+        // Across warm resets, the last RTC sample lets us detect power loss
+        // during ESP reset; otherwise establish a clean first-sample baseline.
+        const float old_volts = g_rtc_context.last_battery_v;
+        s_power_present = isfinite(old_volts) && old_volts >= VEHICLE_POWER_RESTORE_THRESHOLD_V
+            ? true : volts >= VEHICLE_POWER_RESTORE_THRESHOLD_V;
+        s_power_initialized = true;
+    }
+    const bool wants_present = s_power_present
+        ? !(volts <= VEHICLE_POWER_LOST_THRESHOLD_V)
+        : volts >= VEHICLE_POWER_RESTORE_THRESHOLD_V;
+    if (wants_present == s_power_present) {
+        s_power_candidate_since_ms = 0;
+        return;
+    }
+    if (s_power_candidate_since_ms == 0 || now_ms < s_power_candidate_since_ms ||
+        s_power_candidate != wants_present) {
+        s_power_candidate = wants_present;
+        s_power_candidate_since_ms = now_ms;
+        return;
+    }
+    if (now_ms - s_power_candidate_since_ms < VEHICLE_POWER_CONFIRM_MS) return;
+
+    const char *event = wants_present ? "external_power_restored" : "external_power_lost";
+    const int code = wants_present ? EVENT_EXTERNAL_POWER_RESTORED : EVENT_EXTERNAL_POWER_LOST;
+    // The event pipeline persists into SD when network delivery is unavailable.
+    if (state_machine_publish_event(wants_present ? "info" : "error", code, event)) {
+        s_power_present = wants_present;
+        s_power_candidate_since_ms = 0;
+        ESP_LOGW(TAG, "event=%s supply_v=%.2f code=%d", event, (double)volts, code);
+    }
+}
+
 
 /**
  * @brief Power-cycle GNSS after repeated poll failures.
@@ -223,7 +283,10 @@ void state_machine_bootstrap_imu(void) {
     if (imu_err == ESP_OK) {
         s_imu_available = true;
         retry_state_reset(&s_imu_bootstrap_retry);
-        esp_err_t motion_cfg_err = imu_configure_motion_interrupt(120, 200);
+        /* LIS3DSH SM1 uses absolute acceleration: 120 mg is below static gravity
+         * and would trigger INT1 even when parked. 1360 mg is the AN3393
+         * section 9.2 reference wake threshold (0x55 at +/-2g). Tune on board. */
+        esp_err_t motion_cfg_err = imu_configure_motion_interrupt(1360, 200);
         if (motion_cfg_err != ESP_OK) {
             ESP_LOGW(TAG, "event=imu_motion_interrupt_config_failed err=%s", esp_err_to_name(motion_cfg_err));
         } else {
@@ -267,6 +330,7 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
     s_telemetry.imu_accel_delta_mps2 = s_imu_available ? imu_get_peak_accel_delta_mps2() : 0.0f;
 
     uint64_t now_ms = util_uptime_ms();
+    state_machine_monitor_vehicle_power(now_ms);
     if (read_obd && s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
         size_t diag_query_count = 0;
         const tracker_obd_diag_query_t *diag_queries = state_machine_obd_diagnostic_queries(&diag_query_count);
@@ -362,7 +426,12 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
 
     float ignition_threshold_v = (float)s_config.ignition_adc_threshold_mv / 1000.0f;
     // ADC evidence: vehicle supply rail at/above the configured ignition threshold suggests key-on.
-    bool adc_ignition = s_telemetry.vehicle_battery >= ignition_threshold_v;
+    /* FW-15: ADC hysteresis blocks rapid toggling near the per-vehicle threshold;
+     * the ECU/RPM and session debouncer remain authoritative when available. */
+    const float adc_release_threshold_v = ignition_threshold_v - 0.35f;
+    bool adc_ignition = s_telemetry.vehicle_battery >=
+        (s_adc_ignition_latched ? adc_release_threshold_v : ignition_threshold_v);
+    s_adc_ignition_latched = adc_ignition;
     // OBD sample must be recent enough to be trusted as ignition evidence at all.
     bool obd_sample_fresh =
         state_machine_has_recent_obd_sample(now_ms, TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS);

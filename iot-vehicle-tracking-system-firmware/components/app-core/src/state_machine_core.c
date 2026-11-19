@@ -110,6 +110,8 @@ static uint64_t s_last_health_snapshot_log_ms = 0;
 #endif
 
 #define TRACKER_HEALTH_SNAPSHOT_INTERVAL_MS 60000ULL
+/* Bounded additional awake time for parked QoS1 backlog replay. */
+#define TRACKER_HEARTBEAT_REPLAY_GRACE_MS 10000ULL
 
 /**
  * @brief Forward incoming MQTT command payloads into the command handler.
@@ -773,6 +775,17 @@ uint32_t state_machine_next_seq_no(void) {
     if (s_metadata_seq_no == 0U) {
         s_metadata_seq_no = 1U;
     }
+    // Update retained checkpoint on every attempted sequence; NVS at bounded cadence.
+    g_rtc_context.last_metadata_seq_no = s_metadata_seq_no;
+    util_copy_string(g_rtc_context.last_metadata_boot_id,
+                     sizeof(g_rtc_context.last_metadata_boot_id), s_boot_id);
+    if (s_metadata_seq_no == 1U || (s_metadata_seq_no % 32U) == 0U) {
+        tracker_boot_seq_checkpoint_t checkpoint = { .last_seq_no = s_metadata_seq_no };
+        util_copy_string(checkpoint.boot_id, sizeof(checkpoint.boot_id), s_boot_id);
+        esp_err_t err = nvs_config_save_boot_seq(&checkpoint);
+        if (err != ESP_OK) ESP_LOGW(TAG, "event=boot_seq_checkpoint_failed seq=%lu err=%s",
+                                    (unsigned long)s_metadata_seq_no, esp_err_to_name(err));
+    }
     return s_metadata_seq_no;
 }
 
@@ -790,9 +803,39 @@ void state_machine_fill_message_id(char *out, size_t out_size) {
  * @brief Initialize boot-scoped metadata used by outbound payloads.
  */
 void state_machine_init_boot_metadata(void) {
+    // The RTC value is the exact attempted tail for warm reset/deep sleep. On
+    // total power loss the flash checkpoint supplies only a lower bound.
+    s_prev_last_seq_no = 0;
+    memset(s_prev_boot_id, 0, sizeof(s_prev_boot_id));
+    s_prev_seq_source = "unavailable";
+    if (g_rtc_context.last_metadata_seq_no > 0 &&
+        memchr(g_rtc_context.last_metadata_boot_id, '\0',
+               sizeof(g_rtc_context.last_metadata_boot_id)) != NULL &&
+        g_rtc_context.last_metadata_boot_id[0] != '\0') {
+        s_prev_last_seq_no = g_rtc_context.last_metadata_seq_no;
+        util_copy_string(s_prev_boot_id, sizeof(s_prev_boot_id),
+                         g_rtc_context.last_metadata_boot_id);
+        s_prev_seq_source = "rtc_exact";
+    } else {
+        tracker_boot_seq_checkpoint_t checkpoint = {0};
+        bool found = false;
+        esp_err_t err = nvs_config_load_boot_seq(&checkpoint, &found);
+        if (err == ESP_OK && found) {
+            s_prev_last_seq_no = checkpoint.last_seq_no;
+            util_copy_string(s_prev_boot_id, sizeof(s_prev_boot_id), checkpoint.boot_id);
+            s_prev_seq_source = "nvs_lower_bound";
+        } else if (err != ESP_OK) {
+            ESP_LOGW(TAG, "event=boot_seq_restore_failed err=%s", esp_err_to_name(err));
+        }
+    }
     util_generate_boot_id(s_boot_id, sizeof(s_boot_id), g_rtc_context.boot_count);
     util_copy_string(s_session_boot_id, sizeof(s_session_boot_id), s_boot_id);
     s_metadata_seq_no = 0;
+    g_rtc_context.last_metadata_seq_no = 0;
+    util_copy_string(g_rtc_context.last_metadata_boot_id,
+                     sizeof(g_rtc_context.last_metadata_boot_id), s_boot_id);
+    ESP_LOGI(TAG, "event=boot_seq_recovered previous_boot=%s previous_seq=%lu quality=%s",
+             s_prev_boot_id, (unsigned long)s_prev_last_seq_no, s_prev_seq_source);
     ESP_LOGI(TAG,
              "event=boot_metadata_initialized boot_id=%s boot_count=%lu",
              s_boot_id,
@@ -1263,7 +1306,7 @@ static app_state_t state_machine_handle_check_ign_state(void) {
     }
 
     // Refresh wake-time peripherals first so the debounce path sees a current ignition sample.
-    state_machine_run_wake_prelude(false);
+    state_machine_run_wake_prelude(true);
     uint64_t now_ms = util_uptime_ms();
     session_mgr_on_ignition_sample(s_telemetry.ignition, now_ms);
     if (!session_mgr_has_stable_ignition()) {
@@ -1380,7 +1423,7 @@ static app_state_t state_machine_handle_heartbeat_state(void) {
     }
 
     // Heartbeat wake uses the lightweight prelude instead of the full driving bootstrap.
-    state_machine_run_wake_prelude(false);
+    state_machine_run_wake_prelude(true);
     uint64_t now_ms = util_uptime_ms();
     session_mgr_on_ignition_sample(s_telemetry.ignition, now_ms);
     if (s_telemetry.ignition && command_handler_is_tracking_enabled()) {
@@ -1428,6 +1471,15 @@ static app_state_t state_machine_handle_heartbeat_state(void) {
 
         state_machine_publish_status("heartbeat", "none");
         s_heartbeat_raw_published = true;
+    }
+
+    /* Continue replay only while online and within a bounded heartbeat grace period. */
+    if ((s_heartbeat_raw_published || heartbeat_timeout) &&
+        s_runtime_ports->mqtt->is_connected() &&
+        offline_queue_depth() > 0U &&
+        (now_ms - s_heartbeat_started_ms) <
+            (TRACKER_HEARTBEAT_ACTIVE_WINDOW_MS + TRACKER_HEARTBEAT_REPLAY_GRACE_MS)) {
+        return APP_STATE_HEARTBEAT;
     }
 
     if (s_heartbeat_raw_published || heartbeat_timeout) {

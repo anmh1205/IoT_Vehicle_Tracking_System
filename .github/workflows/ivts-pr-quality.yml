@@ -118,6 +118,6 @@ jobs:
       - name: ESP32-S3 cross-compile and partition validation
         uses: espressif/esp-idf-ci-action@v1
         with:
-          esp_idf_version: v5.4.1
+          esp_idf_version: v5.5.3
           target: esp32s3
           path: iot-vehicle-tracking-system-firmware

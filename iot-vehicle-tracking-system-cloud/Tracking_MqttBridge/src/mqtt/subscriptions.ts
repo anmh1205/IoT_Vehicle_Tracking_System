@@ -4,14 +4,14 @@ import { logger } from '../infrastructure/logger';
 
 /**
  * QoS mapping per topic pattern.
- * - rawdata: QoS 0 (high frequency telemetry, losing a few is OK)
+ * - rawdata: QoS 1 (preserve replay delivery; live QoS0 publishing remains possible)
  * - status:  QoS 1 (important state transitions)
  * - events:  QoS 1 (errors/warnings must not be lost)
  * - firmware: QoS 1 (OTA progress is critical)
  * - command ack: QoS 1 (operator feedback must not be lost)
  */
 const SUBSCRIPTION_QOS: Record<string, 0 | 1> = {
-  [DEVICE_TOPICS.RAW_DATA]: 0,
+  [DEVICE_TOPICS.RAW_DATA]: 1,
   [DEVICE_TOPICS.STATUS]: 1,
   [DEVICE_TOPICS.EVENTS]: 1,
   [DEVICE_TOPICS.FIRMWARE]: 1,

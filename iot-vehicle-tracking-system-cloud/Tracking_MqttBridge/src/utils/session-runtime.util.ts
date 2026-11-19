@@ -91,6 +91,7 @@ export const normalizeStatusForSessionRuntime = (params: {
 
 export const shouldAcceptLiveMutation = (params: {
   incomingTimestampMs: number;
+  timestampTrusted?: boolean;
   incomingSeqNo?: number;
   incomingRuntimeBootId?: string | null;
   incomingSessionBootId?: string | null;
@@ -107,6 +108,11 @@ export const shouldAcceptLiveMutation = (params: {
     params.persistedWatermarkMs ?? Number.NEGATIVE_INFINITY,
   );
   const normalizedWatermarkMs = Number.isFinite(watermarkMs) ? watermarkMs : null;
+
+  // Never promote uptime-derived historical records to live freshness via server clock fallback.
+  if (params.timestampTrusted === false) {
+    return { accept: false, reason: 'untrusted_device_time', watermarkMs: normalizedWatermarkMs };
+  }
 
   if (
     normalizedWatermarkMs !== null &&

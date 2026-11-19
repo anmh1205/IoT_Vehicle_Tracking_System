@@ -302,11 +302,11 @@ static void data_formatter_add_runtime_alerts(cJSON *root, const telemetry_t *te
 
     if (telemetry->gnss.query_mode == GNSS_QUERY_MODE_CGPSINFO) {
         // Fallback CGPSINFO path: lacks accurate satellite count and may indicate
-        // the primary CGNSINF query is failing for this modem firmware.
+        // the primary CGNSSINFO query is failing for this modem firmware.
         data_formatter_append_alert(device_alerts,
                                     "gnss_fallback_mode",
                                     "low",
-                                    "GNSS using CGPSINFO fallback; satellite count is approximate");
+                                    "GNSS using CGPSINFO fallback; satellite count is unavailable");
     }
 
     if (telemetry->obd_readiness.valid && telemetry->obd_readiness.mil_on) {
@@ -411,7 +411,7 @@ static void data_formatter_add_diagnostics(cJSON *root, const telemetry_t *telem
     const char *gnss_mode_label = "unknown";
     switch (telemetry->gnss.query_mode) {
         case GNSS_QUERY_MODE_CGNSINF:
-            gnss_mode_label = "cgnsinf";
+            gnss_mode_label = "cgnssinfo";
             break;
         case GNSS_QUERY_MODE_CGPSINFO:
             gnss_mode_label = "cgpsinfo_fallback";
@@ -423,7 +423,14 @@ static void data_formatter_add_diagnostics(cJSON *root, const telemetry_t *telem
     }
     cJSON_AddStringToObject(gnss_diag, "query_mode", gnss_mode_label);
     cJSON_AddBoolToObject(gnss_diag, "fix_valid", telemetry->gnss.fix_valid);
-    cJSON_AddNumberToObject(gnss_diag, "satellites_reported", telemetry->gnss.satellites);
+    if (telemetry->gnss.query_mode != GNSS_QUERY_MODE_CGPSINFO) {
+        cJSON_AddNumberToObject(gnss_diag, "satellites_reported", telemetry->gnss.satellites);
+    }
+    if (telemetry->gnss.fix_valid && telemetry->gnss.dop_valid) {
+        cJSON_AddNumberToObject(gnss_diag, "pdop", telemetry->gnss.pdop);
+        cJSON_AddNumberToObject(gnss_diag, "hdop", telemetry->gnss.hdop);
+        cJSON_AddNumberToObject(gnss_diag, "vdop", telemetry->gnss.vdop);
+    }
 
     ESP_LOGI("DATA_FMT", "event=gnss_diag_added mode=%s fix=%d sat=%u",
              gnss_mode_label, telemetry->gnss.fix_valid ? 1 : 0,
@@ -593,6 +600,7 @@ char *data_format_rawdata(const config_t *cfg,
     cJSON_AddNumberToObject(root, "timestamp", (double)effective_ts_ms);
     cJSON_AddBoolToObject(root, "timestamp_trusted", timestamp_trusted);
     cJSON_AddNumberToObject(root, "uptime", (double)util_uptime_ms());
+    cJSON_AddNumberToObject(root, "uptime_ms", (double)util_uptime_ms());
 
     /* Nested telemetry object. */
     cJSON_AddNumberToObject(data, "imu_accel_delta_mps2", telemetry->imu_accel_delta_mps2);
@@ -610,7 +618,9 @@ char *data_format_rawdata(const config_t *cfg,
         cJSON_AddNumberToObject(data, "speed", telemetry->gnss.speed_kmh);
         cJSON_AddNumberToObject(data, "course", telemetry->gnss.course_deg);
     }
-    cJSON_AddNumberToObject(data, "satellites", telemetry->gnss.satellites);
+    if (telemetry->gnss.query_mode != GNSS_QUERY_MODE_CGPSINFO) {
+        cJSON_AddNumberToObject(data, "satellites", telemetry->gnss.satellites);
+    }
     bool published_ignition = telemetry->ignition;
     if (telemetry->ignition_state == TRACKER_IGNITION_STATE_ON) {
         published_ignition = true;
@@ -680,6 +690,7 @@ char *data_format_status(const config_t *cfg,
     cJSON_AddStringToObject(root, "status", status);
     cJSON_AddNumberToObject(root, "timestamp", (double)effective_ts_ms);
     cJSON_AddBoolToObject(root, "timestamp_trusted", timestamp_trusted);
+    cJSON_AddNumberToObject(root, "uptime_ms", (double)util_uptime_ms());
     if (session_id > 0) {
         cJSON_AddNumberToObject(root, "session_id", session_id);
     }

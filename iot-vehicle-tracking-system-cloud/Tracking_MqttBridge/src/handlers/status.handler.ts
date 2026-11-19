@@ -131,6 +131,7 @@ export const handleStatus = async (
   const persistedWatermarkMs = parseIsoTimestampMs(device.payload_updated_at);
   const liveMutationDecision = shouldAcceptLiveMutation({
     incomingTimestampMs: timestampMs,
+    timestampTrusted: payload.timestamp_trusted,
     incomingSeqNo: seqNo,
     incomingRuntimeBootId: metadataBootId ?? sessionBootId,
     incomingSessionBootId: sessionBootId,
@@ -574,6 +575,10 @@ export const handleStatus = async (
       schema_version: schemaVersion,
       seq_no: seqNo,
       boot_id: sessionBootId,
+      prev_boot_id: payload.prev_boot_id,
+      prev_last_seq_no: payload.prev_last_seq_no,
+      prev_seq_quality: payload.prev_seq_quality,
+      time_quality: payload.timestamp_trusted === false ? 'untrusted' : timestampSource,
     },
   ).catch((err) => {
     logger.error({ err, deviceId: payload.device_id, event: 'status_change_log_write_failed' }, 'Status change log write failed');
@@ -599,5 +604,8 @@ export const handleStatus = async (
     seq_no: seqNo,
     boot_id: sessionBootId,
     runtime_boot_id: metadataBootId,
+    prev_boot_id: payload.prev_boot_id,
+    prev_last_seq_no: payload.prev_last_seq_no,
+    prev_seq_quality: payload.prev_seq_quality,
   });
 };

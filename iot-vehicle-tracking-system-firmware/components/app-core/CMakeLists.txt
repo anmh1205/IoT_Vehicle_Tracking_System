@@ -26,6 +26,7 @@ idf_component_register(
         domain-telemetry
         esp_driver_usb_serial_jtag
         log
+        nvs_flash
         platform-board-esp32s3
         platform-hal-esp-idf
         shared-kernel

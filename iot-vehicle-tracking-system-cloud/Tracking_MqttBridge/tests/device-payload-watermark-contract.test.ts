@@ -8,6 +8,7 @@ const database = readFileSync(new URL('../src/infrastructure/database.ts', impor
 
 test('live mutation watermark uses device payload time, not server receive time', () => {
   assert.match(raw, /persistedWatermarkMs = parseIsoTimestampMs\(device\.payload_updated_at\)/);
+  assert.match(raw, /timestampTrusted: payload\.timestamp_trusted/);
   assert.match(status, /persistedWatermarkMs = parseIsoTimestampMs\(device\.payload_updated_at\)/);
   assert.doesNotMatch(raw, /persistedWatermarkMs = maxTimestampMs/);
   assert.doesNotMatch(status, /persistedWatermarkMs = maxTimestampMs/);

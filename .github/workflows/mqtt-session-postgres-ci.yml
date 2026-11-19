@@ -53,4 +53,4 @@ jobs:
           POSTGRESQL_PASSWORD: ivts_test_password
           POSTGRESQL_DATABASE: ivts_test
           IVTS_AUTH_ISOLATED_DATABASE: '1'
-        run: npx tsx --test tests/session-last-position-postgres.integration.test.ts tests/device-auth-postgres.integration.test.ts tests/device-auth-entrypoints-postgres.integration.test.ts
+        run: npx tsx --test tests/session-last-position-postgres.integration.test.ts tests/device-auth-postgres.integration.test.ts tests/device-auth-entrypoints-postgres.integration.test.ts tests/telemetry-outbox-postgres.integration.test.ts tests/boot-clock-postgres.integration.test.ts

@@ -19,9 +19,11 @@ import { addUpdate } from '../services/batch-writer.service';
 import { publishSupersededSessionEnds } from '../services/session-lifecycle.service';
 import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
+import { pool } from '../infrastructure/pool';
 import { maxTimestampMs, normalizePayloadTimestamp, parseIsoTimestampMs } from '../utils/timestamp.util';
 import { resolveLocalSessionKey } from '../utils/session-identity.util';
 import { normalizeRuntimeState, type RuntimeStateSnapshot } from '../types/device-state.types';
+import { resolveBootClockTimestamp } from '../utils/boot-clock.util';
 import {
   hasAuthoritativeSessionIdentity,
   hasTelemetryFallbackSessionContinuity,
@@ -271,13 +273,24 @@ const isLikelyActiveSessionTelemetry = (params: {
 
 const getRuleKey = (deviceId: string, ruleId: string) => `${deviceId}:${ruleId}`;
 
-const canEmitRule = (deviceId: string, ruleId: string, timestampMs: number): boolean => {
+/** The in-memory map is only a fast path; PostgreSQL alerts are the durable cooldown source. */
+const canEmitRule = async (deviceId: string, ruleId: string, title: string): Promise<boolean> => {
   const key = getRuleKey(deviceId, ruleId);
-  const blockedUntil = ruleCooldownUntil.get(key) ?? 0;
-  if (timestampMs < blockedUntil) {
+  const now = Date.now();
+  if (now < (ruleCooldownUntil.get(key) ?? 0)) return false;
+
+  const recent = await pool.query<{ last_emitted_at: Date | null }>(
+    `SELECT MAX(created_at) AS last_emitted_at FROM alerts
+      WHERE device_id = $1 AND title = $2
+        AND created_at > NOW() - INTERVAL '15 minutes'`,
+    [deviceId, title],
+  );
+  const lastEmittedMs = recent.rows[0]?.last_emitted_at?.getTime() ?? 0;
+  if (lastEmittedMs > 0 && now < lastEmittedMs + OBD_RULE_COOLDOWN_MS) {
+    ruleCooldownUntil.set(key, lastEmittedMs + OBD_RULE_COOLDOWN_MS);
     return false;
   }
-  ruleCooldownUntil.set(key, timestampMs + OBD_RULE_COOLDOWN_MS);
+  ruleCooldownUntil.set(key, now + OBD_RULE_COOLDOWN_MS);
   return true;
 };
 
@@ -527,7 +540,7 @@ const evaluateObdDtcRules = async (
     'Auto-resolved by mqtt bridge: DTC cleared or superseded by latest OBD snapshot.',
   );
 
-  dtcBuckets.forEach((buckets, code) => {
+  for (const [code, buckets] of dtcBuckets) {
     const rule = resolveDtcDefinition(code, buckets);
     const isPendingOnly =
       buckets.size === 1 && buckets.has('pending') && !buckets.has('stored') && !buckets.has('permanent');
@@ -548,11 +561,11 @@ const evaluateObdDtcRules = async (
     const title = `OBD: DTC ${code}`;
 
     if (existingActiveTitles.has(title)) {
-      return;
+      continue;
     }
 
-    if (!canEmitRule(context.deviceId, ruleId, context.timestampMs)) {
-      return;
+    if (!await canEmitRule(context.deviceId, ruleId, title)) {
+      continue;
     }
 
     publishObdMaintenanceAlert(context, {
@@ -566,7 +579,7 @@ const evaluateObdDtcRules = async (
       milOn,
       evidence: bucketLabel,
     });
-  });
+  }
 };
 
 const syncObdConnectionWarnings = async (
@@ -611,7 +624,7 @@ const syncHighImuAccelDeltaAlert = async (
     return;
   }
 
-  if (!canEmitRule(context.deviceId, HIGH_IMU_ACCEL_DELTA_ALERT_TITLE, context.timestampMs)) {
+  if (!await canEmitRule(context.deviceId, HIGH_IMU_ACCEL_DELTA_ALERT_TITLE, HIGH_IMU_ACCEL_DELTA_ALERT_TITLE)) {
     return;
   }
 
@@ -647,7 +660,7 @@ const syncHighImuAccelDeltaAlert = async (
   );
 };
 
-const evaluateObdMaintenanceRules = (
+const evaluateObdMaintenanceRules = async (
   diagnostics: RawDiagnostics | undefined,
   context: ObdAlertContext,
   fallbackVehicleBattery: number | undefined,
@@ -708,16 +721,17 @@ const evaluateObdMaintenanceRules = (
     activeRuleTitles.add('OBD: Voltage risk under load');
   }
 
-  return syncActiveMaintenanceAlertsByTitle(
+  const existingActiveTitles = await syncActiveMaintenanceAlertsByTitle(
     context.deviceId,
     Array.from(OBD_RULE_MAINTENANCE_TITLES),
     Array.from(activeRuleTitles),
     'Auto-resolved by mqtt bridge: OBD maintenance condition cleared in latest telemetry snapshot.',
-  ).then((existingActiveTitles) => {
+  );
+  {
     if (
       channelUnstableActive &&
       !existingActiveTitles.has('OBD: Channel unstable') &&
-      canEmitRule(context.deviceId, 'obd_channel_unstable', context.timestampMs)
+      await canEmitRule(context.deviceId, 'obd_channel_unstable', 'OBD: Channel unstable')
     ) {
       publishObdMaintenanceAlert(context, {
         ruleId: 'obd_channel_unstable',
@@ -733,7 +747,7 @@ const evaluateObdMaintenanceRules = (
     if (
       coolantRiskActive &&
       !existingActiveTitles.has('OBD: Coolant risk pattern') &&
-      canEmitRule(context.deviceId, 'coolant_risk_pattern', context.timestampMs)
+      await canEmitRule(context.deviceId, 'coolant_risk_pattern', 'OBD: Coolant risk pattern')
     ) {
       publishObdMaintenanceAlert(context, {
         ruleId: 'coolant_risk_pattern',
@@ -749,7 +763,7 @@ const evaluateObdMaintenanceRules = (
     if (
       idleAnomalyEligible &&
       !existingActiveTitles.has('OBD: Idle-load anomaly') &&
-      canEmitRule(context.deviceId, 'idle_load_anomaly', context.timestampMs)
+      await canEmitRule(context.deviceId, 'idle_load_anomaly', 'OBD: Idle-load anomaly')
     ) {
       publishObdMaintenanceAlert(context, {
         ruleId: 'idle_load_anomaly',
@@ -765,7 +779,7 @@ const evaluateObdMaintenanceRules = (
     if (
       voltageRiskActive &&
       !existingActiveTitles.has('OBD: Voltage risk under load') &&
-      canEmitRule(context.deviceId, 'voltage_risk_combined', context.timestampMs)
+      await canEmitRule(context.deviceId, 'voltage_risk_combined', 'OBD: Voltage risk under load')
     ) {
       publishObdMaintenanceAlert(context, {
         ruleId: 'voltage_risk_combined',
@@ -777,7 +791,7 @@ const evaluateObdMaintenanceRules = (
         value: vehicleBattery,
       });
     }
-  });
+  }
 };
 
 /**
@@ -864,13 +878,24 @@ export const handleRawData = async (
     return;
   }
 
-  const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
-    payload.timestamp,
-    payload.metadata?.sent_at,
-  );
+  const normalizedTimestamp = normalizePayloadTimestamp(payload.timestamp, payload.metadata?.sent_at);
+  const bootClock = await resolveBootClockTimestamp({
+    deviceId: payload.device_id,
+    bootId: bootId ?? null,
+    uptimeMs: payload.uptime_ms ?? payload.uptime ?? null,
+    timestampTrusted: payload.timestamp_trusted,
+    timestampMs: normalizedTimestamp.timestampMs,
+    timestampSource: normalizedTimestamp.source,
+    receivedAtMs,
+  });
+  const timestampMs = bootClock.timestampMs;
+  const timestampSource: string = bootClock.source;
+  const timeQuality = timestampSource === 'boot_anchor' ? 'reanchored'
+    : payload.timestamp_trusted === false ? 'untrusted'
+      : (timestampSource === 'server_now' ? 'receive_time' : 'device_time');
   const persistedWatermarkMs = parseIsoTimestampMs(device.payload_updated_at);
 
-  if (timestampSource !== 'payload') {
+  if (timestampSource !== 'payload' && timestampSource !== 'boot_anchor') {
     logger.warn(
       {
         deviceId: payload.device_id,
@@ -908,6 +933,7 @@ export const handleRawData = async (
   const payloadCanonicalSessionId = payload.canonical_session_id ?? null;
   const liveMutationDecision = shouldAcceptLiveMutation({
     incomingTimestampMs: timestampMs,
+    timestampTrusted: payload.timestamp_trusted,
     incomingSeqNo: seqNo,
     incomingRuntimeBootId: metadataBootId ?? sessionBootId,
     incomingSessionBootId: sessionBootId,
@@ -1119,6 +1145,9 @@ export const handleRawData = async (
     obd_sample_age_ms: normalizedObdSampleAgeMs,
     obd_connect_fail_count_5m: toFiniteNumber(diagnostics?.channel?.connect_fail_count_5m),
     obd_reported_dtc_count: toFiniteNumber(diagnostics?.reported_dtc_count),
+    gnss_pdop: diagnostics?.gnss?.pdop,
+    gnss_hdop: diagnostics?.gnss?.hdop,
+    gnss_vdop: diagnostics?.gnss?.vdop,
     obd_dtc_stored_count: diagnostics?.dtc ? storedDtcCodes.length : undefined,
     obd_dtc_pending_count: diagnostics?.dtc ? pendingDtcCodes.length : undefined,
     obd_dtc_permanent_count: diagnostics?.dtc ? permanentDtcCodes.length : undefined,
@@ -1128,9 +1157,9 @@ export const handleRawData = async (
     metricsData.uptime = payload.uptime;
   }
 
-  writeDeviceTelemetry(payload.device_id, metricsData, timestampMs).catch((err) => {
-    logger.error({ err, deviceId: payload.device_id, event: 'rawdata_metrics_write_failed' }, 'Telemetry metrics write failed');
-  });
+  // A QoS1 replay must not receive PUBACK until the historical metrics write succeeds.
+  // The ingress callback propagates this error to MQTT.js so the broker can retry.
+  await writeDeviceTelemetry(payload.device_id, metricsData, timestampMs, messageId);
 
   // 5. Write to VictoriaLogs
   writeDeviceEvent(payload.device_id, 'rawdata', 'Device telemetry received', {
@@ -1143,6 +1172,8 @@ export const handleRawData = async (
     longitude: effectiveLongitude,
     speed: effectiveSpeed,
     diagnostics: normalizedDiagnostics ?? null,
+    time_quality: timeQuality,
+    capture_uptime_ms: payload.uptime_ms ?? payload.uptime ?? null,
   }).catch((err) => {
     logger.error({ err, deviceId: payload.device_id, event: 'rawdata_event_log_write_failed' }, 'Telemetry event log write failed');
   });
@@ -1293,6 +1324,8 @@ export const handleRawData = async (
       runtime_boot_id: metadataBootId,
       live_mutation: shouldMutateLiveState,
       historical_session_append: shouldAppendHistoricalSessionTelemetry,
+      time_quality: timeQuality,
+      capture_uptime_ms: payload.uptime_ms ?? payload.uptime ?? undefined,
       stale_reason: shouldRetainStaleSessionTelemetry ? liveMutationDecision.reason : undefined,
       timestamp: new Date(timestampMs).toISOString(),
     });

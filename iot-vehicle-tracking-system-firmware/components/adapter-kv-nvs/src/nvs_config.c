@@ -496,3 +496,43 @@ esp_err_t nvs_config_clear_motion_alarm(void) {
     nvs_close(handle);
     return err;
 }
+
+
+/* FW-08: bounded-wear checkpoint (caller writes once at seq=1 and every 32 messages).
+ * Checkpoint is a lower bound after power loss, not a guarantee of final seq. */
+esp_err_t nvs_config_save_boot_seq(const tracker_boot_seq_checkpoint_t *checkpoint) {
+    if (checkpoint == NULL || checkpoint->last_seq_no == 0 ||
+        checkpoint->boot_id[0] == '\0' ||
+        memchr(checkpoint->boot_id, '\0', sizeof(checkpoint->boot_id)) == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READWRITE, &handle);
+    if (err != ESP_OK) return err;
+    err = nvs_set_blob(handle, TRACKER_NVS_BOOT_SEQ_KEY, checkpoint, sizeof(*checkpoint));
+    if (err == ESP_OK) err = nvs_commit(handle);
+    nvs_close(handle);
+    return err;
+}
+
+esp_err_t nvs_config_load_boot_seq(tracker_boot_seq_checkpoint_t *checkpoint, bool *found) {
+    if (checkpoint == NULL || found == NULL) return ESP_ERR_INVALID_ARG;
+    memset(checkpoint, 0, sizeof(*checkpoint));
+    *found = false;
+    nvs_handle_t handle = 0;
+    esp_err_t err = nvs_open(TRACKER_NVS_NAMESPACE, NVS_READONLY, &handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) return ESP_OK;
+    if (err != ESP_OK) return err;
+    size_t size = sizeof(*checkpoint);
+    err = nvs_get_blob(handle, TRACKER_NVS_BOOT_SEQ_KEY, checkpoint, &size);
+    nvs_close(handle);
+    if (err == ESP_ERR_NVS_NOT_FOUND) return ESP_OK;
+    if (err != ESP_OK) return err;
+    if (size != sizeof(*checkpoint) || checkpoint->last_seq_no == 0 ||
+        checkpoint->boot_id[0] == '\0' ||
+        memchr(checkpoint->boot_id, '\0', sizeof(checkpoint->boot_id)) == NULL) {
+        return ESP_ERR_INVALID_SIZE;
+    }
+    *found = true;
+    return ESP_OK;
+}

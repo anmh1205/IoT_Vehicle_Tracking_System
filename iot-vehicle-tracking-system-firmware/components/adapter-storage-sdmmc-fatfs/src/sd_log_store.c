@@ -82,6 +82,10 @@ typedef struct {
     uint32_t peek_cache_min_seq;
     /** File offset after the last successfully parsed replay record. */
     long peek_cache_offset;
+    /** Avoid repeated full-file GC when no additional records can be reclaimed. */
+    bool gc_watermark_attempted;
+    uint32_t gc_attempt_ack_seq;
+    size_t gc_attempt_bytes_used;
 } sd_log_store_ctx_t;
 
 static sd_log_store_ctx_t s_ctx;
@@ -993,10 +997,25 @@ esp_err_t sd_log_store_gc_if_needed(void) {
 
     size_t hard_limit = (stats.quota_bytes * (size_t)CONFIG_TRACKER_SD_LOG_HARD_QUOTA_PERCENT) / 100U;
     if (stats.bytes_used <= hard_limit) {
-        // Stay append-only until the hard quota is crossed; normal replay movement does not rewrite the log eagerly.
+        // Crossing the quota again after a successful drain starts a fresh GC epoch.
+        s_ctx.gc_watermark_attempted = false;
         return ESP_OK;
     }
 
+    /*
+     * Nothing can be reclaimed until an ACK watermark has advanced.
+     * With no progress, rewriting the entire queue on every append wears out
+     * the SD card, stalls the heartbeat and still leaves the quota exceeded.
+     */
+    if (s_ctx.gc_watermark_attempted &&
+        s_ctx.gc_attempt_ack_seq == s_ctx.meta.ack_seq_critical &&
+        stats.bytes_used >= s_ctx.gc_attempt_bytes_used &&
+        (stats.bytes_used - s_ctx.gc_attempt_bytes_used) < 65536U) {
+        return ESP_OK; // No new ACK/growth to justify a full queue-file rewrite.
+    }
+    s_ctx.gc_watermark_attempted = true;
+    s_ctx.gc_attempt_ack_seq = s_ctx.meta.ack_seq_critical;
+    s_ctx.gc_attempt_bytes_used = stats.bytes_used;
     telemetry_counters_inc_quota_hit();
 
     FILE *in = fopen(SD_LOG_DATA_PATH, "rb");
@@ -1005,6 +1024,34 @@ esp_err_t sd_log_store_gc_if_needed(void) {
         return ESP_OK;
     }
 
+    /* Preflight every source record before creating a candidate file. Calculate
+     * the noncritical eviction budget needed to restore the hard quota. */
+    char line[SD_LOG_LINE_MAX] = {0};
+    bool invalid_record = false;
+    size_t keep_bytes = 0U;
+    while (fgets(line, sizeof(line), in) != NULL) {
+        if (!sd_log_store_line_complete(line)) {
+            invalid_record = true;
+            break;
+        }
+        sd_log_record_t rec = {0};
+        if (sd_log_store_parse_record(line, &rec) != ESP_OK) {
+            invalid_record = true;
+            break;
+        }
+        if (rec.critical != 0 || rec.seq > s_ctx.meta.ack_seq_critical) {
+            keep_bytes += strlen(line);
+        }
+    }
+    if (invalid_record || ferror(in)) {
+        fclose(in);
+        sd_log_store_mark_degraded();
+        ESP_LOGE(TAG, "event=sd_gc_invalid_preflight action=preserve_original");
+        return ESP_ERR_INVALID_SIZE;
+    }
+    rewind(in);
+    size_t evict_noncritical_bytes = keep_bytes > hard_limit ? keep_bytes - hard_limit : 0U;
+    size_t evicted_records = 0U;
     FILE *out = fopen(SD_LOG_DATA_TMP_PATH, "wb");
     if (out == NULL) {
         fclose(in);
@@ -1012,8 +1059,6 @@ esp_err_t sd_log_store_gc_if_needed(void) {
         return ESP_FAIL;
     }
 
-    char line[SD_LOG_LINE_MAX] = {0};
-    bool invalid_record = false;
     while (fgets(line, sizeof(line), in) != NULL) {
         // Compaction may discard acknowledged noncritical records, but cannot
         // silently delete an unknown or malformed critical record.
@@ -1031,6 +1076,14 @@ esp_err_t sd_log_store_gc_if_needed(void) {
          * Non-critical/raw records become disposable once older than that watermark.
          */
         if (rec.critical == 0 && rec.seq <= s_ctx.meta.ack_seq_critical) {
+            continue;
+        }
+        if (rec.critical == 0 && evict_noncritical_bytes > 0U) {
+            size_t evicted_bytes = strlen(line);
+            evict_noncritical_bytes = evicted_bytes >= evict_noncritical_bytes
+                ? 0U : evict_noncritical_bytes - evicted_bytes;
+            evicted_records += 1U;
+            telemetry_counters_inc_quota_evicted_noncritical();
             continue;
         }
         if (fputs(line, out) == EOF) {
@@ -1105,6 +1158,27 @@ esp_err_t sd_log_store_gc_if_needed(void) {
     remove(SD_LOG_DATA_BAK_PATH);
     // Any offset cached against the old file layout becomes invalid once the compacted file is promoted.
     sd_log_store_reset_peek_cache();
+    /*
+     * Preserve the successful-GC watermark until new broker ACKs arrive or
+     * at least 64 KiB of fresh data accumulates. Otherwise a critical-only
+     * queue above quota would rewrite the whole log on EVERY new append.
+     */
+    struct stat compacted_stat = {0};
+    s_ctx.gc_watermark_attempted = true;
+    s_ctx.gc_attempt_ack_seq = s_ctx.meta.ack_seq_critical;
+    if (stat(SD_LOG_DATA_PATH, &compacted_stat) == 0 && compacted_stat.st_size >= 0) {
+        s_ctx.gc_attempt_bytes_used = (size_t)compacted_stat.st_size;
+    } else {
+        s_ctx.gc_attempt_bytes_used = stats.bytes_used;
+    }
+    if (evicted_records > 0U) {
+        ESP_LOGW(TAG, "event=sd_quota_noncritical_eviction records=%u bytes_before=%u hard_limit=%u",
+                 (unsigned)evicted_records, (unsigned)stats.bytes_used, (unsigned)hard_limit);
+    }
+    if (evict_noncritical_bytes > 0U) {
+        ESP_LOGW(TAG, "event=sd_quota_critical_only_overflow bytes_over=%u policy=preserve_critical",
+                 (unsigned)evict_noncritical_bytes);
+    }
     return ESP_OK;
 }
 
