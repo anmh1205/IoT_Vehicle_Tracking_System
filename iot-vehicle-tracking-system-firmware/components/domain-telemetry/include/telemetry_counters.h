@@ -27,6 +27,8 @@ typedef struct {
     uint32_t replay_drop;
     /** SD queue usage crossed the hard quota and triggered GC. */
     uint32_t quota_hit;
+    /** Unacknowledged noncritical samples evicted to preserve critical queue records. */
+    uint32_t quota_evicted_noncritical;
     /** MQTT link-up events seen by the firmware runtime. */
     uint32_t mqtt_connected;
     /** MQTT link-down events seen by the firmware runtime. */
@@ -87,6 +89,8 @@ void telemetry_counters_inc_replay_retry(void);
 void telemetry_counters_inc_replay_drop(void);
 /** @brief Increment quota-hit counter. */
 void telemetry_counters_inc_quota_hit(void);
+/** @brief Increment quota-based noncritical eviction counter. */
+void telemetry_counters_inc_quota_evicted_noncritical(void);
 /** @brief Increment MQTT connected counter. */
 /** @brief Increment MQTT disconnected counter. */
 /** @brief Increment successful live MQTT publish counter. */
