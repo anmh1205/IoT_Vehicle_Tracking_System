@@ -8,6 +8,7 @@
 #include "at_engine.h"
 #include "at_parser.h"
 #include "app_priv.h"
+#include "session/session_tracker.h"
 #include "board/board.h"
 #include "elm327.h"
 #include "ivts_core/model/record.h"
@@ -256,31 +257,27 @@ static void check_ota_deadline(void)
 
 static void check_late_session_assignment(void)
 {
-    g_app.boot_id = 7u;
-    g_app.tracking_enabled = true;
-    g_app.axes.ign = IVTS_IGN_ON;
     s_now = 10;
     s_fail_session_save = true;
-    app_session_tick();
-    assert(g_app.session.count == 0u && g_app.session.active.local_key == 0u);
+    app_session_tick(IVTS_IGN_ON, true, 7u);
+    assert(!app_session_has_unsent_boundary() && app_session_active_id()->local_key == 0u);
     s_now = 5010;
     s_fail_session_save = false;
-    app_session_tick();
-    const uint32_t key = g_app.session.active.local_key;
-    assert(key != 0u && g_app.session.count == 1u);
-    g_app.axes.ign = IVTS_IGN_OFF;
-    app_session_tick();
-    assert(g_app.session.count == 2u && g_app.session.active.local_key == 0u);
-    assert(!app_session_assign(key, "00000008", 42u));
+    app_session_tick(IVTS_IGN_ON, true, 7u);
+    const uint32_t key = app_session_active_id()->local_key;
+    assert(key != 0u && s_persisted_session.count == 1u);
+    app_session_tick(IVTS_IGN_OFF, true, 7u);
+    assert(s_persisted_session.count == 2u && app_session_active_id()->local_key == 0u);
+    assert(!app_session_assign(key, "00000008", 42u, NULL));
     s_fail_session_save = true;
-    assert(!app_session_assign(key, "00000007", 42u));
-    assert(g_app.session.outbox[1].session.canonical_id == 0u);
+    assert(!app_session_assign(key, "00000007", 42u, NULL));
+    assert(s_persisted_session.outbox[1].session.canonical_id == 0u);
     s_fail_session_save = false;
-    assert(app_session_assign(key, "00000007", 42u));
+    assert(app_session_assign(key, "00000007", 42u, NULL));
     assert(s_persisted_session.outbox[0].session.canonical_id == 0u);
     assert(s_persisted_session.outbox[1].session.canonical_id == 42u);
-    assert(app_session_assign(key, "00000007", 42u));
-    assert(!app_session_assign(key, "00000007", 99u));
+    assert(app_session_assign(key, "00000007", 42u, NULL));
+    assert(!app_session_assign(key, "00000007", 99u, NULL));
 }
 
 static void check_mqtt_rx(void)

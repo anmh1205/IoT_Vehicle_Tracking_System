@@ -13,6 +13,7 @@
  */
 
 #include "app_priv.h"
+#include "session/session_tracker.h"
 #include "app_timing.h"
 #include <string.h>
 #include "board/board.h"
@@ -138,6 +139,6 @@ void app_state_make_record(ivts_record_t *r)
     r->imu_delta_mmps2 = t->imu_accel_delta_mmps2;
     s_t.imu_accel_delta_mmps2 = 0;
     if (t->ignition == IVTS_IGN_ON && g_app.tracking_enabled) {
-        r->session = g_app.session.active;
+        r->session = *app_session_active_id();
     }
 }

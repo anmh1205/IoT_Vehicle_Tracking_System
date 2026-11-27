@@ -24,6 +24,9 @@
  */
 
 #include "app_priv.h"
+#include "publish/messages.h"
+#include "publish/outbox.h"
+#include "session/session_tracker.h"
 #include "fw_update/fw_update.h"
 #include "app_timing.h"
 #include <string.h>
@@ -218,7 +221,7 @@ static const char *do_tracking(int n, int params)
     if (enabled == g_app.tracking_enabled) { return NULL; }
     if (storage_tracking_save(enabled) != IVTS_OK) { return "persist_failed"; }
     g_app.tracking_enabled = enabled;
-    g_app.status_dirty = true;
+    app_outbox_request_status();
     return NULL;
 }
 
@@ -229,7 +232,10 @@ static const char *do_assignment(int n, int params)
     if (!get_decimal(n, params, "local_session_key", UINT32_MAX, &local) ||
         !get_decimal(n, params, "canonical_session_id", IVTS_SESSION_MAX_CANONICAL_ID, &canonical) ||
         !get_str(n, params, "boot_id", boot, sizeof boot)) { return "invalid_session"; }
-    return app_session_assign((uint32_t)local, boot, canonical) ? NULL : "session_not_current";
+    bool active_changed;
+    if (!app_session_assign((uint32_t)local, boot, canonical, &active_changed)) { return "session_not_current"; }
+    if (active_changed) { app_outbox_request_status(); }
+    return NULL;
 }
 
 static const char *do_restart(const char *id, bool rollback)
@@ -383,7 +389,7 @@ void app_cmd_tick(void)
             s_location_deadline = 0;
             complete(fixed ? "location_publish_timeout" : "location_unavailable");
         } else if (fixed) {
-            s_location_inflight = app_publish_location();
+            s_location_inflight = app_messages_publish_location();
         }
     }
     if (s_ack.status == NULL || now < s_retry_at) { return; }
@@ -398,5 +404,5 @@ void app_cmd_tick(void)
             s_restart_at = now + CMD_RESTART_DELAY_MS;
         }
     }
-    (void)app_publish_ack_cmd(s_ack.id, s_ack.status, s_ack.response);
+    (void)app_messages_publish_command_ack(s_ack.id, s_ack.status, s_ack.response);
 }

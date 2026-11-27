@@ -24,6 +24,9 @@
  */
 
 #include "app_priv.h"
+#include "alarm/motion_alarm.h"
+#include "publish/outbox.h"
+#include "session/session_tracker.h"
 #include "fw_update/fw_update.h"
 #include "app_timing.h"
 #include <string.h>
@@ -159,11 +162,8 @@ bool app_init_all(void)
     app_cmd_init();
     (void)storage_config_load(&g_app.cfg);
     (void)storage_tracking_load(&g_app.tracking_enabled);
-    e = storage_session_load(&g_app.session);
-    if (e != IVTS_OK && e != IVTS_ERR_NOT_FOUND) {
-        ESP_LOGW(APP_TAG, "session NVS: %s", ivts_err_name(e));
-    }
-    g_app.alarm_persisted = storage_alarm_load(&g_app.alarm) == IVTS_OK && g_app.alarm.seq != 0u;
+    app_session_restore();
+    app_alarm_restore();
     bool defaults_ok = fill_deploy_defaults(&g_app.cfg);
     ivts_cfg_issue_t config_issues[IVTS_CFG_F_COUNT];
     size_t config_issue_count = ivts_config_validate(&g_app.cfg, config_issues, IVTS_CFG_F_COUNT);
@@ -229,6 +229,7 @@ bool app_init_all(void)
     if (ota_init(&ota_cfg) != IVTS_OK) { return false; }
 
     app_fw_update_restore_at_boot();
+    app_outbox_init();
     ESP_LOGI(APP_TAG, "init xong boot_id=%lu provisioned=%d sd=%d", (unsigned long)g_app.boot_id,
              provisioned, storage_sd_ok());
     return true;

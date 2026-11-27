@@ -1,6 +1,7 @@
 #include "fw_update.h"
 #include <string.h>
 #include "app_priv.h"
+#include "link/app_link.h"
 #include "app_timing.h"
 #include "esp_log.h"
 #include "ivts_core/base/str.h"
@@ -128,7 +129,7 @@ void app_fw_update_confirm_tick(void)
     if (uptime < s_confirm_retry_at_ms) { return; }
     bool trusted;
     uint64_t now = app_clock_unix_ms_or_zero(&trusted);
-    bool healthy = (g_app.link == IVTS_LINK_BROKER_UP) && s_update.has_health_ack;
+    bool healthy = app_link_is_broker_up() && s_update.has_health_ack;
     switch (ivts_ota_confirm_decide(&s_update.confirm_ctx, healthy, now, trusted, uptime)) {
     case IVTS_CONFIRM_ACCEPT:
         accept_running_image(uptime);

@@ -19,6 +19,13 @@
  */
 
 #include "app_priv.h"
+#include "alarm/motion_alarm.h"
+#include "link/app_link.h"
+#include "publish/messages.h"
+#include "publish/outbox.h"
+#include "publish/publisher.h"
+#include "publish/replay.h"
+#include "session/session_tracker.h"
 #include "fw_update/fw_update.h"
 #include "app_timing.h"
 #include <string.h>
@@ -27,7 +34,6 @@
 #include "platform/platform_reset.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "ivts_core/base/str.h"
 #include "ivts_core/fsm/state.h"
 #include "modem/modem.h"
 #include "obd/obd.h"
@@ -56,9 +62,8 @@ static void update_led(uint64_t now)
 
 static void update_link(ivts_link_t link)
 {
-    if (g_app.link == link) { return; }
-    g_app.link = (uint8_t)link;
-    if (link == IVTS_LINK_BROKER_UP) { g_app.status_dirty = true; }
+    if (!app_link_update(link)) { return; }
+    if (app_link_is_broker_up()) { app_outbox_request_status(); }
     ESP_LOGI(APP_TAG, "link -> %u", (unsigned)link);
 }
 
@@ -83,11 +88,10 @@ void app_dispatch(const ivts_event_t *ev)
     case IVTS_EV_LINK_STATE:
         update_link(modem_link_state());
         break;
-    case IVTS_EV_MQTT_ACK:     app_publish_on_ack(ev); break;
-    case IVTS_EV_QUEUE_READY:  app_publish_on_queue_ready(); break;
+    case IVTS_EV_MQTT_ACK:     app_publisher_on_ack(ev); break;
+    case IVTS_EV_QUEUE_READY:  app_replay_on_queue_ready(); break;
     case IVTS_EV_CONFIG_CORRUPT:
-        (void)ivts_str_copy(g_app.event_code, sizeof g_app.event_code, "config_corrupt");
-        g_app.event_dirty = true;
+        app_outbox_request_event("config_corrupt");
         break;
     case IVTS_EV_STORE_RESULT:
         ESP_LOGW(APP_TAG, "storage op=%u err=%s", ev->u.store_result.op,
@@ -116,17 +120,17 @@ static void execute(const ivts_fsm_out_t *o)
     update_gnss(o->actions);
     if (o->actions & IVTS_ACT_OBD_START) { (void)obd_start(); }
     if (o->actions & IVTS_ACT_OBD_STOP)  { (void)obd_stop(); }
-    if (o->actions & IVTS_ACT_PUBLISH_STATUS) { g_app.status_dirty = true; }
+    if (o->actions & IVTS_ACT_PUBLISH_STATUS) { app_outbox_request_status(); }
     if (o->actions & IVTS_ACT_SLEEP) {
         app_sleep_enter(o);
         return;
     }
-    app_publish_control_tick();
+    app_outbox_tick(g_app.fsm.state == IVTS_ST_HEARTBEAT || !g_app.tracking_enabled);
     if ((o->actions & IVTS_ACT_PUBLISH_RAW) &&
         (g_app.fsm.state != IVTS_ST_DRIVING || g_app.tracking_enabled)) {
-        app_publish(PUB_RAW_LIVE);
+        app_messages_publish_live_record();
     }
-    if (o->actions & IVTS_ACT_REPLAY) { app_publish_replay_tick(); }
+    if (o->actions & IVTS_ACT_REPLAY) { app_replay_tick(); }
 }
 
 /** Thân task "app": xem mô tả ở đầu file. */
@@ -152,21 +156,20 @@ static void app_task(void *arg)
         next_tick = now + APP_TICK_MS;
 
         update_link(modem_link_state());
-        app_publish_poll();
+        app_publisher_poll();
         app_fw_update_poll(now);
         app_cmd_handle();
         app_cmd_tick();
 
         (void)ivts_axes_tick(&g_app.axes, &g_app.axes_cfg, now);
-        if (g_app.provisioned) { app_session_tick(); }
-        bool linked = g_app.link == IVTS_LINK_BROKER_UP;
+        if (g_app.provisioned) { app_session_tick(g_app.axes.ign, g_app.tracking_enabled, g_app.boot_id); }
+        bool linked = app_link_is_broker_up();
         ivts_fsm_in_t in = {
             .now = now, .ignition = g_app.axes.ign, .motion = g_app.axes.motion, .wake = g_app.fsm.wake,
             .link_up = linked,
             .link_expected = g_app.provisioned,
-            .publish_idle = !g_app.pub_inflight && !storage_queue_push_pending(),
-            .control_pending = g_app.status_dirty || g_app.session.count != 0u || app_fw_update_report_needs_publish() ||
-                               g_app.alarm.seq != 0u || app_cmd_pending(),
+            .publish_idle = !app_publisher_is_busy() && !storage_queue_push_pending(),
+            .control_pending = app_outbox_has_unsent_control(),
             .queue_pending = storage_queue_pending(),
             .ota_active = app_fw_update_in_progress() ||
                           app_cmd_blocks_sleep(),
@@ -177,7 +180,7 @@ static void app_task(void *arg)
         if (out.changed) {
             ESP_LOGI(APP_TAG, "state %s -> %s", ivts_app_state_name(before), ivts_app_state_name(g_app.fsm.state));
             app_state_set_device(ivts_fsm_device_state(g_app.fsm.state), IVTS_SLEEP_NONE);
-            if (g_app.fsm.state == IVTS_ST_ALARM) { app_publish_latch_alarm(); }
+            if (g_app.fsm.state == IVTS_ST_ALARM) { app_alarm_latch(g_app.provisioned, g_app.boot_id); }
         }
         if (app_fw_update_in_progress()) {
             app_state_set_device(IVTS_DEV_OTA, IVTS_SLEEP_NONE);

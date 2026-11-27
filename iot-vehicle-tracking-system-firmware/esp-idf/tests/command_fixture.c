@@ -2,6 +2,9 @@
 #include <assert.h>
 #include <string.h>
 #include "app_priv.h"
+#include "publish/messages.h"
+#include "publish/outbox.h"
+#include "session/session_tracker.h"
 #include "esp_system.h"
 #include "ivts_core/payload/json_reader.h"
 #include "modem_priv.h"
@@ -25,6 +28,7 @@ static ivts_telemetry_t s_telemetry;
 int64_t esp_timer_get_time(void) { return 0; }
 uint64_t app_now(void) { return s_now; }
 const ivts_telemetry_t *app_state_get(void) { return &s_telemetry; }
+void app_outbox_request_status(void) {}
 void app_apply_config(void) {}
 void esp_restart(void) { s_restarts++; }
 esp_err_t modem_os_start(void) { return ESP_OK; }
@@ -43,7 +47,7 @@ static ivts_err_t event_sink(void *ctx, const ivts_event_t *ev)
     return IVTS_OK;
 }
 
-bool app_publish_ack_cmd(const char *id, const char *status, const char *reason)
+bool app_messages_publish_command_ack(const char *id, const char *status, const char *reason)
 {
     assert(id[0] != '\0' && status != NULL);
     if (!s_cloud_available) { return false; }
@@ -53,15 +57,16 @@ bool app_publish_ack_cmd(const char *id, const char *status, const char *reason)
     return true;
 }
 
-bool app_publish_location(void)
+bool app_messages_publish_location(void)
 {
     if (!s_cloud_available) { return false; }
     s_location_count++;
     return true;
 }
 
-bool app_session_assign(uint32_t key, const char *boot, uint64_t canonical)
+bool app_session_assign(uint32_t key, const char *boot, uint64_t canonical, bool *active_changed)
 {
+    *active_changed = false;
     (void)key;
     (void)boot;
     (void)canonical;

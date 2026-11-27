@@ -22,6 +22,7 @@
  */
 
 #include "app_priv.h"
+#include "link/app_link.h"
 #include "app_timing.h"
 #include "board/board.h"
 #include "esp_log.h"
@@ -44,7 +45,7 @@ static bool wait_modem_stop(void)
     }
     if (!modem_is_stopped()) { return false; }
     while (app_os_receive(&ev, 0)) { app_dispatch(&ev); }
-    g_app.link = IVTS_LINK_DOWN;
+    (void)app_link_update(IVTS_LINK_DOWN);
     return true;
 }
 
