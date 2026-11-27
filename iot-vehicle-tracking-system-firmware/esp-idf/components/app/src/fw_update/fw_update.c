@@ -1,3 +1,4 @@
+#include "persist/app_records.h"
 #include "fw_update.h"
 #include <string.h>
 #include "app_clock.h"
@@ -64,7 +65,7 @@ static void restore_idle(void)
 void app_fw_update_restore_at_boot(void)
 {
     ivts_ota_pending_t saved;
-    (void)storage_ota_pending_load(&saved);
+    (void)app_records_ota_pending_load(&saved);
     (void)ivts_str_copy(s_update.report.current_version, sizeof s_update.report.current_version, ota_running_version());
     (void)ivts_str_copy(s_update.report.partition, sizeof s_update.report.partition, ota_running_partition());
     s_update.fw_report_needs_publish = true;
@@ -164,7 +165,7 @@ static void release_reboot_after_report(void)
 static void clear_confirm_ctx_after_report(void)
 {
     ivts_ota_pending_t empty = {0};
-    if (storage_ota_pending_save(&empty) == IVTS_OK) { s_update.awaiting_final_report_ack = false; }
+    if (app_records_ota_pending_save(&empty) == IVTS_OK) { s_update.awaiting_final_report_ack = false; }
     else { on_report_failed(); }
 }
 

@@ -71,9 +71,9 @@ static ivts_fsm_in_t collect_fsm_input(uint64_t now)
         .now = now, .ignition = s_axes.ign, .motion = s_axes.motion, .wake = s_fsm.wake,
         .link_up = linked,
         .link_expected = app_device_is_provisioned(),
-        .publish_idle = !app_publisher_is_busy() && !storage_queue_push_pending(),
+        .publish_idle = !app_publisher_is_busy() && !storage_queue_has_unflushed_push(),
         .control_pending = app_outbox_has_unsent_control() || app_cmd_pending(),
-        .queue_pending = storage_queue_pending(),
+        .queue_pending = storage_queue_count(),
         .ota_active = app_fw_update_in_progress() ||
                       app_cmd_blocks_sleep(),
     };

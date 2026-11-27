@@ -1,3 +1,4 @@
+#include "persist/app_records.h"
 #include "cmd_receipts.h"
 #include <string.h>
 #include "app_log.h"
@@ -10,7 +11,7 @@ static bool s_needs_checkpoint;
 
 static bool load_receipts(void)
 {
-    ivts_err_t e = storage_command_receipts_load(&s_receipts);
+    ivts_err_t e = app_records_command_receipts_load(&s_receipts);
     if (e != IVTS_OK && e != IVTS_ERR_NOT_FOUND) {
         ESP_LOGW(APP_TAG, "command receipts NVS: %s", ivts_err_name(e));
         return false;
@@ -49,7 +50,7 @@ bool cmd_receipts_needs_checkpoint(void) { return s_needs_checkpoint; }
 
 bool cmd_receipts_flush(void)
 {
-    if (storage_command_receipts_save(&s_receipts) != IVTS_OK) { return false; }
+    if (app_records_command_receipts_save(&s_receipts) != IVTS_OK) { return false; }
     s_needs_checkpoint = false;
     return true;
 }

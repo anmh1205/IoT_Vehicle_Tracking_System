@@ -28,8 +28,8 @@ static void pop_token(uint32_t token)
 
 app_replay_result_t app_replay_until(const ivts_session_boundary_t *boundary)
 {
-    bool writing = storage_queue_push_pending();
-    if (storage_queue_pending() == 0u) { return writing ? REPLAY_BUSY : REPLAY_EMPTY; }
+    bool writing = storage_queue_has_unflushed_push();
+    if (storage_queue_count() == 0u) { return writing ? REPLAY_BUSY : REPLAY_EMPTY; }
 
     uint8_t frame[IVTS_RECORD_MAX_SIZE];
     size_t len = 0;

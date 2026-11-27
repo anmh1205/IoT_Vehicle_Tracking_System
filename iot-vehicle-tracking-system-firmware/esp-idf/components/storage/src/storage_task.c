@@ -1,14 +1,14 @@
 /**
- * @file storage_os.c
+ * @file storage_task.c
  * @brief Task "storage": thực thi mọi thao tác trên thẻ SD tuần tự.
  *
  * ## Mô hình thực thi
  *
  * Task "storage" (priority và stack từ storage_cfg_t; app_init.c đặt 3 và 5120 B):
  * - Sở hữu thẻ SD và FATFS: không task nào khác mở file trên SD, nên không cần khoá FATFS.
- * - Là consumer duy nhất của s_q. Chặn vô hạn trên xQueueReceive khi không có việc.
+ * - Là consumer duy nhất của s_request_queue. Chặn vô hạn trên xQueueReceive khi không có việc.
  *
- * Queue s_q (req_queue_len phần tử, mỗi phần tử là storage_req_t sao chép theo giá trị):
+ * Queue s_request_queue (req_queue_len phần tử, mỗi phần tử là storage_req_t sao chép theo giá trị):
  * - Producer: task "app" (log, push, request_peek, pop). Gửi với timeout 0 nên không bao giờ chặn
  *   caller; queue đầy thì trả IVTS_ERR_FULL.
  * - Mỗi yêu cầu mang bản sao dữ liệu (tối đa STORAGE_LOG_LINE_MAX byte), nên buffer của caller
@@ -29,7 +29,10 @@
  * kịp ghi xuống SD). Dữ liệu đã ghi xuống SD tồn tại; xem storage_queue.c về cách khôi phục.
  */
 
-#include "storage_priv.h"
+#include "storage_task.h"
+#include "storage_internal.h"
+#include "queue/queue.h"
+#include "sd/sd_io.h"
 #include <stdatomic.h>
 #include <string.h>
 #include "esp_check.h"
@@ -58,14 +61,14 @@ typedef struct {
 
 _Static_assert(IVTS_RECORD_MAX_SIZE <= STORAGE_LOG_LINE_MAX, "bản ghi phải vừa ô data của yêu cầu");
 
-static QueueHandle_t s_q;   /* Queue yêu cầu; consumer duy nhất là task "storage". */
+static QueueHandle_t s_request_queue;   /* Queue yêu cầu; consumer duy nhất là task "storage". */
 static atomic_uint s_pending_pushes;
 
 /** Đưa yêu cầu vào queue mà không chờ. @return IVTS_ERR_FULL nếu queue đầy. */
 static ivts_err_t post(const storage_req_t *r)
 {
-    if (s_q == NULL) { return IVTS_ERR_INVALID_STATE; }
-    return (xQueueSend(s_q, r, 0) == pdTRUE) ? IVTS_OK : IVTS_ERR_FULL;
+    if (s_request_queue == NULL) { return IVTS_ERR_INVALID_STATE; }
+    return (xQueueSend(s_request_queue, r, 0) == pdTRUE) ? IVTS_OK : IVTS_ERR_FULL;
 }
 
 /* Xem storage.h. */
@@ -93,7 +96,7 @@ ivts_err_t storage_queue_push(const uint8_t *rec, size_t len)
     return e;
 }
 
-bool storage_queue_push_pending(void) { return atomic_load(&s_pending_pushes) != 0u; }
+bool storage_queue_has_unflushed_push(void) { return atomic_load(&s_pending_pushes) != 0u; }
 
 /* Xem storage.h. */
 ivts_err_t storage_queue_request_peek(void)
@@ -126,7 +129,7 @@ static void storage_task(void *arg)
     (void)arg;
     storage_req_t r;
     for (;;) {
-        if (xQueueReceive(s_q, &r, portMAX_DELAY) != pdTRUE) { continue; }
+        if (xQueueReceive(s_request_queue, &r, portMAX_DELAY) != pdTRUE) { continue; }
         switch (r.op) {
         case REQ_LOG:    report(IVTS_STORE_OP_LOG_APPEND, storage_sd_log_write((const char *)r.data, r.len)); break;
         case REQ_Q_PUSH:
@@ -144,13 +147,12 @@ static void storage_task(void *arg)
     }
 }
 
-/* Xem storage_priv.h. */
-esp_err_t storage_os_start(void)
+esp_err_t storage_task_start(void)
 {
-    s_q = xQueueCreate(g_storage_cfg.req_queue_len, sizeof(storage_req_t));
-    ESP_RETURN_ON_FALSE(s_q != NULL, ESP_ERR_NO_MEM, STORAGE_TAG, "queue");
-    BaseType_t ok = xTaskCreate(storage_task, "storage", g_storage_cfg.task_stack, NULL,
-                                g_storage_cfg.task_prio, NULL);
+    s_request_queue = xQueueCreate(storage_config_view()->req_queue_len, sizeof(storage_req_t));
+    ESP_RETURN_ON_FALSE(s_request_queue != NULL, ESP_ERR_NO_MEM, STORAGE_TAG, "queue");
+    BaseType_t ok = xTaskCreate(storage_task, "storage", storage_config_view()->task_stack, NULL,
+                                storage_config_view()->task_prio, NULL);
     ESP_RETURN_ON_FALSE(ok == pdPASS, ESP_ERR_NO_MEM, STORAGE_TAG, "task");
     return ESP_OK;
 }

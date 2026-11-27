@@ -1,37 +1,12 @@
-/**
- * @file storage_sd.c
- * @brief Gắn thẻ SD (SDMMC 4-bit + FATFS) và ghi log có xoay file và giới hạn dung lượng.
- *
- * Log nằm ở /sd/log/LNNNNNNN.TXT (tên 8.3 để không phụ thuộc long file name). File đang ghi là
- * file có số lớn nhất; khi vượt log_file_max_bytes thì chuyển sang số kế tiếp và xoá các file cũ
- * nhất cho đến khi tổng dung lượng không vượt log_quota_bytes.
- *
- * ## Ngữ cảnh gọi
- *
- * storage_sd_mount() chạy trong storage_init(), trước khi task "storage" tồn tại.
- * storage_sd_log_write() chỉ chạy trong task "storage". Các biến s_log_* chỉ hai ngữ cảnh đó
- * truy cập, không bao giờ đồng thời, nên không cần khoá.
- *
- * ## Khi reset hoặc mất nguồn
- *
- * Mỗi dòng log được ghi bằng fopen/fwrite/fclose; fclose gọi f_close của FATFS nên đồng bộ cả
- * dữ liệu lẫn bảng FAT. Mất nguồn sau fclose thì dòng đã nằm trên thẻ; mất nguồn trong lúc ghi
- * có thể để lại dòng cuối dở. Lần mount sau quét thư mục để khôi phục chỉ số file và tổng dung lượng.
- */
+#include "sd_io.h"
+#include "storage_internal.h"
 
-#include "storage_priv.h"
 #include <dirent.h>
 #include <stdio.h>
-#include <string.h>
 #include <sys/stat.h>
-#include "driver/sdmmc_host.h"
-#include "esp_log.h"
-#include "esp_vfs_fat.h"
-#include "sdmmc_cmd.h"
 
 #define LOG_DIR SD_MOUNT "/log"   /* Thư mục chứa các file log. */
 
-static sdmmc_card_t *s_card;   /* Thông tin thẻ sau khi gắn. */
 static uint32_t s_log_idx;     /* Số của file log đang ghi. */
 static uint32_t s_log_size;    /* Kích thước hiện tại của file đang ghi, byte. */
 static uint32_t s_log_total;   /* Tổng dung lượng mọi file log, byte. */
@@ -68,40 +43,10 @@ static void log_scan(void)
     closedir(d);
 }
 
-/*
- * Xem storage_priv.h. Không tự định dạng thẻ khi gắn lỗi: thẻ hỏng cần được người kiểm tra,
- * và tự định dạng sẽ xoá dữ liệu.
- */
-esp_err_t storage_sd_mount(void)
+void storage_sd_log_open(void)
 {
-    const storage_cfg_t *c = &g_storage_cfg;
-    sdmmc_host_t host = SDMMC_HOST_DEFAULT();
-    sdmmc_slot_config_t slot = SDMMC_SLOT_CONFIG_DEFAULT();
-    slot.width = 4;
-    slot.clk = (gpio_num_t)c->pin_clk;
-    slot.cmd = (gpio_num_t)c->pin_cmd;
-    slot.d0 = (gpio_num_t)c->pin_d0;
-    slot.d1 = (gpio_num_t)c->pin_d1;
-    slot.d2 = (gpio_num_t)c->pin_d2;
-    slot.d3 = (gpio_num_t)c->pin_d3;
-    slot.cd = (c->pin_cd >= 0) ? (gpio_num_t)c->pin_cd : SDMMC_SLOT_NO_CD;
-    /* Bật pull-up nội của SoC cho các chân SDMMC. Pull-up nội yếu; ESP-IDF khuyến nghị pull-up
-     * ngoài 10 kΩ trên CMD và D0..D3 để chạy ổn định. */
-    slot.flags |= SDMMC_SLOT_FLAG_INTERNAL_PULLUP;
-
-    esp_vfs_fat_sdmmc_mount_config_t mc = {
-        .format_if_mount_failed = false,   /* Không tự định dạng khi gắn lỗi. */
-        .max_files = 4,
-        .allocation_unit_size = 16 * 1024,
-    };
-    esp_err_t e = esp_vfs_fat_sdmmc_mount(SD_MOUNT, &host, &slot, &mc, &s_card);
-    if (e != ESP_OK) {
-        ESP_LOGW(STORAGE_TAG, "mount SD: %s", esp_err_to_name(e));
-        return e;
-    }
     mkdir(LOG_DIR, 0775);
     log_scan();
-    return ESP_OK;
 }
 
 /**
@@ -112,7 +57,7 @@ esp_err_t storage_sd_mount(void)
  */
 static void log_enforce_quota(void)
 {
-    while (s_log_total > g_storage_cfg.log_quota_bytes) {
+    while (s_log_total > storage_config_view()->log_quota_bytes) {
         DIR *d = opendir(LOG_DIR);
         if (d == NULL) { return; }
         uint32_t oldest = UINT32_MAX;
@@ -132,11 +77,11 @@ static void log_enforce_quota(void)
     }
 }
 
-/* Xem storage_priv.h. Ghi @p line kèm ký tự xuống dòng; xoay file nếu vượt giới hạn kích thước. */
+/* Ghi @p line kèm ký tự xuống dòng; xoay file nếu vượt giới hạn kích thước. */
 ivts_err_t storage_sd_log_write(const char *line, size_t len)
 {
     if (!storage_sd_ok()) { return IVTS_ERR_INVALID_STATE; }
-    if (s_log_size + len + 1u > g_storage_cfg.log_file_max_bytes) {
+    if (s_log_size + len + 1u > storage_config_view()->log_file_max_bytes) {
         s_log_idx++;                                 /* Xoay sang file mới. */
         s_log_size = 0;
         log_enforce_quota();

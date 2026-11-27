@@ -18,7 +18,7 @@ class Reliability(unittest.TestCase):
         obd = components / "obd" / "src"
         build_fixture(
             cls.executable,
-            [FIRMWARE / "tests" / "reliability_fixture.c", storage / "src" / "storage_queue.c",
+            [FIRMWARE / "tests" / "reliability_fixture.c", *sorted((storage / "src/queue").glob("*.c")),
              modem / "at/at_parser.c", modem / "at/at_engine.c", modem / "mqtt/mqtt_rx.c", modem / "mqtt/mqtt_session.c",
              obd / "elm327.c", obd / "obd_pid.c",
              components / "app/src/session/session_tracker.c", components / "app/src/runtime/app_clock.c", PLATFORM / "src/platform_clock.c", *sorted(CORE.glob("src/**/*.c"))],

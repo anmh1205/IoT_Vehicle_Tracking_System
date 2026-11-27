@@ -15,6 +15,7 @@
 #include "slots/modem_slots.h"
 #include "ota/ota.h"
 #include "storage/storage.h"
+#include "persist/app_records.h"
 
 static uint64_t s_now = 1u;
 
@@ -80,33 +81,33 @@ ivts_err_t storage_config_save(const ivts_config_t *c)
     return IVTS_OK;
 }
 
-ivts_err_t storage_tracking_save(bool enabled)
+ivts_err_t app_records_tracking_save(bool enabled)
 {
     (void)enabled;
     return IVTS_OK;
 }
 
-ivts_err_t storage_command_receipts_load(ivts_cmd_receipts_t *out)
+ivts_err_t app_records_command_receipts_load(ivts_cmd_receipts_t *out)
 {
     if (s_read_fails) { return IVTS_ERR_IO; }
     *out = s_saved_receipts;
     return out->next != 0u || out->id[0][0] != '\0' ? IVTS_OK : IVTS_ERR_NOT_FOUND;
 }
 
-ivts_err_t storage_command_receipts_save(const ivts_cmd_receipts_t *in)
+ivts_err_t app_records_command_receipts_save(const ivts_cmd_receipts_t *in)
 {
     if (s_write_fails) { return IVTS_ERR_IO; }
     s_saved_receipts = *in;
     return IVTS_OK;
 }
 
-ivts_err_t storage_restart_intent_load(ivts_restart_intent_t *out)
+ivts_err_t app_records_restart_intent_load(ivts_restart_intent_t *out)
 {
     *out = s_restart_intent;
     return s_restart_intent.id[0] == '\0' ? IVTS_ERR_NOT_FOUND : IVTS_OK;
 }
 
-ivts_err_t storage_restart_intent_save(const ivts_restart_intent_t *intent)
+ivts_err_t app_records_restart_intent_save(const ivts_restart_intent_t *intent)
 {
     s_restart_intent = *intent;
     return IVTS_OK;

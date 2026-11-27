@@ -11,7 +11,7 @@ idf_component_register(
         "src/telemetry/telemetry_snapshot.c" "src/telemetry/record_capture.c"
         # Power and persistence
         "src/power/sleep_controller.c" "src/power/gnss_arbiter.c" "src/power/led_pattern.c"
-        "src/persist/rtc_context.c"
+        "src/persist/rtc_context.c" "src/persist/app_records.c"
         # Publishing, session and alarms
         "src/publish/publisher.c" "src/publish/messages.c" "src/publish/replay.c"
         "src/publish/outbox.c" "src/publish/outbox_calc.c"

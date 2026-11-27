@@ -11,6 +11,9 @@
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "ivts_core/model/record.h"
+#include "ivts_core/model/command.h"
+#include "ivts_core/model/session.h"
+#include "ivts_core/ota/confirm.h"
 #include "modem/modem.h"
 #include "obd/obd.h"
 #include "ota/ota.h"
@@ -54,7 +57,7 @@ static ivts_cmd_receipts_t s_receipts;
 static ivts_restart_intent_t s_restart_intent;
 static bool s_image_pending_verify;
 static bool s_fail_receipts_save;
-static bool s_tracking_enabled = true;
+static uint8_t s_tracking_enabled = 1u;
 static unsigned s_receipts_saves;
 static unsigned s_tracking_saves;
 static unsigned s_mark_valid_calls;
@@ -235,44 +238,52 @@ ivts_err_t storage_config_load(ivts_config_t *out)
 }
 
 ivts_err_t storage_config_save(const ivts_config_t *cfg) { (void)cfg; return IVTS_OK; }
-ivts_err_t storage_tracking_load(bool *enabled) { *enabled = s_tracking_enabled; return IVTS_OK; }
-ivts_err_t storage_tracking_save(bool enabled)
+typedef struct {
+    const char *key;
+    uint16_t version;
+    void *data;
+    size_t size;
+} fixture_record_t;
+
+static const fixture_record_t k_records[] = {
+    { "tracking", 1, &s_tracking_enabled, sizeof s_tracking_enabled },
+    { "session", 1, &s_session, sizeof s_session },
+    { "motion_alarm", 1, &s_alarm, sizeof s_alarm },
+    { "ota", 3, &s_ota_context, sizeof s_ota_context },
+    { "cmd_receipts", 1, &s_receipts, sizeof s_receipts },
+    { "reboot_id", 2, &s_restart_intent, sizeof s_restart_intent },
+};
+
+static const fixture_record_t *record_for(const char *key, uint16_t version, size_t len)
 {
-    s_tracking_enabled = enabled;
-    s_tracking_saves++;
+    for (size_t i = 0; i < sizeof k_records / sizeof k_records[0]; i++) {
+        if (strcmp(key, k_records[i].key) == 0) {
+            assert(version == k_records[i].version && len == k_records[i].size);
+            return &k_records[i];
+        }
+    }
+    assert(false);
+    return NULL;
+}
+
+ivts_err_t storage_record_load(const char *key, uint16_t version, void *buffer, size_t len)
+{
+    const fixture_record_t *record = record_for(key, version, len);
+    if (record->data == &s_restart_intent && s_restart_intent.id[0] == '\0') {
+        return IVTS_ERR_NOT_FOUND;
+    }
+    memcpy(buffer, record->data, len);
     return IVTS_OK;
 }
 
-ivts_err_t storage_session_load(ivts_session_state_t *out) { *out = s_session; return IVTS_OK; }
-ivts_err_t storage_session_save(const ivts_session_state_t *session) { s_session = *session; return IVTS_OK; }
-ivts_err_t storage_alarm_load(ivts_motion_alarm_t *alarm) { *alarm = s_alarm; return IVTS_OK; }
-ivts_err_t storage_alarm_save(const ivts_motion_alarm_t *alarm) { s_alarm = *alarm; return IVTS_OK; }
-ivts_err_t storage_ota_pending_load(ivts_ota_pending_t *out) { *out = s_ota_context; return IVTS_OK; }
-ivts_err_t storage_ota_pending_save(const ivts_ota_pending_t *ctx)
+ivts_err_t storage_record_save(const char *key, uint16_t version, const void *buffer, size_t len)
 {
-    s_ota_context = *ctx;
-    if (!ctx->pending) { s_ota_context_clears++; }
-    return IVTS_OK;
-}
-
-ivts_err_t storage_command_receipts_load(ivts_cmd_receipts_t *out) { *out = s_receipts; return IVTS_OK; }
-ivts_err_t storage_command_receipts_save(const ivts_cmd_receipts_t *receipts)
-{
-    if (s_fail_receipts_save) { return IVTS_ERR_IO; }
-    s_receipts_saves++;
-    s_receipts = *receipts;
-    return IVTS_OK;
-}
-
-ivts_err_t storage_restart_intent_load(ivts_restart_intent_t *out)
-{
-    *out = s_restart_intent;
-    return out->id[0] == '\0' ? IVTS_ERR_NOT_FOUND : IVTS_OK;
-}
-
-ivts_err_t storage_restart_intent_save(const ivts_restart_intent_t *intent)
-{
-    s_restart_intent = *intent;
+    const fixture_record_t *record = record_for(key, version, len);
+    if (record->data == &s_receipts && s_fail_receipts_save) { return IVTS_ERR_IO; }
+    memcpy(record->data, buffer, len);
+    if (record->data == &s_receipts) { s_receipts_saves++; }
+    if (record->data == &s_tracking_enabled) { s_tracking_saves++; }
+    if (record->data == &s_ota_context && !s_ota_context.pending) { s_ota_context_clears++; }
     return IVTS_OK;
 }
 
@@ -283,8 +294,8 @@ ivts_err_t storage_queue_push(const uint8_t *record, size_t len)
     return IVTS_OK;
 }
 
-bool storage_queue_push_pending(void) { return false; }
-uint32_t storage_queue_pending(void) { return s_offline_count; }
+bool storage_queue_has_unflushed_push(void) { return false; }
+uint32_t storage_queue_count(void) { return s_offline_count; }
 ivts_err_t storage_queue_request_peek(void)
 {
     s_peek_requests++;

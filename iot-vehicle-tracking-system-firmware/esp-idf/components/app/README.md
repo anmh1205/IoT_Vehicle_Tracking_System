@@ -5,7 +5,7 @@ The app task drains its event queue, refreshes telemetry and executes the FSM. I
 | Folder | Responsibility |
 | --- | --- |
 | `boot`, `runtime` | Initialization order, task configuration, callbacks, event dispatch and FSM actions |
-| `device`, `link`, `persist` | Device identity and policy, broker availability, deep-sleep context |
+| `device`, `link`, `persist` | Device identity and policy, broker availability, typed NVS records and deep-sleep context |
 | `telemetry`, `session`, `alarm` | Measurements, RAW capture, session boundaries and durable motion alarms |
 | `publish` | Payload construction, single modem slot, ACK routing and ordered replay |
 | `command`, `fw_update` | Command validation and receipts, firmware updates and boot confirmation |

@@ -52,7 +52,7 @@ void app_messages_publish_live_record(void)
     app_telemetry_consume_imu_peak();
     ivts_msg_meta_t m = { .device_id = app_device_config()->device_id, .auth_token = app_device_config()->auth_token };
     ivts_err_t error = ivts_payload_rawdata(&m, &r, app_telemetry_view(), s_buf, sizeof s_buf, &len);
-    if (!app_session_has_unsent_boundary() && storage_queue_pending() == 0u && !storage_queue_push_pending() &&
+    if (!app_session_has_unsent_boundary() && storage_queue_count() == 0u && !storage_queue_has_unflushed_push() &&
         error == IVTS_OK && app_publisher_send(APP_MSG_RAW_LIVE, MODEM_TOPIC_RAWDATA, s_buf, len)) {
         s_live_record = r;
     } else {

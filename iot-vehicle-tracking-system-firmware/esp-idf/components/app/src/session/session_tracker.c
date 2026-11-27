@@ -1,3 +1,4 @@
+#include "persist/app_records.h"
 /**
  * @file session_tracker.c
  * @brief Theo dõi phiên theo ignition và lưu các mốc chưa có PUBACK trong NVS.
@@ -20,7 +21,7 @@ static ivts_session_state_t s_session;
 
 static bool commit(const ivts_session_state_t *next)
 {
-    if (storage_session_save(next) != IVTS_OK) {
+    if (app_records_session_save(next) != IVTS_OK) {
         ESP_LOGW(APP_TAG, "không lưu được phiên");
         return false;
     }
@@ -54,7 +55,7 @@ static void make_boundary(ivts_session_boundary_t *boundary, ivts_boundary_kind_
 
 void app_session_restore(void)
 {
-    ivts_err_t error = storage_session_load(&s_session);
+    ivts_err_t error = app_records_session_load(&s_session);
     if (error != IVTS_OK && error != IVTS_ERR_NOT_FOUND) {
         ESP_LOGW(APP_TAG, "session NVS: %s", ivts_err_name(error));
     }

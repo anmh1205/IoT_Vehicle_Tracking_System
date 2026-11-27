@@ -3,18 +3,23 @@
  * @brief Khởi tạo component storage và trạng thái chung (cấu hình, cờ thẻ SD).
  */
 
-#include "storage_priv.h"
+#include "storage_internal.h"
+#include "storage_task.h"
+#include "nvs/nvs_store_internal.h"
+#include "queue/queue.h"
+#include "sd/sd_io.h"
 #include "platform/platform_err.h"
 #include "esp_log.h"
 #include "platform/platform_clock.h"
 
-storage_cfg_t g_storage_cfg;
+static storage_cfg_t s_storage_cfg;
 static bool s_sd_ok;   /* Thẻ SD đã gắn và queue đã mở; ghi trong storage_init(), trước khi task "storage" tồn tại. */
 
-/* Xem storage_priv.h. */
+const storage_cfg_t *storage_config_view(void) { return &s_storage_cfg; }
+
 void storage_emit(const ivts_event_t *ev)
 {
-    (void)ivts_sink_emit(&g_storage_cfg.sink, ev);
+    (void)ivts_sink_emit(&s_storage_cfg.sink, ev);
 }
 
 /* Xem storage.h. */
@@ -28,7 +33,7 @@ bool storage_sd_ok(void) { return s_sd_ok; }
 ivts_err_t storage_init(const storage_cfg_t *cfg)
 {
     if (cfg == NULL || cfg->sink.fn == NULL) { return IVTS_ERR_INVALID_ARG; }
-    g_storage_cfg = *cfg;
+    s_storage_cfg = *cfg;
 
     esp_err_t e = storage_nvs_init();
     if (e != ESP_OK) {
@@ -49,7 +54,7 @@ ivts_err_t storage_init(const storage_cfg_t *cfg)
             storage_emit(&ev);
         }
     }
-    e = storage_os_start();
-    ESP_LOGI(STORAGE_TAG, "init sd=%d pending=%lu", s_sd_ok, (unsigned long)storage_queue_pending());
+    e = storage_task_start();
+    ESP_LOGI(STORAGE_TAG, "init sd=%d pending=%lu", s_sd_ok, (unsigned long)storage_queue_count());
     return platform_err_from_esp(e);
 }

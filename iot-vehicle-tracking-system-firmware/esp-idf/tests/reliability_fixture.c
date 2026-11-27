@@ -20,12 +20,15 @@
 #include "mqtt/mqtt_session.h"
 #include "slots/modem_slots.h"
 #include "obd_pid.h"
-#include "storage_priv.h"
+#include "storage_internal.h"
+#include "queue/queue.h"
+#include "persist/app_records.h"
 
 #define FIRST "sd/q/Q0000000.BIN"
 #define SECOND "sd/q/Q0000001.BIN"
 
-storage_cfg_t g_storage_cfg;
+static storage_cfg_t s_storage_cfg;
+const storage_cfg_t *storage_config_view(void) { return &s_storage_cfg; }
 void storage_emit(const ivts_event_t *ev) { assert(ev->type == IVTS_EV_QUEUE_READY); }
 
 static const char *s_fail_read;
@@ -47,7 +50,7 @@ ivts_err_t board_time_get(uint64_t *unix_ms, bool *trusted)
     return IVTS_OK;
 }
 
-ivts_err_t storage_session_save(const ivts_session_state_t *state)
+ivts_err_t app_records_session_save(const ivts_session_state_t *state)
 {
     if (s_fail_session_save) { return IVTS_ERR_IO; }
     s_persisted_session = *state;
@@ -107,8 +110,8 @@ size_t __wrap_fwrite(const void *ptr, size_t size, size_t count, FILE *stream)
 
 static void open_queue(uint32_t segment_bytes)
 {
-    g_storage_cfg.queue_max_segments = 2;
-    g_storage_cfg.queue_segment_bytes = segment_bytes;
+    s_storage_cfg.queue_max_segments = 2;
+    s_storage_cfg.queue_segment_bytes = segment_bytes;
     assert(mkdir("sd", 0700) == 0);
     storage_queue_slot_init();
     assert(storage_queue_open() == ESP_OK);
@@ -138,14 +141,14 @@ static void check_eviction_with_delayed_ack(void)
     uint32_t old = peek(1);
     s_fail_remove = true;
     assert(push(3) == IVTS_ERR_IO);
-    assert(storage_queue_pending() == 2u && peek(1) == old);
+    assert(storage_queue_count() == 2u && peek(1) == old);
     s_fail_remove = false;
-    assert(push(3) == IVTS_OK && storage_queue_pending() == 2u);
+    assert(push(3) == IVTS_OK && storage_queue_count() == 2u);
     assert(storage_queue_do_pop(old) == IVTS_ERR_NOT_FOUND);
-    assert(storage_queue_pending() == 2u);
+    assert(storage_queue_count() == 2u);
     assert(storage_queue_do_pop(peek(2)) == IVTS_OK);
     assert(storage_queue_do_pop(peek(3)) == IVTS_OK);
-    assert(storage_queue_open() == ESP_OK && storage_queue_pending() == 0u);
+    assert(storage_queue_open() == ESP_OK && storage_queue_count() == 0u);
 }
 
 static void check_read_error(void)
@@ -154,12 +157,12 @@ static void check_read_error(void)
     assert(push(1) == IVTS_OK && push(2) == IVTS_OK);
     s_fail_read = FIRST;
     assert(storage_queue_do_peek() == IVTS_ERR_IO);
-    assert(storage_queue_pending() == 2u && access(FIRST, F_OK) == 0);
+    assert(storage_queue_count() == 2u && access(FIRST, F_OK) == 0);
     s_fail_read = SECOND;
     assert(storage_queue_open() != ESP_OK);
     assert(access(FIRST, F_OK) == 0 && access(SECOND, F_OK) == 0);
     s_fail_read = NULL;
-    assert(storage_queue_open() == ESP_OK && storage_queue_pending() == 2u);
+    assert(storage_queue_open() == ESP_OK && storage_queue_count() == 2u);
     assert(storage_queue_do_pop(peek(1)) == IVTS_OK);
     assert(storage_queue_do_pop(peek(2)) == IVTS_OK);
 }
@@ -170,16 +173,16 @@ static void check_partial_append(void)
     assert(push(1) == IVTS_OK);
     s_short_write = true;
     s_fail_truncate = true;
-    assert(push(2) == IVTS_ERR_IO && storage_queue_pending() == 1u);
-    assert(push(3) == IVTS_ERR_IO && storage_queue_pending() == 1u);
+    assert(push(2) == IVTS_ERR_IO && storage_queue_count() == 1u);
+    assert(push(3) == IVTS_ERR_IO && storage_queue_count() == 1u);
     s_fail_truncate = false;
-    assert(push(3) == IVTS_OK && storage_queue_pending() == 2u);
+    assert(push(3) == IVTS_OK && storage_queue_count() == 2u);
     FILE *f = __real_fopen(FIRST, "ab");
     assert(f != NULL && fputc(0xa5, f) != EOF && fclose(f) == 0);
     s_fail_truncate = true;
     assert(storage_queue_open() != ESP_OK);
     s_fail_truncate = false;
-    assert(storage_queue_open() == ESP_OK && storage_queue_pending() == 2u);
+    assert(storage_queue_open() == ESP_OK && storage_queue_count() == 2u);
     assert(storage_queue_do_pop(peek(1)) == IVTS_OK);
     assert(storage_queue_do_pop(peek(3)) == IVTS_OK);
 }
@@ -191,7 +194,7 @@ static void check_sparse_segments(void)
     assert(rename(SECOND, "sd/q/Q8000000.BIN") == 0);
     FILE *backup = fopen("sd/q/Q9999999.TMP", "wb");
     assert(backup != NULL && fclose(backup) == 0);
-    assert(storage_queue_open() == ESP_OK && storage_queue_pending() == 2u);
+    assert(storage_queue_open() == ESP_OK && storage_queue_count() == 2u);
     assert(storage_queue_do_pop(peek(1)) == IVTS_OK);
     assert(storage_queue_do_pop(peek(2)) == IVTS_OK);
     assert(push(3) == IVTS_OK && storage_queue_do_pop(peek(3)) == IVTS_OK);

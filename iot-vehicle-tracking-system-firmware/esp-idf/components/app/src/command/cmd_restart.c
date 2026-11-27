@@ -1,3 +1,4 @@
+#include "persist/app_records.h"
 #include "cmd_handlers.h"
 #include <string.h>
 #include "telemetry/telemetry_snapshot.h"
@@ -13,7 +14,7 @@ static uint64_t s_restart_at_ms;
 
 static const char *load_restart_intent(ivts_restart_intent_t *intent, const char *id, bool *same)
 {
-    ivts_err_t error = storage_restart_intent_load(intent);
+    ivts_err_t error = app_records_restart_intent_load(intent);
     if (error != IVTS_OK && error != IVTS_ERR_NOT_FOUND) { return "dedupe_unavailable"; }
     *same = error == IVTS_OK && strcmp(intent->id, id) == 0;
     return NULL;
@@ -40,7 +41,7 @@ static const char *persist_restart_intent(const char *id, bool rollback, const c
     if (rollback && ivts_str_copy(intent.rollback_origin, sizeof intent.rollback_origin, running) != IVTS_OK) {
         return "no_rollback_image";
     }
-    if (storage_restart_intent_save(&intent) != IVTS_OK) { return "persist_failed"; }
+    if (app_records_restart_intent_save(&intent) != IVTS_OK) { return "persist_failed"; }
     return NULL;
 }
 

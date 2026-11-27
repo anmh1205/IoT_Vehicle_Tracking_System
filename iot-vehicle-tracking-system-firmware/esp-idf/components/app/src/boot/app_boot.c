@@ -1,3 +1,4 @@
+#include "persist/app_records.h"
 #include "app_boot.h"
 #include "app_config.h"
 #include "app_wiring.h"
@@ -50,7 +51,7 @@ static void load_persisted_state(ivts_config_t *config)
     app_cmd_init();
     (void)storage_config_load(config);
     bool tracking_enabled = app_device_tracking_enabled();
-    (void)storage_tracking_load(&tracking_enabled);
+    (void)app_records_tracking_load(&tracking_enabled);
     app_device_set_tracking_enabled(tracking_enabled);
     app_session_restore();
     app_alarm_restore();

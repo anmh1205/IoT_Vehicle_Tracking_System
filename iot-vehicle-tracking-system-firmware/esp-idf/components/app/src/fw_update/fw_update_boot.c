@@ -1,3 +1,4 @@
+#include "persist/app_records.h"
 #include "fw_update.h"
 #include "app_clock.h"
 #include "ivts_core/base/str.h"
@@ -13,5 +14,5 @@ ivts_err_t app_fw_update_prepare_boot(const ivts_ota_cmd_t *cmd, const char *par
     (void)ivts_str_copy(pending.job_id, sizeof pending.job_id, cmd->job_id);
     (void)ivts_str_copy(pending.target_version, sizeof pending.target_version, cmd->version);
     (void)ivts_str_copy(pending.target_partition, sizeof pending.target_partition, partition);
-    return storage_ota_pending_save(&pending);
+    return app_records_ota_pending_save(&pending);
 }
