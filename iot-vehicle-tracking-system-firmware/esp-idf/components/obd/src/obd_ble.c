@@ -112,47 +112,57 @@ static bool adv_is_candidate(const struct ble_gap_disc_desc *d)
  * Khi chưa chỉ định địa chỉ đích, dùng service đã biết hoặc tên quảng bá OBD.
  * Notification lớn hơn bộ đệm được báo lỗi để task loại toàn bộ phản hồi.
  */
-static int gap_cb(struct ble_gap_event *ev, void *arg)
+static void on_disc(const struct ble_gap_disc_desc *disc)
+{
+    bev_t event = { .type = BEV_ADV };
+    event.addr[0] = disc->addr.type;
+    memcpy(&event.addr[1], disc->addr.val, 6);
+    if (g_obd_cfg.target_addr[0] != '\0' ? !obd_ble_addr_matches(event.addr, g_obd_cfg.target_addr)
+                                          : !adv_is_candidate(disc)) { return; }
+    (void)obd_post(&event);
+}
+
+static void on_connect(const struct ble_gap_event *gap)
+{
+    bev_t event = { .type = BEV_CONNECTED, .status = (int16_t)gap->connect.status,
+                    .conn = gap->connect.conn_handle };
+    (void)obd_post(&event);
+}
+
+static void on_disconnect(const struct ble_gap_event *gap)
+{
+    bev_t event = { .type = BEV_DISCONNECTED, .status = (int16_t)gap->disconnect.reason,
+                    .conn = gap->disconnect.conn.conn_handle };
+    (void)obd_post(&event);
+}
+
+static void on_notify_rx(const struct ble_gap_event *gap)
+{
+    bev_t event = { .type = BEV_NOTIFY, .conn = gap->notify_rx.conn_handle, .h_start = gap->notify_rx.attr_handle };
+    uint16_t len = OS_MBUF_PKTLEN(gap->notify_rx.om);
+    if (len > sizeof event.data || os_mbuf_copydata(gap->notify_rx.om, 0, len, event.data) != 0) {
+        event.status = BLE_HS_EMSGSIZE;
+    } else {
+        event.len = (uint8_t)len;
+    }
+    (void)obd_post(&event);
+}
+
+static int gap_cb(struct ble_gap_event *event, void *arg)
 {
     (void)arg;
-    bev_t e = {0};
-    switch (ev->type) {
-    case BLE_GAP_EVENT_DISC:
-        e.type = BEV_ADV;
-        e.addr[0] = ev->disc.addr.type;
-        memcpy(&e.addr[1], ev->disc.addr.val, 6);
-        if (g_obd_cfg.target_addr[0] != '\0' ? !obd_ble_addr_matches(e.addr, g_obd_cfg.target_addr)
-                                             : !adv_is_candidate(&ev->disc)) { return 0; }
-        break;
-    case BLE_GAP_EVENT_DISC_COMPLETE:
-        e.type = BEV_SCAN_DONE;
-        break;
-    case BLE_GAP_EVENT_CONNECT:
-        e.type = BEV_CONNECTED;
-        e.status = (int16_t)ev->connect.status;
-        e.conn = ev->connect.conn_handle;
-        break;
-    case BLE_GAP_EVENT_DISCONNECT:
-        e.type = BEV_DISCONNECTED;
-        e.conn = ev->disconnect.conn.conn_handle;
-        e.status = (int16_t)ev->disconnect.reason;
-        break;
-    case BLE_GAP_EVENT_NOTIFY_RX: {
-        e.type = BEV_NOTIFY;
-        e.conn = ev->notify_rx.conn_handle;
-        e.h_start = ev->notify_rx.attr_handle;
-        uint16_t n = OS_MBUF_PKTLEN(ev->notify_rx.om);
-        if (n > sizeof e.data || os_mbuf_copydata(ev->notify_rx.om, 0, n, e.data) != 0) {
-            e.status = BLE_HS_EMSGSIZE;
-        } else {
-            e.len = (uint8_t)n;
-        }
+    switch (event->type) {
+    case BLE_GAP_EVENT_DISC: on_disc(&event->disc); break;
+    case BLE_GAP_EVENT_DISC_COMPLETE: {
+        const bev_t done = { .type = BEV_SCAN_DONE };
+        (void)obd_post(&done);
         break;
     }
-    default:
-        return 0;
+    case BLE_GAP_EVENT_CONNECT: on_connect(event); break;
+    case BLE_GAP_EVENT_DISCONNECT: on_disconnect(event); break;
+    case BLE_GAP_EVENT_NOTIFY_RX: on_notify_rx(event); break;
+    default: break;
     }
-    (void)obd_post(&e);
     return 0;
 }
 

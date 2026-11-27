@@ -118,37 +118,57 @@ static void emit_link(bool conn, bool elm, ivts_ecu_state_t ecu)
  * @param[out] out   Sự kiện khớp; có thể NULL.
  * @return true nếu nhận được sự kiện cần chờ; false khi hết timeout, bị STOP hoặc mất kết nối.
  */
+static bool is_current_notification(const bev_t *event)
+{
+    return s_link && event->conn == s_conn && event->h_start == s_rx_handle;
+}
+
+static bool is_interrupting_event(const bev_t *event)
+{
+    if (event->type == BEV_CTRL_CHANGED) {
+        return !atomic_load(&s_ble_active) || !atomic_load(&s_enabled);
+    }
+    if (event->type == BEV_DISCONNECTED) { return s_link && event->conn == s_conn; }
+    return event->type == BEV_NOTIFY && is_current_notification(event) && event->status != 0;
+}
+
+static bool track_link_events(const bev_t *event)
+{
+    switch (event->type) {
+    case BEV_SYNCED: s_synced = true; break;
+    case BEV_CTRL_CHANGED:
+    case BEV_DISCONNECTED:
+        return false;
+    case BEV_NOTIFY:
+        if (!is_current_notification(event)) { return false; }
+        (void)elm_rx_feed(&s_rx, event->data, event->len);
+        break;
+    default: break;
+    }
+    return true;
+}
+
 static bool wait_ev(uint8_t want, uint32_t timeout_ms, bev_t *out)
 {
-    uint64_t end = platform_uptime_ms() + timeout_ms;
+    uint64_t deadline_at_ms = platform_uptime_ms() + timeout_ms;
     for (;;) {
         if (atomic_load(&s_ble_active) && !atomic_load(&s_enabled)) { return false; }
-        uint64_t t = platform_uptime_ms();
-        if (t >= end) { return false; }
-        bev_t e;
-        if (xQueueReceive(s_q, &e, pdMS_TO_TICKS(end - t)) != pdTRUE) { return false; }
-        switch (e.type) {
-        case BEV_SYNCED:       s_synced = true; break;
-        case BEV_CTRL_CHANGED:
-            if (!atomic_load(&s_ble_active) || !atomic_load(&s_enabled)) { return false; }
-            continue;
-        case BEV_DISCONNECTED:
-            if (!s_link || e.conn != s_conn) { continue; }
-            s_link = false;
+        uint64_t now_ms = platform_uptime_ms();
+        if (now_ms >= deadline_at_ms) { return false; }
+        bev_t event;
+        if (xQueueReceive(s_q, &event, pdMS_TO_TICKS(deadline_at_ms - now_ms)) != pdTRUE) { return false; }
+        if (is_interrupting_event(&event)) {
+            if (event.type == BEV_DISCONNECTED) { s_link = false; }
+            if (event.type == BEV_NOTIFY) { s_rx.overflow = true; }
             return false;
-        case BEV_NOTIFY:
-            if (!s_link || e.conn != s_conn || e.h_start != s_rx_handle) { continue; }
-            if (e.status != 0) { s_rx.overflow = true; return false; }
-            (void)elm_rx_feed(&s_rx, e.data, e.len);
-            break;
-        default: break;
         }
+        if (!track_link_events(&event)) { continue; }
         if (want == BEV_NOTIFY) {
-            if (s_rx.complete) { return true; }      /* Phản hồi trọn vẹn khi đã thấy '>'. */
+            if (s_rx.complete) { return true; }
             continue;
         }
-        if (want == WAIT_ANY || e.type == want) {
-            if (out != NULL) { *out = e; }
+        if (want == WAIT_ANY || event.type == want) {
+            if (out != NULL) { *out = event; }
             return true;
         }
     }
@@ -188,74 +208,141 @@ static bool wait_gatt(uint64_t deadline, bev_t *e)
  * Mỗi bước có timeout riêng; bất kỳ bước nào thất bại hoặc bị STOP/mất kết nối thì hàm trả false
  * và caller dọn dẹp kết nối. Thành công thì phát IVTS_EV_OBD_LINK với elm_ready = true.
  */
-static bool session_setup(void)
+typedef struct { uint16_t start, end; } obd_service_range_t;
+typedef struct { uint16_t rx, tx, rx_end; } obd_characteristic_handles_t;
+typedef void (*discovery_visitor_t)(const bev_t *event, void *ctx);
+
+static bool collect_discovery(uint64_t deadline_at_ms, discovery_visitor_t visit, void *ctx)
 {
-    bev_t e;
-    if (obd_ble_scan() != 0) { return false; }
-    uint8_t addr[7] = {0};
-    uint64_t deadline = platform_uptime_ms() + 11000u;
-    for (;;) {
-        uint64_t now = platform_uptime_ms();
-        if (now >= deadline || !wait_ev(WAIT_ANY, (uint32_t)(deadline - now), &e) ||
-            e.type == BEV_SCAN_DONE) { obd_ble_scan_stop(); return false; }
-        if (e.type == BEV_ADV) { memcpy(addr, e.addr, sizeof addr); break; }
+    bev_t event;
+    while (wait_gatt(deadline_at_ms, &event)) {
+        if (event.type == BEV_DISC_DONE) { return s_link && event.status == 0; }
+        visit(&event, ctx);
     }
-    if (obd_ble_connect(addr) != 0) { return false; }
-    if (!wait_ev(BEV_CONNECTED, 11000, &e) || e.status != 0) { return false; }
-    s_conn = e.conn;
+    return false;
+}
+
+static bool scan_for_adapter(uint8_t addr[7])
+{
+    if (obd_ble_scan() != 0) { return false; }
+    uint64_t deadline_at_ms = platform_uptime_ms() + 11000u;
+    for (;;) {
+        uint64_t now_ms = platform_uptime_ms();
+        bev_t event;
+        if (now_ms >= deadline_at_ms || !wait_ev(WAIT_ANY, (uint32_t)(deadline_at_ms - now_ms), &event) ||
+            event.type == BEV_SCAN_DONE) {
+            obd_ble_scan_stop();
+            return false;
+        }
+        if (event.type == BEV_ADV) {
+            memcpy(addr, event.addr, sizeof event.addr);
+            return true;
+        }
+    }
+}
+
+static bool connect_adapter(const uint8_t addr[7])
+{
+    bev_t event;
+    if (obd_ble_connect(addr) != 0 || !wait_ev(BEV_CONNECTED, 11000u, &event) || event.status != 0) {
+        return false;
+    }
+    s_conn = event.conn;
     s_link = true;
     emit_link(true, false, IVTS_ECU_UNKNOWN);
+    return true;
+}
 
-    uint16_t svc_s = 0, svc_e = 0, rx_val = 0, tx_val = 0, cccd = 0;
-    if (obd_ble_disc_svc(s_conn) != 0) { return false; }
-    deadline = platform_uptime_ms() + 5000u;
-    while (wait_gatt(deadline, &e)) {
-        if (e.type == BEV_SVC) { svc_s = e.h_start; svc_e = e.h_end; }
-        if (e.type == BEV_DISC_DONE) { break; }
+static void take_service(const bev_t *event, void *ctx)
+{
+    obd_service_range_t *range = ctx;
+    if (event->type == BEV_SVC) {
+        range->start = event->h_start;
+        range->end = event->h_end;
     }
-    if (!s_link || e.type != BEV_DISC_DONE || e.status != 0 || svc_s == 0u) {
+}
+
+static bool discover_obd_service(obd_service_range_t *range)
+{
+    if (obd_ble_disc_svc(s_conn) != 0) { return false; }
+    if (!collect_discovery(platform_uptime_ms() + 5000u, take_service, range) || range->start == 0u) {
         ESP_LOGW(OBD_TAG, "không thấy service 0x18F0");
         return false;
     }
-    if (obd_ble_disc_chrs(s_conn, svc_s, svc_e) != 0) { return false; }
-    uint16_t rx_end = svc_e;
-    deadline = platform_uptime_ms() + 5000u;
-    e.type = BEV_SYNCED;
-    while (wait_gatt(deadline, &e)) {
-        if (e.type == BEV_CHR) {
-            if (rx_val != 0u && e.h_start > rx_val && e.h_start <= rx_end) {
-                rx_end = (uint16_t)(e.h_start - 1u);
-            }
-            if (e.uuid16 == UUID_RX) { rx_val = e.h_end; }
-            if (e.uuid16 == UUID_TX) { tx_val = e.h_end; }
-        }
-        if (e.type == BEV_DISC_DONE) { break; }
+    return true;
+}
+
+static void take_characteristic(const bev_t *event, void *ctx)
+{
+    obd_characteristic_handles_t *handles = ctx;
+    if (event->type != BEV_CHR) { return; }
+    if (handles->rx != 0u && event->h_start > handles->rx && event->h_start <= handles->rx_end) {
+        handles->rx_end = (uint16_t)(event->h_start - 1u);
     }
-    if (!s_link || e.type != BEV_DISC_DONE || e.status != 0 || rx_val == 0u || tx_val == 0u) {
+    if (event->uuid16 == UUID_RX) { handles->rx = event->h_end; }
+    if (event->uuid16 == UUID_TX) { handles->tx = event->h_end; }
+}
+
+static bool discover_rx_tx_chars(const obd_service_range_t *range, obd_characteristic_handles_t *handles)
+{
+    if (obd_ble_disc_chrs(s_conn, range->start, range->end) != 0) { return false; }
+    handles->rx_end = range->end;
+    if (!collect_discovery(platform_uptime_ms() + 5000u, take_characteristic, handles) ||
+        handles->rx == 0u || handles->tx == 0u) {
         ESP_LOGW(OBD_TAG, "thiếu char 2AF0/2AF1");
         return false;
     }
-    /* NimBLE tự tăng value handle một đơn vị trước khi tìm descriptor. */
-    if (rx_end <= rx_val || obd_ble_disc_dscs(s_conn, rx_val, rx_end) != 0) { return false; }
-    deadline = platform_uptime_ms() + 5000u;
-    e.type = BEV_SYNCED;
-    while (wait_gatt(deadline, &e)) {
-        if (e.type == BEV_DSC && e.uuid16 == 0x2902 && cccd == 0u) { cccd = e.h_start; }
-        if (e.type == BEV_DISC_DONE) { break; }
-    }
-    if (!s_link || e.type != BEV_DISC_DONE || e.status != 0 || cccd == 0u ||
-        obd_ble_enable_notify(s_conn, cccd) != 0) { return false; }
-    if (!wait_gatt(platform_uptime_ms() + 5000u, &e) || e.type != BEV_WRITE_DONE || e.status != 0) { return false; }
-    s_rx_handle = rx_val;
-    s_tx_handle = tx_val;
+    return true;
+}
 
+static void take_cccd(const bev_t *event, void *ctx)
+{
+    uint16_t *cccd = ctx;
+    if (event->type == BEV_DSC && event->uuid16 == 0x2902 && *cccd == 0u) { *cccd = event->h_start; }
+}
+
+static bool discover_rx_cccd(const obd_characteristic_handles_t *handles, uint16_t *cccd)
+{
+    /* NimBLE starts descriptor discovery one handle beyond the value handle. */
+    if (handles->rx_end <= handles->rx || obd_ble_disc_dscs(s_conn, handles->rx, handles->rx_end) != 0) {
+        return false;
+    }
+    return collect_discovery(platform_uptime_ms() + 5000u, take_cccd, cccd) && *cccd != 0u;
+}
+
+static bool enable_rx_notify(uint16_t cccd)
+{
+    bev_t event;
+    return obd_ble_enable_notify(s_conn, cccd) == 0 &&
+           wait_gatt(platform_uptime_ms() + 5000u, &event) && event.type == BEV_WRITE_DONE && event.status == 0;
+}
+
+static bool run_elm_init_sequence(void)
+{
     for (size_t i = 0; i < ELM_INIT_SEQ_LEN; i++) {
-        const elm_init_step_t *st = &ELM_INIT_SEQ[i];
-        if (!elm_cmd(st->cmd, st->timeout_ms) || !elm_reply_valid(s_rx.buf, st->is_reset, true)) {
-            ESP_LOGW(OBD_TAG, "ELM init %s lỗi: %s", st->cmd, s_rx.buf);
+        const elm_init_step_t *step = &ELM_INIT_SEQ[i];
+        if (!elm_cmd(step->cmd, step->timeout_ms) || !elm_reply_valid(s_rx.buf, step->is_reset, true)) {
+            ESP_LOGW(OBD_TAG, "ELM init %s lỗi: %s", step->cmd, s_rx.buf);
             return false;
         }
     }
+    return true;
+}
+
+static bool session_setup(void)
+{
+    uint8_t addr[7] = {0};
+    obd_service_range_t range = {0};
+    obd_characteristic_handles_t handles = {0};
+    uint16_t cccd = 0;
+    if (!scan_for_adapter(addr) || !connect_adapter(addr) || !discover_obd_service(&range) ||
+        !discover_rx_tx_chars(&range, &handles) || !discover_rx_cccd(&handles, &cccd) ||
+        !enable_rx_notify(cccd)) {
+        return false;
+    }
+    s_rx_handle = handles.rx;
+    s_tx_handle = handles.tx;
+    if (!run_elm_init_sequence()) { return false; }
     s_ecu_ready = false;
     emit_link(true, true, IVTS_ECU_UNKNOWN);
     return true;
@@ -280,6 +367,36 @@ static bool probe_ecu(void)
  * Không có giá trị nào nhưng ECU báo trạng thái (NO DATA, STOPPED khi tắt máy) thì phát
  * IVTS_EV_OBD_LINK để app cập nhật trạng thái ECU.
  */
+static bool read_pid(uint8_t pid, ivts_obd_sample_t *sample, ivts_ecu_state_t *ecu)
+{
+    char command[5];
+    snprintf(command, sizeof command, "01%02X", (unsigned)pid);
+    if (!elm_cmd(command, 3000)) { return false; }
+    ivts_ecu_state_t reply_state = elm_reply_ecu_state(s_rx.buf);
+    if (reply_state == IVTS_ECU_STOPPED || reply_state == IVTS_ECU_NO_DATA) { *ecu = reply_state; }
+
+    uint8_t bytes[16];
+    size_t len;
+    if (elm_extract_bytes(s_rx.buf, 0x01, bytes, sizeof bytes, &len) == IVTS_OK &&
+        len >= 2u && bytes[1] == pid) {
+        (void)obd_pid_decode(bytes, len, sample);
+    }
+    return true;
+}
+
+static void report_sample_or_ecu_state(const ivts_obd_sample_t *sample, ivts_ecu_state_t ecu)
+{
+    if (sample->valid_mask != 0u) {
+        emit_link(true, true, IVTS_ECU_LIVE);
+        ivts_event_t event = { .type = IVTS_EV_OBD_SAMPLE, .ts_ms = platform_uptime_ms() };
+        event.u.obd_sample = *sample;
+        (void)ivts_sink_emit(&g_obd_cfg.sink, &event);
+    } else if (ecu != IVTS_ECU_UNKNOWN) {
+        s_ecu_ready = false;
+        emit_link(true, true, ecu);
+    }
+}
+
 static bool poll_once(void)
 {
     if (!s_ecu_ready) {
@@ -287,30 +404,13 @@ static bool poll_once(void)
         if (!s_ecu_ready) { return true; }
     }
     static const uint8_t pids[] = { 0x0C, 0x0D, 0x05, 0x04, 0x2F };
-    ivts_obd_sample_t s = {0};
+    ivts_obd_sample_t sample = {0};
     ivts_ecu_state_t ecu = IVTS_ECU_UNKNOWN;
     for (size_t i = 0; i < sizeof pids / sizeof pids[0] && s_link && atomic_load(&s_enabled); i++) {
-        char cmd[5];
-        snprintf(cmd, sizeof cmd, "01%02X", (unsigned)pids[i]);
-        if (!elm_cmd(cmd, 3000)) { return false; }
-        ivts_ecu_state_t reply_state = elm_reply_ecu_state(s_rx.buf);
-        if (reply_state == IVTS_ECU_STOPPED || reply_state == IVTS_ECU_NO_DATA) { ecu = reply_state; }
-        uint8_t b[16];
-        size_t n;
-        if (elm_extract_bytes(s_rx.buf, 0x01, b, sizeof b, &n) == IVTS_OK && n >= 2u && b[1] == pids[i]) {
-            (void)obd_pid_decode(b, n, &s);
-        }
+        if (!read_pid(pids[i], &sample, &ecu)) { return false; }
     }
     if (!atomic_load(&s_enabled) || !s_link) { return false; }
-    if (s.valid_mask != 0u) {
-        emit_link(true, true, IVTS_ECU_LIVE);
-        ivts_event_t ev = { .type = IVTS_EV_OBD_SAMPLE, .ts_ms = platform_uptime_ms() };
-        ev.u.obd_sample = s;
-        (void)ivts_sink_emit(&g_obd_cfg.sink, &ev);
-    } else if (ecu != IVTS_ECU_UNKNOWN) {
-        s_ecu_ready = false;                         /* ECU có thể đã tắt khi BLE vẫn kết nối. */
-        emit_link(true, true, ecu);                 /* Xe tắt máy: ELM327 báo NO DATA hoặc STOPPED. */
-    }
+    report_sample_or_ecu_state(&sample, ecu);
     return true;
 }
 
@@ -321,87 +421,124 @@ static bool poll_once(void)
  * Dữ liệu được dựng vào biến cục bộ trước và chỉ sao chép vào biến dùng chung trong mutex, nên
  * thời gian giữ mutex rất ngắn.
  */
+static bool read_readiness(ivts_obd_readiness_t *readiness)
+{
+    uint8_t bytes[64];
+    size_t len;
+    if (!elm_cmd("0101", 3000)) { return false; }
+    if (elm_extract_bytes(s_rx.buf, 0x01, bytes, sizeof bytes, &len) == IVTS_OK) {
+        (void)obd_readiness_decode(bytes, len, readiness);
+    }
+    return true;
+}
+
+static bool read_dtc_mode(size_t index, ivts_dtc_list_t *list)
+{
+    static const char *const modes[] = { "03", "07", "0A" };
+    static const uint8_t mode_ids[] = { 0x03, 0x07, 0x0A };
+    uint8_t bytes[64];
+    size_t len;
+    if (!elm_cmd(modes[index], 5000)) { return false; }
+    if (elm_extract_bytes(s_rx.buf, mode_ids[index], bytes, sizeof bytes, &len) == IVTS_OK) {
+        (void)obd_dtc_decode(bytes, len, list);
+    }
+    return true;
+}
+
+static void store_diag_snapshot(const ivts_obd_readiness_t *readiness, const ivts_dtc_list_t dtc[3])
+{
+    xSemaphoreTake(g_obd_diag_mx, portMAX_DELAY);
+    g_obd_rd = *readiness;
+    memcpy(g_obd_dtc, dtc, sizeof g_obd_dtc);
+    xSemaphoreGive(g_obd_diag_mx);
+    ivts_event_t event = { .type = IVTS_EV_OBD_DIAG_READY, .ts_ms = platform_uptime_ms() };
+    (void)ivts_sink_emit(&g_obd_cfg.sink, &event);
+}
+
 static bool diag_once(void)
 {
-    ivts_obd_readiness_t rd = {0};
-    ivts_dtc_list_t d[3] = {0};
-    static const char *const modes[3] = { "03", "07", "0A" };
-    static const uint8_t mode_id[3] = { 0x03, 0x07, 0x0A };
-    uint8_t b[64];
-    size_t n;
-    if (!elm_cmd("0101", 3000)) { return false; }
-    if (elm_extract_bytes(s_rx.buf, 0x01, b, sizeof b, &n) == IVTS_OK) {
-        (void)obd_readiness_decode(b, n, &rd);
-    }
-    for (int i = 0; i < 3 && s_link && atomic_load(&s_enabled); i++) {
-        if (!elm_cmd(modes[i], 5000)) { return false; }
-        if (elm_extract_bytes(s_rx.buf, mode_id[i], b, sizeof b, &n) == IVTS_OK) {
-            (void)obd_dtc_decode(b, n, &d[i]);
-        }
+    ivts_obd_readiness_t readiness = {0};
+    ivts_dtc_list_t dtc[3] = {0};
+    if (!read_readiness(&readiness)) { return false; }
+    for (size_t i = 0; i < 3u && s_link && atomic_load(&s_enabled); i++) {
+        if (!read_dtc_mode(i, &dtc[i])) { return false; }
     }
     if (!atomic_load(&s_enabled) || !s_link) { return false; }
-    xSemaphoreTake(g_obd_diag_mx, portMAX_DELAY);
-    g_obd_rd = rd;
-    memcpy(g_obd_dtc, d, sizeof d);
-    xSemaphoreGive(g_obd_diag_mx);
-    ivts_event_t ev = { .type = IVTS_EV_OBD_DIAG_READY, .ts_ms = platform_uptime_ms() };
-    (void)ivts_sink_emit(&g_obd_cfg.sink, &ev);
+    store_diag_snapshot(&readiness, dtc);
     return true;
 }
 
 /** Thân task "obd": xem mô tả ở đầu file. */
+static void handle_disabled(uint32_t *attempt)
+{
+    if (atomic_load(&s_ble_active)) {
+        /* Keep active if the hardware state is unknown. */
+        if (obd_ble_deinit() != 0) { vTaskSuspend(NULL); }
+        s_synced = false;
+        (void)xQueueReset(s_q);
+        atomic_store(&s_ble_active, false);
+    }
+    *attempt = 0;
+    if (!atomic_load(&s_enabled)) { (void)wait_ev(WAIT_ANY, 1000, NULL); }
+}
+
+static bool ensure_ble_up(void)
+{
+    if (!atomic_load(&s_ble_active)) {
+        atomic_store(&s_ble_active, true);
+        if (!atomic_load(&s_enabled) || obd_ble_init() != 0) {
+            atomic_store(&s_ble_active, false);
+            (void)wait_ev(WAIT_ANY, 2000, NULL);
+            return false;
+        }
+    }
+    if (!s_synced) {
+        (void)wait_ev(BEV_SYNCED, 1000, NULL);
+        return false;
+    }
+    return true;
+}
+
+static void run_session_loop(uint32_t *attempt)
+{
+    uint64_t next_diag_at_ms = platform_uptime_ms();
+    while (s_link && atomic_load(&s_enabled)) {
+        uint64_t started_at_ms = platform_uptime_ms();
+        if (!poll_once()) { break; }
+        *attempt = 0;
+        if (s_ecu_ready && platform_uptime_ms() >= next_diag_at_ms) {
+            if (!diag_once()) { break; }
+            next_diag_at_ms = platform_uptime_ms() + (uint64_t)g_obd_cfg.diag_period_s * 1000u;
+        }
+        uint64_t elapsed_ms = platform_uptime_ms() - started_at_ms;
+        if (elapsed_ms < g_obd_cfg.poll_ms) {
+            (void)wait_ev(WAIT_NONE, (uint32_t)(g_obd_cfg.poll_ms - elapsed_ms), NULL);
+        }
+    }
+}
+
+static void reconnect_backoff(uint32_t *attempt)
+{
+    if (atomic_load(&s_enabled)) {
+        uint32_t delay_ms = ivts_backoff_ms(&k_bo, (*attempt)++, (uint32_t)platform_uptime_ms());
+        (void)wait_ev(WAIT_NONE, delay_ms, NULL);
+    }
+}
+
 static void obd_task(void *arg)
 {
     (void)arg;
     uint32_t attempt = 0;
     for (;;) {
         if (!atomic_load(&s_enabled)) {
-            if (atomic_load(&s_ble_active)) {
-                /* Giữ cờ active nếu trạng thái phần cứng không còn xác định. */
-                if (obd_ble_deinit() != 0) { vTaskSuspend(NULL); }
-                s_synced = false;
-                (void)xQueueReset(s_q);
-                atomic_store(&s_ble_active, false);
-            }
-            attempt = 0;
-            if (!atomic_load(&s_enabled)) { (void)wait_ev(WAIT_ANY, 1000, NULL); }
+            handle_disabled(&attempt);
             continue;
         }
-        if (!atomic_load(&s_ble_active)) {
-            /* Đặt cờ trước khi kiểm tra lại yêu cầu để app không ngủ giữa lúc bật BLE. */
-            atomic_store(&s_ble_active, true);
-            if (!atomic_load(&s_enabled) || obd_ble_init() != 0) {
-                atomic_store(&s_ble_active, false);
-                (void)wait_ev(WAIT_ANY, 2000, NULL);
-                continue;
-            }
-        }
-        if (!s_synced) {
-            (void)wait_ev(BEV_SYNCED, 1000, NULL);
-            continue;
-        }
-        if (session_setup()) {
-            uint64_t next_diag = platform_uptime_ms();
-            while (s_link && atomic_load(&s_enabled)) {
-                uint64_t t0 = platform_uptime_ms();
-                if (!poll_once()) { break; }             /* Phiên mất đồng bộ; dựng lại trước khi gửi lệnh khác. */
-                attempt = 0;
-                if (s_ecu_ready && platform_uptime_ms() >= next_diag) {
-                    if (!diag_once()) { break; }
-                    next_diag = platform_uptime_ms() + (uint64_t)g_obd_cfg.diag_period_s * 1000u;
-                }
-                uint64_t spent = platform_uptime_ms() - t0;
-                if (spent < g_obd_cfg.poll_ms) {
-                    (void)wait_ev(WAIT_NONE, (uint32_t)(g_obd_cfg.poll_ms - spent), NULL);
-                }
-            }
-        }
+        if (!ensure_ble_up()) { continue; }
+        if (session_setup()) { run_session_loop(&attempt); }
         if (s_link) { obd_ble_disconnect(s_conn); s_link = false; }
         emit_link(false, false, IVTS_ECU_DISCONNECTED);
-        if (atomic_load(&s_enabled)) {
-            uint32_t delay = ivts_backoff_ms(&k_bo, attempt++, (uint32_t)platform_uptime_ms());
-            (void)wait_ev(WAIT_NONE, delay, NULL);        /* STOP cắt ngang cả lúc chờ nối lại. */
-        }
+        reconnect_backoff(&attempt);
     }
 }
 
