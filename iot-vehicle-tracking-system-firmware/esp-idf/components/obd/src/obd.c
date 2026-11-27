@@ -4,7 +4,6 @@
  */
 
 #include "obd_internal.h"
-#include "obd_task.h"
 
 static obd_cfg_t s_obd_cfg;
 

@@ -4,10 +4,8 @@
  */
 
 #include "storage_internal.h"
-#include "storage_task.h"
-#include "nvs/nvs_store_internal.h"
 #include "queue/queue.h"
-#include "sd/sd_io.h"
+#include "sd/sd.h"
 #include "esp_log.h"
 #include "platform/platform.h"
 

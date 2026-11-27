@@ -29,10 +29,9 @@
  * kịp ghi xuống SD). Dữ liệu đã ghi xuống SD tồn tại; xem storage_queue.c về cách khôi phục.
  */
 
-#include "storage_task.h"
 #include "storage_internal.h"
 #include "queue/queue.h"
-#include "sd/sd_io.h"
+#include "sd/sd.h"
 #include <stdatomic.h>
 #include <string.h>
 #include "esp_check.h"

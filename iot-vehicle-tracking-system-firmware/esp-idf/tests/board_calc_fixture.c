@@ -1,8 +1,6 @@
 #include <assert.h>
 #include <string.h>
-#include "drivers/ds3231_calc.h"
-#include "drivers/lis3dsh_calc.h"
-#include "drivers/power_adc_calc.h"
+#include "board_calc.h"
 
 static void test_rtc(void)
 {

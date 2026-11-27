@@ -1,6 +1,6 @@
 #include "board_internal.h"
-#include "ds3231.h"
-#include "ds3231_calc.h"
+#include "drivers/drivers.h"
+#include "board_calc.h"
 #include "esp_log.h"
 
 /* DS3231M: địa chỉ I2C 0x68; thanh ghi 0x00..0x06 là giờ dạng BCD; thanh ghi 0x0F là status,

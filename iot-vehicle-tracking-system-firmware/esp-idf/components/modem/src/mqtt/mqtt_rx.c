@@ -1,11 +1,7 @@
-#include "mqtt_rx.h"
+#include "mqtt/mqtt.h"
 #include "modem_internal.h"
 #include "esp_log.h"
-#include "at/at_dispatch.h"
-#include "at/at_parser.h"
-#include "at/raw_buffer.h"
-#include "link/modem_link.h"
-#include "slots/modem_slots.h"
+#include "at/at.h"
 
 #include <stdio.h>
 #include <string.h>

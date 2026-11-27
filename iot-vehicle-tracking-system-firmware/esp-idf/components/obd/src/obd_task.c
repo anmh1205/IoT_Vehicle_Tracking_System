@@ -1,8 +1,4 @@
-#include "obd_task.h"
 #include "obd_internal.h"
-#include "ble/obd_ble.h"
-#include "poll/obd_diag.h"
-#include "poll/obd_poll.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"

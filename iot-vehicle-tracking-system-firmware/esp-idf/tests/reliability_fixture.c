@@ -5,24 +5,17 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "at/at_engine.h"
 #include "app_internal.h"
 #include "session_tracker.h"
 #include "board/board.h"
-#include "elm/elm327.h"
 #include "ivts_core/model/record.h"
 #include "ivts_core/ota/confirm.h"
-#include "at/at_dispatch.h"
-#include "at/at_parser.h"
-#include "link/modem_link.h"
+#include "at/at.h"
+#include "mqtt/mqtt.h"
 #include "modem_internal.h"
-#include "mqtt/mqtt_rx.h"
-#include "mqtt/mqtt_session.h"
-#include "slots/modem_slots.h"
-#include "elm/obd_pid.h"
+#include "obd_internal.h"
 #include "storage_internal.h"
 #include "queue/queue.h"
-#include "queue/queue_frame.h"
 #include "persist/persist.h"
 
 #define FIRST "sd/q/Q0000000.BIN"

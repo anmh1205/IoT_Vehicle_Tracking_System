@@ -2,11 +2,10 @@ idf_component_register(
     SRCS
         "src/storage.c" "src/storage_task.c"
         # NVS records and SD log
-        "src/nvs/nvs_store.c" "src/sd/sd_mount.c" "src/sd/sd_log.c"
+        "src/nvs_store.c" "src/sd/sd_mount.c" "src/sd/sd_log.c"
         # Offline queue and on-disk format
-        "src/queue/queue.c" "src/queue/queue_open.c" "src/queue/queue_segments.c"
-        "src/queue/queue_frame.c" "src/queue/queue_cursor.c" "src/queue/queue_peek_slot.c"
-        "src/queue/queue_push.c" "src/queue/queue_peek.c" "src/queue/queue_pop.c"
+        "src/queue/queue_store.c"
+        "src/queue/queue_rw.c" "src/queue/queue_peek.c"
     INCLUDE_DIRS "include"
     PRIV_INCLUDE_DIRS "src"
     REQUIRES ivts-core

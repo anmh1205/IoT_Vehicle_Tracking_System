@@ -18,9 +18,8 @@
 
 #include "board_internal.h"
 #include "platform/platform.h"
-#include "lis3dsh.h"
-#include "lis3dsh_calc.h"
-#include "bsp/board_task.h"
+#include "drivers/drivers.h"
+#include "board_calc.h"
 #include <string.h>
 #include "driver/gpio.h"
 #include "esp_check.h"

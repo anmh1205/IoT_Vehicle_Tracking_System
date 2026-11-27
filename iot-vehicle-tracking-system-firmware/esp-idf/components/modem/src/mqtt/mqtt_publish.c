@@ -1,9 +1,6 @@
-#include "mqtt_publish.h"
+#include "mqtt/mqtt.h"
 #include "modem_internal.h"
-#include "at/at_dispatch.h"
-#include "at/at_parser.h"
-#include "link/modem_link.h"
-#include "slots/modem_slots.h"
+#include "at/at.h"
 
 #include <stdio.h>
 #include <string.h>

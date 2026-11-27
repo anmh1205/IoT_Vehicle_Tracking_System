@@ -1,20 +1,12 @@
-#include "modem_task.h"
 #include "modem_internal.h"
-#include "at/at_dispatch.h"
+#include "at/at.h"
 #include "esp_check.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
-#include "gnss/modem_gnss.h"
-#include "http/modem_http.h"
-#include "link/modem_link.h"
-#include "mqtt/mqtt_publish.h"
-#include "mqtt/mqtt_rx.h"
-#include "mqtt/mqtt_session.h"
-#include "slots/modem_slots.h"
-#include "transport/modem_power.h"
-#include "transport/modem_uart.h"
+#include "mqtt/mqtt.h"
+#include "transport/transport.h"
 
 #define REQ_QUEUE_LEN 8u
 #define LOOP_WAIT_MS 50u

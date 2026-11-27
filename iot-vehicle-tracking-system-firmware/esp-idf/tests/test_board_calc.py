@@ -10,9 +10,7 @@ def test_board_calculations(tmp_path):
         executable,
         [
             FIRMWARE / "tests/board_calc_fixture.c",
-            board / "drivers/ds3231_calc.c",
-            board / "drivers/lis3dsh_calc.c",
-            board / "drivers/power_adc_calc.c",
+            board / "board_calc.c",
             CORE / "src/base/civil.c",
         ],
         ["-I", board],

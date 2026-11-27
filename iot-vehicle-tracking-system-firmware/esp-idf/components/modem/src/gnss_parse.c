@@ -1,0 +1,204 @@
+#include "modem_internal.h"
+#include <string.h>
+#include "ivts_core/base/civil.h"
+
+#define MAX_FIELDS 20u   /* Số trường tối đa của một dòng; trường dư bị bỏ. */
+
+/**
+ * @brief Tách chuỗi "a,b,,c" tại chỗ bằng cách thay dấu ',' bằng NUL.
+ * @param[out] f Mảng con trỏ tới từng trường; trường rỗng trỏ tới chuỗi rỗng.
+ * @return Số trường (>= 1).
+ */
+static unsigned split(char *s, char *f[], unsigned max)
+{
+    unsigned n = 0;
+    f[n++] = s;
+    for (; *s != '\0' && n < max; s++) {
+        if (*s == ',') {
+            *s = '\0';
+            f[n++] = s + 1;
+        }
+    }
+    return n;
+}
+
+/**
+ * @brief Đổi số thập phân "123.45" thành số nguyên giá trị × 10^scale.
+ *
+ * Phần thập phân thừa bị cắt chứ không làm tròn. Phần nguyên bị giới hạn ở 1e8 để phép nhân
+ * không tràn uint64_t.
+ *
+ * @retval IVTS_OK              Đã chuyển đổi.
+ * @retval IVTS_ERR_INVALID_ARG Không bắt đầu bằng chữ số, có ký tự lạ hoặc phần nguyên quá lớn.
+ */
+static ivts_err_t parse_fixed(const char *s, unsigned scale, uint64_t *out)
+{
+    uint64_t ip = 0, fp = 0;
+    unsigned fd = 0;
+    if (*s < '0' || *s > '9') { return IVTS_ERR_INVALID_ARG; }
+    while (*s >= '0' && *s <= '9') {
+        ip = ip * 10u + (uint64_t)(*s++ - '0');
+        if (ip > 100000000u) { return IVTS_ERR_INVALID_ARG; }
+    }
+    if (*s == '.') {
+        s++;
+        while (*s >= '0' && *s <= '9') {
+            if (fd < scale) { fp = fp * 10u + (uint64_t)(*s - '0'); fd++; }
+            s++;
+        }
+    }
+    if (*s != '\0') { return IVTS_ERR_INVALID_ARG; }
+    while (fd < scale) { fp *= 10u; fd++; }
+    uint64_t mul = 1;
+    for (unsigned i = 0; i < scale; i++) { mul *= 10u; }
+    *out = ip * mul + fp;
+    return IVTS_OK;
+}
+
+/* Xem gnss_parse.h. */
+ivts_err_t gnss_nmea_to_e7(const char *ddmm, char hemi, int32_t *out)
+{
+    uint64_t v;                                    /* Giá trị ddmm.mmmmmm nhân 1e6. */
+    if (ddmm == NULL || out == NULL || parse_fixed(ddmm, 6, &v) != IVTS_OK) {
+        return IVTS_ERR_INVALID_ARG;
+    }
+    uint64_t deg = v / 100000000u;                 /* Phần độ: hai hoặc ba chữ số đầu. */
+    uint64_t min_u = v % 100000000u;               /* Phần phút nhân 1e6. */
+    if (min_u >= 60000000u) { return IVTS_ERR_INVALID_ARG; }
+    /* Đổi phút sang độ nhân 1e7: (phút × 1e6) × 10 / 60, có làm tròn. */
+    uint64_t e7 = deg * 10000000u + (min_u * 10u + 30u) / 60u;
+    bool lat = (hemi == 'N' || hemi == 'S');
+    if (!lat && hemi != 'E' && hemi != 'W') { return IVTS_ERR_INVALID_ARG; }
+    if (e7 > (lat ? 900000000u : 1800000000u)) { return IVTS_ERR_INVALID_ARG; }
+    *out = (hemi == 'S' || hemi == 'W') ? -(int32_t)e7 : (int32_t)e7;
+    return IVTS_OK;
+}
+
+/** Giá trị của hai chữ số thập phân liên tiếp; caller đã kiểm tra là chữ số. */
+static int two(const char *s) { return (s[0] - '0') * 10 + (s[1] - '0'); }
+
+/** @return true nếu @p n ký tự đầu của @p s đều là chữ số. */
+static bool digits(const char *s, size_t n)
+{
+    for (size_t i = 0; i < n; i++) { if (s[i] < '0' || s[i] > '9') { return false; } }
+    return true;
+}
+
+/* Xem gnss_parse.h. Năm hai chữ số được hiểu là 2000..2099. */
+ivts_err_t gnss_datetime_to_unix_ms(const char *ddmmyy, const char *hhmmss, uint64_t *out)
+{
+    if (ddmmyy == NULL || hhmmss == NULL || out == NULL || strlen(ddmmyy) != 6u ||
+        strlen(hhmmss) < 6u || !digits(ddmmyy, 6) || !digits(hhmmss, 6)) {
+        return IVTS_ERR_INVALID_ARG;
+    }
+    ivts_civil_t c = {
+        .year = (uint16_t)(2000 + two(ddmmyy + 4)), .month = (uint8_t)two(ddmmyy + 2),
+        .day = (uint8_t)two(ddmmyy), .hour = (uint8_t)two(hhmmss), .min = (uint8_t)two(hhmmss + 2),
+        .sec = (uint8_t)two(hhmmss + 4), .ms = 0,
+    };
+    if (hhmmss[6] == '.') {                        /* Phần thập phân của giây: ".s" đến ".sss". */
+        unsigned mul = 100, ms = 0;
+        for (const char *p = hhmmss + 7; *p >= '0' && *p <= '9' && mul > 0u; p++, mul /= 10u) {
+            ms += (unsigned)(*p - '0') * mul;
+        }
+        c.ms = (uint16_t)ms;
+    }
+    return ivts_civil_to_unix_ms(&c, out);
+}
+
+/**
+ * @brief Điền phần chung của hai định dạng, bắt đầu từ trường f[i]:
+ *        lat, N/S, lon, E/W, date, time, alt, speed, course.
+ *
+ * Giờ UTC, tốc độ và hướng là tuỳ chọn: thiếu hoặc sai định dạng thì để nguyên giá trị 0.
+ * Toạ độ bắt buộc; thiếu hoặc sai thì cả dòng bị từ chối.
+ */
+static ivts_err_t fill_common(char *f[], unsigned i, unsigned n, ivts_gnss_t *g)
+{
+    if (i + 9u > n) { return IVTS_ERR_INVALID_ARG; }
+    if (gnss_nmea_to_e7(f[i], f[i + 1][0], &g->lat_e7) != IVTS_OK ||
+        gnss_nmea_to_e7(f[i + 2], f[i + 3][0], &g->lon_e7) != IVTS_OK) {
+        return IVTS_ERR_INVALID_ARG;
+    }
+    if (f[i + 1][0] != 'N' && f[i + 1][0] != 'S') { return IVTS_ERR_INVALID_ARG; }
+    if (f[i + 3][0] != 'E' && f[i + 3][0] != 'W') { return IVTS_ERR_INVALID_ARG; }
+    uint64_t ts = 0;
+    if (gnss_datetime_to_unix_ms(f[i + 4], f[i + 5], &ts) == IVTS_OK) {
+        g->ts_unix_ms = ts;
+    }
+    uint64_t v;
+    if (f[i + 7][0] != '\0' && parse_fixed(f[i + 7], 3, &v) == IVTS_OK) {
+        /* Đổi mili-knot sang cm/s: 1 kn = 51,4444 cm/s, nên cm/s = mili-knot × 514444 / 1e7. */
+        uint64_t cms = (v * 514444u + 5000000u) / 10000000u;
+        g->speed_cm_s = (cms > UINT16_MAX) ? UINT16_MAX : (uint16_t)cms;
+    }
+    if (f[i + 8][0] != '\0' && parse_fixed(f[i + 8], 1, &v) == IVTS_OK && v < 3600u) {
+        g->course_deg_x10 = (uint16_t)v;
+    }
+    g->fix_valid = true;
+    return IVTS_OK;
+}
+
+/**
+ * @brief Kiểm tra tiền tố, sao chép phần sau tiền tố vào @p buf và tách trường.
+ *
+ * Sao chép là bắt buộc vì split() ghi vào chuỗi. @p out được xoá về 0.
+ */
+static ivts_err_t prepare(const char *line, const char *prefix, char *buf, size_t cap,
+                          char *f[], unsigned *n, ivts_gnss_t *out)
+{
+    if (line == NULL || out == NULL) { return IVTS_ERR_INVALID_ARG; }
+    size_t pl = strlen(prefix);
+    if (strncmp(line, prefix, pl) != 0) { return IVTS_ERR_INVALID_ARG; }
+    const char *s = line + pl;
+    while (*s == ' ') { s++; }
+    if (strlen(s) >= cap) { return IVTS_ERR_INVALID_ARG; }
+    strcpy(buf, s);
+    memset(out, 0, sizeof(*out));
+    *n = split(buf, f, MAX_FIELDS);
+    return IVTS_OK;
+}
+
+/* Xem gnss_parse.h. */
+ivts_err_t gnss_parse_cgnssinfo(const char *line, ivts_gnss_t *out)
+{
+    char buf[160];
+    char *f[MAX_FIELDS];
+    unsigned n;
+    ivts_err_t e = prepare(line, "+CGNSSINFO:", buf, sizeof buf, f, &n, out);
+    if (e != IVTS_OK) { return e; }
+    out->src = IVTS_GNSS_SRC_FULL;
+    if (f[0][0] == '\0') { return IVTS_OK; }           /* Chưa có fix. */
+
+    /* Vị trí trường lat được xác định bằng mốc N/S và E/W thay vì chỉ số cố định, vì các bản
+     * firmware SIM7600 khác nhau có thể thêm trường số vệ tinh (ví dụ Galileo) trước lat. */
+    unsigned lat = 0;
+    for (unsigned i = 1; i + 3u < n; i++) {
+        char h1 = f[i + 1][0], h2 = f[i + 3][0];
+        if ((h1 == 'N' || h1 == 'S') && f[i + 1][1] == '\0' && (h2 == 'E' || h2 == 'W') && f[i + 3][1] == '\0') {
+            lat = i;
+            break;
+        }
+    }
+    if (lat < 2u) { return IVTS_ERR_INVALID_ARG; }
+    unsigned sats = 0;
+    for (unsigned i = 1; i < lat; i++) {               /* f[0] là mode; các trường trước lat là số vệ tinh. */
+        uint64_t v;
+        if (f[i][0] != '\0' && parse_fixed(f[i], 0, &v) == IVTS_OK) { sats += (unsigned)v; }
+    }
+    out->sats = (uint8_t)(sats > 255u ? 255u : sats);
+    return fill_common(f, lat, n, out);
+}
+
+/* Xem gnss_parse.h. */
+ivts_err_t gnss_parse_cgpsinfo(const char *line, ivts_gnss_t *out)
+{
+    char buf[160];
+    char *f[MAX_FIELDS];
+    unsigned n;
+    ivts_err_t e = prepare(line, "+CGPSINFO:", buf, sizeof buf, f, &n, out);
+    if (e != IVTS_OK) { return e; }
+    out->src = IVTS_GNSS_SRC_APPROX;                   /* Định dạng này không có số vệ tinh: sats = 0. */
+    if (f[0][0] == '\0') { return IVTS_OK; }
+    return fill_common(f, 0, n, out);
+}

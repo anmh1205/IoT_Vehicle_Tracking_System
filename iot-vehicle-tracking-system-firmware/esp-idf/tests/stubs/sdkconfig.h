@@ -1,4 +1,5 @@
 #pragma once
+#define CONFIG_IVTS_MODEM_CA_CERT "host-fixture-ca.pem"
 
 #define CONFIG_IVTS_DEFAULT_DEVICE_ID "fixture"
 #define CONFIG_IVTS_DEFAULT_AUTH_TOKEN "fixture-token"
