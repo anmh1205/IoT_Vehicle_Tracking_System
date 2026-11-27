@@ -1,19 +1,18 @@
 /**
  * @file time.h
- * @brief Kiểu thời gian tương đối (uptime) dùng trong core.
+ * @brief Portable monotonic millisecond types and deadline helpers.
  */
 #pragma once
 #include <stdint.h>
 
 /**
- * Thời gian tính từ lúc boot, đơn vị ms.
- * Không được lưu vào NVS, RTC hay record: giá trị chỉ có nghĩa trong một lần boot.
+ * Monotonic milliseconds since boot. The value is meaningful within one boot.
  */
 typedef uint64_t ivts_ms_t;
 
 /**
- * @brief Số ms đã trôi qua từ @p since đến @p now.
- * @return now - since; 0 nếu @p since nằm sau @p now (không underflow).
+ * @brief Return elapsed milliseconds from @p since to @p now.
+ * @return The difference, or zero when since is later than now.
  */
 static inline ivts_ms_t ivts_elapsed(ivts_ms_t now, ivts_ms_t since)
 {

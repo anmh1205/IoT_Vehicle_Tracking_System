@@ -1,3 +1,10 @@
+/**
+ * @file obd_internal.h
+ * @brief Private OBD BLE events, ELM session, task and poll interfaces.
+ *
+ * Callbacks transfer tagged, by-value messages. The OBD task owns active
+ * connection state, while the diagnostic snapshot is mutex-protected.
+ */
 #pragma once
 #include "obd/obd.h"
 #include <stdbool.h>
@@ -16,35 +23,35 @@ void obd_emit(const ivts_event_t *event);
 #define OBD_SERVICE_UUID 0x18F0u
 
 /* The OBD task initiates NimBLE operations; callbacks post events. */
-int  obd_ble_init(void);                                                   /**< Khởi tạo NimBLE và đăng ký callback. */
-int  obd_ble_deinit(void);                                                 /**< Dừng host và tắt controller NimBLE. */
-int  obd_ble_scan(void);                                                   /**< Bắt đầu quét; mỗi gói thành OBD_BLE_EV_ADV. */
-void obd_ble_scan_stop(void);                                              /**< Dừng quét. */
-int  obd_ble_connect(const uint8_t addr[7]);                               /**< Kết nối tới địa chỉ (loại + 6 byte). */
-int  obd_ble_disc_svc(uint16_t conn);                                      /**< Tìm service. */
-int  obd_ble_disc_chrs(uint16_t conn, uint16_t start, uint16_t end);       /**< Tìm characteristic trong dải handle. */
-int  obd_ble_disc_dscs(uint16_t conn, uint16_t value_handle, uint16_t end); /**< Tìm descriptor sau value handle. */
-int  obd_ble_enable_notify(uint16_t conn, uint16_t cccd);                  /**< Bật notification qua CCCD. */
-int  obd_ble_write(uint16_t conn, uint16_t handle, const char *s);         /**< Ghi chuỗi tới characteristic TX. */
-void obd_ble_disconnect(uint16_t conn);                                    /**< Ngắt kết nối. */
-/** @return true nếu @p addr khớp @p want (chuỗi "AA:BB:..."), hoặc @p want rỗng. */
+int  obd_ble_init(void);                                                   /**< Start NimBLE and register its callbacks. */
+int  obd_ble_deinit(void);                                                 /**< Stop and deinitialize the NimBLE host and controller. */
+int  obd_ble_scan(void);                                                   /**< Start scanning. Advertising reports arrive as OBD_BLE_EV_ADV. */
+void obd_ble_scan_stop(void);                                              /**< Stop scanning for an adapter. */
+int  obd_ble_connect(const uint8_t addr[7]);                               /**< Connect to the given address type and six address bytes. */
+int  obd_ble_disc_svc(uint16_t conn);                                      /**< Discover the OBD service. */
+int  obd_ble_disc_chrs(uint16_t conn, uint16_t start, uint16_t end);       /**< Discover characteristics in the specified handle range. */
+int  obd_ble_disc_dscs(uint16_t conn, uint16_t value_handle, uint16_t end); /**< Discover descriptors after the value handle. */
+int  obd_ble_enable_notify(uint16_t conn, uint16_t cccd);                  /**< Enable notifications by writing the CCCD. */
+int  obd_ble_write(uint16_t conn, uint16_t handle, const char *s);         /**< Write bytes to the adapter's TX characteristic. */
+void obd_ble_disconnect(uint16_t conn);                                    /**< Terminate the BLE connection. */
+/** @return true if @p addr matches @p want, or the target address is empty. */
 bool obd_ble_addr_matches(const uint8_t addr[7], const char *want);
 
 uint8_t obd_ble_own_addr_type(void);
 
 typedef enum {
-    OBD_BLE_EV_SYNCED = 0,     /**< Host NimBLE đã đồng bộ với controller. */
-    OBD_BLE_EV_ADV,            /**< Nhận một gói quảng bá khi quét. */
-    OBD_BLE_EV_SCAN_DONE,      /**< Quét kết thúc. */
-    OBD_BLE_EV_CONNECTED,      /**< Kết quả kết nối (status, conn). */
-    OBD_BLE_EV_DISCONNECTED,   /**< Mất kết nối. */
-    OBD_BLE_EV_SVC,            /**< Một service tìm thấy (h_start, h_end). */
-    OBD_BLE_EV_CHR,            /**< Một characteristic tìm thấy (uuid16, value_handle). */
-    OBD_BLE_EV_DSC,            /**< Một descriptor tìm thấy (uuid16, h_start = handle). */
-    OBD_BLE_EV_DISC_DONE,      /**< Kết thúc một lượt discovery. */
-    OBD_BLE_EV_WRITE_DONE,     /**< Kết quả một lệnh ghi GATT. */
-    OBD_BLE_EV_NOTIFY,         /**< Một mảnh phản hồi ELM327 qua notification. */
-    OBD_BLE_EV_CTRL_CHANGED    /**< Đánh thức task sau obd_start() hoặc obd_stop(). */
+    OBD_BLE_EV_SYNCED = 0,     /**< NimBLE host synchronized with the controller. */
+    OBD_BLE_EV_ADV,            /**< Advertising report received during an active scan. */
+    OBD_BLE_EV_SCAN_DONE,      /**< Adapter scan completed. */
+    OBD_BLE_EV_CONNECTED,      /**< Connection result carrying status and connection handle. */
+    OBD_BLE_EV_DISCONNECTED,   /**< BLE disconnected. */
+    OBD_BLE_EV_SVC,            /**< GATT service handle range found during discovery. */
+    OBD_BLE_EV_CHR,            /**< GATT characteristic UUID and value handle. */
+    OBD_BLE_EV_DSC,            /**< GATT descriptor UUID and handle. */
+    OBD_BLE_EV_DISC_DONE,      /**< A GATT discovery operation finished. */
+    OBD_BLE_EV_WRITE_DONE,     /**< GATT write completion. */
+    OBD_BLE_EV_NOTIFY,         /**< ELM327 reply fragment received through a GATT notification. */
+    OBD_BLE_EV_CTRL_CHANGED    /**< Wake the OBD worker after obd_start() or obd_stop(). */
 } obd_ble_event_type_t;
 
 /* NimBLE callbacks copy one tagged event to the OBD task's queue. */
@@ -62,100 +69,99 @@ typedef struct {
 } obd_ble_event_t;
 
 /**
- * @file elm327.h
- * @brief Giao thức văn bản của adapter ELM327: ghép phản hồi, kiểm tra hợp lệ, tách byte dữ liệu.
+ * @brief Frame and decode ELM327 text replies.
  *
- * Module thuần C, không có trạng thái toàn cục; kiểm thử được trên host. Một phản hồi kết thúc
- * bằng prompt '>'.
+ * These routines operate on caller-owned buffers and can run without BLE. The
+ * prompt '>' marks the end of a complete response.
  */
 
-#define ELM_REPLY_MAX 512u   /**< Dung lượng bộ đệm một phản hồi (gồm NUL). */
+#define ELM_REPLY_MAX 512u   /**< ELM response capacity, including the trailing NUL. */
 
-/** Một bước của chuỗi khởi tạo adapter. */
+/** One entry in the adapter initialization sequence. */
 typedef struct {
-    const char *cmd;          /**< Lệnh AT gửi (không gồm "\r"). */
-    uint32_t    timeout_ms;   /**< Thời gian chờ phản hồi; ATZ dài nhất vì adapter khởi động lại. */
-    bool        is_reset;     /**< Lệnh reset: phản hồi có chuỗi banner thay vì chỉ "OK". */
+    const char *cmd;          /**< AT command text without its trailing carriage return. */
+    uint32_t    timeout_ms;   /**< Response deadline in milliseconds. ATZ allows time for a restart. */
+    bool        is_reset;     /**< Reset semantics allow a banner response instead of an OK line. */
 } elm_init_step_t;
 
-extern const elm_init_step_t ELM_INIT_SEQ[];   /**< Chuỗi khởi tạo theo thứ tự thực hiện. */
-extern const size_t ELM_INIT_SEQ_LEN;          /**< Số bước của ELM_INIT_SEQ. */
+extern const elm_init_step_t ELM_INIT_SEQ[];   /**< ELM327 initialization commands in execution order. */
+extern const size_t ELM_INIT_SEQ_LEN;          /**< Number of entries in ELM_INIT_SEQ. */
 
-/** Bộ ghép phản hồi từ các mảnh notification BLE. */
+/** Incremental ELM response assembled from BLE notification fragments. */
 typedef struct {
-    char   buf[ELM_REPLY_MAX];   /**< Nội dung đã nhận, kết thúc bằng NUL. */
-    size_t len;                  /**< Số byte trong buf. */
-    bool   complete;             /**< Đã thấy prompt '>': phản hồi trọn vẹn. */
-    bool   overflow;             /**< Phản hồi dài hơn bộ đệm; phần thừa bị bỏ. */
+    char   buf[ELM_REPLY_MAX];   /**< Accumulated reply, maintained as a NUL-terminated string. */
+    size_t len;                  /**< Number of reply bytes currently in buf. */
+    bool   complete;             /**< The '>' prompt indicates a complete reply. */
+    bool   overflow;             /**< The buffer filled before the reply ended. Excess bytes were discarded. */
 } elm_rx_t;
 
-/** Xoá bộ ghép để nhận phản hồi mới. */
+/** Reset the assembly state for a new response. */
 void elm_rx_reset(elm_rx_t *r);
 
 /**
- * @brief Nối một mảnh notification vào bộ ghép.
- * @return true khi phản hồi đã trọn vẹn (đã thấy '>').
+ * @brief Append a notification fragment to the current response.
+ * @return true when the terminating '>' prompt has arrived.
  */
 bool elm_rx_feed(elm_rx_t *r, const uint8_t *data, size_t n);
 
 /**
- * @brief Kiểm tra phản hồi hợp lệ: có prompt và không chứa lỗi đã biết.
- * @param is_reset         Phản hồi của lệnh reset (ATZ); không yêu cầu "OK".
- * @param is_at_command    Phản hồi của lệnh AT (không phải PID); yêu cầu có dòng "OK".
+ * @brief Validate a complete ELM327 reply and its response type.
+ * @param is_reset An ATZ reply may contain a banner instead of OK.
+ * @param is_at_command For ordinary AT commands, require a line containing OK.
  */
 bool elm_reply_valid(const char *reply, bool is_reset, bool is_at_command);
 
-/** Phân loại trạng thái ECU từ phản hồi: có dữ liệu, đã dừng, không có dữ liệu hoặc không rõ. */
+/** Classify ECU health from data and ELM status text. */
 ivts_ecu_state_t elm_reply_ecu_state(const char *reply);
 
 /**
- * @brief Lấy các byte dữ liệu của phản hồi cho service @p mode (ví dụ 0x01).
+ * @brief Extract payload bytes for the requested OBD service.
  *
- * Bỏ echo, "SEARCHING...", dòng đếm byte ISO-TP (ví dụ "00A"), tiền tố khung ("0:") và khoảng
- * trắng. Các byte ghi ra bắt đầu từ byte mode + 0x40. Khi nhiều ECU cùng trả lời, chỉ dùng dòng
- * khớp đầu tiên.
+ * Ignore echo, SEARCHING text, ISO-TP length-only lines, frame indices, and
+ * whitespace. The first matching response supplies the payload.
  *
- * @param[out] out Bộ đệm nhận byte; @p cap là dung lượng.
- * @param[out] n   Số byte ghi vào out.
- * @retval IVTS_OK         Đã tách được dữ liệu.
- * @retval IVTS_ERR_NOT_FOUND Không có dòng nào khớp.
+ * @param mode Requested service, for example 0x01.
+ * @param[out] out Destination byte array.
+ * @param cap Capacity of out in bytes.
+ * @param[out] n Number of bytes written.
+ * @retval IVTS_OK A matching payload was decoded.
+ * @retval IVTS_ERR_NOT_FOUND No reply matched the service.
  */
 ivts_err_t elm_extract_bytes(const char *reply, uint8_t mode, uint8_t *out, size_t cap, size_t *n);
 
 /**
- * @file obd_pid.h
- * @brief Giải mã OBD-II service 01, 03, 07 và 0A từ dãy byte đã bỏ header.
+ * @brief Decode OBD-II service 01, 03, 07 and 0A payload bytes.
  *
- * Module thuần C, không trạng thái; kiểm thử được trên host. Công thức theo SAE J1979
- * (tham chiếu: en.wikipedia.org/wiki/OBD-II_PIDs).
+ * The parsers use caller-owned buffers with no BLE state. PID conversions
+ * follow SAE J1979.
  */
 
 /**
- * @brief Giải mã một PID service 01.
- * @param b Dữ liệu dạng [0x41, pid, A, B, ...].
- * @param[in,out] s Mẫu cần điền; giá trị giải mã được ghi vào đúng trường và bật bit tương ứng
- *                  trong valid_mask.
- * @retval IVTS_OK            Đã giải mã.
- * @retval IVTS_ERR_NOT_FOUND PID không được hỗ trợ.
- * @retval IVTS_ERR_INVALID_ARG Dữ liệu NULL hoặc không đủ byte.
+ * @brief Decode one supported service 01 PID.
+ * @param b Reply bytes beginning with [0x41, pid].
+ * @param[in,out] s Sample to update and mark valid for the decoded field.
+ * @retval IVTS_OK The PID was decoded.
+ * @retval IVTS_ERR_NOT_FOUND The PID is unsupported.
+ * @retval IVTS_ERR_INVALID_ARG Missing input or too few bytes.
  */
 ivts_err_t obd_pid_decode(const uint8_t *b, size_t n, ivts_obd_sample_t *s);
 
 /**
- * @brief Giải mã trạng thái sẵn sàng của các monitor (PID 0x01).
- * @param b Dữ liệu dạng [0x41, 0x01, A, B, C, D].
+ * @brief Decode readiness from service 01 PID 0x01.
+ * @param b Reply bytes [0x41, 0x01, A, B, C, D].
  */
 ivts_err_t obd_readiness_decode(const uint8_t *b, size_t n, ivts_obd_readiness_t *r);
 
 /**
- * @brief Giải mã danh sách DTC của service 03 (stored), 07 (pending) hoặc 0A (permanent).
- * @param b Dữ liệu dạng [0x43|0x47|0x4A, (số lượng trên CAN), hi, lo, hi, lo, ...].
+ * @brief Decode stored, pending or permanent trouble codes from service 03, 07 or 0A.
+ * @param b Reply prefix 0x43, 0x47 or 0x4A, then an optional CAN count and two
+ * bytes per trouble code.
  */
 ivts_err_t obd_dtc_decode(const uint8_t *b, size_t n, ivts_dtc_list_t *d);
 
 /**
- * @brief Định dạng một DTC hai byte thành chuỗi, ví dụ (0x01, 0x33) thành "P0133".
- * @param[out] out Bộ đệm IVTS_DTC_CODE_SIZE byte, kết thúc bằng NUL.
+ * @brief Format a two-byte code, such as 0x01 0x33 as "P0133".
+ * @param[out] out IVTS_DTC_CODE_SIZE-byte buffer including the trailing NUL.
  */
 void obd_dtc_format(uint8_t hi, uint8_t lo, char out[IVTS_DTC_CODE_SIZE]);
 

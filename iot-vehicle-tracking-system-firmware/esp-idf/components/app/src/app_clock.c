@@ -1,3 +1,10 @@
+/**
+ * @file app_clock.c
+ * @brief Clock access for application policy and cloud timestamps.
+ *
+ * Deadlines use monotonic uptime. Cloud timestamps require a trusted board RTC
+ * reading and can block on I2C.
+ */
 #include "app_internal.h"
 #include <stddef.h>
 #include "board/board.h"

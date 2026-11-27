@@ -1,3 +1,10 @@
+/**
+ * @file cmd_inbox.c
+ * @brief Command envelope parsing, handler dispatch and reliable command ACK delivery.
+ *
+ * The app task owns parsing buffers, the in-flight ACK and retry state.
+ * Checkpoint successful receipts before handing an ACK to the publisher.
+ */
 #include "command/command.h"
 #include <string.h>
 #include "app_internal.h"

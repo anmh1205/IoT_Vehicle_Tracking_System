@@ -1,3 +1,10 @@
+/**
+ * @file messages.c
+ * @brief Encoding and submission of application messages to the modem.
+ *
+ * New messages take IDs from the current app context. Replayed records
+ * preserve their original boot ID and sequence across retries.
+ */
 #include "publish/publish.h"
 #include "app_internal.h"
 #include "device/device.h"
@@ -51,7 +58,7 @@ void app_messages_publish_live_record(void)
         error == IVTS_OK && app_publisher_send(APP_MSG_RAW_LIVE, MODEM_TOPIC_RAWDATA, s_buf, len)) {
         s_live_record = r;
     } else {
-        to_queue(&r);                     /* Bản ghi giữ boot_id và seq đã cấp khi replay. */
+        to_queue(&r);                     /* Replay preserves the boot ID and sequence allocated at capture. */
     }
 }
 

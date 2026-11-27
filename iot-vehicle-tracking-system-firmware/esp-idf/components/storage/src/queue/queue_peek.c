@@ -1,3 +1,10 @@
+/**
+ * @file queue_peek.c
+ * @brief Storage-task peeking and cross-task access to the cached record.
+ *
+ * File reads occur on the storage task. The copy mutex protects the slot, its
+ * token and the pending count separately from file I/O.
+ */
 #include "queue/queue.h"
 #include "platform/platform.h"
 #include <string.h>
@@ -6,14 +13,14 @@
 
 static platform_mutex_t s_slot_mutex;
 static struct {
-    bool     full;                          /* Ô đang giữ một bản ghi chưa pop. */
-    uint8_t  data[IVTS_RECORD_MAX_SIZE];    /* Bản ghi đã mã hoá. */
+    bool     full;                          /* Slot contains a peeked record that has not been popped. */
+    uint8_t  data[IVTS_RECORD_MAX_SIZE];    /* Serialized bytes of the peeked record. */
     size_t   len;
-    uint32_t token;                         /* Định danh để pop. */
-    uint32_t next_seg, next_off;            /* Vị trí cursor sau khi pop bản ghi này. */
+    uint32_t token;                         /* Token that authorizes removal of this specific record. */
+    uint32_t next_seg, next_off;            /* Cursor position to commit after a matching pop. */
 } s_slot;
-static uint32_t s_pending;     /* Số bản ghi còn trong queue, kể cả bản ghi trong ô peek. */
-static uint32_t s_token;       /* Bộ đếm cấp token. */
+static uint32_t s_pending;     /* Pending record count including the cached peek. */
+static uint32_t s_token;       /* Sequence used to assign a new nonzero token. */
 
 void storage_queue_slot_init(void)
 {
@@ -175,7 +182,7 @@ ivts_err_t storage_queue_peek_record(storage_queue_state_t *queue)
             ESP_LOGW(STORAGE_TAG, "queue: khung hỏng %s@%lu, bỏ phần còn lại của đoạn", p, (unsigned long)queue->read_offset);
         }
         if (queue->read_segment == queue->tail) {
-            storage_queue_slot_set_count(0);                            /* Bộ đếm lệch với nội dung file: lấy file làm chuẩn. */
+            storage_queue_slot_set_count(0);                            /* Reconcile the pending count with the segment contents on disk. */
             return IVTS_OK;
         }
         ivts_err_t error = advance_past_segment(queue, p, exists);

@@ -1,31 +1,19 @@
 /**
  * @file board_task.c
- * @brief Lấy mẫu ADC và xử lý ngắt IMU trong task board.
+ * @brief ADC sampling and latched IMU interrupt handling on the board task.
  *
- * ## Mô hình thực thi
+ * The task uses the priority and stack supplied by app wiring. It waits on
+ * ulTaskNotifyTake() for up to power_sample_ms. A notification services the
+ * latched IMU interrupt and emits a motion event. A timeout produces an ADC
+ * sample if the sampling deadline is due.
  *
- * Task "board" (priority và stack lấy từ board_cfg_t; app_wiring.c đặt 2 và 3072 B):
- * - Sở hữu việc lấy mẫu ADC định kỳ và xử lý ngắt IMU. Không task nào khác đọc IMU.
- * - Chờ bằng ulTaskNotifyTake() với timeout = power_sample_ms:
- *   - có notify: đọc OUTS1 qua I2C (nhả ngắt đã chốt), phát IVTS_EV_MOTION_IRQ;
- *   - hết timeout: đọc ADC, phát IVTS_EV_POWER_SAMPLE.
- * - Priority thấp nhất trong hệ thống: mẫu ADC trễ vài trăm ms không ảnh hưởng chức năng,
- *   còn modem và app cần được phục vụ trước.
+ * The GPIO ISR only sends a task notification. The sleep adapter can also
+ * notify the board task in task context after an IMU wake. Notifications can
+ * coalesce, so the worker reads OUTS1 to release the latched interrupt.
  *
- * ## Nguồn notify
- *
- * - imu_isr() gọi board_task_notify_imu_from_isr() (ngữ cảnh ISR).
- * - board_sleep() gọi board_task_notify_imu() (ngữ cảnh task) sau khi thức do IMU.
- *
- * ISR không gọi sink và không truy cập I2C; chỉ báo cho task. Task notification không đếm
- * theo từng lần: nhiều ngắt liên tiếp gộp thành một lần xử lý, và không có sự kiện nào bị mất
- * vì mỗi lần xử lý đều đọc OUTS1 để nhả ngắt.
- *
- * ## Khi reset hoặc mất nguồn
- *
- * Task không có state bền vững. Cấu hình IMU được ghi lại ở mỗi lần board_init().
+ * The task keeps no durable state. Board initialization reapplies the IMU
+ * configuration after reset.
  */
-
 #include "board_internal.h"
 #include "drivers/drivers.h"
 #include "esp_check.h"
@@ -33,8 +21,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-static TaskHandle_t s_task;             /* Task "board"; NULL khi chưa tạo. */
-static board_cfg_t s_cfg;   /* Bản sao cfg; chỉ ghi trong board_task_configure(), trước khi task tồn tại. */
+static TaskHandle_t s_task;             /* Board task handle. NULL until creation. */
+static board_cfg_t s_cfg;   /* Configuration copied before starting the worker. */
 
 void IRAM_ATTR board_task_notify_imu_from_isr(void)
 {
@@ -54,7 +42,7 @@ void board_task_notify_imu(void)
 
 static void emit(const ivts_event_t *ev)
 {
-    (void)ivts_sink_emit(&s_cfg.sink, ev);   /* Queue app đầy: app đã đếm event bị bỏ, board không gửi lại. */
+    (void)ivts_sink_emit(&s_cfg.sink, ev);   /* A full app queue counts the dropped event. The board does not retry it. */
 }
 
 static void handle_imu_irq(uint64_t now_ms)
@@ -99,7 +87,7 @@ void board_task_configure(const board_cfg_t *cfg)
     s_cfg = *cfg;
 }
 
-/* Tạo task sau khi ADC và IMU đã khởi tạo: task bắt đầu đọc ADC ngay ở lần timeout đầu tiên. */
+/* Start the worker after ADC and IMU initialization. */
 esp_err_t board_task_start(void)
 {
     BaseType_t ok = xTaskCreate(board_task, "board", s_cfg.task_stack, NULL, s_cfg.task_prio, &s_task);

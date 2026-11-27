@@ -1,3 +1,10 @@
+/**
+ * @file fsm_actions.c
+ * @brief Application effects requested by the platform-independent FSM.
+ *
+ * The app task applies actions to the board, modem, OBD and publishing
+ * services in the established order.
+ */
 #include "runtime/runtime.h"
 #include "command/command.h"
 #include "device/device.h"

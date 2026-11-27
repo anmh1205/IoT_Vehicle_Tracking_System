@@ -1,11 +1,11 @@
 # OTA
 
-The app starts one OTA task through `include/ota/ota.h`. The task reads an HTTPS byte source supplied by app wiring, hashes and writes the image, and reports progress to the app. The job verifies SHA-256 and the installed image version before persisting the confirmation context and selecting the new partition.
+The app starts one OTA task through `include/ota/ota.h`. App wiring supplies the HTTPS byte source and preparation callback. The task downloads, hashes and writes the image while reporting progress to the app.
 
-| File | Responsibility |
+| Source | Responsibility |
 | --- | --- |
-| `src/ota.c` | Configuration, progress delivery, running image and rollback APIs |
-| `src/ota_task.c` | Single active task and command lifetime |
+| `src/ota_task.c` | Task creation and command lifetime, configuration, progress and running image or rollback APIs |
 | `src/ota_job.c` | Download retries, image checks, cleanup and boot partition selection |
+| `src/ota_internal.h` | Private job, configuration and event interface |
 
-Download and flash behavior live in `ota_job.c`. App-side confirmation and final report delivery live in app `fw_update/`.
+The job verifies SHA-256 and the finalized image version, then persists the confirmation context before selecting the new partition. The app confirms the image and delivers the final report in app `src/fw_update.c`.

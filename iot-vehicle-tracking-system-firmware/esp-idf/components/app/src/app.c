@@ -1,3 +1,10 @@
+/**
+ * @file app.c
+ * @brief Firmware composition entry point and recovery from startup failure.
+ *
+ * Starts the runtime using the central task specification. A failed startup
+ * waits for the existing restart delay before resetting the controller.
+ */
 #include "app/app.h"
 #include "app_internal.h"
 #include "boot/boot.h"

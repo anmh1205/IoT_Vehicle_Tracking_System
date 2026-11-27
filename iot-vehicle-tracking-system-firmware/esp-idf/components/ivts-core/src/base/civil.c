@@ -1,8 +1,12 @@
+/**
+ * @file civil.c
+ * @brief Gregorian calendar conversion for UTC times and Unix milliseconds.
+ */
 #include "ivts_core/base/civil.h"
 #include <stdbool.h>
 #include <stddef.h>
 
-/* Thuật toán days_from_civil / civil_from_days (Howard Hinnant, public domain). */
+/* The algorithm days_from_civil / civil_from_days (Howard Hinnant, public domain). */
 static int64_t days_from_civil(int64_t y, unsigned m, unsigned d)
 {
     y -= (m <= 2u) ? 1 : 0;

@@ -1,3 +1,11 @@
+/**
+ * @file app_wiring.c
+ * @brief Composition of board pins, component task settings and callback ports.
+ *
+ * This is the only application source that reads the PCB pin map. It connects
+ * the modem HTTPS implementation to the OTA byte source and registers publish
+ * ACK callbacks.
+ */
 #include "boot/boot.h"
 #include "boot/task_table.h"
 #include <string.h>
@@ -17,8 +25,10 @@
 #include "sdkconfig.h"
 #include "storage/storage.h"
 
-/* Cổng nguồn byte cho OTA: chuyển modem_http_* thành ota_source_t, để component ota không
- * phụ thuộc trực tiếp vào modem. */
+/*
+ * Bind modem HTTPS to the OTA byte-source callbacks so the OTA worker can read
+ * through its source interface.
+ */
 static ivts_err_t src_open(void *ctx, const char *url, uint32_t *size, int *st) { (void)ctx; return modem_http_open(url, size, st); }
 static ivts_err_t src_read(void *ctx, uint32_t off, uint8_t *b, size_t n, size_t *got) { (void)ctx; return modem_http_read(off, b, n, got); }
 static void src_close(void *ctx) { (void)ctx; modem_http_close(); }
@@ -82,8 +92,10 @@ bool app_wiring_init_modem(ivts_sink_t sink, ivts_config_t *config, bool provisi
         (void)ivts_str_copy(modem_cfg.device_id, sizeof modem_cfg.device_id, config->device_id);
         (void)ivts_str_copy(modem_cfg.client_id, sizeof modem_cfg.client_id, config->device_id);
     } else {
-        /* Chưa provision thì không kết nối cloud (modem_set_link không được gọi), nhưng dữ liệu
-         * vẫn được ghi vào offline queue. */
+        /*
+         * An unprovisioned device skips modem_set_link() and continues
+         * recording to the offline queue.
+         */
         (void)ivts_str_copy(modem_cfg.client_id, sizeof modem_cfg.client_id, "unprovisioned");
         config->device_id[sizeof config->device_id - 1u] = '\0';
         config->auth_token[sizeof config->auth_token - 1u] = '\0';

@@ -1,3 +1,10 @@
+/**
+ * @file app_internal.h
+ * @brief Application-wide time, logging and message-sequence declarations.
+ *
+ * Timeouts and scheduling intervals are milliseconds. The app task owns the
+ * message sequence after boot, and RTC context carries it through deep sleep.
+ */
 #pragma once
 #include <stdbool.h>
 #include <stdint.h>

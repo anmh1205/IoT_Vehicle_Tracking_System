@@ -1,12 +1,13 @@
 # OBD
 
-The OBD task starts BLE, runs discovery and polls ELM327. NimBLE host callbacks copy tagged events to the OBD queue without blocking. The app reads the diagnostic snapshot under its copy mutex and receives samples and link state by event.
+The OBD task starts BLE, runs discovery and polls ELM327. NimBLE callbacks queue tagged events without blocking. The app reads the diagnostic snapshot under a copy mutex and receives samples and link state through events.
 
-| Folder | Responsibility |
+| Source | Responsibility |
 | --- | --- |
-| `ble` | NimBLE lifecycle, GAP, GATT and callback events |
-| `session` | Adapter scan, connection, discovery and ELM setup |
-| `poll` | Live PIDs, readiness and diagnostic snapshots |
-| `elm` | ELM reply parsing, init commands and PID decoding |
+| `obd_task.c` | Public startup and OBD task lifecycle |
+| `obd_ble.c` | NimBLE host, GAP and GATT callbacks |
+| `obd_session.c` | Scan, connect, discover GATT characteristics and configure ELM327 |
+| `obd_poll.c` | Live PIDs, readiness and trouble-code snapshots |
+| `obd_elm327.c`, `obd_pid.c` | ELM reply framing and OBD-II decoding |
 
-Public APIs are in `include/obd/obd.h`. Add a PID decoder in `elm/obd_pid.c`, update the poll list in `poll/obd_poll.c` and update the sample model in ivts-core. Add initialization commands in the `ELM_INIT_SEQ` table in `elm/elm327.c`.
+Public APIs are in `include/obd/obd.h`. Add a PID decoder to `obd_pid.c`, add it to the poll list in `obd_poll.c` and update the sample model in ivts-core. Add ELM initialization commands in the `ELM_INIT_SEQ` table in `obd_elm327.c`.

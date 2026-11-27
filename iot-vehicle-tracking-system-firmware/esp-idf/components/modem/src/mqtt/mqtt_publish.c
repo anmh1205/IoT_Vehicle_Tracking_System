@@ -1,3 +1,10 @@
+/**
+ * @file mqtt_publish.c
+ * @brief QoS 1 message submission and acknowledgement routing.
+ *
+ * The modem task owns the borrowed transmit slot until AT completion. Publish
+ * ACK events carry the local transaction ID for app correlation.
+ */
 #include "mqtt/mqtt.h"
 #include "modem_internal.h"
 #include "at/at.h"
@@ -5,7 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define PUB_TIMEOUT_S 60   /* Thời gian module chờ PUBACK, giây (manual cho phép 60..180). */
+#define PUB_TIMEOUT_S 60   /* SIM7600 PUBACK timeout in seconds. The modem accepts 60 through 180 seconds. */
 
 static bool input(const char *what, const char *data, size_t len)
 {
@@ -37,30 +44,30 @@ static bool send_publish(int16_t *err)
     if (ok) {
         *err = 0;
     } else if (r == AT_RES_TIMEOUT) {
-        *err = -1;                                   /* Không có kết quả trong PUB_TIMEOUT_S + 5 giây. */
+        *err = -1;                                   /* No publish result before PUB_TIMEOUT_S plus five seconds. */
     } else if (at_field_int(modem_at_response(), 1, &e)) {
-        *err = (int16_t)e;                           /* Mã <err> theo bảng lỗi MQTT của module. */
+        *err = (int16_t)e;                           /* Error field from the SIM7600 MQTT result. */
     }
     return ok;
 }
 
 static void on_pub_result(int16_t err)
 {
-    /* Mã 11 là "no connection" trong bảng lỗi MQTT: broker đã mất. */
+    /* SIM7600 error 11 indicates that the broker session has disconnected. */
     if (err == 11) { modem_link_on_connection_lost(); }
     if (err == -1) {
-        /* Đóng phiên cũ để kết quả PUB đến trễ không khớp nhầm vào lần gửi kế tiếp. */
+        /* Close the old session before a late PUB result can match a later publish. */
         modem_emit_link(IVTS_LINK_NET_UP, (int32_t)IVTS_ERR_TIMEOUT);
         modem_link_reset(MODEM_LINK_STEP_MQTT_START);
     }
 }
 
 /**
- * @brief Gửi bản tin trong ô publish (nếu có) và báo kết quả cho app.
+ * @brief Publish the current slot and emit its completion event.
  *
- * Mã lỗi báo qua IVTS_EV_MQTT_ACK: 0 = thành công; -2 = lỗi khi nhập topic hoặc payload;
- * -1 = không có kết quả trong PUB_TIMEOUT_S + 5 giây; giá trị khác là mã <err> trong bảng lỗi
- * MQTT của module. Mã 11 (không có kết nối) làm máy trạng thái quay lại bước kết nối.
+ * IVTS_EV_MQTT_ACK carries zero on success, -2 for topic or payload input
+ * failure, -1 for a missing result after PUB_TIMEOUT_S plus five seconds, or
+ * the modem's own MQTT error code.
  */
 void modem_mqtt_publish_pending(void)
 {
@@ -71,7 +78,7 @@ void modem_mqtt_publish_pending(void)
     if (!modem_tx_take(&t, &p, &n, &id)) { return; }
     const char *topic = modem_topic_name(t);
     bool ok = send_topic(topic) && send_payload(p, n);
-    int16_t err = -2;                                   /* Lỗi trước khi PUB (nhập topic hoặc payload). */
+    int16_t err = -2;                                   /* Failed before publishing while submitting the topic or body. */
     if (ok) { ok = send_publish(&err); }
     modem_tx_done(ok, err);
     if (!ok) { on_pub_result(err); }

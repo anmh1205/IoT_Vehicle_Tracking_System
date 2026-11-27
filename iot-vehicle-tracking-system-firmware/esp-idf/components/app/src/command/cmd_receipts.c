@@ -1,3 +1,11 @@
+/**
+ * @file cmd_receipts.c
+ * @brief Deduplication and durable command receipt checkpoints.
+ *
+ * The app task loads and updates recent successful IDs. The checkpoint reports
+ * persistence failure so ACK delivery can retry without re-executing the
+ * command.
+ */
 #include "persist/persist.h"
 #include "command/command.h"
 #include <string.h>

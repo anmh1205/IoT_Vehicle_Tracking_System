@@ -1,3 +1,10 @@
+/**
+ * @file cmd_ota.c
+ * @brief Command handlers for firmware update and rollback.
+ *
+ * Parses cloud parameters and delegates execution to the application
+ * firmware-update policy and the OTA adapter.
+ */
 #include "command/command.h"
 #include <string.h>
 #include "fw_update.h"

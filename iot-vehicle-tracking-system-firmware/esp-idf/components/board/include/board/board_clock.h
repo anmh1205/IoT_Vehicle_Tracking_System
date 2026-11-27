@@ -1,21 +1,30 @@
+/**
+ * @file board_clock.h
+ * @brief UTC time access through the on-board RTC.
+ *
+ * Calls can wait for the shared I2C bus. A readable RTC value carries a
+ * separate trust flag based on date and oscillator state.
+ */
 #pragma once
 #include <stdbool.h>
 #include <stdint.h>
 #include "ivts_core/base/err.h"
 
 /**
- * @brief Đọc giờ từ DS3231M.
- * @param unix_ms  Nhận Unix time (ms); 0 nếu giá trị đọc được không phải ngày hợp lệ.
- * @param trusted  Nhận true khi cờ OSF (oscillator stop flag) không bật và giờ >= 2024-01-01.
- * @return IVTS_OK; IVTS_ERR_INVALID_STATE nếu không có RTC; lỗi I2C khác.
+ * @brief Read the calendar and oscillator status from the DS3231M.
+ * @param[out] unix_ms Unix time in milliseconds, or zero for an invalid date.
+ * @param[out] trusted True when OSF is clear and the date is at least
+ * 2024-01-01.
+ * @return IVTS_OK after a read, IVTS_ERR_INVALID_STATE when RTC is
+ * unavailable, or the relevant I2C error.
  */
 ivts_err_t board_time_get(uint64_t *unix_ms, bool *trusted);
 
 /**
- * @brief Ghi giờ vào DS3231M rồi xoá cờ OSF.
- * @param unix_ms  Unix time (ms), năm 2000..2099.
+ * @brief Write DS3231M time, then clear its oscillator stop flag.
+ * @param unix_ms Unix time in milliseconds, within years 2000 through 2099.
  */
 ivts_err_t board_time_set(uint64_t unix_ms);
 
-/** @brief Thời gian từ lúc boot (ms), theo esp_timer. */
+/** @brief Read monotonic milliseconds since boot. */
 uint64_t board_uptime_ms(void);

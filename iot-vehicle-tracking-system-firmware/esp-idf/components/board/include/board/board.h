@@ -1,3 +1,11 @@
+/**
+ * @file board.h
+ * @brief Board initialization, status and the public clock, power and sensor APIs.
+ *
+ * The application supplies policy and an event sink at startup. PCB constants
+ * are available to the board implementation and app wiring through the
+ * dedicated pin map.
+ */
 #pragma once
 
 #include "board/board_clock.h"
@@ -5,27 +13,29 @@
 #include "board/board_sensors.h"
 #include "ivts_core/event/event.h"
 
-/** Cấu hình khởi tạo board. */
+/** Configuration supplied by app wiring when initializing the board. */
 typedef struct {
-    ivts_sink_t sink;              /**< Nhận IVTS_EV_POWER_SAMPLE và IVTS_EV_MOTION_IRQ. */
-    uint16_t    power_sample_ms;   /**< Chu kỳ phát IVTS_EV_POWER_SAMPLE. */
-    uint8_t     imu_threshold;     /**< Ngưỡng THRS1_1 của LIS3DSH (đơn vị thô, thang ±2 g). */
-    bool        imu_enabled;       /**< false: không khởi tạo IMU. */
-    uint8_t     task_prio;         /**< Priority của task "board". */
-    uint32_t    task_stack;        /**< Stack của task "board" (byte). */
+    ivts_sink_t sink;              /**< Receives IVTS_EV_POWER_SAMPLE and IVTS_EV_MOTION_IRQ. */
+    uint16_t    power_sample_ms;   /**< Period between power samples in milliseconds. */
+    uint8_t     imu_threshold;     /**< Raw LIS3DSH THRS1_1 threshold at the ±2 g scale. */
+    bool        imu_enabled;       /**< Set true to probe and initialize the IMU. */
+    uint8_t     task_prio;         /**< FreeRTOS priority for the board task. */
+    uint32_t    task_stack;        /**< Board task stack size in bytes. */
 } board_cfg_t;
 
 /**
- * @brief Khởi tạo board và tạo task "board".
+ * @brief Initialize the board and create the sampling task.
  *
- * Gọi một lần từ app_init. Lỗi IMU hoặc RTC không làm init thất bại: board vẫn chạy và
- * board_imu_ok()/board_rtc_ok() trả false. Lỗi bus I2C, ADC hoặc tạo task là lỗi nặng.
+ * Call once during app startup. Missing IMU or RTC hardware is reported
+ * through the corresponding availability flag. I2C, ADC or task-creation
+ * failures prevent board startup.
  *
- * @return IVTS_OK hoặc mã lỗi của bước thất bại.
+ * @return IVTS_OK on success, otherwise the error from the failed startup
+ * step.
  */
 ivts_err_t board_init(const board_cfg_t *cfg);
 
-/** @brief IMU đã khởi tạo thành công. */
+/** @brief Report whether LIS3DSH initialization succeeded. */
 bool board_imu_ok(void);
-/** @brief DS3231M đã được phát hiện. */
+/** @brief Report whether the DS3231M was detected and attached. */
 bool board_rtc_ok(void);

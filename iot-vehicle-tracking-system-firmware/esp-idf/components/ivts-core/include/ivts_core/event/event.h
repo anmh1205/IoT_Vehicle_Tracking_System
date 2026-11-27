@@ -1,11 +1,10 @@
 /**
  * @file event.h
- * @brief Sự kiện giữa các component và cơ chế sink.
+ * @brief By-value event envelopes published between firmware tasks.
  *
- * Mọi component I/O (board, modem, obd, storage, ota) báo kết quả cho app bằng
- * ivts_event_t qua một ivts_sink_t. Event được copy theo giá trị và không mang
- * con trỏ; dữ liệu lớn (command, readiness/DTC) nằm ở "ô" của component nguồn
- * và event chỉ báo là đã sẵn sàng.
+ * Board, modem, OBD, storage and OTA report results through an ivts_sink_t.
+ * Large command and diagnostic data stay in an adapter-owned slot and are
+ * retrieved through the corresponding component API.
  */
 #pragma once
 #include <stddef.h>
@@ -15,31 +14,31 @@
 #include "ivts_core/model/gnss.h"
 #include "ivts_core/model/obd.h"
 
-/** Kích thước tối đa của một event; cũng là kích thước một phần tử queue của app. */
+/** Maximum byte size of an event stored in the application queue. */
 #define IVTS_EVENT_MAX_SIZE 64u
 
 typedef enum {
     IVTS_EV_NONE = 0,
-    IVTS_EV_LINK_STATE,      /**< modem: trạng thái mạng / broker thay đổi. */
-    IVTS_EV_GNSS_FIX,        /**< modem: một mẫu GNSS. */
-    IVTS_EV_MQTT_ACK,        /**< modem: kết quả publish QoS1. */
-    IVTS_EV_CMD_PENDING,     /**< modem: ô command có dữ liệu mới. */
-    IVTS_EV_STORE_RESULT,    /**< storage: một yêu cầu thất bại. */
-    IVTS_EV_QUEUE_READY,     /**< storage: ô peek của offline queue đã nạp bản ghi. */
-    IVTS_EV_CONFIG_CORRUPT,  /**< storage: blob config hỏng, đã thay bằng giá trị mặc định. */
-    IVTS_EV_OBD_LINK,        /**< obd: trạng thái BLE/ELM327/ECU thay đổi. */
-    IVTS_EV_OBD_SAMPLE,      /**< obd: một mẫu PID. */
-    IVTS_EV_OBD_DIAG_READY,  /**< obd: readiness/DTC mới, lấy bằng obd_diag_copy(). */
-    IVTS_EV_POWER_SAMPLE,    /**< board: điện áp nguồn xe và nguồn thiết bị (mV). */
-    IVTS_EV_MOTION_IRQ,      /**< board: IMU phát hiện chuyển động. */
-    IVTS_EV_OTA_PROGRESS,    /**< ota: tiến độ hoặc kết quả. */
+    IVTS_EV_LINK_STATE,      /**< Modem network or broker link change. */
+    IVTS_EV_GNSS_FIX,        /**< New GNSS sample from the modem. */
+    IVTS_EV_MQTT_ACK,        /**< Result of a QoS 1 modem publish. */
+    IVTS_EV_CMD_PENDING,     /**< The modem command FIFO contains new data. */
+    IVTS_EV_STORE_RESULT,    /**< A storage request failed. */
+    IVTS_EV_QUEUE_READY,     /**< The oldest offline record is available in the peek slot. */
+    IVTS_EV_CONFIG_CORRUPT,  /**< The stored configuration failed validation and defaults were loaded. */
+    IVTS_EV_OBD_LINK,        /**< OBD BLE, ELM327 or ECU link state changed. */
+    IVTS_EV_OBD_SAMPLE,      /**< New OBD PID sample. */
+    IVTS_EV_OBD_DIAG_READY,  /**< New OBD readiness or trouble-code snapshot available through obd_diag_copy(). */
+    IVTS_EV_POWER_SAMPLE,    /**< Vehicle and device supply voltages in millivolts. */
+    IVTS_EV_MOTION_IRQ,      /**< IMU motion interrupt processed by the board task. */
+    IVTS_EV_OTA_PROGRESS,    /**< OTA progress or result. */
     IVTS_EV_COUNT
 } ivts_event_type_t;
 
-/** Mức kết nối của modem. */
+/** Current network and broker connection level. */
 typedef enum { IVTS_LINK_DOWN = 0, IVTS_LINK_NET_UP, IVTS_LINK_BROKER_UP } ivts_link_t;
 
-/** Loại yêu cầu storage trong IVTS_EV_STORE_RESULT. */
+/** Storage operation identified by IVTS_EV_STORE_RESULT. */
 typedef enum {
     IVTS_STORE_OP_CONFIG_SAVE = 0,
     IVTS_STORE_OP_LOG_APPEND,
@@ -49,7 +48,7 @@ typedef enum {
     IVTS_STORE_OP_QUEUE_PEEK
 } ivts_store_op_t;
 
-/** Cảnh báo chuyển động chưa có PUBACK. seq = 0 nghĩa là không có cảnh báo. */
+/** Motion alarm pending PUBACK. A zero sequence means no pending alarm. */
 typedef struct {
     uint64_t unix_ms;
     uint32_t uptime_ms;
@@ -59,7 +58,7 @@ typedef struct {
 
 typedef struct {
     uint8_t   type;      /**< ivts_event_type_t. */
-    ivts_ms_t ts_ms;     /**< Uptime lúc event được tạo. */
+    ivts_ms_t ts_ms;     /**< Monotonic milliseconds when this event was produced. */
     union {
         struct { uint8_t link; int32_t err; }                  link_state;
         ivts_gnss_t                                            gnss;
@@ -80,25 +79,26 @@ _Static_assert(sizeof(ivts_event_t) <= IVTS_EVENT_MAX_SIZE,
                "ivts_event_t vuot IVTS_EVENT_MAX_SIZE");
 
 /**
- * @brief Hàm nhận event của app.
+ * @brief Consume an event from a component task without blocking.
  *
- * Không chặn: copy event vào queue của app rồi trả về ngay. Chỉ gọi từ task.
- * Không gọi từ ISR; không gọi từ callback của stack (ví dụ NimBLE) khi callback
- * đó đang giữ lock của stack.
+ * The app sink copies the event into its queue. Producers invoke it in task
+ * context, outside SDK callback and driver locks.
  *
- * @return IVTS_OK; IVTS_ERR_FULL nếu queue đầy (event bị bỏ).
+ * @return IVTS_OK on delivery, or IVTS_ERR_FULL when a full queue drops the
+ * event.
  */
 typedef ivts_err_t (*ivts_sink_fn)(void *ctx, const ivts_event_t *ev);
 
-/** Đích nhận event: hàm và ngữ cảnh của nó. */
+/** Event sink callback and caller-supplied context. */
 typedef struct {
     ivts_sink_fn fn;
     void *ctx;
 } ivts_sink_t;
 
 /**
- * @brief Phát một event tới sink.
- * @return Kết quả của sink; IVTS_ERR_INVALID_ARG nếu s, s->fn hoặc ev là NULL.
+ * @brief Deliver a by-value event through the configured sink.
+ * @return The sink's result, or IVTS_ERR_INVALID_ARG for a missing sink,
+ * callback or event.
  */
 static inline ivts_err_t ivts_sink_emit(const ivts_sink_t *s, const ivts_event_t *ev)
 {
@@ -108,5 +108,5 @@ static inline ivts_err_t ivts_sink_emit(const ivts_sink_t *s, const ivts_event_t
     return s->fn(s->ctx, ev);
 }
 
-/** @brief Tên chuỗi của loại event. Không bao giờ NULL. */
+/** @brief Return the stable non-null name of an event type. */
 const char *ivts_event_name(ivts_event_type_t t);

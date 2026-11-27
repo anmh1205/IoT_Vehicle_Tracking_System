@@ -1,3 +1,10 @@
+/**
+ * @file power_adc.c
+ * @brief Calibrated ADC1 sampling for vehicle and board supply voltages.
+ *
+ * Average pin readings, then apply the PCB divider and channel trim. Return
+ * acquisition and calibration errors through the driver result.
+ */
 #include "board_internal.h"
 #include "drivers/drivers.h"
 #include "board_calc.h"
@@ -7,7 +14,7 @@
 #include "esp_check.h"
 #include "esp_log.h"
 
-#define SAMPLES            8   /* Số mẫu trung bình cho mỗi lần đọc, giảm nhiễu. */
+#define SAMPLES            8   /* Average this many ADC samples to reduce measurement noise. */
 
 typedef struct {
     adc_channel_t     ch;
@@ -29,15 +36,17 @@ static esp_err_t chan_init(int gpio, uint32_t gain_ppm, chan_t *c)
     adc_cali_curve_fitting_config_t cal = {
         .unit_id = ADC_UNIT_1, .chan = c->ch, .atten = ADC_ATTEN_DB_12, .bitwidth = ADC_BITWIDTH_DEFAULT,
     };
-    /* Không có dữ liệu hiệu chuẩn trong eFuse thì curve fitting trả lỗi và init thất bại.
-     * Không dùng công thức danh định thay thế: sai số vài trăm mV ở mức 12 V đủ để đổi kết quả
-     * so với ngưỡng ignition. */
+    /*
+     * Curve fitting requires eFuse calibration. If calibration is unavailable,
+     * initialization fails because nominal scaling can shift the ignition
+     * decision by several hundred millivolts at a 12 V input.
+     */
     ESP_RETURN_ON_ERROR(adc_cali_create_scheme_curve_fitting(&cal, &c->cali), BOARD_TAG, "cali ch%d", (int)c->ch);
     c->gain_ppm = gain_ppm;
     return ESP_OK;
 }
 
-/* ADC1 oneshot, hai kênh: nguồn xe và nguồn thiết bị. */
+/* ADC1 one-shot channels for the vehicle and device supplies. */
 esp_err_t power_adc_init(const power_adc_cfg_t *cfg)
 {
     s_divider = cfg->divider;
@@ -65,8 +74,10 @@ static esp_err_t read_mv(const chan_t *c, uint16_t *out)
 ivts_err_t board_power_read(uint16_t *vehicle_mv, uint16_t *device_mv)
 {
     if (vehicle_mv == NULL || device_mv == NULL) { return IVTS_ERR_INVALID_ARG; }
-    /* adc_oneshot_read() an toàn đa luồng (tài liệu ADC oneshot, mục Thread Safety): task "board"
-     * (lấy mẫu định kỳ) và app (kiểm tra pin trước OTA) cùng gọi hàm này mà không cần khoá thêm. */
+    /*
+     * The board task and app can both call adc_oneshot_read(), which is
+     * thread-safe in the ESP-IDF one-shot driver.
+     */
     esp_err_t e = read_mv(&s_veh, vehicle_mv);
     if (e == ESP_OK) { e = read_mv(&s_dev, device_mv); }
     return board_err(e);

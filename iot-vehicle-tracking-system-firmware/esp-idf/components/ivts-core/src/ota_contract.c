@@ -1,3 +1,7 @@
+/**
+ * @file ota_contract.c
+ * @brief OTA manifest validation and post-boot image confirmation rules.
+ */
 #include "ivts_core/ota/contract.h"
 #include "ivts_core/ota/confirm.h"
 #include <stddef.h>
@@ -55,7 +59,7 @@ ivts_err_t ivts_sha256_hex_decode(const char *hex, uint8_t out[32])
     if (hex == NULL || out == NULL) { return IVTS_ERR_INVALID_ARG; }
     for (int i = 0; i < 32; i++) {
         int hi = hexval(hex[2 * i]);
-        if (hi < 0) { return IVTS_ERR_INVALID_ARG; }   /* cũng bắt chuỗi ngắn: gặp NUL */
+        if (hi < 0) { return IVTS_ERR_INVALID_ARG; }   /* A NUL byte also marks the end of a shorter string. */
         int lo = hexval(hex[2 * i + 1]);
         if (lo < 0) { return IVTS_ERR_INVALID_ARG; }
         out[i] = (uint8_t)((hi << 4) | lo);
@@ -67,7 +71,7 @@ ivts_confirm_t ivts_ota_confirm_decide(const ivts_ota_confirm_ctx_t *p, bool hea
                                        uint64_t now_unix_ms, bool time_trusted, ivts_ms_t uptime_ms)
 {
     if (p == NULL || !p->pending) {
-        return IVTS_CONFIRM_ACCEPT;          /* Không có image đang chờ xác nhận. */
+        return IVTS_CONFIRM_ACCEPT;          /* No installed image awaits confirmation. */
     }
     bool wall_time_expired = time_trusted && p->deadline_unix_ms != 0u && now_unix_ms >= p->deadline_unix_ms;
     if (wall_time_expired || uptime_ms >= (ivts_ms_t)p->timeout_s * 1000u) {

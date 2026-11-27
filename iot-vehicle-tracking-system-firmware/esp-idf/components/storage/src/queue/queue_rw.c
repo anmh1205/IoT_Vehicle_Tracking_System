@@ -1,3 +1,11 @@
+/**
+ * @file queue_rw.c
+ * @brief Queue frame codec, record append, token-checked pop and cursor persistence.
+ *
+ * Write the existing disk frame with its CRC. Only pop the record matching the
+ * active token and checkpoint the advanced read cursor at the established
+ * intervals.
+ */
 #include "queue/queue.h"
 #include "ivts_core/base/crc32.h"
 #include <string.h>
@@ -108,7 +116,10 @@ static ivts_err_t rotate_tail_if_full(storage_queue_state_t *queue, size_t len)
 {
     if (queue->tail_size + len + FRAME_OVERHEAD > storage_config_view()->queue_segment_bytes) {
         if (queue->tail == MAX_SEGMENT_ID) { return IVTS_ERR_FULL; }
-        /* Dọn đoạn cũ trước khi cập nhật tail; lỗi I/O giữ nguyên con trỏ ghi. */
+        /*
+         * Reclaim old segments before updating the tail. On failure, preserve
+         * the current write position.
+         */
         while (queue->tail - queue->head + 1u >= storage_config_view()->queue_max_segments) {
             ivts_err_t result = drop_head_segment(queue);
             if (result != IVTS_OK) { return result; }

@@ -1,3 +1,10 @@
+/**
+ * @file nvs_store.c
+ * @brief Versioned IVTS NVS envelope and typed configuration persistence.
+ *
+ * Keep existing namespace, keys, byte layout and checksum behavior. Handle
+ * failure before committing a replacement value.
+ */
 #include "storage_internal.h"
 #include "esp_log.h"
 #include "nvs.h"
@@ -7,30 +14,30 @@
 
 #include <string.h>
 
-#define NS          "ivts"          /* Namespace NVS của firmware. */
-#define KEY_CFG     "cfg"           /* Key của blob cấu hình. */
-#define KEY_BOOT    "boot"          /* Key của bộ đếm boot nguội. */
+#define NS          "ivts"          /* NVS namespace for IVTS records. */
+#define KEY_CFG     "cfg"           /* NVS key for the configuration blob. */
+#define KEY_BOOT    "boot"          /* NVS key for the persistent boot counter. */
 #define BLOB_MAGIC  0x49565453u     /* ASCII "IVTS". */
-#define CFG_VERSION 1u              /* Tăng khi đổi layout của ivts_config_t. */
+#define CFG_VERSION 1u              /* Increment when the deployed ivts_config_t layout changes. */
 #define BLOB_PAYLOAD_MAX STORAGE_RECORD_PAYLOAD_MAX
 
-/** Header đứng trước payload trong mỗi blob. */
+/** Header stored immediately before the NVS payload. */
 typedef struct {
     uint32_t magic;      /**< BLOB_MAGIC. */
-    uint16_t version;    /**< Phiên bản layout của payload. */
-    uint16_t len;        /**< sizeof của payload; bắt được trường hợp đổi kích thước struct mà quên tăng version. */
-    uint32_t crc;        /**< CRC32 của payload. */
+    uint16_t version;    /**< Payload layout version. */
+    uint16_t len;        /**< Payload byte length, checked separately from the version. */
+    uint32_t crc;        /**< CRC32 of the payload bytes. */
 } blob_hdr_t;
 
 esp_err_t storage_nvs_init(void)
 {
-    /* NVS chứa cấu hình, phiên và trạng thái OTA; lỗi init phải được báo lên app. */
+    /* Propagate an initialization error because NVS holds essential IVTS state. */
     return nvs_flash_init();
 }
 
 /**
- * @brief Ghi một blob {header, payload} vào key @p key và commit.
- * @retval ESP_ERR_INVALID_SIZE Payload lớn hơn bộ đệm.
+ * @brief Write and commit a header and payload under @p key.
+ * @retval ESP_ERR_INVALID_SIZE Payload exceeds the bounded record buffer.
  */
 static esp_err_t blob_save(const char *key, uint16_t ver, const void *payload, size_t len)
 {
@@ -55,15 +62,16 @@ ivts_err_t storage_record_save(const char *key, uint16_t version, const void *bu
 }
 
 /**
- * @brief Đọc và kiểm tra blob của key @p key.
+ * @brief Load and verify an NVS record.
  *
- * Các lỗi được phân biệt để app biết đây là thiết bị mới hay dữ liệu hỏng.
+ * Distinguish a missing key on a new device from a record that failed
+ * validation or could not be read.
  *
- * @retval IVTS_OK            Hợp lệ; payload đã được sao chép vào @p payload.
- * @retval IVTS_ERR_NOT_FOUND Chưa có key hoặc namespace.
- * @retval IVTS_ERR_CRC       Thiếu header, sai magic hoặc CRC.
- * @retval IVTS_ERR_VERSION   Sai version hoặc kích thước.
- * @retval IVTS_ERR_IO        Lỗi NVS khác.
+ * @retval IVTS_OK The validated payload was copied to @p payload.
+ * @retval IVTS_ERR_NOT_FOUND The namespace or key is missing.
+ * @retval IVTS_ERR_CRC Missing header, incorrect magic or CRC mismatch.
+ * @retval IVTS_ERR_VERSION Version or byte length mismatch.
+ * @retval IVTS_ERR_IO Another NVS operation failed.
  */
 ivts_err_t storage_record_load(const char *key, uint16_t ver, void *payload, size_t len)
 {
@@ -72,7 +80,7 @@ ivts_err_t storage_record_load(const char *key, uint16_t ver, void *payload, siz
     size_t n = sizeof buf;
     nvs_handle_t nh;
     esp_err_t e = nvs_open(NS, NVS_READONLY, &nh);
-    if (e == ESP_ERR_NVS_NOT_FOUND) { return IVTS_ERR_NOT_FOUND; }   /* Namespace chưa tồn tại. */
+    if (e == ESP_ERR_NVS_NOT_FOUND) { return IVTS_ERR_NOT_FOUND; }   /* The IVTS namespace has not been created. */
     if (e != ESP_OK) { return IVTS_ERR_IO; }
     e = nvs_get_blob(nh, key, buf, &n);
     nvs_close(nh);
@@ -88,7 +96,6 @@ ivts_err_t storage_record_load(const char *key, uint16_t ver, void *payload, siz
     return IVTS_OK;
 }
 
-/* Xem storage.h. */
 ivts_err_t storage_config_load(ivts_config_t *out)
 {
     if (out == NULL) { return IVTS_ERR_INVALID_ARG; }
@@ -105,16 +112,14 @@ ivts_err_t storage_config_load(ivts_config_t *out)
     return r;
 }
 
-/* Xem storage.h. */
 ivts_err_t storage_config_save(const ivts_config_t *cfg)
 {
     if (cfg == NULL) { return IVTS_ERR_INVALID_ARG; }
-    /* Quy tắc hợp lệ thuộc về ivts-core; storage chỉ từ chối cấu hình không hợp lệ ở đầu vào. */
+    /* Use the core rules to reject an invalid configuration before persisting it. */
     if (ivts_config_validate(cfg, NULL, 0) != 0u) { return IVTS_ERR_INVALID_ARG; }
     return storage_record_save(KEY_CFG, CFG_VERSION, cfg, sizeof *cfg);
 }
 
-/* Xem storage.h. */
 ivts_err_t storage_boot_id_next(uint32_t *out)
 {
     if (out == NULL) { return IVTS_ERR_INVALID_ARG; }

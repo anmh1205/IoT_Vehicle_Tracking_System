@@ -1,3 +1,10 @@
+/**
+ * @file boot.h
+ * @brief Private entry points for boot composition and configuration mapping.
+ *
+ * The startup caller invokes wiring before launching the app task. Runtime
+ * configuration updates reuse the same application policy mapper.
+ */
 #pragma once
 #include <stdbool.h>
 #include "ivts_core/model/config.h"

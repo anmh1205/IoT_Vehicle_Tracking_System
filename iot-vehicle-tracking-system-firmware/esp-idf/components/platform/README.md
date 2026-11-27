@@ -1,7 +1,5 @@
 # Platform
 
-`platform_clock.h` provides monotonic uptime in milliseconds. Any task can read it.
-`platform_reset.h` logs the restart reason at the point where a task requests an ESP32 reset.
-`platform_err.h` maps ESP-IDF results at I/O boundaries in implementation files.
+Use `include/platform/platform.h` for shared ESP-IDF services. `platform.c` provides monotonic uptime in milliseconds, restart with a reason and SDK error translation. `platform_rtos.c` supplies task delays, millisecond-to-tick conversion and task-context mutexes.
 
-The three corresponding files in `src/` hold all SDK calls. Board allocation errors keep the board API's existing I/O error mapping.
+The RTOS implementation preserves native rounding and the established indefinite waits. The public mutex type is opaque. Firmware adapters own the lifetime of their mutexes and keep file, UART and event delivery outside bounded snapshot-copy sections.

@@ -1,3 +1,7 @@
+/**
+ * @file fsm.c
+ * @brief FSM initialization and dispatch with caller-owned runtime state.
+ */
 #include "fsm/fsm.h"
 #include <string.h>
 

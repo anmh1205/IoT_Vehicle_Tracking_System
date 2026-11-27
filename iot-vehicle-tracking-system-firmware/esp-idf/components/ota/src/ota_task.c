@@ -1,25 +1,16 @@
 /**
  * @file ota_task.c
- * @brief Vòng đời của task "ota": tạo khi bắt đầu OTA, tự xoá khi xong.
+ * @brief OTA task lifecycle, progress and image management entry points.
  *
- * ## Mô hình thực thi
+ * The app atomically claims the worker slot and copies the command before
+ * creating the OTA task. The worker reads that copy, runs the job and clears
+ * the active flag before deleting itself. The flag also lets other tasks query
+ * progress without sharing the job's mutable state.
  *
- * - ota_start() chạy trong task gọi (task "app"). Hàm sao chép lệnh vào s_job rồi tạo task "ota".
- * - Task "ota" (priority và stack từ ota_cfg_t; app_wiring.c đặt 3 và 6144 B) chạy ota_job_run() rồi
- *   tự xoá. Task chỉ tồn tại khi đang tải nên stack được trả lại heap sau mỗi lần OTA.
- * - s_running là cờ duy nhất giữa hai task, kiểu atomic: ota_start() đặt, task "ota" xoá khi
- *   xong, ota_running() đọc từ task bất kỳ. Cờ cũng chặn hai lần OTA chạy chồng.
- * - s_job được ghi trong ota_start() trước khi tạo task và chỉ đọc bởi task "ota" sau đó;
- *   việc tạo task đảm bảo thứ tự ghi trước đọc, nên không cần khoá.
- * - ota_job_run() chặn trong các lời gọi nguồn byte (modem_http_*) và gửi sự kiện tiến độ qua sink
- *   (không chặn). Kết quả đến task "app" qua queue của app.
- *
- * ## Khi reset hoặc mất nguồn
- *
- * Reset trong lúc tải làm mất tiến độ; esp_ota_begin() đã xoá partition đích nhưng partition
- * đang chạy không bị ảnh hưởng và firmware khởi động lại bình thường. Lần OTA sau bắt đầu từ đầu.
+ * Byte-source calls can block on the modem task. Progress notifications are by
+ * value. A reset during download abandons the candidate write and keeps the
+ * running partition selected until boot selection succeeds.
  */
-
 #include "ota_internal.h"
 #include <stdatomic.h>
 #include <string.h>
@@ -30,14 +21,14 @@
 #include "esp_ota_ops.h"
 #include "platform/platform.h"
 
-/** Tham số của lần OTA đang chạy. */
+/** Parameters of the currently claimed OTA job. */
 static struct {
     ivts_ota_cmd_t cmd;
     uint16_t       battery_mv, min_mv;
 } s_job;
-static atomic_bool s_running;   /* true từ ota_start() đến khi task "ota" kết thúc. */
+static atomic_bool s_running;   /* Worker slot ownership flag, from claim through job completion. */
 
-/** Thân task "ota": chạy một lần OTA rồi tự xoá. */
+/** Run one update job and release the worker slot before exiting. */
 static void ota_task(void *arg)
 {
     (void)arg;
@@ -46,9 +37,9 @@ static void ota_task(void *arg)
     vTaskDelete(NULL);
 }
 
-/* Xem ota.h. */
-/* Xem ota.h. Cờ s_running được chiếm bằng atomic_exchange nên hai lời gọi đồng thời không thể
- * cùng thành công. s_job chỉ được ghi sau khi đã chiếm cờ. */
+/*
+ * Claim the job atomically before publishing its parameters to the worker.
+ */
 ivts_err_t ota_start(const ivts_ota_cmd_t *cmd, uint16_t battery_mv, uint16_t min_battery_mv)
 {
     if (cmd == NULL) { return IVTS_ERR_INVALID_ARG; }
@@ -63,7 +54,6 @@ ivts_err_t ota_start(const ivts_ota_cmd_t *cmd, uint16_t battery_mv, uint16_t mi
     return IVTS_OK;
 }
 
-/* Xem ota.h. */
 bool ota_running(void) { return atomic_load(&s_running); }
 
 static ota_cfg_t s_ota_cfg;
@@ -103,7 +93,6 @@ bool ota_progress_take(ivts_event_t *ev)
     return true;
 }
 
-/* Xem ota.h. */
 bool ota_image_pending_verify(void)
 {
     esp_ota_img_states_t st;
@@ -111,16 +100,14 @@ bool ota_image_pending_verify(void)
     return run != NULL && esp_ota_get_state_partition(run, &st) == ESP_OK && st == ESP_OTA_IMG_PENDING_VERIFY;
 }
 
-/* Xem ota.h. */
 ivts_err_t ota_mark_valid(void)
 {
     return esp_ota_mark_app_valid_cancel_rollback() == ESP_OK ? IVTS_OK : IVTS_ERR_IO;
 }
 
-/* Xem ota.h. */
 ivts_err_t ota_rollback_and_reboot(void)
 {
-    /* ESP-IDF khởi động lại nếu thành công, nên quay lại caller luôn là lỗi. */
+    /* ESP-IDF reboots on success. Any return from this call is an error. */
     esp_err_t e = esp_ota_mark_app_invalid_rollback_and_reboot();
     ESP_LOGE(OTA_TAG, "rollback: %s", esp_err_to_name(e));
     return IVTS_ERR_IO;
@@ -139,13 +126,11 @@ ivts_err_t ota_schedule_rollback(void)
     return esp_ota_mark_app_invalid_rollback() == ESP_OK ? IVTS_OK : IVTS_ERR_INVALID_STATE;
 }
 
-/* Xem ota.h. */
 const char *ota_running_version(void)
 {
     return esp_app_get_description()->version;
 }
 
-/* Xem ota.h. */
 const char *ota_running_partition(void)
 {
     const esp_partition_t *p = esp_ota_get_running_partition();

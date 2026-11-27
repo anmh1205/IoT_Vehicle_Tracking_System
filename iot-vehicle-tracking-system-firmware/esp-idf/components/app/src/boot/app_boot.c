@@ -1,3 +1,10 @@
+/**
+ * @file app_boot.c
+ * @brief Ordered startup, recovery of persisted state and boot identity.
+ *
+ * Open the event queue before starting producers. Load NVS and resolve
+ * provisioning before connecting the modem, then restore the OTA boot context.
+ */
 #include "persist/persist.h"
 #include "boot/boot.h"
 #include "motion_alarm.h"
@@ -67,8 +74,10 @@ static bool resolve_provisioning(ivts_config_t *config)
 
 static void restore_boot_identity(void)
 {
-    /* boot_id: thức từ deep sleep thì giữ nguyên (ngữ cảnh RTC còn hợp lệ); boot nguội thì
-     * lấy số mới từ NVS. */
+    /*
+     * Keep the boot ID on a deep-sleep wake with valid RTC context. For a cold
+     * boot or invalid context, allocate a new boot ID from NVS.
+     */
     uint32_t seq = 0;
     uint32_t boot_id = 0;
     if (esp_reset_reason() != ESP_RST_DEEPSLEEP || !app_rtc_ctx_load(&boot_id, &seq)) {
@@ -87,7 +96,10 @@ bool app_boot_init(void)
     ivts_config_t config = {0};
     load_persisted_state(&config);
     bool provisioned = resolve_provisioning(&config);
-    /* Chỉ app_sleep_enter() cho CPU ngủ sau khi modem và BLE đã dừng. */
+    /*
+     * Disable automatic light sleep. The app sleep controller coordinates
+     * modem and BLE shutdown before asking the board to sleep.
+     */
     ivts_err_t e = board_set_auto_light_sleep(false);
     if (e != IVTS_OK) { ESP_LOGW(APP_TAG, "power management: %s", ivts_err_name(e)); }
     app_config_apply(&config);

@@ -1,3 +1,10 @@
+/**
+ * @file modem_link.c
+ * @brief LTE and MQTT link sequencing, retry backoff and power recovery.
+ *
+ * The modem task executes one state-machine step at a time, preserving retry
+ * windows and emitting link changes by value.
+ */
 #include "modem_internal.h"
 #include "esp_log.h"
 #include "ivts_core/base/backoff.h"
@@ -9,12 +16,12 @@
 
 static modem_link_t s_link;
 
-#define FAILS_POWER_CYCLE  8u        /* Số thất bại tích luỹ dẫn đến power-cycle. */
+#define FAILS_POWER_CYCLE  8u        /* Accumulated failures that trigger a modem power cycle. */
 
-/* Backoff giữa các lần thử lại: 1 s tăng dần đến 60 s, cộng jitter đến 2 s. */
+/* Retry delays grow from 1 to 60 seconds plus up to 2 seconds of jitter. */
 static const ivts_backoff_t k_step_backoff = { .base_ms = 1000, .max_ms = 60000, .jitter_ms = 2000 };
 
-/** Tên bước, dùng cho log. */
+/** Stable name of a link step for logging. */
 static const char *st_name(modem_link_step_t s)
 {
     static const char *const n[] = { "OFF", "POWER", "SYNC", "SIM", "REG", "PDP",
@@ -22,7 +29,10 @@ static const char *st_name(modem_link_step_t s)
     return (s <= MODEM_LINK_STEP_UP) ? n[s] : "?";
 }
 
-/* Đặt máy trạng thái về @p to và xoá bộ đếm; fails_total chỉ xoá khi về MODEM_LINK_STEP_OFF hoặc MODEM_LINK_STEP_POWER. */
+/*
+ * Reset the current step and retry counters. Clear accumulated failures only
+ * when moving to OFF or POWER.
+ */
 void modem_link_reset(modem_link_step_t to)
 {
     s_link.step = to;
@@ -32,7 +42,7 @@ void modem_link_reset(modem_link_step_t to)
     if (to <= MODEM_LINK_STEP_POWER) { s_link.fails_total = 0; }
 }
 
-/** Chuyển sang bước @p to, xoá bộ đếm thử lại và ghi log. */
+/** Enter @p to, reset its retry counters and log the transition. */
 static void go(modem_link_step_t to)
 {
     ESP_LOGI(MODEM_TAG, "lte %s -> %s", st_name(s_link.step), st_name(to));
@@ -43,10 +53,10 @@ static void go(modem_link_step_t to)
 }
 
 /**
- * @brief Ghi nhận một lần thất bại và đặt thời điểm thử lại theo backoff.
+ * @brief Record one failure and apply retry backoff.
  *
- * Đủ FAILS_POWER_CYCLE lần thất bại tích luỹ thì tắt nguồn module bằng PWRKEY, báo link xuống
- * và quay về MODEM_LINK_STEP_POWER.
+ * At FAILS_POWER_CYCLE accumulated failures, pulse PWRKEY, report link down
+ * and restart from MODEM_LINK_STEP_POWER.
  */
 static void fail(void)
 {
@@ -64,7 +74,7 @@ static void fail(void)
     l->retry_at_ms = modem_now() + d;
 }
 
-/* Mất kết nối broker: về bước kết nối lại, mạng dữ liệu vẫn giữ. */
+/* Reconnect to the broker while keeping the LTE data context. */
 void modem_link_on_connection_lost(void)
 {
     if (s_link.step >= MODEM_LINK_STEP_MQTT_CONN) {

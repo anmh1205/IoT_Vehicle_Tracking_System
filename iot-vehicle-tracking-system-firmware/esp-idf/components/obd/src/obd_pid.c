@@ -1,7 +1,10 @@
+/**
+ * @file obd_pid.c
+ * @brief Pure OBD-II PID, readiness and diagnostic trouble code decoders.
+ */
 #include "obd_internal.h"
 #include <string.h>
 
-/* Xem obd_pid.h. */
 ivts_err_t obd_pid_decode(const uint8_t *b, size_t n, ivts_obd_sample_t *s)
 {
     if (b == NULL || s == NULL || n < 3u || b[0] != 0x41u) { return IVTS_ERR_INVALID_ARG; }
@@ -34,8 +37,8 @@ ivts_err_t obd_pid_decode(const uint8_t *b, size_t n, ivts_obd_sample_t *s)
 }
 
 /**
- * Trạng thái của monitor ở vị trí @p bit: bit trong @p avail bằng 1 nghĩa là monitor được hỗ trợ;
- * bit trong @p incomplete bằng 1 nghĩa là monitor chưa hoàn tất.
+ * A supported monitor has its bit set in avail. A set incomplete bit means
+ * that the monitor has yet to complete.
  */
 static ivts_monitor_status_t mon(uint8_t avail, uint8_t incomplete, unsigned bit)
 {
@@ -43,7 +46,6 @@ static ivts_monitor_status_t mon(uint8_t avail, uint8_t incomplete, unsigned bit
     return (((unsigned)incomplete >> bit) & 1u) ? IVTS_MON_INCOMPLETE : IVTS_MON_COMPLETE;
 }
 
-/* Xem obd_pid.h. */
 ivts_err_t obd_readiness_decode(const uint8_t *b, size_t n, ivts_obd_readiness_t *r)
 {
     if (b == NULL || r == NULL || n < 6u || b[0] != 0x41u || b[1] != 0x01u) { return IVTS_ERR_INVALID_ARG; }
@@ -53,7 +55,7 @@ ivts_err_t obd_readiness_decode(const uint8_t *b, size_t n, ivts_obd_readiness_t
     r->mil_on = (A & 0x80u) != 0u;
     r->reported_dtc_count = A & 0x7Fu;
     r->compression_ignition = (B & 0x08u) != 0u;
-    /* Byte B: bit0..2 có mặt, bit4..6 chưa xong: misfire, fuel, components */
+    /* Byte B uses bits 0–2 for supported monitors and 4–6 for incomplete status. */
     r->misfire                  = mon(B, (uint8_t)(B >> 4), 0);
     r->fuel_system              = mon(B, (uint8_t)(B >> 4), 1);
     r->comprehensive_components = mon(B, (uint8_t)(B >> 4), 2);
@@ -62,7 +64,7 @@ ivts_err_t obd_readiness_decode(const uint8_t *b, size_t n, ivts_obd_readiness_t
         r->heated_catalyst      = mon(C, D, 1);
         r->evaporative_system   = mon(C, D, 2);
         r->secondary_air_system = mon(C, D, 3);
-        r->ac_refrigerant       = mon(C, D, 4);   /* bit C4: A/C (J1979 cũ) hoặc GPF (bản mới) */
+        r->ac_refrigerant       = mon(C, D, 4);   /* Bit C4 represents the A/C monitor in older J1979 and GPF in newer versions. */
         r->oxygen_sensor        = mon(C, D, 5);
         r->oxygen_sensor_heater = mon(C, D, 6);
         r->egr_vvt_system       = mon(C, D, 7);
@@ -77,7 +79,6 @@ ivts_err_t obd_readiness_decode(const uint8_t *b, size_t n, ivts_obd_readiness_t
     return IVTS_OK;
 }
 
-/* Xem obd_pid.h. */
 void obd_dtc_format(uint8_t hi, uint8_t lo, char out[IVTS_DTC_CODE_SIZE])
 {
     static const char sys[] = "PCBU";
@@ -90,7 +91,6 @@ void obd_dtc_format(uint8_t hi, uint8_t lo, char out[IVTS_DTC_CODE_SIZE])
     out[5] = '\0';
 }
 
-/* Xem obd_pid.h. */
 ivts_err_t obd_dtc_decode(const uint8_t *b, size_t n, ivts_dtc_list_t *d)
 {
     if (b == NULL || d == NULL || n < 1u) { return IVTS_ERR_INVALID_ARG; }
@@ -98,14 +98,14 @@ ivts_err_t obd_dtc_decode(const uint8_t *b, size_t n, ivts_dtc_list_t *d)
     memset(d, 0, sizeof(*d));
     d->valid = true;
     size_t i = 1;
-    /* Trên CAN (ISO 15765-4), sau byte mode có một byte đếm; giao thức cũ thì không có. Với ATH0
-     * không phân biệt được bằng header, nên dùng tính chẵn lẻ: số byte sau mode là lẻ thì byte
-     * đầu tiên là byte đếm.
-     * Cách suy luận này cũng được các thư viện OBD mã nguồn mở dùng; kết quả cần được đối chiếu
-     * với dữ liệu thực từ xe. */
+    /*
+     * CAN adds a DTC count byte after the response service. Older protocols
+     * begin directly with two-byte codes. With ELM headers disabled, an odd
+     * number of bytes after the service identifies the extra count byte.
+     */
     if (((n - 1u) % 2u) == 1u) { i = 2; }
     for (; i + 1u < n; i += 2u) {
-        if (b[i] == 0u && b[i + 1u] == 0u) { continue; }   /* Bỏ cặp byte đệm của khung. */
+        if (b[i] == 0u && b[i + 1u] == 0u) { continue; }   /* Ignore an all-zero DTC pair. */
         if (d->count >= IVTS_DTC_MAX_CODES) { d->truncated = true; break; }
         obd_dtc_format(b[i], b[i + 1u], d->codes[d->count++]);
     }

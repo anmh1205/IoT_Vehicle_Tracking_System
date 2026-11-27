@@ -1,3 +1,7 @@
+/**
+ * @file model_config.c
+ * @brief Validation of device configuration before provisioning or updates.
+ */
 #include "ivts_core/model/config.h"
 #include <string.h>
 
@@ -26,7 +30,7 @@ static void check_range(issue_sink_t *s, ivts_cfg_field_t f,
     }
 }
 
-/* Chuỗi bắt buộc: phải có NUL trong buffer và không rỗng. */
+/* A required field must be nonempty and NUL-terminated within its capacity. */
 static void check_required_str(issue_sink_t *s, ivts_cfg_field_t f,
                                const char *buf, size_t size)
 {
@@ -37,7 +41,7 @@ static void check_required_str(issue_sink_t *s, ivts_cfg_field_t f,
     }
 }
 
-/* Chuỗi tuỳ chọn: rỗng được, nhưng nếu có thì phải có NUL. */
+/* An optional field can be empty and must be NUL-terminated within its capacity. */
 static void check_optional_str(issue_sink_t *s, ivts_cfg_field_t f,
                                const char *buf, size_t size)
 {
@@ -63,7 +67,7 @@ static bool is_hex(char ch)
     return (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F');
 }
 
-/* "AA:BB:CC:DD:EE:FF" — đúng 17 ký tự, ':' ở vị trí 2,5,8,11,14. */
+/* An address has the form "AA:BB:CC:DD:EE:FF", with colons at indices 2, 5, 8, 11 and 14. */
 static bool ble_addr_ok(const char *a)
 {
     if (strlen(a) != 17u) {
@@ -84,7 +88,7 @@ void ivts_config_defaults(ivts_config_t *c)
     if (c == NULL) {
         return;
     }
-    memset(c, 0, sizeof(*c));   /* Xoá cả padding: blob được CRC khi lưu NVS. */
+    memset(c, 0, sizeof(*c));   /* Clear padding along with the fields because NVS checksums the full blob. */
 
     c->heartbeat_interval_s      = (uint16_t)IVTS_CFG_DEFAULT_HEARTBEAT_S;
     c->tracking_interval_s       = (uint16_t)IVTS_CFG_DEFAULT_TRACKING_S;
@@ -96,7 +100,7 @@ void ivts_config_defaults(ivts_config_t *c)
     c->sleep_enabled             = true;
     c->imu_wakeup_enabled        = true;
     c->command_subscribe_enabled = true;
-    /* mqtt_port = 0 và các chuỗi để trống: app_boot.c điền từ Kconfig. */
+    /* Leave mqtt_port and strings empty for app boot to populate from Kconfig. */
 }
 
 size_t ivts_config_validate(const ivts_config_t *c, ivts_cfg_issue_t *out, size_t cap)

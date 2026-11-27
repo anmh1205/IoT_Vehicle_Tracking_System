@@ -1,3 +1,7 @@
+/**
+ * @file ota_internal.h
+ * @brief Private OTA job execution, configuration and event interfaces.
+ */
 #pragma once
 #include "ota/ota.h"
 

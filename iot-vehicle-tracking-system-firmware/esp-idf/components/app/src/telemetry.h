@@ -1,3 +1,10 @@
+/**
+ * @file components/app/src/telemetry.h
+ * @brief Application telemetry snapshot and record capture interfaces.
+ *
+ * The app task owns snapshots and builds RAW records from the current sample
+ * and identity. Callers copy data through these functions.
+ */
 #pragma once
 #include "ivts_core/event/event.h"
 #include "ivts_core/fsm/axes.h"

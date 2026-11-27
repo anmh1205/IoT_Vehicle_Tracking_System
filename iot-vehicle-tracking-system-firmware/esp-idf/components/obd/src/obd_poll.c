@@ -1,3 +1,10 @@
+/**
+ * @file obd_poll.c
+ * @brief Live OBD sampling and readiness or trouble-code snapshots.
+ *
+ * The OBD task owns ELM requests. Copy diagnostics under the snapshot mutex
+ * and keep BLE, transport and sink operations outside the lock.
+ */
 #include "obd_internal.h"
 #include "esp_log.h"
 #include "platform/platform.h"

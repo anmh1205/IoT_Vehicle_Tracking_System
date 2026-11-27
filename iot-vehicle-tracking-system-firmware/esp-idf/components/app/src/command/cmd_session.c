@@ -1,3 +1,11 @@
+/**
+ * @file cmd_session.c
+ * @brief Tracking, active-session assignment and on-demand location commands.
+ *
+ * Changes to tracking and assigned session identity follow their persistence
+ * path. A location request holds GNSS until publish acknowledgement or its
+ * deadline.
+ */
 #include "command/command.h"
 #include "ivts_core/payload/meta.h"
 #include "publish/publish.h"

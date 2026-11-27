@@ -1,3 +1,7 @@
+/**
+ * @file axes.c
+ * @brief Ignition debounce, motion timeout and derived vehicle state logic.
+ */
 #include "ivts_core/fsm/axes.h"
 
 void ivts_axes_init(ivts_axes_t *a)
@@ -19,7 +23,7 @@ bool ivts_axes_on_power(ivts_axes_t *a, const ivts_axes_cfg_t *c, uint16_t vehic
     } else if (vehicle_mv < off_below) {
         raw = IVTS_IGN_OFF;
     } else {
-        /* Trong dải trễ giữ giá trị hiện tại; trước mẫu đầu tiên mặc định OFF. */
+        /* Keep the current ignition state in the hysteresis band. The initial default is OFF. */
         raw = (a->ign == IVTS_IGN_UNKNOWN) ? IVTS_IGN_OFF : a->ign;
     }
 
@@ -30,8 +34,10 @@ bool ivts_axes_on_power(ivts_axes_t *a, const ivts_axes_cfg_t *c, uint16_t vehic
     if (raw == a->ign) {
         return false;
     }
-    /* Mẫu đầu tiên (từ UNKNOWN) được chấp nhận ngay: debounce chỉ áp dụng cho chuyển trạng thái,
-     * nếu không boot phải chờ off_hold_ms chỉ để xác định xe đang tắt. */
+    /*
+     * Apply the first reading immediately. Debounce later ignition
+     * transitions.
+     */
     uint32_t hold = (a->ign == IVTS_IGN_UNKNOWN) ? 0u
                   : (raw == IVTS_IGN_ON) ? c->on_hold_ms : c->off_hold_ms;
     if (ivts_elapsed(now, a->candidate_since) >= hold) {
@@ -58,7 +64,7 @@ bool ivts_axes_tick(ivts_axes_t *a, const ivts_axes_cfg_t *c, ivts_ms_t now)
         return true;
     }
     if (a->motion == IVTS_MOTION_UNKNOWN && now >= c->motion_quiet_ms) {
-        a->motion = IVTS_MOTION_STATIONARY;     /* đủ lâu không có IRQ từ boot */
+        a->motion = IVTS_MOTION_STATIONARY;     /* No recent interrupt within the configured quiet interval. */
         return true;
     }
     return false;

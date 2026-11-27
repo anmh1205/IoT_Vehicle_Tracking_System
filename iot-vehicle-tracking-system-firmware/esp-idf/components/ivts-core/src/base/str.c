@@ -1,3 +1,7 @@
+/**
+ * @file str.c
+ * @brief Bounded copying and stable string names for portable error codes.
+ */
 #include "ivts_core/base/str.h"
 #include <string.h>
 #include "ivts_core/base/err.h"
@@ -14,10 +18,10 @@ ivts_err_t ivts_str_copy(char *dst, size_t cap, const char *src)
 
     size_t n = strlen(src);
     if (n < cap) {
-        memcpy(dst, src, n + 1u);          /* gồm cả NUL */
+        memcpy(dst, src, n + 1u);          /* Include the terminating NUL. */
         return IVTS_OK;
     }
-    memcpy(dst, src, cap - 1u);            /* cắt, chừa chỗ cho NUL */
+    memcpy(dst, src, cap - 1u);            /* Truncate the copy while reserving the trailing NUL. */
     dst[cap - 1u] = '\0';
     return IVTS_ERR_FULL;
 }
@@ -36,7 +40,7 @@ int ivts_clamp_int(int v, int lo, int hi)
 
 const char *ivts_err_name(ivts_err_t e)
 {
-    /* Không dùng default: để -Wswitch báo lỗi khi thêm giá trị enum mà chưa thêm tên. */
+    /* Leave the switch exhaustive so -Wswitch reports enum additions without a name. */
     switch (e) {
     case IVTS_OK:                 return "IVTS_OK";
     case IVTS_ERR_FAIL:           return "IVTS_ERR_FAIL";

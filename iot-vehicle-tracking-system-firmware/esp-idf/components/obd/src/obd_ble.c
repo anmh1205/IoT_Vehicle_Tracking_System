@@ -1,3 +1,10 @@
+/**
+ * @file obd_ble.c
+ * @brief NimBLE lifecycle, GAP scanning and GATT callbacks for ELM327.
+ *
+ * BLE host callbacks copy their results into task events. The OBD task
+ * interprets the events and advances its own session state.
+ */
 #include "obd_internal.h"
 #include "esp_log.h"
 #include "host/ble_hs.h"
@@ -27,7 +34,7 @@ static void on_sync(void)
 static void host_task(void *param)
 {
     (void)param;
-    nimble_port_run();               /* Trả về khi nimble_port_stop() được gọi. */
+    nimble_port_run();               /* Return after nimble_port_stop() stops the host. */
     nimble_port_freertos_deinit();
 }
 
@@ -147,7 +154,7 @@ int obd_ble_connect(const uint8_t addr[7])
 {
     ble_addr_t a = { .type = addr[0] };
     memcpy(a.val, &addr[1], 6);
-    obd_ble_scan_stop();                      /* Controller không cho vừa quét vừa kết nối. */
+    obd_ble_scan_stop();                      /* Disable BLE controller activity before entering sleep. */
     return ble_gap_connect(obd_ble_own_addr_type(), &a, 10000, NULL, gap_cb, NULL);
 }
 
@@ -160,7 +167,7 @@ bool obd_ble_addr_matches(const uint8_t addr[7], const char *want)
 {
     if (want[0] == '\0') { return true; }
     char s[18];
-    /* NimBLE lưu địa chỉ dạng little-endian nên byte cuối của val được in trước. */
+    /* NimBLE stores addresses least-significant byte first. Print the last byte first. */
     snprintf(s, sizeof s, "%02X:%02X:%02X:%02X:%02X:%02X", addr[6], addr[5], addr[4], addr[3], addr[2], addr[1]);
     return strcasecmp(s, want) == 0;
 }
@@ -243,7 +250,7 @@ int obd_ble_disc_dscs(uint16_t conn, uint16_t value_handle, uint16_t end)
 
 int obd_ble_enable_notify(uint16_t conn, uint16_t cccd)
 {
-    static const uint8_t on[2] = { 0x01, 0x00 };   /* Bit 0 của CCCD: notification. */
+    static const uint8_t on[2] = { 0x01, 0x00 };   /* Set CCCD bit 0 to enable notifications. */
     return ble_gattc_write_flat(conn, cccd, on, sizeof on, write_cb, NULL);
 }
 

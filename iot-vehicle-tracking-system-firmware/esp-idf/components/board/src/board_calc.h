@@ -1,3 +1,10 @@
+/**
+ * @file board_calc.h
+ * @brief Pure conversions shared by board drivers and host tests.
+ *
+ * Units are explicit at the driver boundary. These functions accept ordinary
+ * values and buffers and perform no peripheral I/O.
+ */
 #pragma once
 #include <stdbool.h>
 #include <stdint.h>
@@ -5,8 +12,11 @@
 
 #define DS3231_OSF 0x80u
 
+/** @brief Decode the seven RTC registers to Unix milliseconds for years 2000–2099. */
 ivts_err_t ds3231_decode_time(const uint8_t registers[7], uint64_t *unix_ms);
+/** @brief Encode Unix milliseconds as seven DS3231 BCD calendar registers. */
 ivts_err_t ds3231_encode_time(uint64_t unix_ms, uint8_t registers[7]);
+/** @brief Check the oscillator-stop flag and the minimum trusted date. */
 bool ds3231_is_trusted(uint8_t status, uint64_t unix_ms);
 
 /* Return the index of the largest absolute component, breaking ties by axis order. */

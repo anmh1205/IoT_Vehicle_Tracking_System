@@ -1,3 +1,10 @@
+/**
+ * @file fw_update.h
+ * @brief Application firmware-update policy and report lifecycle interfaces.
+ *
+ * The app task owns update state. The OTA worker invokes the preparation
+ * callback before selecting a new boot partition.
+ */
 #pragma once
 #include <stdbool.h>
 #include <stdint.h>

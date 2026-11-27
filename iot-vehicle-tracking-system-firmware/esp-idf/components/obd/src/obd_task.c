@@ -1,3 +1,10 @@
+/**
+ * @file obd_task.c
+ * @brief OBD task startup, connection lifecycle and polling orchestration.
+ *
+ * The worker drains BLE callback events and owns its session. The app can
+ * request start or stop while this task performs transport work.
+ */
 #include "obd_internal.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -83,7 +90,7 @@ ivts_err_t obd_task_set_enabled(bool enabled)
     if (s_event_queue == NULL) { return IVTS_ERR_INVALID_STATE; }
     atomic_store(&s_enabled, enabled);
     obd_ble_event_t event = { .type = OBD_BLE_EV_CTRL_CHANGED };
-    (void)obd_task_post(&event);   /* Nếu queue đầy, task đã có sự kiện để thức và kiểm tra s_enabled. */
+    (void)obd_task_post(&event);   /* A full queue already has an event that can wake the worker to read s_enabled. */
     return IVTS_OK;
 }
 
@@ -171,7 +178,7 @@ int obd_task_start(void)
 }
 
 /**
- * Hàm công khai của component obd; chuyển yêu cầu sang task "obd" qua queue.
+ * Public OBD entry points hand lifecycle requests to the worker.
  */
 
 static obd_cfg_t s_obd_cfg;
@@ -183,7 +190,7 @@ void obd_emit(const ivts_event_t *event)
     (void)ivts_sink_emit(&s_obd_cfg.sink, event);
 }
 
-/* Xem obd.h. NimBLE được khởi tạo trong task OBD khi gọi obd_start(). */
+/* Start NimBLE on the OBD task after the app requests obd_start(). */
 ivts_err_t obd_init(const obd_cfg_t *cfg)
 {
     if (cfg == NULL || cfg->sink.fn == NULL) { return IVTS_ERR_INVALID_ARG; }
@@ -191,13 +198,11 @@ ivts_err_t obd_init(const obd_cfg_t *cfg)
     return (obd_task_start() == 0) ? IVTS_OK : IVTS_ERR_FULL;
 }
 
-/* Xem obd.h. */
 ivts_err_t obd_start(void)
 {
     return obd_task_set_enabled(true);
 }
 
-/* Xem obd.h. */
 ivts_err_t obd_stop(void)
 {
     return obd_task_set_enabled(false);

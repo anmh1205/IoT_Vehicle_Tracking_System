@@ -1,6 +1,6 @@
 /**
  * @file platform_rtos.c
- * @brief Task-context delays and mutex operations backed by FreeRTOS.
+ * @brief Task-context delays, tick conversion and mutex operations backed by FreeRTOS.
  *
  * The implementation keeps scheduler types out of device adapters. Calls honor
  * the native tick conversion and the existing unbounded mutex wait semantics.

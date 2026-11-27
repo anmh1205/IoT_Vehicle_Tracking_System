@@ -1,60 +1,57 @@
-#pragma once
-
 /**
  * @file json_reader.h
- * @brief Bộ đọc JSON có giới hạn cho dữ liệu từ cloud.
+ * @brief Bounded JSON tokenizer and token-based object access.
  *
- * Tokenizer kiểu jsmn: không cấp phát động, không sửa input, không đệ quy.
- * Dữ liệu cloud là dữ liệu ngoài nên độ sâu, số token và độ dài đều bị chặn.
+ * The tokenizer works on offsets into the caller-owned input and uses a
+ * caller-supplied token array. Input length, nesting depth and token count are
+ * bounded before fields are used by firmware command handlers.
  */
+#pragma once
 
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include "ivts_core/base/err.h"
 
-/** Loại token. */
+/** JSON token kind. */
 typedef enum { IVTS_JT_OBJ = 1, IVTS_JT_ARR, IVTS_JT_STR, IVTS_JT_PRIM } ivts_jtype_t;
 
-/** Một token JSON, mô tả bằng vị trí trong chuỗi nguồn. */
+/** JSON token identified by offsets into the source buffer. */
 typedef struct {
     uint8_t  type;     /**< ivts_jtype_t. */
-    uint16_t start;    /**< STR: sau dấu " mở. PRIM/OBJ/ARR: ký tự đầu tiên. */
-    uint16_t end;      /**< Vị trí ngay sau ký tự cuối (STR: tại dấu " đóng). */
-    uint16_t size;     /**< OBJ: số cặp key/value. ARR: số phần tử. */
-    int16_t  parent;   /**< Chỉ số token cha; -1 cho gốc. */
+    uint16_t start;    /**< Start offset, after the opening quote for a string. */
+    uint16_t end;      /**< End offset, at the closing quote for a string. */
+    uint16_t size;     /**< Number of key/value pairs for OBJ or elements for ARR. */
+    int16_t  parent;   /**< Parent token index, or -1 for the root. */
 } ivts_jtok_t;
 
-#define IVTS_JSON_MAX_LEN 4096u   /**< Độ dài tối đa của chuỗi JSON. */
+#define IVTS_JSON_MAX_LEN 4096u   /**< Maximum accepted JSON input length in bytes. */
 
 /**
- * @brief Tách JSON thành token.
- *
- * @param js         Chuỗi JSON (không cần NUL).
- * @param len        Độ dài, tối đa IVTS_JSON_MAX_LEN.
- * @param t          Mảng token đầu ra.
- * @param ntok       Số phần tử của @p t.
- * @param max_depth  Độ sâu lồng tối đa.
- * @return Số token (> 0), hoặc lỗi dưới dạng SỐ ÂM của ivts_err_t:
- *         -IVTS_ERR_FULL nếu hết token;
- *         -IVTS_ERR_INVALID_ARG nếu sai cú pháp, quá sâu, quá dài hoặc có dữ liệu thừa sau gốc.
+ * @brief Tokenize one JSON value within the supplied capacity and depth.
+ * @param js Input bytes, which need no trailing NUL.
+ * @param len Input length, at most IVTS_JSON_MAX_LEN.
+ * @param[out] t Caller-supplied token array.
+ * @param ntok Token array capacity.
+ * @param max_depth Maximum object or array nesting depth.
+ * @return A positive token count, -IVTS_ERR_FULL when tokens run out, or
+ * -IVTS_ERR_INVALID_ARG for malformed input, excess depth or trailing data.
  */
 int ivts_json_parse(const char *js, size_t len, ivts_jtok_t *t, size_t ntok, uint8_t max_depth);
 
 /**
- * @brief Tìm value của @p key trong object @c t[obj].
- * @return Chỉ số token của value, hoặc -1 nếu không có.
+ * @brief Find the value of @p key among the direct members of object @c t[obj].
+ * @return Value token index, or -1 if the key is absent.
  */
 int ivts_json_find(const char *js, const ivts_jtok_t *t, int ntok, int obj, const char *key);
 
 /**
- * @brief Sao chép chuỗi đã giải escape vào @p out (có NUL).
- * @return IVTS_OK; IVTS_ERR_FULL nếu @p cap không đủ (out vẫn là chuỗi hợp lệ);
- *         IVTS_ERR_INVALID_ARG nếu token không phải chuỗi hoặc chứa escape không hỗ trợ
- *         (\u ngoài 0x01..0x7F bị từ chối).
+ * @brief Decode a JSON string and NUL-terminate the destination.
+ * @return IVTS_OK, IVTS_ERR_FULL for truncated output, or IVTS_ERR_INVALID_ARG
+ * for a non-string token or an unsupported escape.
  */
 ivts_err_t ivts_json_get_str(const char *js, const ivts_jtok_t *tok, char *out, size_t cap);
-/** @brief Đọc số nguyên không dấu 32 bit. Từ chối số âm, số thập phân và giá trị tràn. */
+/** @brief Read an unsigned 32-bit integer and reject negative, fractional or overflowing values. */
 ivts_err_t ivts_json_get_u32(const char *js, const ivts_jtok_t *tok, uint32_t *out);
-/** @brief Đọc giá trị true/false. */
+/** @brief Read a JSON boolean literal. */
 ivts_err_t ivts_json_get_bool(const char *js, const ivts_jtok_t *tok, bool *out);

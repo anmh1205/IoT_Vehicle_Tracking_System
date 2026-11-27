@@ -1,3 +1,10 @@
+/**
+ * @file drivers.h
+ * @brief Private board sensor-driver initialization and sensor access.
+ *
+ * Use the configured I2C device slots and ADC calibration. The drivers hide
+ * hardware registers and SDK handles from callers.
+ */
 #pragma once
 #include "board_internal.h"
 #include <stdint.h>

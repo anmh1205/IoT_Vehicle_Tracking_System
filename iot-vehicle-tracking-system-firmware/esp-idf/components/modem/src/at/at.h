@@ -1,16 +1,12 @@
 /**
  * @file at.h
- * @brief Bộ thực thi một lệnh AT tại một thời điểm: ghép dòng trả lời, nhận prompt, tính timeout.
+ * @brief Private AT engine, parser and received-byte dispatch interfaces.
  *
- * Module thuần C, không phụ thuộc ESP-IDF: ghi byte qua con trỏ hàm at_tx_t và nhận thời gian
- * qua tham số, nên kiểm thử trên host được. Không có khoá bên trong; mọi lời gọi phải xuất phát
- * từ cùng một task (task "modem").
- *
- * Quy trình dùng: at_engine_start() gửi lệnh; vòng lặp đưa từng dòng nhận được vào
- * at_engine_on_line() (và prompt vào at_engine_on_prompt()); at_engine_poll() báo kết quả
- * hoặc hết thời gian.
+ * The modem task serializes one active AT command. The engine takes a write
+ * callback and monotonic time. Start the command, deliver received lines and
+ * any prompt, then poll until the result or deadline. Parser and engine code
+ * can run on the host without UART or FreeRTOS.
  */
-
 #pragma once
 #include <stdbool.h>
 #include <stddef.h>
@@ -18,144 +14,146 @@
 #include "ivts_core/base/err.h"
 #include "ivts_core/base/time.h"
 
-#define AT_RESP_MAX 192u   /**< Kích thước bộ đệm lưu dòng trả lời (gồm NUL). */
+#define AT_RESP_MAX 192u   /**< Captured response line capacity, including its trailing NUL. */
 
-/** Mô tả một lệnh AT và cách nhận biết kết thúc của nó. */
+/** One AT command and its completion criteria. */
 typedef struct {
-    const char    *text;            /**< Nội dung lệnh, không gồm "\r" (engine tự thêm). */
-    const char    *capture;         /**< Tiền tố dòng cần giữ lại vào resp (ví dụ "+CPIN:"); NULL = không giữ. */
-    const char    *final_prefix;    /**< NULL: dòng OK kết thúc lệnh. Khác NULL: lệnh kết thúc khi gặp dòng
-                                         có tiền tố này (thường đến sau OK, ví dụ "+CMQTTPUB:"). */
-    uint8_t        final_err_field; /**< 0: dòng final không mang mã lỗi. n > 0: trường thứ n (đếm từ 1)
-                                         sau dấu ':' là mã lỗi, 0 nghĩa là thành công. Ví dụ
-                                         "+CMQTTPUB: 0,<err>" dùng 2 và "+CMQTTSTART: <err>" dùng 1
-                                         (AT manual MQTT của SIM7600). */
-    const uint8_t *data;            /**< Dữ liệu gửi sau prompt '>' (chế độ nhập dữ liệu); NULL = không có. */
-    size_t         data_len;        /**< Độ dài @c data. */
-    uint32_t       timeout_ms;      /**< Thời gian tối đa chờ lệnh kết thúc. */
-    bool           redact;          /**< Lệnh có credential hoặc URL riêng tư. */
-    bool           final_exact;     /**< So cả dòng nếu final_prefix chứa giá trị kết thúc. */
+    const char    *text;            /**< Command text. The engine writes the trailing carriage return. */
+    const char    *capture;         /**< Optional response prefix to capture, such as "+CPIN:". */
+    const char    *final_prefix;    /**<
+     * With NULL, OK completes the command. Otherwise wait for the final
+     * prefix.
+     */
+    uint8_t        final_err_field; /**<
+     * When nonzero, select the 1-based error field after the colon. A zero
+     * field value means success. For example, "+CMQTTPUB: 0,<err>" uses field
+     * 2 and "+CMQTTSTART: <err>" uses field 1. Zero disables field extraction.
+     */
+    const uint8_t *data;            /**< Optional bytes to transmit once the modem issues the '>' prompt. */
+    size_t         data_len;        /**< Number of bytes available at @c data. */
+    uint32_t       timeout_ms;      /**< Maximum command duration in milliseconds. */
+    bool           redact;          /**< Suppress logging of a command containing credentials or a private URL. */
+    bool           final_exact;     /**< Match the full final line when the criterion includes its terminal value. */
 } at_cmd_t;
 
-/** Kết quả của một lệnh. */
+/** Result of an AT command. */
 typedef enum {
-    AT_RES_PENDING = 0,   /**< Chưa kết thúc. */
-    AT_RES_OK,            /**< Thành công. */
-    AT_RES_ERROR,         /**< Module trả ERROR/+CME ERROR, hoặc dòng final mang mã lỗi khác 0. */
-    AT_RES_TIMEOUT        /**< Hết timeout_ms mà chưa kết thúc. */
+    AT_RES_PENDING = 0,   /**< Command still in progress. */
+    AT_RES_OK,            /**< Command completed successfully. */
+    AT_RES_ERROR,         /**< The modem reported an error or returned a nonzero terminal error field. */
+    AT_RES_TIMEOUT        /**< The command deadline expired. */
 } at_result_t;
 
-/** Đường ghi byte tới module. */
+/** Injected byte writer used by the AT engine. */
 typedef struct {
-    void (*write)(void *ctx, const void *buf, size_t n);   /**< Ghi @p n byte; không chờ phản hồi. */
-    void *ctx;                                             /**< Truyền lại cho write(). */
+    void (*write)(void *ctx, const void *buf, size_t n);   /**< Write @p n bytes without waiting for a response. */
+    void *ctx;                                             /**< Context passed to write(). */
 } at_tx_t;
 
-/** Trạng thái engine; các trường chỉ đọc đối với caller trừ resp. */
+/** Engine state. The caller reads response data without mutating engine fields. */
 typedef struct {
     at_tx_t     tx;
-    at_cmd_t    cmd;          /**< Bản sao lệnh đang chạy; con trỏ bên trong vẫn do caller sở hữu. */
-    ivts_ms_t   deadline;     /**< Thời điểm (ms) hết hạn của lệnh đang chạy. */
-    bool        busy;         /**< Có lệnh đang chạy. */
-    bool        ok_seen;      /**< Đã nhận dòng OK (dùng khi chờ thêm dòng final_prefix). */
-    bool        data_sent;    /**< Đã gửi data sau prompt, chỉ gửi một lần. */
-    at_result_t result;       /**< Kết quả của lệnh gần nhất. */
-    char        resp[AT_RESP_MAX];   /**< Dòng capture hoặc final_prefix nhận được sau cùng; hoặc dòng lỗi. */
+    at_cmd_t    cmd;          /**< Shallow command copy. Referenced buffers remain caller-owned. */
+    ivts_ms_t   deadline;     /**< Monotonic deadline of the active command in milliseconds. */
+    bool        busy;         /**< A command is active. */
+    bool        ok_seen;      /**< The modem sent OK and may still owe the configured final response. */
+    bool        data_sent;    /**< Prevents sending the data buffer again on a duplicate prompt. */
+    at_result_t result;       /**< Result of the most recent command. */
+    char        resp[AT_RESP_MAX];   /**< Last captured response, final line or modem error. */
 } at_engine_t;
 
-/** Đặt engine về trạng thái rảnh với đường ghi @p tx. */
+/** Initialize an idle engine with the supplied byte writer @p tx. */
 void at_engine_init(at_engine_t *e, at_tx_t tx);
 
 /**
- * @brief Gửi lệnh và bắt đầu theo dõi kết quả.
- * @param now Thời gian hiện tại (ms); hạn chót là now + cmd->timeout_ms.
- * @retval IVTS_OK                  Đã gửi.
- * @retval IVTS_ERR_INVALID_STATE   Đang có lệnh chạy.
- * @retval IVTS_ERR_INVALID_ARG     cmd hoặc cmd->text NULL.
+ * @brief Send a command and start its completion deadline.
+ * @param now Current monotonic time in milliseconds.
+ * @retval IVTS_OK The command was written.
+ * @retval IVTS_ERR_INVALID_STATE A command is already active.
+ * @retval IVTS_ERR_INVALID_ARG The command or its text is missing.
  */
 ivts_err_t at_engine_start(at_engine_t *e, const at_cmd_t *cmd, ivts_ms_t now);
 
 /**
- * @brief Đưa một dòng nhận được vào engine.
- * @return true nếu dòng thuộc về lệnh đang chạy và đã được tiêu thụ; false nếu caller phải xử lý
- *         như URC hoặc dòng không xác định.
+ * @brief Offer one modem line to the active command.
+ * @return true when consumed. The caller can route other lines as URCs or
+ * ignore an unrecognized response.
  */
 bool at_engine_on_line(at_engine_t *e, const char *line);
 
-/** Báo đã nhận prompt '>'; gửi data của lệnh nếu có và chưa gửi. */
+/** Handle a data prompt and transmit the command's bytes once. */
 void at_engine_on_prompt(at_engine_t *e);
 
 /**
- * @brief Kiểm tra hạn chót và trả kết quả hiện tại.
- * @return AT_RES_PENDING nếu lệnh còn chạy; ngược lại là kết quả cuối.
+ * @brief Check the command deadline and return its current status.
+ * @return AT_RES_PENDING while active, otherwise the final result.
  */
 at_result_t at_engine_poll(at_engine_t *e, ivts_ms_t now);
 
 /**
- * @file at_parser.h
- * @brief Tách luồng byte UART của SIM7600 thành dòng văn bản, prompt '>' và khối dữ liệu thô,
- *        và phân loại dòng.
+ * @brief UART framing for text lines, prompts and blocks of raw data.
  *
- * Module thuần C: không truy cập UART, không dùng đồng hồ; at_dispatch.c đưa từng byte vào.
- * Không có khoá bên trong; mọi lời gọi phải xuất phát từ task "modem".
+ * Dispatch feeds individual bytes on the modem task. The parser keeps framing
+ * state but performs no UART I/O or clock access.
  */
 
-#define AT_LINE_MAX 256u   /**< Kích thước bộ đệm một dòng hoặc một khối dữ liệu thô (gồm NUL). */
+#define AT_LINE_MAX 256u   /**< Buffer capacity for one line or a raw data chunk. */
 
-/** Đơn vị dữ liệu parser trả về sau mỗi byte. */
+/** Type of unit returned when feeding one byte. */
 typedef enum {
-    AT_UNIT_NONE = 0,   /**< Chưa đủ một đơn vị. */
-    AT_UNIT_LINE,       /**< p->buf là một dòng đã bỏ CR/LF và kết thúc bằng NUL. */
-    AT_UNIT_PROMPT,     /**< Module chờ dữ liệu ('>' ở đầu dòng). */
-    AT_UNIT_DATA        /**< p->buf chứa p->len byte thô (một phần hoặc hết khối). */
+    AT_UNIT_NONE = 0,   /**< No complete unit yet. */
+    AT_UNIT_LINE,       /**< buf holds a NUL-terminated line with CR and LF removed. */
+    AT_UNIT_PROMPT,     /**< The modem is requesting input with a leading '>'. */
+    AT_UNIT_DATA        /**< buf holds len raw bytes from the current block. */
 } at_unit_t;
 
-/** Trạng thái parser. buf và len là kết quả; các trường còn lại là trạng thái nội bộ. */
+/** Incremental parser state. buf and len describe the last returned unit. */
 typedef struct {
     char   buf[AT_LINE_MAX];
     size_t len;
-    size_t raw_left;      /**< Số byte thô còn phải nhận; > 0 nghĩa là đang ở chế độ thô. */
-    bool   overflow;      /**< Dòng dài hơn AT_LINE_MAX: phần thừa bị bỏ. */
-    bool   skip_lf;       /**< Dòng trước kết thúc bằng CR; LF kế tiếp thuộc về dòng đó. */
+    size_t raw_left;      /**< Number of raw bytes still expected. Positive while in raw mode. */
+    bool   overflow;      /**< The input line exceeded the buffer and its trailing bytes were discarded. */
+    bool   skip_lf;       /**< Discard the LF that follows a processed CR terminator. */
     bool   skip_prompt_space;
-    bool   unit_done;     /**< Đơn vị trước đã giao cho caller; lần feed kế tiếp xoá bộ đệm. */
+    bool   unit_done;     /**< The previous unit was delivered. The next feed can reuse the buffer. */
 } at_parser_t;
 
-/** Đặt parser về trạng thái ban đầu. */
+/** Reset the parser to its initial state. */
 void at_parser_init(at_parser_t *p);
 
 /**
- * @brief Đưa một byte vào parser.
- * @return Đơn vị hoàn chỉnh nếu có, ngược lại AT_UNIT_NONE. Nội dung trong p->buf và p->len chỉ
- *         hợp lệ đến lần gọi at_parser_feed() kế tiếp.
+ * @brief Feed one byte into the parser.
+ * @return A complete unit type or AT_UNIT_NONE. buf and len are valid until
+ * the next call to at_parser_feed().
  */
 at_unit_t at_parser_feed(at_parser_t *p, uint8_t b);
 
 /**
- * @brief Chuyển sang chế độ thô cho @p n byte kế tiếp.
+ * @brief Treat the next @p n bytes as raw data.
  *
- * Gọi ngay sau khi xử lý dòng header báo trước n byte dữ liệu, ví dụ "+CMQTTRXPAYLOAD: 0,17".
- * Dữ liệu được trả về qua AT_UNIT_DATA, mỗi lần tối đa AT_LINE_MAX byte.
+ * Call just after parsing a header that declares the length, such as
+ * "+CMQTTRXPAYLOAD: 0,17". AT_UNIT_DATA returns chunks no larger than the
+ * buffer.
  */
 void at_parser_expect_raw(at_parser_t *p, size_t n);
 
-/** Loại dòng văn bản. */
+/** Classification for one modem text line. */
 typedef enum {
-    AT_LINE_INFO = 0,     /**< Dòng phản hồi trung gian. */
+    AT_LINE_INFO = 0,     /**< Intermediate command response. */
     AT_LINE_OK,           /**< "OK". */
-    AT_LINE_ERROR,        /**< "ERROR", "+CME ERROR:" hoặc "+CMS ERROR:". */
-    AT_LINE_URC           /**< Dòng module tự gửi, nằm trong bảng tiền tố URC. */
+    AT_LINE_ERROR,        /**< "ERROR", "+CME ERROR:" or "+CMS ERROR:". */
+    AT_LINE_URC           /**< Unsolicited result code with a known prefix. */
 } at_line_kind_t;
 
-/** Phân loại một dòng. */
+/** Classify a text line for AT dispatch. */
 at_line_kind_t at_classify(const char *line);
 
-/** @return true nếu @p line bắt đầu bằng @p prefix (phân biệt hoa thường). */
+/** @return true when @p line starts with @p prefix, using a case-sensitive match. */
 bool at_has_prefix(const char *line, const char *prefix);
 
 /**
- * @brief Lấy số nguyên thứ @p idx (đếm từ 0) sau dấu ':' của dòng dạng "+X: a,b,c".
- * @return false nếu thiếu trường, trường không phải số nguyên hợp lệ hoặc vượt int32_t.
+ * @brief Parse the zero-based comma-delimited integer field @p idx after the colon.
+ * @return false for a missing, malformed or out-of-range int32_t field.
  */
 bool at_field_int(const char *line, unsigned idx, int32_t *out);
 

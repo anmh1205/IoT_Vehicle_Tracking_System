@@ -1,15 +1,22 @@
+/**
+ * @file board_hw.h
+ * @brief Pin assignments and calibration values for the IVTS PCB.
+ *
+ * Only board sources and app wiring consume this map. External adapters
+ * receive wiring via their configuration structs.
+ */
 #pragma once
 
-/* PCB IVTS. GPIO33..37 cần module không dùng octal PSRAM. */
+/* PCB map. GPIO33 through GPIO37 require a module without octal PSRAM. */
 #define BOARD_PIN_I2C_SDA        2
 #define BOARD_PIN_I2C_SCL        1
-#define BOARD_PIN_IMU_INT1       36   /**< INT1 nối chân vật lý 41 của ESP32-S3. GPIO36 chỉ đánh thức light sleep. */
-#define BOARD_PIN_ADC_VEHICLE    3    /**< ADC1, chia áp 11:1. */
+#define BOARD_PIN_IMU_INT1       36   /**< INT1 connects to physical pin 41. GPIO36 can wake light sleep. */
+#define BOARD_PIN_ADC_VEHICLE    3    /**< ADC1 input behind an 11:1 divider. */
 #define BOARD_PIN_ADC_DEVICE     4
 #define BOARD_PIN_MODEM_TX       17
 #define BOARD_PIN_MODEM_RX       18
-#define BOARD_PIN_MODEM_PWRKEY   34   /**< GPIO33..37 dành cho octal flash/PSRAM: chỉ dùng được khi module không có octal PSRAM. */
-#define BOARD_PIN_MODEM_RESET    35   /**< Dây RESET hiện chưa được dùng. */
+#define BOARD_PIN_MODEM_PWRKEY   34   /**< GPIO33 through GPIO37 can be reserved for octal flash or PSRAM. */
+#define BOARD_PIN_MODEM_RESET    35   /**< The PCB routes RESET. The running modem driver does not drive it. */
 #define BOARD_PIN_LED            15
 #define BOARD_PIN_SD_CLK         10
 #define BOARD_PIN_SD_CMD         9

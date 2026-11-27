@@ -1,3 +1,10 @@
+/**
+ * @file board.c
+ * @brief Board startup, peripheral wiring and capability status.
+ *
+ * Initialize the I2C bus and optional sensors before the board sampling task
+ * starts. Keep availability flags for hardware that fails probing.
+ */
 #include "board_internal.h"
 #include "board/board_hw.h"
 #include "drivers/drivers.h"
@@ -14,14 +21,14 @@ ivts_err_t board_init(const board_cfg_t *cfg)
     if (cfg == NULL || cfg->sink.fn == NULL) {
         return IVTS_ERR_INVALID_ARG;
     }
-    board_power_capture_wake();                 /* Chụp nguyên nhân thức ngay đầu init, trước các bước khác. */
+    board_power_capture_wake();                 /* Capture the boot wake cause before configuring peripherals. */
     gpio_config_t led = { .pin_bit_mask = 1ULL << BOARD_PIN_LED, .mode = GPIO_MODE_OUTPUT };
     s_led_ok = gpio_config(&led) == ESP_OK;
     board_led_set(false);
 
     board_task_configure(cfg);
     esp_err_t e = board_i2c_init();
-    if (e != ESP_OK) { return board_err(e); }   /* Không có bus I2C thì không có RTC và IMU. */
+    if (e != ESP_OK) { return board_err(e); }   /* RTC and IMU depend on the same I2C bus. */
 
     s_rtc_ok = (ds3231_init(BOARD_DEV_RTC, BOARD_RTC_I2C_ADDR, BOARD_RTC_I2C_HZ) == ESP_OK);
     if (cfg->imu_enabled) {
@@ -43,7 +50,7 @@ ivts_err_t board_init(const board_cfg_t *cfg)
         .device_gain_ppm = BOARD_ADC_GAIN_DEVICE_PPM,
     };
     e = power_adc_init(&adc_cfg);
-    if (e != ESP_OK) { return board_err(e); }   /* Không có ADC thì không suy ra được ignition. */
+    if (e != ESP_OK) { return board_err(e); }   /* Ignition inference requires vehicle supply voltage from the ADC. */
     e = board_task_start();
     if (e != ESP_OK) { return board_err(e); }
     ESP_LOGI(BOARD_TAG, "init ok rtc=%d imu=%d wake=%d", s_rtc_ok, s_imu_ok, (int)board_wake_cause());

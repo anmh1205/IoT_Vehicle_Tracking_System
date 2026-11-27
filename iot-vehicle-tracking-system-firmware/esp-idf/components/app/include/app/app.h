@@ -1,20 +1,22 @@
+/**
+ * @file app.h
+ * @brief Public entry point for starting the IVTS application and its worker tasks.
+ *
+ * Call once from app_main. Initialization runs on the caller and starts the
+ * application task only after its dependencies are ready.
+ */
 #pragma once
 
 /**
- * @file app.h
- * @brief Điểm vào của tầng ứng dụng (composition root).
- */
-
-/**
- * @brief Khởi tạo toàn bộ firmware và tạo task "app".
+ * @brief Initialize firmware components and start the app task.
  *
- * Thứ tự khởi tạo: queue sự kiện, board, storage, modem, obd, ota; sau đó tạo task "app".
- * Hàm trả về ngay sau khi task được tạo.
+ * Create the application event queue first, then initialize board and storage,
+ * restore persisted state, and initialize modem, OBD and OTA. Return to the
+ * startup caller after creating the app task.
  *
- * Nếu khởi tạo một thành phần bắt buộc thất bại (queue, board, storage, modem), hàm ghi log,
- * chờ 10 giây rồi khởi động lại. Các thành phần không bắt buộc (SD, IMU, RTC, OBD) thất bại
- * thì firmware chạy tiếp ở chế độ suy giảm.
+ * A mandatory initialization failure is logged and triggers a restart after 10
+ * seconds. SD, IMU, RTC and OBD failures allow degraded operation.
  *
- * @note Gọi một lần từ app_main(), trước khi scheduler phục vụ task nào của firmware.
+ * @note Call once from app_main() before starting any IVTS workers.
  */
 void app_start(void);

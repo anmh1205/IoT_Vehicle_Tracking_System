@@ -1,10 +1,17 @@
-#include "persist/persist.h"
 /**
  * @file session_tracker.c
- * @brief Theo dõi phiên theo ignition và lưu các mốc chưa có PUBACK trong NVS.
+ * @brief Ignition-session tracking and durable delivery of session boundaries.
  *
- * Task app là writer duy nhất. Phiên đang mở và mốc mới được commit cùng lúc.
- * Nếu reset sau PUBACK nhưng trước khi xoá mốc, lần gửi sau giữ nguyên định danh.
+ * Persist open and closed session boundaries until PUBACK. Accept a late
+ * backend assignment while the corresponding boundary is still pending.
+ */
+#include "persist/persist.h"
+/**
+ * @brief Ignition-session tracking and durable delivery of session boundaries.
+ *
+ * The app task is the sole writer. It commits the active session and its new
+ * boundary together. A reset between PUBACK and removal can replay the same
+ * boundary using its original identity.
  */
 
 #include "session_tracker.h"
@@ -35,7 +42,7 @@ static bool wants_active_session(ivts_ignition_t ignition, bool tracking_enabled
 
 static bool outbox_has_room(bool want_active)
 {
-    /* Giữ một chỗ cho mốc đóng khi mở phiên mới. */
+    /* Reserve space for the close boundary before opening a session. */
     uint8_t limit = want_active ? IVTS_SESSION_OUTBOX_SIZE - 1u : IVTS_SESSION_OUTBOX_SIZE;
     return s_session.count < limit;
 }
@@ -117,7 +124,10 @@ bool app_session_assign(uint32_t local_key, const char *boot_id, uint64_t canoni
     bool active = assignment_matches(&next.active, local_key, boot_id);
     ivts_session_id_t *target = active ? &next.active : NULL;
     if (target == NULL) {
-        /* Bridge có thể trả định danh sau khi ignition đã OFF, trong lúc mốc đóng còn chờ gửi. */
+        /*
+         * The bridge can assign a session ID after ignition turns off while
+         * the close boundary is still pending.
+         */
         for (size_t i = 0; i < next.count; i++) {
             ivts_session_boundary_t *boundary = &next.outbox[i];
             if (boundary->kind == IVTS_BOUNDARY_ENDED && assignment_matches(&boundary->session, local_key, boot_id)) {

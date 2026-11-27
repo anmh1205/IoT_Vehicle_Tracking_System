@@ -1,10 +1,20 @@
+/**
+ * @file ds3231.c
+ * @brief DS3231M RTC register access and trusted time reporting.
+ *
+ * Use the shared I2C adapter for register transactions and pure BCD conversion
+ * helpers for the calendar representation.
+ */
 #include "board_internal.h"
 #include "drivers/drivers.h"
 #include "board_calc.h"
 #include "esp_log.h"
 
-/* DS3231M: địa chỉ I2C 0x68; thanh ghi 0x00..0x06 là giờ dạng BCD; thanh ghi 0x0F là status,
- * bit 7 (OSF) bật khi dao động từng dừng, nghĩa là giờ không còn đáng tin. */
+/*
+ * The DS3231M uses address 0x68. BCD time occupies registers 0x00–0x06. Bit 7
+ * of status register 0x0F is the oscillator stop flag (OSF). An asserted OSF
+ * means the clock may have stopped and its time is untrusted.
+ */
 #define DS3231_REG_TIME    0x00
 #define DS3231_REG_STATUS  0x0F
 
@@ -32,7 +42,7 @@ ivts_err_t board_time_get(uint64_t *unix_ms, bool *trusted)
     if (ds3231_decode_time(r, unix_ms) != IVTS_OK) {
         *unix_ms = 0;
         *trusted = false;
-        return IVTS_OK;                               /* Đọc được nhưng giá trị không phải ngày hợp lệ. */
+        return IVTS_OK;                               /* I2C succeeded, but the calendar value is invalid. */
     }
     *trusted = ds3231_is_trusted(st, *unix_ms);
     return IVTS_OK;
@@ -46,8 +56,11 @@ ivts_err_t board_time_set(uint64_t unix_ms)
     if (encode_error != IVTS_OK) { return encode_error; }
     esp_err_t e = board_i2c_write(s_device, DS3231_REG_TIME, r, sizeof r);
     if (e != ESP_OK) { return board_err(e); }
-    /* OSF được xoá sau khi ghi giờ: nếu mất nguồn giữa hai lệnh, OSF vẫn bật và giờ tiếp tục
-     * bị coi là không đáng tin ở lần boot sau. */
+    /*
+     * Clear OSF after writing the date. A power loss between the writes can
+     * leave OSF asserted so the next boot continues treating RTC time as
+     * untrusted.
+     */
     uint8_t st = 0;
     e = board_i2c_read(s_device, DS3231_REG_STATUS, &st, 1);
     if (e == ESP_OK) {

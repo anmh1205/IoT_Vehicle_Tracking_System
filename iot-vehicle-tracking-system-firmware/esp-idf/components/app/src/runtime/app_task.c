@@ -1,26 +1,17 @@
 /**
  * @file app_task.c
- * @brief Queue sự kiện của app và việc tạo task "app".
+ * @brief Application event queue, FreeRTOS task and periodic firmware services.
  *
- * ## Mô hình thực thi
+ * Modem, board, storage, OBD and OTA post events by value from task context.
+ * The IMU ISR signals the board task. Each producer attempts a zero-wait send.
+ * A full queue drops the event, returns IVTS_ERR_FULL and increments the
+ * atomic drop count. Large payloads stay in their owner's slot and are copied
+ * separately when the consumer handles the notification.
  *
- * Task "app" (configured by boot/task_table.h):
- * - App consumes these events and owns application state.
- *
- * Queue s_event_queue (APP_QUEUE_LEN phần tử, mỗi phần tử là một ivts_event_t sao chép theo giá trị):
- * - Producer: task "modem", "board", "storage", "obd", "ota" gọi sink_fn() từ ngữ cảnh task.
- * - Không có producer nào chạy trong ISR: ISR của IMU chỉ notify task "board".
- * - sink_fn() dùng timeout 0 nên producer không bao giờ bị chặn bởi app chậm. Queue đầy thì
- *   sự kiện bị bỏ, trả IVTS_ERR_FULL và tăng s_drops.
- * - Sự kiện chỉ mang giá trị nhỏ; dữ liệu lớn nằm trong "slot" của component sở hữu và được
- *   lấy bằng hàm riêng sau khi nhận sự kiện báo hiệu.
- *
- * ## Khi reset hoặc mất nguồn
- *
- * Queue nằm trong RAM nên sự kiện chưa xử lý bị mất khi reset. Dữ liệu cần bền vững
- * (offline queue, cấu hình, OTA pending) do storage ghi riêng, không đi qua queue này.
+ * This queue is volatile. Durable offline records, configuration and OTA
+ * context are written through storage and survive independently of event
+ * delivery.
  */
-
 #include "runtime/runtime.h"
 #include <stdatomic.h>
 #include "freertos/FreeRTOS.h"
@@ -41,15 +32,16 @@
 #include "storage/storage.h"
 #include "telemetry.h"
 
-#define APP_QUEUE_LEN   32     /* Số sự kiện tối đa chờ xử lý. */
+#define APP_QUEUE_LEN   32     /* Maximum number of pending by-value events. */
 
-static QueueHandle_t s_event_queue;                  /* Queue sự kiện; tạo một lần trong app_events_init(). */
-static _Atomic uint32_t s_drops;           /* Số sự kiện bỏ do đầy; nhiều task tăng đồng thời. */
+static QueueHandle_t s_event_queue;                  /* Event queue created by app_events_init() before starting producers. */
+static _Atomic uint32_t s_drops;           /* Full-queue drops counted atomically across producers. */
 
 /**
- * @brief Sink của app: sao chép sự kiện vào queue mà không chờ.
- * @return IVTS_OK nếu đã xếp hàng; IVTS_ERR_FULL nếu queue đầy (sự kiện bị bỏ và được đếm).
- * @note Gọi từ ngữ cảnh task của bất kỳ component nào; không gọi từ ISR.
+ * @brief Copy an event into the app queue without waiting.
+ * @retval IVTS_OK The event was copied into the queue.
+ * @retval IVTS_ERR_FULL The queue was full. The event was dropped and counted.
+ * @note Call from task context. ISRs signal the task that owns the source.
  */
 static ivts_err_t sink_fn(void *ctx, const ivts_event_t *ev)
 {
@@ -87,27 +79,25 @@ bool app_task_start(uint32_t stack_bytes, uint8_t priority)
 }
 
 /**
- * Chẩn đoán runtime: stack high-water-mark của từng task và bộ nhớ heap.
- *
- * Chỉ được biên dịch đầy đủ khi bật CONFIG_IVTS_DIAG_STACK_LOG; ngược lại app_diag_tick() rỗng.
- * Hàm chỉ gọi từ task "app" nên bộ đệm static không cần khoá.
+ * Stack high-water marks and heap diagnostics are optional. The app task owns
+ * the static sample buffer and serializes access to it.
  */
 
 #if CONFIG_IVTS_DIAG_STACK_LOG
-#define MAX_TASKS 24   /* Số task tối đa ghi log; nhiều hơn thì bỏ qua lần log đó. */
+#define MAX_TASKS 24   /* Maximum task records per diagnostics sample. */
 
 /**
- * @brief Mỗi 60 giây ghi log stack còn trống của từng task và thống kê heap.
+ * @brief Log per-task stack high-water marks and heap capacity every 60 seconds.
  *
- * Trên ESP-IDF StackType_t là uint8_t nên high-water-mark tính bằng byte. Mức còn trống nên
- * giữ tối thiểu khoảng 1 KB sau khi chạy qua mọi đường thực thi (OTA, replay, OBD diag).
+ * ESP-IDF reports stack high-water marks in bytes. Check the minimum free
+ * stack after exercising OTA, replay and OBD diagnostics when sizing tasks.
  */
 static void app_diag_tick(uint64_t now_ms)
 {
     static uint64_t next;
     if (now_ms < next) { return; }
     next = now_ms + DIAG_PERIOD_MS;
-    static TaskStatus_t st[MAX_TASKS];             /* static để không tốn stack (~1 KB); chỉ task "app" gọi. */
+    static TaskStatus_t st[MAX_TASKS];             /* Use static storage for the sample table to preserve app stack space. */
     UBaseType_t n = uxTaskGetSystemState(st, MAX_TASKS, NULL);
     if (n == 0u) { ESP_LOGW(APP_TAG, "diag: hơn %d task", MAX_TASKS); return; }
     for (UBaseType_t i = 0; i < n; i++) {
@@ -119,7 +109,7 @@ static void app_diag_tick(uint64_t now_ms)
              (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
 }
 #else
-/** Bản rỗng khi CONFIG_IVTS_DIAG_STACK_LOG tắt. */
+/** Stub used when CONFIG_IVTS_DIAG_STACK_LOG is disabled. */
 static void app_diag_tick(uint64_t now_ms) { (void)now_ms; }
 #endif
 
@@ -209,7 +199,7 @@ static void app_task_run(void *arg)
     ivts_fsm_init(&s_fsm, app_now(), wake);
     uint64_t next_tick = 0;
 
-    /* Vẫn chờ queue và xử lý sự kiện khi FSM đang fake sleep. */
+    /* Continue waiting for and draining events while the FSM is in simulated sleep. */
     while (true) {
         drain_events();
         uint64_t now = app_now();

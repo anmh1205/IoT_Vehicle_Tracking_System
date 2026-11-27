@@ -1,21 +1,28 @@
+/**
+ * @file at_parser.c
+ * @brief Incremental UART framing for response lines, prompts and raw bytes.
+ *
+ * Caller-owned parser state survives reads that split lines or data blocks. No
+ * reads or writes are issued by the parser itself.
+ */
 #include "at/at.h"
 #include <string.h>
 
-/* Tiền tố URC của SIM7600 mà firmware xử lý. Các dòng +CMQTTPUB, +CMQTTCONNECT... không nằm
- * trong bảng: chúng là kết quả trễ của lệnh đang chạy và at_engine nhận bằng final_prefix. */
+/*
+ * Known URC prefixes. Late +CMQTTPUB and +CMQTTCONNECT responses remain
+ * associated with the active command through final_prefix.
+ */
 static const char *const k_urc[] = {
     "+CMQTTRXSTART:", "+CMQTTRXTOPIC:", "+CMQTTRXPAYLOAD:", "+CMQTTRXEND:",
     "+CMQTTCONNLOST:", "+CMQTTNONET", "+CGEV:", "+CPIN:", "RDY", "SMS DONE",
     "PB DONE", "+HTTPACTION:", "NO CARRIER",
 };
 
-/* Xem at_parser.h. */
 void at_parser_init(at_parser_t *p)
 {
     memset(p, 0, sizeof(*p));
 }
 
-/* Xem at_parser.h. */
 void at_parser_expect_raw(at_parser_t *p, size_t n)
 {
     p->raw_left = n;
@@ -23,16 +30,17 @@ void at_parser_expect_raw(at_parser_t *p, size_t n)
     p->unit_done = false;
 }
 
-/* Xem at_parser.h. */
 at_unit_t at_parser_feed(at_parser_t *p, uint8_t b)
 {
-    /* Đơn vị trước (dòng hoặc khối thô) đã giao cho caller nên bộ đệm được dùng lại. */
+    /* The caller consumed the prior unit. Reuse the buffer for the next one. */
     if (p->unit_done) {
         p->unit_done = false;
         p->len = 0;
     }
-    /* Dòng kết thúc bằng CR thì LF ngay sau đó thuộc về dòng đó, kể cả khi parser đã chuyển sang
-     * chế độ thô (ví dụ "+CMQTTRXPAYLOAD: 0,9\r\n<9 byte>"). */
+    /*
+     * A trailing LF belongs to its CR-terminated header even if dispatch
+     * entered raw mode after processing the header.
+     */
     if (p->skip_lf) {
         p->skip_lf = false;
         if (b == '\n') { return AT_UNIT_NONE; }
@@ -46,7 +54,7 @@ at_unit_t at_parser_feed(at_parser_t *p, uint8_t b)
         p->raw_left--;
         if (p->raw_left == 0u || p->len == AT_LINE_MAX) {
             p->unit_done = true;
-            return AT_UNIT_DATA;               /* Caller đọc buf và len trước lần feed kế tiếp. */
+            return AT_UNIT_DATA;               /* The caller reads buf and len before the next feed. */
         }
         return AT_UNIT_NONE;
     }
@@ -59,7 +67,7 @@ at_unit_t at_parser_feed(at_parser_t *p, uint8_t b)
             return AT_UNIT_NONE;
         }
         if (p->len == 0u) {
-            return AT_UNIT_NONE;               /* Dòng trống giữa CR và LF. */
+            return AT_UNIT_NONE;               /* Ignore an empty CR or LF line. */
         }
         p->buf[p->len] = '\0';
         p->skip_lf = (b == '\r');
@@ -68,7 +76,7 @@ at_unit_t at_parser_feed(at_parser_t *p, uint8_t b)
     }
     if (b == '>' && p->len == 0u && !p->overflow) {
         p->skip_prompt_space = true;
-        return AT_UNIT_PROMPT;                 /* Prompt không có CRLF theo sau. */
+        return AT_UNIT_PROMPT;                 /* The data prompt is not followed by CRLF. */
     }
     if (b != '\0' && p->len + 1u < AT_LINE_MAX && !p->overflow) {
         p->buf[p->len++] = (char)b;
@@ -78,13 +86,11 @@ at_unit_t at_parser_feed(at_parser_t *p, uint8_t b)
     return AT_UNIT_NONE;
 }
 
-/* Xem at_parser.h. */
 bool at_has_prefix(const char *line, const char *prefix)
 {
     return strncmp(line, prefix, strlen(prefix)) == 0;
 }
 
-/* Xem at_parser.h. */
 at_line_kind_t at_classify(const char *line)
 {
     if (strcmp(line, "OK") == 0) { return AT_LINE_OK; }
@@ -98,7 +104,6 @@ at_line_kind_t at_classify(const char *line)
     return AT_LINE_INFO;
 }
 
-/* Xem at_parser.h. */
 bool at_field_int(const char *line, unsigned idx, int32_t *out)
 {
     const char *s = strchr(line, ':');

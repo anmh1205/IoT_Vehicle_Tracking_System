@@ -1,3 +1,10 @@
+/**
+ * @file slots.c
+ * @brief Modem cross-task publish slot and command FIFO.
+ *
+ * One mutex protects bounded copies and state updates. The modem holds the
+ * transmit slot through completion and emits events after releasing the mutex.
+ */
 #include "modem_internal.h"
 #include "platform/platform.h"
 #include <string.h>
@@ -14,10 +21,10 @@ bool modem_slots_init(void)
 static void modem_slots_lock(void) { platform_mutex_lock(s_slot_mutex); }
 static void modem_slots_unlock(void) { platform_mutex_unlock(s_slot_mutex); }
 
-/** Ô publish. */
+/** Transmit slot holds a queued or in-flight payload. */
 static struct {
-    bool          busy;         /* Có bản tin chưa có kết quả; ô không nhận bản tin mới. */
-    bool          in_flight;    /* Task "modem" đã lấy bản tin đi gửi. */
+    bool          busy;         /* The occupied slot cannot accept another publish. */
+    bool          in_flight;    /* The modem task borrowed the slot for transmission. */
     bool          result_ready;
     bool          ok;
     int16_t       err;
@@ -46,7 +53,7 @@ ivts_err_t modem_publish(modem_topic_t topic, const char *payload, size_t len, u
     s_tx.result_ready = false;
     modem_slots_unlock();
     modem_req_t r = { .op = REQ_PUB_KICK };
-    (void)modem_task_post(&r, 0);                 /* Queue đầy vẫn được: vòng lặp của task "modem" kiểm tra ô publish ở mỗi vòng. */
+    (void)modem_task_post(&r, 0);                 /* A failed doorbell send is harmless because the modem checks the slot each loop. */
     return IVTS_OK;
 }
 
@@ -70,7 +77,7 @@ bool modem_publish_result(uint32_t tx_id, bool *ok, int16_t *err)
     return ready;
 }
 
-/* payload trỏ thẳng vào ô publish; xem phần "Mô hình thực thi" về tính an toàn của con trỏ này. */
+/* The payload pointer borrows slot storage until modem_tx_done() releases it. */
 bool modem_tx_take(modem_topic_t *topic, const char **payload, size_t *len, uint32_t *tx_id)
 {
     modem_slots_lock();
@@ -109,7 +116,7 @@ void modem_tx_done(bool ok, int16_t err)
 
 #define CMD_QUEUE_DEPTH 4u
 
-/** Hàng đợi command vòng tròn, bảo vệ bởi mutex của slots. */
+/** Circular command FIFO protected by the shared slot mutex. */
 static struct {
     struct {
         size_t len;
@@ -118,7 +125,7 @@ static struct {
     size_t head;
     size_t count;
 } s_cmd;
-static uint32_t s_cmd_dropped;  /* Số command mất vì hàng đợi đầy. */
+static uint32_t s_cmd_dropped;  /* Commands dropped on FIFO overflow. */
 
 void modem_cmd_store(const char *payload, size_t len)
 {
@@ -141,8 +148,11 @@ void modem_cmd_store(const char *payload, size_t len)
         ev.u.cmd_pending.len = (uint16_t)len;
         modem_emit(&ev);
     } else {
-        /* SIM7600 đã gửi PUBACK cho broker khi đẩy URC, nên không thể từ chối nhận: command này
-         * mất. Cloud không thấy ACK trên commands/ack và phải gửi lại theo command_id. */
+        /*
+         * SIM7600 has already sent broker PUBACK before delivering the URC. A
+         * full FIFO drops the command. The cloud can retry the same command ID
+         * when it receives no application acknowledgement on commands/ack.
+         */
         ESP_LOGW(MODEM_TAG, "hàng đợi command đầy, bỏ command %u byte", (unsigned)len);
     }
 }

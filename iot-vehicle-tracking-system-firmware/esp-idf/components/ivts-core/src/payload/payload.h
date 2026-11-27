@@ -1,3 +1,7 @@
+/**
+ * @file components/ivts-core/src/payload/payload.h
+ * @brief Private common MQTT metadata, formatting and enum names.
+ */
 #pragma once
 #include "ivts_core/payload/json_writer.h"
 #include "ivts_core/payload/payload.h"

@@ -1,3 +1,10 @@
+/**
+ * @file queue_store.c
+ * @brief Offline queue startup, segment discovery and recovery.
+ *
+ * Recovery validates the tail and saved read position before accepting new
+ * work. The storage task owns subsequent mutations of the recovered state.
+ */
 #include "queue/queue.h"
 #include "esp_log.h"
 #include <dirent.h>
@@ -39,7 +46,7 @@ static esp_err_t validate_queue_cfg(void)
 
 static bool repair_tail_segment(storage_queue_state_t *queue, uint32_t *total_in_tail)
 {
-    /* Cắt khung dở ở cuối đoạn đang ghi (nguồn mất giữa lúc fwrite). */
+    /* Trim an incomplete tail frame left by a partial append or power loss. */
     int result = storage_queue_scan_segment(queue->tail, 0, &queue->tail_size, total_in_tail);
     if (result == FRAME_IO) { return false; }
     if (result == FRAME_CORRUPT) {

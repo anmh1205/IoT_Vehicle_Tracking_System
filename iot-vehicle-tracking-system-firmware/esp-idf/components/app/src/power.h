@@ -1,3 +1,10 @@
+/**
+ * @file power.h
+ * @brief Runtime sleep coordination and status LED policy interfaces.
+ *
+ * The app task drives both features. The sleep controller coordinates
+ * background workers before invoking the board sleep adapter.
+ */
 #pragma once
 #include "ivts_core/fsm/axes.h"
 #include "ivts_core/fsm/fsm.h"

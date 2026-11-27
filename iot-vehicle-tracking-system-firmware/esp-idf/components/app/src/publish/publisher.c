@@ -1,3 +1,11 @@
+/**
+ * @file publisher.c
+ * @brief Single in-flight publish and acknowledgement correlation.
+ *
+ * Attempt to submit a complete payload to the modem. Only a matching
+ * transaction acknowledgement releases the publisher and invokes the
+ * registered handler.
+ */
 #include "publish/publish.h"
 #include "esp_log.h"
 #include "device/device.h"

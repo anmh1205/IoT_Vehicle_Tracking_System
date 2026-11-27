@@ -1,3 +1,10 @@
+/**
+ * @file msg_seq.c
+ * @brief Per-boot message-sequence allocation and restoration.
+ *
+ * The app task allocates sequence numbers for new records. The deep-sleep
+ * context restores the counter alongside the same boot ID.
+ */
 #include "app_internal.h"
 
 static uint32_t s_sequence;

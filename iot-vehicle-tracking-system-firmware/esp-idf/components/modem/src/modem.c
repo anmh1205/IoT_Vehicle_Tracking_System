@@ -1,3 +1,10 @@
+/**
+ * @file modem.c
+ * @brief Public modem initialization, configuration snapshots and requests.
+ *
+ * The modem task owns link and UART work. Startup copies configuration and
+ * prepares static topic strings before starting it.
+ */
 #include "modem_internal.h"
 #include "platform/platform.h"
 
@@ -19,7 +26,7 @@ uint64_t modem_now(void) { return platform_uptime_ms(); }
 
 void modem_emit(const ivts_event_t *ev) { (void)ivts_sink_emit(&s_modem_cfg.sink, ev); }
 
-/* Chỉ phát sự kiện khi link thay đổi so với lần báo trước. */
+/* Emit a link event only when its value changes. */
 void modem_emit_link(uint8_t link, int32_t err)
 {
     if (atomic_exchange(&s_link, link) == link) { return; }

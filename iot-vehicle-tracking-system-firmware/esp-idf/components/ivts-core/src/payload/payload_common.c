@@ -1,3 +1,7 @@
+/**
+ * @file payload_common.c
+ * @brief Common MQTT JSON fields, escaping and stable wire enum names.
+ */
 #include "payload/payload.h"
 
 static const char s_hex[] = "0123456789abcdef";
@@ -17,7 +21,7 @@ void ivts_msg_id_format(char out[IVTS_MSG_ID_SIZE], const char *device_id, uint3
         hash = (hash ^ *p) * UINT64_C(1099511628211);
     }
 
-    /* UUIDv8: giữ đủ 32 bit của boot và seq, dành 58 bit cho định danh thiết bị. */
+    /* The UUIDv8 identity uses 32 bits each for boot ID and sequence and 58 bits for device identity. */
     uint8_t bytes[] = {
         (uint8_t)(boot_id >> 24), (uint8_t)(boot_id >> 16), (uint8_t)(boot_id >> 8), (uint8_t)boot_id,
         (uint8_t)(seq >> 24), (uint8_t)(seq >> 16),

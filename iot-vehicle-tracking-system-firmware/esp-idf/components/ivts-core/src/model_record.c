@@ -1,3 +1,7 @@
+/**
+ * @file model_record.c
+ * @brief Versioned binary record codec for offline and replayed telemetry.
+ */
 #include "ivts_core/model/record.h"
 #include <string.h>
 
@@ -24,7 +28,7 @@ ivts_err_t ivts_record_encode(const ivts_record_t *r, uint8_t *buf, size_t cap, 
     put32(&w, r->boot_id);
     put32(&w, r->seq);
     put64(&w, r->gnss.ts_unix_ms);
-    put32(&w, (uint32_t)r->gnss.lat_e7);       /* int32 -> uint32 giữ nguyên bit (bù 2). */
+    put32(&w, (uint32_t)r->gnss.lat_e7);       /* Converting int32_t to uint32_t preserves the two's-complement bits. */
     put32(&w, (uint32_t)r->gnss.lon_e7);
     put16(&w, r->gnss.speed_cm_s);
     put16(&w, r->gnss.course_deg_x10);
@@ -92,7 +96,7 @@ ivts_err_t ivts_record_decode(const uint8_t *buf, size_t len, ivts_record_t *r)
     r->obd.fuel_pct        = get8(&d);
     r->obd.load_pct        = get8(&d);
     if (legacy) {
-        /* V1 chỉ lưu giờ UTC của fix GNSS nếu thời điểm đó đã được module trả về. */
+        /* A version 1 record contains UTC only when the GNSS fix included a timestamp. */
         r->captured_unix_ms = r->gnss.fix_valid ? r->gnss.ts_unix_ms : 0u;
         return IVTS_OK;
     }

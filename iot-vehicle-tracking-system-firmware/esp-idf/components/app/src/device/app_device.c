@@ -1,3 +1,11 @@
+/**
+ * @file app_device.c
+ * @brief Application-owned device identity, provisioning and runtime configuration.
+ *
+ * Boot initializes the policy and identifiers. The application task owns
+ * subsequent changes and applies validated configuration through the bound
+ * callback.
+ */
 #include "device/device.h"
 #include <stddef.h>
 

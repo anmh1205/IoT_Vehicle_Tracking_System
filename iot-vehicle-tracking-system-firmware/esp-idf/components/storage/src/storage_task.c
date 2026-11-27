@@ -1,34 +1,19 @@
 /**
  * @file storage_task.c
- * @brief Task "storage": thực thi mọi thao tác trên thẻ SD tuần tự.
+ * @brief Storage startup and single-task serialization of SD requests.
  *
- * ## Mô hình thực thi
+ * The worker is the sole consumer of its request queue and owns SD file I/O.
+ * Producers submit copied requests with zero wait and can reuse their buffers
+ * as soon as the call returns. Full queues return IVTS_ERR_FULL. Operations
+ * from the same producer retain their submission order.
  *
- * Task "storage" (priority và stack từ storage_cfg_t; app_wiring.c đặt 3 và 5120 B):
- * - Sở hữu thẻ SD và FATFS: không task nào khác mở file trên SD, nên không cần khoá FATFS.
- * - Là consumer duy nhất của s_request_queue. Chặn vô hạn trên xQueueReceive khi không có việc.
+ * A failed SD operation emits IVTS_EV_STORE_RESULT. A completed peek publishes
+ * IVTS_EV_QUEUE_READY while the data stays in its mutex-protected slot.
+ * Duplicate ACKs can produce stale pop tokens, which the worker ignores.
  *
- * Queue s_request_queue (req_queue_len phần tử, mỗi phần tử là storage_req_t sao chép theo giá trị):
- * - Producer: task "app" (log, push, request_peek, pop). Gửi với timeout 0 nên không bao giờ chặn
- *   caller; queue đầy thì trả IVTS_ERR_FULL.
- * - Mỗi yêu cầu mang bản sao dữ liệu (tối đa STORAGE_LOG_LINE_MAX byte), nên buffer của caller
- *   dùng lại được ngay khi hàm trả về.
- *
- * Kết quả:
- * - Lỗi thực thi báo qua IVTS_EV_STORE_RESULT (thành công thì im lặng).
- * - Peek thành công báo qua IVTS_EV_QUEUE_READY (phát trong storage_queue_do_peek()); dữ liệu nằm
- *   trong ô peek do mutex bảo vệ và được lấy bằng storage_queue_peek_copy().
- * - Pop không báo lỗi khi token đã cũ: ACK trùng là bình thường.
- *
- * Thứ tự yêu cầu của một producer được giữ nguyên (FIFO), nên push rồi pop từ cùng task "app"
- * thực hiện đúng thứ tự đó.
- *
- * ## Khi reset hoặc mất nguồn
- *
- * Queue yêu cầu nằm trong RAM: yêu cầu chưa xử lý bị mất khi reset (ví dụ bản ghi vừa push chưa
- * kịp ghi xuống SD). Dữ liệu đã ghi xuống SD tồn tại; xem storage_queue.c về cách khôi phục.
+ * Queued requests are volatile. After reset, the queue store reconstructs
+ * state from segment files and the last durable cursor.
  */
-
 #include "storage_internal.h"
 #include "queue/queue.h"
 #include "sd/sd.h"
@@ -42,47 +27,45 @@
 #include "freertos/task.h"
 #include "ivts_core/model/record.h"
 
-/** Loại yêu cầu gửi tới task "storage". */
+/** Operation identifier carried by a storage request. */
 typedef enum {
-    REQ_LOG = 0,   /**< Ghi một dòng log. */
-    REQ_Q_PUSH,    /**< Thêm bản ghi vào offline queue. */
-    REQ_Q_PEEK,    /**< Nạp bản ghi cũ nhất vào ô peek. */
-    REQ_Q_POP      /**< Bỏ bản ghi đã peek (theo token). */
+    REQ_LOG = 0,   /**< Append one SD log line. */
+    REQ_Q_PUSH,    /**< Append a record to the offline queue. */
+    REQ_Q_PEEK,    /**< Fill the peek slot from the oldest available record. */
+    REQ_Q_POP      /**< Remove the record associated with the supplied peek token. */
 } req_op_t;
 
-/** Một yêu cầu, sao chép theo giá trị vào queue. */
+/** One work item copied by value into the storage queue. */
 typedef struct {
     uint8_t  op;                            /**< req_op_t. */
-    uint16_t len;                           /**< Số byte hợp lệ trong data. */
-    uint32_t token;                         /**< REQ_Q_POP: token của bản ghi cần bỏ. */
-    uint8_t  data[STORAGE_LOG_LINE_MAX];    /**< Dòng log hoặc bản ghi đã mã hoá. */
+    uint16_t len;                           /**< Number of valid bytes in data. */
+    uint32_t token;                         /**< Token identifying the record requested by REQ_Q_POP. */
+    uint8_t  data[STORAGE_LOG_LINE_MAX];    /**< Copied log line or encoded offline record. */
 } storage_req_t;
 
 _Static_assert(IVTS_RECORD_MAX_SIZE <= STORAGE_LOG_LINE_MAX, "bản ghi phải vừa ô data của yêu cầu");
 
-static QueueHandle_t s_request_queue;   /* Queue yêu cầu; consumer duy nhất là task "storage". */
+static QueueHandle_t s_request_queue;   /* Work queue consumed only by the storage task. */
 static atomic_uint s_pending_pushes;
 
-/** Đưa yêu cầu vào queue mà không chờ. @return IVTS_ERR_FULL nếu queue đầy. */
+/** Queue one request without waiting. Returns IVTS_ERR_FULL on overflow. */
 static ivts_err_t post(const storage_req_t *r)
 {
     if (s_request_queue == NULL) { return IVTS_ERR_INVALID_STATE; }
     return (xQueueSend(s_request_queue, r, 0) == pdTRUE) ? IVTS_OK : IVTS_ERR_FULL;
 }
 
-/* Xem storage.h. */
 ivts_err_t storage_log_append(const char *line)
 {
     if (line == NULL) { return IVTS_ERR_INVALID_ARG; }
     if (!storage_sd_ok()) { return IVTS_ERR_INVALID_STATE; }
     storage_req_t r = { .op = REQ_LOG };
     size_t n = strnlen(line, STORAGE_LOG_LINE_MAX);
-    memcpy(r.data, line, n);                 /* Dòng quá dài bị cắt: lỗi log không được làm caller thất bại. */
+    memcpy(r.data, line, n);                 /* Truncate an oversized log line to fit its request buffer. */
     r.len = (uint16_t)n;
     return post(&r);
 }
 
-/* Xem storage.h. */
 ivts_err_t storage_queue_push(const uint8_t *rec, size_t len)
 {
     if (rec == NULL || len == 0u || len > IVTS_RECORD_MAX_SIZE) { return IVTS_ERR_INVALID_ARG; }
@@ -97,7 +80,6 @@ ivts_err_t storage_queue_push(const uint8_t *rec, size_t len)
 
 bool storage_queue_has_unflushed_push(void) { return atomic_load(&s_pending_pushes) != 0u; }
 
-/* Xem storage.h. */
 ivts_err_t storage_queue_request_peek(void)
 {
     if (!storage_sd_ok()) { return IVTS_ERR_INVALID_STATE; }
@@ -105,14 +87,13 @@ ivts_err_t storage_queue_request_peek(void)
     return post(&r);
 }
 
-/* Xem storage.h. */
 ivts_err_t storage_queue_pop(uint32_t token)
 {
     storage_req_t r = { .op = REQ_Q_POP, .token = token };
     return post(&r);
 }
 
-/** Báo kết quả qua IVTS_EV_STORE_RESULT; thành công thì không phát gì. */
+/** Emit a storage result event only when the operation fails. */
 static void report(uint8_t op, ivts_err_t e)
 {
     if (e == IVTS_OK) { return; }
@@ -122,7 +103,7 @@ static void report(uint8_t op, ivts_err_t e)
     storage_emit(&ev);
 }
 
-/** Thân task "storage": nhận yêu cầu và thực thi tuần tự. */
+/** Drain requests one at a time on the storage worker. */
 static void storage_task(void *arg)
 {
     (void)arg;
@@ -157,11 +138,11 @@ esp_err_t storage_task_start(void)
 }
 
 /**
- * Khởi tạo component storage và trạng thái chung (cấu hình, cờ thẻ SD).
+ * Storage initialization, copied configuration and SD availability.
  */
 
 static storage_cfg_t s_storage_cfg;
-static bool s_sd_ok;   /* Thẻ SD đã gắn và queue đã mở; ghi trong storage_init(), trước khi task "storage" tồn tại. */
+static bool s_sd_ok;   /* Set during storage_init() after the card and offline queue are ready. */
 
 const storage_cfg_t *storage_config_view(void) { return &s_storage_cfg; }
 
@@ -170,13 +151,12 @@ void storage_emit(const ivts_event_t *ev)
     (void)ivts_sink_emit(&s_storage_cfg.sink, ev);
 }
 
-/* Xem storage.h. */
 bool storage_sd_ok(void) { return s_sd_ok; }
 
 /*
- * Xem storage.h. Thứ tự: NVS, ô peek, thẻ SD và queue, rồi task "storage". Gắn thẻ hoặc mở queue
- * thất bại chỉ đặt s_sd_ok = false và báo IVTS_EV_STORE_RESULT (op SD_MOUNT); NVS thất bại làm
- * hàm lỗi vì không có NVS thì không có cấu hình.
+ * Initialize NVS, the peek slot, SD and the queue before starting the worker.
+ * NVS failure aborts startup. SD mount or queue recovery failure sets the SD
+ * availability flag false and emits a mount result.
  */
 ivts_err_t storage_init(const storage_cfg_t *cfg)
 {

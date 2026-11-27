@@ -1,3 +1,7 @@
+/**
+ * @file json_reader.c
+ * @brief Bounded JSON tokenization and extraction of typed token values.
+ */
 #include "ivts_core/payload/json_reader.h"
 #include <string.h>
 
@@ -11,8 +15,10 @@ static bool tok_eq(const char *js, const ivts_jtok_t *k, const char *s)
 int ivts_json_find(const char *js, const ivts_jtok_t *t, int ntok, int obj, const char *key)
 {
     if (obj < 0 || obj >= ntok || t[obj].type != IVTS_JT_OBJ) { return -1; }
-    /* Con trực tiếp của obj xếp theo thứ tự key, value, key, value...
-     * Token con sâu hơn có parent khác nên bị bỏ qua. */
+    /*
+     * Direct object children alternate key and value tokens. Skip descendants
+     * with a different parent.
+     */
     bool at_key = true;
     for (int i = obj + 1; i < ntok; i++) {
         if (t[i].parent != obj) { continue; }
@@ -71,7 +77,7 @@ ivts_err_t ivts_json_get_u32(const char *js, const ivts_jtok_t *tok, uint32_t *o
     uint64_t v = 0;
     for (size_t i = tok->start; i < tok->end; i++) {
         char c = js[i];
-        if (c < '0' || c > '9') { return IVTS_ERR_INVALID_ARG; }   /* không âm, không thập phân */
+        if (c < '0' || c > '9') { return IVTS_ERR_INVALID_ARG; }   /* Reject a sign or a non-digit in an unsigned integer token. */
         v = v * 10u + (uint64_t)(c - '0');
         if (v > UINT32_MAX) { return IVTS_ERR_INVALID_ARG; }
     }
@@ -89,12 +95,12 @@ ivts_err_t ivts_json_get_bool(const char *js, const ivts_jtok_t *tok, bool *out)
 }
 
 typedef enum {
-    JSON_EXPECT_VALUE,            /* gốc, sau ':' , sau ',' trong mảng */
+    JSON_EXPECT_VALUE,            /* At the root, after an object colon, or after an array comma. */
     JSON_EXPECT_VALUE_OR_CLOSE,   /* ngay sau '[' */
     JSON_EXPECT_KEY,              /* sau ',' trong object */
     JSON_EXPECT_KEY_OR_CLOSE,     /* ngay sau '{' */
-    JSON_EXPECT_COMMA_OR_CLOSE,   /* sau một value */
-    JSON_EXPECT_NOTHING           /* gốc đã xong: chỉ còn khoảng trắng */
+    JSON_EXPECT_COMMA_OR_CLOSE,   /* After a value. */
+    JSON_EXPECT_NOTHING           /* Only whitespace may follow the completed root value. */
 } json_expect_t;
 
 typedef struct {
@@ -104,7 +110,7 @@ typedef struct {
     ivts_jtok_t *t;
     size_t       ntok;
     int          n;
-    int          cur;       /* container đang mở, -1 = gốc */
+    int          cur;       /* Index of the open container. A negative index denotes the root. */
     uint8_t      depth;
     uint8_t      max_depth;
     json_expect_t       want;
@@ -125,7 +131,7 @@ static int alloc_tok(json_parser_t *p, ivts_jtype_t type, size_t start, size_t e
 static bool is_ws(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
 static bool want_value(const json_parser_t *p) { return p->want == JSON_EXPECT_VALUE || p->want == JSON_EXPECT_VALUE_OR_CLOSE; }
 
-/* Một value vừa xong (hoặc container vừa đóng). */
+/* A value finished or a container closed. */
 static void value_done(json_parser_t *p)
 {
     p->want = (p->cur < 0) ? JSON_EXPECT_NOTHING : JSON_EXPECT_COMMA_OR_CLOSE;
@@ -133,7 +139,7 @@ static void value_done(json_parser_t *p)
 
 static ivts_err_t parse_string(json_parser_t *p)
 {
-    size_t start = ++p->pos;                     /* bỏ dấu " mở */
+    size_t start = ++p->pos;                     /* Skip the opening quote. */
     for (; p->pos < p->len; p->pos++) {
         char c = p->js[p->pos];
         if (c == '"') {
@@ -155,7 +161,7 @@ static ivts_err_t parse_string(json_parser_t *p)
             }
         }
     }
-    return IVTS_ERR_INVALID_ARG;                 /* hết input khi chuỗi chưa đóng */
+    return IVTS_ERR_INVALID_ARG;                 /* Input ended before the string closed. */
 }
 
 static const char *scan_digits(const char *p, const char *end)
@@ -199,7 +205,7 @@ static ivts_err_t parse_prim(json_parser_t *p)
     bool lit = (n == 4 && memcmp(s, "true", 4) == 0) || (n == 5 && memcmp(s, "false", 5) == 0) ||
                (n == 4 && memcmp(s, "null", 4) == 0);
     if (!lit && !valid_number(s, s + n)) { return IVTS_ERR_INVALID_ARG; }
-    p->pos--;                                    /* vòng ngoài sẽ ++ */
+    p->pos--;                                    /* The enclosing loop advances the position. */
     return alloc_tok(p, IVTS_JT_PRIM, start, start + n) < 0 ? IVTS_ERR_FULL : IVTS_OK;
 }
 

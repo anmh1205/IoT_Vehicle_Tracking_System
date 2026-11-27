@@ -1,3 +1,11 @@
+/**
+ * @file modem_power.c
+ * @brief SIM7600 PWRKEY sequencing and modem light-sleep lock.
+ *
+ * Apply the configured active level and native task delay. Keep the restart
+ * guard during shutdown and hold the PM lock while UART communication is
+ * active.
+ */
 #include "transport/transport.h"
 #include "platform/platform.h"
 #include "modem_internal.h"
@@ -28,7 +36,7 @@ esp_err_t modem_power_gpio_init(const modem_cfg_t *c)
     s_pwrkey_inverted = c->pwrkey_inverted;
     gpio_config_t io = { .pin_bit_mask = 1ULL << c->pin_pwrkey, .mode = GPIO_MODE_OUTPUT };
     ESP_RETURN_ON_ERROR(gpio_config(&io), MODEM_TAG, "pwrkey");
-    gpio_set_level(c->pin_pwrkey, c->pwrkey_inverted ? 0 : 1);     /* Nhả PWRKEY. */
+    gpio_set_level(c->pin_pwrkey, c->pwrkey_inverted ? 0 : 1);     /* Release PWRKEY at its configured inactive level. */
     return ESP_OK;
 }
 
@@ -42,7 +50,7 @@ esp_err_t modem_pm_lock_create(void)
 
 void modem_pm_hold(bool hold)
 {
-    /* Auto light sleep tắt clock UART, nên cấm light sleep trong lúc nói chuyện với module. */
+    /* Hold the PM lock during modem communication because light sleep gates UART. */
     if (s_pm == NULL || hold == s_pm_held) { return; }
     if (hold) { (void)esp_pm_lock_acquire(s_pm); } else { (void)esp_pm_lock_release(s_pm); }
     s_pm_held = hold;
@@ -60,8 +68,11 @@ bool modem_power_down(void)
 {
     if (modem_power_restart_is_blocked()) { return false; }
     modem_power_pulse(3000);
-    /* SIM7600 Hardware Design, bảng 9: UART còn hoạt động trong khi tắt,
-     * STATUS thường xuống sau 26 s. Board không đưa STATUS về ESP32. */
+    /*
+     * The SIM7600 UART can remain active during shutdown. Hardware Design
+     * Table 9 shows STATUS typically falling after 26 seconds. This PCB does
+     * not wire STATUS.
+     */
     s_restart_at_ms = modem_now() + 30000u;
     return true;
 }

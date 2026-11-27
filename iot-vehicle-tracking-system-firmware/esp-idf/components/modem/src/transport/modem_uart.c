@@ -1,3 +1,10 @@
+/**
+ * @file modem_uart.c
+ * @brief Dedicated UART transport for SIM7600 AT bytes.
+ *
+ * Opening UART binds the app-supplied pins and baud rate. Receive timeout uses
+ * the same tick conversion as the scheduler.
+ */
 #include "transport/transport.h"
 #include "platform/platform.h"
 #include "modem_internal.h"
@@ -17,7 +24,7 @@ esp_err_t modem_uart_open(const modem_cfg_t *c)
         .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-        .source_clk = UART_SCLK_XTAL,    /* Giữ baud ổn định khi quản lý nguồn đổi tần số APB. */
+        .source_clk = UART_SCLK_XTAL,    /* Keep baud timing stable across APB frequency changes. */
     };
     ESP_RETURN_ON_ERROR(uart_driver_install(c->uart_num, UART_RX_BUF, UART_TX_BUF, 0, NULL, 0), MODEM_TAG, "uart install");
     ESP_RETURN_ON_ERROR(uart_param_config(c->uart_num, &uc), MODEM_TAG, "uart cfg");

@@ -1,3 +1,10 @@
+/**
+ * @file gnss_arbiter.c
+ * @brief Reconciliation of FSM and command demands for GNSS power.
+ *
+ * The app task combines persistent FSM demand with temporary command demand
+ * and sends a modem request only when the requested state changes.
+ */
 #include "device/device.h"
 #include "ivts_core/fsm/fsm.h"
 #include "modem/modem.h"

@@ -1,13 +1,12 @@
-#pragma once
-
 /**
  * @file ota.h
- * @brief Cập nhật firmware qua mạng: tải image, kiểm tra SHA-256, ghi vào partition kế tiếp và
- *        quản lý xác nhận hoặc rollback sau khi khởi động lại.
+ * @brief Public OTA task, byte source, progress, image and rollback interfaces.
  *
- * Component không biết modem: nguồn byte được cấp qua ota_source_t. Việc tải chạy trong task "ota",
- * chỉ tồn tại khi đang tải. Tiến độ và kết quả báo qua IVTS_EV_OTA_PROGRESS.
+ * App wiring supplies the byte source and boot-preparation callback. The
+ * worker exists for the duration of the update. It downloads, hashes and
+ * writes the image, then the app handles its confirmation after reboot.
  */
+#pragma once
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -17,79 +16,77 @@
 #include "ivts_core/ota/contract.h"
 
 /**
- * Nguồn byte của image. app_wiring.c nối các hàm modem_http_* vào cấu trúc này.
- * Các hàm được gọi từ task "ota" và được phép chặn.
+ * Blocking image-source callbacks supplied by app wiring and called on the OTA
+ * task.
  */
 typedef struct {
-    /** Mở @p url; ghi kích thước nội dung vào @p size và mã trạng thái HTTP vào @p http_status. */
+    /** Open @p url and report content size and HTTP status. */
     ivts_err_t (*open)(void *ctx, const char *url, uint32_t *size, int *http_status);
-    /** Đọc tối đa @p len byte từ vị trí @p offset; ghi số byte đọc được vào @p got. */
+    /** Read up to @p len bytes at @p offset and report the count in @p got. */
     ivts_err_t (*read)(void *ctx, uint32_t offset, uint8_t *buf, size_t len, size_t *got);
-    /** Đóng nguồn; gọi sau mỗi lần open, kể cả khi open thất bại. */
+    /** Close the source after an open attempt, including failed opens. */
     void       (*close)(void *ctx);
-    void       *ctx;    /**< Truyền lại cho open, read và close. */
+    void       *ctx;    /**< Context passed to all byte-source callbacks. */
 } ota_source_t;
 
-/** Cấu hình OTA; ota_init() sao chép toàn bộ. */
+/** Configuration copied by ota_init(). */
 typedef struct {
-    ivts_sink_t  sink;         /**< Nơi nhận IVTS_EV_OTA_PROGRESS. */
-    ota_source_t src;          /**< Nguồn byte của image. */
-    /** Task OTA lưu ngữ cảnh xác nhận qua cổng này trước khi đổi partition khởi động. */
+    ivts_sink_t  sink;         /**< Destination for IVTS_EV_OTA_PROGRESS events. */
+    ota_source_t src;          /**< Byte source for the candidate image. */
+    /** Persist confirmation context before changing the boot partition. */
     ivts_err_t (*prepare_boot)(const ivts_ota_cmd_t *cmd, const char *partition);
-    uint8_t      task_prio;    /**< Priority của task "ota". */
-    uint32_t     task_stack;   /**< Stack của task "ota", byte. */
+    uint8_t      task_prio;    /**< FreeRTOS priority for the OTA task. */
+    uint32_t     task_stack;   /**< OTA task stack size in bytes. */
 } ota_cfg_t;
 
 /**
- * @brief Lưu cấu hình OTA.
- * @retval IVTS_OK              Đã lưu.
- * @retval IVTS_ERR_INVALID_ARG cfg NULL hoặc thiếu open/read/close.
+ * @brief Store the OTA configuration and source callbacks.
+ * @retval IVTS_OK Configuration copied.
+ * @retval IVTS_ERR_INVALID_ARG Missing configuration or callbacks.
  */
 ivts_err_t ota_init(const ota_cfg_t *cfg);
 
 /**
- * @brief Sao chép lệnh và tạo task "ota" thực hiện tải.
+ * @brief Copy an OTA command and start the download worker.
  *
- * Tiến độ và kết quả báo qua IVTS_EV_OTA_PROGRESS{phase = ivts_ota_status_t, pct,
- * err = ivts_ota_err_t}. Pha IVTS_OTA_ST_REBOOTING nghĩa là partition khởi động đã được đặt:
- * ngữ cảnh xác nhận đã được lưu và app có thể khởi động lại.
+ * Progress arrives as IVTS_EV_OTA_PROGRESS. IVTS_OTA_ST_REBOOTING means the
+ * confirmation context is durable and the new boot partition was selected.
  *
- * @param battery_mv     Điện áp nguồn hiện tại.
- * @param min_battery_mv Điện áp tối thiểu cho phép OTA; thấp hơn thì OTA thất bại.
- * @retval IVTS_OK                Task đã được tạo.
- * @retval IVTS_ERR_INVALID_ARG   cmd NULL.
- * @retval IVTS_ERR_INVALID_STATE Đang có OTA chạy.
- * @retval IVTS_ERR_FULL          Không tạo được task.
+ * @param battery_mv Device supply voltage in millivolts.
+ * @param min_battery_mv Configured minimum voltage for OTA.
+ * @retval IVTS_OK The task was created.
+ * @retval IVTS_ERR_INVALID_ARG The command is missing.
+ * @retval IVTS_ERR_INVALID_STATE An OTA worker is already running.
+ * @retval IVTS_ERR_FULL Task allocation failed.
  */
 ivts_err_t ota_start(const ivts_ota_cmd_t *cmd, uint16_t battery_mv, uint16_t min_battery_mv);
 
-/** @return true nếu task "ota" đang chạy. Gọi được từ task bất kỳ. */
+/** @return True while an OTA job owns the worker slot. Safe from any task. */
 bool ota_running(void);
-/** Lấy tiến độ mới nhất, kể cả khi queue sự kiện app từng đầy. Chỉ task app gọi. */
+/** Read the latest progress even if its queue event was dropped. */
 bool ota_progress_take(ivts_event_t *ev);
 
 /**
- * @name Dùng lúc khởi động
- * Các hàm app dùng để xử lý trạng thái xác nhận image sau OTA.
+ * @name Running image and post-boot confirmation
  * @{
  */
 
-/** @return true nếu image đang chạy ở trạng thái PENDING_VERIFY (vừa cài, chưa xác nhận). */
+/** @return True if the running image is still PENDING_VERIFY. */
 bool ota_image_pending_verify(void);
 
-/** Xác nhận image đang chạy là hợp lệ và huỷ rollback. */
+/** Mark the running image valid and cancel automatic rollback. */
 ivts_err_t ota_mark_valid(void);
 
-/** Đánh dấu image đang chạy không hợp lệ và khởi động lại về partition cũ. Không trả về nếu thành công. */
+/** Mark the running image invalid and restart into a previous partition. */
 ivts_err_t ota_rollback_and_reboot(void);
-/** Có slot hợp lệ để quay về từ image OTA đang chạy. */
+/** Report whether ESP-IDF has a valid rollback target. */
 bool ota_can_rollback(void);
-/** Chọn image trước đã hợp lệ; app quyết định thời điểm khởi động lại. */
+/** Select the previous valid image. The caller controls reboot timing. */
 ivts_err_t ota_schedule_rollback(void);
 
-/** @return Phiên bản của image đang chạy (chuỗi tĩnh, không bao giờ NULL). */
+/** @return Non-null static version string of the running image. */
 const char *ota_running_version(void);
 
-/** @return Nhãn partition đang chạy, hoặc chuỗi rỗng nếu không xác định (chuỗi tĩnh). */
+/** @return Static label of the running partition, or an empty string if unknown. */
 const char *ota_running_partition(void);
 /** @} */

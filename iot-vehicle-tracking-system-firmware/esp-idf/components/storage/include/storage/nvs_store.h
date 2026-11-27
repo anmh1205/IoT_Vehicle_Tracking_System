@@ -1,3 +1,10 @@
+/**
+ * @file nvs_store.h
+ * @brief Synchronous access to versioned NVS records, device config and boot ID.
+ *
+ * The record envelope validates layout version, byte length and CRC.
+ * Operations can wait on flash and return errors to callers.
+ */
 #pragma once
 #include <stddef.h>
 #include <stdint.h>
@@ -11,28 +18,26 @@ ivts_err_t storage_record_load(const char *key, uint16_t version, void *buffer, 
 ivts_err_t storage_record_save(const char *key, uint16_t version, const void *buffer, size_t len);
 
 /**
- * @brief Đọc cấu hình từ NVS.
+ * @brief Load and validate the NVS configuration.
  *
- * Khi đọc không được (CRC sai, sai version, không có), *out được đặt về ivts_config_defaults().
- * Trừ trường hợp IVTS_ERR_NOT_FOUND (thiết bị mới, không phải dữ liệu hỏng), hàm còn phát
- * IVTS_EV_CONFIG_CORRUPT.
+ * On failure, fill @p out with core defaults. An absent key is normal on a new
+ * device. Other failures also emit IVTS_EV_CONFIG_CORRUPT.
  *
- * @retval IVTS_OK            Đọc được.
- * @retval IVTS_ERR_NOT_FOUND Chưa có cấu hình.
- * @retval IVTS_ERR_CRC       Dữ liệu hỏng.
- * @retval IVTS_ERR_VERSION   Phiên bản hoặc kích thước không khớp.
- * @retval IVTS_ERR_IO        Lỗi NVS.
+ * @retval IVTS_OK Stored configuration loaded.
+ * @retval IVTS_ERR_NOT_FOUND No stored configuration.
+ * @retval IVTS_ERR_CRC A corrupt header or payload was detected.
+ * @retval IVTS_ERR_VERSION Stored version or length does not match.
+ * @retval IVTS_ERR_IO Another NVS operation failed.
  */
 ivts_err_t storage_config_load(ivts_config_t *out);
 
 /**
- * @brief Ghi cấu hình xuống NVS dưới dạng một blob duy nhất (nguyên tử).
- * @retval IVTS_ERR_INVALID_ARG cfg NULL hoặc không qua ivts_config_validate().
+ * @brief Validate and commit the configuration as one versioned NVS blob.
+ * @retval IVTS_ERR_INVALID_ARG Configuration is absent or invalid.
  */
 ivts_err_t storage_config_save(const ivts_config_t *cfg);
 
 /**
- * @brief Tăng và trả về bộ đếm lần khởi động nguội (cấp nguồn hoặc reset), lưu trong NVS.
- *        Dùng làm boot_id của message_id.
+ * @brief Increment and commit the NVS boot counter, returning the new boot ID.
  */
 ivts_err_t storage_boot_id_next(uint32_t *out);

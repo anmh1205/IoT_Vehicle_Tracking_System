@@ -1,3 +1,11 @@
+/**
+ * @file device.h
+ * @brief Application access to device policy, link state and GNSS demand.
+ *
+ * These capabilities keep identity, link observations and requested GNSS power
+ * in their respective owners. Access is serialized by startup and the app
+ * task.
+ */
 #pragma once
 #include <stdbool.h>
 #include "ivts_core/model/config.h"

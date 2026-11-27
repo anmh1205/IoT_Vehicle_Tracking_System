@@ -1,3 +1,10 @@
+/**
+ * @file publish.h
+ * @brief Private app-task publish, replay and control-message interfaces.
+ *
+ * One modem transaction can be outstanding. Registered ACK handlers run on the
+ * app task and own their message-specific durable state changes.
+ */
 #pragma once
 #include <stdbool.h>
 #include "ivts_core/event/event.h"
@@ -8,15 +15,15 @@
 /* The modem accepts one outstanding message. Keep its kind with the transaction ID. */
 typedef enum {
     APP_MSG_NONE = 0,
-    APP_MSG_RAW_LIVE,     /**< Mẫu telemetry thời gian thực. */
-    APP_MSG_RAW_REPLAY,   /**< Bản ghi lấy từ offline queue. */
-    APP_MSG_LOCATION,     /**< Vị trí gửi theo yêu cầu từ cloud. */
-    APP_MSG_STATUS,       /**< Trạng thái thiết bị định kỳ. */
-    APP_MSG_BOUNDARY,     /**< Mốc mở/đóng phiên đã lưu NVS. */
-    APP_MSG_EVENT,        /**< Sự kiện đơn lẻ (ví dụ config_corrupt). */
-    APP_MSG_ALARM,        /**< Cảnh báo chuyển động lưu NVS. */
-    APP_MSG_FW,           /**< Trạng thái firmware/OTA. */
-    APP_MSG_CMD_ACK,      /**< Phản hồi một command từ cloud. */
+    APP_MSG_RAW_LIVE,     /**< Live telemetry sample. */
+    APP_MSG_RAW_REPLAY,   /**< Record read from the offline queue. */
+    APP_MSG_LOCATION,     /**< Location requested by a cloud command. */
+    APP_MSG_STATUS,       /**< Periodic device status. */
+    APP_MSG_BOUNDARY,     /**< Session-open or session-close boundary retained in NVS. */
+    APP_MSG_EVENT,        /**< Single device event, such as config_corrupt. */
+    APP_MSG_ALARM,        /**< Motion alarm retained in NVS. */
+    APP_MSG_FW,           /**< Firmware or OTA status report. */
+    APP_MSG_CMD_ACK,      /**< Acknowledgement of a cloud command. */
     APP_MSG_COUNT,
 } app_msg_kind_t;
 
@@ -27,8 +34,10 @@ void app_publisher_set_ack_handlers(const app_msg_ack_fn handlers[APP_MSG_COUNT]
 
 /* App task. Copy a payload to the modem when the slot is available. */
 bool app_publisher_send(app_msg_kind_t kind, modem_topic_t topic, const char *payload, size_t len);
+/** @brief Report whether the single publish slot still has an outstanding result. */
 bool app_publisher_is_busy(void);
 void app_publisher_on_ack(const ivts_event_t *event);
+/** @brief Recover the most recent modem ACK if its queue event was dropped. */
 void app_publisher_poll(void);
 
 /* App task. Build and send a live record, or spool it to SD. */
@@ -66,6 +75,9 @@ typedef enum {
 
 /* App task. Issue the next peek or send when the modem slot is free. */
 void app_replay_tick(void);
+/** @brief Deliver older RAW records first, stopping at a supplied boundary or at an empty queue. */
 app_replay_result_t app_replay_until(const ivts_session_boundary_t *boundary);
+/** @brief Queue a token-checked pop after a successful replay acknowledgement. */
 void app_replay_on_ack(bool ok);
+/** @brief Release the outstanding peek wait after storage has filled its slot. */
 void app_replay_on_queue_ready(void);

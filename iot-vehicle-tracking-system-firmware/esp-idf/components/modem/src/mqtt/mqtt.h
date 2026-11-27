@@ -1,3 +1,10 @@
+/**
+ * @file mqtt.h
+ * @brief Private MQTT session, TLS, receive and QoS 1 publish APIs.
+ *
+ * The modem task serializes these operations. HTTPS reuses the TLS setup with
+ * its own SIM7600 context index.
+ */
 #pragma once
 #include "modem_internal.h"
 #include "modem/modem.h"
@@ -18,6 +25,7 @@ void modem_mqtt_publish_pending(void);
 void modem_mqtt_rx_init(void);
 void modem_mqtt_rx_on_urc(const char *line);
 void modem_mqtt_rx_on_data(const uint8_t *data, size_t len);
+/** @brief Drop the incomplete frame after UART dispatch loses raw data. */
 void modem_mqtt_rx_discard_raw(void);
 
 /* Modem task. Configure certificate validation for MQTT or HTTPS. */

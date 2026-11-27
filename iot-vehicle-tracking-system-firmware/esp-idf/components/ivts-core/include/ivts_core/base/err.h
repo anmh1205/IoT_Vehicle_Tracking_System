@@ -1,9 +1,9 @@
 /**
  * @file err.h
- * @brief Mã lỗi dùng chung của firmware, độc lập với esp_err_t.
+ * @brief Portable IVTS results shared by the host and target firmware.
  *
- * Component I/O đổi esp_err_t sang ivts_err_t tại biên của mình để các
- * module thuần (ivts-core) và host test không phụ thuộc ESP-IDF.
+ * ESP-IDF adapters translate their SDK results at the I/O boundary before
+ * returning to portable core code.
  */
 #pragma once
 
@@ -14,15 +14,14 @@ typedef enum {
     IVTS_ERR_INVALID_STATE,
     IVTS_ERR_TIMEOUT,
     IVTS_ERR_NOT_FOUND,
-    IVTS_ERR_FULL,       /**< Hết chỗ hoặc bị cắt. */
+    IVTS_ERR_FULL,       /**< Buffer full or output truncated. */
     IVTS_ERR_IO,
     IVTS_ERR_CRC,
     IVTS_ERR_VERSION,
-    IVTS_ERR_COUNT       /**< Giá trị cuối enum, dùng để test duyệt hết các mã. */
+    IVTS_ERR_COUNT       /**< Sentinel after the last valid result code. */
 } ivts_err_t;
 
 /**
- * @brief Tên chuỗi của mã lỗi.
- * @return Con trỏ tới chuỗi tĩnh, không bao giờ NULL.
+ * @brief Return the static string name for an IVTS result code.
  */
 const char *ivts_err_name(ivts_err_t e);

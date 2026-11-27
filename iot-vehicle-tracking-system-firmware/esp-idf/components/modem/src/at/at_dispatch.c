@@ -1,3 +1,10 @@
+/**
+ * @file at_dispatch.c
+ * @brief Routing between UART input, AT responses and raw protocol streams.
+ *
+ * The modem task pumps UART bytes. A line or prompt is offered to the active
+ * command and asynchronous modem protocols as appropriate.
+ */
 #include "at/at.h"
 #include "modem_internal.h"
 #include "esp_log.h"
@@ -23,7 +30,7 @@ const char *modem_at_response(void)
 
 static void on_unsolicited(const char *line)
 {
-    if (modem_http_on_line(line)) { return; }       /* "+HTTPREAD: DATA,n" chuyển parser sang chế độ thô. */
+    if (modem_http_on_line(line)) { return; }       /* An HTTPREAD data header can switch the parser to raw mode. */
     modem_mqtt_rx_on_urc(line);
 }
 

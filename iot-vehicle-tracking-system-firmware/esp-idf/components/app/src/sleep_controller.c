@@ -1,3 +1,11 @@
+/**
+ * @file sleep_controller.c
+ * @brief Coordination of modem and BLE shutdown before board sleep.
+ *
+ * Keep event processing alive while waiting for the modem. On deadline or
+ * renewed activity, cancel the pending sleep and restore the requested
+ * services.
+ */
 #include "power.h"
 #include "app_internal.h"
 #include "device/device.h"
@@ -43,7 +51,7 @@ static board_wake_t enter_hw_sleep(const ivts_fsm_out_t *out, ivts_fsm_state_t s
         .arm_imu = out->sleep_arm_motion,
     };
     ESP_LOGI(APP_TAG, "sleep mode=%d %lus imu=%d", (int)out->sleep_mode, (unsigned long)req.seconds, req.arm_imu);
-    return board_sleep(&req);           /* Deep sleep: không trả về. */
+    return board_sleep(&req);           /* Entering deep sleep resets the processor. */
 }
 
 static void resume_after_wake(ivts_fsm_t *fsm, board_wake_t cause)

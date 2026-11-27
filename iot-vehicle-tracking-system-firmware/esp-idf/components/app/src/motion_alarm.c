@@ -1,3 +1,11 @@
+/**
+ * @file motion_alarm.c
+ * @brief Durable motion alarm delivery and acknowledgement.
+ *
+ * Attempt an NVS write when latching an alarm and retry on later delivery
+ * ticks. Keep its identity until a successful report ACK. If a persisted
+ * alarm cannot be cleared in NVS, retain it for retry.
+ */
 #include "persist/persist.h"
 #include "motion_alarm.h"
 #include "app_internal.h"

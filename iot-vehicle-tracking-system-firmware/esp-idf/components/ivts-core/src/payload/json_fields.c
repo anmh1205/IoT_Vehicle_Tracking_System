@@ -1,3 +1,7 @@
+/**
+ * @file json_fields.c
+ * @brief Typed object-field validation on tokenized JSON input.
+ */
 #include "ivts_core/payload/json_fields.h"
 #include <string.h>
 

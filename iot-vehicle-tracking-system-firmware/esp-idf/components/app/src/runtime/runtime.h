@@ -1,3 +1,10 @@
+/**
+ * @file runtime.h
+ * @brief Private interfaces for app task creation, event dispatch and FSM effects.
+ *
+ * Producers receive a nonblocking sink after queue creation. The app task
+ * serializes event delivery and runtime state transitions.
+ */
 #pragma once
 #include "ivts_core/fsm/axes.h"
 #include "ivts_core/fsm/fsm.h"
@@ -15,12 +22,14 @@ bool app_events_init(void);
 bool app_task_start(uint32_t stack_bytes, uint8_t priority);
 /* All component tasks can post events through this nonblocking sink. */
 ivts_sink_t app_events_sink(void);
-/* The app task is the sole consumer. */
+/** @brief Receive a copied event on the app task, with timeout in milliseconds. */
 bool app_events_receive(ivts_event_t *event, uint32_t timeout_ms);
+/** @brief Read the cumulative number of full-queue drops since boot. */
 uint32_t app_events_drops(void);
 
 /* App task. Apply telemetry and dispatch controls for one event. */
 void app_dispatch(const ivts_event_t *event);
+/** @brief Reconcile link state even when the queue lost its notification. */
 void app_dispatch_refresh_link(void);
 /* Receive and apply one event, optionally waiting on the queue. */
 bool app_dispatch_next(uint32_t timeout_ms);

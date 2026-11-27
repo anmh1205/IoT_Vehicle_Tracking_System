@@ -1,10 +1,14 @@
+/**
+ * @file json_writer.c
+ * @brief Bounded JSON output with escaping and explicit buffer exhaustion.
+ */
 #include "ivts_core/payload/json_writer.h"
 #include <string.h>
 
 static void put_c(ivts_jw_t *w, char c)
 {
     if (w->full) { return; }
-    if (w->len + 1u >= w->cap) {          /* luôn chừa 1 byte cho NUL */
+    if (w->len + 1u >= w->cap) {          /* Reserve one byte for the trailing NUL. */
         w->full = true;
         return;
     }
@@ -30,12 +34,12 @@ static void put_escaped(ivts_jw_t *w, const char *s)
         case '\r': put_s(w, "\\r");  break;
         case '\t': put_s(w, "\\t");  break;
         default:
-            if (c < 0x20u) {            /* ký tự điều khiển khác: \u00XX */
+            if (c < 0x20u) {            /* Escape another control byte as \u00XX. */
                 put_s(w, "\\u00");
                 put_c(w, hex[c >> 4]);
                 put_c(w, hex[c & 0x0Fu]);
             } else {
-                put_c(w, (char)c);      /* UTF-8 đi nguyên byte */
+                put_c(w, (char)c);      /* Copy UTF-8 bytes verbatim. */
             }
         }
     }
@@ -44,7 +48,7 @@ static void put_escaped(ivts_jw_t *w, const char *s)
 
 static void put_u64(ivts_jw_t *w, uint64_t v)
 {
-    char tmp[20];                       /* UINT64_MAX có 20 chữ số */
+    char tmp[20];                       /* UINT64_MAX has 20 digits. */
     size_t n = 0;
     do {
         tmp[n++] = (char)('0' + (int)(v % 10u));
@@ -53,7 +57,7 @@ static void put_u64(ivts_jw_t *w, uint64_t v)
     while (n > 0u) { put_c(w, tmp[--n]); }
 }
 
-/* Dấu phẩy + key (nếu có) trước mỗi phần tử. */
+/* Emit a separator and, for an object member, a key before the value. */
 static void lead(ivts_jw_t *w, const char *key)
 {
     uint8_t bit = (uint8_t)(1u << w->depth);
@@ -118,7 +122,7 @@ void ivts_jw_int(ivts_jw_t *w, const char *key, int64_t v)
     lead(w, key);
     if (v < 0) {
         put_c(w, '-');
-        /* -(INT64_MIN) tràn: đổi sang unsigned TRƯỚC khi đảo dấu. */
+        /* Use an unsigned magnitude to handle INT64_MIN without signed overflow. */
         put_u64(w, (uint64_t)0 - (uint64_t)v);
     } else {
         put_u64(w, (uint64_t)v);
@@ -144,12 +148,12 @@ void ivts_jw_fixed(ivts_jw_t *w, const char *key, int64_t v, uint8_t decimals)
     uint64_t mag = (v < 0) ? ((uint64_t)0 - (uint64_t)v) : (uint64_t)v;
     uint64_t div = 1u;
     for (uint8_t i = 0; i < decimals; i++) { div *= 10u; }
-    if (v < 0) { put_c(w, '-'); }          /* -0.5 phải có dấu dù phần nguyên là 0 */
+    if (v < 0) { put_c(w, '-'); }          /* Preserve the minus sign when the integer part is zero, as in -0.5. */
     put_u64(w, mag / div);
     if (decimals > 0u) {
         put_c(w, '.');
         uint64_t frac = mag % div;
-        for (uint64_t d = div / 10u; d > 0u; d /= 10u) {   /* giữ số 0 đứng đầu */
+        for (uint64_t d = div / 10u; d > 0u; d /= 10u) {   /* Pad fractional digits with leading zeroes. */
             put_c(w, (char)('0' + (int)((frac / d) % 10u)));
         }
     }

@@ -1,3 +1,10 @@
+/**
+ * @file cmd_restart.c
+ * @brief Durable restart and rollback intent with ACK-driven completion.
+ *
+ * Track the original OTA slot and defer the requested restart until the ACK is
+ * delivered or the established deadline expires.
+ */
 #include "persist/persist.h"
 #include "command/command.h"
 #include <string.h>
@@ -61,7 +68,10 @@ static const char *request_restart(const char *id, bool rollback)
         reason = persist_restart_intent(id, rollback, running);
         if (reason != NULL) { return reason; }
     }
-    /* Nếu mất nguồn sau khi lưu ý định, chỉ thử lại rollback khi vẫn ở slot gốc. */
+    /*
+     * After a power loss with a persisted rollback intent, retry the rollback
+     * only while running on the original image slot.
+     */
     if (rollback) {
         if (ota_schedule_rollback() != IVTS_OK) { return "no_rollback_image"; }
         app_fw_update_cancel_confirmation();

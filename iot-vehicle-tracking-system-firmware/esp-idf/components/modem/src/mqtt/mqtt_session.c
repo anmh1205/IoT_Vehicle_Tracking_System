@@ -1,3 +1,10 @@
+/**
+ * @file mqtt_session.c
+ * @brief SIM7600 MQTT connection, subscription and TLS configuration.
+ *
+ * Use the deployment-selected transport and configure TLS with trusted time
+ * and the requested certificate context.
+ */
 #include "mqtt/mqtt.h"
 #include "modem_internal.h"
 #include "at/at.h"
@@ -6,11 +13,11 @@
 #include "ivts_core/base/civil.h"
 #include "sdkconfig.h"
 
-#define KEEPALIVE_S   60   /* Keepalive MQTT, giây (manual cho phép 60..64800). */
+#define KEEPALIVE_S   60   /* MQTT keepalive in seconds. The modem supports 60 through 64800 seconds. */
 
 static bool fmt_ok(int n, size_t cap) { return n > 0 && (size_t)n < cap; }
 
-/** Subscribe topic command ở QoS 1. @return true nếu module xác nhận. */
+/** Subscribe to the command topic at QoS 1 and require modem confirmation. */
 static bool sub_commands(void)
 {
     char cmd[40];
@@ -22,8 +29,8 @@ static bool sub_commands(void)
 }
 
 /**
- * @brief Thực hiện bước MQTT @p step của máy trạng thái kết nối.
- * @return true nếu bước thành công và máy trạng thái được phép sang bước kế.
+ * @brief Execute the requested MQTT link step.
+ * @return true when the link state machine may advance.
  */
 static void mqtt_cleanup_stale_service(void)
 {
@@ -37,9 +44,11 @@ static bool mqtt_start_service(void)
     at_cmd_t c = { .text = "AT+CMQTTSTART", .final_prefix = "+CMQTTSTART:", .final_err_field = 1,
                    .timeout_ms = 12000 };
     at_result_t r = modem_at(&c);
-    /* Dịch vụ MQTT có thể còn chạy từ phiên trước (ESP reset nhưng module không), khi đó
-     * AT+CMQTTSTART trả lỗi. Giải phóng client và dừng dịch vụ để lần thử sau START lại từ
-     * đầu; không coi lỗi này là thành công vì không biết client nào còn đang giữ. */
+    /*
+     * The modem MQTT service can survive an ESP32 reset. If START fails,
+     * release the old client and stop the service so the retry starts from a
+     * known state.
+     */
     if (r != AT_RES_OK) {
         mqtt_cleanup_stale_service();
     }
@@ -79,8 +88,10 @@ bool modem_mqtt_format_connect_cmd(char *cmd, size_t cap, const modem_cfg_t *cfg
 static bool mqtt_connect(bool tls)
 {
     char cmd[256];
-    /* clean_session = 0: broker giữ subscription và các command QoS 1 trong lúc thiết bị
-     * offline. */
+    /*
+     * A persistent session keeps subscriptions and queued QoS 1 commands while
+     * offline.
+     */
     if (!modem_mqtt_format_connect_cmd(cmd, sizeof cmd, modem_config(), tls)) { return false; }
     at_cmd_t c = { .text = cmd, .final_prefix = "+CMQTTCONNECT:", .final_err_field = 2,
                    .timeout_ms = 35000, .redact = modem_config()->mqtt_user[0] != '\0' };

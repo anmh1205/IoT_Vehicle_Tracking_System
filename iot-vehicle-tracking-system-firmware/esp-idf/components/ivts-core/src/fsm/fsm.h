@@ -1,3 +1,7 @@
+/**
+ * @file components/ivts-core/src/fsm/fsm.h
+ * @brief Private state-transition helpers shared by the FSM and its handlers.
+ */
 #pragma once
 #include "ivts_core/fsm/fsm.h"
 

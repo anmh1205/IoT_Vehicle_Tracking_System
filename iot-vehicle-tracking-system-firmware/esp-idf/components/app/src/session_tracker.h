@@ -1,3 +1,10 @@
+/**
+ * @file session_tracker.h
+ * @brief App-task session tracking and publish boundary interfaces.
+ *
+ * The caller ticks session policy and acknowledges published boundaries on the
+ * app task. Restoring or updating a durable session may wait on flash.
+ */
 #pragma once
 #include "ivts_core/model/session.h"
 #include "ivts_core/model/telemetry.h"

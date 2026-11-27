@@ -1,3 +1,11 @@
+/**
+ * @file modem_http.c
+ * @brief HTTPS open, raw stream reads and close for the OTA byte source.
+ *
+ * Callers block through the modem task's request interface. The modem task
+ * owns the HTTP parser state until it has finished writing the supplied
+ * buffers.
+ */
 #include "modem_internal.h"
 #include "at/at.h"
 #include "esp_log.h"
@@ -54,8 +62,8 @@ void modem_http_close(void)
 }
 
 /**
- * @brief Nhận header "+HTTPREAD: [DATA,]<n>" và chuyển parser sang chế độ thô.
- * @return true nếu dòng đã được tiêu thụ; chỉ nhận khi đang có yêu cầu đọc (http_dst != NULL).
+ * @brief Recognize an HTTPREAD data header and enter raw mode.
+ * @return true when an active read consumed the header.
  */
 bool modem_http_on_line(const char *line)
 {
@@ -71,12 +79,13 @@ bool modem_http_on_line(const char *line)
 }
 
 /**
- * @brief Mở phiên HTTP GET và đọc mã trạng thái và kích thước.
- * @retval IVTS_OK                  Mã trạng thái 200.
- * @retval IVTS_ERR_INVALID_STATE   Chưa có kết nối dữ liệu.
- * @retval IVTS_ERR_INVALID_ARG     URL quá dài so với bộ đệm lệnh.
- * @retval IVTS_ERR_TIMEOUT         AT+HTTPACTION không hoàn tất.
- * @retval IVTS_ERR_IO              Lệnh lỗi hoặc mã trạng thái khác 200.
+ * @brief Start an HTTPS GET and collect the status and size.
+ * @retval IVTS_OK The server returned HTTP 200.
+ * @retval IVTS_ERR_INVALID_STATE The modem has no active data context.
+ * @retval IVTS_ERR_INVALID_ARG Invalid HTTPS URL or command length.
+ * @retval IVTS_ERR_TIMEOUT AT+HTTPACTION did not complete successfully.
+ * @retval IVTS_ERR_IO Modem setup failed or the server reported a non-200
+ * status.
  */
 static ivts_err_t do_open(const modem_req_t *r)
 {
@@ -84,7 +93,7 @@ static ivts_err_t do_open(const modem_req_t *r)
     if (r->url == NULL || strncmp(r->url, "https://", 8u) != 0 || strpbrk(r->url, "\"\\\r\n\t ") != NULL) {
         return IVTS_ERR_INVALID_ARG;
     }
-    (void)modem_at_simple("AT+HTTPTERM", 3000);           /* Đóng phiên còn treo từ trước nếu có. */
+    (void)modem_at_simple("AT+HTTPTERM", 3000);           /* Close a stale HTTP session before opening a new one. */
     if (modem_at_simple("AT+HTTPINIT", 10000) != AT_RES_OK) { return IVTS_ERR_IO; }
     if (!modem_tls_configure(1)) { return IVTS_ERR_IO; }
     if (modem_at_simple("AT+HTTPPARA=\"SSLCFG\",1", 5000) != AT_RES_OK &&
@@ -93,7 +102,7 @@ static ivts_err_t do_open(const modem_req_t *r)
     }
     (void)modem_at_simple("AT+HTTPPARA=\"UA\",\"IVTS-Firmware/1.0\"", 5000);
     (void)modem_at_simple("AT+HTTPPARA=\"USERDATA\",\"Accept-Encoding: identity\"", 5000);
-    char cmd[300];                                        /* URL tối đa 256 ký tự theo contract OTA. */
+    char cmd[300];                                        /* The OTA contract limits URLs to 256 characters. */
     int k = snprintf(cmd, sizeof cmd, "AT+HTTPPARA=\"URL\",\"%s\"", r->url);
     if (k < 0 || (size_t)k >= sizeof cmd) { return IVTS_ERR_INVALID_ARG; }
     at_cmd_t url = { .text = cmd, .timeout_ms = 5000, .redact = true };
@@ -111,13 +120,13 @@ static ivts_err_t do_open(const modem_req_t *r)
 }
 
 /**
- * @brief Đọc @c r->len byte từ @c r->offset vào @c r->buf.
+ * @brief Read up to @c r->len bytes at @c r->offset into @c r->buf.
  *
- * Trong lúc lệnh chạy, destination trỏ tới bộ đệm của caller để modem_http_route_raw()
- * ghi trực tiếp byte thô. destination được đặt lại NULL ngay khi lệnh kết thúc.
+ * During the command, raw dispatch writes directly into the caller's buffer.
+ * Clear the destination when the AT command returns.
  *
- * @retval IVTS_OK       Đọc được ít nhất một byte.
- * @retval IVTS_ERR_IO   Lệnh lỗi hoặc không đọc được byte nào.
+ * @retval IVTS_OK At least one byte was received within capacity.
+ * @retval IVTS_ERR_IO The read failed, overflowed or returned no bytes.
  */
 static ivts_err_t do_read(const modem_req_t *r)
 {

@@ -1,13 +1,12 @@
-#pragma once
-
 /**
  * @file record.h
- * @brief Bản ghi telemetry của offline queue và định dạng lưu trữ của nó.
+ * @brief Versioned binary telemetry records for the offline queue and replay.
  *
- * Bản ghi được mã hoá từng byte, little-endian, có byte version ở đầu. Không dùng
- * memcpy trên struct: padding và endianness không thuộc về hợp đồng định dạng.
- * CRC không nằm trong bản ghi mà do khung của storage_queue thêm vào.
+ * Encode the version byte and fields explicitly in little-endian order.
+ * Compiler padding and host endianness do not enter the storage format. The
+ * containing queue frame adds the CRC.
  */
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
@@ -16,15 +15,15 @@
 #include "ivts_core/model/obd.h"
 #include "ivts_core/model/session.h"
 
-#define IVTS_RECORD_VERSION  2u    /**< Version của định dạng ghi mới. */
-#define IVTS_RECORD_V1_SIZE  47u   /**< Kích thước bản ghi version 1 (byte). */
+#define IVTS_RECORD_VERSION  2u    /**< Version emitted by the current encoder. */
+#define IVTS_RECORD_V1_SIZE  47u   /**< Encoded size of a version 1 record in bytes. */
 #define IVTS_RECORD_V2_SIZE  81u
 #define IVTS_RECORD_MAX_SIZE IVTS_RECORD_V2_SIZE
 
-/** Một mẫu telemetry được lưu hoặc gửi. */
+/** One telemetry sample for serialization or delivery. */
 typedef struct {
-    uint32_t          boot_id;     /**< Cùng seq tạo message_id; ổn định qua reset. */
-    uint32_t          seq;         /**< Số thứ tự cấp lúc chụp mẫu; replay dùng lại đúng giá trị. */
+    uint32_t          boot_id;     /**< Boot ID used with the sequence to preserve message identity across replay. */
+    uint32_t          seq;         /**< Sequence allocated at capture and reused during replay. */
     ivts_gnss_t       gnss;
     ivts_obd_sample_t obd;
     uint16_t          vehicle_mv;
@@ -32,8 +31,8 @@ typedef struct {
     uint8_t           ignition;    /**< ivts_ignition_t. */
     uint8_t           motion;      /**< ivts_motion_t. */
     uint8_t           vehicle;     /**< ivts_vehicle_t. */
-    uint64_t          captured_unix_ms; /**< Giờ lấy mẫu tin cậy, 0 nếu chưa có. */
-    uint32_t          uptime_ms;        /**< Uptime lúc lấy mẫu. */
+    uint64_t          captured_unix_ms; /**< Trusted sample time in Unix milliseconds. Zero means unavailable. */
+    uint32_t          uptime_ms;        /**< Monotonic sample time in milliseconds. */
     uint32_t          imu_delta_mmps2;
     ivts_session_id_t session;
     uint8_t           device;           /**< ivts_device_state_t. */
@@ -41,25 +40,29 @@ typedef struct {
 } ivts_record_t;
 
 /**
- * @brief Mã hoá bản ghi theo định dạng version hiện tại.
- * @param r        Bản ghi nguồn.
- * @param buf      Buffer đích.
- * @param cap      Kích thước @p buf, tối thiểu IVTS_RECORD_V2_SIZE.
- * @param out_len  Nhận số byte đã ghi; có thể NULL.
- * @return IVTS_OK; IVTS_ERR_INVALID_ARG nếu tham số sai hoặc buffer nhỏ.
+ * @brief Encode a record in the current wire format.
+ * @param r Source record.
+ * @param[out] buf Destination buffer.
+ * @param cap Capacity of buf, at least IVTS_RECORD_V2_SIZE bytes.
+ * @param[out] out_len Optional byte count written.
+ * @return IVTS_OK, or IVTS_ERR_INVALID_ARG for an invalid argument or
+ * capacity.
  */
 ivts_err_t ivts_record_encode(const ivts_record_t *r, uint8_t *buf, size_t cap, size_t *out_len);
 
 /**
- * @brief Giải mã bản ghi.
- * @param buf  Dữ liệu đã mã hoá.
- * @param len  Số byte của @p buf.
- * @param r    Nhận bản ghi.
- * @return IVTS_OK; IVTS_ERR_INVALID_ARG nếu con trỏ NULL hoặc dữ liệu ngắn hơn định dạng;
- *         IVTS_ERR_VERSION nếu version không được hỗ trợ.
- * @note Hàm không kiểm tra CRC; việc đó thuộc về khung lưu trữ của storage_queue.
+ * @brief Decode a supported version of an offline record.
+ * @param buf Encoded record bytes.
+ * @param len Number of bytes in buf.
+ * @param[out] r Decoded record.
+ * @return IVTS_OK on success, IVTS_ERR_INVALID_ARG for invalid arguments or a
+ * short record, or IVTS_ERR_VERSION for an unsupported format.
+ * @note The storage queue validates the CRC of the containing frame.
  */
 ivts_err_t ivts_record_decode(const uint8_t *buf, size_t len, ivts_record_t *r);
 
-/** So thứ tự replay của mẫu và mốc phiên. Mẫu thuộc phiên đang đóng phải đi trước mốc đóng. */
+/**
+ * Compare a sample against a session boundary for replay. A sample from the
+ * closing session precedes its close boundary.
+ */
 bool ivts_record_precedes_boundary(const ivts_record_t *r, const ivts_session_boundary_t *b);

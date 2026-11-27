@@ -1,3 +1,10 @@
+/**
+ * @file obd_session.c
+ * @brief ELM327 scanning, GATT discovery and adapter initialization.
+ *
+ * Match discovery results to the active BLE connection and use bounded waits.
+ * Enable notifications before issuing ELM commands.
+ */
 #include "obd_internal.h"
 #include "esp_log.h"
 #include "platform/platform.h"

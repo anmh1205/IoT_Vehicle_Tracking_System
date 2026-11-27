@@ -1,3 +1,7 @@
+/**
+ * @file fsm_states.c
+ * @brief State-specific transitions, sleep predicates and requested effects.
+ */
 #include "fsm/fsm.h"
 
 static void go(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_fsm_state_t s, ivts_ms_t now)
@@ -10,12 +14,12 @@ static void go(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_fsm_state_t s, ivts_ms_t
     out->changed = true;
 }
 
-/* Phát RAW theo chu kỳ, tính từ lần phát trước (lần đầu phát ngay). */
+/* Publish RAW at the configured interval, starting immediately on entry. */
 static void periodic_raw(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_ms_t now, uint32_t period)
 {
     if (f->last_raw_ms == 0u || ivts_elapsed(now, f->last_raw_ms) >= period) {
         out->actions |= IVTS_ACT_PUBLISH_RAW;
-        f->last_raw_ms = (now == 0u) ? 1u : now;   /* 0 dành cho "chưa phát" */
+        f->last_raw_ms = (now == 0u) ? 1u : now;   /* Zero represents an unsent RAW timestamp. */
     }
 }
 
@@ -28,7 +32,7 @@ static void status_once(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_ms_t now)
     }
 }
 
-/* Thiết bị đã provision chờ broker trong cửa sổ thức để heartbeat có cơ hội được gửi. */
+/* Give a provisioned device the awake window to connect and send its heartbeat. */
 static bool drained(const ivts_fsm_in_t *in)
 {
     if (in->ota_active || !in->publish_idle) { return false; }
@@ -41,11 +45,12 @@ static void enter_sleep(ivts_fsm_t *f, const ivts_fsm_cfg_t *c, ivts_fsm_out_t *
     out->actions |= IVTS_ACT_SLEEP | IVTS_ACT_GNSS_OFF;
     out->sleep_s = c->heartbeat_s;
     if (!c->sleep_enabled) {
-        out->sleep_mode = IVTS_SLEEP_FAKE;       /* thức nhưng hành xử như đang ngủ */
+        out->sleep_mode = IVTS_SLEEP_FAKE;       /* Keep the hardware powered while the FSM is in simulated sleep. */
         out->sleep_arm_motion = c->imu_wakeup_enabled;
     } else if (c->imu_wakeup_enabled && !c->deep_wake_on_motion) {
-        /* Chân INT không phải RTC GPIO: deep sleep không thể thức theo motion.
-         * Muốn giữ cảnh báo trộm thì phải dùng light sleep (tốn dòng hơn). */
+        /*
+         * The IMU interrupt GPIO cannot wake deep sleep on this board.
+         */
         out->sleep_mode = IVTS_SLEEP_LIGHT;
         out->sleep_arm_motion = true;
     } else {

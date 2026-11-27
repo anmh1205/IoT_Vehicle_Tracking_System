@@ -1,3 +1,7 @@
+/**
+ * @file json_fields.h
+ * @brief Typed JSON field access for bounds-checked command and manifest reads.
+ */
 #pragma once
 #include "ivts_core/payload/json_reader.h"
 

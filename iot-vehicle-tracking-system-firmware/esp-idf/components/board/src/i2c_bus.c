@@ -1,11 +1,20 @@
+/**
+ * @file i2c_bus.c
+ * @brief Shared board I2C device registry and timed transaction serialization.
+ *
+ * RTC and IMU calls share one task mutex. Each transfer has its own timeout
+ * inside the lock, with a separate timeout for acquiring the lock.
+ */
 #include "board_internal.h"
 #include "board/board_hw.h"
 #include "platform/platform.h"
 #include "driver/i2c_master.h"
 #include "esp_check.h"
 
-/* Thời gian tối đa của một giao dịch I2C, và thời gian chờ mutex bus. Giao dịch dài nhất
- * (đọc 7 byte ở 100 kHz) ngắn hơn 2 ms, nên 100 ms chỉ bị chạm khi bus bị treo. */
+/*
+ * I2C transfers and acquisition of the bus mutex have separate deadlines. A
+ * normal 7-byte transfer at 100 kHz takes less than 2 ms.
+ */
 #define I2C_XFER_TIMEOUT_MS 50
 #define I2C_LOCK_TIMEOUT_MS 100
 
@@ -24,7 +33,7 @@ static void board_i2c_unlock(void)
     platform_mutex_unlock(s_i2c_mutex);
 }
 
-/* Bus I2C master port 0. Thiết bị trên bus được thêm sau bằng board_i2c_add(). */
+/* Initialize I2C master port 0. Register devices separately with board_i2c_add(). */
 esp_err_t board_i2c_init(void)
 {
     s_i2c_mutex = platform_mutex_create();
@@ -36,7 +45,7 @@ esp_err_t board_i2c_init(void)
         .scl_io_num = BOARD_PIN_I2C_SCL,
         .clk_source = I2C_CLK_SRC_DEFAULT,
         .glitch_ignore_cnt = 7,
-        .flags.enable_internal_pullup = true,   /* Pull-up nội bổ sung cho pull-up ngoài của board. */
+        .flags.enable_internal_pullup = true,   /* Enable internal pull-ups in addition to the external board pull-ups. */
     };
     return i2c_new_master_bus(&cfg, &s_bus);
 }

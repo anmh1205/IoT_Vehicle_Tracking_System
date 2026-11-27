@@ -1,3 +1,10 @@
+/**
+ * @file app_records.c
+ * @brief Typed wrappers for versioned application records stored in NVS.
+ *
+ * These functions preserve the key and layout used by deployed firmware. They
+ * can block on flash and return persistence errors to the caller.
+ */
 #include "persist/persist.h"
 #include "storage/nvs_store.h"
 

@@ -1,22 +1,12 @@
 /**
  * @file sleep.c
- * @brief Quản lý nguồn: cấu hình PM, ngủ light/deep sleep, xác định nguyên nhân thức.
+ * @brief ESP-IDF light and deep sleep configuration for the board.
  *
- * Component board sở hữu mọi lời gọi sleep của ESP-IDF.
- *
- * ## Ngữ cảnh gọi
- *
- * - board_power_capture_wake(): gọi một lần trong board_init(), trước khi task nào chạy.
- * - board_sleep(): chỉ task app (sleep controller) gọi. Hàm chặn trong suốt thời gian ngủ;
- *   khi light sleep, mọi task khác bị đóng băng cùng CPU. Deep sleep không trả về.
- * - board_wake_cause(): đọc s_boot_wake, giá trị chỉ ghi một lần lúc khởi động nên không cần khoá.
- *
- * ## Khi reset hoặc mất nguồn
- *
- * Deep sleep reset CPU; RAM thường mất, chỉ RTC_DATA_ATTR còn (xem rtc_context.c).
- * Nguyên nhân thức được đọc lại từ esp_sleep_get_wakeup_causes() ở lần boot kế tiếp.
+ * Capture the ESP-IDF wake-source bitmap at board startup. The app sleep
+ * controller is the sole caller that enters sleep. Light sleep suspends
+ * execution until wake and returns the mapped wake reason. Deep sleep resets
+ * the CPU on wake and preserves only the configured retained memory.
  */
-
 #include "board_internal.h"
 #include "board/board_hw.h"
 #include "drivers/drivers.h"
@@ -28,7 +18,10 @@
 ivts_err_t board_set_auto_light_sleep(bool enabled)
 {
 #if CONFIG_PM_ENABLE
-    /* Khi cho phép tự ngủ, modem giữ ESP_PM_NO_LIGHT_SLEEP trong lúc cần UART. */
+    /*
+     * When automatic light sleep is enabled, the modem holds
+     * ESP_PM_NO_LIGHT_SLEEP while it needs UART.
+     */
     esp_pm_config_t pm = {
         .max_freq_mhz = CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ,
         .min_freq_mhz = 40,
@@ -50,7 +43,7 @@ static void arm_timer_wake(uint32_t seconds)
 static bool imu_already_pending(bool is_imu_armed)
 {
     if (!is_imu_armed || lis3dsh_interrupt_level() != 1) { return false; }
-    /* Giữ ngắt đã chốt đến khi task board đọc OUTS1. */
+    /* Preserve the latched interrupt for the board task to acknowledge via OUTS1. */
     board_task_notify_imu();
     return true;
 }
@@ -79,7 +72,7 @@ static board_wake_t enter_light_sleep(bool arm_imu)
     }
     board_wake_t wake = board_power_read_wake_cause();
     if (wake == BOARD_WAKE_IMU) {
-        board_task_notify_imu();                     /* Task board đọc OUTS1 và phát sự kiện. */
+        board_task_notify_imu();                     /* The board task reads OUTS1 and publishes the motion event. */
     }
     return wake;
 }

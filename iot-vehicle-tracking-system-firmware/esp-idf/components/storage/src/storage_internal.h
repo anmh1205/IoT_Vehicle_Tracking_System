@@ -1,3 +1,7 @@
+/**
+ * @file storage_internal.h
+ * @brief Private storage startup, task configuration and NVS initialization hooks.
+ */
 #pragma once
 #include "storage/storage.h"
 #include "esp_err.h"

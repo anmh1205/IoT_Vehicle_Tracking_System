@@ -1,8 +1,14 @@
+/**
+ * @file at_engine.c
+ * @brief Execution and completion tracking for one outstanding AT command.
+ *
+ * The caller provides a monotonic timestamp and write function. Results
+ * distinguish prompts, final replies, modem errors and timeouts.
+ */
 #include "at/at.h"
 #include <string.h>
 #include "ivts_core/base/str.h"
 
-/* Xem at_engine.h. */
 void at_engine_init(at_engine_t *e, at_tx_t tx)
 {
     memset(e, 0, sizeof(*e));
@@ -25,7 +31,7 @@ ivts_err_t at_engine_start(at_engine_t *e, const at_cmd_t *cmd, ivts_ms_t now)
     return IVTS_OK;
 }
 
-/** Kết thúc lệnh hiện tại với kết quả @p r. */
+/** Complete the active command with result @p r. */
 static void finish(at_engine_t *e, at_result_t r)
 {
     e->result = r;
@@ -36,7 +42,7 @@ bool at_engine_on_line(at_engine_t *e, const char *line)
 {
     if (!e->busy) { return false; }
 
-    /* Echo của chính lệnh: xảy ra khi echo đang bật (ATE1) hoặc trước khi ATE0 có hiệu lực. */
+    /* Ignore the modem's command echo before ATE0 takes effect. */
     if (strcmp(line, e->cmd.text) == 0) { return true; }
 
     at_line_kind_t kind = at_classify(line);
@@ -51,9 +57,11 @@ bool at_engine_on_line(at_engine_t *e, const char *line)
         finish(e, AT_RES_ERROR);
         return true;
     }
-    /* Tiền tố của lệnh đang chạy được so trước khi coi dòng là URC, vì một số dòng vừa là URC
-     * vừa là phản hồi: "+CPIN:" xuất hiện lúc boot và cũng là phản hồi của AT+CPIN?;
-     * "+HTTPACTION:" là URC nhưng cũng là kết quả của AT+HTTPACTION. */
+    /*
+     * Match the active command first. For example, +CPIN: can arrive
+     * unsolicited at boot or carry the AT+CPIN? response. +HTTPACTION: can
+     * finish an active HTTP request or arrive as a URC.
+     */
     if (e->cmd.final_prefix != NULL &&
         (e->cmd.final_exact ? strcmp(line, e->cmd.final_prefix) == 0 : at_has_prefix(line, e->cmd.final_prefix))) {
         if (e->cmd.data != NULL && !e->data_sent) { return true; }
@@ -61,7 +69,7 @@ bool at_engine_on_line(at_engine_t *e, const char *line)
         int32_t err = 0;
         if (e->cmd.final_err_field > 0u &&
             (!at_field_int(line, (unsigned)e->cmd.final_err_field - 1u, &err) || err != 0)) {
-            finish(e, AT_RES_ERROR);           /* Mã lỗi khác 0, hoặc dòng sai định dạng nên không đọc được mã. */
+            finish(e, AT_RES_ERROR);           /* A missing error field or nonzero error value fails the command. */
         } else {
             finish(e, AT_RES_OK);
         }
@@ -71,10 +79,10 @@ bool at_engine_on_line(at_engine_t *e, const char *line)
         (void)ivts_str_copy(e->resp, sizeof(e->resp), line);
         return true;
     }
-    return false;          /* URC hoặc dòng không xác định: caller xử lý. */
+    return false;          /* Let the caller route unsolicited or unknown lines. */
 }
 
-/* Prompt chỉ có ý nghĩa với lệnh có data; gửi data đúng một lần. */
+/* Only an active data command reacts to a prompt. Transmit its body once. */
 void at_engine_on_prompt(at_engine_t *e)
 {
     if (!e->busy || e->cmd.data == NULL || e->data_sent) { return; }

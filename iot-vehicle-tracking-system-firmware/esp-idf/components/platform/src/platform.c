@@ -1,6 +1,6 @@
 /**
  * @file platform.c
- * @brief Monotonic time, restart and SDK result translation.
+ * @brief Monotonic time, restart and ESP-IDF result translation.
  */
 #include "platform/platform.h"
 #include "esp_log.h"

@@ -1,3 +1,10 @@
+/**
+ * @file fw_update.c
+ * @brief Application-side firmware update, reboot and confirmation policy.
+ *
+ * Boot restores pending context. The app task persists status where required
+ * and coordinates image confirmation, rollback and final report ACK.
+ */
 #include "persist/persist.h"
 #include "fw_update.h"
 #include <string.h>
@@ -76,7 +83,7 @@ void app_fw_update_restore_at_boot(void)
 }
 
 /**
- * @brief Cập nhật trạng thái firmware và hẹn reboot khi đã sẵn sàng.
+ * @brief Apply OTA worker status and schedule a reboot when requested.
  */
 static void app_fw_update_on_progress(const ivts_event_t *ev)
 {
@@ -120,9 +127,10 @@ static void rollback_running_image(uint64_t uptime_ms)
 }
 
 /**
- * @brief Quyết định chấp nhận hay rollback image OTA đang chờ xác nhận.
+ * @brief Evaluate the pending OTA image against the boot confirmation policy.
  *
- * Xác nhận trước hạn khi broker đang kết nối và đã PUBACK bản tin trạng thái trong lần boot này.
+ * Confirm before the deadline when the broker is up and a qualifying publish
+ * has received PUBACK during this boot.
  */
 void app_fw_update_confirm_tick(void)
 {

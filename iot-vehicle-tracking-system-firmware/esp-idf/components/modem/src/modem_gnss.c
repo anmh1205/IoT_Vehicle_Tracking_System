@@ -1,3 +1,10 @@
+/**
+ * @file modem_gnss.c
+ * @brief Periodic SIM7600 GNSS reads and parsing into integer fix fields.
+ *
+ * The modem task applies the requested GNSS state, reads fixes and publishes
+ * snapshots. Convert time and coordinates before publishing across tasks.
+ */
 #include "modem_internal.h"
 #include "at/at.h"
 #include "esp_log.h"
@@ -54,12 +61,12 @@ void modem_gnss_step(void)
     modem_emit(&ev);
 }
 
-#define MAX_FIELDS 20u   /* Số trường tối đa của một dòng; trường dư bị bỏ. */
+#define MAX_FIELDS 20u   /* Maximum number of CSV fields. Ignore fields beyond the caller's capacity. */
 
 /**
- * @brief Tách chuỗi "a,b,,c" tại chỗ bằng cách thay dấu ',' bằng NUL.
- * @param[out] f Mảng con trỏ tới từng trường; trường rỗng trỏ tới chuỗi rỗng.
- * @return Số trường (>= 1).
+ * @brief Split CSV in place by replacing commas with NUL.
+ * @param[out] f Field pointers. Adjacent delimiters produce an empty field.
+ * @return Number of fields, at least one.
  */
 static unsigned split(char *s, char *f[], unsigned max)
 {
@@ -75,13 +82,14 @@ static unsigned split(char *s, char *f[], unsigned max)
 }
 
 /**
- * @brief Đổi số thập phân "123.45" thành số nguyên giá trị × 10^scale.
+ * @brief Convert a decimal value to an unsigned integer scaled by 10^scale.
  *
- * Phần thập phân thừa bị cắt chứ không làm tròn. Phần nguyên bị giới hạn ở 1e8 để phép nhân
- * không tràn uint64_t.
+ * Extra fractional digits are truncated. Limit the integer part to guard
+ * against overflow when it is scaled.
  *
- * @retval IVTS_OK              Đã chuyển đổi.
- * @retval IVTS_ERR_INVALID_ARG Không bắt đầu bằng chữ số, có ký tự lạ hoặc phần nguyên quá lớn.
+ * @retval IVTS_OK Conversion succeeded.
+ * @retval IVTS_ERR_INVALID_ARG Missing leading digit, invalid character or
+ * integer part outside the supported range.
  */
 static ivts_err_t parse_fixed(const char *s, unsigned scale, uint64_t *out)
 {
@@ -107,17 +115,16 @@ static ivts_err_t parse_fixed(const char *s, unsigned scale, uint64_t *out)
     return IVTS_OK;
 }
 
-/* Xem gnss_parse.h. */
 ivts_err_t gnss_nmea_to_e7(const char *ddmm, char hemi, int32_t *out)
 {
-    uint64_t v;                                    /* Giá trị ddmm.mmmmmm nhân 1e6. */
+    uint64_t v;                                    /* NMEA degrees and minutes scaled by 10^6. */
     if (ddmm == NULL || out == NULL || parse_fixed(ddmm, 6, &v) != IVTS_OK) {
         return IVTS_ERR_INVALID_ARG;
     }
-    uint64_t deg = v / 100000000u;                 /* Phần độ: hai hoặc ba chữ số đầu. */
-    uint64_t min_u = v % 100000000u;               /* Phần phút nhân 1e6. */
+    uint64_t deg = v / 100000000u;                 /* Degree component from the leading two or three digits. */
+    uint64_t min_u = v % 100000000u;               /* Minute component scaled by 10^6. */
     if (min_u >= 60000000u) { return IVTS_ERR_INVALID_ARG; }
-    /* Đổi phút sang độ nhân 1e7: (phút × 1e6) × 10 / 60, có làm tròn. */
+    /* Convert scaled minutes to degrees times 10^7, rounding to the nearest integer. */
     uint64_t e7 = deg * 10000000u + (min_u * 10u + 30u) / 60u;
     bool lat = (hemi == 'N' || hemi == 'S');
     if (!lat && hemi != 'E' && hemi != 'W') { return IVTS_ERR_INVALID_ARG; }
@@ -126,17 +133,17 @@ ivts_err_t gnss_nmea_to_e7(const char *ddmm, char hemi, int32_t *out)
     return IVTS_OK;
 }
 
-/** Giá trị của hai chữ số thập phân liên tiếp; caller đã kiểm tra là chữ số. */
+/** Decode two decimal digits validated by the caller. */
 static int two(const char *s) { return (s[0] - '0') * 10 + (s[1] - '0'); }
 
-/** @return true nếu @p n ký tự đầu của @p s đều là chữ số. */
+/** @return true when the first @p n characters of @p s are all decimal digits. */
 static bool digits(const char *s, size_t n)
 {
     for (size_t i = 0; i < n; i++) { if (s[i] < '0' || s[i] > '9') { return false; } }
     return true;
 }
 
-/* Xem gnss_parse.h. Năm hai chữ số được hiểu là 2000..2099. */
+/* Interpret the two-digit year in the range 2000 through 2099. */
 ivts_err_t gnss_datetime_to_unix_ms(const char *ddmmyy, const char *hhmmss, uint64_t *out)
 {
     if (ddmmyy == NULL || hhmmss == NULL || out == NULL || strlen(ddmmyy) != 6u ||
@@ -148,7 +155,7 @@ ivts_err_t gnss_datetime_to_unix_ms(const char *ddmmyy, const char *hhmmss, uint
         .day = (uint8_t)two(ddmmyy), .hour = (uint8_t)two(hhmmss), .min = (uint8_t)two(hhmmss + 2),
         .sec = (uint8_t)two(hhmmss + 4), .ms = 0,
     };
-    if (hhmmss[6] == '.') {                        /* Phần thập phân của giây: ".s" đến ".sss". */
+    if (hhmmss[6] == '.') {                        /* Accept a fractional second with one to three digits. */
         unsigned mul = 100, ms = 0;
         for (const char *p = hhmmss + 7; *p >= '0' && *p <= '9' && mul > 0u; p++, mul /= 10u) {
             ms += (unsigned)(*p - '0') * mul;
@@ -159,11 +166,11 @@ ivts_err_t gnss_datetime_to_unix_ms(const char *ddmmyy, const char *hhmmss, uint
 }
 
 /**
- * @brief Điền phần chung của hai định dạng, bắt đầu từ trường f[i]:
- *        lat, N/S, lon, E/W, date, time, alt, speed, course.
+ * @brief Decode the fields shared by both fix reports.
  *
- * Giờ UTC, tốc độ và hướng là tuỳ chọn: thiếu hoặc sai định dạng thì để nguyên giá trị 0.
- * Toạ độ bắt buộc; thiếu hoặc sai thì cả dòng bị từ chối.
+ * Starting at f[i], consume latitude, N/S, longitude, E/W, date, time,
+ * altitude, speed and course. Coordinates are required. Missing or malformed
+ * UTC time, speed and course leave the corresponding value zero.
  */
 static ivts_err_t fill_common(char *f[], unsigned i, unsigned n, ivts_gnss_t *g)
 {
@@ -180,7 +187,7 @@ static ivts_err_t fill_common(char *f[], unsigned i, unsigned n, ivts_gnss_t *g)
     }
     uint64_t v;
     if (f[i + 7][0] != '\0' && parse_fixed(f[i + 7], 3, &v) == IVTS_OK) {
-        /* Đổi mili-knot sang cm/s: 1 kn = 51,4444 cm/s, nên cm/s = mili-knot × 514444 / 1e7. */
+        /* Convert milliknots to cm/s using 514444 / 10^7. */
         uint64_t cms = (v * 514444u + 5000000u) / 10000000u;
         g->speed_cm_s = (cms > UINT16_MAX) ? UINT16_MAX : (uint16_t)cms;
     }
@@ -192,9 +199,9 @@ static ivts_err_t fill_common(char *f[], unsigned i, unsigned n, ivts_gnss_t *g)
 }
 
 /**
- * @brief Kiểm tra tiền tố, sao chép phần sau tiền tố vào @p buf và tách trường.
+ * @brief Check the prefix and split a writable copy of the remaining fields.
  *
- * Sao chép là bắt buộc vì split() ghi vào chuỗi. @p out được xoá về 0.
+ * split() edits the copy at each comma. Clear the output fix before decoding.
  */
 static ivts_err_t prepare(const char *line, const char *prefix, char *buf, size_t cap,
                           char *f[], unsigned *n, ivts_gnss_t *out)
@@ -211,7 +218,6 @@ static ivts_err_t prepare(const char *line, const char *prefix, char *buf, size_
     return IVTS_OK;
 }
 
-/* Xem gnss_parse.h. */
 ivts_err_t gnss_parse_cgnssinfo(const char *line, ivts_gnss_t *out)
 {
     char buf[160];
@@ -220,10 +226,13 @@ ivts_err_t gnss_parse_cgnssinfo(const char *line, ivts_gnss_t *out)
     ivts_err_t e = prepare(line, "+CGNSSINFO:", buf, sizeof buf, f, &n, out);
     if (e != IVTS_OK) { return e; }
     out->src = IVTS_GNSS_SRC_FULL;
-    if (f[0][0] == '\0') { return IVTS_OK; }           /* Chưa có fix. */
+    if (f[0][0] == '\0') { return IVTS_OK; }           /* The module reported no fix. */
 
-    /* Vị trí trường lat được xác định bằng mốc N/S và E/W thay vì chỉ số cố định, vì các bản
-     * firmware SIM7600 khác nhau có thể thêm trường số vệ tinh (ví dụ Galileo) trước lat. */
+    /*
+     * Locate latitude using the N/S and E/W markers. Some SIM7600 firmware
+     * includes additional satellite constellation fields before the
+     * coordinates.
+     */
     unsigned lat = 0;
     for (unsigned i = 1; i + 3u < n; i++) {
         char h1 = f[i + 1][0], h2 = f[i + 3][0];
@@ -234,7 +243,7 @@ ivts_err_t gnss_parse_cgnssinfo(const char *line, ivts_gnss_t *out)
     }
     if (lat < 2u) { return IVTS_ERR_INVALID_ARG; }
     unsigned sats = 0;
-    for (unsigned i = 1; i < lat; i++) {               /* f[0] là mode; các trường trước lat là số vệ tinh. */
+    for (unsigned i = 1; i < lat; i++) {               /* The first field holds the mode. Remaining leading fields are satellite counts. */
         uint64_t v;
         if (f[i][0] != '\0' && parse_fixed(f[i], 0, &v) == IVTS_OK) { sats += (unsigned)v; }
     }
@@ -242,7 +251,6 @@ ivts_err_t gnss_parse_cgnssinfo(const char *line, ivts_gnss_t *out)
     return fill_common(f, lat, n, out);
 }
 
-/* Xem gnss_parse.h. */
 ivts_err_t gnss_parse_cgpsinfo(const char *line, ivts_gnss_t *out)
 {
     char buf[160];
@@ -250,7 +258,7 @@ ivts_err_t gnss_parse_cgpsinfo(const char *line, ivts_gnss_t *out)
     unsigned n;
     ivts_err_t e = prepare(line, "+CGPSINFO:", buf, sizeof buf, f, &n, out);
     if (e != IVTS_OK) { return e; }
-    out->src = IVTS_GNSS_SRC_APPROX;                   /* Định dạng này không có số vệ tinh: sats = 0. */
+    out->src = IVTS_GNSS_SRC_APPROX;                   /* This fallback format reports no satellite count. */
     if (f[0][0] == '\0') { return IVTS_OK; }
     return fill_common(f, 0, n, out);
 }

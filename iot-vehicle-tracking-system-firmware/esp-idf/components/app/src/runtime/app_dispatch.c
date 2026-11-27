@@ -1,3 +1,10 @@
+/**
+ * @file app_dispatch.c
+ * @brief Dispatch table for by-value events received by the app task.
+ *
+ * Dispatch runs on the app task and routes events to their owning feature.
+ * Link refresh reconciles the last snapshot if a notification was dropped.
+ */
 #include "runtime/runtime.h"
 #include "app_internal.h"
 #include "esp_log.h"

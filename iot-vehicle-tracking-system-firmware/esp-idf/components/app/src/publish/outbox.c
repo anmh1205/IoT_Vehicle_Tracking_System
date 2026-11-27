@@ -1,3 +1,10 @@
+/**
+ * @file outbox.c
+ * @brief Control-message scheduling and publish ACK state transitions.
+ *
+ * Preserve OTA and alarm precedence, and let older RAW records drain ahead of
+ * their closing or opening session boundary.
+ */
 #include "publish/publish.h"
 #include "motion_alarm.h"
 #include "app_internal.h"

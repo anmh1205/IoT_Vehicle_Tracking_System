@@ -1,30 +1,33 @@
+/**
+ * @file obd_elm327.c
+ * @brief ELM327 ASCII response framing and conversion to OBD bytes.
+ */
 #include "obd_internal.h"
 #include <ctype.h>
 #include <string.h>
 
-/* Chuỗi khởi tạo adapter. */
+/* Reset the adapter before applying the remaining settings. */
 const elm_init_step_t ELM_INIT_SEQ[] = {
     { "ATZ",   3000, true  },   /* Reset adapter. */
-    { "ATE0",  1000, false },   /* Tắt echo. */
-    { "ATL0",  1000, false },   /* Tắt linefeed. */
-    { "ATS0",  1000, false },   /* Tắt khoảng trắng giữa các byte. */
-    { "ATH0",  1000, false },   /* Tắt header CAN. */
-    { "ATSP0", 1000, false },   /* Tự dò giao thức. */
+    { "ATE0",  1000, false },   /* Disable echo of ELM commands. */
+    { "ATL0",  1000, false },   /* Suppress line feeds in ELM output. */
+    { "ATS0",  1000, false },   /* Remove spaces between hexadecimal bytes. */
+    { "ATH0",  1000, false },   /* Hide CAN headers. */
+    { "ATSP0", 1000, false },   /* Let the ELM327 select the vehicle protocol automatically. */
 };
 const size_t ELM_INIT_SEQ_LEN = sizeof(ELM_INIT_SEQ) / sizeof(ELM_INIT_SEQ[0]);
 
-/* Xem elm327.h. */
 void elm_rx_reset(elm_rx_t *r)
 {
     memset(r, 0, sizeof(*r));
 }
 
-/* Xem elm327.h. Byte sau prompt không được nhận (vòng lặp dừng khi complete). */
+/* Ignore bytes arriving after the terminating prompt. */
 bool elm_rx_feed(elm_rx_t *r, const uint8_t *data, size_t n)
 {
     for (size_t i = 0; i < n && !r->complete; i++) {
         char c = (char)data[i];
-        if (c == '\0') { continue; }              /* Một số adapter chèn byte NUL; bỏ qua. */
+        if (c == '\0') { continue; }              /* Ignore padding NUL bytes inserted by some adapters. */
         if (r->len + 1u < ELM_REPLY_MAX) {
             r->buf[r->len++] = c;
             r->buf[r->len] = '\0';
@@ -36,7 +39,7 @@ bool elm_rx_feed(elm_rx_t *r, const uint8_t *data, size_t n)
     return r->complete;
 }
 
-/** @return true nếu @p text chứa @p word (không phân biệt hoa thường). */
+/** @return true when @p text contains @p word, ignoring case. */
 static bool contains_ci(const char *text, const char *word)
 {
     size_t wl = strlen(word);
@@ -48,7 +51,7 @@ static bool contains_ci(const char *text, const char *word)
     return false;
 }
 
-/** @return true nếu phản hồi có một dòng đúng bằng "OK". */
+/** @return true if the response includes a line equal to "OK". */
 static bool has_ok_line(const char *r)
 {
     const char *line = r;
@@ -65,7 +68,6 @@ static bool has_ok_line(const char *r)
     return false;
 }
 
-/* Xem elm327.h. */
 bool elm_reply_valid(const char *reply, bool is_reset, bool is_at_command)
 {
     if (reply == NULL || strchr(reply, '>') == NULL) { return false; }
@@ -87,7 +89,6 @@ bool elm_reply_valid(const char *reply, bool is_reset, bool is_at_command)
     return false;
 }
 
-/* Xem elm327.h. */
 ivts_ecu_state_t elm_reply_ecu_state(const char *reply)
 {
     if (reply == NULL) { return IVTS_ECU_UNKNOWN; }
@@ -97,7 +98,7 @@ ivts_ecu_state_t elm_reply_ecu_state(const char *reply)
     return IVTS_ECU_UNKNOWN;
 }
 
-/** Giá trị của một chữ số hex, hoặc -1 nếu @p c không phải chữ số hex. */
+/** Return the value of a hexadecimal digit, or -1 for an invalid character. */
 static int hexv(char c)
 {
     if (c >= '0' && c <= '9') { return c - '0'; }
@@ -107,8 +108,9 @@ static int hexv(char c)
 }
 
 /**
- * Gom các byte hex của dòng [s, e) vào @p out, bỏ khoảng trắng và tiền tố khung "n:".
- * @return Số byte ghi được, hoặc -1 nếu dòng có ký tự không hợp lệ.
+ * Decode the hex bytes in [s, e), skipping whitespace and an optional frame
+ * index such as "0:".
+ * @return Number of bytes written, or -1 for an invalid character.
  */
 static int line_bytes(const char *s, const char *e, uint8_t *out, size_t cap)
 {
@@ -124,10 +126,9 @@ static int line_bytes(const char *s, const char *e, uint8_t *out, size_t cap)
         n++;
         hi = -1;
     }
-    return (hi >= 0) ? -1 : n;                     /* số chữ số lẻ: không phải dữ liệu */
+    return (hi >= 0) ? -1 : n;                     /* A single hexadecimal digit is not a data byte. */
 }
 
-/* Xem elm327.h. */
 ivts_err_t elm_extract_bytes(const char *reply, uint8_t mode, uint8_t *out, size_t cap, size_t *n)
 {
     if (reply == NULL || out == NULL || n == NULL || cap == 0u || strchr(reply, '>') == NULL) {
@@ -145,7 +146,7 @@ ivts_err_t elm_extract_bytes(const char *reply, uint8_t mode, uint8_t *out, size
         bool frame = (memchr(s, ':', (size_t)(e - s)) != NULL);
         if (k > 0 && (size_t)k <= sizeof tmp) {
             if (!started) {
-                /* tìm byte mode+0x40 trong dòng đầu tiên chứa nó */
+                /* Find the first reply line with the response service byte, mode + 0x40. */
                 for (int i = 0; i < k; i++) {
                     if (tmp[i] == want) {
                         started = true;
@@ -154,9 +155,9 @@ ivts_err_t elm_extract_bytes(const char *reply, uint8_t mode, uint8_t *out, size
                     }
                 }
             } else if (frame) {
-                for (int j = 0; j < k && got < cap; j++) { out[got++] = tmp[j]; }   /* khung ISO-TP tiếp */
+                for (int j = 0; j < k && got < cap; j++) { out[got++] = tmp[j]; }   /* Skip the ISO-TP byte-count line. */
             } else {
-                break;                                                             /* ECU thứ hai */
+                break;                                                             /* Ignore a second ECU reply in this field. */
             }
         }
         s = (*e == '\0' || *e == '>') ? e : e + 1;

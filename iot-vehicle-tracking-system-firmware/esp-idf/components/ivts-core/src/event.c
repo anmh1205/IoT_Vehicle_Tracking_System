@@ -1,3 +1,7 @@
+/**
+ * @file event.c
+ * @brief Common publication of typed, by-value cross-task events.
+ */
 #include "ivts_core/event/event.h"
 
 const char *ivts_event_name(ivts_event_type_t t)

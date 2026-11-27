@@ -1,3 +1,7 @@
+/**
+ * @file sd_log.c
+ * @brief SD log append, rotation and quota enforcement on the storage task.
+ */
 #include "sd/sd.h"
 #include "storage_internal.h"
 
@@ -5,15 +9,15 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
-#define LOG_DIR SD_MOUNT "/log"   /* Thư mục chứa các file log. */
+#define LOG_DIR SD_MOUNT "/log"   /* Directory containing rotated log files. */
 
-static uint32_t s_log_idx;     /* Số của file log đang ghi. */
-static uint32_t s_log_size;    /* Kích thước hiện tại của file đang ghi, byte. */
-static uint32_t s_log_total;   /* Tổng dung lượng mọi file log, byte. */
+static uint32_t s_log_idx;     /* Index of the active log file. */
+static uint32_t s_log_size;    /* Current size of the active log file in bytes. */
+static uint32_t s_log_total;   /* Total size of all log files in bytes. */
 
 /**
- * @brief Tách chỉ số từ tên file dạng "LNNNNNNN.TXT".
- * @return true và ghi *idx nếu tên đúng định dạng; false nếu không.
+ * @brief Parse a log index from LNNNNNNN.TXT.
+ * @return true and write idx if the format matches.
  */
 static bool parse_log_name(const char *n, uint32_t *idx)
 {
@@ -23,7 +27,7 @@ static bool parse_log_name(const char *n, uint32_t *idx)
     return true;
 }
 
-/** Quét thư mục log để khôi phục s_log_idx, s_log_size và s_log_total. */
+/** Scan the log directory to rebuild file index and byte counters. */
 static void log_scan(void)
 {
     DIR *d = opendir(LOG_DIR);
@@ -32,7 +36,7 @@ static void log_scan(void)
     while ((de = readdir(d)) != NULL) {
         uint32_t idx;
         if (!parse_log_name(de->d_name, &idx)) { continue; }
-        char path[sizeof(LOG_DIR) + 1 + sizeof(de->d_name)];   /* d_name dài tối đa 255 ký tự. */
+        char path[sizeof(LOG_DIR) + 1 + sizeof(de->d_name)];   /* A directory entry name is at most 255 characters. */
         snprintf(path, sizeof path, LOG_DIR "/%s", de->d_name);
         struct stat st;
         if (stat(path, &st) == 0) {
@@ -50,10 +54,10 @@ void storage_sd_log_open(void)
 }
 
 /**
- * @brief Xoá file log cũ nhất cho đến khi tổng dung lượng không vượt log_quota_bytes.
+ * @brief Delete oldest eligible log files until the quota is satisfied.
  *
- * Mỗi vòng quét lại thư mục để tìm file có chỉ số nhỏ nhất; số file log nhỏ nên không cần giữ
- * chỉ mục trong RAM. File đang ghi không bao giờ bị xoá.
+ * Directory scans choose the smallest index each time, avoiding an in-memory
+ * index. Preserve the active log file.
  */
 static void log_enforce_quota(void)
 {
@@ -67,7 +71,7 @@ static void log_enforce_quota(void)
             if (parse_log_name(de->d_name, &idx) && idx < oldest) { oldest = idx; }
         }
         closedir(d);
-        if (oldest == UINT32_MAX || oldest == s_log_idx) { return; }   /* Không xoá file đang ghi. */
+        if (oldest == UINT32_MAX || oldest == s_log_idx) { return; }   /* Preserve the active log when reclaiming old files. */
         char path[48];
         snprintf(path, sizeof path, LOG_DIR "/L%07lu.TXT", (unsigned long)oldest);
         struct stat st;
@@ -77,12 +81,12 @@ static void log_enforce_quota(void)
     }
 }
 
-/* Ghi @p line kèm ký tự xuống dòng; xoay file nếu vượt giới hạn kích thước. */
+/* Append @p line with a newline, rotating at the configured size. */
 ivts_err_t storage_sd_log_write(const char *line, size_t len)
 {
     if (!storage_sd_ok()) { return IVTS_ERR_INVALID_STATE; }
     if (s_log_size + len + 1u > storage_config_view()->log_file_max_bytes) {
-        s_log_idx++;                                 /* Xoay sang file mới. */
+        s_log_idx++;                                 /* Advance to a new log file. */
         s_log_size = 0;
         log_enforce_quota();
     }
@@ -92,8 +96,10 @@ ivts_err_t storage_sd_log_write(const char *line, size_t len)
     if (f == NULL) { return IVTS_ERR_IO; }
     size_t w = fwrite(line, 1, len, f);
     w += fwrite("\n", 1, 1, f);
-    /* fclose gọi f_close của FATFS, đồng bộ cả dữ liệu lẫn bảng FAT: mất nguồn sau lệnh này thì
-     * dòng log đã nằm trên thẻ. */
+    /*
+     * Closing the FatFs file flushes data and filesystem metadata through the
+     * driver. Return a close failure to the caller.
+     */
     int rc = fclose(f);
     if (w != len + 1u || rc != 0) { return IVTS_ERR_IO; }
     s_log_size += (uint32_t)(len + 1u);

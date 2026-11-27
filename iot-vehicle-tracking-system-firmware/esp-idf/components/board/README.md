@@ -1,13 +1,13 @@
 # Board
 
-| Folder | Responsibility |
+| Source | Responsibility |
 | --- | --- |
-| `include/board` | Board setup, RTC, power, sensor APIs and the PCB pin map |
-| `src/bsp` | Driver wiring and the board task that reads ADC and handles IMU interrupts |
-| `src/bus` | Shared I2C bus, device registration and transaction mutex |
-| `src/drivers` | DS3231M, LIS3DSH, ADC calibration and pure conversions |
-| `src/power` | Timer and IMU wake, sleep entry and wake reason |
+| `include/board` | Public setup, RTC, power and sensor APIs, plus the dedicated PCB pin map |
+| `src/board.c`, `src/board_task.c` | Driver wiring, ADC sampling and latched IMU events |
+| `src/i2c_bus.c` | I2C device registry and timed transaction lock |
+| `src/drivers/`, `src/board_calc.c` | DS3231M, LIS3DSH, calibrated ADC and host-testable conversions |
+| `src/sleep.c`, `src/wake.c` | Sleep entry, wake-source configuration and wake reason |
 
-The app initializes the board and calls its sleep and RTC APIs. The board task samples ADC and handles latched IMU interrupts. The GPIO ISR wakes that task. RTC and IMU transactions share the mutex in `i2c_bus.c`.
+App wiring initializes the board and supplies the event sink. The IMU ISR wakes the board task. That task reads and clears the latched interrupt and sends the motion event. RTC and IMU transactions share the platform mutex in `i2c_bus.c`.
 
-To change PCB wiring, edit `include/board/board_hw.h`. For a new I2C sensor, add its driver and conversion tests, declare its PCB parameters there and wire the driver in `src/bsp/board.c`. Sleep and wake changes belong in `src/power`.
+PCB wiring changes go in `include/board/board_hw.h`. For a new I2C sensor, add its driver and private declarations under `src/drivers/`, test any conversion in `board_calc.c` and wire the driver in `src/board.c`.

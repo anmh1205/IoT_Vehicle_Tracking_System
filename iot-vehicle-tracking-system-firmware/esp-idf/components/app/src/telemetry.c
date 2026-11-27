@@ -1,3 +1,10 @@
+/**
+ * @file telemetry.c
+ * @brief App-owned sensor snapshots and offline RAW record capture.
+ *
+ * Apply source-specific validity and age checks before publishing. Capture
+ * boot identity and sequence with each RAW record to support stable replay.
+ */
 #include "telemetry.h"
 #include "app_internal.h"
 #include <string.h>
@@ -8,7 +15,7 @@
 #include "device/device.h"
 #include "session_tracker.h"
 
-/** Snapshot telemetry hiện tại; chỉ task "app" truy cập. */
+/** Current telemetry snapshot, owned by the app task. */
 static ivts_telemetry_t s_snapshot;
 static uint64_t s_obd_sample_ms;
 static uint64_t s_gnss_sample_ms;
@@ -33,7 +40,7 @@ const ivts_telemetry_t *app_telemetry_view(void) { return &s_snapshot; }
 
 void app_telemetry_consume_imu_peak(void) { s_snapshot.imu_accel_delta_mmps2 = 0; }
 
-/** Đặt trạng thái thiết bị và chế độ ngủ báo lên cloud. */
+/** Set the device state and sleep mode reported to the cloud. */
 void app_telemetry_set_device(ivts_device_state_t d, ivts_sleep_mode_t m)
 {
     s_snapshot.device_state = d;
@@ -41,19 +48,21 @@ void app_telemetry_set_device(ivts_device_state_t d, ivts_sleep_mode_t m)
 }
 
 /**
- * @brief Cập nhật snapshot theo một sự kiện từ component.
+ * @brief Update the app snapshot from a component event.
  *
- * - GNSS: lưu trạng thái fix mới nhất để không gửi toạ độ cũ khi mất fix.
- *   Fix hợp lệ có giờ UTC được dùng để chỉnh RTC nếu RTC chưa đáng tin.
- * - OBD: mất kết nối BLE thì xoá số liệu OBD để không báo số liệu cũ như dữ liệu sống.
+ * Keep the latest GNSS validity flag so a lost fix invalidates old positions.
+ * Use GNSS UTC to set an untrusted RTC. Clear OBD measurements when BLE
+ * disconnects so a later payload cannot report stale values as live.
  */
 static void sync_rtc_from_gnss(const ivts_event_t *ev)
 {
     if (ev->u.gnss.fix_valid && ev->u.gnss.ts_unix_ms != 0u) {
         uint64_t rtc_ms = 0;
         bool trusted = false;
-        /* RTC chưa đáng tin mà GNSS đã có giờ UTC: đồng bộ RTC từ GNSS, là nguồn giờ đáng tin
-         * duy nhất khi thiết bị không có mạng. */
+        /*
+         * Set the untrusted RTC from a valid GNSS UTC fix. This time source
+         * works without a cellular network connection.
+         */
         if (board_time_get(&rtc_ms, &trusted) == IVTS_OK && !trusted &&
             board_time_set(ev->u.gnss.ts_unix_ms) == IVTS_OK) {
             ESP_LOGI(APP_TAG, "RTC <- GNSS %llu", (unsigned long long)ev->u.gnss.ts_unix_ms);
@@ -128,10 +137,10 @@ void app_telemetry_on_event(const ivts_event_t *ev)
 }
 
 /**
- * @brief Chụp snapshot hiện tại thành một bản ghi và cấp số seq mới cho nó.
+ * @brief Capture the current snapshot and allocate its record sequence.
  *
- * seq được cấp tại thời điểm chụp; khi bản ghi đi qua offline queue và được replay, nó giữ
- * nguyên boot_id và seq này để cloud khử trùng lặp.
+ * Allocate the sequence at capture. Offline storage and replay retain that
+ * sequence and boot ID so the cloud can deduplicate retries.
  */
 void app_record_capture(ivts_record_t *r)
 {

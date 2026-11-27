@@ -1,3 +1,10 @@
+/**
+ * @file board_internal.h
+ * @brief Private board bus, task and sleep integration interfaces.
+ *
+ * The board task, clock and sensor drivers share the I2C adapter. Wake and
+ * sleep helpers remain within board sources.
+ */
 #pragma once
 #include <stdbool.h>
 #include <stdint.h>
@@ -9,7 +16,7 @@
 
 #define BOARD_TAG "board"
 
-/* Giữ mã lỗi I/O của board khi không cấp phát được mutex hoặc task. */
+/* Preserve the board I/O error mapping on mutex or task allocation failure. */
 static inline ivts_err_t board_err(esp_err_t error)
 {
     return error == ESP_ERR_NO_MEM ? IVTS_ERR_IO : platform_err_from_esp(error);

@@ -1,3 +1,10 @@
+/**
+ * @file modem_internal.h
+ * @brief Private modem task, slot, link, GNSS and HTTP interfaces.
+ *
+ * The modem task owns UART protocol state. Cross-task storage is either copied
+ * under a mutex or borrowed for the lifetime of a synchronous request.
+ */
 #pragma once
 #include "modem/modem.h"
 #include "esp_err.h"
@@ -20,13 +27,15 @@ void modem_emit_link(uint8_t link, int32_t error);
 void modem_set_stopped(bool stopped);
 
 typedef enum {
-    REQ_LINK = 0,     /**< Bật/tắt liên kết (on). */
-    REQ_GNSS,         /**< Bật/tắt GNSS (on). */
-    REQ_PUB_KICK,     /**< Đánh thức vòng lặp khi ô publish có bản tin mới. */
-    REQ_HTTP_OPEN,    /**< Mở URL HTTP. */
-    REQ_HTTP_READ,    /**< Đọc nội dung HTTP. */
-    REQ_HTTP_CLOSE    /**< Đóng phiên HTTP. */
+    REQ_LINK = 0,     /**< Set link demand from the on flag. */
+    REQ_GNSS,         /**< Set GNSS demand from the on flag. */
+    REQ_PUB_KICK,     /**< Wake the modem loop after accepting an outbound payload. */
+    REQ_HTTP_OPEN,    /**< Open the HTTP byte source. */
+    REQ_HTTP_READ,    /**< Read a range from the open HTTP source. */
+    REQ_HTTP_CLOSE    /**< Close the HTTP byte source. */
 } modem_req_op_t;
+
+struct modem_rpc;
 
 /**
  * @brief Request copied by value into the modem work queue.
@@ -36,18 +45,16 @@ typedef enum {
  * Notifications sent through component sinks carry values with no borrowed
  * buffers because their receivers run independently.
  */
-struct modem_rpc;
-
 typedef struct {
     uint8_t           op;       /**< modem_req_op_t. */
-    bool              on;       /**< Tham số của REQ_LINK và REQ_GNSS. */
-    const char       *url;      /**< REQ_HTTP_OPEN: URL, do caller sở hữu. */
-    uint8_t          *buf;      /**< REQ_HTTP_READ: nơi nhận dữ liệu. */
-    size_t            len;      /**< REQ_HTTP_READ: dung lượng của buf. */
-    uint32_t          offset;   /**< REQ_HTTP_READ: vị trí đọc trong nội dung. */
-    size_t           *got;      /**< REQ_HTTP_READ: số byte đọc được. */
-    uint32_t         *size;     /**< REQ_HTTP_OPEN: kích thước nội dung. */
-    int              *status;   /**< REQ_HTTP_OPEN: mã trạng thái HTTP. */
+    bool              on;       /**< Requested state for REQ_LINK and REQ_GNSS. */
+    const char       *url;      /**< REQ_HTTP_OPEN URL. The waiting caller owns the buffer. */
+    uint8_t          *buf;      /**< REQ_HTTP_READ destination buffer. */
+    size_t            len;      /**< REQ_HTTP_READ destination capacity in bytes. */
+    uint32_t          offset;   /**< REQ_HTTP_READ offset in the content, in bytes. */
+    size_t           *got;      /**< REQ_HTTP_READ byte count actually copied. */
+    uint32_t         *size;     /**< REQ_HTTP_OPEN content size in bytes. */
+    int              *status;   /**< REQ_HTTP_OPEN HTTP status code. */
     struct modem_rpc *reply;    /**< Completion state owned by the waiting task. */
 } modem_req_t;
 
@@ -81,26 +88,26 @@ static inline size_t append_bounded(void *destination, size_t capacity, size_t *
 }
 
 typedef enum {
-    MODEM_LINK_STEP_OFF = 0,     /**< Module tắt nguồn. */
-    MODEM_LINK_STEP_POWER,       /**< Đang bật nguồn bằng PWRKEY. */
-    MODEM_LINK_STEP_SYNC,        /**< Đồng bộ lệnh AT với module. */
-    MODEM_LINK_STEP_SIM,         /**< Kiểm tra SIM. */
-    MODEM_LINK_STEP_REG,         /**< Chờ đăng ký mạng LTE. */
-    MODEM_LINK_STEP_PDP,         /**< Mở kết nối dữ liệu. */
-    MODEM_LINK_STEP_MQTT_START,  /**< Khởi động dịch vụ MQTT. */
-    MODEM_LINK_STEP_MQTT_ACQ,    /**< Tạo MQTT client. */
-    MODEM_LINK_STEP_MQTT_CONN,   /**< Kết nối broker. */
+    MODEM_LINK_STEP_OFF = 0,     /**< Module powered off. */
+    MODEM_LINK_STEP_POWER,       /**< Power the module on through PWRKEY. */
+    MODEM_LINK_STEP_SYNC,        /**< Synchronize the AT channel with the modem. */
+    MODEM_LINK_STEP_SIM,         /**< Check whether the SIM is ready. */
+    MODEM_LINK_STEP_REG,         /**< Wait for LTE network registration. */
+    MODEM_LINK_STEP_PDP,         /**< Open the packet-data context. */
+    MODEM_LINK_STEP_MQTT_START,  /**< Start the MQTT service. */
+    MODEM_LINK_STEP_MQTT_ACQ,    /**< Allocate the SIM7600 MQTT client. */
+    MODEM_LINK_STEP_MQTT_CONN,   /**< Connect the client to the broker. */
     MODEM_LINK_STEP_MQTT_SUB,    /**< Subscribe topic command. */
-    MODEM_LINK_STEP_UP           /**< Sẵn sàng gửi nhận. */
+    MODEM_LINK_STEP_UP           /**< Broker session ready to send and receive. */
 } modem_link_step_t;
 
-/** Trạng thái máy trạng thái kết nối LTE/MQTT. */
+/** LTE and MQTT connection state on the modem task. */
 typedef struct {
-    modem_link_step_t step;           /**< Bước hiện tại. */
-    uint32_t    attempt;      /**< Số lần thất bại liên tiếp của bước hiện tại. */
-    uint32_t    fails_total;  /**< Tổng số thất bại từ lần bật nguồn; vượt ngưỡng thì power-cycle. */
-    uint64_t    retry_at_ms;     /**< Thời điểm (ms, theo modem_now()) được phép thử lại. */
-    uint64_t    entered_at_ms;     /**< Thời điểm (ms) vào bước hiện tại. */
+    modem_link_step_t step;           /**< Current link step. */
+    uint32_t    attempt;      /**< Consecutive failures of the current step. */
+    uint32_t    fails_total;  /**< Failures since power-up. A threshold breach requests a power cycle. */
+    uint64_t    retry_at_ms;     /**< Earliest monotonic retry time in milliseconds. */
+    uint64_t    entered_at_ms;     /**< Monotonic entry time of the current step in milliseconds. */
 } modem_link_t;
 
 /* Modem task. Run the link state machine and publish link transitions. */
@@ -130,42 +137,35 @@ void modem_gnss_reset_power(void);
 void modem_gnss_step(void);
 
 /**
- * @file gnss_parse.h
- * @brief Phân tích kết quả GNSS của SIM7600 thành ivts_gnss_t bằng số nguyên (không dùng float).
+ * @brief Decode SIM7600 GNSS reports into integer position and time fields.
  *
- * Module thuần C, không có trạng thái toàn cục nên gọi được từ mọi task và kiểm thử được trên host.
- *
- * Định dạng theo SIM7500_SIM7600 Series AT Command Manual V2.00, mục 17.2.2 và 17.2.21:
- *
- *     +CGNSSINFO: <mode>,<GPS-SVs>,<GLONASS-SVs>,<BEIDOU-SVs>,<lat>,<N/S>,<log>,<E/W>,<date>,
- *                 <UTC-time>,<alt>,<speed>,<course>,<PDOP>,<HDOP>,<VDOP>   -> IVTS_GNSS_SRC_FULL
- *     +CGPSINFO:  <lat>,<N/S>,<log>,<E/W>,<date>,<UTC time>,<alt>,<speed>,<course>
- *                                                                          -> IVTS_GNSS_SRC_APPROX
- *
- * Đơn vị: lat dạng ddmm.mmmmmm, log dạng dddmm.mmmmmm, date dạng ddmmyy, time dạng hhmmss.s,
- * speed tính bằng knot. Khi chưa có fix (ví dụ "+CGNSSINFO: ,,,,") hàm trả IVTS_OK với
- * fix_valid = false.
+ * The pure parser supports the full +CGNSSINFO report with satellite counts
+ * and the +CGPSINFO fallback. The fixes use degrees and decimal minutes,
+ * DDMMYY dates, UTC hhmmss.s timestamps and speeds in knots before conversion.
+ * An empty fix report returns IVTS_OK with fix_valid cleared. See sections
+ * 17.2.2 and 17.2.21 of SIM7500_SIM7600 Series AT Command Manual V2.00.
  */
 
-/** Phân tích một dòng +CGNSSINFO (đầy đủ). @return IVTS_OK, hoặc lỗi nếu dòng sai định dạng. */
+/** Parse a full +CGNSSINFO report. Returns an error for a malformed line. */
 ivts_err_t gnss_parse_cgnssinfo(const char *line, ivts_gnss_t *out);
 
-/** Phân tích một dòng +CGPSINFO (rút gọn). @return IVTS_OK, hoặc lỗi nếu dòng sai định dạng. */
+/** Parse a fallback +CGPSINFO report. Returns an error for a malformed line. */
 ivts_err_t gnss_parse_cgpsinfo(const char *line, ivts_gnss_t *out);
 
 /**
- * @brief Đổi toạ độ NMEA sang độ nhân 1e7, có dấu theo bán cầu.
+ * @brief Convert NMEA degrees and minutes to signed degrees times 10^7.
  *
- * Ví dụ "3113.330650" với 'N' cho 312221775. Hemisphere 'S' và 'W' cho giá trị âm.
+ * For example, "3113.330650" with 'N' gives 312221775. South and west are
+ * negative.
  *
- * @param hemi 'N', 'S', 'E' hoặc 'W'; 'N'/'S' kiểm tra giới hạn vĩ độ, 'E'/'W' kiểm tra kinh độ.
- * @retval IVTS_OK              Đã chuyển đổi.
- * @retval IVTS_ERR_INVALID_ARG Tham số NULL, chuỗi sai định dạng, phút >= 60, bán cầu không hợp lệ
- *                              hoặc vượt giới hạn.
+ * @param hemi 'N' or 'S' selects latitude. 'E' or 'W' selects longitude.
+ * @retval IVTS_OK Conversion succeeded.
+ * @retval IVTS_ERR_INVALID_ARG Missing input, malformed number, invalid
+ * hemisphere, minutes of at least 60, or coordinate outside its valid range.
  */
 ivts_err_t gnss_nmea_to_e7(const char *ddmm, char hemi, int32_t *out);
 
-/** Đổi ngày ddmmyy và giờ hhmmss(.s) UTC sang Unix epoch tính bằng ms. */
+/** Convert a DDMMYY date and UTC hhmmss with optional fraction to Unix milliseconds. */
 ivts_err_t gnss_datetime_to_unix_ms(const char *ddmmyy, const char *hhmmss, uint64_t *out);
 
 /** @brief Execute an HTTP operation on the modem task and return its result. */

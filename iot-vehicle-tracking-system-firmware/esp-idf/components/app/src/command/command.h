@@ -1,3 +1,10 @@
+/**
+ * @file components/app/src/command/command.h
+ * @brief Private command inbox, dispatch, receipt and handler interfaces.
+ *
+ * The app task serializes command handling and ACK transitions. The publisher
+ * reports completion by callback after correlating the MQTT transaction.
+ */
 #pragma once
 #include <stdbool.h>
 #include "ivts_core/model/command.h"

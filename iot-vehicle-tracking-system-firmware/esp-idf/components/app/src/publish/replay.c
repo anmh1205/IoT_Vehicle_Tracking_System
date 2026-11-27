@@ -1,3 +1,11 @@
+/**
+ * @file replay.c
+ * @brief Offline RAW replay and acknowledgement-driven queue advancement.
+ *
+ * The app retains the peek token until successful PUBACK for a valid RAW
+ * record. Entries that fail payload decoding are discarded. A session
+ * boundary waits behind its earlier RAW records.
+ */
 #include "publish/publish.h"
 #include "app_internal.h"
 #include "device/device.h"
@@ -36,7 +44,7 @@ app_replay_result_t app_replay_until(const ivts_session_boundary_t *boundary)
         return REPLAY_BUSY;
     }
     s_awaiting_peek = false;
-    /* A queued pop can leave the old token visible until storage has committed the cursor. */
+    /* A queued pop can leave the old token visible until the storage task processes it. */
     if (token == s_popped_token) { return REPLAY_BUSY; }
 
     ivts_record_t record;

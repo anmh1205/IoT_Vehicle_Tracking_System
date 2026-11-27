@@ -1,3 +1,10 @@
+/**
+ * @file motion_alarm.h
+ * @brief Application motion alarm persistence and publish hooks.
+ *
+ * Boot restores any durable alarm. The app task latches it, presents it to the
+ * publisher and handles the ACK.
+ */
 #pragma once
 #include "ivts_core/event/event.h"
 

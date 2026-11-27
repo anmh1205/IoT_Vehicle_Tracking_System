@@ -1,3 +1,10 @@
+/**
+ * @file persist.h
+ * @brief Application NVS records and retained RTC context interfaces.
+ *
+ * NVS is flash-backed and synchronous. RTC context survives deep sleep and is
+ * accepted only after its version, size and checksum are validated.
+ */
 #pragma once
 #include "ivts_core/event/event.h"
 #include "ivts_core/model/command.h"

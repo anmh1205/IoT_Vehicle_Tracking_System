@@ -1,3 +1,10 @@
+/**
+ * @file modem_task.c
+ * @brief FreeRTOS ownership of SIM7600 requests, UART work and HTTP completion.
+ *
+ * Only the modem task runs AT commands. A synchronous HTTP caller retains its
+ * buffers until the final signal after all output has been written.
+ */
 #include "modem_internal.h"
 #include "at/at.h"
 #include "esp_check.h"
@@ -70,7 +77,7 @@ static void handle_req(const modem_req_t *r)
         modem_gnss_request(r->on);
         break;
     case REQ_PUB_KICK:
-        break;                                    /* Chỉ để đánh thức vòng lặp. */
+        break;                                    /* A publish kick only wakes the modem loop. */
     default: {
         ivts_err_t result = modem_http_handle(r);
         if (r->reply != NULL) {
@@ -95,10 +102,10 @@ static void modem_task(void *arg)
             modem_mqtt_publish_pending();
         } else {
             modem_topic_t t; const char *p; size_t n; uint32_t id;
-            if (modem_tx_take(&t, &p, &n, &id)) { modem_tx_done(false, -1); }   /* Chưa có broker: báo lỗi ngay. */
+            if (modem_tx_take(&t, &p, &n, &id)) { modem_tx_done(false, -1); }   /* Fail a queued publish when there is no broker session. */
         }
         if (modem_link_current_step() == MODEM_LINK_STEP_OFF) {
-            (void)xQueuePeek(s_request_queue, &r, pdMS_TO_TICKS(1000));   /* Module tắt: chờ yêu cầu mới, không đọc UART. */
+            (void)xQueuePeek(s_request_queue, &r, pdMS_TO_TICKS(1000));   /* While powered off, wait for a new request instead of reading UART. */
         } else {
             modem_at_dispatch_pump(LOOP_WAIT_MS);
         }

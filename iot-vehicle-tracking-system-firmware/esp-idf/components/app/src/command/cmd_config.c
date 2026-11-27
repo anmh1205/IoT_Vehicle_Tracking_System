@@ -1,3 +1,10 @@
+/**
+ * @file cmd_config.c
+ * @brief Validation and application of fields writable through cloud commands.
+ *
+ * The editable-field table controls which typed fields are accepted.
+ * Persistence and normal receipt processing apply to successful commands.
+ */
 #include "command/command.h"
 #include <stddef.h>
 #include <string.h>

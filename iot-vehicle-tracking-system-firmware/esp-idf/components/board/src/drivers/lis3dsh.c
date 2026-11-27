@@ -1,21 +1,16 @@
 /**
  * @file lis3dsh.c
- * @brief Driver LIS3DSH: phát hiện chuyển động bằng state machine SM1, ngắt qua chân INT1.
+ * @brief LIS3DSH motion detection using the SM1 interrupt state machine.
  *
- * LIS3DSH (datasheet ST DocID022405) không có thanh ghi INT1_CFG/INT1_THS của LIS3DH.
- * Ngắt chuyển động được tạo bởi state machine SM1 (thanh ghi 0x40..0x5F): SM1 chờ một trục
- * trong mask vượt ngưỡng THRS1, phát ngắt rồi quay lại trạng thái chờ.
+ * The LIS3DSH uses SM1 registers 0x40–0x5F for detection. The program waits
+ * for a selected axis to cross THRS1, asserts INT1 and returns to its waiting
+ * state. Register and instruction encodings follow the datasheet DocID022405
+ * and AN3393.
  *
- * ## Ngữ cảnh gọi
- *
- * - lis3dsh_init(): gọi từ board_init() trước khi task "board" tạo ra.
- * - imu_isr(): ngữ cảnh ISR, chỉ báo task qua board_task_notify_imu_from_isr().
- * - lis3dsh_clear_interrupt(): task "board" gọi sau mỗi notify; board_sleep() gọi trước khi ngủ.
- *   Cả hai đi qua mutex bus I2C.
- *
- * Giá trị thanh ghi và mã lệnh state machine tra theo datasheet và AN3393.
+ * Board startup configures the sensor. Its ISR notifies the board task, which
+ * acknowledges the interrupt. The sleep adapter also clears an old interrupt
+ * before arming a wake source. Register access uses the board I2C mutex.
  */
-
 #include "board_internal.h"
 #include "platform/platform.h"
 #include "drivers/drivers.h"
@@ -31,7 +26,7 @@
 #define LIS_CTRL1       0x21   /* SM1: HYST[7:5] SM1_PIN[3] SM1_EN[0] */
 #define LIS_CTRL3       0x23   /* DR_EN[7] IEA[6] IEL[5] INT2_EN[4] INT1_EN[3] VFILT[2] STRT[0] */
 #define LIS_CTRL5       0x24   /* FSCALE[5:3] = 000 -> ±2g */
-#define LIS_CTRL6       0x25   /* ADD_INC[4] cho phép đọc liên tiếp. */
+#define LIS_CTRL6       0x25   /* ADD_INC bit 4 enables sequential register reads. */
 #define LIS_OUT_X_L     0x28
 #define LIS_ST1_1       0x40
 #define LIS_ST1_2       0x41
@@ -41,23 +36,23 @@
 #define LIS_SETT1       0x5B
 #define LIS_OUTS1       0x5F
 
-/* Mã lệnh state machine (AN3393): nibble cao = điều kiện RESET, nibble thấp = điều kiện NEXT. */
-#define SM_NOP_GNTH1    0x05   /* Chờ: một trục trong mask vượt THRS1. */
-#define SM_CONT         0x11   /* Phát ngắt rồi quay về ST1_1. */
-/* Bit của MASKx: P_X N_X P_Y N_Y P_Z N_Z P_V N_V (P = chiều dương, N = chiều âm). */
+/* SM1 opcode encoding from AN3393. The high nibble is RESET and the low nibble is NEXT. */
+#define SM_NOP_GNTH1    0x05   /* Wait for a masked axis to cross THRS1. */
+#define SM_CONT         0x11   /* Assert the interrupt and return to ST1_1. */
+/* MASKx bits are P_X N_X P_Y N_Y P_Z N_Z P_V N_V, where P and N select direction. */
 #define MASK_X          0xC0
 #define MASK_Y          0x30
 #define MASK_Z          0x0C
 
 static lis3dsh_cfg_t s_imu_cfg;
 
-/** Ghi một thanh ghi 8 bit của IMU. */
+/** Write one 8-bit IMU register. */
 static esp_err_t wr(uint8_t reg, uint8_t v) { return board_i2c_write(s_imu_cfg.i2c_device, reg, &v, 1); }
 
 static void IRAM_ATTR imu_isr(void *arg)
 {
     (void)arg;
-    /* ISR không gọi sink và không truy cập I2C: chỉ đánh thức task "board". */
+    /* The ISR only wakes the board task. Task context handles I2C and sink delivery. */
     board_task_notify_imu_from_isr();
 }
 
@@ -75,7 +70,7 @@ static esp_err_t read_axes(int16_t a[3])
 static int16_t s_previous_axes[3];
 static uint64_t s_last_sample_ms;
 
-/* Chỉ task board gọi. Đo độ lớn của vector hiệu giữa hai mẫu để loại trọng lực tĩnh. */
+/* The board task compares successive vectors to remove static gravity. */
 uint32_t lis3dsh_sample_delta(uint64_t now_ms)
 {
     int16_t axes[3];
@@ -91,13 +86,14 @@ uint32_t lis3dsh_sample_delta(uint64_t now_ms)
 }
 
 /**
- * @brief Chọn mask các trục dùng để phát hiện chuyển động, loại trục đang chịu trọng lực.
+ * @brief Choose the motion axes by excluding the axis dominated by gravity.
  *
- * Trục thẳng đứng luôn đo khoảng 1 g; so với ngưỡng nhỏ hơn 1 g thì SM1 ngắt liên tục.
- * Hàm đọc một mẫu OUT_X/Y/Z, coi trục có |giá trị| lớn nhất là trục trọng lực và loại nó.
- * Mask được tính một lần lúc init, nên cần khởi động lại sau khi thay đổi cách lắp thiết bị.
+ * Read one OUT_X/Y/Z sample and omit its largest absolute component. A static
+ * vertical component is close to 1 g and would otherwise cross a lower SM1
+ * threshold. Recompute the mask at startup after changing the mounting angle.
  *
- * @return Mask gồm hai trục còn lại; MASK_X | MASK_Y (lắp nằm ngang) nếu không đọc được IMU.
+ * @return A mask for the remaining axes, or MASK_X | MASK_Y after a read
+ * error.
  */
 static uint8_t mask_without_gravity(void)
 {
@@ -125,11 +121,11 @@ static esp_err_t lis3dsh_probe(void)
 
 static esp_err_t lis3dsh_configure_sampling(void)
 {
-    ESP_RETURN_ON_ERROR(wr(LIS_CTRL1, 0x00), BOARD_TAG, "sm1 off");        /* Tắt SM1 trong lúc ghi chương trình. */
+    ESP_RETURN_ON_ERROR(wr(LIS_CTRL1, 0x00), BOARD_TAG, "sm1 off");        /* Disable SM1 while programming it. */
     ESP_RETURN_ON_ERROR(wr(LIS_CTRL4, 0x4F), BOARD_TAG, "ctrl4");          /* ODR 25 Hz, BDU, XYZ. */
-    ESP_RETURN_ON_ERROR(wr(LIS_CTRL5, 0x00), BOARD_TAG, "ctrl5");          /* Thang đo ±2 g. */
-    ESP_RETURN_ON_ERROR(wr(LIS_CTRL6, 0x10), BOARD_TAG, "ctrl6");          /* Burst I2C tự tăng địa chỉ. */
-    platform_delay_ms(100);                                         /* Chờ vài mẫu đầu ổn định trước khi đọc trọng lực. */
+    ESP_RETURN_ON_ERROR(wr(LIS_CTRL5, 0x00), BOARD_TAG, "ctrl5");          /* Select the ±2 g measurement range. */
+    ESP_RETURN_ON_ERROR(wr(LIS_CTRL6, 0x10), BOARD_TAG, "ctrl6");          /* Enable I2C address auto-increment for burst reads. */
+    platform_delay_ms(100);                                         /* Allow initial samples to settle before measuring gravity. */
 
     return ESP_OK;
 }
@@ -141,8 +137,8 @@ static esp_err_t lis3dsh_program_sm1(uint8_t threshold, uint8_t mask)
     ESP_RETURN_ON_ERROR(wr(LIS_MASK1_A, mask), BOARD_TAG, "mask_a");
     ESP_RETURN_ON_ERROR(wr(LIS_ST1_1, SM_NOP_GNTH1), BOARD_TAG, "st1_1");
     ESP_RETURN_ON_ERROR(wr(LIS_ST1_2, SM_CONT), BOARD_TAG, "st1_2");
-    ESP_RETURN_ON_ERROR(wr(LIS_SETT1, 0x01), BOARD_TAG, "sett1");          /* SITR: lệnh CONT được phép đổi luồng. */
-    ESP_RETURN_ON_ERROR(wr(LIS_CTRL3, 0x48), BOARD_TAG, "ctrl3");          /* IEA=1 tích cực mức cao, INT1_EN=1, IEL=0 ngắt chốt (giữ đến khi đọc OUTS1). */
+    ESP_RETURN_ON_ERROR(wr(LIS_SETT1, 0x01), BOARD_TAG, "sett1");          /* SITR permits the CONT instruction to change program flow. */
+    ESP_RETURN_ON_ERROR(wr(LIS_CTRL3, 0x48), BOARD_TAG, "ctrl3");          /* Select active-high latched INT1. Reading OUTS1 releases the interrupt. */
 
     return ESP_OK;
 }
@@ -173,15 +169,17 @@ esp_err_t lis3dsh_init(const lis3dsh_cfg_t *cfg)
     if (error == ESP_OK) { error = install_int1_isr(); }
     if (error != ESP_OK) { return error; }
 
-    ESP_RETURN_ON_ERROR(wr(LIS_CTRL1, 0x01), BOARD_TAG, "sm1 on");         /* Bật SM1 sau cùng, khi mọi cấu hình đã xong. */
+    ESP_RETURN_ON_ERROR(wr(LIS_CTRL1, 0x01), BOARD_TAG, "sm1 on");         /* Enable SM1 after all configuration writes succeed. */
     uint8_t outs;
     return lis3dsh_clear_interrupt(&outs);
 }
 
 esp_err_t lis3dsh_clear_interrupt(uint8_t *outs)
 {
-    /* Theo datasheet, thao tác đọc OUTS1 tác động lên chức năng ngắt của SM1; ngắt chốt
-     * (IEL=0) được nhả bằng lần đọc này. */
+    /*
+     * Reading OUTS1 releases the asserted SM1 interrupt in latched mode
+     * (IEL=0).
+     */
     return board_i2c_read(s_imu_cfg.i2c_device, LIS_OUTS1, outs, 1);
 }
 

@@ -1,14 +1,11 @@
-#pragma once
-
 /**
- * @file obd.h
- * @brief Giao diện công khai của component OBD: kết nối ELM327 qua BLE (NimBLE central) và đọc PID,
- *        trạng thái sẵn sàng và mã lỗi DTC.
+ * @file components/obd/include/obd/obd.h
+ * @brief Public ELM327-over-BLE OBD component and diagnostic snapshot APIs.
  *
- * Mọi thao tác BLE và ELM327 chạy trong task "obd". Các hàm điều khiển trong header này không
- * chặn; kết quả quay về qua sink dưới dạng IVTS_EV_OBD_LINK, IVTS_EV_OBD_SAMPLE và
- * IVTS_EV_OBD_DIAG_READY.
+ * The OBD task owns the BLE link and ELM327 exchanges. Control requests return
+ * immediately. The sink receives link, sample and diagnostic events.
  */
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -16,51 +13,56 @@
 #include "ivts_core/event/event.h"
 #include "ivts_core/model/obd.h"
 
-/** Cấu hình OBD; obd_init() sao chép toàn bộ. */
+/** Configuration copied by obd_init(). */
 typedef struct {
-    ivts_sink_t sink;              /**< Nơi nhận sự kiện OBD. */
-    char        target_addr[18];   /**< Địa chỉ BLE đích dạng "AA:BB:CC:DD:EE:FF"; rỗng = chọn thiết bị
-                                        quảng bá service 0x18F0 hoặc tên OBD tương thích. */
-    uint16_t    poll_ms;           /**< Chu kỳ một vòng PID 0C/0D/05/04/2F (mili-giây). */
-    uint16_t    diag_period_s;     /**< Chu kỳ đọc readiness (0101) và DTC (03/07/0A), giây. */
-    uint8_t     task_prio;         /**< Priority của task "obd". */
-    uint32_t    task_stack;        /**< Stack của task "obd", byte. */
+    ivts_sink_t sink;              /**< Destination for OBD link, sample and diagnostic events. */
+    char        target_addr[18];   /**<
+     * Target BLE address, or an empty string to discover an adapter by service
+     * or name.
+     */
+    uint16_t    poll_ms;           /**< Interval between live PID poll rounds, in milliseconds. */
+    uint16_t    diag_period_s;     /**< Interval between readiness and DTC queries, in seconds. */
+    uint8_t     task_prio;         /**< FreeRTOS priority for the OBD task. */
+    uint32_t    task_stack;        /**< OBD task stack size in bytes. */
 } obd_cfg_t;
 
 /**
- * @brief Khởi tạo queue và task "obd".
+ * @brief Create the OBD event queue, diagnostic mutex and worker.
  *
- * Phải gọi sau storage_init() để NVS sẵn sàng khi obd_start() khởi tạo NimBLE.
+ * Call after storage_init() so NVS is available when the worker starts NimBLE.
  *
- * @retval IVTS_OK              Đã khởi tạo.
- * @retval IVTS_ERR_INVALID_ARG cfg hoặc sink NULL.
- * @retval IVTS_ERR_FULL        Không tạo được queue, mutex hoặc task.
+ * @retval IVTS_OK The worker was created.
+ * @retval IVTS_ERR_INVALID_ARG Missing configuration or sink.
+ * @retval IVTS_ERR_FULL Queue, mutex or task allocation failed.
  */
 ivts_err_t obd_init(const obd_cfg_t *cfg);
 
 /**
- * @brief Yêu cầu bật NimBLE, quét, kết nối và đọc dữ liệu. Trả về ngay.
- * @retval IVTS_ERR_INVALID_STATE Chưa khởi tạo OBD.
+ * @brief Request BLE startup, discovery, connection and polling.
+ * @retval IVTS_ERR_INVALID_STATE The OBD worker is not initialized.
  */
 ivts_err_t obd_start(void);
 
 /**
- * @brief Yêu cầu ngắt kết nối, dừng đọc và tắt NimBLE. Trả về ngay.
- * @retval IVTS_ERR_INVALID_STATE Chưa khởi tạo OBD.
+ * @brief Request polling to stop and the worker to shut down NimBLE.
+ * @retval IVTS_ERR_INVALID_STATE The OBD worker is not initialized.
  */
 ivts_err_t obd_stop(void);
 
-/** @return true nếu đã tắt BLE. Gọi sau obd_stop() để kiểm tra trước khi ngủ. */
+/**
+ * @return True once the OBD worker has stopped. Check after obd_stop() when
+ * coordinating sleep.
+ */
 bool obd_is_stopped(void);
 
 /**
- * @brief Sao chép readiness và DTC mới nhất.
+ * @brief Copy the latest readiness and trouble-code snapshots.
  *
- * Gọi sau khi nhận IVTS_EV_OBD_DIAG_READY. Tham số nào NULL thì bỏ qua. Hàm khoá mutex trong lúc
- * sao chép nên an toàn gọi từ task bất kỳ.
+ * Call after IVTS_EV_OBD_DIAG_READY. Any output pointer can be NULL. A mutex
+ * protects the snapshot during the copy, so callers may use task context.
  *
- * @retval IVTS_OK                Đã sao chép.
- * @retval IVTS_ERR_INVALID_STATE obd_init() chưa chạy.
+ * @retval IVTS_OK Requested outputs were copied.
+ * @retval IVTS_ERR_INVALID_STATE The snapshot mutex is unavailable.
  */
 ivts_err_t obd_diag_copy(ivts_obd_readiness_t *rd, ivts_dtc_list_t *stored,
                          ivts_dtc_list_t *pending, ivts_dtc_list_t *permanent);

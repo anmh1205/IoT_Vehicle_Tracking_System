@@ -1,3 +1,10 @@
+/**
+ * @file mqtt_rx.c
+ * @brief Incremental reception of SIM7600 MQTT topic and payload blocks.
+ *
+ * Track declared lengths across UART fragments. Deliver eligible cloud
+ * commands through the modem FIFO after a complete frame.
+ */
 #include "mqtt/mqtt.h"
 #include "modem_internal.h"
 #include "esp_log.h"

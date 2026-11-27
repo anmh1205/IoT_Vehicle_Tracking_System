@@ -1,3 +1,10 @@
+/**
+ * @file sd_mount.c
+ * @brief SDMMC pin binding, card detection and FAT mount.
+ *
+ * Use the app-supplied wiring and leave an existing card untouched if its
+ * filesystem cannot be mounted.
+ */
 #include "sd/sd.h"
 #include "storage_internal.h"
 #include "driver/sdmmc_host.h"
@@ -20,12 +27,14 @@ esp_err_t storage_sd_mount(void)
     slot.d2 = (gpio_num_t)c->pin_d2;
     slot.d3 = (gpio_num_t)c->pin_d3;
     slot.cd = (c->pin_cd >= 0) ? (gpio_num_t)c->pin_cd : SDMMC_SLOT_NO_CD;
-    /* Bật pull-up nội của SoC cho các chân SDMMC. Pull-up nội yếu; ESP-IDF khuyến nghị pull-up
-     * ngoài 10 kΩ trên CMD và D0..D3 để chạy ổn định. */
+    /*
+     * Enable the SoC's weak internal SDMMC pull-ups. The hardware normally
+     * also needs external 10 kΩ pull-ups on CMD and D0 through D3.
+     */
     slot.flags |= SDMMC_SLOT_FLAG_INTERNAL_PULLUP;
 
     esp_vfs_fat_sdmmc_mount_config_t mc = {
-        .format_if_mount_failed = false,   /* Không tự định dạng khi gắn lỗi. */
+        .format_if_mount_failed = false,   /* Mount failure leaves the existing filesystem intact. */
         .max_files = 4,
         .allocation_unit_size = 16 * 1024,
     };

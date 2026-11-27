@@ -1,35 +1,43 @@
+/**
+ * @file board_power.h
+ * @brief Board sleep entry, wake reporting and automatic light-sleep policy.
+ *
+ * The app coordinates radio shutdown before calling these functions. Supported
+ * wake sources depend on the board's GPIO routing.
+ */
 #pragma once
 #include <stdbool.h>
 #include <stdint.h>
 #include "ivts_core/base/err.h"
 
-/** Nguyên nhân của lần thức. */
+/** Wake reason reported by the board. */
 typedef enum {
-    BOARD_WAKE_POWER_ON = 0,   /**< Cấp nguồn hoặc reset, không phải thức từ sleep. */
+    BOARD_WAKE_POWER_ON = 0,   /**< Power-on or reset. */
     BOARD_WAKE_TIMER,
     BOARD_WAKE_IMU,
     BOARD_WAKE_OTHER
 } board_wake_t;
 
-/** Yêu cầu ngủ. */
+/** Sleep parameters supplied by application policy. */
 typedef struct {
-    bool     deep;       /**< false: light sleep (hàm trả về khi thức). true: deep sleep (không trả về). */
-    uint32_t seconds;    /**< Thời gian ngủ tối đa trước khi timer đánh thức. */
-    bool     arm_imu;    /**< Cho phép IMU đánh thức, nếu chân INT hỗ trợ ở chế độ đã chọn. */
+    bool     deep;       /**< False selects light sleep and returns on wake. True selects deep sleep. */
+    uint32_t seconds;    /**< Maximum sleep duration before timer wake, in milliseconds. */
+    bool     arm_imu;    /**< Allow IMU wake when the INT GPIO supports the selected sleep mode. */
 } board_sleep_req_t;
 
-/** @brief Chân INT của IMU có thể đánh thức deep sleep (esp_sleep_is_valid_wakeup_gpio). */
+/** @brief Report whether the PCB's IMU interrupt can wake deep sleep. */
 bool board_motion_deep_wake_capable(void);
-/** Cấu hình quản lý tần số và cho phép hoặc cấm light sleep tự động khi các task đang chờ. */
+/** Configure frequency scaling and automatic light sleep when tasks are idle. */
 ivts_err_t board_set_auto_light_sleep(bool enabled);
 
-/** @brief Nguyên nhân của lần boot hiện tại, chụp một lần ở đầu board_init(). */
+/** @brief Return the wake reason captured once at the beginning of board_init(). */
 board_wake_t board_wake_cause(void);
 
 /**
- * @brief Vào light hoặc deep sleep.
+ * @brief Enter light sleep or deep sleep.
  *
- * Light sleep: trả về nguyên nhân thức. Deep sleep: không trả về.
- * Nếu IMU được armed và chân INT đang ở mức cao thì hàm trả BOARD_WAKE_IMU ngay mà không ngủ.
+ * Light sleep returns the wake reason. Deep sleep resumes by booting the
+ * firmware. When the armed IMU interrupt is already high, return
+ * BOARD_WAKE_IMU without entering sleep.
  */
 board_wake_t board_sleep(const board_sleep_req_t *req);

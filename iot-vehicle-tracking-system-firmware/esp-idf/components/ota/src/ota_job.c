@@ -1,3 +1,10 @@
+/**
+ * @file ota_job.c
+ * @brief OTA download, verification, cleanup and boot partition selection.
+ *
+ * Check size/version/digest, finalize the image and persist confirmation
+ * context before selecting the new boot partition.
+ */
 #include "ota_internal.h"
 #include "esp_app_desc.h"
 #include "esp_log.h"
@@ -6,10 +13,10 @@
 
 #include <string.h>
 
-/* SHA-256 dùng PSA Crypto (psa_hash_*): ESP-IDF 6.1 đi kèm mbedTLS 4.x, không còn API
- * mbedtls_sha256_*. psa_crypto_init() đã được ESP-IDF gọi lúc khởi động
- * (mbedtls/port/esp_psa_crypto_init.c) nên không cần gọi lại. */
-#define CHUNK 1024u   /* Kích thước mỗi lần đọc nguồn và ghi flash, byte. */
+/*
+ * SHA-256 uses PSA Crypto in ESP-IDF 6.1. The SDK initializes PSA at boot.
+ */
+#define CHUNK 1024u   /* Maximum bytes read and written per OTA chunk. */
 
 typedef struct {
     const ota_source_t *source;

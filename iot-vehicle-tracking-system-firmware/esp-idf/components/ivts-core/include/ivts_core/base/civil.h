@@ -1,15 +1,15 @@
 /**
  * @file civil.h
- * @brief Chuyển đổi giữa ngày giờ UTC và Unix time (ms).
+ * @brief Conversion between UTC calendar values and Unix milliseconds.
  *
- * Không dùng time.h/mktime: kết quả không phụ thuộc TZ, locale hay độ rộng time_t
- * của host so với target. Dùng bởi modem (giờ GNSS) và board (DS3231M).
+ * The conversion is independent of the local time zone, locale and time_t
+ * width.
  */
 #pragma once
 #include <stdint.h>
 #include "ivts_core/base/err.h"
 
-/** Ngày giờ UTC theo lịch Gregory. */
+/** UTC date and time in the Gregorian calendar. */
 typedef struct {
     uint16_t year;    /**< 1970..2099 */
     uint8_t  month;   /**< 1..12 */
@@ -19,17 +19,17 @@ typedef struct {
 } ivts_civil_t;
 
 /**
- * @brief Đổi ngày giờ UTC sang Unix time (ms).
- * @param c    Ngày giờ đầu vào.
- * @param out  Nhận Unix time (ms).
- * @return IVTS_OK; IVTS_ERR_INVALID_ARG nếu con trỏ NULL, trường ngoài dải
- *         hoặc ngày không tồn tại (31/4, 29/2 năm thường).
+ * @brief Convert UTC calendar fields into Unix milliseconds.
+ * @param c Input calendar fields.
+ * @param[out] out Unix time in milliseconds.
+ * @return IVTS_OK, or IVTS_ERR_INVALID_ARG for a null pointer, out-of-range
+ * field or invalid date such as April 31.
  */
 ivts_err_t ivts_civil_to_unix_ms(const ivts_civil_t *c, uint64_t *out);
 
 /**
- * @brief Đổi Unix time (ms) sang ngày giờ UTC.
- * @param unix_ms  Unix time (ms).
- * @param c        Nhận kết quả. Không được NULL.
+ * @brief Convert Unix milliseconds into UTC calendar fields.
+ * @param unix_ms Unix time in milliseconds.
+ * @param[out] c Required result pointer.
  */
 void ivts_unix_ms_to_civil(uint64_t unix_ms, ivts_civil_t *c);

@@ -1,3 +1,7 @@
+/**
+ * @file payload_control.c
+ * @brief MQTT serialization for device status, events and firmware reports.
+ */
 #include "payload/payload.h"
 #include "ivts_core/ota/contract.h"
 
