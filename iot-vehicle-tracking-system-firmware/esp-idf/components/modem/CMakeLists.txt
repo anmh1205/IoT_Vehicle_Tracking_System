@@ -6,10 +6,10 @@ idf_component_register(
         # AT framing and execution
         "src/at/at_parser.c" "src/at/at_engine.c" "src/at/at_dispatch.c"
         # LTE and MQTT
-        "src/modem_link.c" "src/link_steps.c"
+        "src/modem_link.c"
         "src/mqtt/mqtt_session.c" "src/mqtt/mqtt_publish.c" "src/mqtt/mqtt_rx.c"
         # HTTP and GNSS
-        "src/modem_http.c" "src/modem_gnss.c" "src/gnss_parse.c"
+        "src/modem_http.c" "src/modem_gnss.c"
         # Cross-task slots
         "src/slots.c"
     INCLUDE_DIRS "include"

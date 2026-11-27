@@ -1,7 +1,6 @@
 idf_component_register(
     SRCS
         # Base types and model codecs
-        "src/base/err.c"
         "src/base/str.c"
         "src/base/backoff.c"
         "src/base/crc32.c"
@@ -11,7 +10,6 @@ idf_component_register(
         "src/event.c"
         # JSON and MQTT payloads
         "src/payload/json_writer.c"
-        "src/payload/json_tokenizer.c"
         "src/payload/json_reader.c"
         "src/payload/json_fields.c"
         "src/payload/payload_common.c"

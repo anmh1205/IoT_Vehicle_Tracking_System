@@ -1,6 +1,6 @@
 idf_component_register(
     SRCS
-        "src/storage.c" "src/storage_task.c"
+        "src/storage_task.c"
         # NVS records and SD log
         "src/nvs_store.c" "src/sd/sd_mount.c" "src/sd/sd_log.c"
         # Offline queue and on-disk format

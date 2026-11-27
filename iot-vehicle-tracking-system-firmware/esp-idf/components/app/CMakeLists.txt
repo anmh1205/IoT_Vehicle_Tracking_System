@@ -17,8 +17,8 @@ idf_component_register(
         "src/publish/outbox.c"
         "src/session_tracker.c" "src/motion_alarm.c"
         # Commands and firmware updates
-        "src/command/cmd_inbox.c" "src/command/cmd_table.c" "src/command/cmd_config.c"
-        "src/command/cmd_ota.c" "src/command/cmd_location.c" "src/command/cmd_session.c"
+        "src/command/cmd_inbox.c" "src/command/cmd_config.c"
+        "src/command/cmd_ota.c" "src/command/cmd_session.c"
         "src/command/cmd_restart.c" "src/command/cmd_receipts.c"
         "src/fw_update.c"
     INCLUDE_DIRS "include"
