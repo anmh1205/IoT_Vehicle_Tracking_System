@@ -22,6 +22,7 @@
 #include "obd_pid.h"
 #include "storage_internal.h"
 #include "queue/queue.h"
+#include "queue/queue_frame.h"
 #include "persist/app_records.h"
 
 #define FIRST "sd/q/Q0000000.BIN"
@@ -287,6 +288,21 @@ static void check_late_session_assignment(void)
     assert(!app_session_assign(key, "00000007", 99u, NULL));
 }
 
+static void check_queue_frame_codec(void)
+{
+    const uint8_t record[] = { 'a', 'b', 'c' };
+    /* IEEE CRC32 over 03 61 62 63 is 0xf994e822. On disk CRC is little endian. */
+    const uint8_t expected[] = { 0xA5, 0x03, 0x61, 0x62, 0x63, 0x22, 0xe8, 0x94, 0xf9 };
+    uint8_t encoded[sizeof expected], decoded[sizeof record];
+    size_t len = storage_queue_frame_encode(encoded, record, sizeof record);
+    assert(len == sizeof expected && memcmp(encoded, expected, sizeof expected) == 0);
+    assert(storage_queue_frame_decode(encoded, len, decoded, &len) == (int)sizeof expected);
+    assert(len == sizeof record && memcmp(decoded, record, sizeof record) == 0);
+    assert(storage_queue_frame_decode(encoded, sizeof encoded - 1u, NULL, NULL) == FRAME_CORRUPT);
+    encoded[2] ^= 1u;
+    assert(storage_queue_frame_decode(encoded, sizeof encoded, NULL, NULL) == FRAME_CORRUPT);
+}
+
 static void check_mqtt_connect_command(void)
 {
     const modem_cfg_t config = { .mqtt_port = 1883, .mqtt_host = "broker.test",
@@ -374,7 +390,7 @@ static void check_obd(void)
 int main(int argc, char *argv[])
 {
     const struct { const char *name; void (*check)(void); } cases[] = {
-        {"eviction", check_eviction_with_delayed_ack}, {"read_error", check_read_error},
+        {"frame", check_queue_frame_codec}, {"eviction", check_eviction_with_delayed_ack}, {"read_error", check_read_error},
         {"partial_append", check_partial_append}, {"sparse", check_sparse_segments},
         {"uart", check_uart}, {"ota", check_ota_deadline},
         {"session", check_late_session_assignment}, {"mqtt_rx", check_mqtt_rx}, {"obd", check_obd},

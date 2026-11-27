@@ -33,6 +33,9 @@ class Reliability(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             subprocess.run([self.executable, case], cwd=directory, check=True, timeout=5)
 
+    def test_queue_frame_codec_matches_disk_format(self):
+        self.run_case("frame")
+
     def test_delayed_ack_after_eviction_and_failed_delete(self):
         self.run_case("eviction")
 

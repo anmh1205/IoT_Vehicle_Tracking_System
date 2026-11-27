@@ -39,6 +39,7 @@ def executable():
     "replay_and_control_order",
     "ota_boot_normal",
     "ota_boot_landed",
+    "ota_boot_landed_legacy",
     "ota_boot_rolled_back",
     "ota_confirm",
     "ota_deadline",

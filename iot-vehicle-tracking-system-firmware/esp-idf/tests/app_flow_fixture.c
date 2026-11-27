@@ -56,6 +56,7 @@ static ivts_ota_pending_t s_ota_context;
 static ivts_cmd_receipts_t s_receipts;
 static ivts_restart_intent_t s_restart_intent;
 static bool s_image_pending_verify;
+static bool s_legacy_ota_context;
 static bool s_fail_receipts_save;
 static uint8_t s_tracking_enabled = 1u;
 static unsigned s_receipts_saves;
@@ -268,6 +269,12 @@ static const fixture_record_t *record_for(const char *key, uint16_t version, siz
 
 ivts_err_t storage_record_load(const char *key, uint16_t version, void *buffer, size_t len)
 {
+    if (s_legacy_ota_context && strcmp(key, "ota") == 0) {
+        if (version == 3u) { return IVTS_ERR_VERSION; }
+        assert(version == 2u && len == offsetof(ivts_ota_pending_t, target_partition));
+        memcpy(buffer, &s_ota_context, len);
+        return IVTS_OK;
+    }
     const fixture_record_t *record = record_for(key, version, len);
     if (record->data == &s_restart_intent && s_restart_intent.id[0] == '\0') {
         return IVTS_ERR_NOT_FOUND;
@@ -654,7 +661,8 @@ static void seed_scenario(const char *name)
     if (strncmp(name, "ota_boot_", 9u) == 0) {
         s_before_tick = ota_boot;
         if (strcmp(name, "ota_boot_normal") != 0) {
-            seed_ota_context(strcmp(name, "ota_boot_landed") == 0 ? "2.0.0" : "3.0.0");
+            seed_ota_context(strcmp(name, "ota_boot_rolled_back") == 0 ? "3.0.0" : "2.0.0");
+            s_legacy_ota_context = strcmp(name, "ota_boot_landed_legacy") == 0;
         }
         return;
     }
