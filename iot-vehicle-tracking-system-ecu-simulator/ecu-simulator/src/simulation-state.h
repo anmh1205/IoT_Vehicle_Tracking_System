@@ -53,14 +53,17 @@ struct driver_command_t {
   bool hold_stopped;
 };
 
+enum ignition_phase_t : uint8_t {
+  IGNITION_OFF, IGNITION_KEY_ON, IGNITION_CRANKING, IGNITION_RUNNING,
+};
+
 struct ignition_cycle_state_t {
   bool ignition_on;
-  uint32_t started_s;
-  uint32_t duration_s;
-  uint32_t drive_started_s;
+  uint32_t started_ms;
+  uint32_t duration_ms;
   bool forced_cycle_active;
   bool forced_cycle_return_state;
-  uint32_t forced_cycle_deadline_s;
+  uint32_t forced_cycle_deadline_ms;
 };
 
 struct powertrain_state_t {
@@ -108,6 +111,12 @@ struct fault_profile_t {
 struct diagnostic_state_t {
   fault_profile_t profile;
   uint32_t active_ms;
+  uint8_t failed_drives;
+  uint8_t clean_drives;
+  uint8_t incomplete_monitors;
+  bool tested_this_drive;
+  bool failed_this_drive;
+  bool fault_enabled;
   bool pending;
   bool stored;
   bool permanent;

@@ -9,5 +9,5 @@ void powertrain_state_begin(powertrain_state_t &state);
 void powertrain_state_tick(powertrain_state_t &state,
                            const powertrain_config_t &config,
                            const driver_command_t &command,
-                           bool ignition_on,
+                           ignition_phase_t phase,
                            uint32_t delta_ms);

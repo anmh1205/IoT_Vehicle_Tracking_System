@@ -11,7 +11,7 @@ uint8_t clamp_u8(int value) {
   return static_cast<uint8_t>(value);
 }
 
-uint16_t clamp_u16(int value) {
+uint16_t clamp_u16(long value) {
   if (value < 0) {
     return 0;
   }
@@ -94,12 +94,14 @@ void build_obd_snapshot(ecu_snapshot_t &snapshot,
   }
 
   const uint8_t engine_load_pct = compute_engine_load(powertrain);
-  snapshot.fuel_system_status_a = powertrain.engine_running ? 0x02 : 0x00;
+  snapshot.fuel_system_status_a = powertrain.engine_running ? (powertrain.coolant_c >= 58.0f ? 0x02 : 0x01) : 0x00;
   snapshot.fuel_system_status_b = 0x00;
-  snapshot.short_trim_bank1_pct = diagnostic.profile.short_trim_pct + (diagnostic.pending ? 2 : 0);
-  snapshot.long_trim_bank1_pct = diagnostic.profile.long_trim_pct + (diagnostic.stored ? 2 : 0);
-  snapshot.short_trim_bank2_pct = diagnostic.profile.short_trim_pct > 0 ? diagnostic.profile.short_trim_pct - 1 : diagnostic.profile.short_trim_pct + 1;
-  snapshot.long_trim_bank2_pct = diagnostic.profile.long_trim_pct > 0 ? diagnostic.profile.long_trim_pct - 1 : diagnostic.profile.long_trim_pct + 1;
+  if (powertrain.engine_running && diagnostic.fault_enabled) {
+    snapshot.short_trim_bank1_pct = diagnostic.profile.short_trim_pct + (diagnostic.pending ? 2 : 0);
+    snapshot.long_trim_bank1_pct = diagnostic.profile.long_trim_pct + (diagnostic.stored ? 2 : 0);
+    snapshot.short_trim_bank2_pct = diagnostic.profile.short_trim_pct > 0 ? diagnostic.profile.short_trim_pct - 1 : diagnostic.profile.short_trim_pct + 1;
+    snapshot.long_trim_bank2_pct = diagnostic.profile.long_trim_pct > 0 ? diagnostic.profile.long_trim_pct - 1 : diagnostic.profile.long_trim_pct + 1;
+  }
   snapshot.engine_load_pct = engine_load_pct;
   snapshot.coolant_c = clamp_u8(static_cast<int>(powertrain.coolant_c));
   snapshot.fuel_pressure_kpa = powertrain.fuel_pressure_kpa;
@@ -111,17 +113,17 @@ void build_obd_snapshot(ecu_snapshot_t &snapshot,
   snapshot.maf_centigrams_per_s = compute_maf_centigrams(powertrain, engine_load_pct);
   snapshot.throttle_pct = clamp_u8(static_cast<int>(powertrain.throttle_actual_pct));
   snapshot.obd_standard = 0x01;
-  snapshot.run_time_s = clamp_u16(static_cast<int>(powertrain.runtime_s));
-  snapshot.distance_with_mil_km = clamp_u16(static_cast<int>(powertrain.distance_with_mil_m / 1000UL));
+  snapshot.run_time_s = clamp_u16(static_cast<long>(powertrain.runtime_s));
+  snapshot.distance_with_mil_km = clamp_u16(static_cast<long>(powertrain.distance_with_mil_m / 1000UL));
   snapshot.fuel_level_pct = clamp_u8(static_cast<int>(powertrain.fuel_level_pct));
-  snapshot.distance_since_clear_km = clamp_u16(static_cast<int>(powertrain.distance_m / 1000UL));
+  snapshot.distance_since_clear_km = clamp_u16(static_cast<long>(powertrain.distance_m / 1000UL));
   snapshot.barometric_kpa = static_cast<uint8_t>(powertrain.barometric_kpa > 255 ? 255 : powertrain.barometric_kpa);
   snapshot.control_module_mv = powertrain.control_module_mv;
   snapshot.ambient_air_c = static_cast<int8_t>(clamp_u8(static_cast<int>(powertrain.ambient_air_c + 40.0f)) - 40);
   snapshot.abs_throttle_b_pct = clamp_u8(static_cast<int>(powertrain.throttle_actual_pct + 3.0f));
   snapshot.commanded_throttle_pct = clamp_u8(static_cast<int>(powertrain.throttle_demand_pct));
-  snapshot.time_with_mil_s = clamp_u16(static_cast<int>(powertrain.time_with_mil_s));
-  snapshot.time_since_clear_min = clamp_u16(static_cast<int>(powertrain.total_elapsed_s / 60UL));
+  snapshot.time_with_mil_s = clamp_u16(static_cast<long>(powertrain.time_with_mil_s));
+  snapshot.time_since_clear_min = clamp_u16(static_cast<long>(powertrain.total_elapsed_s / 60UL));
   snapshot.ethanol_pct = 10;
   snapshot.oil_temp_c = static_cast<int16_t>(powertrain.oil_temp_c);
   snapshot.fuel_rate_centiliters_per_h = compute_fuel_rate_centiliters_per_h(powertrain, engine_load_pct);
@@ -129,7 +131,7 @@ void build_obd_snapshot(ecu_snapshot_t &snapshot,
   clear_bucket(snapshot.stored_dtc);
   clear_bucket(snapshot.pending_dtc);
   clear_bucket(snapshot.permanent_dtc);
-  if (diagnostic.pending && !diagnostic.stored) {
+  if (diagnostic.pending) {
     push_code(snapshot.pending_dtc, diagnostic.profile.primary_code);
   }
   if (diagnostic.stored) {
@@ -137,9 +139,6 @@ void build_obd_snapshot(ecu_snapshot_t &snapshot,
     if (diagnostic.secondary_stored) {
       push_code(snapshot.stored_dtc, diagnostic.profile.secondary_code);
     }
-  }
-  if (diagnostic.pending && diagnostic.stored && !diagnostic.secondary_stored) {
-    push_code(snapshot.pending_dtc, diagnostic.profile.secondary_code);
   }
   if (diagnostic.permanent) {
     push_code(snapshot.permanent_dtc, diagnostic.profile.permanent_code);
