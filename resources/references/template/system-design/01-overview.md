@@ -1,214 +1,39 @@
-# System Overview
+# 01. Tổng quan hệ thống IVTS
 
-> Tổng quan kiến trúc hệ thống IoT
+IVTS nối thiết bị theo dõi trên xe với dashboard điều hành đội xe. Tracker thu vị trí, trạng thái nguồn và dữ liệu OBD-II khi có adapter tương thích. Cloud lưu lịch sử, phát thay đổi theo thời gian thực và chuyển lệnh hợp lệ xuống thiết bị.
 
----
+[Kiến trúc IVTS trong repository](../../../../docs/system-architecture.md) mô tả các ranh giới chính. Bộ tài liệu này giải thích từng ranh giới và dẫn đến mã nguồn thực hiện.
 
-## 1. High-Level Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              IOT SYSTEM ARCHITECTURE                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐                 │
-│  │  IoT Device  │     │  IoT Device  │     │  IoT Device  │                 │
-│  │  (ESP32/STM) │     │  (ESP32/STM) │     │  (ESP32/STM) │                 │
-│  └──────┬───────┘     └──────┬───────┘     └──────┬───────┘                 │
-│         │                    │                    │                          │
-│         └────────────────────┼────────────────────┘                          │
-│                              │                                               │
-│                              ▼                                               │
-│                    ┌──────────────────┐                                      │
-│                    │    EMQX Broker   │                                      │
-│                    │   (MQTT Server)  │                                      │
-│                    └────────┬─────────┘                                      │
-│                             │                                                │
-│         ┌───────────────────┼───────────────────┐                           │
-│         │                   │                   │                            │
-│         ▼                   ▼                   ▼                            │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                      │
-│  │ MQTT Bridge │    │   Backend   │    │  Frontend   │                      │
-│  │  (Worker)   │    │  (Express)  │    │  (Next.js)  │                      │
-│  └──────┬──────┘    └──────┬──────┘    └─────────────┘                      │
-│         │                  │                                                 │
-│         ▼                  ▼                                                 │
-│  ┌─────────────────────────────────────┐                                    │
-│  │           DATA LAYER                 │                                    │
-│  │  ┌────────────┐  ┌────────────────┐ │                                    │
-│  │  │ PostgreSQL │  │ VictoriaMetrics│ │                                    │
-│  │  │ (Metadata) │  │ (Time-series)  │ │                                    │
-│  │  └────────────┘  └────────────────┘ │                                    │
-│  └─────────────────────────────────────┘                                    │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    OBD["Xe hoặc bench ECU"] --> Tracker["Tracker ESP32-S3"]
+    Tracker <-->|MQTT| Broker["EMQX"]
+    Broker <--> Bridge["MQTT Bridge"]
+    Bridge --> PG["PostgreSQL"]
+    Broker <--> API["Express và Socket.IO"]
+    PG <--> API
+    API <--> Web["Next.js dashboard"]
+    Mobile["Flutter WebView"] --> Web
 ```
 
----
+| Khu vực | Thành phần và ranh giới |
+| --- | --- |
+| Trên xe | ESP32-S3 chạy FreeRTOS. SIM7600 đảm nhiệm LTE, GNSS và kết nối MQTT. Adapter BLE OBD-II cung cấp dữ liệu ECU khi có kết nối. |
+| Cloud | EMQX chuyển bản tin. MQTT Bridge xử lý ingest. Backend cung cấp API, quyền truy cập, lệnh thiết bị và Socket.IO. |
+| Dữ liệu | PostgreSQL lưu trạng thái, phiên, lịch sử và dữ liệu nghiệp vụ. VictoriaMetrics và VictoriaLogs phục vụ luồng metrics và logs. |
+| Người vận hành | Next.js hiển thị dashboard. Flutter hiển thị dashboard trong WebView và kết nối với các chức năng native. |
+| Kiểm thử bench | Arduino Uno và MCP2515 mô phỏng một ECU trên CAN. Một adapter OBD BLE có thể nối bench với tracker để kiểm tra đường truyền thực tế. |
 
-## 2. Component Overview
+## Các phần thiết kế
 
-### 2.1 IoT Devices (Edge Layer)
-
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| MCU | ESP32 / STM32 | Main controller |
-| Sensors | Domain-specific | Data collection |
-| Communication | MQTT over WiFi/4G | Data transmission |
-| Firmware | C/C++ / MicroPython | Device logic |
-
-### 2.2 Message Broker
-
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| MQTT Broker | EMQX 5.x | Message routing |
-| WebSocket | EMQX WSS | Browser connections |
-| Authentication | Username/Password | Device auth |
-
-### 2.3 Backend Services
-
-| Service | Technology | Purpose |
-|---------|------------|---------|
-| API Server | Express.js + TypeScript | REST API |
-| MQTT Bridge | Node.js Worker | MQTT → Database |
-| Socket.IO | Socket.IO 4.x | Real-time updates |
-| Auth | JWT + bcrypt | Authentication |
-
-### 2.4 Data Layer
-
-| Database | Technology | Purpose |
-|----------|------------|---------|
-| Relational | PostgreSQL 16 | Device metadata, users |
-| Time-series | VictoriaMetrics | Sensor data |
-| Logs | VictoriaLogs | Event logging |
-
-### 2.5 Frontend
-
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| Web App | Next.js 16 | Dashboard |
-| UI Library | shadcn/ui + Tailwind | Components |
-| State | TanStack Query + Zustand | Data management |
-| Real-time | Socket.IO Client | Live updates |
-
-### 2.6 Mobile
-
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| App Shell | Flutter | Cross-platform |
-| WebView | flutter_inappwebview | Dashboard embed |
-| Push | FCM + Socket.IO | Notifications |
-
----
-
-## 3. Data Flow
-
-### 3.1 Sensor Data Flow
-
-```
-IoT Device
-    │
-    │ 1. MQTT Publish (v1/{device_id}/rawdata)
-    ▼
-EMQX Broker
-    │
-    │ 2. Subscribe & Receive
-    ▼
-MQTT Bridge
-    │
-    ├── 3a. Write to VictoriaMetrics (time-series)
-    ├── 3b. Update PostgreSQL (device state)
-    └── 3c. Emit Socket.IO event
-           │
-           │ 4. Real-time broadcast
-           ▼
-      Dashboard / Mobile App
-```
-
-### 3.2 API Request Flow
-
-```
-User/Client
-    │
-    │ 1. HTTP Request
-    ▼
-Backend API
-    │
-    ├── 2. Auth middleware (JWT)
-    ├── 3. Validation (Zod)
-    ├── 4. Business logic
-    │
-    ├── 5a. Query PostgreSQL (metadata)
-    └── 5b. Query VictoriaMetrics (metrics)
-           │
-           │ 6. Response
-           ▼
-      Client
-```
-
-### 3.3 Real-time Event Flow
-
-```
-State Change (device status, alert, etc.)
-    │
-    │ 1. Event emitted
-    ▼
-Socket.IO Server
-    │
-    │ 2. Broadcast to namespace
-    ▼
-Connected Clients
-    │
-    │ 3. React Query cache update
-    ▼
-UI Re-render
-```
-
----
-
-## 4. Scalability
-
-### Horizontal Scaling
-
-```
-                    ┌─────────────┐
-                    │ Load Balancer│
-                    └──────┬──────┘
-           ┌───────────────┼───────────────┐
-           ▼               ▼               ▼
-    ┌────────────┐  ┌────────────┐  ┌────────────┐
-    │ Backend 1  │  │ Backend 2  │  │ Backend 3  │
-    └────────────┘  └────────────┘  └────────────┘
-           │               │               │
-           └───────────────┼───────────────┘
-                           ▼
-                    ┌─────────────┐
-                    │   Redis     │ (Session store)
-                    └─────────────┘
-```
-
-### MQTT Bridge Scaling
-
-```
-EMQX Broker (Shared Subscription)
-    │
-    ├── MQTT Bridge Worker 1
-    ├── MQTT Bridge Worker 2
-    └── MQTT Bridge Worker 3
-```
-
----
-
-## 5. Technology Summary
-
-| Layer | Technology | Version |
-|-------|------------|---------|
-| **Device** | ESP32 / STM32 | - |
-| **Protocol** | MQTT 5.0 | EMQX 5.3 |
-| **Backend** | Express + TypeScript | Node 20 |
-| **Frontend** | Next.js + React | 16 / 19 |
-| **Database** | PostgreSQL | 16 |
-| **Time-series** | VictoriaMetrics | 1.96+ |
-| **Logging** | VictoriaLogs | 1.0+ |
-| **Monitoring** | Grafana | 10.x |
-| **Container** | Docker Compose | 3.8 |
+| Tài liệu | Phạm vi |
+| --- | --- |
+| [02. Yêu cầu](02-requirements.md) | Hành vi nghiệp vụ và điều kiện kiểm chứng |
+| [03. Kiến trúc](03-architecture.md) | Quyền sở hữu logic, trạng thái và giao tiếp giữa các lớp |
+| [04. Dữ liệu](04-database-design.md) | Phiên xe, lịch sử telemetry, giao dịch và migration |
+| [05. API](05-api-design.md) | Route HTTP, envelope, lệnh và export |
+| [06. Realtime](06-realtime-design.md) | MQTT, Socket.IO và khôi phục sau reconnect |
+| [07. Frontend](07-frontend-design.md) | Dashboard, bản đồ, cache và Flutter WebView |
+| [08. Bảo mật](08-security.md) | Danh tính người dùng, quyền tài sản, ACL thiết bị và origin WebView |
+| [09. Triển khai](09-deployment.md) | Compose, cổng dịch vụ, TLS và phát hành UAT |
+| [10. Giám sát](10-monitoring.md) | Readiness, metrics, logs và cách lần theo bản tin |
