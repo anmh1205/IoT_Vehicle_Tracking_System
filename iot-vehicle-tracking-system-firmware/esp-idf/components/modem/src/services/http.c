@@ -98,7 +98,7 @@ static ivts_err_t do_open(const modem_req_t *r)
     if (k < 0 || (size_t)k >= sizeof cmd) { return IVTS_ERR_INVALID_ARG; }
     at_cmd_t url = { .text = cmd, .timeout_ms = 5000, .redact = true };
     if (modem_at(&url) != AT_RES_OK) { return IVTS_ERR_IO; }
-    at_cmd_t c = { .text = "AT+HTTPACTION=0", .final_prefix = "+HTTPACTION:", .timeout_ms = 120000 };
+    at_cmd_t c = { .text = "AT+HTTPACTION=0", .final_prefix = "+HTTPACTION:", .timeout_ms = 120000, .require_ok = true };
     if (modem_at(&c) != AT_RES_OK) { return IVTS_ERR_TIMEOUT; }
     int32_t status = 0, len = 0;
     if (!at_field_int(modem_at_response(), 1, &status) || !at_field_int(modem_at_response(), 2, &len) || len < 0) {
@@ -119,7 +119,7 @@ static ivts_err_t do_read(const modem_req_t *r)
     s_http.capacity = r->len;
     s_http.length = 0;
     s_http.overflow = false;
-    /* The exact zero-length terminal line must not match a nonzero data header. */
+    /* Only the exact zero-length marker completes the read. An OK can precede the raw blocks. */
     at_cmd_t c = { .text = cmd, .final_prefix = "+HTTPREAD: 0", .final_exact = true, .timeout_ms = 15000 };
     at_result_t res = modem_at(&c);
     s_http.destination = NULL;

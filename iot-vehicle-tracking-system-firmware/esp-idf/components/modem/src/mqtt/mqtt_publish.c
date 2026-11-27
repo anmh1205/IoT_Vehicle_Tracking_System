@@ -34,13 +34,13 @@ static bool send_payload(const char *payload, size_t len)
     return input("PAYLOAD", payload, len);
 }
 
-/** @brief Wait for the modem QoS 1 result and retain the input error code if no result field parses. */
+/** @brief Wait for OK and the modem QoS 1 result. Retain the input error code if no result field parses. */
 static bool send_publish(int16_t *err)
 {
     char cmd[40];
     snprintf(cmd, sizeof cmd, "AT+CMQTTPUB=0,1,%d", PUB_TIMEOUT_S);
     at_cmd_t c = { .text = cmd, .final_prefix = "+CMQTTPUB:", .final_err_field = 2,
-                   .timeout_ms = (PUB_TIMEOUT_S + 5) * 1000u };
+                   .timeout_ms = (PUB_TIMEOUT_S + 5) * 1000u, .require_ok = true };
     at_result_t r = modem_at(&c);
     int32_t e = 0;
     bool ok = (r == AT_RES_OK);

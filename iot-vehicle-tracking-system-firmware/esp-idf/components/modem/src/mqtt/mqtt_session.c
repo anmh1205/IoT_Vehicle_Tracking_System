@@ -26,7 +26,7 @@ static bool sub_commands(void)
     size_t tl = strlen(modem_command_topic());
     snprintf(cmd, sizeof cmd, "AT+CMQTTSUB=0,%u,1", (unsigned)tl);
     at_cmd_t c = { .text = cmd, .data = (const uint8_t *)modem_command_topic(), .data_len = tl,
-                   .final_prefix = "+CMQTTSUB:", .final_err_field = 2, .timeout_ms = 15000 };
+                   .final_prefix = "+CMQTTSUB:", .final_err_field = 2, .timeout_ms = 15000, .require_ok = true };
     return modem_at(&c) == AT_RES_OK;
 }
 
@@ -40,8 +40,9 @@ static void mqtt_cleanup_stale_service(void)
 
 static bool mqtt_start_service(void)
 {
+    /* The SIM7600 can send the START result before or after the terminal OK. */
     at_cmd_t c = { .text = "AT+CMQTTSTART", .final_prefix = "+CMQTTSTART:", .final_err_field = 1,
-                   .timeout_ms = 12000 };
+                   .timeout_ms = 12000, .require_ok = true };
     at_result_t r = modem_at(&c);
     /*
      * The modem MQTT service can survive an ESP32 reset. If START fails,
@@ -94,7 +95,7 @@ static bool mqtt_connect(bool tls)
      */
     if (!modem_mqtt_format_connect_cmd(cmd, sizeof cmd, modem_config(), tls)) { return false; }
     at_cmd_t c = { .text = cmd, .final_prefix = "+CMQTTCONNECT:", .final_err_field = 2,
-                   .timeout_ms = 35000, .redact = modem_config()->mqtt_user[0] != '\0' };
+                   .timeout_ms = 35000, .redact = modem_config()->mqtt_user[0] != '\0', .require_ok = true };
     return modem_at(&c) == AT_RES_OK;
 }
 

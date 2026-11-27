@@ -50,7 +50,7 @@ typedef enum {
      */MODEM_LINK_ADVANCE, /**< Enter the target step with an optional delay.
      */MODEM_LINK_FAIL, /**< Count a failure and apply recovery or backoff.
      */MODEM_LINK_RETRY_LATER, /**< Retry after a delay without counting a failure.
-     */MODEM_LINK_RESTART, /**< Count a registration failure and return to the power step.
+     */MODEM_LINK_RESTART, /**< Count a registration failure and return to POWER with backoff or a shutdown guard.
      */MODEM_LINK_BROKER_UP, /**< Enter UP and report broker readiness. */
 } step_action_t;
 

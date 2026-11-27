@@ -105,10 +105,14 @@ static void apply_step_result(modem_link_t *link, step_result_t result)
         break;
     case MODEM_LINK_FAIL: fail(); break;
     case MODEM_LINK_RETRY_LATER: link->retry_at_ms = modem_now() + result.delay_ms; break;
-    case MODEM_LINK_RESTART:
+    case MODEM_LINK_RESTART: {
         fail();
+        if (link->step == MODEM_LINK_STEP_POWER) { break; }  /* The threshold already started guarded recovery. */
+        uint64_t retry_at_ms = link->retry_at_ms;
         go(MODEM_LINK_STEP_POWER);
+        link->retry_at_ms = retry_at_ms;
         break;
+    }
     case MODEM_LINK_BROKER_UP:
         go(MODEM_LINK_STEP_UP);
         modem_emit_link(IVTS_LINK_BROKER_UP, 0);
@@ -164,14 +168,15 @@ static step_result_t step_power(void)
     return (step_result_t){ .action = MODEM_LINK_ADVANCE, .target = MODEM_LINK_STEP_SYNC, .delay_ms = 12000u };
 }
 
-static step_result_t step_sync(const modem_link_t *link)
+/** @brief Synchronize AT and let the accumulated-failure threshold handle recovery. */
+static step_result_t step_sync(void)
 {
     if (modem_at_simple("AT", 1000) == AT_RES_OK && modem_at_simple("ATE0", 1000) == AT_RES_OK) {
         (void)modem_at_simple("AT+CMEE=2", 1000);
         (void)modem_at_simple("AT+CTZU=1", 1000);
         return advance_to(MODEM_LINK_STEP_SIM);
     }
-    return link->attempt >= 10u ? advance_to(MODEM_LINK_STEP_POWER) : (step_result_t){ .action = MODEM_LINK_FAIL };
+    return (step_result_t){ .action = MODEM_LINK_FAIL };
 }
 
 static bool parse_cpin_ready(const char *response)
@@ -232,7 +237,7 @@ step_result_t modem_link_run_step(const modem_link_t *link)
 {
     switch (link->step) {
     case MODEM_LINK_STEP_POWER: return step_power();
-    case MODEM_LINK_STEP_SYNC: return step_sync(link);
+    case MODEM_LINK_STEP_SYNC: return step_sync();
     case MODEM_LINK_STEP_SIM: return step_sim();
     case MODEM_LINK_STEP_REG: return step_register(link);
     case MODEM_LINK_STEP_PDP: return step_pdp();

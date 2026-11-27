@@ -28,6 +28,7 @@ typedef struct {
     uint32_t       timeout_ms;      /**< Command deadline interval in milliseconds. */
     bool           redact;          /**< Hide command and captured response in command-completion logs. */
     bool           final_exact;     /**< Require a full final-line match when a final criterion is set. */
+    bool           require_ok;      /**< With a final criterion, wait for both the final line and OK in either order. */
 } at_cmd_t;
 
 /** @brief Result of an AT command. */
@@ -52,6 +53,7 @@ typedef struct {
     bool        busy;         /**< A command is active. */
     bool        ok_seen;      /**< The modem sent OK after any required command data. */
     bool        data_sent;    /**< Prevents sending the data buffer again on a duplicate prompt. */
+    at_result_t final_result; /**< Decoded final line, or AT_RES_PENDING until the line is seen. */
     at_result_t result;       /**< Result of the most recent command. */
     char        resp[AT_RESP_MAX];   /**< Last captured response, final line or modem error, NUL-terminated. */
 } at_engine_t;
@@ -82,8 +84,9 @@ ivts_err_t at_engine_start(at_engine_t *e, const at_cmd_t *cmd, ivts_ms_t now);
 /**
  * @brief Offer one modem line to the active command.
  *
- * Command criteria take precedence over URC classification. A configured final line can complete without
- * a separate OK. A data command requires its prompt before accepting either success signal.
+ * Command criteria take precedence over URC classification. Commands with require_ok set and a final
+ * criterion consume both lines before succeeding, regardless of order. A modem ERROR ends the command.
+ * A data command requires its prompt before accepting either success signal.
  *
  * @param e Required initialized engine.
  * @param line Required NUL-terminated line borrowed for the call.

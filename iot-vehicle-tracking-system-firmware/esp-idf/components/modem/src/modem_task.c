@@ -4,6 +4,9 @@
  *
  * The modem task drains copied app and OTA requests before stepping link, GNSS and MQTT services.
  * Those services own protocol state. The task is the only consumer and runs their UART work serially.
+ * Stopped means the logical link is off and the power-down pulse has been issued. The SIM7600 may
+ * still be completing shutdown for about 26 s (Hardware Design Table 9).
+ * modem_power_restart_is_blocked() defers restart during that window.
  * A synchronous OTA caller retains the URL and output buffers through the completion signal.
  */
 #include "modem_internal.h"
@@ -77,8 +80,12 @@ static void handle_req(const modem_req_t *r)
 {
     switch (r->op) {
     case REQ_LINK:
-        if (r->on) { link_up(); }
-        else { link_down(); }
+        if (r->on) {
+            link_up();
+            modem_link_start_handled();
+        } else {
+            link_down();
+        }
         break;
     case REQ_GNSS:
         modem_gnss_request(r->on);
@@ -113,7 +120,8 @@ static void modem_task(void *arg)
             if (modem_tx_take(&t, &p, &n, &id)) { modem_tx_done(false, -1); }   /* Fail a queued publish when there is no broker session. */
         }
         if (modem_link_current_step() == MODEM_LINK_STEP_OFF) {
-            (void)xQueuePeek(s_request_queue, &r, pdMS_TO_TICKS(1000));   /* While powered off, wait for a new request instead of reading UART. */
+            /* Wait for a new request while the link is logically off. */
+            (void)xQueuePeek(s_request_queue, &r, pdMS_TO_TICKS(1000));
         } else {
             modem_at_dispatch_pump(LOOP_WAIT_MS);
         }

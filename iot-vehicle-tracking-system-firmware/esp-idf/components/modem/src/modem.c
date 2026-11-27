@@ -4,7 +4,7 @@
  *
  * App startup copies configuration and prepares static topic strings before starting the modem task.
  * The app posts link and GNSS demand. The modem task owns protocol work and publishes link changes.
- * Link and stopped snapshots use atomic access across tasks so the app can read them independently of events.
+ * Atomic snapshots track link state, logical stop state and queued link starts independently of events.
  */
 #include "modem_internal.h"
 #include "platform/platform.h"
@@ -17,8 +17,9 @@
 static modem_cfg_t s_modem_cfg;
 static char s_topic_names[MODEM_TOPIC_COUNT][48];
 static char s_command_topic[48];
-/* The app and modem task share these logical snapshots through atomic access. */
+/* The modem task owns link progress. Start requests reserve a count before queueing. */
 static atomic_bool s_stopped = true;
+static atomic_uint s_link_starts_pending;
 static atomic_uchar s_link = IVTS_LINK_DOWN;
 
 const modem_cfg_t *modem_config(void) { return &s_modem_cfg; }
@@ -58,11 +59,19 @@ ivts_err_t modem_init(const modem_cfg_t *cfg)
 ivts_err_t modem_set_link(bool on)
 {
     modem_req_t r = { .op = REQ_LINK, .on = on };
-    if (on) { atomic_store(&s_stopped, false); }
-    return modem_task_post(&r, 0);
+    /* Reserve before the send because the modem task may consume the request before it returns. */
+    if (on) { atomic_fetch_add(&s_link_starts_pending, 1u); }
+    ivts_err_t result = modem_task_post(&r, 0);
+    if (on && result != IVTS_OK) { modem_link_start_handled(); }
+    return result;
 }
 
-bool modem_is_stopped(void) { return atomic_load(&s_stopped); }
+bool modem_is_stopped(void)
+{
+    return atomic_load(&s_link_starts_pending) == 0u && atomic_load(&s_stopped);
+}
+
 ivts_link_t modem_link_state(void) { return (ivts_link_t)atomic_load(&s_link); }
 void modem_set_stopped(bool stopped) { atomic_store(&s_stopped, stopped); }
+void modem_link_start_handled(void) { atomic_fetch_sub(&s_link_starts_pending, 1u); }
 ivts_err_t modem_set_gnss(bool on) { modem_req_t r = { .op = REQ_GNSS, .on = on }; return modem_task_post(&r, 0); }

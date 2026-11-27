@@ -16,13 +16,13 @@
 /* Startup clears these fields. The modem task alone records demand, power state and poll timing. */
 static bool s_gnss_requested;
 static bool s_gnss_on;
-static uint64_t s_next_fix_at_ms;
+static uint64_t s_next_gnss_poll_ms;
 
 void modem_gnss_init(void)
 {
     s_gnss_requested = false;
     s_gnss_on = false;
-    s_next_fix_at_ms = 0;
+    s_next_gnss_poll_ms = 0;
 }
 
 void modem_gnss_request(bool enabled) { s_gnss_requested = enabled; }
@@ -46,11 +46,11 @@ void modem_gnss_step(void)
             IVTS_LOGI(MODEM_TAG, "gnss power=%s requested=%s", s_gnss_on ? "on" : "off",
                       s_gnss_requested ? "on" : "off");
         }
-        s_next_fix_at_ms = modem_now() + 1000;
+        s_next_gnss_poll_ms = modem_now() + 1000;
         return;
     }
-    if (!s_gnss_on || modem_now() < s_next_fix_at_ms) { return; }
-    s_next_fix_at_ms = modem_now() + (uint64_t)modem_config()->gnss_period_s * 1000u;
+    if (!s_gnss_on || modem_now() < s_next_gnss_poll_ms) { return; }
+    s_next_gnss_poll_ms = modem_now() + (uint64_t)modem_config()->gnss_period_s * 1000u;
 
     ivts_gnss_t g;
     at_cmd_t c = { .text = "AT+CGNSSINFO", .capture = "+CGNSSINFO:", .timeout_ms = 2000 };

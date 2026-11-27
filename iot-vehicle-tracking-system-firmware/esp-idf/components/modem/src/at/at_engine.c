@@ -3,7 +3,7 @@
  * @brief Execution and completion tracking for one outstanding AT command.
  *
  * Dispatch drives the engine on the modem task. Host tests supply their own writer and time.
- * The engine borrows command data, keeps one captured response and consumes matching lines and prompts.
+ * The engine borrows command data and keeps one response. Commands can require both OK and a final line.
  * The caller handles UART reads, deadlines between polls and routing of unclaimed lines.
  */
 #include "at/at.h"
@@ -25,6 +25,7 @@ ivts_err_t at_engine_start(at_engine_t *e, const at_cmd_t *cmd, ivts_ms_t now)
     e->busy = true;
     e->ok_seen = false;
     e->data_sent = false;
+    e->final_result = AT_RES_PENDING;
     e->result = AT_RES_PENDING;
     e->resp[0] = '\0';
     e->tx.write(e->tx.ctx, cmd->text, strlen(cmd->text));
@@ -51,10 +52,12 @@ bool at_engine_on_line(at_engine_t *e, const char *line)
         if (e->cmd.data != NULL && !e->data_sent) { return true; }
         e->ok_seen = true;
         if (e->cmd.final_prefix == NULL) { finish(e, AT_RES_OK); }
+        else if (e->final_result != AT_RES_PENDING) { finish(e, e->final_result); }
         return true;
     }
     if (kind == AT_LINE_ERROR) {
-        (void)ivts_str_copy(e->resp, sizeof(e->resp), line);
+        /* Keep the modem result code if the final line already reported the failure. */
+        if (e->final_result != AT_RES_ERROR) { (void)ivts_str_copy(e->resp, sizeof(e->resp), line); }
         finish(e, AT_RES_ERROR);
         return true;
     }
@@ -66,18 +69,20 @@ bool at_engine_on_line(at_engine_t *e, const char *line)
     if (e->cmd.final_prefix != NULL &&
         (e->cmd.final_exact ? strcmp(line, e->cmd.final_prefix) == 0 : at_has_prefix(line, e->cmd.final_prefix))) {
         if (e->cmd.data != NULL && !e->data_sent) { return true; }
+        if (e->final_result != AT_RES_PENDING) { return true; }
         (void)ivts_str_copy(e->resp, sizeof(e->resp), line);
         int32_t err = 0;
         if (e->cmd.final_err_field > 0u &&
             (!at_field_int(line, (unsigned)e->cmd.final_err_field - 1u, &err) || err != 0)) {
-            finish(e, AT_RES_ERROR);           /* A missing error field or nonzero error value fails the command. */
+            e->final_result = AT_RES_ERROR;
         } else {
-            finish(e, AT_RES_OK);
+            e->final_result = AT_RES_OK;
         }
+        if (!e->cmd.require_ok || e->ok_seen) { finish(e, e->final_result); }
         return true;
     }
     if (e->cmd.capture != NULL && at_has_prefix(line, e->cmd.capture)) {
-        (void)ivts_str_copy(e->resp, sizeof(e->resp), line);
+        if (e->final_result == AT_RES_PENDING) { (void)ivts_str_copy(e->resp, sizeof(e->resp), line); }
         return true;
     }
     return false;          /* Let the caller route unsolicited or unknown lines. */

@@ -73,7 +73,7 @@ ivts_err_t modem_init(const modem_cfg_t *cfg);
  *
  * A true request progresses through power, LTE and MQTT setup, including subscription when enabled.
  * A false request runs the disconnect and shutdown path. Link transitions use IVTS_EV_LINK_STATE.
- * A true request clears the stopped flag before attempting to enqueue the request.
+ * An accepted start keeps the stopped snapshot false while queued. A rejected start leaves no pending request.
  *
  * @param on True requests link startup. False requests shutdown.
  * @retval IVTS_OK The queue accepts the request.
@@ -83,11 +83,15 @@ ivts_err_t modem_init(const modem_cfg_t *cfg);
  */
 ivts_err_t modem_set_link(bool on);
 /**
- * @brief Read the modem task's logical stopped flag.
+ * @brief Read whether the modem is stopped and no start is pending.
  *
- * @retval true The initial flag is set or the task has completed its link-down path.
- * @retval false Link startup is requested or the task has started link processing.
- * @note Context: App task. Blocking: Non-blocking atomic read.
+ * After link-down, stopped means the logical link is off and the power-down pulse has been issued.
+ * The SIM7600 may still be completing shutdown for about 26 s (Hardware Design Table 9).
+ * modem_power_restart_is_blocked() defers restart during that window.
+ *
+ * @retval true The task is initially off or has completed the logical link-down path, with no start pending.
+ * @retval false A start is pending or link processing is active.
+ * @note Context: App task. Blocking: Non-blocking atomic reads.
  */
 bool modem_is_stopped(void);
 /**

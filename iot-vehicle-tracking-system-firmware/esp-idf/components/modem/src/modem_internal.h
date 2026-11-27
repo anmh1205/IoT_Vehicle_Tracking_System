@@ -74,6 +74,13 @@ void modem_emit_link(uint8_t link, int32_t error);
  * @note Context: Modem task. Blocking: Non-blocking atomic write.
  */
 void modem_set_stopped(bool stopped);
+/**
+ * @brief Release the reservation for one link-up request.
+ *
+ * @note Context: App or startup task after a failed post, or modem task after applying a queued start.
+ *       Blocking: Non-blocking atomic decrement.
+ */
+void modem_link_start_handled(void);
 
 /** @brief Operation carried by a modem request queue entry. */
 typedef enum {
