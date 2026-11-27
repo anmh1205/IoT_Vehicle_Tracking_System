@@ -19,9 +19,10 @@
  */
 
 #include "storage_priv.h"
+#include "platform/platform_err.h"
 #include <string.h>
 #include "esp_log.h"
-#include "esp_timer.h"
+#include "platform/platform_clock.h"
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "ivts_core/base/crc32.h"
@@ -111,7 +112,7 @@ ivts_err_t storage_config_load(ivts_config_t *out)
     if (r != IVTS_OK) {
         ivts_config_defaults(out);
         if (r != IVTS_ERR_NOT_FOUND) {
-            ivts_event_t ev = { .type = IVTS_EV_CONFIG_CORRUPT, .ts_ms = (uint64_t)esp_timer_get_time() / 1000u };
+            ivts_event_t ev = { .type = IVTS_EV_CONFIG_CORRUPT, .ts_ms = platform_uptime_ms() };
             ev.u.config_corrupt.err = (int32_t)r;
             storage_emit(&ev);
             ESP_LOGW(STORAGE_TAG, "config %s -> defaults", ivts_err_name(r));
@@ -126,7 +127,7 @@ ivts_err_t storage_config_save(const ivts_config_t *cfg)
     if (cfg == NULL) { return IVTS_ERR_INVALID_ARG; }
     /* Quy tắc hợp lệ thuộc về ivts-core; storage chỉ từ chối cấu hình không hợp lệ ở đầu vào. */
     if (ivts_config_validate(cfg, NULL, 0) != 0u) { return IVTS_ERR_INVALID_ARG; }
-    return storage_err(blob_save(KEY_CFG, CFG_VERSION, cfg, sizeof *cfg));
+    return platform_err_from_esp(blob_save(KEY_CFG, CFG_VERSION, cfg, sizeof *cfg));
 }
 
 /* Xem storage.h. */
@@ -135,7 +136,7 @@ ivts_err_t storage_boot_id_next(uint32_t *out)
     if (out == NULL) { return IVTS_ERR_INVALID_ARG; }
     nvs_handle_t nh;
     esp_err_t e = nvs_open(NS, NVS_READWRITE, &nh);
-    if (e != ESP_OK) { return storage_err(e); }
+    if (e != ESP_OK) { return platform_err_from_esp(e); }
     uint32_t v = 0;
     e = nvs_get_u32(nh, KEY_BOOT, &v);
     if (e == ESP_ERR_NVS_NOT_FOUND) { v = 0; e = ESP_OK; }
@@ -146,7 +147,7 @@ ivts_err_t storage_boot_id_next(uint32_t *out)
     }
     nvs_close(nh);
     if (e == ESP_OK) { *out = v; }
-    return storage_err(e);
+    return platform_err_from_esp(e);
 }
 
 /* Xem storage.h. */
@@ -165,7 +166,7 @@ ivts_err_t storage_ota_pending_load(ivts_ota_pending_t *out)
 ivts_err_t storage_ota_pending_save(const ivts_ota_pending_t *p)
 {
     if (p == NULL) { return IVTS_ERR_INVALID_ARG; }
-    return storage_err(blob_save(KEY_OTA, OTA_VERSION, p, sizeof *p));
+    return platform_err_from_esp(blob_save(KEY_OTA, OTA_VERSION, p, sizeof *p));
 }
 
 ivts_err_t storage_command_receipts_load(storage_command_receipts_t *out)
@@ -186,7 +187,7 @@ ivts_err_t storage_command_receipts_load(storage_command_receipts_t *out)
 ivts_err_t storage_command_receipts_save(const storage_command_receipts_t *receipts)
 {
     if (receipts == NULL || receipts->next >= STORAGE_COMMAND_RECEIPTS) { return IVTS_ERR_INVALID_ARG; }
-    return storage_err(blob_save("cmd_receipts", 1, receipts, sizeof *receipts));
+    return platform_err_from_esp(blob_save("cmd_receipts", 1, receipts, sizeof *receipts));
 }
 
 ivts_err_t storage_restart_intent_load(storage_restart_intent_t *out)
@@ -204,7 +205,7 @@ ivts_err_t storage_restart_intent_load(storage_restart_intent_t *out)
 ivts_err_t storage_restart_intent_save(const storage_restart_intent_t *intent)
 {
     if (intent == NULL) { return IVTS_ERR_INVALID_ARG; }
-    return storage_err(blob_save("reboot_id", 2, intent, sizeof *intent));
+    return platform_err_from_esp(blob_save("reboot_id", 2, intent, sizeof *intent));
 }
 
 ivts_err_t storage_tracking_load(bool *enabled)
@@ -218,7 +219,7 @@ ivts_err_t storage_tracking_load(bool *enabled)
 ivts_err_t storage_tracking_save(bool enabled)
 {
     uint8_t value = enabled ? 1u : 0u;
-    return storage_err(blob_save("tracking", 1, &value, sizeof value));
+    return platform_err_from_esp(blob_save("tracking", 1, &value, sizeof value));
 }
 
 ivts_err_t storage_session_load(ivts_session_state_t *state)
@@ -231,7 +232,7 @@ ivts_err_t storage_session_load(ivts_session_state_t *state)
 
 ivts_err_t storage_session_save(const ivts_session_state_t *state)
 {
-    return storage_err(blob_save("session", 1, state, sizeof *state));
+    return platform_err_from_esp(blob_save("session", 1, state, sizeof *state));
 }
 
 ivts_err_t storage_alarm_load(ivts_motion_alarm_t *alarm)
@@ -243,5 +244,5 @@ ivts_err_t storage_alarm_load(ivts_motion_alarm_t *alarm)
 
 ivts_err_t storage_alarm_save(const ivts_motion_alarm_t *alarm)
 {
-    return storage_err(blob_save("motion_alarm", 1, alarm, sizeof *alarm));
+    return platform_err_from_esp(blob_save("motion_alarm", 1, alarm, sizeof *alarm));
 }

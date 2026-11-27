@@ -34,7 +34,7 @@
 #include <string.h>
 #include "esp_check.h"
 #include "esp_log.h"
-#include "esp_timer.h"
+#include "platform/platform_clock.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
@@ -114,7 +114,7 @@ ivts_err_t storage_queue_pop(uint32_t token)
 static void report(uint8_t op, ivts_err_t e)
 {
     if (e == IVTS_OK) { return; }
-    ivts_event_t ev = { .type = IVTS_EV_STORE_RESULT, .ts_ms = (uint64_t)esp_timer_get_time() / 1000u };
+    ivts_event_t ev = { .type = IVTS_EV_STORE_RESULT, .ts_ms = platform_uptime_ms() };
     ev.u.store_result.op = op;
     ev.u.store_result.err = (int32_t)e;
     storage_emit(&ev);

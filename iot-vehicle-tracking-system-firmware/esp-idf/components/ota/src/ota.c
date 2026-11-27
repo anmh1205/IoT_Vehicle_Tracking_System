@@ -32,7 +32,7 @@
 #include "esp_app_desc.h"
 #include "esp_log.h"
 #include "esp_ota_ops.h"
-#include "esp_timer.h"
+#include "platform/platform_clock.h"
 #include "psa/crypto.h"
 
 /* SHA-256 dùng PSA Crypto (psa_hash_*): ESP-IDF 6.1 đi kèm mbedTLS 4.x, không còn API
@@ -48,7 +48,7 @@ void ota_emit(uint8_t phase, uint8_t pct, uint8_t err)
 {
     uint32_t progress = (1u << 24) | ((uint32_t)phase << 16) | ((uint32_t)pct << 8) | err;
     atomic_store(&s_progress, progress);
-    ivts_event_t ev = { .type = IVTS_EV_OTA_PROGRESS, .ts_ms = (uint64_t)esp_timer_get_time() / 1000u };
+    ivts_event_t ev = { .type = IVTS_EV_OTA_PROGRESS, .ts_ms = platform_uptime_ms() };
     ev.u.ota_progress.phase = phase;
     ev.u.ota_progress.pct = pct;
     ev.u.ota_progress.err = err;

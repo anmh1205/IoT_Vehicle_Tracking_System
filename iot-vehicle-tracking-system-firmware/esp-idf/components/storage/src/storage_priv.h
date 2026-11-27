@@ -16,20 +16,6 @@
 #define SD_MOUNT      "/sd"   /* Điểm gắn VFS của thẻ SD. */
 #endif
 
-/** Đổi esp_err_t sang ivts_err_t; mã không có tương ứng thành IVTS_ERR_IO. */
-static inline ivts_err_t storage_err(esp_err_t e)
-{
-    switch (e) {
-    case ESP_OK:                return IVTS_OK;
-    case ESP_ERR_INVALID_ARG:   return IVTS_ERR_INVALID_ARG;
-    case ESP_ERR_INVALID_STATE: return IVTS_ERR_INVALID_STATE;
-    case ESP_ERR_TIMEOUT:       return IVTS_ERR_TIMEOUT;
-    case ESP_ERR_NOT_FOUND:     return IVTS_ERR_NOT_FOUND;
-    case ESP_ERR_NO_MEM:        return IVTS_ERR_FULL;
-    default:                    return IVTS_ERR_IO;
-    }
-}
-
 /** Cấu hình storage; ghi trong storage_init(), chỉ đọc sau đó. */
 extern storage_cfg_t g_storage_cfg;
 

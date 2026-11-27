@@ -45,7 +45,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "esp_log.h"
-#include "esp_timer.h"
+#include "platform/platform_clock.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "ivts_core/base/crc32.h"
@@ -427,7 +427,7 @@ ivts_err_t storage_queue_do_peek(void)
             s_slot.next_off = s_rd_off + (uint32_t)k;
             s_slot.full = true;
             xSemaphoreGive(s_mx);
-            ivts_event_t ev = { .type = IVTS_EV_QUEUE_READY, .ts_ms = (uint64_t)esp_timer_get_time() / 1000u };
+            ivts_event_t ev = { .type = IVTS_EV_QUEUE_READY, .ts_ms = platform_uptime_ms() };
             ev.u.queue_ready.pending = pend;
             storage_emit(&ev);
             return IVTS_OK;

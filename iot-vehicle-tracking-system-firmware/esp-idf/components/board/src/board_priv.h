@@ -3,21 +3,14 @@
 #include <stdint.h>
 #include "esp_err.h"
 #include "board/board.h"
-#include "ivts_core/base/err.h"
+#include "platform/platform_err.h"
 
 #define BOARD_TAG "board"
 
-/** Đổi esp_err_t sang ivts_err_t tại biên component. */
-static inline ivts_err_t board_err(esp_err_t e)
+/* Giữ mã lỗi I/O của board khi không cấp phát được mutex hoặc task. */
+static inline ivts_err_t board_err(esp_err_t error)
 {
-    switch (e) {
-    case ESP_OK:                return IVTS_OK;
-    case ESP_ERR_INVALID_ARG:   return IVTS_ERR_INVALID_ARG;
-    case ESP_ERR_INVALID_STATE: return IVTS_ERR_INVALID_STATE;
-    case ESP_ERR_TIMEOUT:       return IVTS_ERR_TIMEOUT;
-    case ESP_ERR_NOT_FOUND:     return IVTS_ERR_NOT_FOUND;
-    default:                    return IVTS_ERR_IO;
-    }
+    return error == ESP_ERR_NO_MEM ? IVTS_ERR_IO : platform_err_from_esp(error);
 }
 
 /* board_os.c: task "board" và mutex bus I2C. */

@@ -16,7 +16,7 @@
 #include <string.h>
 #include "board/board.h"
 #include "esp_log.h"
-#include "esp_timer.h"
+#include "platform/platform_clock.h"
 #include "obd/obd.h"
 #include "sdkconfig.h"
 
@@ -26,7 +26,7 @@ static uint64_t s_obd_sample_ms;
 static uint64_t s_gnss_sample_ms;
 
 /** Thời gian kể từ boot theo ms, từ esp_timer (đơn điệu, không đổi khi RTC được chỉnh). */
-uint64_t app_now(void) { return (uint64_t)esp_timer_get_time() / 1000u; }
+uint64_t app_now(void) { return platform_uptime_ms(); }
 
 /**
  * @brief Trả về snapshot với các trường suy ra từ axes (ignition, motion, vehicle) được làm mới.

@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "esp_log.h"
-#include "esp_timer.h"
+#include "platform/platform_clock.h"
 #include "freertos/queue.h"
 #include "ivts_core/base/str.h"
 
@@ -66,7 +66,7 @@ static struct {
 } s_cmd;
 static uint32_t s_cmd_dropped;  /* Số command mất vì hàng đợi đầy. */
 
-uint64_t modem_now(void) { return (uint64_t)esp_timer_get_time() / 1000u; }
+uint64_t modem_now(void) { return platform_uptime_ms(); }
 
 void modem_emit(const ivts_event_t *ev) { (void)ivts_sink_emit(&g_modem.cfg.sink, ev); }
 

@@ -53,7 +53,6 @@ class Layers(unittest.TestCase):
         self.assert_symbols_local(re.compile(r"\besp_(?:sleep_\w+|light_sleep_start|deep_sleep_start)\b"),
                                   COMPONENTS / "board")
 
-    @unittest.expectedFailure  # P1 centralizes the clock and reset glue.
     def test_clock_and_restart_sdk_calls_stay_in_platform(self):
         self.assert_symbols_local(re.compile(r"\b(?:esp_timer_get_time|esp_restart)\b"),
                                   COMPONENTS / "platform")

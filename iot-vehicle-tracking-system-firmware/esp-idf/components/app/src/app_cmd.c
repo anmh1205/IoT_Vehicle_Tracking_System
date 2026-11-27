@@ -26,7 +26,7 @@
 #include "app_priv.h"
 #include <string.h>
 #include "esp_log.h"
-#include "esp_system.h"
+#include "platform/platform_reset.h"
 #include "ivts_core/base/str.h"
 #include "ivts_core/payload/json_reader.h"
 #include "ivts_core/payload/meta.h"
@@ -383,14 +383,14 @@ void app_cmd_on_ack(bool ok)
     s_retry_at = 0;
     if (s_restart_at != 0u) {
         s_restart_at = 0;
-        esp_restart();
+        platform_restart("cmd_restart");
     }
 }
 
 void app_cmd_tick(void)
 {
     uint64_t now = app_now();
-    if (s_restart_at != 0u && now >= s_restart_at) { esp_restart(); }
+    if (s_restart_at != 0u && now >= s_restart_at) { platform_restart("cmd_restart_timeout"); }
     if (s_location_deadline != 0u && !s_location_inflight) {
         bool fixed = app_state_get()->gnss.fix_valid;
         if (now >= s_location_deadline) {

@@ -4,7 +4,7 @@ import tempfile
 
 import pytest
 
-from host_build import CORE, FIRMWARE, build_fixture
+from host_build import CORE, FIRMWARE, PLATFORM, build_fixture
 
 
 @pytest.fixture(scope="module")
@@ -18,10 +18,10 @@ def executable():
             [
                 FIRMWARE / "tests/app_flow_fixture.c",
                 *sorted((app / "src").rglob("*.c")),
-                *sorted(CORE.glob("src/**/*.c")),
+                PLATFORM / "src/platform_clock.c", PLATFORM / "src/platform_reset.c", *sorted(CORE.glob("src/**/*.c")),
             ],
             [
-                "-I", FIRMWARE / "tests/stubs",
+                "-I", PLATFORM / "include", "-I", FIRMWARE / "tests/stubs",
                 "-I", app / "src",
                 *[arg for name in ("app", "board", "modem", "obd", "ota", "storage")
                   for arg in ("-I", components / name / "include")],

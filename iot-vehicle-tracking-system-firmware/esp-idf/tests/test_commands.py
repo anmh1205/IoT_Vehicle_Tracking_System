@@ -3,7 +3,7 @@ import subprocess
 import tempfile
 import unittest
 
-from host_build import CORE, FIRMWARE, build_fixture
+from host_build import CORE, FIRMWARE, PLATFORM, build_fixture
 
 
 class Commands(unittest.TestCase):
@@ -13,13 +13,13 @@ class Commands(unittest.TestCase):
         cls.addClassCleanup(directory.cleanup)
         cls.executable = Path(directory.name) / "command-fixture"
         components = FIRMWARE / "components"
-        includes = [FIRMWARE / "tests" / "stubs", components / "app" / "src",
+        includes = [PLATFORM / "include", FIRMWARE / "tests" / "stubs", components / "app" / "src",
                     components / "modem" / "src"]
         includes += [components / name / "include" for name in ("storage", "modem", "ota")]
         build_fixture(
             cls.executable,
             [FIRMWARE / "tests" / "command_fixture.c", components / "app" / "src" / "app_cmd.c",
-             components / "modem" / "src" / "modem.c", *sorted(CORE.glob("src/**/*.c"))],
+             components / "modem" / "src" / "modem.c", PLATFORM / "src/platform_clock.c", PLATFORM / "src/platform_reset.c", *sorted(CORE.glob("src/**/*.c"))],
             ["-D_POSIX_C_SOURCE=200809L", *(flag for path in includes for flag in ("-I", path))],
         )
 

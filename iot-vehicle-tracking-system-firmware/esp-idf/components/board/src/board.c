@@ -1,7 +1,7 @@
 #include "board_priv.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
-#include "esp_timer.h"
+#include "platform/platform_clock.h"
 
 static bool s_imu_ok;
 static bool s_rtc_ok;
@@ -43,5 +43,5 @@ void board_led_set(bool on)
 
 uint64_t board_uptime_ms(void)
 {
-    return (uint64_t)esp_timer_get_time() / 1000u;
+    return platform_uptime_ms();
 }

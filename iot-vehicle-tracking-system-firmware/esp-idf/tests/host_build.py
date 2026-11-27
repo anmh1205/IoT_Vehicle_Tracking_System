@@ -5,6 +5,7 @@ import subprocess
 
 FIRMWARE = Path(__file__).resolve().parents[1]
 CORE = FIRMWARE / "components" / "ivts-core"
+PLATFORM = FIRMWARE / "components" / "platform"
 
 
 def build_fixture(executable, sources, extra_flags=()):

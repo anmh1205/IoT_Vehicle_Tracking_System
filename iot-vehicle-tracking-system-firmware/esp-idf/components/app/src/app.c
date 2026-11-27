@@ -22,7 +22,7 @@
 #include <string.h>
 #include "board/board.h"
 #include "esp_log.h"
-#include "esp_system.h"
+#include "platform/platform_reset.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "ivts_core/base/str.h"
@@ -214,7 +214,7 @@ static void app_task(void *arg)
         update_link(modem_link_state());
         app_publish_poll();
         if (ota_progress_take(&ev)) { on_ota_progress(&ev); }
-        if (g_app.ota_reboot_ms != 0u && now >= g_app.ota_reboot_ms) { esp_restart(); }
+        if (g_app.ota_reboot_ms != 0u && now >= g_app.ota_reboot_ms) { platform_restart("ota_reboot"); }
         app_cmd_handle();
         app_cmd_tick();
 
@@ -258,6 +258,6 @@ void app_start(void)
     if (!app_init_all() || !app_os_start_task(app_task)) {
         ESP_LOGE(APP_TAG, "init lỗi không cứu được: restart sau 10 s");
         vTaskDelay(pdMS_TO_TICKS(10000));
-        esp_restart();
+        platform_restart("init_failed");
     }
 }
