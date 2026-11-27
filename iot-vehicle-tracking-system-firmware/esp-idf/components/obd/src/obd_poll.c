@@ -6,7 +6,7 @@
  * and keep BLE, transport and sink operations outside the lock.
  */
 #include "obd_internal.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "platform/platform.h"
 #include <stdio.h>
 #include <string.h>
@@ -16,7 +16,6 @@
 static bool probe_ecu(obd_session_t *session)
 {
     if (!obd_session_command(session, "0100", ECU_PROBE_MS)) { return false; }
-    ESP_LOGD(OBD_TAG, "ELM 0100: %s", session->reply.buf);
     uint8_t b[16];
     size_t n;
     session->is_ecu_ready = elm_extract_bytes(session->reply.buf, 0x01, b, sizeof b, &n) == IVTS_OK && n >= 6u && b[1] == 0u;

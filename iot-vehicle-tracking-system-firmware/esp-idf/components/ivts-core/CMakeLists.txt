@@ -7,6 +7,7 @@ idf_component_register(
         "src/base/civil.c"
         "src/model_config.c"
         "src/model_record.c"
+        "src/model_status.c"
         "src/event.c"
         # JSON and MQTT payloads
         "src/payload/json_writer.c"

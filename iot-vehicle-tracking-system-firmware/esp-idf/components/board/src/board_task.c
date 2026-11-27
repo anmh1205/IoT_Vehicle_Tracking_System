@@ -17,7 +17,7 @@
 #include "board_internal.h"
 #include "drivers/drivers.h"
 #include "esp_check.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -52,6 +52,8 @@ static void handle_imu_irq(uint64_t now_ms)
     ivts_event_t event = { .type = IVTS_EV_MOTION_IRQ, .ts_ms = now_ms };
     event.u.motion_irq.pin_level = (uint8_t)lis3dsh_interrupt_level();
     event.u.motion_irq.imu_delta_mmps2 = lis3dsh_sample_delta(now_ms);
+    IVTS_LOGD(BOARD_TAG, "imu irq outs1=0x%02x pin=%u delta=%lummps2", outs, event.u.motion_irq.pin_level,
+              (unsigned long)event.u.motion_irq.imu_delta_mmps2);
     emit(&event);
 }
 
@@ -59,12 +61,17 @@ static void sample_power(uint64_t now_ms)
 {
     uint16_t vehicle_mv = 0;
     uint16_t device_mv = 0;
-    if (board_power_read(&vehicle_mv, &device_mv) != IVTS_OK) { return; }
+    if (board_power_read(&vehicle_mv, &device_mv) != IVTS_OK) {
+        IVTS_LOGW(BOARD_TAG, "adc sample result=fail");
+        return;
+    }
 
     ivts_event_t event = { .type = IVTS_EV_POWER_SAMPLE, .ts_ms = now_ms };
     event.u.power.vehicle_mv = vehicle_mv;
     event.u.power.device_mv = device_mv;
     event.u.power.imu_delta_mmps2 = lis3dsh_sample_delta(now_ms);
+    IVTS_LOGD(BOARD_TAG, "adc sample vehicle=%umV device=%umV imu_delta=%lummps2", vehicle_mv, device_mv,
+              (unsigned long)event.u.power.imu_delta_mmps2);
     emit(&event);
 }
 

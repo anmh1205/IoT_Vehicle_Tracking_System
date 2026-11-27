@@ -7,7 +7,7 @@
  */
 #include "mqtt/mqtt.h"
 #include "modem_internal.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "at/at.h"
 
 #include <stdio.h>
@@ -64,7 +64,8 @@ static void on_rx_end(bool right_client)
         s_rx.topic_len == strlen(command_topic) && memcmp(s_rx.topic, command_topic, s_rx.topic_len) == 0) {
         modem_cmd_store(s_rx.payload, s_rx.payload_len);
     } else if (s_rx.overflow) {
-        ESP_LOGW(MODEM_TAG, "command vượt bộ đệm, bị bỏ");
+        IVTS_LOGE(MODEM_TAG, "mqtt command result=dropped reason=too_large topic=%uB payload=%uB",
+                  (unsigned)s_rx.topic_total, (unsigned)s_rx.payload_total);
     }
     s_rx.active = false;
 }
@@ -106,7 +107,7 @@ static void rx_header(rx_header_t header, const char *fields)
 
 static void on_conn_lost(const char *line)
 {
-    ESP_LOGW(MODEM_TAG, "%s", line);
+    IVTS_LOGW(MODEM_TAG, "mqtt connection_lost urc=\"%s\"", line);
     modem_mqtt_rx_init();
     modem_link_on_connection_lost();
 }

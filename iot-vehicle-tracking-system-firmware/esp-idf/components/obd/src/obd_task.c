@@ -6,7 +6,7 @@
  * request start or stop while this task performs transport work.
  */
 #include "obd_internal.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"

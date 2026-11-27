@@ -19,7 +19,7 @@
 #include "freertos/task.h"
 #include "app_internal.h"
 #include "esp_heap_caps.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "sdkconfig.h"
 #include "motion_alarm.h"
 #include "board/board_power.h"
@@ -31,6 +31,8 @@
 #include "session_tracker.h"
 #include "storage/storage.h"
 #include "telemetry.h"
+#include "ivts_core/model/status.h"
+#include "modem/modem.h"
 
 #define APP_QUEUE_LEN   32     /* Maximum number of pending by-value events. */
 
@@ -99,14 +101,15 @@ static void app_diag_tick(uint64_t now_ms)
     next = now_ms + DIAG_PERIOD_MS;
     static TaskStatus_t st[MAX_TASKS];             /* Use static storage for the sample table to preserve app stack space. */
     UBaseType_t n = uxTaskGetSystemState(st, MAX_TASKS, NULL);
-    if (n == 0u) { ESP_LOGW(APP_TAG, "diag: hơn %d task", MAX_TASKS); return; }
+    if (n == 0u) { IVTS_LOGW("sys", "diag result=too_many_tasks max=%d", MAX_TASKS); return; }
     for (UBaseType_t i = 0; i < n; i++) {
-        ESP_LOGI(APP_TAG, "hwm %-12s prio %2u free %5u B", st[i].pcTaskName,
-                 (unsigned)st[i].uxBasePriority, (unsigned)st[i].usStackHighWaterMark);
+        IVTS_LOGI("sys", "diag task=%s prio=%u stack_free=%uB", st[i].pcTaskName,
+                  (unsigned)st[i].uxBasePriority, (unsigned)st[i].usStackHighWaterMark);
     }
-    ESP_LOGI(APP_TAG, "heap free %u min %u largest %u", (unsigned)heap_caps_get_free_size(MALLOC_CAP_8BIT),
-             (unsigned)heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT),
-             (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
+    IVTS_LOGI("sys", "diag heap_free=%uB heap_min=%uB heap_largest=%uB",
+              (unsigned)heap_caps_get_free_size(MALLOC_CAP_8BIT),
+              (unsigned)heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT),
+              (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
 }
 #else
 /** Stub used when CONFIG_IVTS_DIAG_STACK_LOG is disabled. */
@@ -126,14 +129,68 @@ void app_task_set_config(const ivts_axes_cfg_t *axes_cfg, const ivts_fsm_cfg_t *
 
 void app_task_on_power_sample(uint16_t vehicle_mv)
 {
+    ivts_ignition_t before = s_axes.ign;
     if (ivts_axes_on_power(&s_axes, &s_axes_cfg, vehicle_mv, app_now())) {
-        ESP_LOGI(APP_TAG, "ignition -> %d (%u mV)", (int)s_axes.ign, vehicle_mv);
+        IVTS_LOGI(APP_TAG, "ignition %s -> %s vehicle=%u.%02uV", ivts_ignition_name(before),
+                  ivts_ignition_name(s_axes.ign), (unsigned)(vehicle_mv / 1000u), (unsigned)(vehicle_mv % 1000u / 10u));
     }
 }
 
 void app_task_on_motion(void)
 {
+    ivts_motion_t before = s_axes.motion;
     (void)ivts_axes_on_motion(&s_axes, app_now());
+    if (s_axes.motion != before) {
+        IVTS_LOGI(APP_TAG, "motion %s -> %s", ivts_motion_name(before), ivts_motion_name(s_axes.motion));
+    }
+}
+
+/**
+ * @brief Log the periodic status lines described in ivts_core/model/status.h.
+ *
+ * Runs on the app task. The RTC read may wait briefly for the shared I2C bus.
+ * CONFIG_IVTS_LOG_STATUS_PERIOD_S of zero disables the periodic lines, but a
+ * state transition still prints the core line.
+ */
+static void log_status(bool full)
+{
+    bool trusted = false;
+    ivts_status_view_t view = {
+        .telemetry = app_telemetry_view(),
+        .fsm = s_fsm.state,
+        .link = modem_link_state(),
+        .uptime_ms = app_now(),
+        .queue_pending = storage_queue_count(),
+        .event_drops = app_events_drops(),
+        .cmd_drops = modem_cmd_dropped(),
+        .heap_free_bytes = (uint32_t)heap_caps_get_free_size(MALLOC_CAP_8BIT),
+        .heap_min_bytes = (uint32_t)heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT),
+        .publishing = app_publisher_is_busy(),
+        .control_pending = app_outbox_has_unsent_control() || app_cmd_pending(),
+        .queue_unflushed = storage_queue_has_unflushed_push(),
+        .ota_active = app_fw_update_in_progress(),
+        .tracking_enabled = app_device_tracking_enabled(),
+    };
+    view.utc_unix_ms = app_clock_unix_ms_or_zero(&trusted);
+    view.rtc_trusted = trusted;
+    char line[200];
+    int last = full ? IVTS_STATUS_COUNT : IVTS_STATUS_CORE + 1;
+    for (int group = IVTS_STATUS_CORE; group < last; group++) {
+        (void)ivts_status_format(&view, (ivts_status_group_t)group, line, sizeof line);
+        IVTS_LOGI(APP_TAG, "%s", line);
+    }
+}
+
+static void app_status_tick(uint64_t now_ms)
+{
+#if CONFIG_IVTS_LOG_STATUS_PERIOD_S > 0
+    static uint64_t next;
+    if (now_ms < next) { return; }
+    next = now_ms + (uint64_t)CONFIG_IVTS_LOG_STATUS_PERIOD_S * 1000u;
+    log_status(true);
+#else
+    (void)now_ms;
+#endif
 }
 
 static void drain_events(void)
@@ -175,7 +232,13 @@ static ivts_fsm_in_t collect_fsm_input(uint64_t now)
 static void apply_fsm_transition(const ivts_fsm_out_t *out, ivts_fsm_state_t before)
 {
     if (out->changed) {
-        ESP_LOGI(APP_TAG, "state %s -> %s", ivts_fsm_state_name(before), ivts_fsm_state_name(s_fsm.state));
+        IVTS_LOGI(APP_TAG, "state %s -> %s ign=%s motion=%s link=%s", ivts_fsm_state_name(before),
+                  ivts_fsm_state_name(s_fsm.state), ivts_ignition_name(s_axes.ign), ivts_motion_name(s_axes.motion),
+                  ivts_link_name(modem_link_state()));
+        if (out->actions & IVTS_ACT_SLEEP) {
+            IVTS_LOGI(APP_TAG, "state action=sleep mode=%s duration=%lus", ivts_sleep_mode_name(out->sleep_mode),
+                      (unsigned long)out->sleep_s);
+        }
         if (s_fsm.state == IVTS_ST_ALARM) { app_alarm_latch(app_device_is_provisioned(), app_device_boot_id()); }
     }
 }
@@ -210,6 +273,7 @@ static void app_task_run(void *arg)
             app_publisher_poll();
             app_led_pattern_tick(s_fsm.state, app_device_tracking_enabled(), now);
             app_diag_tick(now);
+            app_status_tick(now);
             continue;
         }
         run_periodic_services(now);
@@ -223,5 +287,7 @@ static void app_task_run(void *arg)
         app_fsm_actions_execute(&out, &s_fsm, &s_axes, &s_axes_cfg);
         app_fw_update_confirm_tick();
         app_diag_tick(now);
+        app_status_tick(now);
+        if (out.changed) { log_status(false); }
     }
 }

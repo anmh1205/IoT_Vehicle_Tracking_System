@@ -6,7 +6,7 @@
  * work. The storage task owns subsequent mutations of the recovered state.
  */
 #include "queue/queue.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include <dirent.h>
 #include <errno.h>
 #include <sys/stat.h>
@@ -53,7 +53,8 @@ static bool repair_tail_segment(storage_queue_state_t *queue, uint32_t *total_in
         char path[48];
         storage_queue_segment_path(path, sizeof path, queue->tail);
         if (truncate(path, (off_t)queue->tail_size) != 0) { return false; }
-        ESP_LOGW(STORAGE_TAG, "queue: bỏ phần khung dở ở %s", path);
+        IVTS_LOGW(STORAGE_TAG, "queue partial_frame file=%s action=truncate size=%luB", path,
+                  (unsigned long)queue->tail_size);
     }
     return true;
 }

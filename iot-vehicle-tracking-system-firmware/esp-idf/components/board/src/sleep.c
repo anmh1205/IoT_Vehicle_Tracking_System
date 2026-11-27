@@ -10,7 +10,7 @@
 #include "board_internal.h"
 #include "board/board_hw.h"
 #include "drivers/drivers.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "esp_pm.h"
 #include "esp_sleep.h"
 #include "sdkconfig.h"
@@ -53,10 +53,10 @@ static void enter_deep_sleep(uint32_t seconds, bool arm_imu)
     if (arm_imu && board_motion_deep_wake_capable()) {
         board_power_arm_imu_deep_wake();
     } else if (arm_imu) {
-        ESP_LOGW(BOARD_TAG, "INT IMU gpio%d không phải RTC GPIO: deep sleep chỉ thức theo timer",
-                 BOARD_PIN_IMU_INT1);
+        IVTS_LOGW(BOARD_TAG, "sleep deep imu_wake=no reason=NOT_RTC_GPIO gpio=%d", BOARD_PIN_IMU_INT1);
     }
-    ESP_LOGI(BOARD_TAG, "deep sleep %lus", (unsigned long)seconds);
+    IVTS_LOGI(BOARD_TAG, "sleep deep duration=%lus imu_wake=%s", (unsigned long)seconds,
+              IVTS_LOG_YES(arm_imu && board_motion_deep_wake_capable()));
     esp_deep_sleep_start();
 }
 
@@ -67,7 +67,7 @@ static board_wake_t enter_light_sleep(bool arm_imu)
     if (arm_imu) { board_power_restore_imu_edge_irq(); }
     if (error != ESP_OK) {
         if (imu_already_pending(arm_imu)) { return BOARD_WAKE_IMU; }
-        ESP_LOGW(BOARD_TAG, "light sleep từ chối: %s", esp_err_to_name(error));
+        IVTS_LOGW(BOARD_TAG, "sleep light result=rejected err=%s", esp_err_to_name(error));
         return BOARD_WAKE_OTHER;
     }
     board_wake_t wake = board_power_read_wake_cause();

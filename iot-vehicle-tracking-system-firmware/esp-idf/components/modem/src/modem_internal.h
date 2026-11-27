@@ -15,7 +15,9 @@
 #include "ivts_core/base/err.h"
 #include "ivts_core/model/gnss.h"
 
+/* UART log tags (see platform/log.h). Per-command AT traffic uses its own tag so it can be enabled alone. */
 #define MODEM_TAG "modem"
+#define AT_TAG    "at"
 
 /* Configuration and topics are initialized before starting the modem task. */
 const modem_cfg_t *modem_config(void);

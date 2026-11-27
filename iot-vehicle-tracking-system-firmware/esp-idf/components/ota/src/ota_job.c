@@ -7,7 +7,7 @@
  */
 #include "ota_internal.h"
 #include "esp_app_desc.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "esp_ota_ops.h"
 #include "psa/crypto.h"
 
@@ -53,7 +53,7 @@ static void job_abort(ota_job_t *job, ivts_ota_err_t error, uint8_t pct)
     job_abort_partition(job);
     job_close_source(job);
 
-    ESP_LOGW(OTA_TAG, "fail: %s", ivts_ota_err_name(error));
+    IVTS_LOGW(OTA_TAG, "job result=fail err=%s pct=%u", ivts_ota_err_name(error), pct);
     ota_emit(IVTS_OTA_ST_FAILED, pct, (uint8_t)error);
 }
 
@@ -164,7 +164,7 @@ static ivts_ota_err_t job_switch_boot(const ota_job_t *job, const ivts_ota_cmd_t
 {
     if (ota_config()->prepare_boot(cmd, job->partition->label) != IVTS_OK) { return IVTS_OTA_E_PERSIST; }
     if (esp_ota_set_boot_partition(job->partition) != ESP_OK) { return IVTS_OTA_E_SET_BOOT; }
-    ESP_LOGI(OTA_TAG, "image ok -> %s", job->partition->label);
+    IVTS_LOGI(OTA_TAG, "image verified=yes boot_partition=%s version=%s", job->partition->label, cmd->version);
     ota_emit(IVTS_OTA_ST_REBOOTING, IVTS_OTA_PCT_CONFIRMING, 0);
     return IVTS_OTA_E_NONE;
 }

@@ -6,7 +6,8 @@
  * Enable notifications before issuing ELM commands.
  */
 #include "obd_internal.h"
-#include "esp_log.h"
+#include "ivts_core/model/status.h"
+#include "platform/log.h"
 #include "platform/platform.h"
 #include <stdio.h>
 #include <string.h>
@@ -19,6 +20,7 @@ void obd_session_emit_link(bool conn, bool elm, ivts_ecu_state_t ecu)
     last_conn = conn;
     last_elm = elm;
     last_ecu = ecu;
+    IVTS_LOGI(OBD_TAG, "link ble=%s elm=%s ecu=%s", conn ? "up" : "down", elm ? "ready" : "no", ivts_ecu_name(ecu));
     ivts_event_t ev = { .type = IVTS_EV_OBD_LINK, .ts_ms = platform_uptime_ms() };
     ev.u.obd_link.connected = conn;
     ev.u.obd_link.elm_ready = elm;
@@ -31,9 +33,18 @@ bool obd_session_command(obd_session_t *session, const char *cmd, uint32_t timeo
     char line[16];
     snprintf(line, sizeof line, "%s\r", cmd);
     elm_rx_reset(&session->reply);
-    if (obd_ble_write(session->connection, session->tx_handle, line) != 0) { return false; }
+    uint64_t started_ms = platform_uptime_ms();
+    if (obd_ble_write(session->connection, session->tx_handle, line) != 0) {
+        IVTS_LOGW(OBD_TAG, "elm write cmd=%s result=fail", cmd);
+        return false;
+    }
     bool ok = obd_task_wait_event(session, OBD_BLE_EV_NOTIFY, timeout_ms, NULL) && session->reply.complete && !session->reply.overflow;
-    if (!ok && session->is_connected && obd_task_is_enabled()) { ESP_LOGW(OBD_TAG, "ELM %s: phản hồi thiếu hoặc quá dài", cmd); }
+    unsigned long took_ms = (unsigned long)(platform_uptime_ms() - started_ms);
+    IVTS_LOGD(OBD_TAG, "elm > %s  < \"%s\" %s %lums", cmd, session->reply.buf, IVTS_LOG_OK(ok), took_ms);
+    if (!ok && session->is_connected && obd_task_is_enabled()) {
+        IVTS_LOGW(OBD_TAG, "elm reply cmd=%s result=%s took=%lums", cmd,
+                  session->reply.overflow ? "overflow" : "incomplete", took_ms);
+    }
     return ok;
 }
 
@@ -73,7 +84,7 @@ static bool run_elm_init_sequence(obd_session_t *session)
     for (size_t i = 0; i < ELM_INIT_SEQ_LEN; i++) {
         const elm_init_step_t *step = &ELM_INIT_SEQ[i];
         if (!obd_session_command(session, step->cmd, step->timeout_ms) || !elm_reply_valid(session->reply.buf, step->is_reset, true)) {
-            ESP_LOGW(OBD_TAG, "ELM init %s lỗi: %s", step->cmd, session->reply.buf);
+            IVTS_LOGW(OBD_TAG, "elm init cmd=%s result=fail reply=\"%s\"", step->cmd, session->reply.buf);
             return false;
         }
     }
@@ -136,7 +147,7 @@ static bool discover_obd_service(obd_session_t *session, obd_service_range_t *ra
 {
     if (obd_ble_disc_svc(session->connection) != 0) { return false; }
     if (!collect_discovery(session, platform_uptime_ms() + 5000u, take_service, range) || range->start == 0u) {
-        ESP_LOGW(OBD_TAG, "không thấy service 0x18F0");
+        IVTS_LOGW(OBD_TAG, "ble discover service=0x18F0 result=not_found");
         return false;
     }
     return true;
@@ -159,7 +170,7 @@ static bool discover_rx_tx_chars(obd_session_t *session, const obd_service_range
     handles->rx_end = range->end;
     if (!collect_discovery(session, platform_uptime_ms() + 5000u, take_characteristic, handles) ||
         handles->rx == 0u || handles->tx == 0u) {
-        ESP_LOGW(OBD_TAG, "thiếu char 2AF0/2AF1");
+        IVTS_LOGW(OBD_TAG, "ble discover chars=0x2AF0/0x2AF1 result=not_found");
         return false;
     }
     return true;

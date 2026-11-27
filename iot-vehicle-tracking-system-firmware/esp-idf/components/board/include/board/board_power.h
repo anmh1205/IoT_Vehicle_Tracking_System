@@ -33,6 +33,9 @@ ivts_err_t board_set_auto_light_sleep(bool enabled);
 /** @brief Return the wake reason captured once at the beginning of board_init(). */
 board_wake_t board_wake_cause(void);
 
+/** Return the lower-case log name of a wake source. */
+const char *board_wake_name(board_wake_t wake);
+
 /**
  * @brief Enter light sleep or deep sleep.
  *

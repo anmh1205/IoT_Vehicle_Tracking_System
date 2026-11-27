@@ -17,7 +17,7 @@
 #include "session_tracker.h"
 #include "app_internal.h"
 #include <string.h>
-#include "esp_log.h"
+#include "platform/log.h"
 #include "ivts_core/payload/meta.h"
 #include "storage/storage.h"
 
@@ -26,7 +26,7 @@ static ivts_session_state_t s_session;
 static bool commit(const ivts_session_state_t *next)
 {
     if (app_records_session_save(next) != IVTS_OK) {
-        ESP_LOGW(APP_TAG, "không lưu được phiên");
+        IVTS_LOGW(APP_TAG, "session save result=fail retry=%ums", (unsigned)NVS_RETRY_MS);
         return false;
     }
     s_session = *next;
@@ -61,7 +61,7 @@ void app_session_restore(void)
 {
     ivts_err_t error = app_records_session_load(&s_session);
     if (error != IVTS_OK && error != IVTS_ERR_NOT_FOUND) {
-        ESP_LOGW(APP_TAG, "session NVS: %s", ivts_err_name(error));
+        IVTS_LOGW(APP_TAG, "session load result=%s", ivts_err_name(error));
     }
 }
 
@@ -93,7 +93,13 @@ void app_session_tick(ivts_ignition_t ignition, bool tracking_enabled, uint32_t 
     }
     b->session = next.active;
     if (!want_active) { next.active = (ivts_session_id_t){0}; }
-    if (!commit(&next)) { s_session_retry_at_ms = now + NVS_RETRY_MS; }
+    if (!commit(&next)) {
+        s_session_retry_at_ms = now + NVS_RETRY_MS;
+        return;
+    }
+    IVTS_LOGI(APP_TAG, "session %s boot=%lu key=%lu seq=%lu outbox=%u", want_active ? "open" : "close",
+              (unsigned long)b->session.boot_id, (unsigned long)b->session.local_key, (unsigned long)b->seq,
+              (unsigned)s_session.count);
 }
 
 bool app_session_on_ack(void)

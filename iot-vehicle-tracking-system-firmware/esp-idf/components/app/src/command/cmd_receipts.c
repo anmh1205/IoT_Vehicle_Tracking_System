@@ -10,7 +10,7 @@
 #include "command/command.h"
 #include <string.h>
 #include "app_internal.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "storage/storage.h"
 
 static ivts_cmd_receipts_t s_receipts;
@@ -21,7 +21,7 @@ static bool load_receipts(void)
 {
     ivts_err_t e = app_records_command_receipts_load(&s_receipts);
     if (e != IVTS_OK && e != IVTS_ERR_NOT_FOUND) {
-        ESP_LOGW(APP_TAG, "command receipts NVS: %s", ivts_err_name(e));
+        IVTS_LOGW(APP_TAG, "cmd receipts_load result=%s", ivts_err_name(e));
         return false;
     }
     return true;

@@ -8,7 +8,7 @@
  */
 #include "modem_internal.h"
 #include "at/at.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "mqtt/mqtt.h"
 
 #include <stdio.h>
@@ -115,7 +115,7 @@ static ivts_err_t do_open(const modem_req_t *r)
     }
     *r->status = (int)status;
     *r->size = (uint32_t)len;
-    ESP_LOGI(MODEM_TAG, "HTTPS GET: status=%ld bytes=%ld", (long)status, (long)len);
+    IVTS_LOGI(MODEM_TAG, "http get status=%ld size=%ldB", (long)status, (long)len);
     return (status == 200) ? IVTS_OK : IVTS_ERR_IO;
 }
 

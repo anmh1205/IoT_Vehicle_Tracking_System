@@ -9,10 +9,34 @@
 #include "board/board_hw.h"
 #include "drivers/drivers.h"
 #include "driver/gpio.h"
-#include "esp_log.h"
+#include "esp_system.h"
+#include "platform/log.h"
 #include "platform/platform.h"
 
 static bool s_imu_ok;
+
+/** Return the upper-case log name of the last controller reset. */
+static const char *reset_reason_name(void)
+{
+    switch (esp_reset_reason()) {
+    case ESP_RST_POWERON: return "POWERON";
+    case ESP_RST_EXT: return "EXTERNAL";
+    case ESP_RST_SW: return "SOFTWARE";
+    case ESP_RST_PANIC: return "PANIC";
+    case ESP_RST_INT_WDT: return "INT_WDT";
+    case ESP_RST_TASK_WDT: return "TASK_WDT";
+    case ESP_RST_WDT: return "WDT";
+    case ESP_RST_DEEPSLEEP: return "DEEPSLEEP";
+    case ESP_RST_BROWNOUT: return "BROWNOUT";
+    case ESP_RST_SDIO: return "SDIO";
+    case ESP_RST_USB: return "USB";
+    case ESP_RST_JTAG: return "JTAG";
+    case ESP_RST_EFUSE: return "EFUSE";
+    case ESP_RST_PWR_GLITCH: return "PWR_GLITCH";
+    case ESP_RST_CPU_LOCKUP: return "CPU_LOCKUP";
+    default: return "UNKNOWN";
+    }
+}
 static bool s_rtc_ok;
 static bool s_led_ok;
 
@@ -53,7 +77,10 @@ ivts_err_t board_init(const board_cfg_t *cfg)
     if (e != ESP_OK) { return board_err(e); }   /* Ignition inference requires vehicle supply voltage from the ADC. */
     e = board_task_start();
     if (e != ESP_OK) { return board_err(e); }
-    ESP_LOGI(BOARD_TAG, "init ok rtc=%d imu=%d wake=%d", s_rtc_ok, s_imu_ok, (int)board_wake_cause());
+    IVTS_LOGI(BOARD_TAG, "boot reset=%s wake=%s rtc=%s imu=%s led=%s sample=%ums", reset_reason_name(),
+              board_wake_name(board_wake_cause()), IVTS_LOG_OK(s_rtc_ok),
+              cfg->imu_enabled ? IVTS_LOG_OK(s_imu_ok) : "off", IVTS_LOG_OK(s_led_ok),
+              (unsigned)cfg->power_sample_ms);
     return IVTS_OK;
 }
 

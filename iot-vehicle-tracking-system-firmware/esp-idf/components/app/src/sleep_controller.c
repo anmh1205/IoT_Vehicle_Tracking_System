@@ -12,7 +12,9 @@
 #include "persist/persist.h"
 #include "telemetry.h"
 #include "board/board.h"
-#include "esp_log.h"
+#include "board/board_power.h"
+#include "ivts_core/model/status.h"
+#include "platform/log.h"
 #include "modem/modem.h"
 #include "obd/obd.h"
 
@@ -29,7 +31,7 @@ static bool can_sleep_now(const ivts_fsm_out_t *out, bool modem_stopped,
                           ivts_axes_t *axes, const ivts_axes_cfg_t *axes_cfg, bool *motion)
 {
     bool ble_stopped = obd_is_stopped();
-    if (!ble_stopped) { ESP_LOGW(APP_TAG, "BLE còn bật, hoãn ngủ"); }
+    if (!ble_stopped) { IVTS_LOGW(APP_TAG, "sleep defer reason=ble_running"); }
     (void)ivts_axes_tick(axes, axes_cfg, app_now());
     *motion = out->sleep_arm_motion && axes->motion == IVTS_MOTION_MOVING;
     return modem_stopped && ble_stopped && axes->ign != IVTS_IGN_ON && !*motion;
@@ -50,7 +52,9 @@ static board_wake_t enter_hw_sleep(const ivts_fsm_out_t *out, ivts_fsm_state_t s
         .seconds = out->sleep_s,
         .arm_imu = out->sleep_arm_motion,
     };
-    ESP_LOGI(APP_TAG, "sleep mode=%d %lus imu=%d", (int)out->sleep_mode, (unsigned long)req.seconds, req.arm_imu);
+    IVTS_LOGI(APP_TAG, "sleep enter mode=%s duration=%lus imu_wake=%s state=%s seq=%lu",
+              ivts_sleep_mode_name(out->sleep_mode), (unsigned long)req.seconds, IVTS_LOG_YES(req.arm_imu),
+              ivts_fsm_state_name(state), (unsigned long)app_msg_seq_current());
     return board_sleep(&req);           /* Entering deep sleep resets the processor. */
 }
 
@@ -58,7 +62,7 @@ static void resume_after_wake(ivts_fsm_t *fsm, board_wake_t cause)
 {
     ivts_wake_t why = (cause == BOARD_WAKE_IMU) ? IVTS_WAKE_MOTION
                     : (cause == BOARD_WAKE_TIMER) ? IVTS_WAKE_TIMER : IVTS_WAKE_OTHER;
-    ESP_LOGI(APP_TAG, "woke %d", (int)why);
+    IVTS_LOGI(APP_TAG, "sleep wake cause=%s", board_wake_name(cause));
     ivts_fsm_woke(fsm, app_now(), why);
     app_telemetry_set_device(IVTS_DEV_WAKING, IVTS_SLEEP_NONE);
     if (app_device_is_provisioned()) { (void)modem_set_link(true); }
@@ -69,6 +73,8 @@ static void finish_sleep_request(const ivts_fsm_out_t *out, bool stopped, ivts_f
 {
     bool motion;
     if (!can_sleep_now(out, stopped, axes, axes_cfg, &motion)) {
+        IVTS_LOGW(APP_TAG, "sleep abort reason=%s", motion ? "motion" : !stopped ? "modem_running"
+                  : axes->ign == IVTS_IGN_ON ? "ignition_on" : "ble_running");
         abort_sleep(fsm, motion ? IVTS_WAKE_MOTION : IVTS_WAKE_OTHER);
         return;
     }
@@ -80,7 +86,7 @@ void app_sleep_enter(const ivts_fsm_out_t *out, ivts_fsm_t *fsm, ivts_axes_t *ax
 {
     app_telemetry_set_device(IVTS_DEV_SLEEPING, out->sleep_mode);
     if (out->sleep_mode == IVTS_SLEEP_FAKE) {
-        ESP_LOGI(APP_TAG, "fake sleep %lus", (unsigned long)out->sleep_s);
+        IVTS_LOGI(APP_TAG, "sleep enter mode=FAKE duration=%lus", (unsigned long)out->sleep_s);
         return;
     }
     (void)obd_stop();
@@ -105,7 +111,7 @@ bool app_sleep_poll(ivts_fsm_t *fsm, ivts_axes_t *axes, const ivts_axes_cfg_t *a
     if (stopped) {
         (void)app_link_update(IVTS_LINK_DOWN);
     } else {
-        ESP_LOGW(APP_TAG, "modem chưa dừng, hoãn ngủ");
+        IVTS_LOGW(APP_TAG, "sleep defer reason=modem_not_stopped wait=%ums", (unsigned)MODEM_STOP_WAIT_MS);
     }
     finish_sleep_request(&s_sleep_request, stopped, fsm, axes, axes_cfg);
     return true;

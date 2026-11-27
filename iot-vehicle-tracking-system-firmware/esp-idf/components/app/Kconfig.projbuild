@@ -87,6 +87,19 @@ menu "IVTS"
         depends on IVTS_SD_ENABLE
         range 2 4096
         default 256
+    config IVTS_LOG_STATUS_PERIOD_S
+        int "Chu kỳ in các dòng status lên UART (giây, 0 = tắt)"
+        range 0 3600
+        default 30
+        help
+            In định kỳ các dòng "status" (fsm, net, time, power, gnss, obd, sys) ở mức INFO
+            để theo dõi thiết bị qua UART mà không cần giải mã payload cloud.
+    config IVTS_LOG_DEBUG
+        bool "Bật log chi tiết (mức DEBUG) cho mọi tag IVTS khi khởi động"
+        default n
+        help
+            In thêm từng lệnh AT, lệnh ELM327, mẫu ADC, ngắt IMU, publish/ACK và bản ghi.
+            Có thể bật riêng từng tag lúc chạy bằng esp_log_level_set("at", ESP_LOG_DEBUG).
     config IVTS_DIAG_STACK_LOG
         bool "Log stack high-water của mọi task mỗi 60 s"
         default n

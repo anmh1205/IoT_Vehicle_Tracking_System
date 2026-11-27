@@ -20,7 +20,7 @@
 #include <stdatomic.h>
 #include <string.h>
 #include "esp_check.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "platform/platform.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
@@ -165,7 +165,7 @@ ivts_err_t storage_init(const storage_cfg_t *cfg)
 
     esp_err_t e = storage_nvs_init();
     if (e != ESP_OK) {
-        ESP_LOGE(STORAGE_TAG, "nvs init: %s", esp_err_to_name(e));
+        IVTS_LOGE(STORAGE_TAG, "nvs init result=fail err=%s", esp_err_to_name(e));
         return platform_err_from_esp(e);
     }
     storage_queue_slot_init();
@@ -183,6 +183,7 @@ ivts_err_t storage_init(const storage_cfg_t *cfg)
         }
     }
     e = storage_task_start();
-    ESP_LOGI(STORAGE_TAG, "init sd=%d pending=%lu", s_sd_ok, (unsigned long)storage_queue_count());
+    IVTS_LOGI(STORAGE_TAG, "init nvs=ok sd=%s queue=%lu", cfg->sd_enabled ? IVTS_LOG_OK(s_sd_ok) : "off",
+              (unsigned long)storage_queue_count());
     return platform_err_from_esp(e);
 }

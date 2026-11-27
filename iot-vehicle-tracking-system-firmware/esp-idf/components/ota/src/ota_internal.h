@@ -5,7 +5,7 @@
 #pragma once
 #include "ota/ota.h"
 
-#define OTA_TAG "ota"
+#define OTA_TAG "ota"   /* UART log tag for OTA download, verify and boot switch lines. */
 
 /* Copied at initialization and read only by the OTA task after start. */
 const ota_cfg_t *ota_config(void);

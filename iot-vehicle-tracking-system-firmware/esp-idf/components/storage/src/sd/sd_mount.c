@@ -8,7 +8,7 @@
 #include "sd/sd.h"
 #include "storage_internal.h"
 #include "driver/sdmmc_host.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "esp_vfs_fat.h"
 #include "sdmmc_cmd.h"
 
@@ -40,9 +40,11 @@ esp_err_t storage_sd_mount(void)
     };
     esp_err_t e = esp_vfs_fat_sdmmc_mount(SD_MOUNT, &host, &slot, &mc, &s_card);
     if (e != ESP_OK) {
-        ESP_LOGW(STORAGE_TAG, "mount SD: %s", esp_err_to_name(e));
+        IVTS_LOGW(STORAGE_TAG, "sd mount result=fail err=%s", esp_err_to_name(e));
         return e;
     }
+    IVTS_LOGI(STORAGE_TAG, "sd mount result=ok card=%s size=%lluMB", s_card->cid.name,
+              (unsigned long long)s_card->csd.capacity * (unsigned long long)s_card->csd.sector_size / (1024u * 1024u));
     storage_sd_log_open();
     return ESP_OK;
 }

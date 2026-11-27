@@ -6,7 +6,7 @@
  * interprets the events and advances its own session state.
  */
 #include "obd_internal.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "host/ble_hs.h"
 #include "nimble/nimble_port.h"
 #include "nimble/nimble_port_freertos.h"
@@ -21,7 +21,7 @@ uint8_t obd_ble_own_addr_type(void) { return s_own_addr_type; }
 
 static void on_reset(int reason)
 {
-    ESP_LOGW(OBD_TAG, "nimble reset %d", reason);
+    IVTS_LOGW(OBD_TAG, "ble host_reset reason=%d", reason);
 }
 
 static void on_sync(void)
@@ -42,13 +42,13 @@ int obd_ble_init(void)
 {
     esp_err_t e = nimble_port_init();
     if (e != ESP_OK) {
-        ESP_LOGE(OBD_TAG, "nimble_port_init: %s", esp_err_to_name(e));
+        IVTS_LOGE(OBD_TAG, "ble init result=fail err=%s", esp_err_to_name(e));
         return -1;
     }
     ble_hs_cfg.reset_cb = on_reset;
     ble_hs_cfg.sync_cb = on_sync;
     nimble_port_freertos_init(host_task);
-    ESP_LOGI(OBD_TAG, "BLE on");
+    IVTS_LOGI(OBD_TAG, "ble power=on");
     return 0;
 }
 
@@ -56,15 +56,15 @@ int obd_ble_deinit(void)
 {
     int rc = nimble_port_stop();
     if (rc != 0) {
-        ESP_LOGE(OBD_TAG, "nimble_port_stop: %d", rc);
+        IVTS_LOGE(OBD_TAG, "ble stop result=fail rc=%d", rc);
         return -1;
     }
     esp_err_t e = nimble_port_deinit();
     if (e != ESP_OK) {
-        ESP_LOGE(OBD_TAG, "nimble_port_deinit: %s", esp_err_to_name(e));
+        IVTS_LOGE(OBD_TAG, "ble deinit result=fail err=%s", esp_err_to_name(e));
         return -1;
     }
-    ESP_LOGI(OBD_TAG, "BLE off");
+    IVTS_LOGI(OBD_TAG, "ble power=off");
     return 0;
 }
 

@@ -12,7 +12,7 @@
 #include "esp_adc/adc_cali_scheme.h"
 #include "esp_adc/adc_oneshot.h"
 #include "esp_check.h"
-#include "esp_log.h"
+#include "platform/log.h"
 
 #define SAMPLES            8   /* Average this many ADC samples to reduce measurement noise. */
 
@@ -30,7 +30,7 @@ static esp_err_t chan_init(int gpio, uint32_t gain_ppm, chan_t *c)
 {
     adc_unit_t unit;
     ESP_RETURN_ON_ERROR(adc_oneshot_io_to_channel(gpio, &unit, &c->ch), BOARD_TAG, "io->ch %d", gpio);
-    ESP_RETURN_ON_FALSE(unit == ADC_UNIT_1, ESP_ERR_INVALID_ARG, BOARD_TAG, "gpio %d không ở ADC1", gpio);
+    ESP_RETURN_ON_FALSE(unit == ADC_UNIT_1, ESP_ERR_INVALID_ARG, BOARD_TAG, "adc init gpio=%d result=not_adc1", gpio);
     adc_oneshot_chan_cfg_t cc = { .atten = ADC_ATTEN_DB_12, .bitwidth = ADC_BITWIDTH_DEFAULT };
     ESP_RETURN_ON_ERROR(adc_oneshot_config_channel(s_unit, c->ch, &cc), BOARD_TAG, "cfg ch");
     adc_cali_curve_fitting_config_t cal = {
@@ -54,6 +54,9 @@ esp_err_t power_adc_init(const power_adc_cfg_t *cfg)
     ESP_RETURN_ON_ERROR(adc_oneshot_new_unit(&uc, &s_unit), BOARD_TAG, "adc unit");
     ESP_RETURN_ON_ERROR(chan_init(cfg->vehicle_gpio, cfg->vehicle_gain_ppm, &s_veh), BOARD_TAG, "veh");
     ESP_RETURN_ON_ERROR(chan_init(cfg->device_gpio, cfg->device_gain_ppm, &s_dev), BOARD_TAG, "dev");
+    IVTS_LOGI(BOARD_TAG, "adc init vehicle_gpio=%d device_gpio=%d divider=%lu vehicle_gain=%luppm device_gain=%luppm",
+              cfg->vehicle_gpio, cfg->device_gpio, (unsigned long)cfg->divider,
+              (unsigned long)cfg->vehicle_gain_ppm, (unsigned long)cfg->device_gain_ppm);
     return ESP_OK;
 }
 

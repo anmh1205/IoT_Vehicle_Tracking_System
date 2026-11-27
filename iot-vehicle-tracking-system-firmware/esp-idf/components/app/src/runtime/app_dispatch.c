@@ -7,20 +7,25 @@
  */
 #include "runtime/runtime.h"
 #include "app_internal.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "device/device.h"
 #include "modem/modem.h"
 #include "publish/publish.h"
 #include "telemetry.h"
+#include "ivts_core/model/status.h"
+#include "storage/storage.h"
 
 typedef void (*app_event_handler_t)(const ivts_event_t *);
 
 void app_dispatch_refresh_link(void)
 {
+    static ivts_link_t previous = IVTS_LINK_DOWN;
     ivts_link_t link = modem_link_state();
     if (!app_link_update(link)) { return; }
     if (app_link_is_broker_up()) { app_outbox_request_status(); }
-    ESP_LOGI(APP_TAG, "link -> %u", (unsigned)link);
+    IVTS_LOGI(APP_TAG, "link %s -> %s queue=%lu", ivts_link_name(previous), ivts_link_name(link),
+              (unsigned long)storage_queue_count());
+    previous = link;
 }
 
 static void on_power_sample(const ivts_event_t *event) { app_task_on_power_sample(event->u.power.vehicle_mv); }
@@ -31,8 +36,10 @@ static void on_config_corrupt(const ivts_event_t *event) { (void)event; app_outb
 
 static void on_store_result(const ivts_event_t *event)
 {
-    ESP_LOGW(APP_TAG, "storage op=%u err=%s", event->u.store_result.op,
-             ivts_err_name((ivts_err_t)event->u.store_result.err));
+    static const char *const ops[] = { "config_save", "log_append", "queue_push", "queue_pop", "sd_mount", "queue_peek" };
+    unsigned op = event->u.store_result.op;
+    IVTS_LOGW(APP_TAG, "storage op=%s result=fail err=%s", op < sizeof ops / sizeof ops[0] ? ops[op] : "unknown",
+              ivts_err_name((ivts_err_t)event->u.store_result.err));
 }
 
 static const app_event_handler_t k_handlers[] = {

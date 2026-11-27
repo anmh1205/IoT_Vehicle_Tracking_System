@@ -9,7 +9,7 @@
 #include "queue/queue.h"
 #include "ivts_core/base/crc32.h"
 #include <string.h>
-#include "esp_log.h"
+#include "platform/log.h"
 #include <errno.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -98,7 +98,7 @@ static ivts_err_t drop_head_segment(storage_queue_state_t *queue)
     storage_queue_slot_evict(queue->head, lost);
     if (queue->read_segment < next) { queue->read_segment = next; queue->read_offset = 0; storage_queue_cursor_save(queue); }
     queue->head = next;
-    ESP_LOGW(STORAGE_TAG, "queue đầy: bỏ %lu bản ghi cũ nhất", (unsigned long)lost);
+    IVTS_LOGE(STORAGE_TAG, "queue full action=drop_oldest lost=%lu", (unsigned long)lost);
     return IVTS_OK;
 }
 

@@ -14,7 +14,7 @@
 #include "ivts_core/model/telemetry.h"
 #include "ivts_core/model/obd.h"
 
-#define OBD_TAG "obd"
+#define OBD_TAG "obd"   /* UART log tag for BLE, ELM327 and ECU lines. */
 
 /* Configuration is set at boot and read by the OBD task and BLE callbacks. */
 const obd_cfg_t *obd_config(void);

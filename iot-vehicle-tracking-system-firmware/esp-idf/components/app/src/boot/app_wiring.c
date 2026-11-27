@@ -17,7 +17,7 @@
 #include "app_internal.h"
 #include "board/board.h"
 #include "board/board_hw.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "ivts_core/base/str.h"
 #include "modem/modem.h"
 #include "obd/obd.h"
@@ -47,7 +47,7 @@ bool app_wiring_init_board(ivts_sink_t sink)
         .task_prio = APP_TASKS[APP_TASK_BOARD].priority, .task_stack = APP_TASKS[APP_TASK_BOARD].stack_bytes,
     };
     ivts_err_t e = board_init(&board_cfg);
-    if (e != IVTS_OK) { ESP_LOGE(APP_TAG, "board: %s", ivts_err_name(e)); return false; }
+    if (e != IVTS_OK) { IVTS_LOGE(APP_TAG, "init step=board result=%s", ivts_err_name(e)); return false; }
     return true;
 }
 
@@ -68,7 +68,7 @@ bool app_wiring_init_storage(ivts_sink_t sink)
         .task_prio = APP_TASKS[APP_TASK_STORAGE].priority, .task_stack = APP_TASKS[APP_TASK_STORAGE].stack_bytes, .req_queue_len = 16,
     };
     ivts_err_t e = storage_init(&storage_cfg);
-    if (e != IVTS_OK) { ESP_LOGE(APP_TAG, "storage: %s", ivts_err_name(e)); return false; }
+    if (e != IVTS_OK) { IVTS_LOGE(APP_TAG, "init step=storage result=%s", ivts_err_name(e)); return false; }
     return true;
 }
 
@@ -101,7 +101,7 @@ bool app_wiring_init_modem(ivts_sink_t sink, ivts_config_t *config, bool provisi
         config->auth_token[sizeof config->auth_token - 1u] = '\0';
     }
     ivts_err_t e = modem_init(&modem_cfg);
-    if (e != IVTS_OK) { ESP_LOGE(APP_TAG, "modem: %s", ivts_err_name(e)); return false; }
+    if (e != IVTS_OK) { IVTS_LOGE(APP_TAG, "init step=modem result=%s", ivts_err_name(e)); return false; }
     app_device_set_provisioned(provisioned);
     if (provisioned) { (void)modem_set_link(true); }
     return true;
@@ -116,7 +116,7 @@ void app_wiring_init_obd(ivts_sink_t sink, const ivts_config_t *config)
     if (memchr(config->obd_ble_addr, '\0', sizeof config->obd_ble_addr) != NULL) {
         (void)ivts_str_copy(obd_cfg.target_addr, sizeof obd_cfg.target_addr, config->obd_ble_addr);
     }
-    if (obd_init(&obd_cfg) != IVTS_OK) { ESP_LOGW(APP_TAG, "obd init lỗi: chạy không OBD"); }
+    if (obd_init(&obd_cfg) != IVTS_OK) { IVTS_LOGW(APP_TAG, "init step=obd result=fail action=run_without_obd"); }
 }
 
 bool app_wiring_init_ota(ivts_sink_t sink)

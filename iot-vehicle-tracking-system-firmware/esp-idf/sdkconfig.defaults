@@ -10,6 +10,13 @@ CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
 # Bootloader đánh dấu firmware mới là PENDING_VERIFY; chưa xác nhận thì lần reset kế tiếp quay về slot cũ.
 CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
 
+# --- Log UART ---
+# Định dạng chuẩn ở components/platform/include/platform/log.h. Mặc định in INFO;
+# biên dịch sẵn DEBUG để bật chi tiết theo tag lúc chạy hoặc qua CONFIG_IVTS_LOG_DEBUG.
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_LOG_MAXIMUM_LEVEL_DEBUG=y
+CONFIG_LOG_COLORS=y
+
 # --- FreeRTOS ---
 # Main task chỉ khởi tạo và gọi bootstrap nên stack nhỏ.
 CONFIG_ESP_MAIN_TASK_STACK_SIZE=4096

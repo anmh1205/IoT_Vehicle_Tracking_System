@@ -18,7 +18,7 @@
 #include <string.h>
 #include "driver/gpio.h"
 #include "esp_check.h"
-#include "esp_log.h"
+#include "platform/log.h"
 
 #define LIS_WHO_AM_I    0x0F
 #define LIS_ID          0x3F
@@ -101,7 +101,7 @@ static uint8_t mask_without_gravity(void)
     if (read_axes(a) != ESP_OK) { return MASK_X | MASK_Y; }
     unsigned gravity_axis = lis3dsh_gravity_axis(a);
     static const uint8_t keep[3] = { MASK_Y | MASK_Z, MASK_X | MASK_Z, MASK_X | MASK_Y };
-    ESP_LOGI(BOARD_TAG, "imu raw x=%d y=%d z=%d -> trục trọng lực %u", a[0], a[1], a[2], gravity_axis);
+    IVTS_LOGI(BOARD_TAG, "imu gravity raw=%d,%d,%d axis=%c", a[0], a[1], a[2], "XYZ"[gravity_axis]);
     return keep[gravity_axis];
 }
 
@@ -109,12 +109,13 @@ static esp_err_t lis3dsh_probe(void)
 {
     uint16_t addr = board_i2c_probe(s_imu_cfg.primary_address) ? s_imu_cfg.primary_address
                   : board_i2c_probe(s_imu_cfg.alternate_address) ? s_imu_cfg.alternate_address : 0;
-    ESP_RETURN_ON_FALSE(addr != 0, ESP_ERR_NOT_FOUND, BOARD_TAG, "LIS3DSH không trả lời 0x1D/0x1E");
+    ESP_RETURN_ON_FALSE(addr != 0, ESP_ERR_NOT_FOUND, BOARD_TAG, "imu probe chip=LIS3DSH addr=0x1D/0x1E result=no_reply");
     ESP_RETURN_ON_ERROR(board_i2c_add(s_imu_cfg.i2c_device, addr, s_imu_cfg.i2c_speed_hz), BOARD_TAG, "add imu");
 
     uint8_t id = 0;
     ESP_RETURN_ON_ERROR(board_i2c_read(s_imu_cfg.i2c_device, LIS_WHO_AM_I, &id, 1), BOARD_TAG, "who_am_i");
-    ESP_RETURN_ON_FALSE(id == LIS_ID, ESP_ERR_NOT_SUPPORTED, BOARD_TAG, "WHO_AM_I=0x%02x (cần 0x3F)", id);
+    ESP_RETURN_ON_FALSE(id == LIS_ID, ESP_ERR_NOT_SUPPORTED, BOARD_TAG, "imu probe chip=LIS3DSH who_am_i=0x%02x expected=0x3F", id);
+    IVTS_LOGI(BOARD_TAG, "imu probe chip=LIS3DSH addr=0x%02x who_am_i=0x%02x result=ok", addr, id);
 
     return ESP_OK;
 }

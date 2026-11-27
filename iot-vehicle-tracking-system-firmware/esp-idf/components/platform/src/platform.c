@@ -3,7 +3,7 @@
  * @brief Monotonic time, restart and ESP-IDF result translation.
  */
 #include "platform/platform.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "esp_system.h"
 #include "esp_timer.h"
 
@@ -14,7 +14,7 @@ uint64_t platform_uptime_ms(void)
 
 void platform_restart(const char *reason)
 {
-    ESP_LOGI("platform", "restart: %s", reason);
+    IVTS_LOGW("sys", "restart reason=%s", reason);
     esp_restart();
 }
 

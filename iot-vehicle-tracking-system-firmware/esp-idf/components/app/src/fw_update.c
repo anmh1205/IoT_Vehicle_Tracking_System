@@ -12,7 +12,7 @@
 #include "device/device.h"
 #include "telemetry.h"
 #include "ivts_core/ota/confirm.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "ivts_core/base/str.h"
 #include "ota/ota.h"
 #include "platform/platform.h"
@@ -39,7 +39,8 @@ static void restore_pending_verify(const ivts_ota_confirm_ctx_t *saved)
     s_update.report.progress = IVTS_OTA_PCT_CONFIRMING;
     (void)ivts_str_copy(s_update.report.job_id, sizeof s_update.report.job_id, saved->job_id);
     (void)ivts_str_copy(s_update.report.target_version, sizeof s_update.report.target_version, saved->target_version);
-    ESP_LOGW(APP_TAG, "image PENDING_VERIFY, hạn %lus", (unsigned long)s_update.confirm_ctx.timeout_s);
+    IVTS_LOGW(APP_TAG, "ota confirm state=PENDING_VERIFY version=%s timeout=%lus", saved->target_version,
+              (unsigned long)s_update.confirm_ctx.timeout_s);
 }
 
 static bool image_landed(const ivts_ota_confirm_ctx_t *saved, const char *version, const char *partition)
@@ -57,7 +58,8 @@ static void restore_after_reboot(const ivts_ota_confirm_ctx_t *saved)
     (void)ivts_str_copy(s_update.report.job_id, sizeof s_update.report.job_id, saved->job_id);
     (void)ivts_str_copy(s_update.report.target_version, sizeof s_update.report.target_version, saved->target_version);
     s_update.awaiting_final_report_ack = true;
-    ESP_LOGW(APP_TAG, "OTA %s: %s", saved->target_version, landed ? "đã xác nhận" : "đã bị rollback");
+    IVTS_LOGW(APP_TAG, "ota result=%s target=%s running=%s job=%s", landed ? "success" : "rolled_back",
+              saved->target_version, ota_running_version(), saved->job_id);
 }
 
 static void restore_idle(void)
@@ -112,16 +114,17 @@ static void accept_running_image(uint64_t uptime_ms)
         (void)ivts_str_copy(s_update.report.current_version, sizeof s_update.report.current_version, ota_running_version());
         (void)ivts_str_copy(s_update.report.partition, sizeof s_update.report.partition, ota_running_partition());
         s_update.fw_report_needs_publish = true;
-        ESP_LOGI(APP_TAG, "image hợp lệ: đã mark valid");
+        IVTS_LOGI(APP_TAG, "ota confirm result=valid version=%s uptime=%llums", ota_running_version(),
+                  (unsigned long long)uptime_ms);
     } else {
         s_confirm_retry_at_ms = uptime_ms + OTA_MARK_VALID_RETRY_MS;
-        ESP_LOGW(APP_TAG, "chưa đánh dấu được image OTA hợp lệ");
+        IVTS_LOGW(APP_TAG, "ota confirm result=mark_valid_failed retry=%ums", (unsigned)OTA_MARK_VALID_RETRY_MS);
     }
 }
 
 static void rollback_running_image(uint64_t uptime_ms)
 {
-    ESP_LOGE(APP_TAG, "quá hạn confirm: rollback");
+    IVTS_LOGE(APP_TAG, "ota confirm result=timeout action=rollback");
     (void)ota_rollback_and_reboot();
     s_confirm_retry_at_ms = uptime_ms + OTA_ROLLBACK_RETRY_MS;
 }

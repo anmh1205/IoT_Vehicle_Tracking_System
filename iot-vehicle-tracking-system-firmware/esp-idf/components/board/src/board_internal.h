@@ -14,6 +14,7 @@
 #include <stddef.h>
 #include "board/board_power.h"
 
+/* UART log tag for board, RTC, IMU, ADC and I2C lines (see platform/log.h). */
 #define BOARD_TAG "board"
 
 /* Preserve the board I/O error mapping on mutex or task allocation failure. */

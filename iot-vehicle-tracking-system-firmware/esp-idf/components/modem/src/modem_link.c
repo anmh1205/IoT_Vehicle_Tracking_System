@@ -6,7 +6,7 @@
  * windows and emitting link changes by value.
  */
 #include "modem_internal.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "ivts_core/base/backoff.h"
 #include "transport/transport.h"
 #include "at/at.h"
@@ -42,10 +42,32 @@ void modem_link_reset(modem_link_step_t to)
     if (to <= MODEM_LINK_STEP_POWER) { s_link.fails_total = 0; }
 }
 
+/**
+ * @brief Log the current signal quality reported by AT+CSQ.
+ * @details Called on the modem task when registration completes and when the
+ * broker link comes up. RSSI 99 means unknown; other values map to dBm.
+ */
+static void log_signal(void)
+{
+    at_cmd_t q = { .text = "AT+CSQ", .capture = "+CSQ:", .timeout_ms = 1000 };
+    int32_t rssi = 99, ber = 99;
+    if (modem_at(&q) != AT_RES_OK || !at_field_int(modem_at_response(), 0, &rssi)) { return; }
+    (void)at_field_int(modem_at_response(), 1, &ber);
+    if (rssi == 99) {
+        IVTS_LOGI(MODEM_TAG, "lte signal rssi=unknown ber=%ld", (long)ber);
+    } else {
+        IVTS_LOGI(MODEM_TAG, "lte signal rssi=%lddBm csq=%ld ber=%ld", (long)(-113 + 2 * rssi), (long)rssi, (long)ber);
+    }
+}
+
 /** Enter @p to, reset its retry counters and log the transition. */
 static void go(modem_link_step_t to)
 {
-    ESP_LOGI(MODEM_TAG, "lte %s -> %s", st_name(s_link.step), st_name(to));
+    uint64_t took_ms = modem_now() - s_link.entered_at_ms;
+    IVTS_LOGI(MODEM_TAG, "lte %s -> %s took=%lu.%lus fails=%lu", st_name(s_link.step), st_name(to),
+              (unsigned long)(took_ms / 1000u), (unsigned long)(took_ms % 1000u / 100u),
+              (unsigned long)s_link.fails_total);
+    if (to == MODEM_LINK_STEP_PDP || to == MODEM_LINK_STEP_UP) { log_signal(); }
     s_link.step = to;
     s_link.attempt = 0;
     s_link.retry_at_ms = 0;
@@ -63,7 +85,7 @@ static void fail(void)
     modem_link_t *l = &s_link;
     l->fails_total++;
     if (l->fails_total >= FAILS_POWER_CYCLE) {
-        ESP_LOGW(MODEM_TAG, "lte: %lu lần lỗi, power-cycle modem", (unsigned long)l->fails_total);
+        IVTS_LOGW(MODEM_TAG, "lte power_cycle step=%s fails=%lu", st_name(l->step), (unsigned long)l->fails_total);
         modem_link_power_down();
         modem_emit_link(IVTS_LINK_DOWN, (int32_t)IVTS_ERR_TIMEOUT);
         modem_link_reset(MODEM_LINK_STEP_POWER);
@@ -72,6 +94,8 @@ static void fail(void)
     uint32_t d = ivts_backoff_ms(&k_step_backoff, l->attempt, (uint32_t)modem_now());
     l->attempt++;
     l->retry_at_ms = modem_now() + d;
+    IVTS_LOGW(MODEM_TAG, "lte retry step=%s attempt=%lu fails=%lu wait=%lums", st_name(l->step),
+              (unsigned long)l->attempt, (unsigned long)l->fails_total, (unsigned long)d);
 }
 
 /* Reconnect to the broker while keeping the LTE data context. */

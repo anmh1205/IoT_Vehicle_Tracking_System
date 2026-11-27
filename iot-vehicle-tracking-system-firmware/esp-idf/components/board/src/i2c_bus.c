@@ -70,7 +70,7 @@ bool board_i2c_probe(uint16_t addr)
 
 esp_err_t board_i2c_read(board_dev_t dev, uint8_t reg, uint8_t *buf, size_t n)
 {
-    ESP_RETURN_ON_FALSE(s_dev[dev] != NULL, ESP_ERR_INVALID_STATE, BOARD_TAG, "dev %d chưa được thêm vào bus", (int)dev);
+    ESP_RETURN_ON_FALSE(s_dev[dev] != NULL, ESP_ERR_INVALID_STATE, BOARD_TAG, "i2c read dev=%d result=not_added", (int)dev);
     if (!board_i2c_lock(I2C_LOCK_TIMEOUT_MS)) { return ESP_ERR_TIMEOUT; }
     esp_err_t e = i2c_master_transmit_receive(s_dev[dev], &reg, 1, buf, n, I2C_XFER_TIMEOUT_MS);
     board_i2c_unlock();
@@ -79,8 +79,8 @@ esp_err_t board_i2c_read(board_dev_t dev, uint8_t reg, uint8_t *buf, size_t n)
 
 esp_err_t board_i2c_write(board_dev_t dev, uint8_t reg, const uint8_t *buf, size_t n)
 {
-    ESP_RETURN_ON_FALSE(s_dev[dev] != NULL, ESP_ERR_INVALID_STATE, BOARD_TAG, "dev %d chưa được thêm vào bus", (int)dev);
-    ESP_RETURN_ON_FALSE(n <= 16, ESP_ERR_INVALID_SIZE, BOARD_TAG, "write dài quá 16 byte");
+    ESP_RETURN_ON_FALSE(s_dev[dev] != NULL, ESP_ERR_INVALID_STATE, BOARD_TAG, "i2c write dev=%d result=not_added", (int)dev);
+    ESP_RETURN_ON_FALSE(n <= 16, ESP_ERR_INVALID_SIZE, BOARD_TAG, "i2c write result=len_over_16B");
     uint8_t tmp[17];
     tmp[0] = reg;
     for (size_t i = 0; i < n; i++) { tmp[i + 1] = buf[i]; }

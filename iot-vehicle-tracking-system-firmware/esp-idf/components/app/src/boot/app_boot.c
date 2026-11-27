@@ -12,10 +12,11 @@
 #include "board/board_power.h"
 #include "command/command.h"
 #include "device/device.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "esp_random.h"
 #include "esp_system.h"
 #include "fw_update.h"
+#include "ota/ota.h"
 #include "ivts_core/base/str.h"
 #include "runtime/runtime.h"
 #include "sdkconfig.h"
@@ -46,7 +47,7 @@ static bool fill_deploy_defaults(ivts_config_t *c)
 static bool init_event_queue(void)
 {
     if (app_events_init()) { return true; }
-    ESP_LOGE(APP_TAG, "queue");
+    IVTS_LOGE(APP_TAG, "init step=event_queue result=fail");
     return false;
 }
 
@@ -67,7 +68,8 @@ static bool resolve_provisioning(ivts_config_t *config)
     ivts_cfg_issue_t config_issues[IVTS_CFG_F_COUNT];
     size_t config_issue_count = ivts_config_validate(config, config_issues, IVTS_CFG_F_COUNT);
     for (size_t i = 0; i < config_issue_count && i < IVTS_CFG_F_COUNT; i++) {
-        ESP_LOGW(APP_TAG, "config field %u reason %u", config_issues[i].field, config_issues[i].reason);
+        IVTS_LOGW(APP_TAG, "config invalid field=%u reason=%u", (unsigned)config_issues[i].field,
+                  (unsigned)config_issues[i].reason);
     }
     return defaults_ok && config_issue_count == 0u;
 }
@@ -87,8 +89,18 @@ static void restore_boot_identity(void)
     app_device_set_boot_id(boot_id);
 }
 
+/** Raise every firmware tag to DEBUG when CONFIG_IVTS_LOG_DEBUG is enabled. */
+static void apply_log_levels(void)
+{
+#if CONFIG_IVTS_LOG_DEBUG
+    static const char *const tags[] = IVTS_LOG_TAGS;
+    for (size_t i = 0; i < sizeof tags / sizeof tags[0]; i++) { esp_log_level_set(tags[i], ESP_LOG_DEBUG); }
+#endif
+}
+
 bool app_boot_init(void)
 {
+    apply_log_levels();
     if (!init_event_queue()) { return false; }
     ivts_sink_t sink = app_events_sink();
     if (!app_wiring_init_board(sink) || !app_wiring_init_storage(sink)) { return false; }
@@ -101,7 +113,7 @@ bool app_boot_init(void)
      * modem and BLE shutdown before asking the board to sleep.
      */
     ivts_err_t e = board_set_auto_light_sleep(false);
-    if (e != IVTS_OK) { ESP_LOGW(APP_TAG, "power management: %s", ivts_err_name(e)); }
+    if (e != IVTS_OK) { IVTS_LOGW(APP_TAG, "init step=power_management result=%s", ivts_err_name(e)); }
     app_config_apply(&config);
     restore_boot_identity();
     if (!app_wiring_init_modem(sink, &config, provisioned)) { return false; }
@@ -112,7 +124,13 @@ bool app_boot_init(void)
     app_device_bind_config_handler(app_config_apply);
     app_fw_update_restore_at_boot();
     app_wiring_register_acks();
-    ESP_LOGI(APP_TAG, "init xong boot_id=%lu provisioned=%d sd=%d", (unsigned long)app_device_boot_id(),
-             provisioned, storage_sd_ok());
+    IVTS_LOGI(APP_TAG, "firmware version=%s partition=%s pending_verify=%s", ota_running_version(),
+              ota_running_partition(), IVTS_LOG_YES(ota_image_pending_verify()));
+    IVTS_LOGI(APP_TAG, "device id=%s boot_id=%lu provisioned=%s tracking=%s broker=%s:%u",
+              config.device_id[0] != '\0' ? config.device_id : "-", (unsigned long)app_device_boot_id(),
+              IVTS_LOG_YES(provisioned), IVTS_LOG_YES(app_device_tracking_enabled()),
+              config.mqtt_host[0] != '\0' ? config.mqtt_host : "-", (unsigned)config.mqtt_port);
+    IVTS_LOGI(APP_TAG, "init result=ok sd=%s queue=%lu", IVTS_LOG_OK(storage_sd_ok()),
+              (unsigned long)storage_queue_count());
     return true;
 }

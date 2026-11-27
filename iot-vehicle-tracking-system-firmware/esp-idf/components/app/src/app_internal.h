@@ -15,7 +15,7 @@ uint64_t app_now(void);
 /** Read the board RTC, returning zero when untrusted. May wait for the I2C bus. */
 uint64_t app_clock_unix_ms_or_zero(bool *trusted_out);
 
-#define APP_TAG "app"
+#define APP_TAG "app"   /* UART log tag for application lines (see platform/log.h). */
 
 /* Allocate and inspect message sequence numbers in the app task. */
 uint32_t app_msg_seq_next(void);

@@ -9,7 +9,7 @@
 #include "app_internal.h"
 #include "device/device.h"
 #include "telemetry.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "fw_update.h"
 #include "ivts_core/payload/json_writer.h"
 #include "ivts_core/payload/payload.h"
@@ -42,7 +42,8 @@ static void to_queue(const ivts_record_t *r)
     if (ivts_record_encode(r, b, sizeof b, &n) != IVTS_OK) { return; }
     ivts_err_t e = storage_queue_push(b, n);
     if (e != IVTS_OK) {
-        ESP_LOGW(APP_TAG, "mất bản ghi seq=%lu (%s)", (unsigned long)r->seq, ivts_err_name(e));
+        IVTS_LOGE(APP_TAG, "record lost boot=%lu seq=%lu err=%s", (unsigned long)r->boot_id, (unsigned long)r->seq,
+                  ivts_err_name(e));
     }
 }
 
@@ -57,7 +58,10 @@ void app_messages_publish_live_record(void)
     if (!app_session_has_unsent_boundary() && storage_queue_count() == 0u && !storage_queue_has_unflushed_push() &&
         error == IVTS_OK && app_publisher_send(APP_MSG_RAW_LIVE, MODEM_TOPIC_RAWDATA, s_buf, len)) {
         s_live_record = r;
+        IVTS_LOGD(APP_TAG, "record live boot=%lu seq=%lu route=publish", (unsigned long)r.boot_id, (unsigned long)r.seq);
     } else {
+        IVTS_LOGD(APP_TAG, "record live boot=%lu seq=%lu route=queue queue=%lu", (unsigned long)r.boot_id,
+                  (unsigned long)r.seq, (unsigned long)storage_queue_count());
         to_queue(&r);                     /* Replay preserves the boot ID and sequence allocated at capture. */
     }
 }

@@ -9,7 +9,7 @@
 #include "app_internal.h"
 #include <string.h>
 #include "board/board.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "obd/obd.h"
 #include "sdkconfig.h"
 #include "device/device.h"
@@ -65,13 +65,16 @@ static void sync_rtc_from_gnss(const ivts_event_t *ev)
          */
         if (board_time_get(&rtc_ms, &trusted) == IVTS_OK && !trusted &&
             board_time_set(ev->u.gnss.ts_unix_ms) == IVTS_OK) {
-            ESP_LOGI(APP_TAG, "RTC <- GNSS %llu", (unsigned long long)ev->u.gnss.ts_unix_ms);
+            IVTS_LOGI(APP_TAG, "rtc sync source=gnss unix_ms=%llu", (unsigned long long)ev->u.gnss.ts_unix_ms);
         }
     }
 }
 
 static void on_gnss_fix(const ivts_event_t *ev)
 {
+    if (ev->u.gnss.fix_valid != s_snapshot.gnss.fix_valid) {
+        IVTS_LOGI(APP_TAG, "gnss fix=%s sats=%u", IVTS_LOG_YES(ev->u.gnss.fix_valid), (unsigned)ev->u.gnss.sats);
+    }
     s_snapshot.gnss = ev->u.gnss;
     s_gnss_sample_ms = ev->ts_ms;
     sync_rtc_from_gnss(ev);

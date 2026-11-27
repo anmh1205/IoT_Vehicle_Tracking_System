@@ -7,7 +7,7 @@
  */
 #include "modem_internal.h"
 #include "at/at.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include <string.h>
 #include "ivts_core/base/civil.h"
 
@@ -40,7 +40,8 @@ void modem_gnss_step(void)
             s_gnss_on = s_gnss_requested;
         }
         if (s_gnss_on != previous) {
-            ESP_LOGI(MODEM_TAG, "GNSS %s", s_gnss_on ? "on" : "off");
+            IVTS_LOGI(MODEM_TAG, "gnss power=%s requested=%s", s_gnss_on ? "on" : "off",
+                      s_gnss_requested ? "on" : "off");
         }
         s_next_fix_at_ms = modem_now() + 1000;
         return;
@@ -55,7 +56,12 @@ void modem_gnss_step(void)
         at_cmd_t c2 = { .text = "AT+CGPSINFO", .capture = "+CGPSINFO:", .timeout_ms = 2000 };
         ok = modem_at(&c2) == AT_RES_OK && gnss_parse_cgpsinfo(modem_at_response(), &g) == IVTS_OK;
     }
-    if (!ok) { return; }
+    if (!ok) {
+        IVTS_LOGD(MODEM_TAG, "gnss read result=fail");
+        return;
+    }
+    IVTS_LOGD(MODEM_TAG, "gnss read fix=%s sats=%u speed=%u.%ukm/h", IVTS_LOG_YES(g.fix_valid), g.sats,
+              (unsigned)(g.speed_cm_s * 36u / 1000u), (unsigned)(g.speed_cm_s * 36u / 100u % 10u));
     ivts_event_t ev = { .type = IVTS_EV_GNSS_FIX, .ts_ms = modem_now() };
     ev.u.gnss = g;
     modem_emit(&ev);

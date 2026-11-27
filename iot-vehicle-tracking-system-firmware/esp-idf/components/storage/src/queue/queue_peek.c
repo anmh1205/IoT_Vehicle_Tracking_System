@@ -8,7 +8,7 @@
 #include "queue/queue.h"
 #include "platform/platform.h"
 #include <string.h>
-#include "esp_log.h"
+#include "platform/log.h"
 #include <errno.h>
 
 static platform_mutex_t s_slot_mutex;
@@ -179,7 +179,8 @@ ivts_err_t storage_queue_peek_record(storage_queue_state_t *queue)
             return IVTS_OK;
         }
         if (k == FRAME_CORRUPT) {
-            ESP_LOGW(STORAGE_TAG, "queue: khung hỏng %s@%lu, bỏ phần còn lại của đoạn", p, (unsigned long)queue->read_offset);
+            IVTS_LOGW(STORAGE_TAG, "queue corrupt_frame file=%s offset=%lu action=skip_segment_rest", p,
+                      (unsigned long)queue->read_offset);
         }
         if (queue->read_segment == queue->tail) {
             storage_queue_slot_set_count(0);                            /* Reconcile the pending count with the segment contents on disk. */

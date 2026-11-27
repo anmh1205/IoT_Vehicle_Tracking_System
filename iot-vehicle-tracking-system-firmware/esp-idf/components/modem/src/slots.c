@@ -8,7 +8,7 @@
 #include "modem_internal.h"
 #include "platform/platform.h"
 #include <string.h>
-#include "esp_log.h"
+#include "platform/log.h"
 
 static platform_mutex_t s_slot_mutex;
 
@@ -153,7 +153,7 @@ void modem_cmd_store(const char *payload, size_t len)
          * full FIFO drops the command. The cloud can retry the same command ID
          * when it receives no application acknowledgement on commands/ack.
          */
-        ESP_LOGW(MODEM_TAG, "hàng đợi command đầy, bỏ command %u byte", (unsigned)len);
+        IVTS_LOGE(MODEM_TAG, "mqtt command result=dropped reason=fifo_full size=%uB", (unsigned)len);
     }
 }
 

@@ -185,3 +185,73 @@ class Layers(unittest.TestCase):
     def test_all_components_do_not_export_mutable_variables(self):
         variables = re.compile(r"^\s*extern\s+(?!const\b)[^;\n()]+;", re.M)
         self.assert_symbols_local(variables)
+
+
+LOG_CALL = re.compile(r'\bIVTS_LOG[EWID]\(\s*([A-Za-z_"][^,]*?)\s*,\s*((?:"(?:\\.|[^"\\])*"\s*)+)')
+RETURN_ON_CALL = re.compile(r'\bESP_RETURN_ON_\w+\((?:[^;"]*?),\s*((?:"(?:\\.|[^"\\])*"\s*)+)')
+LOG_TAGS = {"board", "modem", "at", "storage", "obd", "ota", "app", "sys"}
+LOG_TAG_MACROS = {"BOARD_TAG": "board", "MODEM_TAG": "modem", "AT_TAG": "at", "STORAGE_TAG": "storage",
+                  "OBD_TAG": "obd", "OTA_TAG": "ota", "APP_TAG": "app"}
+# First word: a lower-case subject, an AT/ELM traffic arrow, or a preformatted status line.
+LOG_SUBJECT = re.compile(r'^(?:[a-z][a-z0-9_]*(?: |$)|[<>] |%s$)')
+
+
+def raw_sources():
+    for root in (COMPONENTS, FIRMWARE / "main"):
+        for path in sorted(root.rglob("*")):
+            if path.suffix in {".h", ".c"}:
+                yield path, path.read_text(encoding="utf-8")
+
+
+def literal(chunks):
+    return "".join(re.findall(r'"((?:\\.|[^"\\])*)"', chunks))
+
+
+class LogFormat(unittest.TestCase):
+    """Console UART lines follow components/platform/include/platform/log.h."""
+
+    def test_sdk_log_macros_stay_behind_the_standard_header(self):
+        header = COMPONENTS / "platform/include/platform/log.h"
+        violations = [
+            path.relative_to(FIRMWARE).as_posix()
+            for path, source in production_sources()
+            if path != header and (re.search(r"\bESP_LOG[EWIDV]\s*\(", source) or "esp_log.h" in INCLUDE.findall(source))
+        ]
+        self.assertEqual(violations, [])
+
+    def test_log_lines_use_known_tags_and_a_lower_case_subject(self):
+        violations, count = [], 0
+        for path, source in raw_sources():
+            for tag, chunks in LOG_CALL.findall(source):
+                count += 1
+                text = literal(chunks)
+                where = f"{path.relative_to(FIRMWARE)}: {text[:50]!r}"
+                name = LOG_TAG_MACROS.get(tag, tag.strip('"'))
+                if name not in LOG_TAGS:
+                    violations.append(f"{where}: tag {tag}")
+                if not LOG_SUBJECT.match(text):
+                    violations.append(f"{where}: subject")
+                if not text.isascii() or any(not (c.isprintable()) for c in text):
+                    violations.append(f"{where}: non-ASCII")
+        self.assertGreater(count, 50)
+        self.assertEqual(violations, [])
+
+    def test_sdk_error_messages_are_ascii(self):
+        violations = [
+            f"{path.relative_to(FIRMWARE)}: {literal(chunks)[:50]!r}"
+            for path, source in raw_sources()
+            for chunks in RETURN_ON_CALL.findall(source)
+            if not literal(chunks).isascii()
+        ]
+        self.assertEqual(violations, [])
+
+    def test_tag_macros_match_the_documented_tag_list(self):
+        header = (COMPONENTS / "platform/include/platform/log.h").read_text(encoding="utf-8")
+        listed = set(re.findall(r'"([a-z]+)"', re.search(r"IVTS_LOG_TAGS\s*\{([^}]*)\}", header)[1]))
+        self.assertEqual(listed, LOG_TAGS)
+        defined = {
+            name: value
+            for _, source in raw_sources()
+            for name, value in re.findall(r'#define\s+(\w+_TAG)\s+"([^"]+)"', source)
+        }
+        self.assertEqual(defined, LOG_TAG_MACROS)

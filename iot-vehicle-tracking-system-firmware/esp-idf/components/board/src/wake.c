@@ -70,3 +70,13 @@ board_wake_t board_wake_cause(void)
 {
     return s_boot_wake;
 }
+
+const char *board_wake_name(board_wake_t wake)
+{
+    switch (wake) {
+    case BOARD_WAKE_POWER_ON: return "power_on";
+    case BOARD_WAKE_TIMER: return "timer";
+    case BOARD_WAKE_IMU: return "imu";
+    default: return "other";
+    }
+}

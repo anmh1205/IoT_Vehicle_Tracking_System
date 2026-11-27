@@ -14,7 +14,7 @@
 #include "ota_internal.h"
 #include <stdatomic.h>
 #include <string.h>
-#include "esp_log.h"
+#include "platform/log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_app_desc.h"
@@ -75,6 +75,7 @@ void ota_emit(uint8_t phase, uint8_t pct, uint8_t err)
 {
     uint32_t progress = (1u << 24) | ((uint32_t)phase << 16) | ((uint32_t)pct << 8) | err;
     atomic_store(&s_progress, progress);
+    IVTS_LOGI(OTA_TAG, "progress phase=%s pct=%u err=%u", ivts_ota_status_name((ivts_ota_status_t)phase), pct, err);
     ivts_event_t ev = { .type = IVTS_EV_OTA_PROGRESS, .ts_ms = platform_uptime_ms() };
     ev.u.ota_progress.phase = phase;
     ev.u.ota_progress.pct = pct;
@@ -109,7 +110,7 @@ ivts_err_t ota_rollback_and_reboot(void)
 {
     /* ESP-IDF reboots on success. Any return from this call is an error. */
     esp_err_t e = esp_ota_mark_app_invalid_rollback_and_reboot();
-    ESP_LOGE(OTA_TAG, "rollback: %s", esp_err_to_name(e));
+    IVTS_LOGE(OTA_TAG, "rollback result=fail err=%s", esp_err_to_name(e));
     return IVTS_ERR_IO;
 }
 

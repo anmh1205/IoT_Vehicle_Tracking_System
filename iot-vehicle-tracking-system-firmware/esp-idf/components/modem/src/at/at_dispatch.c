@@ -7,7 +7,7 @@
  */
 #include "at/at.h"
 #include "modem_internal.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "mqtt/mqtt.h"
 #include "transport/transport.h"
 
@@ -30,6 +30,7 @@ const char *modem_at_response(void)
 
 static void on_unsolicited(const char *line)
 {
+    IVTS_LOGD(AT_TAG, "< %s", line);
     if (modem_http_on_line(line)) { return; }       /* An HTTPREAD data header can switch the parser to raw mode. */
     modem_mqtt_rx_on_urc(line);
 }
@@ -51,7 +52,7 @@ static void discard_partial_frame(void)
 void modem_at_dispatch_pump(uint32_t wait_ms)
 {
     if (s_parser.raw_left != 0u && modem_now() >= s_raw_deadline_at_ms) {
-        ESP_LOGW(MODEM_TAG, "UART: khung dữ liệu thô bị cắt");
+        IVTS_LOGW(MODEM_TAG, "uart raw_frame result=truncated left=%uB", (unsigned)s_parser.raw_left);
         discard_partial_frame();
     }
     uint8_t buf[128];
@@ -73,17 +74,32 @@ void modem_at_dispatch_pump(uint32_t wait_ms)
     }
 }
 
+static const char *at_result_name(at_result_t r)
+{
+    switch (r) {
+    case AT_RES_OK: return "OK";
+    case AT_RES_TIMEOUT: return "timeout";
+    case AT_RES_ERROR: return "error";
+    default: return "pending";
+    }
+}
+
 at_result_t modem_at(const at_cmd_t *c)
 {
-    if (at_engine_start(&s_engine, c, modem_now()) != IVTS_OK) { return AT_RES_ERROR; }
+    uint64_t started_ms = modem_now();
+    if (at_engine_start(&s_engine, c, started_ms) != IVTS_OK) { return AT_RES_ERROR; }
     for (;;) {
         modem_at_dispatch_pump(20);
         at_result_t r = at_engine_poll(&s_engine, modem_now());
         if (r != AT_RES_PENDING) {
             if (r == AT_RES_TIMEOUT && s_parser.raw_left != 0u) { discard_partial_frame(); }
+            const char *text = c->redact ? "<redacted>" : c->text;
+            const char *resp = c->redact ? "" : s_engine.resp;
+            unsigned long took_ms = (unsigned long)(modem_now() - started_ms);
+            IVTS_LOGD(AT_TAG, "> %s  < %s %s %lums", text, resp, at_result_name(r), took_ms);
             if (r != AT_RES_OK) {
-                ESP_LOGW(MODEM_TAG, "%s -> %s %s", c->redact ? "AT (credential/URL)" : c->text,
-                         r == AT_RES_TIMEOUT ? "TIMEOUT" : "ERROR", c->redact ? "" : s_engine.resp);
+                IVTS_LOGW(MODEM_TAG, "at fail cmd=\"%s\" result=%s resp=\"%s\" took=%lums", text, at_result_name(r),
+                          resp, took_ms);
             }
             return r;
         }

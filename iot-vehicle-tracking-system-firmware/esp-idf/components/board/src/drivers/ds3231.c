@@ -8,7 +8,7 @@
 #include "board_internal.h"
 #include "drivers/drivers.h"
 #include "board_calc.h"
-#include "esp_log.h"
+#include "platform/log.h"
 
 /*
  * The DS3231M uses address 0x68. BCD time occupies registers 0x00–0x06. Bit 7
@@ -24,10 +24,13 @@ esp_err_t ds3231_init(board_dev_t device, uint16_t address, uint32_t speed_hz)
 {
     s_device = device;
     if (!board_i2c_probe(address)) {
-        ESP_LOGW(BOARD_TAG, "DS3231M không trả lời 0x%02x", address);
+        IVTS_LOGW(BOARD_TAG, "rtc probe chip=DS3231M addr=0x%02x result=no_reply", address);
         return ESP_ERR_NOT_FOUND;
     }
-    return board_i2c_add(s_device, address, speed_hz);
+    esp_err_t e = board_i2c_add(s_device, address, speed_hz);
+    IVTS_LOGI(BOARD_TAG, "rtc probe chip=DS3231M addr=0x%02x result=%s speed=%luHz", address, IVTS_LOG_OK(e == ESP_OK),
+              (unsigned long)speed_hz);
+    return e;
 }
 
 ivts_err_t board_time_get(uint64_t *unix_ms, bool *trusted)
@@ -45,6 +48,8 @@ ivts_err_t board_time_get(uint64_t *unix_ms, bool *trusted)
         return IVTS_OK;                               /* I2C succeeded, but the calendar value is invalid. */
     }
     *trusted = ds3231_is_trusted(st, *unix_ms);
+    IVTS_LOGD(BOARD_TAG, "rtc read unix_ms=%llu status=0x%02x trusted=%s", (unsigned long long)*unix_ms, st,
+              IVTS_LOG_YES(*trusted));
     return IVTS_OK;
 }
 
@@ -66,6 +71,11 @@ ivts_err_t board_time_set(uint64_t unix_ms)
     if (e == ESP_OK) {
         st = (uint8_t)(st & (uint8_t)~DS3231_OSF);
         e = board_i2c_write(s_device, DS3231_REG_STATUS, &st, 1);
+    }
+    if (e == ESP_OK) {
+        IVTS_LOGI(BOARD_TAG, "rtc set unix_ms=%llu result=ok", (unsigned long long)unix_ms);
+    } else {
+        IVTS_LOGW(BOARD_TAG, "rtc set unix_ms=%llu result=fail err=%s", (unsigned long long)unix_ms, esp_err_to_name(e));
     }
     return board_err(e);
 }

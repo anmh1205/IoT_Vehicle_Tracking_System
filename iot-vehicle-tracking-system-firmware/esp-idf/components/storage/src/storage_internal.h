@@ -6,7 +6,7 @@
 #include "storage/storage.h"
 #include "esp_err.h"
 
-#define STORAGE_TAG "storage"
+#define STORAGE_TAG "storage"   /* UART log tag for NVS, SD and offline queue lines. */
 #ifndef SD_MOUNT
 #define SD_MOUNT "/sd"
 #endif

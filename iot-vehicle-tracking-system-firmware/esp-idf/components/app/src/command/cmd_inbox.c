@@ -8,6 +8,7 @@
 #include "command/command.h"
 #include <string.h>
 #include "app_internal.h"
+#include "platform/log.h"
 #include "modem/modem.h"
 #include "publish/publish.h"
 
@@ -37,6 +38,11 @@ void cmd_inbox_complete(const char *reason)
 {
     s_ack.response = reason;
     s_ack.status = reason == NULL ? "acknowledged" : "failed";
+    if (reason == NULL) {
+        IVTS_LOGI(APP_TAG, "cmd done id=%s status=acknowledged", s_ack.id);
+    } else {
+        IVTS_LOGW(APP_TAG, "cmd done id=%s status=failed reason=%s", s_ack.id, reason);
+    }
     if (reason == NULL) { cmd_receipts_append(s_ack.id); }
 }
 
@@ -45,7 +51,11 @@ static int take_and_parse_command(void)
     size_t len = 0;
     if (modem_cmd_take(s_cmd_json, sizeof s_cmd_json, &len) != IVTS_OK) { return 0; }
     int n = ivts_json_parse(s_cmd_json, len, s_cmd_tokens, CMD_TOKEN_CAPACITY, 4);
-    return n > 0 && s_cmd_tokens[0].type == IVTS_JT_OBJ ? n : 0;
+    if (n <= 0 || s_cmd_tokens[0].type != IVTS_JT_OBJ) {
+        IVTS_LOGW(APP_TAG, "cmd received result=malformed_json size=%uB", (unsigned)len);
+        return 0;
+    }
+    return n;
 }
 
 static void read_command_envelope(int token_count, cmd_envelope_t *envelope)
@@ -75,6 +85,8 @@ void app_cmd_handle(void)
     if (token_count == 0) { return; }
     cmd_envelope_t envelope = {0};
     read_command_envelope(token_count, &envelope);
+    IVTS_LOGI(APP_TAG, "cmd received id=%s name=%s params=%s", envelope.id[0] != '\0' ? envelope.id : "-",
+              envelope.has_name ? envelope.name : "-", IVTS_LOG_YES(envelope.has_params));
     if (envelope.id[0] == '\0') {
         handle_internal_assignment(&envelope);
         return;
@@ -84,6 +96,7 @@ void app_cmd_handle(void)
     memcpy(s_ack.id, envelope.id, sizeof s_ack.id);
     if (!cmd_receipts_ready()) { cmd_inbox_complete("dedupe_unavailable"); return; }
     if (cmd_receipts_contains(envelope.id)) {
+        IVTS_LOGI(APP_TAG, "cmd duplicate id=%s action=ack_again", envelope.id);
         s_ack.status = "acknowledged";
         return;
     }
@@ -104,6 +117,7 @@ bool app_cmd_blocks_sleep(void)
 
 void app_cmd_on_ack(bool ok)
 {
+    IVTS_LOGD(APP_TAG, "cmd ack_published id=%s result=%s", s_ack.id, IVTS_LOG_OK(ok));
     if (!ok) {
         s_ack_retry_at_ms = app_now() + ACK_RETRY_MS;
         return;

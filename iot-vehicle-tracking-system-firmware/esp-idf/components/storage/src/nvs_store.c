@@ -6,7 +6,7 @@
  * failure before committing a replacement value.
  */
 #include "storage_internal.h"
-#include "esp_log.h"
+#include "platform/log.h"
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "ivts_core/base/crc32.h"
@@ -106,7 +106,7 @@ ivts_err_t storage_config_load(ivts_config_t *out)
             ivts_event_t ev = { .type = IVTS_EV_CONFIG_CORRUPT, .ts_ms = platform_uptime_ms() };
             ev.u.config_corrupt.err = (int32_t)r;
             storage_emit(&ev);
-            ESP_LOGW(STORAGE_TAG, "config %s -> defaults", ivts_err_name(r));
+            IVTS_LOGW(STORAGE_TAG, "config load result=%s action=defaults", ivts_err_name(r));
         }
     }
     return r;
