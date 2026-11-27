@@ -1,6 +1,5 @@
 #include "app_task.h"
 #include "app_dispatch.h"
-#include "app_events.h"
 #include "fsm_actions.h"
 #include "alarm/motion_alarm.h"
 #include "app_clock.h"
@@ -14,6 +13,7 @@
 #include "fw_update/fw_update.h"
 #include "link/app_link.h"
 #include "power/led_pattern.h"
+#include "power/sleep_controller.h"
 #include "publish/outbox.h"
 #include "publish/publisher.h"
 #include "session/session_tracker.h"
@@ -45,10 +45,8 @@ void app_task_on_motion(void)
 
 static void drain_events(void)
 {
-    ivts_event_t ev;
-    if (app_events_receive(&ev, APP_TICK_MS)) {
-        app_dispatch(&ev);
-        while (app_events_receive(&ev, 0)) { app_dispatch(&ev); }    /* Rút cạn queue rồi mới chạy FSM. */
+    if (app_dispatch_next(APP_TICK_MS)) {
+        while (app_dispatch_next(0)) {}
     }
 }
 
@@ -115,6 +113,12 @@ void app_task_run(void *arg)
         if (now < next_tick) { continue; }
         next_tick = now + APP_TICK_MS;
 
+        if (app_sleep_poll(&s_fsm, &s_axes, &s_axes_cfg, now)) {
+            app_publisher_poll();
+            app_led_pattern_tick(s_fsm.state, app_device_tracking_enabled(), now);
+            app_diag_tick(now);
+            continue;
+        }
         run_periodic_services(now);
         ivts_fsm_in_t in = collect_fsm_input(now);
         ivts_fsm_out_t out;

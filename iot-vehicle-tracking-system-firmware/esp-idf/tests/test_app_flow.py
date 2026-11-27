@@ -48,6 +48,8 @@ def executable():
     "sleep_blocked_by_ota",
     "sleep_blocked_by_location",
     "sleep_blocked_by_restart",
+    "sleep_radio_timeout",
+    "sleep_radio_motion",
 ])
 def test_app_flow(executable, case):
     subprocess.run([executable, case], check=True, timeout=5)

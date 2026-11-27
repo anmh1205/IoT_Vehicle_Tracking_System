@@ -12,29 +12,14 @@
 #include "modem/modem.h"
 #include "obd/obd.h"
 
-/**
- * @brief Chờ task modem ngắt MQTT và phát xong xung tắt nguồn, kể cả nếu link đã mất từ trước.
- *
- * Khi xung PWRKEY được nhả, board có thể ngủ trong lúc SIM7600 hoàn tất tắt.
- * Task modem chịu trách nhiệm chờ phần cứng sẵn sàng nếu board thức sớm.
- */
-static bool wait_modem_stop(app_sleep_dispatch_t dispatch_next)
-{
-    uint64_t end = app_now() + MODEM_STOP_WAIT_MS;
-    while (!modem_is_stopped() && app_now() < end) {
-        (void)dispatch_next(APP_TICK_MS);
-    }
-    if (!modem_is_stopped()) { return false; }
-    while (dispatch_next(0)) {}
-    (void)app_link_update(IVTS_LINK_DOWN);
-    return true;
-}
+typedef enum {
+    APP_SLEEP_IDLE,
+    SLEEP_STOPPING_RADIOS,
+} app_sleep_phase_t;
 
-static bool stop_radios(app_sleep_dispatch_t dispatch_next)
-{
-    (void)obd_stop();
-    return modem_is_stopped() || (modem_set_link(false) == IVTS_OK && wait_modem_stop(dispatch_next));
-}
+static app_sleep_phase_t s_phase;
+static uint64_t s_modem_stop_deadline_at_ms;
+static ivts_fsm_out_t s_sleep_request;
 
 static bool can_sleep_now(const ivts_fsm_out_t *out, bool modem_stopped,
                           ivts_axes_t *axes, const ivts_axes_cfg_t *axes_cfg, bool *motion)
@@ -75,24 +60,49 @@ static void resume_after_wake(ivts_fsm_t *fsm, board_wake_t cause)
     if (app_device_is_provisioned()) { (void)modem_set_link(true); }
 }
 
-/**
- * @brief Đưa thiết bị vào chế độ ngủ do FSM chỉ định, rồi báo FSM khi đã thức.
- * @param out Kết quả bước FSM, cung cấp sleep_mode, sleep_s và sleep_arm_motion.
- * @note Deep sleep không trả về. Light sleep trả về sau khi thức; modem được bật lại.
- */
-void app_sleep_enter(const ivts_fsm_out_t *out, ivts_fsm_t *fsm, ivts_axes_t *axes,
-                     const ivts_axes_cfg_t *axes_cfg, app_sleep_dispatch_t dispatch_next)
+static void finish_sleep_request(const ivts_fsm_out_t *out, bool stopped, ivts_fsm_t *fsm,
+                                 ivts_axes_t *axes, const ivts_axes_cfg_t *axes_cfg)
 {
-    app_telemetry_set_device(IVTS_DEV_SLEEPING, out->sleep_mode);
-    if (out->sleep_mode == IVTS_SLEEP_FAKE) {
-        ESP_LOGI(APP_TAG, "fake sleep %lus", (unsigned long)out->sleep_s);
-        return;                                   /* FSM tự thoát khỏi trạng thái SLEEP khi hết hạn. */
-    }
-    bool stopped = stop_radios(dispatch_next);
     bool motion;
     if (!can_sleep_now(out, stopped, axes, axes_cfg, &motion)) {
         abort_sleep(fsm, motion ? IVTS_WAKE_MOTION : IVTS_WAKE_OTHER);
         return;
     }
     resume_after_wake(fsm, enter_hw_sleep(out, fsm->state));
+}
+
+void app_sleep_enter(const ivts_fsm_out_t *out, ivts_fsm_t *fsm, ivts_axes_t *axes,
+                     const ivts_axes_cfg_t *axes_cfg)
+{
+    app_telemetry_set_device(IVTS_DEV_SLEEPING, out->sleep_mode);
+    if (out->sleep_mode == IVTS_SLEEP_FAKE) {
+        ESP_LOGI(APP_TAG, "fake sleep %lus", (unsigned long)out->sleep_s);
+        return;
+    }
+    (void)obd_stop();
+    if (modem_is_stopped()) {
+        finish_sleep_request(out, true, fsm, axes, axes_cfg);
+    } else if (modem_set_link(false) != IVTS_OK) {
+        finish_sleep_request(out, false, fsm, axes, axes_cfg);
+    } else {
+        s_sleep_request = *out;
+        s_modem_stop_deadline_at_ms = app_now() + MODEM_STOP_WAIT_MS;
+        s_phase = SLEEP_STOPPING_RADIOS;
+    }
+}
+
+bool app_sleep_poll(ivts_fsm_t *fsm, ivts_axes_t *axes, const ivts_axes_cfg_t *axes_cfg, uint64_t now_ms)
+{
+    if (s_phase != SLEEP_STOPPING_RADIOS) { return false; }
+
+    bool stopped = modem_is_stopped();
+    if (!stopped && now_ms < s_modem_stop_deadline_at_ms) { return true; }
+    s_phase = APP_SLEEP_IDLE;
+    if (stopped) {
+        (void)app_link_update(IVTS_LINK_DOWN);
+    } else {
+        ESP_LOGW(APP_TAG, "modem chưa dừng, hoãn ngủ");
+    }
+    finish_sleep_request(&s_sleep_request, stopped, fsm, axes, axes_cfg);
+    return true;
 }

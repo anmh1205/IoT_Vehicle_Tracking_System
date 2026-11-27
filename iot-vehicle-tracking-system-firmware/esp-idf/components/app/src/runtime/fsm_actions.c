@@ -1,5 +1,4 @@
 #include "fsm_actions.h"
-#include "app_dispatch.h"
 #include "command/command.h"
 #include "device/app_device.h"
 #include "obd/obd.h"
@@ -17,7 +16,7 @@ void app_fsm_actions_execute(const ivts_fsm_out_t *o, ivts_fsm_t *fsm, ivts_axes
     if (o->actions & IVTS_ACT_OBD_STOP)  { (void)obd_stop(); }
     if (o->actions & IVTS_ACT_PUBLISH_STATUS) { app_outbox_request_status(); }
     if (o->actions & IVTS_ACT_SLEEP) {
-        app_sleep_enter(o, fsm, axes, axes_cfg, app_dispatch_next);
+        app_sleep_enter(o, fsm, axes, axes_cfg);
         return;
     }
     app_outbox_tick(fsm->state == IVTS_ST_HEARTBEAT || !app_device_tracking_enabled());

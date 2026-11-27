@@ -40,6 +40,11 @@ static bool s_ack_automatically;
 static bool s_publish_busy;
 static bool s_reject_publish;
 static bool s_modem_stopped;
+static bool s_delay_modem_stop;
+static uint64_t s_modem_stop_requested_at_ms;
+static unsigned s_modem_link_enables;
+static unsigned s_led_updates;
+static unsigned s_led_updates_at_stop;
 static fixture_message_t s_messages[CAPACITY];
 static size_t s_message_count;
 static ivts_session_state_t s_session;
@@ -156,7 +161,7 @@ ivts_err_t board_time_set(uint64_t unix_ms) { (void)unix_ms; return IVTS_OK; }
 bool board_imu_ok(void) { return true; }
 bool board_motion_deep_wake_capable(void) { return false; }
 ivts_err_t board_set_auto_light_sleep(bool enabled) { assert(!enabled); return IVTS_OK; }
-void board_led_set(bool on) { (void)on; }
+void board_led_set(bool on) { (void)on; s_led_updates++; }
 board_wake_t board_wake_cause(void) { return BOARD_WAKE_OTHER; }
 board_wake_t board_sleep(const board_sleep_req_t *req)
 {
@@ -166,7 +171,13 @@ board_wake_t board_sleep(const board_sleep_req_t *req)
 }
 
 ivts_err_t modem_init(const modem_cfg_t *cfg) { assert(cfg->sink.fn == s_sink.fn); return IVTS_OK; }
-ivts_err_t modem_set_link(bool on) { s_modem_stopped = !on; return IVTS_OK; }
+ivts_err_t modem_set_link(bool on)
+{
+    if (on) { s_modem_link_enables++; }
+    else { s_modem_stop_requested_at_ms = s_now_ms; }
+    s_modem_stopped = !on && !s_delay_modem_stop;
+    return IVTS_OK;
+}
 bool modem_is_stopped(void) { return s_modem_stopped; }
 ivts_link_t modem_link_state(void) { return s_link; }
 ivts_err_t modem_set_gnss(bool on) { s_gnss_enabled = on; return IVTS_OK; }
@@ -554,6 +565,33 @@ static void sleep_blocked(unsigned tick)
     }
 }
 
+static void sleep_radio_shutdown(unsigned tick)
+{
+    bool timeout = strcmp(s_case_name, "sleep_radio_timeout") == 0;
+    switch (tick) {
+    case 1: power_sample(false); break;
+    case 5: s_now_ms = 21000u; break;
+    case 6:
+        assert(s_sleep_calls == 0u && s_modem_stop_requested_at_ms == 21000u);
+        s_led_updates_at_stop = s_led_updates;
+        if (timeout) {
+            s_now_ms = s_modem_stop_requested_at_ms + 7900u;
+        } else {
+            post((ivts_event_t){ .type = IVTS_EV_MOTION_IRQ });
+        }
+        break;
+    case 7:
+        assert(s_led_updates > s_led_updates_at_stop);
+        assert(s_sleep_calls == 0u && s_modem_link_enables == 1u);
+        if (!timeout) { s_modem_stopped = true; }
+        break;
+    case 8:
+        assert(s_sleep_calls == 0u && s_modem_link_enables == 2u);
+        finish();
+    default: break;
+    }
+}
+
 static void seed_offline_head(void)
 {
     s_offline_count = 1;
@@ -624,6 +662,12 @@ static void seed_scenario(const char *name)
     }
     if (strncmp(name, "restart_", 8u) == 0) {
         s_before_tick = restart_flow;
+        return;
+    }
+    if (strncmp(name, "sleep_radio_", 12u) == 0) {
+        s_before_tick = sleep_radio_shutdown;
+        s_delay_modem_stop = true;
+        s_ack_automatically = true;
         return;
     }
     if (strncmp(name, "sleep_blocked_by_", 17u) == 0) {
