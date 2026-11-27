@@ -1,20 +1,15 @@
 name: PostgreSQL UAT Deploy
 
 on:
-  push:
-    branches: [uat]
-    paths:
-      - 'iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/**'
-      - 'scripts/deploy/**'
-      - '.github/workflows/postgresql-uat.yml'
   workflow_dispatch:
 
 concurrency:
-  group: postgresql-uat-${{ github.ref }}
-  cancel-in-progress: true
+  group: ivts-uat-vps
+  cancel-in-progress: false
 
 jobs:
   deploy-uat:
+    if: github.ref_name == 'uat'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -108,6 +103,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: SERVICE_ENV_CONTENT,SERVICE_DIR,COMPOSE_FILE
           script: |
+            set -eu
             chmod +x /opt/tracking/scripts/deploy/bootstrap-vps.sh
             chmod +x /opt/tracking/scripts/deploy/sync-postgres-schema.sh
             export SERVICE_ENV_CONTENT="$SERVICE_ENV_CONTENT"

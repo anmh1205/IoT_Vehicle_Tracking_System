@@ -1,0 +1,2 @@
+scripts/deploy/*.sh text eol=lf
+iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/*.sql text eol=lf

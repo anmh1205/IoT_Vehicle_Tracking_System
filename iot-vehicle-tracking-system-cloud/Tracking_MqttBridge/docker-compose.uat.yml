@@ -1,6 +1,6 @@
 services:
   mqtt-bridge:
-    image: ${DOCKERHUB_USERNAME}/tracking-mqtt-bridge:uat
+    image: ${DOCKERHUB_USERNAME}/tracking-mqtt-bridge:${IVTS_IMAGE_TAG:-uat}
     container_name: tracking-mqtt-bridge
     env_file: .env
     restart: always
