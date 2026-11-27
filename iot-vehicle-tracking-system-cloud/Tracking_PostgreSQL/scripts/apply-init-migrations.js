@@ -155,7 +155,10 @@ function main() {
   const runner = createPostgresCommandRunner(postgresEnv, options.mode || undefined);
 
   // A dry run must not create its own tracking table.
-  let catalog = collectCatalog(runner);
+  // Only objects that existed before this invocation are candidates for legacy
+  // baselining. Earlier migrations in an empty database can create some of a
+  // later migration's objects without having done its remaining work.
+  const catalog = collectCatalog(runner);
   if (!options.dryRun) ensureMigrationTable(runner);
   const recorded = options.dryRun && !catalog.tables.has(MIGRATION_TABLE)
     ? new Map()
@@ -228,7 +231,6 @@ function main() {
     if (!options.dryRun && appliedMode === 'executed') {
       // One database transaction: the migration and its receipt either both persist or neither does.
       runner.execSql('BEGIN;\n' + sql + '\n' + migrationReceiptSql(fileName, checksum, appliedMode) + '\nCOMMIT;');
-      catalog = collectCatalog(runner);
     } else if (!options.dryRun) {
       recordMigration(runner, fileName, checksum, appliedMode);
     }

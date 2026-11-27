@@ -15,6 +15,7 @@ function runScenario({
   failExecution = false,
   fileName = '01-example.sql',
   oldStaticCredential = false,
+  pendingFiles,
 } = {}) {
   const writes = [];
   const errors = [];
@@ -30,12 +31,15 @@ function runScenario({
     },
     execSql(text) {
       writes.push(text);
+      for (const match of text.matchAll(/CREATE TABLE (?:IF NOT EXISTS )?(\w+)/g)) {
+        tables.add(match[1]);
+      }
       if (failExecution && text.includes('BEGIN;')) throw new Error('simulated DDL failure');
     },
   };
   const fakeFs = {
-    readdirSync: () => [fileName],
-    readFileSync: () => sql,
+    readdirSync: () => pendingFiles ? Object.keys(pendingFiles) : [fileName],
+    readFileSync: (filename) => pendingFiles ? pendingFiles[path.basename(filename)] : sql,
   };
   const customRequire = (name) => {
     if (name === 'node:fs') return fakeFs;
@@ -127,6 +131,18 @@ test('fresh migration and receipt commit in one transaction', () => {
   assert.match(apply, /INSERT INTO init_schema_migrations/);
   assert.match(apply, /COMMIT;/);
   assert.equal(result.writes.filter((write) => write.includes("VALUES ('01-example.sql'")).length, 1);
+});
+
+test('later migrations execute when their objects did not exist at the start', () => {
+  const result = runScenario({
+    pendingFiles: {
+      '01-create.sql': 'CREATE TABLE example (id integer);',
+      '02-index.sql': 'CREATE TABLE IF NOT EXISTS example (id integer); CREATE INDEX example_id_idx ON example(id);',
+    },
+  });
+  assert.equal(result.failed, false);
+  assert.match(result.logs.join(' '), /apply 02-index\.sql: executed/);
+  assert.ok(result.writes.some((write) => write.includes('CREATE INDEX example_id_idx')));
 });
 
 test('failed migration never writes a standalone success receipt', () => {
