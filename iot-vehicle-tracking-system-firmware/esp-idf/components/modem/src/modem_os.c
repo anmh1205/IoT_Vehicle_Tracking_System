@@ -125,32 +125,45 @@ static void discard_partial_frame(void)
  * Header gần nhất chọn đích: HTTPREAD hoặc topic/payload MQTT. URC MQTT đến khi chờ
  * HTTPREAD vẫn đi vào bộ đệm command.
  */
-static void on_data(const uint8_t *buf, size_t n)
+static size_t append_bounded(void *destination, size_t capacity, size_t *used,
+                             const uint8_t *data, size_t len)
 {
-    modem_t *m = &g_modem;
-    if (m->http_raw) {
-        if (m->http_dst != NULL) {
-            size_t room = m->http_cap - m->http_len;
-            size_t k = (n < room) ? n : room;
-            memcpy(m->http_dst + m->http_len, buf, k);
-            m->http_len += k;
-        }
-        if (m->parser.raw_left == 0u) { m->http_raw = false; }
-        return;
+    size_t room = capacity - *used;
+    size_t copied = len < room ? len : room;
+    memcpy((uint8_t *)destination + *used, data, copied);
+    *used += copied;
+    return copied;
+}
+
+static void route_http_bytes(modem_t *modem, const uint8_t *data, size_t len)
+{
+    if (modem->http_dst != NULL) {
+        (void)append_bounded(modem->http_dst, modem->http_cap, &modem->http_len, data, len);
     }
-    if (m->rx.active && m->rx.phase == 1u) {
-        size_t room = sizeof m->rx.topic - 1u - m->rx.tlen;
-        size_t k = (n < room) ? n : room;
-        memcpy(m->rx.topic + m->rx.tlen, buf, k);
-        m->rx.tlen += k;
-        m->rx.topic[m->rx.tlen] = '\0';
-        m->rx.overflow |= (k < n);
-    } else if (m->rx.active && m->rx.phase == 2u) {
-        size_t room = sizeof m->rx.payload - m->rx.plen;
-        size_t k = (n < room) ? n : room;
-        memcpy(m->rx.payload + m->rx.plen, buf, k);
-        m->rx.plen += k;
-        m->rx.overflow |= (k < n);
+    if (modem->parser.raw_left == 0u) { modem->http_raw = false; }
+}
+
+static void append_rx_topic(modem_t *modem, const uint8_t *data, size_t len)
+{
+    size_t copied = append_bounded(modem->rx.topic, sizeof modem->rx.topic - 1u, &modem->rx.tlen, data, len);
+    modem->rx.topic[modem->rx.tlen] = '\0';
+    modem->rx.overflow |= copied < len;
+}
+
+static void append_rx_payload(modem_t *modem, const uint8_t *data, size_t len)
+{
+    size_t copied = append_bounded(modem->rx.payload, sizeof modem->rx.payload, &modem->rx.plen, data, len);
+    modem->rx.overflow |= copied < len;
+}
+
+static void on_data(const uint8_t *data, size_t len)
+{
+    if (g_modem.http_raw) {
+        route_http_bytes(&g_modem, data, len);
+    } else if (g_modem.rx.active && g_modem.rx.phase == 1u) {
+        append_rx_topic(&g_modem, data, len);
+    } else if (g_modem.rx.active && g_modem.rx.phase == 2u) {
+        append_rx_payload(&g_modem, data, len);
     }
 }
 
@@ -208,7 +221,7 @@ at_result_t modem_at_simple(const char *text, uint32_t timeout_ms)
     return modem_at(&c);
 }
 
-bool modem_tls_configure(unsigned index)
+static void sync_modem_clock(void)
 {
     char cmd[180];
     uint64_t unix_ms;
@@ -219,6 +232,11 @@ bool modem_tls_configure(unsigned index)
                  (unsigned)c.year % 100u, c.month, c.day, c.hour, c.min, c.sec);
         (void)modem_at_simple(cmd, 2000);
     }
+}
+
+static bool apply_ssl_settings(unsigned index)
+{
+    char cmd[180];
     static const struct { const char *key; unsigned value; } settings[] = {
         { "sslversion", 3 }, { "authmode", 1 }, { "ignorelocaltime", 0 },
         { "enableSNI", 1 }, { "negotiatetime", 30 },
@@ -227,10 +245,39 @@ bool modem_tls_configure(unsigned index)
         int n = snprintf(cmd, sizeof cmd, "AT+CSSLCFG=\"%s\",%u,%u", settings[i].key, index, settings[i].value);
         if (n <= 0 || (size_t)n >= sizeof cmd || modem_at_simple(cmd, 3000) != AT_RES_OK) { return false; }
     }
+    return true;
+}
+
+static bool set_ca_cert(unsigned index)
+{
+    char cmd[180];
     static const char ca[] = CONFIG_IVTS_MODEM_CA_CERT;
     if (ca[0] == '\0' || strpbrk(ca, "\"\\\r\n") != NULL) { return false; }
     int n = snprintf(cmd, sizeof cmd, "AT+CSSLCFG=\"cacert\",%u,\"%s\"", index, ca);
     return n > 0 && (size_t)n < sizeof cmd && modem_at_simple(cmd, 3000) == AT_RES_OK;
+}
+
+bool modem_tls_configure(unsigned index)
+{
+    sync_modem_clock();
+    return apply_ssl_settings(index) && set_ca_cert(index);
+}
+
+static void link_down(void)
+{
+    modem_mqtt_disconnect();
+    if (g_modem.lte.st != L_OFF) { modem_power_down(); }
+    modem_lte_reset(L_OFF);
+    modem_emit_link(IVTS_LINK_DOWN, 0);
+    modem_pm_hold(false);
+    modem_set_stopped(true);
+}
+
+static void link_up(void)
+{
+    if (g_modem.lte.st != L_OFF) { return; }
+    modem_set_stopped(false);
+    modem_lte_reset(L_POWER);
 }
 
 /**
@@ -244,17 +291,8 @@ static void handle_req(const modem_req_t *r)
     switch (r->op) {
     case REQ_LINK:
         g_modem.link_wanted = r->on;
-        if (!r->on) {
-            modem_mqtt_disconnect();
-            if (g_modem.lte.st != L_OFF) { modem_power_down(); }
-            modem_lte_reset(L_OFF);
-            modem_emit_link(IVTS_LINK_DOWN, 0);
-            modem_pm_hold(false);
-            modem_set_stopped(true);
-        } else if (g_modem.lte.st == L_OFF) {
-            modem_set_stopped(false);
-            modem_lte_reset(L_POWER);
-        }
+        if (r->on) { link_up(); }
+        else { link_down(); }
         break;
     case REQ_GNSS:
         g_modem.gnss_wanted = r->on;
@@ -294,9 +332,8 @@ static void modem_task(void *arg)
  * @brief Cấu hình UART và GPIO PWRKEY, tạo PM lock, queue yêu cầu và task "modem".
  * @return ESP_OK, hoặc lỗi của bước đầu tiên thất bại (ESP_ERR_NO_MEM nếu không tạo được queue/task).
  */
-esp_err_t modem_os_start(void)
+static esp_err_t modem_uart_open(const modem_cfg_t *c)
 {
-    const modem_cfg_t *c = &g_modem.cfg;
     uart_config_t uc = {
         .baud_rate = (int)c->baud,
         .data_bits = UART_DATA_8_BITS,
@@ -309,17 +346,42 @@ esp_err_t modem_os_start(void)
     ESP_RETURN_ON_ERROR(uart_param_config(c->uart_num, &uc), MODEM_TAG, "uart cfg");
     ESP_RETURN_ON_ERROR(uart_set_pin(c->uart_num, c->pin_tx, c->pin_rx, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE),
                         MODEM_TAG, "uart pin");
+    return ESP_OK;
+}
+
+static esp_err_t modem_power_gpio_init(const modem_cfg_t *c)
+{
     gpio_config_t io = { .pin_bit_mask = 1ULL << c->pin_pwrkey, .mode = GPIO_MODE_OUTPUT };
     ESP_RETURN_ON_ERROR(gpio_config(&io), MODEM_TAG, "pwrkey");
     gpio_set_level(c->pin_pwrkey, c->pwrkey_inverted ? 0 : 1);     /* Nhả PWRKEY. */
+    return ESP_OK;
+}
+
+static esp_err_t modem_pm_lock_create(void)
+{
 #if CONFIG_PM_ENABLE
     ESP_RETURN_ON_ERROR(esp_pm_lock_create(ESP_PM_NO_LIGHT_SLEEP, 0, "modem", &s_pm), MODEM_TAG, "pm lock");
 #endif
-    at_parser_init(&g_modem.parser);
-    at_engine_init(&g_modem.eng, (at_tx_t){ uart_tx, NULL });
+    return ESP_OK;
+}
+
+static esp_err_t modem_task_start(const modem_cfg_t *c)
+{
     g_modem_q = xQueueCreate(REQ_QUEUE_LEN, sizeof(modem_req_t));
     ESP_RETURN_ON_FALSE(g_modem_q != NULL, ESP_ERR_NO_MEM, MODEM_TAG, "queue");
     BaseType_t ok = xTaskCreate(modem_task, "modem", c->task_stack, NULL, c->task_prio, NULL);
     ESP_RETURN_ON_FALSE(ok == pdPASS, ESP_ERR_NO_MEM, MODEM_TAG, "task");
     return ESP_OK;
+}
+
+esp_err_t modem_os_start(void)
+{
+    const modem_cfg_t *cfg = &g_modem.cfg;
+    esp_err_t error = modem_uart_open(cfg);
+    if (error == ESP_OK) { error = modem_power_gpio_init(cfg); }
+    if (error == ESP_OK) { error = modem_pm_lock_create(); }
+    if (error != ESP_OK) { return error; }
+    at_parser_init(&g_modem.parser);
+    at_engine_init(&g_modem.eng, (at_tx_t){ uart_tx, NULL });
+    return modem_task_start(cfg);
 }

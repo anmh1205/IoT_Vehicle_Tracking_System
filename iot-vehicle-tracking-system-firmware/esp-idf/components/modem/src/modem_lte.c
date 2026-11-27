@@ -97,91 +97,131 @@ static bool reg_ok(const char *resp)
     return at_field_int(resp, 1, &stat) && (stat == 1 || stat == 5);
 }
 
-/**
- * @brief Thực hiện một bước của máy trạng thái nếu đến hạn thử lại.
- *
- * Không làm gì khi ở L_OFF (link đã tắt, xem modem_os.c) hoặc L_UP, hoặc khi chưa đến retry_at.
- */
+typedef enum {
+    STEP_IDLE, STEP_ADVANCE, STEP_FAIL, STEP_RETRY_LATER, STEP_RESTART, STEP_BROKER_UP,
+} step_action_t;
+
+typedef struct {
+    step_action_t action;
+    lte_state_t target;
+    uint32_t delay_ms;
+} step_result_t;
+
+static step_result_t advance_to(lte_state_t target)
+{
+    return (step_result_t){ .action = STEP_ADVANCE, .target = target };
+}
+
+static step_result_t step_power(void)
+{
+    if (modem_now() < g_modem.power_restart_at) { return (step_result_t){ .action = STEP_IDLE }; }
+    modem_pm_hold(true);
+    if (modem_at_simple("AT", 500) == AT_RES_OK) { return advance_to(L_SYNC); }
+    modem_power_pulse(500);
+    /* Wait for the module to finish starting before the next AT command. */
+    return (step_result_t){ .action = STEP_ADVANCE, .target = L_SYNC, .delay_ms = 12000u };
+}
+
+static step_result_t step_sync(const modem_lte_t *link)
+{
+    if (modem_at_simple("AT", 1000) == AT_RES_OK && modem_at_simple("ATE0", 1000) == AT_RES_OK) {
+        (void)modem_at_simple("AT+CMEE=2", 1000);
+        (void)modem_at_simple("AT+CTZU=1", 1000);
+        return advance_to(L_SIM);
+    }
+    return link->attempt >= 10u ? advance_to(L_POWER) : (step_result_t){ .action = STEP_FAIL };
+}
+
+static bool parse_cpin_ready(const char *response)
+{
+    if (!at_has_prefix(response, "+CPIN:")) { return false; }
+    const char *state = response + sizeof("+CPIN:") - 1u;
+    while (*state == ' ') { state++; }
+    return strcmp(state, "READY") == 0;
+}
+
+static step_result_t step_sim(void)
+{
+    at_cmd_t command = { .text = "AT+CPIN?", .capture = "+CPIN:", .timeout_ms = 5000 };
+    if (modem_at(&command) == AT_RES_OK && parse_cpin_ready(g_modem.eng.resp)) { return advance_to(L_REG); }
+    return (step_result_t){ .action = STEP_FAIL };
+}
+
+static step_result_t step_register(const modem_lte_t *link)
+{
+    at_cmd_t command = { .text = "AT+CEREG?", .capture = "+CEREG:", .timeout_ms = 3000 };
+    if (modem_at(&command) == AT_RES_OK && reg_ok(g_modem.eng.resp)) { return advance_to(L_PDP); }
+    if (modem_now() - link->st_since > REG_TIMEOUT_MS) {
+        return (step_result_t){ .action = STEP_RESTART };
+    }
+    return (step_result_t){ .action = STEP_RETRY_LATER, .delay_ms = 2000u };
+}
+
+static bool format_cgdcont(char *command, size_t capacity, const char *apn)
+{
+    int len = snprintf(command, capacity, "AT+CGDCONT=1,\"IP\",\"%s\"", apn);
+    return len > 0 && (size_t)len < capacity;
+}
+
+static step_result_t step_pdp(void)
+{
+    char command[96];
+    if (format_cgdcont(command, sizeof command, g_modem.cfg.apn) &&
+        modem_at_simple(command, 5000) == AT_RES_OK && modem_at_simple("AT+CGACT=1,1", 150000) == AT_RES_OK) {
+        modem_emit_link(IVTS_LINK_NET_UP, 0);
+        return advance_to(L_MQTT_START);
+    }
+    return (step_result_t){ .action = STEP_FAIL };
+}
+
+static step_result_t step_mqtt(const modem_lte_t *link)
+{
+    if (modem_mqtt_step(link->st)) {
+        if (link->st == L_MQTT_SUB) { return (step_result_t){ .action = STEP_BROKER_UP }; }
+        return advance_to((lte_state_t)(link->st + 1));
+    }
+    if (link->st == L_MQTT_CONN && link->attempt >= 3u) { return advance_to(L_MQTT_START); }
+    return (step_result_t){ .action = STEP_FAIL };
+}
+
+static step_result_t run_step(const modem_lte_t *link)
+{
+    switch (link->st) {
+    case L_POWER: return step_power();
+    case L_SYNC: return step_sync(link);
+    case L_SIM: return step_sim();
+    case L_REG: return step_register(link);
+    case L_PDP: return step_pdp();
+    case L_MQTT_START: case L_MQTT_ACQ: case L_MQTT_CONN: case L_MQTT_SUB:
+        return step_mqtt(link);
+    default: return (step_result_t){ .action = STEP_IDLE };
+    }
+}
+
+static void apply_step_result(modem_lte_t *link, step_result_t result)
+{
+    switch (result.action) {
+    case STEP_ADVANCE:
+        go(result.target);
+        if (result.delay_ms != 0u) { link->retry_at = modem_now() + result.delay_ms; }
+        break;
+    case STEP_FAIL: fail(); break;
+    case STEP_RETRY_LATER: link->retry_at = modem_now() + result.delay_ms; break;
+    case STEP_RESTART:
+        fail();
+        go(L_POWER);
+        break;
+    case STEP_BROKER_UP:
+        go(L_UP);
+        modem_emit_link(IVTS_LINK_BROKER_UP, 0);
+        break;
+    case STEP_IDLE: break;
+    }
+}
+
 void modem_lte_step(void)
 {
-    modem_t *m = &g_modem;
-    modem_lte_t *l = &m->lte;
-    if (l->st == L_OFF || l->st == L_UP || modem_now() < l->retry_at) { return; }
-
-    switch (l->st) {
-    case L_POWER:
-        if (modem_now() < m->power_restart_at) { return; }
-        modem_pm_hold(true);
-        if (modem_at_simple("AT", 500) == AT_RES_OK) {       /* Module đã chạy sẵn (ESP reset nhưng module còn nguồn). */
-            go(L_SYNC);
-            break;
-        }
-        modem_power_pulse(500);                              /* Xung PWRKEY bật nguồn 500 ms. */
-        go(L_SYNC);
-        l->retry_at = modem_now() + 12000;                   /* Chờ module khởi động xong rồi mới đồng bộ AT. */
-        break;
-    case L_SYNC:
-        if (modem_at_simple("AT", 1000) == AT_RES_OK && modem_at_simple("ATE0", 1000) == AT_RES_OK) {
-            (void)modem_at_simple("AT+CMEE=2", 1000);         /* Báo lỗi dạng chữ để log dễ đọc. */
-            (void)modem_at_simple("AT+CTZU=1", 1000);        /* Giờ mạng cho TLS khi chưa có giờ RTC. */
-            go(L_SIM);
-        } else if (l->attempt >= 10) {
-            go(L_POWER);
-        } else {
-            fail();
-        }
-        break;
-    case L_SIM: {
-        at_cmd_t c = { .text = "AT+CPIN?", .capture = "+CPIN:", .timeout_ms = 5000 };
-        if (modem_at(&c) == AT_RES_OK && at_has_prefix(m->eng.resp, "+CPIN:")) {
-            const char *state = m->eng.resp + sizeof("+CPIN:") - 1u;
-            while (*state == ' ') { state++; }
-            if (strcmp(state, "READY") == 0) {
-                go(L_REG);
-                break;
-            }
-        }
-        fail();
-        break;
-    }
-    case L_REG: {
-        at_cmd_t c = { .text = "AT+CEREG?", .capture = "+CEREG:", .timeout_ms = 3000 };
-        if (modem_at(&c) == AT_RES_OK && reg_ok(m->eng.resp)) {
-            go(L_PDP);
-        } else if (modem_now() - l->st_since > REG_TIMEOUT_MS) {
-            fail();
-            go(L_POWER);
-        } else {
-            l->retry_at = modem_now() + 2000;               /* Đang chờ đăng ký: hỏi lại sau 2 s, không tính là lỗi. */
-        }
-        break;
-    }
-    case L_PDP: {
-        char cmd[96];
-        int k = snprintf(cmd, sizeof cmd, "AT+CGDCONT=1,\"IP\",\"%s\"", m->cfg.apn);
-        if (k > 0 && (size_t)k < sizeof cmd && modem_at_simple(cmd, 5000) == AT_RES_OK && modem_at_simple("AT+CGACT=1,1", 150000) == AT_RES_OK) {
-            modem_emit_link(IVTS_LINK_NET_UP, 0);
-            go(L_MQTT_START);
-        } else {
-            fail();
-        }
-        break;
-    }
-    case L_MQTT_START: case L_MQTT_ACQ: case L_MQTT_CONN: case L_MQTT_SUB:
-        if (modem_mqtt_step(l->st)) {
-            if (l->st == L_MQTT_SUB) {
-                go(L_UP);
-                modem_emit_link(IVTS_LINK_BROKER_UP, 0);
-            } else {
-                go((lte_state_t)(l->st + 1));
-            }
-        } else if (l->st == L_MQTT_CONN && l->attempt >= 3) {
-            go(L_MQTT_START);                               /* Kết nối lỗi liên tiếp: làm lại từ khởi động dịch vụ MQTT. */
-        } else {
-            fail();
-        }
-        break;
-    default:
-        break;
-    }
+    modem_lte_t *link = &g_modem.lte;
+    if (link->st == L_OFF || link->st == L_UP || modem_now() < link->retry_at) { return; }
+    apply_step_result(link, run_step(link));
 }

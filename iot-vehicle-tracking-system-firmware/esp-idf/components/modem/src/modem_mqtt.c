@@ -58,58 +58,82 @@ static bool sub_commands(void)
  * @brief Thực hiện bước MQTT @p st của máy trạng thái kết nối.
  * @return true nếu bước thành công và máy trạng thái được phép sang bước kế.
  */
+static void mqtt_cleanup_stale_service(void)
+{
+    (void)modem_at_simple("AT+CMQTTDISC=0,60", 5000);
+    (void)modem_at_simple("AT+CMQTTREL=0", 3000);
+    (void)modem_at_simple("AT+CMQTTSTOP", 5000);
+}
+
+static bool mqtt_start_service(void)
+{
+    at_cmd_t c = { .text = "AT+CMQTTSTART", .final_prefix = "+CMQTTSTART:", .final_err_field = 1,
+                   .timeout_ms = 12000 };
+    at_result_t r = modem_at(&c);
+    /* Dịch vụ MQTT có thể còn chạy từ phiên trước (ESP reset nhưng module không), khi đó
+     * AT+CMQTTSTART trả lỗi. Giải phóng client và dừng dịch vụ để lần thử sau START lại từ
+     * đầu; không coi lỗi này là thành công vì không biết client nào còn đang giữ. */
+    if (r != AT_RES_OK) {
+        mqtt_cleanup_stale_service();
+    }
+    return r == AT_RES_OK;
+}
+
+static bool mqtt_acquire_client(bool tls)
+{
+    const modem_cfg_t *cfg = &g_modem.cfg;
+    char cmd[256];
+    if (tls && !modem_tls_configure(0)) { return false; }
+    if (!fmt_ok(snprintf(cmd, sizeof cmd, "AT+CMQTTACCQ=0,\"%s\",%u,4", cfg->client_id, tls ? 1u : 0u), sizeof cmd) ||
+        modem_at_simple(cmd, 5000) != AT_RES_OK) {
+        return false;
+    }
+    if (tls && modem_at_simple("AT+CMQTTSSLCFG=0,0", 3000) != AT_RES_OK) {
+        (void)modem_at_simple("AT+CMQTTREL=0", 3000);
+        return false;
+    }
+    return true;
+}
+
+static bool format_connect_cmd(char *cmd, size_t cap, const modem_cfg_t *cfg, bool tls)
+{
+    int k;
+    unsigned port = tls ? 8883u : cfg->mqtt_port;
+    if (cfg->mqtt_user[0] != '\0') {
+        k = snprintf(cmd, cap, "AT+CMQTTCONNECT=0,\"tcp://%s:%u\",%d,0,\"%s\",\"%s\"",
+                     cfg->mqtt_host, port, KEEPALIVE_S, cfg->mqtt_user, cfg->mqtt_pass);
+    } else {
+        k = snprintf(cmd, cap, "AT+CMQTTCONNECT=0,\"tcp://%s:%u\",%d,0",
+                     cfg->mqtt_host, port, KEEPALIVE_S);
+    }
+    return fmt_ok(k, cap);
+}
+
+static bool mqtt_connect(bool tls)
+{
+    char cmd[256];
+    /* clean_session = 0: broker giữ subscription và các command QoS 1 trong lúc thiết bị
+     * offline. */
+    if (!format_connect_cmd(cmd, sizeof cmd, &g_modem.cfg, tls)) { return false; }
+    at_cmd_t c = { .text = cmd, .final_prefix = "+CMQTTCONNECT:", .final_err_field = 2,
+                   .timeout_ms = 35000, .redact = g_modem.cfg.mqtt_user[0] != '\0' };
+    return modem_at(&c) == AT_RES_OK;
+}
+
+static bool mqtt_subscribe(void)
+{
+    return !g_modem.cfg.command_subscribe_enabled || sub_commands();
+}
+
 bool modem_mqtt_step(lte_state_t st)
 {
-    modem_t *m = &g_modem;
-    bool tls = m->cfg.mqtt_port == 8883u || strcmp(m->cfg.mqtt_host, "mqtt.thingdock.dev") == 0;
-    char cmd[256];
+    bool tls = g_modem.cfg.mqtt_port == 8883u || strcmp(g_modem.cfg.mqtt_host, "mqtt.thingdock.dev") == 0;
     switch (st) {
-    case L_MQTT_START: {
-        at_cmd_t c = { .text = "AT+CMQTTSTART", .final_prefix = "+CMQTTSTART:", .final_err_field = 1,
-                       .timeout_ms = 12000 };
-        at_result_t r = modem_at(&c);
-        /* Dịch vụ MQTT có thể còn chạy từ phiên trước (ESP reset nhưng module không), khi đó
-         * AT+CMQTTSTART trả lỗi. Giải phóng client và dừng dịch vụ để lần thử sau START lại từ
-         * đầu; không coi lỗi này là thành công vì không biết client nào còn đang giữ. */
-        if (r != AT_RES_OK) {
-            (void)modem_at_simple("AT+CMQTTDISC=0,60", 5000);
-            (void)modem_at_simple("AT+CMQTTREL=0", 3000);
-            (void)modem_at_simple("AT+CMQTTSTOP", 5000);
-        }
-        return r == AT_RES_OK;
-    }
-    case L_MQTT_ACQ:
-        if (tls && !modem_tls_configure(0)) { return false; }
-        if (!fmt_ok(snprintf(cmd, sizeof cmd, "AT+CMQTTACCQ=0,\"%s\",%u,4", m->cfg.client_id, tls ? 1u : 0u), sizeof cmd) ||
-            modem_at_simple(cmd, 5000) != AT_RES_OK) {
-            return false;
-        }
-        if (tls && modem_at_simple("AT+CMQTTSSLCFG=0,0", 3000) != AT_RES_OK) {
-            (void)modem_at_simple("AT+CMQTTREL=0", 3000);
-            return false;
-        }
-        return true;
-    case L_MQTT_CONN: {
-        /* clean_session = 0: broker giữ subscription và các command QoS 1 trong lúc thiết bị
-         * offline. */
-        int k;
-        unsigned port = tls ? 8883u : m->cfg.mqtt_port;
-        if (m->cfg.mqtt_user[0] != '\0') {
-            k = snprintf(cmd, sizeof cmd, "AT+CMQTTCONNECT=0,\"tcp://%s:%u\",%d,0,\"%s\",\"%s\"",
-                         m->cfg.mqtt_host, port, KEEPALIVE_S, m->cfg.mqtt_user, m->cfg.mqtt_pass);
-        } else {
-            k = snprintf(cmd, sizeof cmd, "AT+CMQTTCONNECT=0,\"tcp://%s:%u\",%d,0",
-                         m->cfg.mqtt_host, port, KEEPALIVE_S);
-        }
-        if (!fmt_ok(k, sizeof cmd)) { return false; }    /* Lệnh bị cắt sẽ mang credential sai: không gửi. */
-        at_cmd_t c = { .text = cmd, .final_prefix = "+CMQTTCONNECT:", .final_err_field = 2,
-                       .timeout_ms = 35000, .redact = m->cfg.mqtt_user[0] != '\0' };
-        return modem_at(&c) == AT_RES_OK;
-    }
-    case L_MQTT_SUB:
-        return !m->cfg.command_subscribe_enabled || sub_commands();
-    default:
-        return false;
+    case L_MQTT_START: return mqtt_start_service();
+    case L_MQTT_ACQ: return mqtt_acquire_client(tls);
+    case L_MQTT_CONN: return mqtt_connect(tls);
+    case L_MQTT_SUB: return mqtt_subscribe();
+    default: return false;
     }
 }
 
@@ -123,6 +147,35 @@ static bool input(const char *what, const char *data, size_t len)
     snprintf(cmd, sizeof cmd, "AT+CMQTT%s=0,%u", what, (unsigned)len);
     at_cmd_t c = { .text = cmd, .data = (const uint8_t *)data, .data_len = len, .timeout_ms = 10000 };
     return modem_at(&c) == AT_RES_OK;
+}
+
+static bool send_topic(const char *topic)
+{
+    return input("TOPIC", topic, strlen(topic));
+}
+
+static bool send_payload(const char *payload, size_t len)
+{
+    return input("PAYLOAD", payload, len);
+}
+
+static bool send_publish(int16_t *err)
+{
+    char cmd[40];
+    snprintf(cmd, sizeof cmd, "AT+CMQTTPUB=0,1,%d", PUB_TIMEOUT_S);
+    at_cmd_t c = { .text = cmd, .final_prefix = "+CMQTTPUB:", .final_err_field = 2,
+                   .timeout_ms = (PUB_TIMEOUT_S + 5) * 1000u };
+    at_result_t r = modem_at(&c);
+    int32_t e = 0;
+    bool ok = (r == AT_RES_OK);
+    if (ok) {
+        *err = 0;
+    } else if (r == AT_RES_TIMEOUT) {
+        *err = -1;                                   /* Không có kết quả trong PUB_TIMEOUT_S + 5 giây. */
+    } else if (at_field_int(g_modem.eng.resp, 1, &e)) {
+        *err = (int16_t)e;                           /* Mã <err> theo bảng lỗi MQTT của module. */
+    }
+    return ok;
 }
 
 /**
@@ -140,24 +193,9 @@ void modem_mqtt_publish_pending(void)
     uint32_t id;
     if (!modem_tx_take(&t, &p, &n, &id)) { return; }
     const char *topic = g_modem.topic[t];
-    bool ok = input("TOPIC", topic, strlen(topic)) && input("PAYLOAD", p, n);
+    bool ok = send_topic(topic) && send_payload(p, n);
     int16_t err = -2;                                   /* Lỗi trước khi PUB (nhập topic hoặc payload). */
-    if (ok) {
-        char cmd[40];
-        snprintf(cmd, sizeof cmd, "AT+CMQTTPUB=0,1,%d", PUB_TIMEOUT_S);
-        at_cmd_t c = { .text = cmd, .final_prefix = "+CMQTTPUB:", .final_err_field = 2,
-                       .timeout_ms = (PUB_TIMEOUT_S + 5) * 1000u };
-        at_result_t r = modem_at(&c);
-        int32_t e = 0;
-        ok = (r == AT_RES_OK);
-        if (ok) {
-            err = 0;
-        } else if (r == AT_RES_TIMEOUT) {
-            err = -1;                                   /* Không có kết quả trong PUB_TIMEOUT_S + 5 giây. */
-        } else if (at_field_int(g_modem.eng.resp, 1, &e)) {
-            err = (int16_t)e;                           /* Mã <err> theo bảng lỗi MQTT của module. */
-        }
-    }
+    if (ok) { ok = send_publish(&err); }
     modem_tx_done(ok, err);
     /* Mã 11 là "no connection" trong bảng lỗi MQTT: broker đã mất. */
     if (!ok && err == 11) { modem_lte_conn_lost(); }
