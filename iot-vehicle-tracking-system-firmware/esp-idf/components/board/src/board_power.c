@@ -71,55 +71,73 @@ bool board_motion_deep_wake_capable(void)
     return esp_sleep_is_valid_wakeup_gpio((gpio_num_t)BOARD_PIN_IMU_INT1);
 }
 
+static void arm_timer_wake(uint32_t seconds)
+{
+    (void)esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+    (void)esp_sleep_enable_timer_wakeup((uint64_t)seconds * 1000000u);
+}
+
+static bool imu_already_pending(bool is_imu_armed)
+{
+    if (!is_imu_armed || board_imu_int_level() != 1) { return false; }
+    /* Giữ ngắt đã chốt đến khi task board đọc OUTS1. */
+    board_os_notify_imu();
+    return true;
+}
+
+static void enter_deep_sleep(uint32_t seconds, bool arm_imu)
+{
+    if (arm_imu && board_motion_deep_wake_capable()) {
+        (void)esp_sleep_enable_ext1_wakeup_io(1ULL << BOARD_PIN_IMU_INT1, ESP_EXT1_WAKEUP_ANY_HIGH);
+    } else if (arm_imu) {
+        ESP_LOGW(BOARD_TAG, "INT IMU gpio%d không phải RTC GPIO: deep sleep chỉ thức theo timer",
+                 BOARD_PIN_IMU_INT1);
+    }
+    ESP_LOGI(BOARD_TAG, "deep sleep %lus", (unsigned long)seconds);
+    esp_deep_sleep_start();
+}
+
+static esp_err_t arm_imu_level_wake(void)
+{
+    const gpio_num_t imu_gpio = (gpio_num_t)BOARD_PIN_IMU_INT1;
+    /* Chuyển chân sang wake theo mức mà không phát ISR lặp khi INT1 còn chốt. */
+    (void)gpio_intr_disable(imu_gpio);
+    esp_err_t error = gpio_wakeup_enable(imu_gpio, GPIO_INTR_HIGH_LEVEL);
+    return error == ESP_OK ? esp_sleep_enable_gpio_wakeup() : error;
+}
+
+static void restore_imu_edge_irq(void)
+{
+    const gpio_num_t imu_gpio = (gpio_num_t)BOARD_PIN_IMU_INT1;
+    (void)gpio_wakeup_disable(imu_gpio);
+    (void)gpio_set_intr_type(imu_gpio, GPIO_INTR_POSEDGE);
+    (void)gpio_intr_enable(imu_gpio);
+}
+
+static board_wake_t enter_light_sleep(bool arm_imu)
+{
+    esp_err_t error = arm_imu ? arm_imu_level_wake() : ESP_OK;
+    if (error == ESP_OK) { error = esp_light_sleep_start(); }
+    if (arm_imu) { restore_imu_edge_irq(); }
+    if (error != ESP_OK) {
+        if (imu_already_pending(arm_imu)) { return BOARD_WAKE_IMU; }
+        ESP_LOGW(BOARD_TAG, "light sleep từ chối: %s", esp_err_to_name(error));
+        return BOARD_WAKE_OTHER;
+    }
+    board_wake_t wake = map_causes(esp_sleep_get_wakeup_causes());
+    if (wake == BOARD_WAKE_IMU) {
+        board_os_notify_imu();                     /* Task board đọc OUTS1 và phát sự kiện. */
+    }
+    return wake;
+}
+
 board_wake_t board_sleep(const board_sleep_req_t *req)
 {
     if (req == NULL) { return BOARD_WAKE_OTHER; }
-    (void)esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
-    (void)esp_sleep_enable_timer_wakeup((uint64_t)req->seconds * 1000000u);
+    arm_timer_wake(req->seconds);
 
-    bool imu = req->arm_imu && board_imu_ok();
-    if (imu && board_imu_int_level() == 1) {
-        /* Giữ ngắt đã chốt đến khi task board đọc OUTS1. */
-        board_os_notify_imu();
-        return BOARD_WAKE_IMU;
-    }
-
-    if (req->deep) {
-        if (imu && board_motion_deep_wake_capable()) {
-            (void)esp_sleep_enable_ext1_wakeup_io(1ULL << BOARD_PIN_IMU_INT1, ESP_EXT1_WAKEUP_ANY_HIGH);
-        } else if (imu) {
-            ESP_LOGW(BOARD_TAG, "INT IMU gpio%d không phải RTC GPIO: deep sleep chỉ thức theo timer",
-                     BOARD_PIN_IMU_INT1);
-        }
-        ESP_LOGI(BOARD_TAG, "deep sleep %lus", (unsigned long)req->seconds);
-        esp_deep_sleep_start();                     /* Không trả về; CPU reset khi thức. */
-    }
-
-    const gpio_num_t imu_gpio = (gpio_num_t)BOARD_PIN_IMU_INT1;
-    esp_err_t e = ESP_OK;
-    if (imu) {
-        /* Chuyển chân sang wake theo mức mà không phát ISR lặp khi INT1 còn chốt. */
-        (void)gpio_intr_disable(imu_gpio);
-        e = gpio_wakeup_enable(imu_gpio, GPIO_INTR_HIGH_LEVEL);
-        if (e == ESP_OK) { e = esp_sleep_enable_gpio_wakeup(); }
-    }
-    if (e == ESP_OK) { e = esp_light_sleep_start(); }
-    if (imu) {
-        (void)gpio_wakeup_disable(imu_gpio);
-        (void)gpio_set_intr_type(imu_gpio, GPIO_INTR_POSEDGE);
-        (void)gpio_intr_enable(imu_gpio);
-    }
-    if (e != ESP_OK) {
-        if (imu && board_imu_int_level() == 1) {
-            board_os_notify_imu();
-            return BOARD_WAKE_IMU;
-        }
-        ESP_LOGW(BOARD_TAG, "light sleep từ chối: %s", esp_err_to_name(e));
-        return BOARD_WAKE_OTHER;
-    }
-    board_wake_t w = map_causes(esp_sleep_get_wakeup_causes());
-    if (w == BOARD_WAKE_IMU) {
-        board_os_notify_imu();                      /* Task "board" sẽ đọc OUTS1 và phát IVTS_EV_MOTION_IRQ. */
-    }
-    return w;
+    bool arm_imu = req->arm_imu && board_imu_ok();
+    if (imu_already_pending(arm_imu)) { return BOARD_WAKE_IMU; }
+    if (req->deep) { enter_deep_sleep(req->seconds, arm_imu); }
+    return enter_light_sleep(arm_imu);
 }

@@ -49,6 +49,12 @@ esp_err_t board_adc_init(void)
     return ESP_OK;
 }
 
+static uint16_t power_adc_scale_mv(uint64_t pin_mv, uint32_t divider, uint32_t gain_ppm)
+{
+    uint64_t voltage_mv = pin_mv * divider * gain_ppm / 1000000u;
+    return voltage_mv > UINT16_MAX ? UINT16_MAX : (uint16_t)voltage_mv;
+}
+
 static esp_err_t read_mv(const chan_t *c, uint16_t *out)
 {
     int sum = 0;
@@ -59,8 +65,7 @@ static esp_err_t read_mv(const chan_t *c, uint16_t *out)
         sum += mv;
     }
     uint64_t pin_mv = (uint64_t)(sum / SAMPLES);
-    uint64_t v = pin_mv * DIVIDER * c->gain_ppm / 1000000u;
-    *out = (v > UINT16_MAX) ? UINT16_MAX : (uint16_t)v;
+    *out = power_adc_scale_mv(pin_mv, DIVIDER, c->gain_ppm);
     return ESP_OK;
 }
 

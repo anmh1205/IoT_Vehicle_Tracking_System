@@ -18,6 +18,7 @@
 
 #include "board_priv.h"
 #include <math.h>
+#include <string.h>
 #include <stdlib.h>
 #include "driver/gpio.h"
 #include "esp_check.h"
@@ -72,28 +73,43 @@ static esp_err_t read_axes(int16_t a[3])
     return ESP_OK;
 }
 
+static int16_t s_previous_axes[3];
+static uint64_t s_last_sample_ms;
+
+static uint32_t lis3dsh_delta_mmps2(const int16_t previous[3], const int16_t current[3], uint64_t age_ms)
+{
+    float squares = 0.0f;
+    for (size_t i = 0; i < 3u; i++) {
+        float delta = (float)current[i] - (float)previous[i];
+        squares += delta * delta;
+    }
+    /* ±2g: 0,06 mg/LSB. Bỏ nhiễu dưới 20 mg. */
+    float delta_mg = sqrtf(squares) * 0.06f;
+    return age_ms <= 20000u && delta_mg > 20.0f ? (uint32_t)(delta_mg * 9.80665f + 0.5f) : 0u;
+}
+
 /* Chỉ task board gọi. Đo độ lớn của vector hiệu giữa hai mẫu để loại trọng lực tĩnh. */
 uint32_t board_imu_sample_delta(uint64_t now_ms)
 {
-    static int16_t previous[3];
-    static uint64_t last_ms;
     int16_t axes[3];
     if (!board_imu_ok() || read_axes(axes) != ESP_OK) {
-        last_ms = 0;
+        s_last_sample_ms = 0;
         return 0;
     }
-    uint64_t age = now_ms - last_ms;
-    float squares = 0.0f;
-    for (size_t i = 0; i < 3u; i++) {
-        float d = (float)axes[i] - (float)previous[i];
-        squares += d * d;
-        previous[i] = axes[i];
+    uint32_t delta_mmps2 = s_last_sample_ms != 0u
+        ? lis3dsh_delta_mmps2(s_previous_axes, axes, now_ms - s_last_sample_ms) : 0u;
+    memcpy(s_previous_axes, axes, sizeof s_previous_axes);
+    s_last_sample_ms = now_ms;
+    return delta_mmps2;
+}
+
+static unsigned lis3dsh_gravity_axis(const int16_t axes[3])
+{
+    unsigned gravity_axis = 0;
+    for (unsigned i = 1; i < 3u; i++) {
+        if (abs(axes[i]) > abs(axes[gravity_axis])) { gravity_axis = i; }
     }
-    bool had_baseline = last_ms != 0u && age <= 20000u;
-    last_ms = now_ms;
-    /* ±2g: 0,06 mg/LSB. Bỏ nhiễu dưới 20 mg. */
-    float delta_mg = sqrtf(squares) * 0.06f;
-    return had_baseline && delta_mg > 20.0f ? (uint32_t)(delta_mg * 9.80665f + 0.5f) : 0u;
+    return gravity_axis;
 }
 
 /**
@@ -109,20 +125,13 @@ static uint8_t mask_without_gravity(void)
 {
     int16_t a[3];
     if (read_axes(a) != ESP_OK) { return MASK_X | MASK_Y; }
-    int g = 0;
-    for (int i = 1; i < 3; i++) {
-        if (abs(a[i]) > abs(a[g])) { g = i; }
-    }
+    unsigned gravity_axis = lis3dsh_gravity_axis(a);
     static const uint8_t keep[3] = { MASK_Y | MASK_Z, MASK_X | MASK_Z, MASK_X | MASK_Y };
-    ESP_LOGI(BOARD_TAG, "imu raw x=%d y=%d z=%d -> trục trọng lực %d", a[0], a[1], a[2], g);
-    return keep[g];
+    ESP_LOGI(BOARD_TAG, "imu raw x=%d y=%d z=%d -> trục trọng lực %u", a[0], a[1], a[2], gravity_axis);
+    return keep[gravity_axis];
 }
 
-/**
- * @brief Dò IMU, cấu hình SM1 và đăng ký ISR cho chân INT1.
- * @param threshold Giá trị ghi vào THRS1 (đơn vị theo thang ±2 g của LIS3DSH).
- */
-esp_err_t board_imu_init(uint8_t threshold)
+static esp_err_t lis3dsh_probe(void)
 {
     uint16_t addr = board_i2c_probe(LIS_ADDR_A) ? LIS_ADDR_A
                   : board_i2c_probe(LIS_ADDR_B) ? LIS_ADDR_B : 0;
@@ -133,13 +142,22 @@ esp_err_t board_imu_init(uint8_t threshold)
     ESP_RETURN_ON_ERROR(board_i2c_read(BOARD_DEV_IMU, LIS_WHO_AM_I, &id, 1), BOARD_TAG, "who_am_i");
     ESP_RETURN_ON_FALSE(id == LIS_ID, ESP_ERR_NOT_SUPPORTED, BOARD_TAG, "WHO_AM_I=0x%02x (cần 0x3F)", id);
 
+    return ESP_OK;
+}
+
+static esp_err_t lis3dsh_configure_sampling(void)
+{
     ESP_RETURN_ON_ERROR(wr(LIS_CTRL1, 0x00), BOARD_TAG, "sm1 off");        /* Tắt SM1 trong lúc ghi chương trình. */
     ESP_RETURN_ON_ERROR(wr(LIS_CTRL4, 0x4F), BOARD_TAG, "ctrl4");          /* ODR 25 Hz, BDU, XYZ. */
     ESP_RETURN_ON_ERROR(wr(LIS_CTRL5, 0x00), BOARD_TAG, "ctrl5");          /* Thang đo ±2 g. */
     ESP_RETURN_ON_ERROR(wr(LIS_CTRL6, 0x10), BOARD_TAG, "ctrl6");          /* Burst I2C tự tăng địa chỉ. */
     vTaskDelay(pdMS_TO_TICKS(100));                                         /* Chờ vài mẫu đầu ổn định trước khi đọc trọng lực. */
 
-    uint8_t mask = mask_without_gravity();
+    return ESP_OK;
+}
+
+static esp_err_t lis3dsh_program_sm1(uint8_t threshold, uint8_t mask)
+{
     ESP_RETURN_ON_ERROR(wr(LIS_THRS1_1, threshold), BOARD_TAG, "thrs1");
     ESP_RETURN_ON_ERROR(wr(LIS_MASK1_B, mask), BOARD_TAG, "mask_b");
     ESP_RETURN_ON_ERROR(wr(LIS_MASK1_A, mask), BOARD_TAG, "mask_a");
@@ -148,6 +166,11 @@ esp_err_t board_imu_init(uint8_t threshold)
     ESP_RETURN_ON_ERROR(wr(LIS_SETT1, 0x01), BOARD_TAG, "sett1");          /* SITR: lệnh CONT được phép đổi luồng. */
     ESP_RETURN_ON_ERROR(wr(LIS_CTRL3, 0x48), BOARD_TAG, "ctrl3");          /* IEA=1 tích cực mức cao, INT1_EN=1, IEL=0 ngắt chốt (giữ đến khi đọc OUTS1). */
 
+    return ESP_OK;
+}
+
+static esp_err_t install_int1_isr(void)
+{
     gpio_config_t io = {
         .pin_bit_mask = 1ULL << BOARD_PIN_IMU_INT1,
         .mode = GPIO_MODE_INPUT,
@@ -158,6 +181,17 @@ esp_err_t board_imu_init(uint8_t threshold)
     esp_err_t e = gpio_install_isr_service(0);
     ESP_RETURN_ON_FALSE(e == ESP_OK || e == ESP_ERR_INVALID_STATE, e, BOARD_TAG, "isr service");
     ESP_RETURN_ON_ERROR(gpio_isr_handler_add(BOARD_PIN_IMU_INT1, imu_isr, NULL), BOARD_TAG, "isr add");
+
+    return ESP_OK;
+}
+
+esp_err_t board_imu_init(uint8_t threshold)
+{
+    esp_err_t error = lis3dsh_probe();
+    if (error == ESP_OK) { error = lis3dsh_configure_sampling(); }
+    if (error == ESP_OK) { error = lis3dsh_program_sm1(threshold, mask_without_gravity()); }
+    if (error == ESP_OK) { error = install_int1_isr(); }
+    if (error != ESP_OK) { return error; }
 
     ESP_RETURN_ON_ERROR(wr(LIS_CTRL1, 0x01), BOARD_TAG, "sm1 on");         /* Bật SM1 sau cùng, khi mọi cấu hình đã xong. */
     uint8_t outs;

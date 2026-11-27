@@ -74,28 +74,39 @@ static void emit(const ivts_event_t *ev)
     (void)ivts_sink_emit(&s_cfg.sink, ev);   /* Queue app đầy: app đã đếm event bị bỏ, board không gửi lại. */
 }
 
+static void handle_imu_irq(uint64_t now_ms)
+{
+    uint8_t outs = 0;
+    (void)board_imu_clear(&outs);
+    ivts_event_t event = { .type = IVTS_EV_MOTION_IRQ, .ts_ms = now_ms };
+    event.u.motion_irq.pin_level = (uint8_t)board_imu_int_level();
+    event.u.motion_irq.imu_delta_mmps2 = board_imu_sample_delta(now_ms);
+    emit(&event);
+}
+
+static void sample_power(uint64_t now_ms)
+{
+    uint16_t vehicle_mv = 0;
+    uint16_t device_mv = 0;
+    if (board_power_read(&vehicle_mv, &device_mv) != IVTS_OK) { return; }
+
+    ivts_event_t event = { .type = IVTS_EV_POWER_SAMPLE, .ts_ms = now_ms };
+    event.u.power.vehicle_mv = vehicle_mv;
+    event.u.power.device_mv = device_mv;
+    event.u.power.imu_delta_mmps2 = board_imu_sample_delta(now_ms);
+    emit(&event);
+}
+
 static void board_task(void *arg)
 {
     (void)arg;
     for (;;) {
-        uint32_t n = ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(s_cfg.power_sample_ms));
-        ivts_event_t ev = { .ts_ms = board_uptime_ms() };
-        if (n > 0u && board_imu_ok()) {
-            uint8_t outs = 0;
-            (void)board_imu_clear(&outs);
-            ev.type = IVTS_EV_MOTION_IRQ;
-            ev.u.motion_irq.pin_level = (uint8_t)board_imu_int_level();
-            ev.u.motion_irq.imu_delta_mmps2 = board_imu_sample_delta(ev.ts_ms);
-            emit(&ev);
-            continue;
-        }
-        uint16_t veh = 0, dev = 0;
-        if (board_power_read(&veh, &dev) == IVTS_OK) {
-            ev.type = IVTS_EV_POWER_SAMPLE;
-            ev.u.power.vehicle_mv = veh;
-            ev.u.power.device_mv = dev;
-            ev.u.power.imu_delta_mmps2 = board_imu_sample_delta(ev.ts_ms);
-            emit(&ev);
+        uint32_t notifications = ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(s_cfg.power_sample_ms));
+        uint64_t now_ms = board_uptime_ms();
+        if (notifications > 0u && board_imu_ok()) {
+            handle_imu_irq(now_ms);
+        } else {
+            sample_power(now_ms);
         }
     }
 }
