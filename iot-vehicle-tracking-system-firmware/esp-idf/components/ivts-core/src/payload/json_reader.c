@@ -44,7 +44,7 @@ static void value_done(jp_t *p)
     p->want = (p->cur < 0) ? W_NOTHING : W_COMMA_OR_CLOSE;
 }
 
-static int parse_string(jp_t *p)
+static ivts_err_t parse_string(jp_t *p)
 {
     size_t start = ++p->pos;                     /* bỏ dấu " mở */
     for (; p->pos < p->len; p->pos++) {
@@ -98,7 +98,7 @@ static bool valid_number(const char *p, const char *end)
     return p == end;
 }
 
-static int parse_prim(jp_t *p)
+static ivts_err_t parse_prim(jp_t *p)
 {
     size_t start = p->pos;
     for (; p->pos < p->len; p->pos++) {
@@ -116,77 +116,108 @@ static int parse_prim(jp_t *p)
     return alloc_tok(p, IVTS_JT_PRIM, start, start + n) < 0 ? IVTS_ERR_FULL : IVTS_OK;
 }
 
-int ivts_json_parse(const char *js, size_t len, ivts_jtok_t *t, size_t ntok, uint8_t max_depth)
+static void count_array_item(jp_t *parser)
 {
-    if (js == NULL || t == NULL || ntok == 0u || len > IVTS_JSON_MAX_LEN) {
+    if (parser->cur >= 0 && parser->t[parser->cur].type == IVTS_JT_ARR) {
+        parser->t[parser->cur].size++;
+    }
+}
+
+static ivts_err_t on_open(jp_t *parser, char character)
+{
+    if (!want_value(parser) || parser->depth >= parser->max_depth) { return IVTS_ERR_INVALID_ARG; }
+    count_array_item(parser);
+
+    bool is_object = character == '{';
+    int token = alloc_tok(parser, is_object ? IVTS_JT_OBJ : IVTS_JT_ARR, parser->pos, 0);
+    if (token < 0) { return IVTS_ERR_FULL; }
+
+    parser->depth++;
+    parser->cur = token;
+    parser->want = is_object ? W_KEY_OR_CLOSE : W_VALUE_OR_CLOSE;
+    return IVTS_OK;
+}
+
+static ivts_err_t on_close(jp_t *parser, char character)
+{
+    if (parser->cur < 0) { return IVTS_ERR_INVALID_ARG; }
+    ivts_jtok_t *token = &parser->t[parser->cur];
+    bool is_object = token->type == IVTS_JT_OBJ;
+    if ((character == '}') != is_object) { return IVTS_ERR_INVALID_ARG; }
+    want_t empty_container = is_object ? W_KEY_OR_CLOSE : W_VALUE_OR_CLOSE;
+    if (parser->want != empty_container && parser->want != W_COMMA_OR_CLOSE) { return IVTS_ERR_INVALID_ARG; }
+
+    token->end = (uint16_t)(parser->pos + 1u);
+    parser->depth--;
+    parser->cur = token->parent;
+    value_done(parser);
+    return IVTS_OK;
+}
+
+static ivts_err_t expect_colon(jp_t *parser)
+{
+    size_t colon = parser->pos + 1u;
+    while (colon < parser->len && is_ws(parser->js[colon])) { colon++; }
+    if (colon >= parser->len || parser->js[colon] != ':') { return IVTS_ERR_INVALID_ARG; }
+    parser->pos = colon;
+    parser->want = W_VALUE;
+    return IVTS_OK;
+}
+
+static ivts_err_t on_string(jp_t *parser)
+{
+    bool is_key = parser->want == W_KEY || parser->want == W_KEY_OR_CLOSE;
+    if (!is_key && !want_value(parser)) { return IVTS_ERR_INVALID_ARG; }
+    ivts_err_t error = parse_string(parser);
+    if (error != IVTS_OK) { return error; }
+    if (is_key) {
+        parser->t[parser->cur].size++; /* Objects count their key-value pairs. */
+        return expect_colon(parser);
+    }
+    count_array_item(parser);
+    value_done(parser);
+    return IVTS_OK;
+}
+
+static ivts_err_t on_comma(jp_t *parser)
+{
+    if (parser->want != W_COMMA_OR_CLOSE) { return IVTS_ERR_INVALID_ARG; }
+    parser->want = parser->t[parser->cur].type == IVTS_JT_OBJ ? W_KEY : W_VALUE;
+    return IVTS_OK;
+}
+
+static ivts_err_t on_primitive(jp_t *parser)
+{
+    if (!want_value(parser)) { return IVTS_ERR_INVALID_ARG; }
+    ivts_err_t error = parse_prim(parser);
+    if (error != IVTS_OK) { return error; }
+    count_array_item(parser);
+    value_done(parser);
+    return IVTS_OK;
+}
+
+int ivts_json_parse(const char *js, size_t len, ivts_jtok_t *tokens, size_t ntok, uint8_t max_depth)
+{
+    if (js == NULL || tokens == NULL || ntok == 0u || len > IVTS_JSON_MAX_LEN) {
         return -IVTS_ERR_INVALID_ARG;
     }
-    jp_t p = { js, len, 0, t, ntok, 0, -1, 0, max_depth, W_VALUE };
+    jp_t parser = { js, len, 0, tokens, ntok, 0, -1, 0, max_depth, W_VALUE };
+    for (; parser.pos < len; parser.pos++) {
+        char character = js[parser.pos];
+        if (is_ws(character)) { continue; }
+        if (parser.want == W_NOTHING) { return -IVTS_ERR_INVALID_ARG; }
 
-    for (; p.pos < len; p.pos++) {
-        char c = js[p.pos];
-        if (is_ws(c)) { continue; }
-        if (p.want == W_NOTHING) { return -IVTS_ERR_INVALID_ARG; }      /* rác sau gốc */
-
-        switch (c) {
-        case '{': case '[': {
-            if (!want_value(&p)) { return -IVTS_ERR_INVALID_ARG; }
-            if (p.depth >= p.max_depth) { return -IVTS_ERR_INVALID_ARG; }
-            if (p.cur >= 0 && t[p.cur].type == IVTS_JT_ARR) { p.t[p.cur].size++; }
-            int i = alloc_tok(&p, c == '{' ? IVTS_JT_OBJ : IVTS_JT_ARR, p.pos, 0);
-            if (i < 0) { return -IVTS_ERR_FULL; }
-            p.depth++;
-            p.cur = i;
-            p.want = (c == '{') ? W_KEY_OR_CLOSE : W_VALUE_OR_CLOSE;
-            break;
+        ivts_err_t error;
+        switch (character) {
+        case '{': case '[': error = on_open(&parser, character); break;
+        case '}': case ']': error = on_close(&parser, character); break;
+        case '"': error = on_string(&parser); break;
+        case ',': error = on_comma(&parser); break;
+        default: error = on_primitive(&parser); break;
         }
-        case '}': case ']': {
-            if (p.cur < 0) { return -IVTS_ERR_INVALID_ARG; }
-            ivts_jtok_t *k = &t[p.cur];
-            bool obj = (k->type == IVTS_JT_OBJ);
-            if ((c == '}') != obj) { return -IVTS_ERR_INVALID_ARG; }
-            want_t ok_open = obj ? W_KEY_OR_CLOSE : W_VALUE_OR_CLOSE;
-            if (p.want != ok_open && p.want != W_COMMA_OR_CLOSE) { return -IVTS_ERR_INVALID_ARG; }
-            k->end = (uint16_t)(p.pos + 1u);
-            p.depth--;
-            p.cur = k->parent;
-            value_done(&p);
-            break;
-        }
-        case '"': {
-            bool is_key = (p.want == W_KEY || p.want == W_KEY_OR_CLOSE);
-            if (!is_key && !want_value(&p)) { return -IVTS_ERR_INVALID_ARG; }
-            int r = parse_string(&p);
-            if (r != IVTS_OK) { return -r; }
-            if (is_key) {
-                p.t[p.cur].size++;                     /* object đếm theo cặp: đếm ở key */
-                size_t q = p.pos + 1u;
-                while (q < len && is_ws(js[q])) { q++; }
-                if (q >= len || js[q] != ':') { return -IVTS_ERR_INVALID_ARG; }
-                p.pos = q;
-                p.want = W_VALUE;
-            } else {
-                if (p.cur >= 0 && t[p.cur].type == IVTS_JT_ARR) { p.t[p.cur].size++; }
-                value_done(&p);
-            }
-            break;
-        }
-        case ',':
-            if (p.want != W_COMMA_OR_CLOSE) { return -IVTS_ERR_INVALID_ARG; }
-            p.want = (t[p.cur].type == IVTS_JT_OBJ) ? W_KEY : W_VALUE;
-            break;
-        default: {
-            if (!want_value(&p)) { return -IVTS_ERR_INVALID_ARG; }
-            int r = parse_prim(&p);
-            if (r != IVTS_OK) { return -r; }
-            if (p.cur >= 0 && t[p.cur].type == IVTS_JT_ARR) { p.t[p.cur].size++; }
-            value_done(&p);
-            break;
-        }
-        }
+        if (error != IVTS_OK) { return -(int)error; }
     }
-    if (p.want != W_NOTHING) { return -IVTS_ERR_INVALID_ARG; }          /* rỗng / chưa đóng hết */
-    return p.n;
+    return parser.want == W_NOTHING ? parser.n : -IVTS_ERR_INVALID_ARG;
 }
 
 static bool tok_eq(const char *js, const ivts_jtok_t *k, const char *s)
