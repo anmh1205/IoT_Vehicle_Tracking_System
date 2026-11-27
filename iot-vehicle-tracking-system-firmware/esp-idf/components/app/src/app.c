@@ -5,7 +5,7 @@
  * ## Mô hình thực thi
  *
  * app_task() là toàn bộ task "app" (xem app_os.c về queue, priority và stack). Mỗi vòng:
- * 1. Chờ sự kiện tối đa TICK_MS. Có sự kiện thì rút cạn queue, mỗi sự kiện qua app_dispatch().
+ * 1. Chờ sự kiện tối đa APP_TICK_MS. Có sự kiện thì rút cạn queue, mỗi sự kiện qua app_dispatch().
  * 2. Nếu chưa đến mốc tick kế tiếp thì quay lại bước 1; ngược lại chạy một bước FSM.
  * 3. Thực thi các hành động FSM yêu cầu (execute()), kiểm tra xác nhận OTA, ghi chẩn đoán.
  *
@@ -19,6 +19,7 @@
  */
 
 #include "app_priv.h"
+#include "app_timing.h"
 #include <string.h>
 #include "board/board.h"
 #include "esp_log.h"
@@ -33,8 +34,6 @@
 #include "storage/storage.h"
 
 app_t g_app;
-
-#define TICK_MS 100   /* Chu kỳ chạy FSM; cũng là timeout chờ queue. */
 
 static void update_led(uint64_t now)
 {
@@ -66,7 +65,7 @@ static void on_ota_progress(const ivts_event_t *ev)
     g_app.fw_dirty = true;
     if (ev->u.ota_progress.phase == IVTS_OTA_ST_REBOOTING) {
         g_app.ota_job_active = false;
-        g_app.ota_reboot_ms = app_now() + 20000u;
+        g_app.ota_reboot_ms = app_now() + OTA_REBOOT_DELAY_MS;
     } else if (ev->u.ota_progress.phase == IVTS_OTA_ST_FAILED) {
         g_app.ota_job_active = false;
         g_app.ota_report_pending = ev->u.ota_progress.err == IVTS_OTA_E_SET_BOOT;
@@ -84,9 +83,8 @@ static void ota_confirm_tick(void)
     static uint64_t retry_at;
     uint64_t uptime = app_now();
     if (uptime < retry_at) { return; }
-    uint64_t now = 0;
-    bool trusted = false;
-    (void)board_time_get(&now, &trusted);
+    bool trusted;
+    uint64_t now = app_clock_unix_ms_or_zero(&trusted);
     bool healthy = (g_app.link == IVTS_LINK_BROKER_UP) && g_app.ota_health_acked;
     switch (ivts_ota_confirm_decide(&g_app.ota_pending, healthy, now, trusted, uptime)) {
     case IVTS_CONFIRM_ACCEPT:
@@ -100,14 +98,14 @@ static void ota_confirm_tick(void)
             g_app.fw_dirty = true;
             ESP_LOGI(APP_TAG, "image hợp lệ: đã mark valid");
         } else {
-            retry_at = uptime + 1000u;
+            retry_at = uptime + OTA_MARK_VALID_RETRY_MS;
             ESP_LOGW(APP_TAG, "chưa đánh dấu được image OTA hợp lệ");
         }
         break;
     case IVTS_CONFIRM_ROLLBACK:
         ESP_LOGE(APP_TAG, "quá hạn confirm: rollback");
         (void)ota_rollback_and_reboot();
-        retry_at = uptime + 5000u;
+        retry_at = uptime + OTA_ROLLBACK_RETRY_MS;
         break;
     case IVTS_CONFIRM_WAIT:
         break;
@@ -203,13 +201,13 @@ static void app_task(void *arg)
     /* Vẫn chờ queue và xử lý sự kiện khi FSM đang fake sleep. */
     while (true) {
         ivts_event_t ev;
-        if (app_os_receive(&ev, TICK_MS)) {
+        if (app_os_receive(&ev, APP_TICK_MS)) {
             app_dispatch(&ev);
             while (app_os_receive(&ev, 0)) { app_dispatch(&ev); }    /* Rút cạn queue rồi mới chạy FSM. */
         }
         uint64_t now = app_now();
         if (now < next_tick) { continue; }
-        next_tick = now + TICK_MS;
+        next_tick = now + APP_TICK_MS;
 
         update_link(modem_link_state());
         app_publish_poll();
@@ -257,7 +255,7 @@ void app_start(void)
 {
     if (!app_init_all() || !app_os_start_task(app_task)) {
         ESP_LOGE(APP_TAG, "init lỗi không cứu được: restart sau 10 s");
-        vTaskDelay(pdMS_TO_TICKS(10000));
+        vTaskDelay(pdMS_TO_TICKS(INIT_RESTART_DELAY_MS));
         platform_restart("init_failed");
     }
 }

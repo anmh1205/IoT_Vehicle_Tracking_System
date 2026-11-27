@@ -24,6 +24,7 @@
  */
 
 #include "app_priv.h"
+#include "app_timing.h"
 #include <string.h>
 #include "board/board.h"
 #include "esp_log.h"
@@ -56,9 +57,8 @@ static bool modem_time_get(uint64_t *unix_ms)
 static ivts_err_t prepare_ota_boot(const ivts_ota_cmd_t *cmd, const char *partition)
 {
     ivts_ota_pending_t pending = { .pending = true, .timeout_s = cmd->confirm_timeout_s };
-    bool trusted = false;
-    uint64_t now = 0;
-    (void)board_time_get(&now, &trusted);
+    bool trusted;
+    uint64_t now = app_clock_unix_ms_or_zero(&trusted);
     if (trusted) { pending.deadline_unix_ms = now + (uint64_t)pending.timeout_s * 1000u; }
     (void)ivts_str_copy(pending.job_id, sizeof pending.job_id, cmd->job_id);
     (void)ivts_str_copy(pending.target_version, sizeof pending.target_version, cmd->version);
@@ -79,17 +79,17 @@ void app_apply_config(void)
         .hysteresis_mv = CONFIG_IVTS_IGNITION_HYST_MV,
         .on_hold_ms = CONFIG_IVTS_IGNITION_ON_HOLD_MS,
         .off_hold_ms = c->ignition_off_hold_ms,
-        .motion_quiet_ms = 30000,
+        .motion_quiet_ms = MOTION_QUIET_MS,
     };
     g_app.fsm_cfg = (ivts_fsm_cfg_t){
         .tracking_ms = (uint32_t)c->tracking_interval_s * 1000u,
         .alarm_ms = (uint32_t)c->alarm_interval_s * 1000u,
         .alarm_timeout_ms = (uint32_t)c->alarm_timeout_s * 1000u,
         .heartbeat_s = c->heartbeat_interval_s,
-        .status_ms = 60000,
-        .check_ign_max_ms = 5000,
-        .parked_settle_ms = 20000,
-        .awake_max_ms = 90000,
+        .status_ms = STATUS_PERIOD_MS,
+        .check_ign_max_ms = CHECK_IGN_MAX_MS,
+        .parked_settle_ms = PARKED_SETTLE_MS,
+        .awake_max_ms = AWAKE_MAX_MS,
         .sleep_enabled = real_sleep,
         .imu_wakeup_enabled = c->imu_wakeup_enabled && board_imu_ok(),
         .deep_wake_on_motion = board_motion_deep_wake_capable(),

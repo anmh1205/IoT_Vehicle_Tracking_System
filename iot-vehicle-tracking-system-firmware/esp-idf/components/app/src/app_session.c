@@ -7,8 +7,8 @@
  */
 
 #include "app_priv.h"
+#include "app_timing.h"
 #include <string.h>
-#include "board/board.h"
 #include "esp_log.h"
 #include "ivts_core/payload/meta.h"
 #include "storage/storage.h"
@@ -45,15 +45,13 @@ void app_session_tick(void)
     b->boot_id = g_app.boot_id;
     b->seq = app_rtc_next_seq();
     b->uptime_ms = (uint32_t)now;
-    bool trusted = false;
-    (void)board_time_get(&b->unix_ms, &trusted);
-    if (!trusted) { b->unix_ms = 0u; }
+    b->unix_ms = app_clock_unix_ms_or_zero(NULL);
     if (want_active) {
         next.active = (ivts_session_id_t){ .boot_id = b->boot_id, .local_key = b->seq };
     }
     b->session = next.active;
     if (!want_active) { next.active = (ivts_session_id_t){0}; }
-    if (!commit(&next)) { next_attempt_ms = now + 5000u; }
+    if (!commit(&next)) { next_attempt_ms = now + NVS_RETRY_MS; }
 }
 
 bool app_session_on_ack(void)

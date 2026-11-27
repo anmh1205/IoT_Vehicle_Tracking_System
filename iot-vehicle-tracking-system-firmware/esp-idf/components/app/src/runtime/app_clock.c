@@ -1,0 +1,18 @@
+#include "app_clock.h"
+#include <stddef.h>
+#include "board/board.h"
+#include "platform/platform_clock.h"
+
+uint64_t app_now(void)
+{
+    return platform_uptime_ms();
+}
+
+uint64_t app_clock_unix_ms_or_zero(bool *trusted_out)
+{
+    uint64_t unix_ms = 0;
+    bool trusted = false;
+    (void)board_time_get(&unix_ms, &trusted);
+    if (trusted_out != NULL) { *trusted_out = trusted; }
+    return trusted ? unix_ms : 0u;
+}

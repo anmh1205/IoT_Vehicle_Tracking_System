@@ -24,6 +24,7 @@
  */
 
 #include "app_priv.h"
+#include "app_timing.h"
 #include <string.h>
 #include "esp_log.h"
 #include "platform/platform_reset.h"
@@ -35,7 +36,6 @@
 #include "storage/storage.h"
 
 #define MAX_TOK 64   /* Số token JSON tối đa của một command. */
-#define LOCATION_TIMEOUT_MS 90000u   /* Cho GNSS cold start, trong TTL 120 giây của backend. */
 
 static char s_js[MODEM_CMD_MAX];       /* Nội dung command đã lấy từ modem. */
 static ivts_jtok_t s_tok[MAX_TOK];     /* Token của s_js. */
@@ -376,7 +376,7 @@ void app_cmd_on_location_ack(bool ok)
 void app_cmd_on_ack(bool ok)
 {
     if (!ok) {
-        s_retry_at = app_now() + 1000u;
+        s_retry_at = app_now() + ACK_RETRY_MS;
         return;
     }
     s_ack = (command_ack_t){0};
@@ -403,13 +403,13 @@ void app_cmd_tick(void)
     if (s_ack.status == NULL || now < s_retry_at) { return; }
     if (s_checkpoint_pending) {
         if (storage_command_receipts_save(&s_receipts) != IVTS_OK) {
-            s_retry_at = now + 1000u;
+            s_retry_at = now + ACK_RETRY_MS;
             return;
         }
         s_checkpoint_pending = false;
         if (s_restart_requested) {
             s_restart_requested = false;
-            s_restart_at = now + 20000u;
+            s_restart_at = now + CMD_RESTART_DELAY_MS;
         }
     }
     (void)app_publish_ack_cmd(s_ack.id, s_ack.status, s_ack.response);

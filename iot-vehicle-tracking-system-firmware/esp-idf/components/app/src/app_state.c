@@ -13,10 +13,10 @@
  */
 
 #include "app_priv.h"
+#include "app_timing.h"
 #include <string.h>
 #include "board/board.h"
 #include "esp_log.h"
-#include "platform/platform_clock.h"
 #include "obd/obd.h"
 #include "sdkconfig.h"
 
@@ -24,9 +24,6 @@
 static ivts_telemetry_t s_t;
 static uint64_t s_obd_sample_ms;
 static uint64_t s_gnss_sample_ms;
-
-/** Thời gian kể từ boot theo ms, từ esp_timer (đơn điệu, không đổi khi RTC được chỉnh). */
-uint64_t app_now(void) { return platform_uptime_ms(); }
 
 /**
  * @brief Trả về snapshot với các trường suy ra từ axes (ignition, motion, vehicle) được làm mới.
@@ -126,11 +123,9 @@ void app_state_make_record(ivts_record_t *r)
     r->boot_id = g_app.boot_id;
     r->seq = app_rtc_next_seq();
     r->uptime_ms = (uint32_t)app_now();
-    bool trusted = false;
-    (void)board_time_get(&r->captured_unix_ms, &trusted);
-    if (!trusted) { r->captured_unix_ms = 0u; }
+    r->captured_unix_ms = app_clock_unix_ms_or_zero(NULL);
     r->gnss = t->gnss;
-    if (t->obd_ble_connected && t->obd_elm_ready && t->obd_sample_age_ms <= 30000u) {
+    if (t->obd_ble_connected && t->obd_elm_ready && t->obd_sample_age_ms <= OBD_SAMPLE_MAX_AGE_MS) {
         r->obd = t->obd;
     }
     r->vehicle_mv = t->vehicle_mv;

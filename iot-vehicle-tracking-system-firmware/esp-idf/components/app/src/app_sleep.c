@@ -22,13 +22,12 @@
  */
 
 #include "app_priv.h"
+#include "app_timing.h"
 #include "board/board.h"
 #include "esp_log.h"
 #include "modem/modem.h"
 #include "obd/obd.h"
 #include "storage/storage.h"
-
-#define MODEM_STOP_WAIT_MS 8000
 
 /**
  * @brief Chờ task modem ngắt MQTT và phát xong xung tắt nguồn, kể cả nếu link đã mất từ trước.
@@ -41,7 +40,7 @@ static bool wait_modem_stop(void)
     uint64_t end = app_now() + MODEM_STOP_WAIT_MS;
     ivts_event_t ev;
     while (!modem_is_stopped() && app_now() < end) {
-        if (app_os_receive(&ev, 100)) { app_dispatch(&ev); }
+        if (app_os_receive(&ev, APP_TICK_MS)) { app_dispatch(&ev); }
     }
     if (!modem_is_stopped()) { return false; }
     while (app_os_receive(&ev, 0)) { app_dispatch(&ev); }

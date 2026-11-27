@@ -7,6 +7,7 @@
  */
 
 #include "app_priv.h"
+#include "app_timing.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -26,7 +27,7 @@ void app_diag_tick(uint64_t now_ms)
 {
     static uint64_t next;
     if (now_ms < next) { return; }
-    next = now_ms + 60000u;
+    next = now_ms + DIAG_PERIOD_MS;
     static TaskStatus_t st[MAX_TASKS];             /* static để không tốn stack (~1 KB); chỉ task "app" gọi. */
     UBaseType_t n = uxTaskGetSystemState(st, MAX_TASKS, NULL);
     if (n == 0u) { ESP_LOGW(APP_TAG, "diag: hơn %d task", MAX_TASKS); return; }

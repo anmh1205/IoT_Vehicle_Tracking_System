@@ -32,8 +32,8 @@
  */
 
 #include "app_priv.h"
+#include "app_timing.h"
 #include <string.h>
-#include "board/board.h"
 #include "esp_log.h"
 #include "ivts_core/payload/json_writer.h"
 #include "ivts_core/payload/payload.h"
@@ -59,8 +59,7 @@ static ivts_msg_meta_t meta(uint32_t seq)
         .seq = seq,
         .uptime_ms = app_now(),
     };
-    (void)board_time_get(&m.sent_unix_ms, &m.time_trusted);
-    if (!m.time_trusted) { m.sent_unix_ms = 0; }
+    m.sent_unix_ms = app_clock_unix_ms_or_zero(&m.time_trusted);
     return m;
 }
 
@@ -137,7 +136,7 @@ void app_publish(pub_kind_t kind)
         };
         e = ivts_payload_status(&m, &t, &b->session, (ivts_boundary_kind_t)b->kind,
                                 false, s_buf, sizeof s_buf, &len);
-        s_boundary_retry_at = app_now() + 5000u;
+        s_boundary_retry_at = app_now() + BOUNDARY_RETRY_MS;
         if (e == IVTS_OK) { (void)send(kind, MODEM_TOPIC_STATUS, len); }
         return;
     }
@@ -299,7 +298,7 @@ void app_publish_control_tick(void)
         return;
     }
     if (g_app.alarm.seq != 0u && app_now() >= s_alarm_retry_at) {
-        s_alarm_retry_at = app_now() + 5000u;
+        s_alarm_retry_at = app_now() + ALARM_RETRY_MS;
         if (!g_app.alarm_persisted) {
             g_app.alarm_persisted = storage_alarm_save(&g_app.alarm) == IVTS_OK;
         }
@@ -375,7 +374,7 @@ static bool replay_before(const ivts_session_boundary_t *boundary)
     }
     /* Ô trống: yêu cầu storage nạp. Sau 5 s chưa có QUEUE_READY (bộ đếm pending lệch với nội dung
      * file) thì yêu cầu lại. */
-    if (g_app.replay_requested && app_now() - s_peek_asked_at < 5000u) { return true; }
+    if (g_app.replay_requested && app_now() - s_peek_asked_at < PEEK_RETRY_MS) { return true; }
     if (storage_queue_request_peek() == IVTS_OK) {
         g_app.replay_requested = true;
         s_peek_asked_at = app_now();

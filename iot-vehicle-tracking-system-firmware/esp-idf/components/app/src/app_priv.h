@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "app_clock.h"
 #include "ivts_core/event/event.h"
 #include "ivts_core/fsm/axes.h"
 #include "ivts_core/fsm/fsm.h"
@@ -106,7 +107,6 @@ const ivts_telemetry_t *app_state_get(void);
 void app_state_set_device(ivts_device_state_t d, ivts_sleep_mode_t m);
 void app_state_make_record(ivts_record_t *r);     /**< Chụp mẫu telemetry hiện tại và cấp seq mới. */
 void app_dispatch(const ivts_event_t *ev);
-uint64_t app_now(void);                           /**< Thời gian đơn điệu của app, đơn vị ms. */
 
 /* ---- app_publish.c ---- */
 void app_publish(pub_kind_t kind);
