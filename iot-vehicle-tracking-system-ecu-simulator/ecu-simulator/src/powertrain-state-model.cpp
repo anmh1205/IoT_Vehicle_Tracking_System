@@ -154,8 +154,8 @@ void update_running_state(powertrain_state_t &state,
   state.rpm = approach(state.rpm,
                        clampf(rpm_target, 0.0f, static_cast<float>(config.redline_rpm)),
                        delta_s * (state.rpm < rpm_target ? 2400.0f : 3000.0f));
-  state.coolant_c = approach(state.coolant_c, 92.0f + state.throttle_actual_pct * 0.04f, delta_s * 3.6f);
-  state.oil_temp_c = approach(state.oil_temp_c, state.coolant_c + 7.0f, delta_s * 2.8f);
+  state.coolant_c = approach(state.coolant_c, 92.0f + state.throttle_actual_pct * 0.04f, delta_s * 0.62f);
+  state.oil_temp_c = approach(state.oil_temp_c, state.coolant_c + 7.0f, delta_s * 0.42f);
   state.intake_air_c = approach(state.intake_air_c, state.ambient_air_c + state.throttle_actual_pct * 0.06f + state.speed_kph * 0.015f, delta_s * 2.0f);
   state.control_module_mv = static_cast<uint16_t>(13720.0f + state.throttle_actual_pct * 5.0f);
   state.fuel_pressure_kpa = static_cast<uint16_t>(304.0f + state.throttle_actual_pct * 1.1f + state.gear * 4.0f);
@@ -184,13 +184,14 @@ void powertrain_state_begin(powertrain_state_t &state) {
 void powertrain_state_tick(powertrain_state_t &state,
                            const powertrain_config_t &config,
                            const driver_command_t &command,
-                           bool ignition_on,
+                           ignition_phase_t phase,
                            uint32_t delta_ms) {
   const float delta_s = delta_ms / 1000.0f;
-  state.selector = ignition_on ? command.selector : SELECTOR_POSITION_P;
-  state.intent = ignition_on ? command.intent : DRIVE_INTENT_PARKED;
+  const bool running = phase == IGNITION_RUNNING;
+  state.selector = running ? command.selector : SELECTOR_POSITION_P;
+  state.intent = running ? command.intent : DRIVE_INTENT_PARKED;
 
-  if (!ignition_on) {
+  if (!running) {
     state.engine_running = false;
     state.gear = 0;
     state.throttle_demand_pct = 0.0f;
@@ -198,12 +199,13 @@ void powertrain_state_tick(powertrain_state_t &state,
     state.brake_pct = 80.0f;
     state.converter_slip_rpm = approach(state.converter_slip_rpm, 0.0f, delta_s * 1000.0f);
     state.speed_kph = approach(state.speed_kph, 0.0f, delta_s * 18.0f);
-    state.rpm = approach(state.rpm, 0.0f, delta_s * 3200.0f);
-    state.coolant_c = approach(state.coolant_c, state.ambient_air_c + 6.0f, delta_s * 1.6f);
-    state.oil_temp_c = approach(state.oil_temp_c, state.coolant_c + 2.0f, delta_s * 1.4f);
-    state.intake_air_c = approach(state.intake_air_c, state.ambient_air_c + 1.0f, delta_s * 1.6f);
-    state.control_module_mv = 12220;
-    state.fuel_pressure_kpa = 285;
+    const bool cranking = phase == IGNITION_CRANKING;
+    state.rpm = approach(state.rpm, cranking ? 235.0f : 0.0f, delta_s * 3200.0f);
+    state.coolant_c = approach(state.coolant_c, state.ambient_air_c + 6.0f, delta_s * 0.12f);
+    state.oil_temp_c = approach(state.oil_temp_c, state.coolant_c + 2.0f, delta_s * 0.10f);
+    state.intake_air_c = approach(state.intake_air_c, state.ambient_air_c + 1.0f, delta_s * 0.12f);
+    state.control_module_mv = cranking ? 10150 : 12220;
+    state.fuel_pressure_kpa = phase == IGNITION_OFF ? 180 : 285;
     state.shift_inhibit_remaining_ms = 0;
     return;
   }

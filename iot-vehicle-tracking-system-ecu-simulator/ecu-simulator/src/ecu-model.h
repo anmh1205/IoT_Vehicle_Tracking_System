@@ -56,3 +56,7 @@ bool ecu_model_is_ignition_on();
 bool ecu_model_has_ignition_timer();
 uint32_t ecu_model_ignition_timer_remaining_s();
 const ecu_snapshot_t &ecu_model_get();
+const ecu_snapshot_t *ecu_model_get_freeze_frame();
+bool ecu_model_clear_diagnostics();
+void ecu_model_set_fault_enabled(bool enabled);
+bool ecu_model_set_fault_profile(uint8_t profile);
