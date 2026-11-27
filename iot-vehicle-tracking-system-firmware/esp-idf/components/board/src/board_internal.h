@@ -91,6 +91,21 @@ esp_err_t board_i2c_add(board_dev_t device, uint16_t address, uint32_t speed_hz)
  * @note Context: App startup. Waits up to 100 ms for the mutex, then passes a 50 ms probe timeout to the SDK.
  */
 bool board_i2c_probe(uint16_t address);
+
+/**
+ * @brief Acquire the shared bus for a sequence of transfers.
+ * @retval true The caller owns the bus and must release it with board_i2c_unlock().
+ * @retval false The mutex wait times out.
+ * @note Context: Task context after bus initialization. Waits up to 100 ms.
+ * @warning While holding the bus, use the locked transfer variants to avoid acquiring the same mutex twice.
+ */
+bool board_i2c_lock(void);
+/**
+ * @brief Release the shared bus after a sequence of transfers, including on transfer failure.
+ * @note Context: Task context while holding the bus. Non-blocking.
+ */
+void board_i2c_unlock(void);
+
 /**
  * @brief Read a register range with a combined write and read.
  * @param device Registered RTC or IMU slot.
@@ -107,6 +122,12 @@ bool board_i2c_probe(uint16_t address);
  */
 esp_err_t board_i2c_read(board_dev_t device, uint8_t reg, uint8_t *data, size_t len);
 /**
+ * @brief Read a register range while the caller owns the bus.
+ * @see board_i2c_read() for parameters and transfer results.
+ * @note Context: Task context while holding the bus. Uses a 50 ms transfer timeout.
+ */
+esp_err_t board_i2c_read_locked(board_dev_t device, uint8_t reg, uint8_t *data, size_t len);
+/**
  * @brief Send a register address followed by up to 16 bytes.
  * @param device Registered RTC or IMU slot.
  * @param reg First register address.
@@ -121,3 +142,9 @@ esp_err_t board_i2c_read(board_dev_t device, uint8_t reg, uint8_t *data, size_t 
  *       a 50 ms transfer timeout.
  */
 esp_err_t board_i2c_write(board_dev_t device, uint8_t reg, const uint8_t *data, size_t len);
+/**
+ * @brief Write a register range while the caller owns the bus.
+ * @see board_i2c_write() for parameters and transfer results.
+ * @note Context: Task context while holding the bus. Uses a 50 ms transfer timeout.
+ */
+esp_err_t board_i2c_write_locked(board_dev_t device, uint8_t reg, const uint8_t *data, size_t len);

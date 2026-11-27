@@ -3,7 +3,7 @@
  * @brief UTC calendar access and monotonic uptime.
  *
  * The app reads and sets the RTC. The modem and OTA task read it through app callbacks.
- * RTC operations may wait on the shared I2C bus. Locking covers individual transfers.
+ * RTC operations hold the shared I2C bus lock across their calendar and status transfers.
  * Read results are written directly into caller-owned outputs.
  */
 #pragma once
@@ -24,8 +24,9 @@
  * @retval IVTS_ERR_TIMEOUT The bus lock or a transfer times out.
  * @retval IVTS_ERR_NOT_FOUND I2C reports a missing resource.
  * @retval IVTS_ERR_IO Another I2C failure.
- * @note Context: App, modem or OTA task after board initialization. Each of up to two transfers has a
- *       100 ms mutex timeout and a 50 ms transfer timeout. Outputs are unchanged on an error return.
+ * @note Context: App, modem or OTA task after board initialization. Waits up to 100 ms for the shared
+ *       bus lock, then holds it for up to two transfers with a 50 ms timeout each. Outputs are unchanged
+ *       on an error return.
  */
 ivts_err_t board_time_get(uint64_t *unix_ms, bool *trusted);
 
@@ -39,9 +40,10 @@ ivts_err_t board_time_get(uint64_t *unix_ms, bool *trusted);
  * @retval IVTS_ERR_TIMEOUT The bus lock or a transfer times out.
  * @retval IVTS_ERR_NOT_FOUND I2C reports a missing resource.
  * @retval IVTS_ERR_IO Another I2C failure.
- * @note Context: App task after board initialization. Up to three I2C transfers, each with a 100 ms
- *       mutex timeout and 50 ms transfer timeout.
- * @warning A status access failure can leave the new calendar written with the previous trust flag.
+ * @note Context: App task after board initialization. Waits up to 100 ms for the shared bus lock,
+ *       then holds it for up to three transfers with a 50 ms timeout each.
+ * @warning A calendar transfer failure can leave partially written registers. A status access failure
+ *       can leave the new calendar with the previous oscillator stop flag.
  */
 ivts_err_t board_time_set(uint64_t unix_ms);
 

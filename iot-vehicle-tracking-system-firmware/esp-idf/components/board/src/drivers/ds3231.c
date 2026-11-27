@@ -4,8 +4,8 @@
  *
  * Board startup probes and registers the device. The app reads and sets UTC. The modem and OTA task also read
  * it.
- * The I2C mutex protects individual transfers. Calendar conversion is delegated to the driver calculation
- * helpers.
+ * The I2C mutex serializes complete calendar and status sequences. The driver calculation helpers convert
+ * the calendar.
  * The calendar is written before oscillator status is cleared. The caller supplies time policy.
  */
 #include "board_internal.h"
@@ -42,8 +42,10 @@ ivts_err_t board_time_get(uint64_t *unix_ms, bool *trusted)
     if (unix_ms == NULL || trusted == NULL) { return IVTS_ERR_INVALID_ARG; }
     if (!board_rtc_ok()) { return IVTS_ERR_INVALID_STATE; }
     uint8_t r[7], st = 0;
-    esp_err_t e = board_i2c_read(s_device, DS3231_REG_TIME, r, sizeof r);
-    if (e == ESP_OK) { e = board_i2c_read(s_device, DS3231_REG_STATUS, &st, 1); }
+    if (!board_i2c_lock()) { return IVTS_ERR_TIMEOUT; }
+    esp_err_t e = board_i2c_read_locked(s_device, DS3231_REG_TIME, r, sizeof r);
+    if (e == ESP_OK) { e = board_i2c_read_locked(s_device, DS3231_REG_STATUS, &st, 1); }
+    board_i2c_unlock();
     if (e != ESP_OK) { return board_err(e); }
 
     if (ds3231_decode_time(r, unix_ms) != IVTS_OK) {
@@ -63,19 +65,23 @@ ivts_err_t board_time_set(uint64_t unix_ms)
     uint8_t r[7];
     ivts_err_t encode_error = ds3231_encode_time(unix_ms, r);
     if (encode_error != IVTS_OK) { return encode_error; }
-    esp_err_t e = board_i2c_write(s_device, DS3231_REG_TIME, r, sizeof r);
-    if (e != ESP_OK) { return board_err(e); }
+    if (!board_i2c_lock()) { return IVTS_ERR_TIMEOUT; }
+    esp_err_t e = board_i2c_write_locked(s_device, DS3231_REG_TIME, r, sizeof r);
+    if (e != ESP_OK) {
+        board_i2c_unlock();
+        return board_err(e);
+    }
     /*
-     * Clear OSF after writing the date. A power loss between the writes can
-     * leave OSF asserted so the next boot continues treating RTC time as
-     * untrusted.
+     * Clear OSF after writing the date. If OSF was asserted, a power loss
+     * before the clear leaves the next boot treating RTC time as untrusted.
      */
     uint8_t st = 0;
-    e = board_i2c_read(s_device, DS3231_REG_STATUS, &st, 1);
+    e = board_i2c_read_locked(s_device, DS3231_REG_STATUS, &st, 1);
     if (e == ESP_OK) {
         st = (uint8_t)(st & (uint8_t)~DS3231_OSF);
-        e = board_i2c_write(s_device, DS3231_REG_STATUS, &st, 1);
+        e = board_i2c_write_locked(s_device, DS3231_REG_STATUS, &st, 1);
     }
+    board_i2c_unlock();
     if (e == ESP_OK) {
         IVTS_LOGI(BOARD_TAG, "rtc set unix_ms=%llu result=ok", (unsigned long long)unix_ms);
     } else {
