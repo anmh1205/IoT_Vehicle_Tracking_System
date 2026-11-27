@@ -101,11 +101,6 @@ class Layers(unittest.TestCase):
                 violations.append(f"{folder}: circular module dependency")
         self.assertEqual(violations, [])
 
-    def test_refactored_components_do_not_export_mutable_variables(self):
-        variables = re.compile(r"^\s*extern\s+(?!const\b)[^;\n()]+;", re.M)
-        self.assert_symbols_local(variables, COMPONENTS / "obd", COMPONENTS / "ota")
-
-    @unittest.expectedFailure  # P9 gives OBD and OTA state explicit owners.
     def test_all_components_do_not_export_mutable_variables(self):
         variables = re.compile(r"^\s*extern\s+(?!const\b)[^;\n()]+;", re.M)
         self.assert_symbols_local(variables)
