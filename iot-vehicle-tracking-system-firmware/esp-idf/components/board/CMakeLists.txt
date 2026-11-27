@@ -2,14 +2,13 @@ idf_component_register(
     SRCS
         # Board setup and sampling task
         "src/board.c" "src/board_task.c"
-        # Shared bus
-        "src/i2c_bus.c"
-        # Sensor drivers and pure conversion functions
-        "src/drivers/ds3231.c" "src/board_calc.c"
+        # Sensor drivers, shared I2C bus and pure conversion helpers
+        "src/drivers/i2c_bus.c"
+        "src/drivers/ds3231.c" "src/drivers/drivers_calc.c"
         "src/drivers/lis3dsh.c"
         "src/drivers/power_adc.c"
         # Sleep and wake sources
-        "src/sleep.c" "src/wake.c"
+        "src/power/sleep.c" "src/power/wake.c"
     INCLUDE_DIRS "include"
     PRIV_INCLUDE_DIRS "src"
     REQUIRES ivts-core

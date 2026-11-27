@@ -1,11 +1,12 @@
 /**
- * @file board_calc.c
+ * @file src/drivers/drivers_calc.c
  * @brief Host-testable RTC, accelerometer and ADC calculations.
  *
  * Decode or encode DS3231 BCD time, select and compare LIS3DSH axes, and scale
- * calibrated pin voltage to the measured input.
+ * calibrated pin voltage to the measured input. Host coverage is in
+ * tests/test_board_calc.py.
  */
-#include "board_calc.h"
+#include "drivers/drivers_calc.h"
 #include <string.h>
 #include "ivts_core/base/civil.h"
 #include <math.h>

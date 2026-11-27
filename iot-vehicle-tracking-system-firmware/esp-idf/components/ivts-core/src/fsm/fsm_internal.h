@@ -1,10 +1,13 @@
 /**
- * @file components/ivts-core/src/fsm/fsm.h
+ * @file components/ivts-core/src/fsm/fsm_internal.h
  * @brief Private state-transition helpers shared by the FSM and its handlers.
  */
-#pragma once
+#ifndef IVTS_CORE_FSM_INTERNAL_H
+#define IVTS_CORE_FSM_INTERNAL_H
 #include "ivts_core/fsm/fsm.h"
 
 /* Run the current state's transitions after initializing the common output. */
 void ivts_fsm_run_state(ivts_fsm_t *fsm, const ivts_fsm_cfg_t *cfg,
                         const ivts_fsm_in_t *in, ivts_fsm_out_t *out);
+
+#endif

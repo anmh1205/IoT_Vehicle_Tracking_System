@@ -1,5 +1,5 @@
 /**
- * @file nvs_store.c
+ * @file src/nvs/nvs_store.c
  * @brief Versioned IVTS NVS envelope and typed configuration persistence.
  *
  * Keep existing namespace, keys, byte layout and checksum behavior. Handle

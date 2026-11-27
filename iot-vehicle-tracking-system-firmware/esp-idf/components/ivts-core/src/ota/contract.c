@@ -1,5 +1,5 @@
 /**
- * @file ota_contract.c
+ * @file src/ota/contract.c
  * @brief OTA manifest validation and post-boot image confirmation rules.
  */
 #include "ivts_core/ota/contract.h"

@@ -2,7 +2,7 @@
  * @file fsm_states.c
  * @brief State-specific transitions, sleep predicates and requested effects.
  */
-#include "fsm/fsm.h"
+#include "fsm/fsm_internal.h"
 
 static void go(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_fsm_state_t s, ivts_ms_t now)
 {

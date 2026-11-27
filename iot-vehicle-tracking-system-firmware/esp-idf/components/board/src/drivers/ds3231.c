@@ -7,7 +7,7 @@
  */
 #include "board_internal.h"
 #include "drivers/drivers.h"
-#include "board_calc.h"
+#include "drivers/drivers_calc.h"
 #include "platform/log.h"
 
 /*

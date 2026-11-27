@@ -1,5 +1,5 @@
 /**
- * @file sleep.c
+ * @file src/power/sleep.c
  * @brief ESP-IDF light and deep sleep configuration for the board.
  *
  * Capture the ESP-IDF wake-source bitmap at board startup. The app sleep
@@ -10,6 +10,7 @@
 #include "board_internal.h"
 #include "board/board_hw.h"
 #include "drivers/drivers.h"
+#include "power/power.h"
 #include "platform/log.h"
 #include "esp_pm.h"
 #include "esp_sleep.h"

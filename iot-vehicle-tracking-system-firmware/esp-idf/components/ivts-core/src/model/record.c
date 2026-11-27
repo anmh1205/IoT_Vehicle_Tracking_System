@@ -1,5 +1,5 @@
 /**
- * @file model_record.c
+ * @file src/model/record.c
  * @brief Versioned binary record codec for offline and replayed telemetry.
  */
 #include "ivts_core/model/record.h"

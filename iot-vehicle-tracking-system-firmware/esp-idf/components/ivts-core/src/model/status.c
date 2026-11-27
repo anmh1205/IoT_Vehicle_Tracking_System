@@ -1,5 +1,5 @@
 /**
- * @file model_status.c
+ * @file src/model/status.c
  * @brief Pure formatting of the periodic console status lines.
  */
 #include "ivts_core/model/status.h"

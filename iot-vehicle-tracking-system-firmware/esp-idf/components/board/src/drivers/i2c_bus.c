@@ -1,5 +1,5 @@
 /**
- * @file i2c_bus.c
+ * @file src/drivers/i2c_bus.c
  * @brief Shared board I2C device registry and timed transaction serialization.
  *
  * RTC and IMU calls share one task mutex. Each transfer has its own timeout

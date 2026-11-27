@@ -1,5 +1,5 @@
 /**
- * @file event.c
+ * @file src/event/event.c
  * @brief Common publication of typed, by-value cross-task events.
  */
 #include "ivts_core/event/event.h"

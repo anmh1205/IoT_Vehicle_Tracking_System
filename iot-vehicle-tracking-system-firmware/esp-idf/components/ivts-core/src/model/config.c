@@ -1,5 +1,5 @@
 /**
- * @file model_config.c
+ * @file src/model/config.c
  * @brief Validation of device configuration before provisioning or updates.
  */
 #include "ivts_core/model/config.h"

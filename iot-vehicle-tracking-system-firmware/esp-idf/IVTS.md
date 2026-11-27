@@ -28,18 +28,18 @@ Sự kiện được sao chép theo giá trị và có kích thước tối đa 
 
 ## Phần cứng
 
-- Chân, địa chỉ I2C, hệ số ADC và cực tính PWRKEY nằm trong bản wiring PCB. INT1 nối GPIO36. Khi cần wake theo IMU, FSM chọn light sleep. Deep sleep trên PCB hiện tại thức bằng timer. [Pin map](components/board/include/board/board_hw.h) · [Wake IMU](components/board/src/wake.c)
+- Chân, địa chỉ I2C, hệ số ADC và cực tính PWRKEY nằm trong bản wiring PCB. INT1 nối GPIO36. Khi cần wake theo IMU, FSM chọn light sleep. Deep sleep trên PCB hiện tại thức bằng timer. [Pin map](components/board/include/board/board_hw.h) · [Wake IMU](components/board/src/power/wake.c)
 - LIS3DSH dùng state machine SM1 để phát ngắt chốt. Đọc OUTS1 nhả ngắt. DS3231M báo thời gian đáng tin khi OSF đã xóa và ngày đạt mốc cấu hình. [LIS3DSH](components/board/src/drivers/lis3dsh.c) · [RTC](components/board/src/drivers/ds3231.c)
 - PWRKEY dùng GPIO34. GPIO35 đã nối RESET và hiện chưa được dùng. PCB dùng hai chân này với biến thể ESP32-S3 phù hợp vì GPIO33–37 có thể dành cho octal PSRAM. SIM7600 đọc GNSS bằng `AT+CGNSSINFO`, với `AT+CGPSINFO` là đường dự phòng. [Pin map](components/board/include/board/board_hw.h) · [GNSS](components/modem/src/modem_gnss.c)
 
 ## Hợp đồng giữ qua refactor
 
-- NVS dùng namespace `ivts`, magic `0x49565453` và header kèm version, kích thước, CRC. Config, boot counter, OTA context, receipts, restart intent, tracking, session và alarm giữ key và layout đã triển khai. Payload tối đa 1.537 byte theo kích thước receipts. OTA context v2 và restart intent v1 còn đọc được. [NVS](components/storage/src/nvs_store.c) · [Typed records](components/app/src/persist/app_records.c)
+- NVS dùng namespace `ivts`, magic `0x49565453` và header kèm version, kích thước, CRC. Config, boot counter, OTA context, receipts, restart intent, tracking, session và alarm giữ key và layout đã triển khai. Payload tối đa 1.537 byte theo kích thước receipts. OTA context v2 và restart intent v1 còn đọc được. [NVS](components/storage/src/nvs/nvs_store.c) · [Typed records](components/app/src/persist/app_records.c)
 - Offline queue dùng `/sd/q/QNNNNNNN.BIN` với frame `A5 | len | payload | crc32`. Cursor `CURSOR.BIN` được ghi mỗi 16 lần pop hoặc khi queue hết. Replay RAW giữ boot ID và sequence gốc. Bản ghi replay hợp lệ chỉ được pop sau PUBACK thành công. Replay loại riêng các khung có payload lỗi giải mã. [Frame codec và cursor](components/storage/src/queue/queue_rw.c) · [Replay](components/app/src/publish/replay.c)
 - RTC giữ boot ID, sequence và trạng thái FSM qua deep sleep với magic, version, kích thước và CRC. Boot nguội lấy boot ID mới từ NVS. [RTC context](components/app/src/persist/rtc_context.c)
 - Topic và field JSON giữ hợp đồng với MQTT Bridge. Publisher khớp ACK với một transaction đang gửi. Thứ tự control là firmware khi confirm hoặc chờ reboot OTA, alarm, ranh giới phiên sau RAW đứng trước, status, firmware, rồi event. [Publish](components/app/src/publish/outbox.c) · [Hợp đồng cloud](tests/test_cloud_contract.py)
 - App ghi receipt lệnh thành công trước khi gửi ACK. Với reboot đã ghi receipt, PUBACK kích hoạt reboot ngay. Thiết bị có đường dự phòng 20 giây khi thiếu PUBACK. OTA xác minh digest, kết thúc ghi image, kiểm tra version và lưu context trước khi đặt boot partition. Context được giữ tới PUBACK báo cáo cuối. PUBACK trạng thái, ranh giới phiên hoặc báo cáo `confirming` có thể xác nhận image nếu broker đang kết nối và còn trong hạn. [Restart](components/app/src/command/cmd_restart.c) · [OTA job](components/ota/src/ota_job.c) · [Xác nhận OTA](components/app/src/fw_update.c)
-- Component board sở hữu mọi lời gọi ngủ của ESP-IDF. App xử lý sự kiện trong vòng chính khi chờ modem dừng. Hết hạn chờ thì hủy ngủ và khôi phục yêu cầu kết nối. [Sleep controller](components/app/src/sleep_controller.c) · [Board sleep](components/board/src/sleep.c)
+- Component board sở hữu mọi lời gọi ngủ của ESP-IDF. App xử lý sự kiện trong vòng chính khi chờ modem dừng. Hết hạn chờ thì hủy ngủ và khôi phục yêu cầu kết nối. [Sleep controller](components/app/src/sleep_controller.c) · [Board sleep](components/board/src/power/sleep.c)
 
 ## Kiểm chứng
 

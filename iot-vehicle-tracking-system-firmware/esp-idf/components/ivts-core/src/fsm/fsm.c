@@ -2,7 +2,7 @@
  * @file fsm.c
  * @brief FSM initialization and dispatch with caller-owned runtime state.
  */
-#include "fsm/fsm.h"
+#include "fsm/fsm_internal.h"
 #include <string.h>
 
 const char *ivts_fsm_state_name(ivts_fsm_state_t s)

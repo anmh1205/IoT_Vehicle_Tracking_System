@@ -41,13 +41,3 @@ esp_err_t board_i2c_add(board_dev_t device, uint16_t address, uint32_t speed_hz)
 bool board_i2c_probe(uint16_t address);
 esp_err_t board_i2c_read(board_dev_t device, uint8_t reg, uint8_t *data, size_t len);
 esp_err_t board_i2c_write(board_dev_t device, uint8_t reg, const uint8_t *data, size_t len);
-
-/* Switch INT1 to level wake just before light sleep; restore the IRQ after any result. */
-esp_err_t board_power_arm_imu_level_wake(void);
-void board_power_restore_imu_edge_irq(void);
-void board_power_arm_imu_deep_wake(void);
-
-/* Capture the boot wake source before initializing any drivers. */
-void board_power_capture_wake(void);
-/* Read the reason for the most recent wake, including light sleep. */
-board_wake_t board_power_read_wake_cause(void);

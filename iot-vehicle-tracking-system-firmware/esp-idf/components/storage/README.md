@@ -6,7 +6,7 @@ The storage task serializes SD writes and owns the offline queue cursor. The app
 | --- | --- |
 | `include/storage` | Initialization, NVS records, SD logging and offline queue APIs |
 | `src/storage_task.c` | Recovery before task creation, request queue and SD work |
-| `src/nvs_store.c` | IVTS namespace, versioned record envelope, configuration and boot ID |
+| `src/nvs/nvs_store.c` | IVTS namespace, versioned record envelope, configuration and boot ID |
 | `src/sd/` | SDMMC mount and log rotation |
 | `src/queue/queue_store.c` | Segment discovery, open and recovery |
 | `src/queue/queue_rw.c` | Disk frame, append, cursor checkpoint and token-checked pop |

@@ -1,5 +1,5 @@
 /**
- * @file wake.c
+ * @file src/power/wake.c
  * @brief Board wake-source mapping and IMU GPIO wake handling.
  *
  * Arm the latched IMU interrupt as a level wake source for sleep, then restore
@@ -7,7 +7,7 @@
  */
 #include "board_internal.h"
 #include "board/board_hw.h"
-#include "board/board_power.h"
+#include "power/power.h"
 #include "driver/gpio.h"
 #include "esp_sleep.h"
 

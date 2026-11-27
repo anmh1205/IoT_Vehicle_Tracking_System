@@ -2,7 +2,7 @@
  * @file payload_control.c
  * @brief MQTT serialization for device status, events and firmware reports.
  */
-#include "payload/payload.h"
+#include "payload/payload_internal.h"
 #include "ivts_core/ota/contract.h"
 
 ivts_err_t ivts_payload_event(const ivts_msg_meta_t *m, int32_t code, const char *severity,

@@ -2,7 +2,7 @@
  * @file payload_common.c
  * @brief Common MQTT JSON fields, escaping and stable wire enum names.
  */
-#include "payload/payload.h"
+#include "payload/payload_internal.h"
 
 static const char s_hex[] = "0123456789abcdef";
 

@@ -1,8 +1,9 @@
 /**
- * @file components/ivts-core/src/payload/payload.h
+ * @file components/ivts-core/src/payload/payload_internal.h
  * @brief Private common MQTT metadata, formatting and enum names.
  */
-#pragma once
+#ifndef IVTS_CORE_PAYLOAD_INTERNAL_H
+#define IVTS_CORE_PAYLOAD_INTERNAL_H
 #include "ivts_core/payload/json_writer.h"
 #include "ivts_core/payload/payload.h"
 #include "ivts_core/model/telemetry.h"
@@ -20,3 +21,5 @@ const char *ivts_payload_vehicle_name(uint8_t value);
 const char *ivts_payload_device_name(ivts_device_state_t value);
 const char *ivts_payload_ecu_name(ivts_ecu_state_t value);
 const char *ivts_payload_sleep_name(uint8_t value);
+
+#endif

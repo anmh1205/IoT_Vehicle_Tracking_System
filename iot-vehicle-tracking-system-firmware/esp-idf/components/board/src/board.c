@@ -8,6 +8,7 @@
 #include "board_internal.h"
 #include "board/board_hw.h"
 #include "drivers/drivers.h"
+#include "power/power.h"
 #include "driver/gpio.h"
 #include "esp_system.h"
 #include "platform/log.h"

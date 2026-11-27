@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <string.h>
-#include "board_calc.h"
+#include "drivers/drivers_calc.h"
 
 static void test_rtc(void)
 {

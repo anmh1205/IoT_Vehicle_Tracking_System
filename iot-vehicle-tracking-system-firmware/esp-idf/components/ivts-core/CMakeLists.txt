@@ -1,14 +1,16 @@
 idf_component_register(
     SRCS
-        # Base types and model codecs
+        # Base utilities
         "src/base/str.c"
         "src/base/backoff.c"
         "src/base/crc32.c"
         "src/base/civil.c"
-        "src/model_config.c"
-        "src/model_record.c"
-        "src/model_status.c"
-        "src/event.c"
+        # Cross-task events
+        "src/event/event.c"
+        # Configuration, record and status models
+        "src/model/config.c"
+        "src/model/record.c"
+        "src/model/status.c"
         # JSON and MQTT payloads
         "src/payload/json_writer.c"
         "src/payload/json_reader.c"
@@ -16,11 +18,12 @@ idf_component_register(
         "src/payload/payload_common.c"
         "src/payload/payload_raw.c"
         "src/payload/payload_control.c"
-        # FSM and OTA contracts
+        # State machines
         "src/fsm/axes.c"
         "src/fsm/fsm.c"
         "src/fsm/fsm_states.c"
-        "src/ota_contract.c"
+        # OTA manifest and confirmation contracts
+        "src/ota/contract.c"
     INCLUDE_DIRS
         "include"
     PRIV_INCLUDE_DIRS "src"
