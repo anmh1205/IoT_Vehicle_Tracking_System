@@ -150,6 +150,7 @@ void vTaskDelay(unsigned ticks) { s_now_ms += ticks; }
 
 ivts_err_t board_init(const board_cfg_t *cfg)
 {
+    assert(cfg->task_prio == 2u && cfg->task_stack == 3072u);
     s_sink = cfg->sink;
     return IVTS_OK;
 }
@@ -174,7 +175,12 @@ board_wake_t board_sleep(const board_sleep_req_t *req)
     return BOARD_WAKE_TIMER;
 }
 
-ivts_err_t modem_init(const modem_cfg_t *cfg) { assert(cfg->sink.fn == s_sink.fn); return IVTS_OK; }
+ivts_err_t modem_init(const modem_cfg_t *cfg)
+{
+    assert(cfg->sink.fn == s_sink.fn);
+    assert(cfg->task_prio == 6u && cfg->task_stack == 6144u);
+    return IVTS_OK;
+}
 ivts_err_t modem_set_link(bool on)
 {
     if (on) { s_modem_link_enables++; }
@@ -228,7 +234,12 @@ ivts_err_t modem_http_read(uint32_t offset, uint8_t *buf, size_t len, size_t *go
 
 void modem_http_close(void) {}
 
-ivts_err_t storage_init(const storage_cfg_t *cfg) { assert(cfg->sink.fn == s_sink.fn); return IVTS_OK; }
+ivts_err_t storage_init(const storage_cfg_t *cfg)
+{
+    assert(cfg->sink.fn == s_sink.fn);
+    assert(cfg->task_prio == 3u && cfg->task_stack == 5120u);
+    return IVTS_OK;
+}
 bool storage_sd_ok(void) { return true; }
 ivts_err_t storage_boot_id_next(uint32_t *out) { *out = BOOT_ID; return IVTS_OK; }
 ivts_err_t storage_config_load(ivts_config_t *out)
@@ -325,7 +336,12 @@ ivts_err_t storage_queue_pop(uint32_t token)
     return IVTS_OK;
 }
 
-ivts_err_t obd_init(const obd_cfg_t *cfg) { assert(cfg->sink.fn == s_sink.fn); return IVTS_OK; }
+ivts_err_t obd_init(const obd_cfg_t *cfg)
+{
+    assert(cfg->sink.fn == s_sink.fn);
+    assert(cfg->task_prio == 4u && cfg->task_stack == 4096u);
+    return IVTS_OK;
+}
 ivts_err_t obd_start(void) { return IVTS_OK; }
 ivts_err_t obd_stop(void) { return IVTS_OK; }
 bool obd_is_stopped(void) { return true; }
@@ -336,7 +352,12 @@ ivts_err_t obd_diag_copy(ivts_obd_readiness_t *readiness, ivts_dtc_list_t *store
     return IVTS_ERR_NOT_FOUND;
 }
 
-ivts_err_t ota_init(const ota_cfg_t *cfg) { assert(cfg->sink.fn == s_sink.fn); return IVTS_OK; }
+ivts_err_t ota_init(const ota_cfg_t *cfg)
+{
+    assert(cfg->sink.fn == s_sink.fn);
+    assert(cfg->task_prio == 3u && cfg->task_stack == 6144u);
+    return IVTS_OK;
+}
 ivts_err_t ota_start(const ivts_ota_cmd_t *cmd, uint16_t battery_mv, uint16_t min_battery_mv)
 {
     assert(strcmp(cmd->job_id, "job-1") == 0 && battery_mv >= min_battery_mv);
