@@ -480,6 +480,8 @@ Operational note:
 
 ## Firmware and Hardware Context
 
+See the [firmware projects](iot-vehicle-tracking-system-firmware/README.md) for the primary ESP-IDF, legacy ESP-IDF and reserved Zephyr directories.
+
 As documented in the thesis draft and aligned with current project assets:
 
 - **MCU**: ESP32-S3 as central controller.

@@ -1,0 +1,35 @@
+# Cấu hình mặc định của IVTS. Giá trị khác được ghi đè qua idf.py menuconfig và lưu trong sdkconfig.
+
+# --- Chip và flash ---
+CONFIG_IDF_TARGET="esp32s3"
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+
+# --- Partition và OTA ---
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+# Bootloader đánh dấu firmware mới là PENDING_VERIFY; chưa xác nhận thì lần reset kế tiếp quay về slot cũ.
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+
+# --- FreeRTOS ---
+# Main task chỉ khởi tạo và gọi bootstrap nên stack nhỏ.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=4096
+CONFIG_FREERTOS_HZ=1000
+# Phát hiện tràn stack bằng watchpoint ở cuối stack của mỗi task.
+CONFIG_FREERTOS_WATCHPOINT_END_OF_STACK=y
+
+# --- Quản lý nguồn ---
+CONFIG_PM_ENABLE=y
+CONFIG_FREERTOS_USE_TICKLESS_IDLE=y
+
+# --- BLE (NimBLE, central cho ELM327) ---
+CONFIG_BT_ENABLED=y
+CONFIG_BT_NIMBLE_ENABLED=y
+CONFIG_BT_NIMBLE_MAX_CONNECTIONS=1
+CONFIG_BT_NIMBLE_ROLE_CENTRAL=y
+CONFIG_BT_NIMBLE_ROLE_OBSERVER=y
+CONFIG_BT_NIMBLE_ROLE_PERIPHERAL=n
+CONFIG_BT_NIMBLE_ROLE_BROADCASTER=n
+
+# --- FATFS ---
+# Cấp phát bộ đệm long file name trên heap thay vì stack.
+CONFIG_FATFS_LFN_HEAP=y

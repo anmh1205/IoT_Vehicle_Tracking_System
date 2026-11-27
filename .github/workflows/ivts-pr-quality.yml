@@ -109,15 +109,35 @@ jobs:
     needs: changed
     if: needs.changed.outputs.firmware == 'true'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: esp-idf
+            idf: v5.5.3
+          - project: esp-idf-legacy
+            idf: v5.4.1
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        if: matrix.project == 'esp-idf'
+        with:
+          node-version: '20'
+      - name: Build the MQTT Bridge validator
+        if: matrix.project == 'esp-idf'
+        working-directory: iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
+        run: |
+          npm ci
+          npm run build
+          echo "IVTS_BRIDGE_VALIDATOR=$PWD/dist/validators/payload.validator.js" >> "$GITHUB_ENV"
       - name: Host regression tests
+        working-directory: iot-vehicle-tracking-system-firmware/${{ matrix.project }}
         run: |
           python -m pip install pytest
-          python -m pytest -q iot-vehicle-tracking-system-firmware/tests
+          python -m pytest -q tests
       - name: ESP32-S3 cross-compile and partition validation
         uses: espressif/esp-idf-ci-action@v1
         with:
-          esp_idf_version: v5.4.1
+          esp_idf_version: ${{ matrix.idf }}
           target: esp32s3
-          path: iot-vehicle-tracking-system-firmware
+          path: iot-vehicle-tracking-system-firmware/${{ matrix.project }}

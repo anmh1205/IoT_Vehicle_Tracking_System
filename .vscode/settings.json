@@ -1,5 +1,5 @@
 {
-  "cmake.sourceDirectory": "${workspaceFolder}/iot-vehicle-tracking-system-firmware",
+  "cmake.sourceDirectory": "${workspaceFolder}/iot-vehicle-tracking-system-firmware/esp-idf",
   "latex-workshop.latex.tools": [
     {
       "name": "texify",

@@ -1,0 +1,98 @@
+menu "IVTS"
+
+    menu "Triển khai (deployment)"
+        config IVTS_DEFAULT_DEVICE_ID
+            string "Device ID mặc định (tối đa 23 ký tự vì dùng làm MQTT client id)"
+            default ""
+        config IVTS_DEFAULT_AUTH_TOKEN
+            string "Auth token mặc định"
+            default ""
+        config IVTS_MQTT_HOST
+            string "MQTT broker host"
+            default "mqtt.thingdock.dev"
+        config IVTS_MQTT_PORT
+            int "MQTT broker port"
+            range 1 65535
+            default 1883
+            help
+                mqtt.thingdock.dev luôn dùng TLS cổng 8883. Với broker riêng,
+                cổng 8883 bật TLS, các cổng khác dùng TCP.
+        config IVTS_MODEM_CA_CERT
+            string "Tên file CA trong SIM7600 (MQTT TLS và OTA HTTPS)"
+            default "isrgrootx1.pem"
+            help
+                Cài CA của broker và máy chủ OTA vào bộ nhớ chứng chỉ SIM7600.
+                TLS kiểm tra chứng chỉ máy chủ và thời gian trên modem.
+        config IVTS_MQTT_USER
+            string "MQTT username"
+            default ""
+        config IVTS_MQTT_PASS
+            string "MQTT password"
+            default ""
+        config IVTS_APN
+            string "APN"
+            default "internet"
+    endmenu
+
+    config IVTS_FORCE_FAKE_SLEEP
+        bool "Luôn dùng fake sleep khi kiểm thử qua USB"
+        default n
+        help
+            Giữ CPU, USB và các task hoạt động khi FSM vào trạng thái ngủ.
+            Tắt light sleep tự động và dùng fake sleep dù cấu hình NVS cho phép
+            ngủ thật. Hết kỳ heartbeat hoặc có nguồn thức thì FSM chạy tiếp.
+
+    config IVTS_IGNITION_ON_HOLD_MS
+        int "Debounce ignition OFF->ON (ms)"
+        range 0 10000
+        default 1500
+    config IVTS_IGNITION_HYST_MV
+        int "Dải trễ ignition (mV)"
+        range 0 3000
+        default 500
+    config IVTS_POWER_SAMPLE_MS
+        int "Chu kỳ lấy mẫu ADC nguồn (ms)"
+        range 100 10000
+        default 500
+    config IVTS_IMU_THRESHOLD
+        int "Ngưỡng THRS1_1 của LIS3DSH (đơn vị thô)"
+        range 1 255
+        default 8
+    config IVTS_GNSS_PERIOD_S
+        int "Chu kỳ đọc GNSS (s)"
+        range 1 60
+        default 1
+    config IVTS_OBD_POLL_MS
+        int "Chu kỳ poll PID OBD (ms)"
+        range 200 10000
+        default 1000
+
+    config IVTS_SD_ENABLE
+        bool "Dùng thẻ SD (log + offline queue)"
+        default y
+    config IVTS_SD_LOG_FILE_MAX
+        int "Kích thước tối đa một file log (byte)"
+        depends on IVTS_SD_ENABLE
+        default 262144
+    config IVTS_SD_LOG_QUOTA
+        int "Tổng dung lượng log (byte)"
+        depends on IVTS_SD_ENABLE
+        default 4194304
+    config IVTS_QUEUE_SEGMENT_BYTES
+        int "Kích thước một đoạn offline queue (byte)"
+        depends on IVTS_SD_ENABLE
+        default 32768
+    config IVTS_QUEUE_MAX_SEGMENTS
+        int "Số đoạn offline queue tối đa"
+        depends on IVTS_SD_ENABLE
+        range 2 4096
+        default 256
+    config IVTS_DIAG_STACK_LOG
+        bool "Log stack high-water của mọi task mỗi 60 s"
+        default n
+        select FREERTOS_USE_TRACE_FACILITY
+        help
+            Ghi log stack còn trống của từng task và thống kê heap mỗi 60 giây bằng
+            uxTaskGetSystemState(). Bật khi cần đo kích thước stack, sau đó điều chỉnh task_stack
+            trong app_init.c. Tắt ở bản phát hành.
+endmenu

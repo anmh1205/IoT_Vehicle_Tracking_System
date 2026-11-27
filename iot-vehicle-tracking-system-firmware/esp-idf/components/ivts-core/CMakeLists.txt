@@ -1,0 +1,20 @@
+idf_component_register(
+    SRCS
+        "src/base/err.c"
+        "src/base/str.c"
+        "src/base/backoff.c"
+        "src/base/crc32.c"
+        "src/base/civil.c"
+        "src/model/config.c"
+        "src/model/record.c"
+        "src/event/event.c"
+        "src/payload/json_writer.c"
+        "src/payload/json_reader.c"
+        "src/payload/payload.c"
+        "src/fsm/axes.c"
+        "src/fsm/fsm.c"
+        "src/ota/contract.c"
+        "src/ota/confirm.c"
+    INCLUDE_DIRS
+        "include"
+)
