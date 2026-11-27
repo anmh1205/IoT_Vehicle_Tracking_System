@@ -1,5 +1,5 @@
 #include <assert.h>
-#include "publish/outbox_calc.h"
+#include "publish/publish.h"
 
 int main(void)
 {

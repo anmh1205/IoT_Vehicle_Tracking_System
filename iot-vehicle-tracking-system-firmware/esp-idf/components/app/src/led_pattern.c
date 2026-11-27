@@ -1,4 +1,4 @@
-#include "led_pattern.h"
+#include "power.h"
 #include "board/board_sensors.h"
 
 typedef struct {

@@ -1,7 +1,7 @@
-#include "cmd_handlers.h"
+#include "command/command.h"
 #include <stddef.h>
 #include <string.h>
-#include "device/app_device.h"
+#include "device/device.h"
 #include "storage/storage.h"
 
 typedef enum { CMD_CONFIG_U16, CMD_CONFIG_BOOL } cmd_config_kind_t;

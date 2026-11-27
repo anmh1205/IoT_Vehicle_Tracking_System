@@ -1,4 +1,4 @@
-#include "app_clock.h"
+#include "app_internal.h"
 #include <stddef.h>
 #include "board/board.h"
 #include "platform/platform.h"

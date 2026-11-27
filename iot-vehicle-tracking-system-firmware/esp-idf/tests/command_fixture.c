@@ -1,13 +1,13 @@
 #include "esp_timer.h"
 #include <assert.h>
 #include <string.h>
-#include "app_clock.h"
-#include "device/app_device.h"
-#include "telemetry/telemetry_snapshot.h"
+#include "app_internal.h"
+#include "device/device.h"
+#include "telemetry.h"
 #include "command/command.h"
-#include "publish/messages.h"
-#include "publish/outbox.h"
-#include "session/session_tracker.h"
+#include "publish/publish.h"
+#include "publish/publish.h"
+#include "session_tracker.h"
 #include "esp_system.h"
 #include "ivts_core/payload/json_reader.h"
 #include "modem_task.h"
@@ -15,7 +15,7 @@
 #include "slots/modem_slots.h"
 #include "ota/ota.h"
 #include "storage/storage.h"
-#include "persist/app_records.h"
+#include "persist/persist.h"
 
 static uint64_t s_now = 1u;
 

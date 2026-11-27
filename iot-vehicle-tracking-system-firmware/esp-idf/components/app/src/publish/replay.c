@@ -1,10 +1,7 @@
-#include "replay.h"
-#include "app_clock.h"
-#include "app_timing.h"
-#include "messages.h"
-#include "publisher.h"
-#include "link/app_link.h"
-#include "session/session_tracker.h"
+#include "publish/publish.h"
+#include "app_internal.h"
+#include "device/device.h"
+#include "session_tracker.h"
 #include "storage/storage.h"
 
 static uint32_t s_replay_token;

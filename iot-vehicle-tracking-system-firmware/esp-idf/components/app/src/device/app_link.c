@@ -1,4 +1,4 @@
-#include "app_link.h"
+#include "device/device.h"
 
 static ivts_link_t s_link;
 

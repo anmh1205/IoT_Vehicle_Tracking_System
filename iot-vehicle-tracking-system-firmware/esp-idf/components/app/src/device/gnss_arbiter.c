@@ -1,4 +1,4 @@
-#include "gnss_arbiter.h"
+#include "device/device.h"
 #include "ivts_core/fsm/fsm.h"
 #include "modem/modem.h"
 

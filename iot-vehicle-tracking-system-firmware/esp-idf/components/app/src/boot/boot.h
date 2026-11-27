@@ -1,6 +1,13 @@
 #pragma once
-#include "ivts_core/event/event.h"
+#include <stdbool.h>
 #include "ivts_core/model/config.h"
+#include "ivts_core/event/event.h"
+
+/* Initialize components in dependency order before starting the app task. */
+bool app_boot_init(void);
+
+/* Convert device policy into the axes and FSM parameters used by the app task. */
+void app_config_apply(const ivts_config_t *config);
 
 /* Bring up components with PCB pin assignments and one common event sink. */
 bool app_wiring_init_board(ivts_sink_t sink);

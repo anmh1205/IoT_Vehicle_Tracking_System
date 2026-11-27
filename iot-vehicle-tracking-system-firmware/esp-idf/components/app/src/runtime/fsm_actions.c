@@ -1,12 +1,9 @@
-#include "fsm_actions.h"
+#include "runtime/runtime.h"
 #include "command/command.h"
-#include "device/app_device.h"
+#include "device/device.h"
 #include "obd/obd.h"
-#include "power/gnss_arbiter.h"
-#include "power/sleep_controller.h"
-#include "publish/messages.h"
-#include "publish/outbox.h"
-#include "publish/replay.h"
+#include "power.h"
+#include "publish/publish.h"
 
 void app_fsm_actions_execute(const ivts_fsm_out_t *o, ivts_fsm_t *fsm, ivts_axes_t *axes,
                              const ivts_axes_cfg_t *axes_cfg)

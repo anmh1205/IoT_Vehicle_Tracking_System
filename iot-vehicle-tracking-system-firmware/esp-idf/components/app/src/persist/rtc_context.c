@@ -19,8 +19,8 @@
  * ngữ cảnh, còn app_init_all() cấp boot_id mới từ NVS mỗi khi ngữ cảnh không hợp lệ.
  */
 
-#include "rtc_context.h"
-#include "app_msg_seq.h"
+#include "persist/persist.h"
+#include "app_internal.h"
 #include <stddef.h>
 #include <string.h>
 #include "esp_attr.h"

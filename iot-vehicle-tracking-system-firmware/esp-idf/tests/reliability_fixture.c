@@ -6,8 +6,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "at/at_engine.h"
-#include "app_msg_seq.h"
-#include "session/session_tracker.h"
+#include "app_internal.h"
+#include "session_tracker.h"
 #include "board/board.h"
 #include "elm/elm327.h"
 #include "ivts_core/model/record.h"
@@ -23,7 +23,7 @@
 #include "storage_internal.h"
 #include "queue/queue.h"
 #include "queue/queue_frame.h"
-#include "persist/app_records.h"
+#include "persist/persist.h"
 
 #define FIRST "sd/q/Q0000000.BIN"
 #define SECOND "sd/q/Q0000001.BIN"

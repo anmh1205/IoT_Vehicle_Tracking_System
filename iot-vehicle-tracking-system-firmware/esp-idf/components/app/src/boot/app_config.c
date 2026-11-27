@@ -1,7 +1,7 @@
-#include "app_config.h"
-#include "app_timing.h"
+#include "boot/boot.h"
+#include "app_internal.h"
 #include "board/board.h"
-#include "runtime/app_task.h"
+#include "runtime/runtime.h"
 #include "sdkconfig.h"
 
 void app_config_apply(const ivts_config_t *c)

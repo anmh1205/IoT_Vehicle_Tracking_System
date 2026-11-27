@@ -1,4 +1,4 @@
-#include "persist/app_records.h"
+#include "persist/persist.h"
 /**
  * @file session_tracker.c
  * @brief Theo dõi phiên theo ignition và lưu các mốc chưa có PUBACK trong NVS.
@@ -8,10 +8,7 @@
  */
 
 #include "session_tracker.h"
-#include "app_clock.h"
-#include "app_log.h"
-#include "app_msg_seq.h"
-#include "app_timing.h"
+#include "app_internal.h"
 #include <string.h>
 #include "esp_log.h"
 #include "ivts_core/payload/meta.h"

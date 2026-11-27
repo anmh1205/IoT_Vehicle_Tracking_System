@@ -1,14 +1,10 @@
-#include "app_dispatch.h"
-#include "app_events.h"
-#include "app_task.h"
-#include "app_log.h"
+#include "runtime/runtime.h"
+#include "app_internal.h"
 #include "esp_log.h"
-#include "link/app_link.h"
+#include "device/device.h"
 #include "modem/modem.h"
-#include "publish/outbox.h"
-#include "publish/publisher.h"
-#include "publish/replay.h"
-#include "telemetry/telemetry_snapshot.h"
+#include "publish/publish.h"
+#include "telemetry.h"
 
 typedef void (*app_event_handler_t)(const ivts_event_t *);
 

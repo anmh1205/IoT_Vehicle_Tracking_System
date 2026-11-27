@@ -1,6 +1,6 @@
-#include "publisher.h"
+#include "publish/publish.h"
 #include "esp_log.h"
-#include "link/app_link.h"
+#include "device/device.h"
 
 static bool s_publish_in_flight;
 static app_msg_kind_t s_in_flight_kind;

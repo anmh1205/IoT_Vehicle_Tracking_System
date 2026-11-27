@@ -1,7 +1,7 @@
-#include "persist/app_records.h"
-#include "cmd_receipts.h"
+#include "persist/persist.h"
+#include "command/command.h"
 #include <string.h>
-#include "app_log.h"
+#include "app_internal.h"
 #include "esp_log.h"
 #include "storage/storage.h"
 

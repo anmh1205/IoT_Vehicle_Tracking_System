@@ -1,24 +1,127 @@
-#include "app_task.h"
-#include "app_dispatch.h"
-#include "fsm_actions.h"
-#include "alarm/motion_alarm.h"
-#include "app_clock.h"
-#include "app_log.h"
-#include "app_timing.h"
+/**
+ * @file app_task.c
+ * @brief Queue sự kiện của app và việc tạo task "app".
+ *
+ * ## Mô hình thực thi
+ *
+ * Task "app" (configured by boot/task_table.h):
+ * - App consumes these events and owns application state.
+ *
+ * Queue s_event_queue (APP_QUEUE_LEN phần tử, mỗi phần tử là một ivts_event_t sao chép theo giá trị):
+ * - Producer: task "modem", "board", "storage", "obd", "ota" gọi sink_fn() từ ngữ cảnh task.
+ * - Không có producer nào chạy trong ISR: ISR của IMU chỉ notify task "board".
+ * - sink_fn() dùng timeout 0 nên producer không bao giờ bị chặn bởi app chậm. Queue đầy thì
+ *   sự kiện bị bỏ, trả IVTS_ERR_FULL và tăng s_drops.
+ * - Sự kiện chỉ mang giá trị nhỏ; dữ liệu lớn nằm trong "slot" của component sở hữu và được
+ *   lấy bằng hàm riêng sau khi nhận sự kiện báo hiệu.
+ *
+ * ## Khi reset hoặc mất nguồn
+ *
+ * Queue nằm trong RAM nên sự kiện chưa xử lý bị mất khi reset. Dữ liệu cần bền vững
+ * (offline queue, cấu hình, OTA pending) do storage ghi riêng, không đi qua queue này.
+ */
+
+#include "runtime/runtime.h"
+#include <stdatomic.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+#include "freertos/task.h"
+#include "app_internal.h"
+#include "esp_heap_caps.h"
+#include "esp_log.h"
+#include "sdkconfig.h"
+#include "motion_alarm.h"
 #include "board/board_power.h"
 #include "command/command.h"
-#include "device/app_device.h"
-#include "diag/app_diag.h"
-#include "esp_log.h"
-#include "fw_update/fw_update.h"
-#include "link/app_link.h"
-#include "power/led_pattern.h"
-#include "power/sleep_controller.h"
-#include "publish/outbox.h"
-#include "publish/publisher.h"
-#include "session/session_tracker.h"
+#include "device/device.h"
+#include "fw_update.h"
+#include "power.h"
+#include "publish/publish.h"
+#include "session_tracker.h"
 #include "storage/storage.h"
-#include "telemetry/telemetry_snapshot.h"
+#include "telemetry.h"
+
+#define APP_QUEUE_LEN   32     /* Số sự kiện tối đa chờ xử lý. */
+
+static QueueHandle_t s_event_queue;                  /* Queue sự kiện; tạo một lần trong app_events_init(). */
+static _Atomic uint32_t s_drops;           /* Số sự kiện bỏ do đầy; nhiều task tăng đồng thời. */
+
+/**
+ * @brief Sink của app: sao chép sự kiện vào queue mà không chờ.
+ * @return IVTS_OK nếu đã xếp hàng; IVTS_ERR_FULL nếu queue đầy (sự kiện bị bỏ và được đếm).
+ * @note Gọi từ ngữ cảnh task của bất kỳ component nào; không gọi từ ISR.
+ */
+static ivts_err_t sink_fn(void *ctx, const ivts_event_t *ev)
+{
+    (void)ctx;
+    if (xQueueSend(s_event_queue, ev, 0) == pdTRUE) {
+        return IVTS_OK;
+    }
+    atomic_fetch_add_explicit(&s_drops, 1u, memory_order_relaxed);
+    return IVTS_ERR_FULL;
+}
+
+bool app_events_init(void)
+{
+    s_event_queue = xQueueCreate(APP_QUEUE_LEN, sizeof(ivts_event_t));
+    return s_event_queue != NULL;
+}
+
+ivts_sink_t app_events_sink(void)
+{
+    return (ivts_sink_t){ .fn = sink_fn, .ctx = NULL };
+}
+
+bool app_events_receive(ivts_event_t *ev, uint32_t timeout_ms)
+{
+    return xQueueReceive(s_event_queue, ev, pdMS_TO_TICKS(timeout_ms)) == pdTRUE;
+}
+
+uint32_t app_events_drops(void) { return atomic_load_explicit(&s_drops, memory_order_relaxed); }
+
+static void app_task_run(void *arg);
+
+bool app_task_start(uint32_t stack_bytes, uint8_t priority)
+{
+    return xTaskCreate(app_task_run, "app", stack_bytes, NULL, priority, NULL) == pdPASS;
+}
+
+/**
+ * Chẩn đoán runtime: stack high-water-mark của từng task và bộ nhớ heap.
+ *
+ * Chỉ được biên dịch đầy đủ khi bật CONFIG_IVTS_DIAG_STACK_LOG; ngược lại app_diag_tick() rỗng.
+ * Hàm chỉ gọi từ task "app" nên bộ đệm static không cần khoá.
+ */
+
+#if CONFIG_IVTS_DIAG_STACK_LOG
+#define MAX_TASKS 24   /* Số task tối đa ghi log; nhiều hơn thì bỏ qua lần log đó. */
+
+/**
+ * @brief Mỗi 60 giây ghi log stack còn trống của từng task và thống kê heap.
+ *
+ * Trên ESP-IDF StackType_t là uint8_t nên high-water-mark tính bằng byte. Mức còn trống nên
+ * giữ tối thiểu khoảng 1 KB sau khi chạy qua mọi đường thực thi (OTA, replay, OBD diag).
+ */
+static void app_diag_tick(uint64_t now_ms)
+{
+    static uint64_t next;
+    if (now_ms < next) { return; }
+    next = now_ms + DIAG_PERIOD_MS;
+    static TaskStatus_t st[MAX_TASKS];             /* static để không tốn stack (~1 KB); chỉ task "app" gọi. */
+    UBaseType_t n = uxTaskGetSystemState(st, MAX_TASKS, NULL);
+    if (n == 0u) { ESP_LOGW(APP_TAG, "diag: hơn %d task", MAX_TASKS); return; }
+    for (UBaseType_t i = 0; i < n; i++) {
+        ESP_LOGI(APP_TAG, "hwm %-12s prio %2u free %5u B", st[i].pcTaskName,
+                 (unsigned)st[i].uxBasePriority, (unsigned)st[i].usStackHighWaterMark);
+    }
+    ESP_LOGI(APP_TAG, "heap free %u min %u largest %u", (unsigned)heap_caps_get_free_size(MALLOC_CAP_8BIT),
+             (unsigned)heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT),
+             (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
+}
+#else
+/** Bản rỗng khi CONFIG_IVTS_DIAG_STACK_LOG tắt. */
+static void app_diag_tick(uint64_t now_ms) { (void)now_ms; }
+#endif
 
 static ivts_axes_t s_axes;
 static ivts_axes_cfg_t s_axes_cfg;
@@ -96,7 +199,7 @@ static void refresh_device_state(bool changed)
     }
 }
 
-void app_task_run(void *arg)
+static void app_task_run(void *arg)
 {
     (void)arg;
     board_wake_t bw = board_wake_cause();

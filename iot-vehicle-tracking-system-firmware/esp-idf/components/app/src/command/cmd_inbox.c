@@ -1,11 +1,8 @@
-#include "command.h"
-#include "cmd_handlers.h"
-#include "cmd_receipts.h"
+#include "command/command.h"
 #include <string.h>
-#include "app_clock.h"
-#include "app_timing.h"
+#include "app_internal.h"
 #include "modem/modem.h"
-#include "publish/messages.h"
+#include "publish/publish.h"
 
 #define CMD_TOKEN_CAPACITY 64
 

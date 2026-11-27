@@ -9,7 +9,9 @@ def test_control_priority(tmp_path):
     executable = tmp_path / "outbox-calc-fixture"
     build_fixture(
         executable,
-        [FIRMWARE / "tests/outbox_calc_fixture.c", app / "publish/outbox_calc.c"],
-        ["-I", app, "-I", components / "modem/include"],
+        [FIRMWARE / "tests/outbox_calc_fixture.c", app / "publish/outbox.c"],
+        ["-I", app, "-I", FIRMWARE / "tests/stubs", "-ffunction-sections",
+         *[flag for name in ("board", "modem") for flag in ("-I", components / name / "include")]],
+        linker_flags=["-Wl,--gc-sections"],
     )
     subprocess.run([executable], check=True, timeout=5)

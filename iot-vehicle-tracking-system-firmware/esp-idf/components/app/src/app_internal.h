@@ -1,4 +1,20 @@
 #pragma once
+#include <stdbool.h>
+#include <stdint.h>
+
+/** Read monotonic milliseconds since boot. */
+uint64_t app_now(void);
+
+/** Read the board RTC, returning zero when untrusted. May wait for the I2C bus. */
+uint64_t app_clock_unix_ms_or_zero(bool *trusted_out);
+
+#define APP_TAG "app"
+
+/* Allocate and inspect message sequence numbers in the app task. */
+uint32_t app_msg_seq_next(void);
+uint32_t app_msg_seq_current(void);
+/* Restore the sequence when loading or saving a deep-sleep RTC context. */
+void app_msg_seq_restore(uint32_t seq);
 
 #define APP_TICK_MS                100u
 #define INIT_RESTART_DELAY_MS    10000u

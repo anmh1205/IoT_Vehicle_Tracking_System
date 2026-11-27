@@ -1,13 +1,10 @@
-#include "persist/app_records.h"
+#include "persist/persist.h"
 #include "fw_update.h"
 #include <string.h>
-#include "app_clock.h"
-#include "app_log.h"
-#include "device/app_device.h"
-#include "telemetry/telemetry_snapshot.h"
+#include "app_internal.h"
+#include "device/device.h"
+#include "telemetry.h"
 #include "ivts_core/ota/confirm.h"
-#include "link/app_link.h"
-#include "app_timing.h"
 #include "esp_log.h"
 #include "ivts_core/base/str.h"
 #include "ota/ota.h"
@@ -248,4 +245,16 @@ void app_fw_update_report_sent(void)
 void app_fw_update_note_health_ack(void)
 {
     s_update.has_health_ack = true;
+}
+
+ivts_err_t app_fw_update_prepare_boot(const ivts_ota_cmd_t *cmd, const char *partition)
+{
+    ivts_ota_confirm_ctx_t pending = { .pending = true, .timeout_s = cmd->confirm_timeout_s };
+    bool trusted;
+    uint64_t now = app_clock_unix_ms_or_zero(&trusted);
+    if (trusted) { pending.deadline_unix_ms = now + (uint64_t)pending.timeout_s * 1000u; }
+    (void)ivts_str_copy(pending.job_id, sizeof pending.job_id, cmd->job_id);
+    (void)ivts_str_copy(pending.target_version, sizeof pending.target_version, cmd->version);
+    (void)ivts_str_copy(pending.target_partition, sizeof pending.target_partition, partition);
+    return app_records_ota_confirm_ctx_save(&pending);
 }

@@ -1,4 +1,4 @@
-#include "app_device.h"
+#include "device/device.h"
 #include <stddef.h>
 
 static ivts_config_t s_config;

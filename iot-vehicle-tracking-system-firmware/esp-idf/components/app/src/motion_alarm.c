@@ -1,8 +1,6 @@
-#include "persist/app_records.h"
+#include "persist/persist.h"
 #include "motion_alarm.h"
-#include "app_clock.h"
-#include "app_msg_seq.h"
-#include "app_timing.h"
+#include "app_internal.h"
 #include "storage/storage.h"
 
 static ivts_motion_alarm_t s_alarm;

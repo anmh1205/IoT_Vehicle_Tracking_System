@@ -1,9 +1,7 @@
-#include "command.h"
-#include "cmd_handlers.h"
-#include "app_clock.h"
-#include "telemetry/telemetry_snapshot.h"
-#include "app_timing.h"
-#include "publish/messages.h"
+#include "command/command.h"
+#include "app_internal.h"
+#include "telemetry.h"
+#include "publish/publish.h"
 
 static uint64_t s_deadline_at_ms;
 static bool s_awaiting_publish_ack;

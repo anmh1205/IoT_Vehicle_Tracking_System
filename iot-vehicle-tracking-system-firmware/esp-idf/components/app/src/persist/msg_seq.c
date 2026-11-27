@@ -1,4 +1,4 @@
-#include "app_msg_seq.h"
+#include "app_internal.h"
 
 static uint32_t s_sequence;
 

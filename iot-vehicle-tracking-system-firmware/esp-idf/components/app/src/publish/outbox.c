@@ -1,15 +1,10 @@
-#include "outbox.h"
-#include "messages.h"
-#include "outbox_calc.h"
-#include "publisher.h"
-#include "replay.h"
-#include "alarm/motion_alarm.h"
-#include "app_clock.h"
-#include "app_timing.h"
-#include "fw_update/fw_update.h"
+#include "publish/publish.h"
+#include "motion_alarm.h"
+#include "app_internal.h"
+#include "fw_update.h"
 #include "ivts_core/base/str.h"
-#include "link/app_link.h"
-#include "session/session_tracker.h"
+#include "device/device.h"
+#include "session_tracker.h"
 
 static bool s_status_needs_publish;
 static bool s_event_needs_publish;
@@ -90,4 +85,12 @@ void app_outbox_tick(bool heartbeat)
         break;
     default: break;
     }
+}
+
+app_msg_kind_t app_outbox_pick_next_control_message(bool boundary, bool status, bool firmware, bool event)
+{
+    if (boundary) { return APP_MSG_BOUNDARY; }
+    if (status) { return APP_MSG_STATUS; }
+    if (firmware) { return APP_MSG_FW; }
+    return event ? APP_MSG_EVENT : APP_MSG_NONE;
 }
