@@ -37,9 +37,11 @@ const getSourceLabel = (alert: RecentAlertItem) => {
 export const RecentAlerts = ({
   alerts,
   isLoading,
+  isUnavailable,
 }: {
   alerts: RecentAlertItem[];
   isLoading?: boolean;
+  isUnavailable?: boolean;
 }) => {
   return (
     <Card>
@@ -81,7 +83,7 @@ export const RecentAlerts = ({
             ))}
             {alerts.length === 0 ? (
               <p className="rounded-lg border border-dashed p-3 text-center text-sm text-muted-foreground">
-                Chưa có cảnh báo gần đây.
+                {isUnavailable ? 'Không thể tải các cảnh báo gần đây.' : 'Chưa có cảnh báo gần đây.'}
               </p>
             ) : null}
           </div>

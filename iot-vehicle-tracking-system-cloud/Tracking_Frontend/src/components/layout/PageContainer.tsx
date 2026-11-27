@@ -37,7 +37,7 @@ export const PageContainer = ({
           )}
         >
           <div className="min-w-0">
-            {pageTitle && <h2 className="text-2xl font-bold tracking-tight">{pageTitle}</h2>}
+            {pageTitle && <h1 className="text-2xl font-bold tracking-tight">{pageTitle}</h1>}
             {pageDescription && (
               <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{pageDescription}</p>
             )}

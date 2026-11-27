@@ -15,6 +15,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { navConfig } from '@/config/nav-config';
 import { isSameOrDescendantPath } from '@/config/dashboard-route-registry';
@@ -29,8 +30,12 @@ const isItemActive = (pathname: string, url: string) => isSameOrDescendantPath(p
 
 const AppSidebar = () => {
   const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar();
   const mainItems = useFilteredNavItems(navConfig.main);
   const secondaryItems = useFilteredNavItems(navConfig.secondary);
+  const closeMobileMenu = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -38,7 +43,7 @@ const AppSidebar = () => {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip="IVTS">
-              <Link href="/dashboard/command">
+              <Link href="/dashboard/command" onNavigate={closeMobileMenu}>
                 <BrandLockup
                   size={34}
                   supportingText="V1"
@@ -81,7 +86,11 @@ const AppSidebar = () => {
                         {item.items.map((subItem) => (
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton asChild isActive={isItemActive(pathname, subItem.url)}>
-                              <Link href={subItem.url}>
+                              <Link
+                                href={subItem.url}
+                                aria-current={pathname === subItem.url ? 'page' : undefined}
+                                onNavigate={closeMobileMenu}
+                              >
                                 <span>{subItem.title}</span>
                               </Link>
                             </SidebarMenuSubButton>
@@ -94,7 +103,11 @@ const AppSidebar = () => {
               ) : (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title} isActive={isItemActive(pathname, item.url)}>
-                    <Link href={item.url}>
+                    <Link
+                      href={item.url}
+                      aria-current={pathname === item.url ? 'page' : undefined}
+                      onNavigate={closeMobileMenu}
+                    >
                       <Icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
@@ -113,7 +126,11 @@ const AppSidebar = () => {
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild tooltip={item.title} isActive={isItemActive(pathname, item.url)}>
-                      <Link href={item.url}>
+                      <Link
+                        href={item.url}
+                        aria-current={pathname === item.url ? 'page' : undefined}
+                        onNavigate={closeMobileMenu}
+                      >
                         <Icon className="h-4 w-4" />
                         <span>{item.title}</span>
                       </Link>

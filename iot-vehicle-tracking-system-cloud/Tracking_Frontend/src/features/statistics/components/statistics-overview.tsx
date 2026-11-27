@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { AlertTriangle, Download, Gauge, TimerReset, TrendingUp } from 'lucide-react';
+import { AlertTriangle, Gauge, TimerReset, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,7 @@ import {
 import { FleetUtilizationChart } from './fleet-utilization-chart';
 import { DeviceUptimeChart } from './device-uptime-chart';
 import { formatDateTime, formatNumber } from '@/lib/utils/date/format';
+import { isDateInputRangeValid } from '@/lib/utils/date/range';
 
 const formatFleetLabel = (value: string, interval: 'day' | 'week' | 'month'): string => {
   if (interval === 'month') {
@@ -63,7 +64,8 @@ export const StatisticsOverview = () => {
     [uptimeQuery.data],
   );
 
-  const hasStatisticsError = summaryQuery.isError || fleetQuery.isError || uptimeQuery.isError;
+  const dateRangeValid = isDateInputRangeValid(params);
+  const failedQueries = [summaryQuery, fleetQuery, uptimeQuery].filter((query) => query.isError);
 
   return (
     <div className="space-y-4">
@@ -76,6 +78,9 @@ export const StatisticsOverview = () => {
             id="statistics-from-date"
             type="date"
             value={from}
+            max={to || undefined}
+            aria-invalid={!dateRangeValid}
+            aria-describedby={!dateRangeValid ? 'statistics-date-error' : undefined}
             onChange={(event) => setFrom(event.target.value)}
             className="w-full sm:w-[170px]"
           />
@@ -88,14 +93,17 @@ export const StatisticsOverview = () => {
             id="statistics-to-date"
             type="date"
             value={to}
+            min={from || undefined}
+            aria-invalid={!dateRangeValid}
+            aria-describedby={!dateRangeValid ? 'statistics-date-error' : undefined}
             onChange={(event) => setTo(event.target.value)}
             className="w-full sm:w-[170px]"
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Khoảng thời gian</Label>
+          <Label htmlFor="statistics-interval" className="text-xs text-muted-foreground">Nhóm dữ liệu</Label>
           <Select value={interval} onValueChange={(value) => setInterval(value as typeof interval)}>
-            <SelectTrigger className="w-full sm:w-[170px]">
+            <SelectTrigger id="statistics-interval" className="w-full sm:w-[170px]">
               <SelectValue placeholder="Khoảng thời gian" />
             </SelectTrigger>
             <SelectContent>
@@ -105,59 +113,71 @@ export const StatisticsOverview = () => {
             </SelectContent>
           </Select>
         </div>
-        <Button
-          className="w-full lg:ml-auto lg:w-auto"
-          variant="outline"
-          disabled
-          title="Chưa hỗ trợ xuất báo cáo thống kê theo khoảng thời gian"
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Xuất báo cáo (chưa hỗ trợ)
-        </Button>
       </div>
 
-      {hasStatisticsError ? (
-        <Alert variant="destructive" role="alert">
+      {!dateRangeValid ? (
+        <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Không thể tải dữ liệu thống kê</AlertTitle>
-          <AlertDescription>
-            Không thể xác minh dữ liệu trong khoảng thời gian đã chọn. Vui lòng thử lại;
-            hệ thống không thay thế dữ liệu thiếu bằng các con số ước tính.
+          <AlertDescription id="statistics-date-error">
+            Chọn đủ hai ngày. Ngày bắt đầu phải trước hoặc trùng ngày kết thúc.
           </AlertDescription>
         </Alert>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          title="Tổng thời gian hoạt động"
-          value={summaryQuery.isError ? '—' : `${formatNumber(summaryQuery.data?.totalRuntimeHours ?? 0)}h`}
-          icon={<TimerReset className="h-4 w-4" />}
-          isLoading={summaryQuery.isLoading}
-        />
-        <StatCard
-          title="Độ ổn định kết nối"
-          value={summaryQuery.isError ? '—' : `${formatNumber(summaryQuery.data?.averageUptimePercent ?? 0)}%`}
-          icon={<TrendingUp className="h-4 w-4" />}
-          isLoading={summaryQuery.isLoading}
-        />
-        <StatCard
-          title="Tổng phiên"
-          value={summaryQuery.isError ? '—' : (summaryQuery.data?.totalSessions ?? 0)}
-          icon={<Gauge className="h-4 w-4" />}
-          isLoading={summaryQuery.isLoading}
-        />
-        <StatCard
-          title="Tổng cảnh báo"
-          value={summaryQuery.isError ? '—' : (summaryQuery.data?.totalAlerts ?? 0)}
-          icon={<AlertTriangle className="h-4 w-4" />}
-          isLoading={summaryQuery.isLoading}
-        />
-      </div>
+      {failedQueries.length > 0 ? (
+        <Alert variant="destructive" role="alert">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Không thể tải dữ liệu thống kê</AlertTitle>
+          <AlertDescription>
+            <p>Một phần dữ liệu trong khoảng thời gian đã chọn chưa tải được.</p>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={failedQueries.some((query) => query.isFetching)}
+              onClick={() => {
+                for (const query of failedQueries) void query.refetch();
+              }}
+            >
+              Thử lại
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <FleetUtilizationChart data={fleetData} isLoading={fleetQuery.isLoading} />
-        <DeviceUptimeChart data={uptimeData} isLoading={uptimeQuery.isLoading} />
-      </div>
+      {dateRangeValid ? (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              title="Tổng thời gian hoạt động"
+              value={summaryQuery.data ? `${formatNumber(summaryQuery.data.totalRuntimeHours)} giờ` : '—'}
+              icon={<TimerReset className="h-4 w-4" />}
+              isLoading={summaryQuery.isLoading}
+            />
+            <StatCard
+              title="Độ ổn định kết nối"
+              value={summaryQuery.data ? `${formatNumber(summaryQuery.data.averageUptimePercent)}%` : '—'}
+              icon={<TrendingUp className="h-4 w-4" />}
+              isLoading={summaryQuery.isLoading}
+            />
+            <StatCard
+              title="Tổng phiên"
+              value={summaryQuery.data?.totalSessions ?? '—'}
+              icon={<Gauge className="h-4 w-4" />}
+              isLoading={summaryQuery.isLoading}
+            />
+            <StatCard
+              title="Tổng cảnh báo"
+              value={summaryQuery.data?.totalAlerts ?? '—'}
+              icon={<AlertTriangle className="h-4 w-4" />}
+              isLoading={summaryQuery.isLoading}
+            />
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <FleetUtilizationChart data={fleetData} isLoading={fleetQuery.isLoading} />
+            <DeviceUptimeChart data={uptimeData} isLoading={uptimeQuery.isLoading} />
+          </div>
+        </>
+      ) : null}
     </div>
   );
 };

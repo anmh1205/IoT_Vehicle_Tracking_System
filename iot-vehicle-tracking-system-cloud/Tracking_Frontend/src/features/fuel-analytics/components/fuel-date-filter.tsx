@@ -14,6 +14,7 @@ interface FuelDateFilterProps {
   from: string;
   to: string;
   interval: 'day' | 'week' | 'month';
+  dateRangeValid: boolean;
   onFromChange: (value: string) => void;
   onToChange: (value: string) => void;
   onIntervalChange: (value: 'day' | 'week' | 'month') => void;
@@ -23,12 +24,13 @@ export const FuelDateFilter = ({
   from,
   to,
   interval,
+  dateRangeValid,
   onFromChange,
   onToChange,
   onIntervalChange,
 }: FuelDateFilterProps) => {
   return (
-    <div className="flex flex-wrap items-end gap-2">
+    <div className="grid gap-3 rounded-xl border bg-muted/20 p-4 sm:flex sm:flex-wrap sm:items-end">
       <div className="space-y-1">
         <Label htmlFor="fuel-from-date" className="text-xs text-muted-foreground">
           Từ ngày
@@ -36,8 +38,11 @@ export const FuelDateFilter = ({
         <Input
           id="fuel-from-date"
           type="date"
-          className="w-[170px]"
+          className="w-full sm:w-[170px]"
           value={from}
+          max={to || undefined}
+          aria-invalid={!dateRangeValid}
+          aria-describedby={!dateRangeValid ? 'fuel-date-error' : undefined}
           onChange={(e) => onFromChange(e.target.value)}
         />
       </div>
@@ -48,15 +53,18 @@ export const FuelDateFilter = ({
         <Input
           id="fuel-to-date"
           type="date"
-          className="w-[170px]"
+          className="w-full sm:w-[170px]"
           value={to}
+          min={from || undefined}
+          aria-invalid={!dateRangeValid}
+          aria-describedby={!dateRangeValid ? 'fuel-date-error' : undefined}
           onChange={(e) => onToChange(e.target.value)}
         />
       </div>
       <div className="space-y-1">
-        <Label className="text-xs text-muted-foreground">Khoảng thời gian</Label>
+        <Label htmlFor="fuel-interval" className="text-xs text-muted-foreground">Nhóm dữ liệu</Label>
         <Select value={interval} onValueChange={(v) => onIntervalChange(v as typeof interval)}>
-          <SelectTrigger className="w-[170px]">
+          <SelectTrigger id="fuel-interval" className="w-full sm:w-[170px]">
             <SelectValue placeholder="Khoảng thời gian" />
           </SelectTrigger>
           <SelectContent>

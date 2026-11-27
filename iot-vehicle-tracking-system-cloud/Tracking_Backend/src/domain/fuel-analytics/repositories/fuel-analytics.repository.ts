@@ -1,4 +1,5 @@
 import { pool } from '@/infrastructure/database/pool';
+import { tripReadScopeParams, tripVisibleTo, type TripReadScope } from '@/domain/trip/repositories/trip-read-scope';
 import type {
   FuelDateRange,
   FuelInterval,
@@ -13,19 +14,20 @@ interface SummaryRow {
   trip_count: string;
 }
 
-export const getSummary = async (range: FuelDateRange): Promise<FuelSummary> => {
+export const getSummary = async (range: FuelDateRange, actor: TripReadScope): Promise<FuelSummary> => {
   const query = `
     SELECT
       COALESCE(SUM(fuel_used_liters), 0)::text AS total_fuel,
       COALESCE(SUM(distance_km), 0)::text AS total_distance,
       COUNT(*)::text AS trip_count
-    FROM trips
+    FROM trips t
     WHERE COALESCE(actual_start, planned_start, created_at) BETWEEN $1 AND $2
       AND fuel_used_liters IS NOT NULL
       AND fuel_used_liters > 0
+      AND ${tripVisibleTo(actor, 3)}
   `;
 
-  const result = await pool.query<SummaryRow>(query, [range.from, range.to]);
+  const result = await pool.query<SummaryRow>(query, [range.from, range.to, ...tripReadScopeParams(actor)]);
   const row = result.rows[0];
 
   const totalFuelUsed = parseFloat(row?.total_fuel ?? '0');
@@ -50,7 +52,7 @@ interface VehicleFuelRow {
   trip_count: string;
 }
 
-export const getByVehicle = async (range: FuelDateRange): Promise<VehicleFuelData[]> => {
+export const getByVehicle = async (range: FuelDateRange, actor: TripReadScope): Promise<VehicleFuelData[]> => {
   const query = `
     SELECT
       t.vehicle_id,
@@ -64,11 +66,12 @@ export const getByVehicle = async (range: FuelDateRange): Promise<VehicleFuelDat
       AND t.fuel_used_liters IS NOT NULL
       AND t.fuel_used_liters > 0
       AND t.vehicle_id IS NOT NULL
+      AND ${tripVisibleTo(actor, 3)}
     GROUP BY t.vehicle_id, v.plate_number
-    ORDER BY total_fuel DESC
+    ORDER BY SUM(t.fuel_used_liters) DESC, t.vehicle_id
   `;
 
-  const result = await pool.query<VehicleFuelRow>(query, [range.from, range.to]);
+  const result = await pool.query<VehicleFuelRow>(query, [range.from, range.to, ...tripReadScopeParams(actor)]);
 
   return result.rows.map((row) => {
     const totalFuel = parseFloat(row.total_fuel);
@@ -86,12 +89,6 @@ export const getByVehicle = async (range: FuelDateRange): Promise<VehicleFuelDat
   });
 };
 
-const toBucketExpression = (interval: FuelInterval): string => {
-  if (interval === 'month') return "DATE_TRUNC('month', ts)";
-  if (interval === 'week') return "DATE_TRUNC('week', ts)";
-  return "DATE_TRUNC('day', ts)";
-};
-
 const toSeriesStep = (interval: FuelInterval): string => {
   if (interval === 'month') return '1 month';
   if (interval === 'week') return '1 week';
@@ -107,35 +104,39 @@ interface TrendRow {
 export const getTrends = async (
   range: FuelDateRange,
   interval: FuelInterval,
+  actor: TripReadScope,
 ): Promise<FuelTrend[]> => {
   const step = toSeriesStep(interval);
-  const bucketExpr = toBucketExpression(interval);
-
   const query = `
     WITH series AS (
-      SELECT generate_series($1::timestamptz, $2::timestamptz, $3::interval) AS ts
+      SELECT generate_series(
+        DATE_TRUNC($4, $1::timestamptz),
+        DATE_TRUNC($4, $2::timestamptz),
+        $3::interval
+      ) AS bucket
     ),
     bucketed AS (
       SELECT
-        ${bucketExpr.replace('ts', 'COALESCE(actual_start, planned_start, created_at)')} AS bucket,
+        DATE_TRUNC($4, COALESCE(actual_start, planned_start, created_at)) AS bucket,
         COALESCE(SUM(fuel_used_liters), 0)::text AS fuel_used,
         COALESCE(SUM(distance_km), 0)::text AS distance
-      FROM trips
+      FROM trips t
       WHERE COALESCE(actual_start, planned_start, created_at) BETWEEN $1 AND $2
         AND fuel_used_liters IS NOT NULL
         AND fuel_used_liters > 0
+        AND ${tripVisibleTo(actor, 5)}
       GROUP BY bucket
     )
     SELECT
-      ${bucketExpr} AS label,
+      series.bucket AS label,
       COALESCE(bucketed.fuel_used, '0') AS fuel_used,
       COALESCE(bucketed.distance, '0') AS distance
     FROM series
-    LEFT JOIN bucketed ON bucketed.bucket = ${bucketExpr}
+    LEFT JOIN bucketed ON bucketed.bucket = series.bucket
     ORDER BY label ASC
   `;
 
-  const result = await pool.query<TrendRow>(query, [range.from, range.to, step]);
+  const result = await pool.query<TrendRow>(query, [range.from, range.to, step, interval, ...tripReadScopeParams(actor)]);
 
   return result.rows.map((row) => {
     const fuelUsed = parseFloat(row.fuel_used);

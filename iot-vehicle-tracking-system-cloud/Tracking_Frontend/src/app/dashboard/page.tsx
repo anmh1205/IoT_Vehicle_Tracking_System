@@ -91,13 +91,14 @@ const DashboardPage = () => {
               variant="outline"
               size="sm"
               className="mt-2"
+              disabled={dashboardQueries.some((query) => query.isError && query.isFetching)}
               onClick={() => {
-                for (const query of dashboardQueries) {
+                for (const query of dashboardQueries.filter((query) => query.isError)) {
                   void query.refetch();
                 }
               }}
             >
-              Thử lại tất cả
+              Thử lại
             </Button>
           </AlertDescription>
         </Alert>
@@ -106,15 +107,15 @@ const DashboardPage = () => {
       <OverviewStats stats={statsQuery.data} isLoading={statsQuery.isLoading} />
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <BarGraph data={deviceActivityQuery.data ?? []} isLoading={deviceActivityQuery.isLoading} />
-        <PieGraph data={distributionQuery.data ?? []} isLoading={distributionQuery.isLoading} />
+        <BarGraph data={deviceActivityQuery.data ?? []} isLoading={deviceActivityQuery.isLoading} isUnavailable={deviceActivityQuery.isError} />
+        <PieGraph data={distributionQuery.data ?? []} isLoading={distributionQuery.isLoading} isUnavailable={distributionQuery.isError} />
       </div>
 
-      <AreaGraph data={fleetRuntimeQuery.data ?? []} isLoading={fleetRuntimeQuery.isLoading} />
+      <AreaGraph data={fleetRuntimeQuery.data ?? []} isLoading={fleetRuntimeQuery.isLoading} isUnavailable={fleetRuntimeQuery.isError} />
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <RecentAlerts alerts={alerts} isLoading={recentAlertsQuery.isLoading} />
-        <ActivityFeed events={activityQuery.data ?? []} isLoading={activityQuery.isLoading} />
+        <RecentAlerts alerts={alerts} isLoading={recentAlertsQuery.isLoading} isUnavailable={recentAlertsQuery.isError} />
+        <ActivityFeed events={activityQuery.data ?? []} isLoading={activityQuery.isLoading} isUnavailable={activityQuery.isError} />
       </div>
 
       <QuickActions />

@@ -13,7 +13,7 @@ The frontend now has a split between:
 
 3. **Protected operational dashboard (`/dashboard/*`)**
    - Keeps the existing authenticated workflow and route tree.
-   - Still relies on `session_token` middleware checks before access.
+   - Next.js Proxy checks for the `session_token` cookie on protected routes and preserves query parameters when redirecting to sign-in. The backend validates the session and device grants.
 
 ## UI Layer Accessibility Architecture
 The completed remediation spans two UI layers:
@@ -89,6 +89,6 @@ The canonical public MQTT domain is `mqtt.thingdock.dev`, served through `tracki
 - Frontend device status semantics now treat `online` as parked heartbeat visibility instead of a driving-equivalent state, including updated labels and parking-profile hints in device detail surfaces.
 
 ## Traceability
-- See root redirect and split login entry changes in `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/page.tsx`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/login/page.tsx`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/auth/components/login-form.tsx`, and `iot-vehicle-tracking-system-cloud/Tracking_Frontend/middleware.ts`.
+- See root redirect and split login entry changes in `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/page.tsx`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/login/page.tsx`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/auth/components/login-form.tsx`, and `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/proxy.ts`.
 - See related dashboard accessibility changes in `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/**/*` for controls, layout, and form validation.
 - See related mobile changes in `iot-vehicle-tracking-system-cloud/Tracking_Mobile/lib/features/webview/**/*` and `iot-vehicle-tracking-system-cloud/Tracking_Mobile/lib/widgets/**/*` for semantic messaging and loading/error behavior.

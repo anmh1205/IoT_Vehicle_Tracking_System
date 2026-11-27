@@ -4,9 +4,11 @@ import type {
   FuelInterval,
 } from '@/domain/fuel-analytics/types/fuel-analytics.types';
 import { createValidationError } from '@/shared/utils/errors.util';
+import type { TripReadScope } from '@/domain/trip/repositories/trip-read-scope';
 
 const DEFAULT_RANGE_DAYS = 30;
 const DEFAULT_FUEL_PRICE_VND = 25000;
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 const parseDate = (value: string | undefined, fallback: Date): Date => {
   if (!value) return fallback;
@@ -23,6 +25,7 @@ const parseRange = (from?: string, to?: string): FuelDateRange => {
 
   const parsedFrom = parseDate(from, defaultFrom);
   const parsedTo = parseDate(to, now);
+  if (to && DATE_ONLY_PATTERN.test(to)) parsedTo.setUTCHours(23, 59, 59, 999);
 
   if (parsedFrom > parsedTo) {
     throw createValidationError('"from" must be earlier than or equal to "to"');
@@ -42,19 +45,19 @@ export const getFuelSummary = async (params: {
   from?: string;
   to?: string;
   fuelPrice?: number;
-}) => {
+}, actor: TripReadScope) => {
   const range = parseRange(params.from, params.to);
   const fuelPrice = params.fuelPrice ?? DEFAULT_FUEL_PRICE_VND;
 
-  const summary = await fuelAnalyticsRepository.getSummary(range);
+  const summary = await fuelAnalyticsRepository.getSummary(range, actor);
   summary.totalCost = Math.round(summary.totalFuelUsed * fuelPrice);
 
   return summary;
 };
 
-export const getFuelByVehicle = async (params: { from?: string; to?: string }) => {
+export const getFuelByVehicle = async (params: { from?: string; to?: string }, actor: TripReadScope) => {
   const range = parseRange(params.from, params.to);
-  const vehicles = await fuelAnalyticsRepository.getByVehicle(range);
+  const vehicles = await fuelAnalyticsRepository.getByVehicle(range, actor);
   return { vehicles };
 };
 
@@ -62,9 +65,9 @@ export const getFuelTrends = async (params: {
   from?: string;
   to?: string;
   interval?: string;
-}) => {
+}, actor: TripReadScope) => {
   const range = parseRange(params.from, params.to);
   const interval = parseInterval(params.interval);
-  const trends = await fuelAnalyticsRepository.getTrends(range, interval);
+  const trends = await fuelAnalyticsRepository.getTrends(range, interval, actor);
   return { trends };
 };

@@ -3,15 +3,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { DeviceActivityPoint } from '@/features/dashboard/hooks/use-dashboard-stats';
+import type { DeviceActivityPoint } from '@/lib/api/dashboard';
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 
 export const BarGraph = ({
   data,
   isLoading,
+  isUnavailable,
 }: {
   data: DeviceActivityPoint[];
   isLoading?: boolean;
+  isUnavailable?: boolean;
 }) => {
   const totalSignals = data.reduce((sum, item) => sum + item.running + item.idle + item.offline, 0);
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
@@ -46,11 +48,7 @@ export const BarGraph = ({
     <Card className="min-w-0">
       <CardHeader>
         <CardTitle>Nhịp kết nối thiết bị trong 7 ngày</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          {totalSignals > 0
-            ? `${totalSignals} tín hiệu kết nối được tổng hợp trong 7 ngày gần nhất`
-            : 'Đang chờ dữ liệu kết nối được đồng bộ từ thiết bị'}
-        </p>
+        {data.length > 0 ? <p className="text-sm text-muted-foreground">{`${totalSignals} sự kiện được ghi nhận trong 7 ngày gần nhất`}</p> : null}
       </CardHeader>
       <CardContent className="min-w-0">
         <div ref={chartContainerRef} className="h-[320px] min-w-0">
@@ -58,7 +56,7 @@ export const BarGraph = ({
             <Skeleton className="h-full w-full" />
           ) : data.length === 0 ? (
             <div className="flex h-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-              Chưa có dữ liệu nhịp kết nối để hiển thị.
+              {isUnavailable ? 'Không thể tải nhịp kết nối.' : 'Chưa có dữ liệu nhịp kết nối để hiển thị.'}
             </div>
           ) : (
             <BarChart width={chartSize.width} height={chartSize.height} data={data} barGap={6}>

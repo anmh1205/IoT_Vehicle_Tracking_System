@@ -73,7 +73,7 @@ const getColumnLabel = <TData, TValue>(column: Column<TData, TValue>) => {
 };
 
 const isInteractiveTarget = (target: EventTarget | null) =>
-  target instanceof HTMLElement &&
+  target instanceof Element &&
   Boolean(
     target.closest(
       'button, a, input, select, textarea, summary, [role="button"], [role="link"], [role="menuitem"], [data-row-click-ignore="true"]',
@@ -339,7 +339,7 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
 
-      {pagination ? (
+      {pagination && table.getPageCount() > 0 ? (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
             Hiển thị {table.getRowModel().rows.length} / {table.getFilteredRowModel().rows.length}{' '}

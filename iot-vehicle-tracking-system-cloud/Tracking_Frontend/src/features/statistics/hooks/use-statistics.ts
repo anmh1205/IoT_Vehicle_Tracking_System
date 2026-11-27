@@ -6,6 +6,7 @@ import {
   type StatisticsSummary,
 } from '@/lib/api/statistics';
 import { toLocalDateInputValue } from '@/lib/utils';
+import { isDateInputRangeValid } from '@/lib/utils/date/range';
 
 export type { StatisticsSummary } from '@/lib/api/statistics';
 
@@ -30,6 +31,7 @@ export const useStatisticsParams = (): StatisticsParams =>
 export const useStatisticsSummary = (params: StatisticsParams) =>
   useQuery<StatisticsSummary>({
     queryKey: ['statistics', 'summary', params],
+    enabled: isDateInputRangeValid(params),
     queryFn: async () => {
       const response = await apiClient.get('/statistics/summary', { params });
       return unwrap<StatisticsSummary>(response.data);
@@ -39,11 +41,13 @@ export const useStatisticsSummary = (params: StatisticsParams) =>
 export const useFleetUtilization = (params: StatisticsParams) =>
   useQuery({
     queryKey: ['statistics', 'fleet-utilization', params],
+    enabled: isDateInputRangeValid(params),
     queryFn: () => statisticsServices.getFleetUsage({ ...params }),
   });
 
 export const useDeviceUptime = (params: StatisticsParams) =>
   useQuery({
     queryKey: ['statistics', 'device-uptime', params],
+    enabled: isDateInputRangeValid(params),
     queryFn: () => statisticsServices.getDeviceUptime({ ...params }),
   });

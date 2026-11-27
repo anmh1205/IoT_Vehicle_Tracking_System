@@ -2,7 +2,7 @@
 
 import { Bell, Car, Cpu, Route } from 'lucide-react';
 import { StatCard } from '@/components/common/stat-card';
-import type { DashboardOverviewStats } from '@/features/dashboard/hooks/use-dashboard-stats';
+import type { DashboardStats } from '@/lib/api/dashboard';
 import { formatNumber } from '@/lib/utils/date/format';
 
 const formatHours = (value: number) => `${formatNumber(value)} giờ`;
@@ -22,13 +22,12 @@ export const OverviewStats = ({
   stats,
   isLoading,
 }: {
-  stats?: DashboardOverviewStats;
+  stats?: DashboardStats;
   isLoading?: boolean;
 }) => {
   const totalDevices = stats?.totalDevices ?? 0;
   const activeDevices = stats?.activeDevices ?? 0;
   const offlineDevices = stats?.offlineDevices ?? 0;
-  const alertsCount = stats?.alertsCount ?? 0;
   const sessionsToday = stats?.sessionsToday ?? 0;
   const runtimeToday = stats?.totalRuntimeToday ?? 0;
   const runtimeWeek = stats?.totalRuntimeWeek ?? 0;
@@ -45,7 +44,7 @@ export const OverviewStats = ({
   const activeDevicesSubtitle =
     inactiveDevices > 0
       ? `${inactiveDevices} thiết bị còn lại đang chậm nhịp hoặc mất kết nối`
-      : 'Toàn bộ thiết bị đang có tín hiệu';
+      : 'Không có thiết bị chậm nhịp hoặc mất kết nối';
   const alertsSubtitle =
     offlineDevices > 0
       ? `${offlineDevices} thiết bị cần kiểm tra kết nối`
@@ -54,8 +53,8 @@ export const OverviewStats = ({
   const tripsTrend =
     sessionsToday > 0 ? `${formatNumber(sessionsPerDevice)} phiên mỗi thiết bị` : 'Chưa phát sinh phiên mới';
   const summaryItems = [
-    { label: 'Tỷ lệ còn tín hiệu', value: `${formatNumber(activeRate)}%` },
-    { label: 'Tỷ lệ mất kết nối', value: `${formatNumber(offlineRate)}%` },
+    { label: 'Tỷ lệ còn tín hiệu', value: totalDevices > 0 ? `${formatNumber(activeRate)}%` : '—' },
+    { label: 'Tỷ lệ mất kết nối', value: totalDevices > 0 ? `${formatNumber(offlineRate)}%` : '—' },
     { label: 'Thời gian hoạt động hôm nay', value: formatDelta(runtimeDelta) },
   ];
 
@@ -64,42 +63,41 @@ export const OverviewStats = ({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Tổng thiết bị"
-          value={totalDevices}
+          value={stats?.totalDevices ?? '—'}
           icon={<Car className="h-4 w-4 text-muted-foreground" />}
-          subtitle={totalDevicesSubtitle}
-          trend={{
-            value: `${activeDevices}/${totalDevices || 1} còn tín hiệu`,
+          subtitle={stats ? totalDevicesSubtitle : undefined}
+          trend={totalDevices > 0 ? {
+            value: `${activeDevices}/${totalDevices} còn tín hiệu`,
             positive: activeRate >= 70,
-          }}
+          } : undefined}
           isLoading={isLoading}
         />
         <StatCard
           title="Thiết bị còn tín hiệu"
-          value={activeDevices}
+          value={stats?.activeDevices ?? '—'}
           icon={<Cpu className="h-4 w-4 text-muted-foreground" />}
-          subtitle={activeDevicesSubtitle}
-          trend={{ value: `${formatNumber(activeRate)}% còn tín hiệu`, positive: activeRate >= 60 }}
+          subtitle={stats ? (totalDevices > 0 ? activeDevicesSubtitle : 'Chưa có thiết bị') : undefined}
+          trend={totalDevices > 0 ? { value: `${formatNumber(activeRate)}% còn tín hiệu`, positive: activeRate >= 60 } : undefined}
           isLoading={isLoading}
         />
         <StatCard
           title="Cảnh báo đang hoạt động"
-          value={alertsCount}
+          value={stats?.alertsCount ?? '—'}
           icon={<Bell className="h-4 w-4 text-muted-foreground" />}
-          subtitle={alertsSubtitle}
-          trend={{ value: `${alertsCount} cảnh báo mở`, positive: false }}
+          subtitle={stats ? alertsSubtitle : undefined}
           isLoading={isLoading}
         />
         <StatCard
-          title="Chuyến đi hôm nay"
-          value={sessionsToday}
+          title="Phiên thiết bị hôm nay"
+          value={stats?.sessionsToday ?? '—'}
           icon={<Route className="h-4 w-4 text-muted-foreground" />}
-          subtitle={tripsSubtitle}
-          trend={{ value: tripsTrend, positive: sessionsPerDevice >= 1 }}
+          subtitle={stats ? tripsSubtitle : undefined}
+          trend={stats ? { value: tripsTrend, positive: sessionsPerDevice >= 1 } : undefined}
           isLoading={isLoading}
         />
       </div>
 
-      {!isLoading ? (
+      {stats ? (
         <div className="grid gap-2 rounded-xl border bg-muted/20 p-2 md:grid-cols-3">
           {summaryItems.map((item) => (
             <div key={item.label} className="rounded-lg bg-background px-3 py-2">

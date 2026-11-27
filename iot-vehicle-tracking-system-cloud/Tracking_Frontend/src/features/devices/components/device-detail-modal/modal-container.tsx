@@ -50,12 +50,8 @@ const toRecord = (value: unknown): Record<string, unknown> | null => {
   return value as Record<string, unknown>;
 };
 
-const getEventLogPresentation = (
-  row: Record<string, unknown>,
-  timestamp: string | null,
-) =>
+const getEventLogPresentation = (row: Record<string, unknown>) =>
   getDashboardEventPresentation({
-    id: String(row.id ?? 'event-log'),
     eventType: String(row.event_type ?? row.eventType ?? 'event'),
     eventCode:
       row.event_code === undefined || row.event_code === null ? null : String(row.event_code),
@@ -63,7 +59,6 @@ const getEventLogPresentation = (
     severity: String(row.severity ?? 'info'),
     deviceId:
       row.device_id === undefined || row.device_id === null ? null : String(row.device_id),
-    serverTimestamp: timestamp ?? new Date().toISOString(),
   });
 
 const buildRawFeed = (params: {
@@ -117,7 +112,7 @@ const buildRawFeed = (params: {
     const diagnostics = extractDiagnosticsPayloadFromEventLog(normalizedRow);
     const isDiagnosticsRow = diagnostics !== null;
     const source: DeviceRawFeedRow['source'] = isDiagnosticsRow ? 'obd-diagnostic' : 'event-log';
-    const presentation = isDiagnosticsRow ? null : getEventLogPresentation(normalizedRow, timestamp);
+    const presentation = isDiagnosticsRow ? null : getEventLogPresentation(normalizedRow);
 
     return {
       id: `event-log-${String(normalizedRow.id ?? index)}`,

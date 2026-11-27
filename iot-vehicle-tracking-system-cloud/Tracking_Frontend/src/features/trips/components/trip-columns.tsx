@@ -26,10 +26,10 @@ const TRIP_STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive
 
 export const getTripColumns = (actions: {
   onPreview: (row: any) => void;
-  onEdit: (row: any) => void;
-  onDelete: (row: any) => void;
-  onStart: (id: number) => void;
-  onEnd: (id: number) => void;
+  onEdit?: (row: any) => void;
+  onDelete?: (row: any) => void;
+  onStart?: (id: number) => void;
+  onEnd?: (id: number) => void;
   startPendingId?: number | null;
   endPendingId?: number | null;
 }): ColumnDef<any>[] => [
@@ -129,32 +129,36 @@ export const getTripColumns = (actions: {
           <Button size="sm" variant="outline" onClick={() => actions.onPreview(row.original)}>
             Xem nhanh
           </Button>
-          <Button size="sm" variant="outline" onClick={() => actions.onEdit(row.original)}>
-            Sửa
-          </Button>
-          {canStart ? (
+          {actions.onEdit ? (
+            <Button size="sm" variant="outline" onClick={() => actions.onEdit?.(row.original)}>
+              Sửa
+            </Button>
+          ) : null}
+          {canStart && actions.onStart ? (
             <Button
               size="sm"
               variant="outline"
               disabled={actions.startPendingId === row.original.id}
-              onClick={() => actions.onStart(row.original.id)}
+              onClick={() => actions.onStart?.(row.original.id)}
             >
               Bắt đầu
             </Button>
           ) : null}
-          {canEnd ? (
+          {canEnd && actions.onEnd ? (
             <Button
               size="sm"
               variant="outline"
               disabled={actions.endPendingId === row.original.id}
-              onClick={() => actions.onEnd(row.original.id)}
+              onClick={() => actions.onEnd?.(row.original.id)}
             >
               Kết thúc
             </Button>
           ) : null}
-          <Button size="sm" variant="destructive" onClick={() => actions.onDelete(row.original)}>
-            Xóa
-          </Button>
+          {actions.onDelete ? (
+            <Button size="sm" variant="destructive" onClick={() => actions.onDelete?.(row.original)}>
+              Xóa
+            </Button>
+          ) : null}
         </div>
       );
     },

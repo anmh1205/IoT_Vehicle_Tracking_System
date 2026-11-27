@@ -15,7 +15,7 @@ const isPublicPath = (pathname: string) => {
     return true;
   }
 
-  if (publicFilePattern.test(pathname)) {
+  if (!pathname.startsWith('/dashboard/') && publicFilePattern.test(pathname)) {
     return true;
   }
 
@@ -30,7 +30,7 @@ const canonicalizeProtectedPath = (pathname: string) => {
   return pathname;
 };
 
-export const middleware = (request: NextRequest) => {
+export const proxy = (request: NextRequest) => {
   const { pathname } = request.nextUrl;
 
   if (isPublicPath(pathname)) {
@@ -41,7 +41,7 @@ export const middleware = (request: NextRequest) => {
 
   if (!sessionCookie) {
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', canonicalizeProtectedPath(pathname));
+    loginUrl.searchParams.set('redirect', canonicalizeProtectedPath(pathname) + request.nextUrl.search);
     return NextResponse.redirect(loginUrl);
   }
 

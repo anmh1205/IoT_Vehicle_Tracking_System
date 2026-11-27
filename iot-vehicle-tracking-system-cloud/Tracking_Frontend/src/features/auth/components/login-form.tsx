@@ -7,8 +7,7 @@ import { useForm } from 'react-hook-form';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { authServices } from '@/lib/api/auth';
@@ -51,10 +50,9 @@ export const LoginForm = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    setValue,
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { username: '', password: '', rememberMe: false },
+    defaultValues: { username: '', password: '' },
   });
 
   const onSubmit = async (values: LoginFormValues) => {
@@ -120,14 +118,14 @@ export const LoginForm = () => {
   return (
     <Card className="w-full max-w-md border-border/70 shadow-sm">
       <CardHeader>
-        <CardTitle>Đăng nhập hệ thống</CardTitle>
+        <h1 id="login-panel-heading" className="text-lg font-semibold leading-tight">Đăng nhập hệ thống</h1>
         <CardDescription>Nhập tài khoản để tiếp tục điều phối và giám sát đội xe.</CardDescription>
       </CardHeader>
       <CardContent>
         {infoMessage ? (
           <Alert className="mb-4">
             <Info className="h-4 w-4" />
-            <AlertTitle>Cần đăng nhập lại</AlertTitle>
+            <AlertTitle>{reason === 'signed-out' ? 'Đã đăng xuất' : 'Thông báo phiên làm việc'}</AlertTitle>
             <AlertDescription>{infoMessage}</AlertDescription>
           </Alert>
         ) : null}
@@ -150,10 +148,12 @@ export const LoginForm = () => {
               autoComplete="username"
               autoCapitalize="none"
               spellCheck={false}
+              aria-invalid={Boolean(errors.username)}
+              aria-describedby={errors.username ? 'username-error' : undefined}
               {...register('username')}
             />
             {errors.username ? (
-              <p role="alert" aria-live="polite" className="text-sm text-destructive">
+              <p id="username-error" role="alert" className="text-sm text-destructive">
                 {errors.username.message}
               </p>
             ) : null}
@@ -167,12 +167,15 @@ export const LoginForm = () => {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Nhập mật khẩu"
                 autoComplete="current-password"
+                className="pr-12"
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={errors.password ? 'password-error' : undefined}
                 {...register('password')}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
-                className="absolute right-1 top-1 inline-flex h-10 w-10 items-center justify-center text-muted-foreground sm:right-2 sm:top-0.5 sm:h-8 sm:w-8"
+                className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center rounded-r-md text-muted-foreground focus-visible:outline-2 focus-visible:outline-ring"
                 aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                 aria-pressed={showPassword}
               >
@@ -180,22 +183,10 @@ export const LoginForm = () => {
               </button>
             </div>
             {errors.password ? (
-              <p role="alert" aria-live="polite" className="text-sm text-destructive">
+              <p id="password-error" role="alert" className="text-sm text-destructive">
                 {errors.password.message}
               </p>
             ) : null}
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="rememberMe"
-                onCheckedChange={(checked) => setValue('rememberMe', Boolean(checked))}
-              />
-              <Label htmlFor="rememberMe" className="text-sm">
-                Ghi nhớ đăng nhập
-              </Label>
-            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>

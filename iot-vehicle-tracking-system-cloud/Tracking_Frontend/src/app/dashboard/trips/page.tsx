@@ -1,13 +1,14 @@
 'use client';
 
 import { useDeferredValue, useMemo, useState } from 'react';
-import { CalendarClock, CircleCheckBig, CirclePlay, CircleX, Plus, Route } from 'lucide-react';
+import { AlertTriangle, CalendarClock, CircleCheckBig, CirclePlay, CircleX, Plus, Route } from 'lucide-react';
 import { useMutation, useQueries, useQueryClient } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
 import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { StatCard } from '@/components/common/stat-card';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -24,6 +25,7 @@ import { getTripColumns } from '@/features/trips/components/trip-columns';
 import { TripForm } from '@/features/trips/components/trip-form';
 import { TripPreviewDialog } from '@/features/trips/components/trip-preview-dialog';
 import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
+import { useRoleAccess } from '@/hooks/use-role-access';
 
 const PAGE_SIZE = 20;
 const TRIP_STATUSES = ['planned', 'in_progress', 'completed', 'cancelled'] as const;
@@ -38,7 +40,7 @@ const emptyToNull = (value: unknown) => {
 const emptyToUndefined = (value: unknown) => emptyToNull(value) ?? undefined;
 
 const getTripCount = (payload: any) =>
-  Number(payload?.pagination?.total ?? payload?.data?.pagination?.total ?? payload?.total ?? 0);
+  payload?.pagination?.total ?? payload?.data?.pagination?.total ?? payload?.total;
 
 const TripsPage = () => {
   const [open, setOpen] = useState(false);
@@ -49,6 +51,7 @@ const TripsPage = () => {
   const [status, setStatus] = useState<TripStatusFilter>('all');
   const deferredSearch = useDeferredValue(search.trim());
   const queryClient = useQueryClient();
+  const { canEditDevice, canDeleteDevice } = useRoleAccess();
 
   const trips = useInfiniteListQuery<any>({
     queryKey: ['trips', deferredSearch, status],
@@ -65,7 +68,7 @@ const TripsPage = () => {
   const tripStatQueries = useQueries({
     queries: [
       {
-        queryKey: ['trip-stats', 'all', deferredSearch],
+        queryKey: ['trips', 'summary', 'all', deferredSearch],
         queryFn: () =>
           tripServices.getList({
             page: 1,
@@ -74,7 +77,7 @@ const TripsPage = () => {
           }),
       },
       ...TRIP_STATUSES.map((item) => ({
-        queryKey: ['trip-stats', item, deferredSearch],
+        queryKey: ['trips', 'summary', item, deferredSearch],
         queryFn: () =>
           tripServices.getList({
             page: 1,
@@ -191,24 +194,17 @@ const TripsPage = () => {
       })),
     [rows],
   );
-  const statsLoading = tripStatQueries.some((query) => query.isLoading);
-  const stats = useMemo(
-    () => ({
-      total: getTripCount(tripStatQueries[0]?.data) || trips.total || rows.length,
-      planned: getTripCount(tripStatQueries[1]?.data),
-      inProgress: getTripCount(tripStatQueries[2]?.data),
-      completed: getTripCount(tripStatQueries[3]?.data),
-      cancelled: getTripCount(tripStatQueries[4]?.data),
-    }),
-    [trips.total, rows.length, tripStatQueries],
-  );
+  const [totalQuery, plannedQuery, inProgressQuery, completedQuery, cancelledQuery] = tripStatQueries;
+  const statsErrors = tripStatQueries.filter((query) => query.isError);
+  const listUnavailable = trips.isLoadingError;
+  const listErrorMessage = getApiErrorMessage(trips.error, 'Không thể tải danh sách chuyến đi.');
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
     <PageContainer
       pageTitle="Chuyến đi"
       pageDescription="Đối chiếu danh sách chuyến đi với dữ liệu thực tế và mở bản đồ phát lại ngay từ bảng."
-      pageHeaderAction={
+      pageHeaderAction={canEditDevice ? (
         <Button
           onClick={() => {
             setEditItem(null);
@@ -218,54 +214,94 @@ const TripsPage = () => {
           <Plus className="mr-2 h-4 w-4" />
           Thêm chuyến đi
         </Button>
-      }
+      ) : undefined}
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
           title="Tổng chuyến đi"
-          value={stats.total}
+          value={getTripCount(totalQuery.data) ?? '—'}
           icon={<Route className="h-4 w-4" />}
           subtitle="Theo từ khóa tìm kiếm hiện tại"
-          isLoading={trips.isLoading || statsLoading}
+          isLoading={totalQuery.isLoading}
         />
         <StatCard
           title="Đã lên kế hoạch"
-          value={stats.planned}
+          value={getTripCount(plannedQuery.data) ?? '—'}
           icon={<CalendarClock className="h-4 w-4" />}
-          isLoading={trips.isLoading || statsLoading}
+          isLoading={plannedQuery.isLoading}
         />
         <StatCard
           title="Đang diễn ra"
-          value={stats.inProgress}
+          value={getTripCount(inProgressQuery.data) ?? '—'}
           icon={<CirclePlay className="h-4 w-4" />}
-          isLoading={trips.isLoading || statsLoading}
+          isLoading={inProgressQuery.isLoading}
         />
         <StatCard
           title="Hoàn tất"
-          value={stats.completed}
+          value={getTripCount(completedQuery.data) ?? '—'}
           icon={<CircleCheckBig className="h-4 w-4" />}
-          isLoading={trips.isLoading || statsLoading}
+          isLoading={completedQuery.isLoading}
         />
         <StatCard
           title="Đã hủy"
-          value={stats.cancelled}
+          value={getTripCount(cancelledQuery.data) ?? '—'}
           icon={<CircleX className="h-4 w-4" />}
-          isLoading={trips.isLoading || statsLoading}
+          isLoading={cancelledQuery.isLoading}
         />
       </div>
+
+      {statsErrors.length > 0 ? (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Không thể cập nhật đầy đủ số liệu chuyến đi</AlertTitle>
+          <AlertDescription>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={statsErrors.some((query) => query.isFetching)}
+              onClick={() => {
+                for (const query of statsErrors) void query.refetch();
+              }}
+            >
+              Thử lại số liệu
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {trips.isError && !listUnavailable ? (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>{trips.isFetchNextPageError ? 'Không thể tải thêm chuyến đi' : 'Không thể làm mới danh sách chuyến đi'}</AlertTitle>
+          <AlertDescription>
+            <p>{listErrorMessage}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={trips.isFetching}
+              onClick={() => {
+                if (trips.isFetchNextPageError) trips.loadMore();
+                else void trips.refetch();
+              }}
+            >
+              Thử lại danh sách
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       <DataTable
         columns={getTripColumns({
           onPreview: (row) => setPreviewTripId(row.id),
-          onEdit: (row) => {
+          onEdit: canEditDevice ? (row) => {
             setEditItem(row);
             setOpen(true);
-          },
-          onDelete: setDeleteItem,
-          onStart: (id) => startMutation.mutate(id),
-          onEnd: (id) => endMutation.mutate(id),
-          startPendingId: startMutation.variables ?? null,
-          endPendingId: endMutation.variables ?? null,
+          } : undefined,
+          onDelete: canDeleteDevice ? setDeleteItem : undefined,
+          onStart: canEditDevice ? (id) => startMutation.mutate(id) : undefined,
+          onEnd: canEditDevice ? (id) => endMutation.mutate(id) : undefined,
+          startPendingId: startMutation.isPending ? startMutation.variables : undefined,
+          endPendingId: endMutation.isPending ? endMutation.variables : undefined,
         })}
         data={tableRows}
         pagination={false}
@@ -274,20 +310,25 @@ const TripsPage = () => {
           if (!row?.id) return;
           setPreviewTripId(row.id);
         }}
-        emptyTitle="Chưa có chuyến đi phù hợp"
-        emptyDescription="Hãy tạo chuyến đi mới hoặc nới bộ lọc để xem lại các hành trình gần đây."
-        emptyAction={{
+        emptyTitle={listUnavailable ? 'Không thể tải danh sách chuyến đi' : 'Chưa có chuyến đi phù hợp'}
+        emptyDescription={listUnavailable ? listErrorMessage : 'Hãy tạo chuyến đi mới hoặc nới bộ lọc để xem lại các hành trình gần đây.'}
+        emptyAction={listUnavailable ? {
+          label: 'Thử lại danh sách',
+          onClick: () => void trips.refetch(),
+        } : canEditDevice ? {
           label: 'Thêm chuyến đi',
           onClick: () => {
             setEditItem(null);
             setOpen(true);
           },
-        }}
+        } : undefined}
         toolbar={
           <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:gap-2 lg:flex-nowrap">
             <Input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
+              type="search"
+              aria-label="Tìm chuyến đi"
               placeholder="Tìm theo mã chuyến, xe, khách hàng, thiết bị, tài xế hoặc điểm đi/đến..."
               className="w-full md:min-w-[320px] md:max-w-[520px]"
             />
@@ -295,7 +336,7 @@ const TripsPage = () => {
               value={status}
               onValueChange={(value: TripStatusFilter) => setStatus(value)}
             >
-              <SelectTrigger className="w-full sm:w-[220px]">
+              <SelectTrigger className="w-full sm:w-[220px]" aria-label="Trạng thái chuyến đi">
                 <SelectValue placeholder="Trạng thái" />
               </SelectTrigger>
               <SelectContent>
@@ -312,6 +353,7 @@ const TripsPage = () => {
 
       <InfiniteScrollTrigger
         hasMore={trips.hasMore}
+        autoLoad={!trips.isError}
         isLoadingMore={trips.isFetchingNextPage}
         onLoadMore={trips.loadMore}
         loadedCount={trips.loadedCount}
