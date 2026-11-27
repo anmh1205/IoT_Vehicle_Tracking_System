@@ -1,11 +1,12 @@
 /**
- * @file modem_gnss.c
+ * @file gnss.c
  * @brief Periodic SIM7600 GNSS reads and parsing into integer fix fields.
  *
  * The modem task applies the requested GNSS state, reads fixes and publishes
  * snapshots. Convert time and coordinates before publishing across tasks.
  */
 #include "modem_internal.h"
+#include "services/services.h"
 #include "at/at.h"
 #include "platform/log.h"
 #include <string.h>

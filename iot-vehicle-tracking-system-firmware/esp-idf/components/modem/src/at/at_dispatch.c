@@ -9,6 +9,7 @@
 #include "modem_internal.h"
 #include "platform/log.h"
 #include "mqtt/mqtt.h"
+#include "services/services.h"
 #include "transport/transport.h"
 
 #define RAW_TIMEOUT_MS 3000u

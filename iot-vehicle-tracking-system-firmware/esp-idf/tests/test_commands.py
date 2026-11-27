@@ -20,7 +20,7 @@ class Commands(unittest.TestCase):
             cls.executable,
             [FIRMWARE / "tests" / "command_fixture.c", *sorted((components / "app/src/command").glob("*.c")),
              components / "app/src/fw_update.c", components / "app/src/device/app_device.c",
-             components / "modem/src/modem.c", components / "modem/src/slots.c", PLATFORM / "src/platform.c", PLATFORM / "src/platform_rtos.c", *sorted(CORE.joinpath("src").rglob("*.c"))],
+             components / "modem/src/modem.c", components / "modem/src/mqtt/mqtt_slots.c", PLATFORM / "src/platform.c", PLATFORM / "src/platform_rtos.c", *sorted(CORE.joinpath("src").rglob("*.c"))],
             ["-D_POSIX_C_SOURCE=200809L", "-ffunction-sections", "-Wl,--gc-sections", *(flag for path in includes for flag in ("-I", path))],
         )
 

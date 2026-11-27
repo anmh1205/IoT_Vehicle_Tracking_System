@@ -6,8 +6,7 @@
  * values and buffers and perform no peripheral I/O. They are unit-tested on
  * the host by tests/test_board_calc.py.
  */
-#ifndef BOARD_DRIVERS_CALC_H
-#define BOARD_DRIVERS_CALC_H
+#pragma once
 #include <stdbool.h>
 #include <stdint.h>
 #include "ivts_core/base/err.h"
@@ -29,5 +28,3 @@ uint32_t lis3dsh_delta_mmps2(const int16_t previous[3], const int16_t current[3]
 
 /* Convert averaged ADC pin millivolts to the input voltage with divider and trim. */
 uint16_t power_adc_scale_mv(uint64_t pin_mv, uint32_t divider, uint32_t gain_ppm);
-
-#endif

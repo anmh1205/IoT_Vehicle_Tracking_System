@@ -1,5 +1,5 @@
 /**
- * @file slots.c
+ * @file mqtt_slots.c
  * @brief Modem cross-task publish slot and command FIFO.
  *
  * One mutex protects bounded copies and state updates. The modem holds the

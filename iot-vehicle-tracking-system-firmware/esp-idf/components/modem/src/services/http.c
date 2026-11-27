@@ -1,5 +1,5 @@
 /**
- * @file modem_http.c
+ * @file http.c
  * @brief HTTPS open, raw stream reads and close for the OTA byte source.
  *
  * Callers block through the modem task's request interface. The modem task
@@ -7,6 +7,7 @@
  * buffers.
  */
 #include "modem_internal.h"
+#include "services/services.h"
 #include "at/at.h"
 #include "platform/log.h"
 #include "mqtt/mqtt.h"

@@ -1,11 +1,12 @@
 /**
- * @file modem_link.c
+ * @file link.c
  * @brief LTE and MQTT link sequencing, retry backoff and power recovery.
  *
  * The modem task executes one state-machine step at a time, preserving retry
  * windows and emitting link changes by value.
  */
 #include "modem_internal.h"
+#include "services/services.h"
 #include "platform/log.h"
 #include "ivts_core/base/backoff.h"
 #include "transport/transport.h"

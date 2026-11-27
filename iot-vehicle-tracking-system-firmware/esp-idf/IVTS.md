@@ -7,9 +7,9 @@ Firmware lấy mẫu nguồn và chuyển động, thu GNSS và OBD, lưu RAW kh
 | Quyết định | Triển khai |
 | --- | --- |
 | D1 · Task board | ISR của LIS3DSH chỉ đánh thức task board. Task nhả ngắt, đọc IMU và lấy mẫu ADC. RTC và IMU chia sẻ mutex I2C. Ignition được suy từ điện áp nguồn xe với hysteresis và debounce. [Board](components/board/README.md) · [Axes](components/ivts-core/src/fsm/axes.c) |
-| D2 · Hàng đợi command | SIM7600 gửi PUBACK tầng MQTT. Modem giữ FIFO bốn lệnh và báo `IVTS_EV_CMD_PENDING` để app lấy payload. App lưu 32 ID lệnh thành công gần nhất ở NVS và trả kết quả trên `commands/ack`. [FIFO](components/modem/src/slots.c) · [Receipts](components/app/src/command/cmd_receipts.c) |
+| D2 · Hàng đợi command | SIM7600 gửi PUBACK tầng MQTT. Modem giữ FIFO bốn lệnh và báo `IVTS_EV_CMD_PENDING` để app lấy payload. App lưu 32 ID lệnh thành công gần nhất ở NVS và trả kết quả trên `commands/ack`. [FIFO](components/modem/src/mqtt/mqtt_slots.c) · [Receipts](components/app/src/command/cmd_receipts.c) |
 | D3 · Đọc JSON có giới hạn | Tokenizer làm việc trên buffer có sẵn và giới hạn độ dài, số token và độ sâu. Giá trị trả về dương là số token, giá trị âm là mã lỗi. Các handler đọc field qua API có kiểu. [Tokenizer](components/ivts-core/src/payload/json_reader.c) · [JSON fields](components/ivts-core/src/payload/json_fields.c) |
-| D4 · Nguồn byte OTA | App nối `ota_source_t` với HTTPS của modem. Task OTA chờ kết quả RPC qua semaphore. Task modem xử lý AT và hoàn thành RPC trước khi caller thu hồi buffer. [Wiring](components/app/src/boot/app_wiring.c) · [HTTP](components/modem/src/modem_http.c) |
+| D4 · Nguồn byte OTA | App nối `ota_source_t` với HTTPS của modem. Task OTA chờ kết quả RPC qua semaphore. Task modem xử lý AT và hoàn thành RPC trước khi caller thu hồi buffer. [Wiring](components/app/src/boot/app_wiring.c) · [HTTP](components/modem/src/services/http.c) |
 
 ## Task và khởi tạo
 
@@ -30,7 +30,7 @@ Sự kiện được sao chép theo giá trị và có kích thước tối đa 
 
 - Chân, địa chỉ I2C, hệ số ADC và cực tính PWRKEY nằm trong bản wiring PCB. INT1 nối GPIO36. Khi cần wake theo IMU, FSM chọn light sleep. Deep sleep trên PCB hiện tại thức bằng timer. [Pin map](components/board/include/board/board_hw.h) · [Wake IMU](components/board/src/power/wake.c)
 - LIS3DSH dùng state machine SM1 để phát ngắt chốt. Đọc OUTS1 nhả ngắt. DS3231M báo thời gian đáng tin khi OSF đã xóa và ngày đạt mốc cấu hình. [LIS3DSH](components/board/src/drivers/lis3dsh.c) · [RTC](components/board/src/drivers/ds3231.c)
-- PWRKEY dùng GPIO34. GPIO35 đã nối RESET và hiện chưa được dùng. PCB dùng hai chân này với biến thể ESP32-S3 phù hợp vì GPIO33–37 có thể dành cho octal PSRAM. SIM7600 đọc GNSS bằng `AT+CGNSSINFO`, với `AT+CGPSINFO` là đường dự phòng. [Pin map](components/board/include/board/board_hw.h) · [GNSS](components/modem/src/modem_gnss.c)
+- PWRKEY dùng GPIO34. GPIO35 đã nối RESET và hiện chưa được dùng. PCB dùng hai chân này với biến thể ESP32-S3 phù hợp vì GPIO33–37 có thể dành cho octal PSRAM. SIM7600 đọc GNSS bằng `AT+CGNSSINFO`, với `AT+CGPSINFO` là đường dự phòng. [Pin map](components/board/include/board/board_hw.h) · [GNSS](components/modem/src/services/gnss.c)
 
 ## Hợp đồng giữ qua refactor
 

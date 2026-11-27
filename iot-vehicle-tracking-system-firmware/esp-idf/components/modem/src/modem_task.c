@@ -13,6 +13,7 @@
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 #include "mqtt/mqtt.h"
+#include "services/services.h"
 #include "transport/transport.h"
 
 #define REQ_QUEUE_LEN 8u
