@@ -82,6 +82,23 @@ test('dry-run on a tracked database does not mutate it', () => {
   assert.deepEqual(result.writes, []);
 });
 
+test('LF and CRLF copies of the same SQL keep the recorded receipt', () => {
+  const sql = 'CREATE TABLE example (id integer);\n';
+  const crlf = sql.replace(/\n/g, '\r\n');
+  for (const recordedSql of [sql, crlf]) {
+    const checksum = crypto.createHash('sha256').update(recordedSql).digest('hex');
+    for (const checkedOutSql of [sql, crlf]) {
+      const result = runScenario({
+        sql: checkedOutSql, dryRun: true, existingTables: ['init_schema_migrations'],
+        recorded: [['01-example.sql', checksum, 'executed']],
+      });
+      assert.equal(result.failed, false);
+      assert.match(result.logs.join(' '), /skip 01-example\.sql: already recorded/);
+      assert.deepEqual(result.writes, []);
+    }
+  }
+});
+
 test('checksum drift fails instead of silently skipping an edited migration', () => {
   const result = runScenario({
     recorded: [['01-example.sql', 'bad-hash', 'executed']],
@@ -126,7 +143,7 @@ test('fully present legacy schema baselines without re-executing DDL', () => {
   assert.equal(result.writes.filter((write) => write.includes("VALUES ('01-example.sql'")).length, 1);
 });
 
-const secureUsersSql = fs.readFileSync(path.join(__dirname, '../init/01-users.sql'), 'utf8');
+const secureUsersSql = fs.readFileSync(path.join(__dirname, '../init/01-users.sql'), 'utf8').replace(/\r\n/g, '\n');
 const historicalUsersChecksum = '7e58d1f34242bd92a259725607e4f75193a733d73ad5bf3fc01111a74200fe55';
 const secureUsersChecksum = '2e0159c1dbab8315e700754fedafc7168048d3b77d59594932597e06ad9f0e53';
 
@@ -148,6 +165,18 @@ test('known privileged seed blocks existing installation until operator rotates 
     fileName: '01-users.sql',
     sql: secureUsersSql,
     recorded: [['01-users.sql', historicalUsersChecksum, 'executed']],
+    oldStaticCredential: true,
+  });
+  assert.equal(result.failed, true);
+  assert.match(result.errors.join(' '), /Rotate the admin password/);
+  assert.equal(result.writes.some((write) => write.includes(secureUsersChecksum)), false);
+});
+
+test('a CRLF legacy admin receipt still requires credential rotation', () => {
+  const result = runScenario({
+    fileName: '01-users.sql',
+    sql: secureUsersSql.replace(/\n/g, '\r\n'),
+    recorded: [['01-users.sql', '47bf808fd4c045df9bc92835acf98e19e18f2f4c2c541d0813b843f83052c778', 'baseline']],
     oldStaticCredential: true,
   });
   assert.equal(result.failed, true);

@@ -7,12 +7,15 @@ const { createPostgresCommandRunner } = require('./postgres-command-runner');
 
 const MIGRATION_TABLE = 'init_schema_migrations';
 
-// The sole permitted legacy checksum rewrite removes an embedded, globally
+// The historical SQL content that may be reconciled removes an embedded, globally
 // known administrator password. Both input and output byte hashes are pinned.
 // Any other historical DDL edit must still fail checksum validation.
 const LEGACY_ADMIN_SEED_RECONCILIATION = Object.freeze({
   filename: '01-users.sql',
-  fromChecksum: '7e58d1f34242bd92a259725607e4f75193a733d73ad5bf3fc01111a74200fe55',
+  fromChecksums: [
+    '7e58d1f34242bd92a259725607e4f75193a733d73ad5bf3fc01111a74200fe55',
+    '47bf808fd4c045df9bc92835acf98e19e18f2f4c2c541d0813b843f83052c778',
+  ],
   toChecksum: '2e0159c1dbab8315e700754fedafc7168048d3b77d59594932597e06ad9f0e53',
 });
 const LEGACY_STATIC_ADMIN_HASH = '$2a$12$iZP02NlhuT/z5W8U7Q7eHOfydGsNPt1tnJFIIR5YGPpgyBmQaKrci';
@@ -175,14 +178,15 @@ function main() {
 
   for (const fileName of files) {
     const filePath = path.join(initDir, fileName);
-    const sql = fs.readFileSync(filePath, 'utf8');
+    const sql = fs.readFileSync(filePath, 'utf8').replace(/\r\n/g, '\n');
     const checksum = hashText(sql);
+    const crlfChecksum = hashText(sql.replace(/\n/g, '\r\n'));
     const existing = recorded.get(fileName);
     if (existing) {
-      if (existing.checksum !== checksum) {
+      if (existing.checksum !== checksum && existing.checksum !== crlfChecksum) {
         const isKnownSeedRemoval =
           fileName === LEGACY_ADMIN_SEED_RECONCILIATION.filename &&
-          existing.checksum === LEGACY_ADMIN_SEED_RECONCILIATION.fromChecksum &&
+          LEGACY_ADMIN_SEED_RECONCILIATION.fromChecksums.includes(existing.checksum) &&
           checksum === LEGACY_ADMIN_SEED_RECONCILIATION.toChecksum;
         if (!isKnownSeedRemoval) {
           throw new Error('Migration checksum drift: ' + fileName + '. Recorded=' + existing.checksum + ', current=' + checksum + '. Create a new migration instead of changing applied SQL.');
