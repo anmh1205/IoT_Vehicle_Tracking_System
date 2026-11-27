@@ -1,5 +1,4 @@
-#include "payload_common.h"
-#include "enum_names.h"
+#include "payload/payload.h"
 
 static void dtc_arr(ivts_jw_t *w, const char *key, const ivts_dtc_list_t *d)
 {

@@ -13,6 +13,6 @@ def build_fixture(executable, sources, extra_flags=(), *, linker_flags=()):
     if os.environ.get("IVTS_HOST_SANITIZE") == "1":
         flags += ["-fsanitize=address,undefined", "-fno-sanitize-recover=all", "-no-pie"]
     subprocess.run(
-        [os.environ.get("CC", "cc"), *flags, "-I", CORE / "include", *extra_flags, *sources, "-o", executable, *linker_flags],
+        [os.environ.get("CC", "cc"), *flags, "-I", CORE / "include", "-I", CORE / "src", *extra_flags, *sources, "-o", executable, *linker_flags],
         check=True,
     )

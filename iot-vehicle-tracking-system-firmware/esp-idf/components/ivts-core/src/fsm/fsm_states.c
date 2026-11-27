@@ -1,4 +1,4 @@
-#include "fsm_states.h"
+#include "fsm/fsm.h"
 
 static void go(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_fsm_state_t s, ivts_ms_t now)
 {

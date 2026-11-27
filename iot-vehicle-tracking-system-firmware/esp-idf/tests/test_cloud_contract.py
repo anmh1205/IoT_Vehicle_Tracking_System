@@ -15,7 +15,7 @@ class CloudContract(unittest.TestCase):
             executable = Path(directory) / "cloud-fixture"
             build_fixture(
                 executable,
-                [FIRMWARE / "tests" / "cloud_fixture.c", *sorted(CORE.glob("src/**/*.c"))],
+                [FIRMWARE / "tests" / "cloud_fixture.c", *sorted(CORE.joinpath("src").rglob("*.c"))],
             )
             output = subprocess.check_output([executable], text=True)
         cls.payloads = [json.loads(line) for line in output.splitlines()]
