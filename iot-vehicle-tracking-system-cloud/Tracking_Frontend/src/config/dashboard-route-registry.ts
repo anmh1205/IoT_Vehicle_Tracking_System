@@ -344,17 +344,19 @@ export const dashboardRouteRegistry: DashboardRouteDef[] = [
   },
   {
     id: 'statistics',
-    title: 'Báo cáo',
+    title: 'Thống kê',
     path: '/dashboard/statistics',
-    surface: 'command',
-    navLevel: 'hidden',
+    surface: 'operations',
+    parentId: 'operations',
+    navLevel: 'secondary',
   },
   {
     id: 'fuel',
     title: 'Nhiên liệu',
     path: '/dashboard/fuel',
-    surface: 'command',
-    navLevel: 'hidden',
+    surface: 'operations',
+    parentId: 'operations',
+    navLevel: 'secondary',
   },
 ];
 

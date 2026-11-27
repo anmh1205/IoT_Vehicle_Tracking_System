@@ -38,7 +38,6 @@ const MapPage = () => {
 
   return (
     <section
-      id="main-content"
       aria-label="Bản đồ theo dõi"
       className="flex min-h-0 flex-1 overflow-hidden"
     >

@@ -12,27 +12,9 @@ import type {
   UpdateTripInput,
 } from '@/domain/trip/types/trip.types';
 
-export interface TripReadScope {
-  userId: number;
-  role: string;
-  deviceAccessMode: string;
-}
+import { hasFullFleetTripAccess as fullFleet, tripVisibleTo, type TripReadScope } from './trip-read-scope';
 
-const fullFleet = (actor: TripReadScope): boolean =>
-  actor.role === 'root' || actor.role === 'admin' || actor.deviceAccessMode === 'all';
-
-const tripVisibleTo = (actor: TripReadScope, param: number): string =>
-  fullFleet(actor) ? 'TRUE' : `EXISTS (
-    SELECT 1 FROM user_device_access uda
-    WHERE uda.user_id = $${param}
-      AND (t.device_id IS NULL OR t.device_id = uda.device_id)
-      AND (t.vehicle_id IS NULL OR EXISTS (
-        SELECT 1 FROM vehicles allowed_vehicle
-        WHERE allowed_vehicle.vehicle_id = t.vehicle_id
-          AND allowed_vehicle.device_id = uda.device_id
-      ))
-      AND (t.device_id IS NOT NULL OR t.vehicle_id IS NOT NULL)
-  )`;
+export type { TripReadScope } from './trip-read-scope';
 
 const ALLOWED_SORT_COLUMNS: Record<string, string> = {
   tripCode: 't.trip_code',

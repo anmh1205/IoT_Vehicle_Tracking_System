@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 
 interface InfiniteScrollTriggerProps {
   hasMore: boolean;
+  autoLoad?: boolean;
   isLoadingMore?: boolean;
   onLoadMore: () => void;
   loadedCount: number;
@@ -15,6 +16,7 @@ interface InfiniteScrollTriggerProps {
 
 export const InfiniteScrollTrigger = ({
   hasMore,
+  autoLoad = true,
   isLoadingMore = false,
   onLoadMore,
   loadedCount,
@@ -24,7 +26,7 @@ export const InfiniteScrollTrigger = ({
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!hasMore || isLoadingMore || !sentinelRef.current) {
+    if (!autoLoad || !hasMore || isLoadingMore || !sentinelRef.current) {
       return;
     }
 
@@ -39,7 +41,7 @@ export const InfiniteScrollTrigger = ({
 
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
-  }, [hasMore, isLoadingMore, onLoadMore]);
+  }, [autoLoad, hasMore, isLoadingMore, onLoadMore]);
 
   if (totalCount === 0 && !hasMore) {
     return null;

@@ -4,16 +4,18 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { DashboardEvent } from '@/features/dashboard/hooks/use-dashboard-stats';
+import type { DashboardEvent } from '@/lib/api/dashboard';
 import { formatRelative } from '@/lib/utils/date/format';
 import { getDashboardEventPresentation } from './dashboard-event-presenters';
 
 export const ActivityFeed = ({
   events,
   isLoading,
+  isUnavailable,
 }: {
   events: DashboardEvent[];
   isLoading?: boolean;
+  isUnavailable?: boolean;
 }) => {
   return (
     <Card>
@@ -59,7 +61,7 @@ export const ActivityFeed = ({
               })}
               {events.length === 0 ? (
                 <p className="rounded-lg border border-dashed p-3 text-center text-sm text-muted-foreground">
-                  Chưa có hoạt động gần đây.
+                  {isUnavailable ? 'Không thể tải các hoạt động gần đây.' : 'Chưa có hoạt động gần đây.'}
                 </p>
               ) : null}
             </div>

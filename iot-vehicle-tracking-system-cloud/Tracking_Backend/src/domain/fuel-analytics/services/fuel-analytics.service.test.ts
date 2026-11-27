@@ -40,6 +40,8 @@ const makeTrend = (overrides: Partial<FuelTrend> = {}): FuelTrend => ({
 
 // -- Tests --------------------------------------------------------------------
 
+const actor = { userId: 17, role: 'viewer', deviceAccessMode: 'assigned' };
+
 describe('fuel-analytics.service', () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -54,9 +56,12 @@ describe('fuel-analytics.service', () => {
       const result = await getFuelSummary({
         from: '2026-01-01',
         to: '2026-01-31',
-      });
+      }, actor);
 
-      expect(fuelRepo.getSummary).toHaveBeenCalledTimes(1);
+      expect(fuelRepo.getSummary).toHaveBeenCalledWith(
+        { from: new Date('2026-01-01T00:00:00.000Z'), to: new Date('2026-01-31T23:59:59.999Z') },
+        actor,
+      );
       expect(result.totalCost).toBe(100 * 25000);
       expect(result.totalFuelUsed).toBe(100);
     });
@@ -68,7 +73,7 @@ describe('fuel-analytics.service', () => {
         from: '2026-01-01',
         to: '2026-01-31',
         fuelPrice: 30000,
-      });
+      }, actor);
 
       expect(result.totalCost).toBe(50 * 30000);
     });
@@ -76,7 +81,7 @@ describe('fuel-analytics.service', () => {
     it('should use default 30-day range when no dates are provided', async () => {
       vi.mocked(fuelRepo.getSummary).mockResolvedValue(makeSummary());
 
-      await getFuelSummary({});
+      await getFuelSummary({}, actor);
 
       const call = vi.mocked(fuelRepo.getSummary).mock.calls[0][0];
       const diffMs = call.to.getTime() - call.from.getTime();
@@ -86,7 +91,7 @@ describe('fuel-analytics.service', () => {
 
     it('should throw a validation error for an invalid "from" date', async () => {
       await expect(
-        getFuelSummary({ from: 'not-a-date', to: '2026-01-31' }),
+        getFuelSummary({ from: 'not-a-date', to: '2026-01-31' }, actor),
       ).rejects.toMatchObject({
         name: 'ApiError',
         status: 400,
@@ -96,7 +101,7 @@ describe('fuel-analytics.service', () => {
 
     it('should throw a validation error for an invalid "to" date', async () => {
       await expect(
-        getFuelSummary({ from: '2026-01-01', to: 'invalid' }),
+        getFuelSummary({ from: '2026-01-01', to: 'invalid' }, actor),
       ).rejects.toMatchObject({
         name: 'ApiError',
         status: 400,
@@ -106,7 +111,7 @@ describe('fuel-analytics.service', () => {
 
     it('should throw a validation error when "from" is after "to"', async () => {
       await expect(
-        getFuelSummary({ from: '2026-02-01', to: '2026-01-01' }),
+        getFuelSummary({ from: '2026-02-01', to: '2026-01-01' }, actor),
       ).rejects.toMatchObject({
         name: 'ApiError',
         status: 400,
@@ -125,7 +130,7 @@ describe('fuel-analytics.service', () => {
       const result = await getFuelByVehicle({
         from: '2026-01-01',
         to: '2026-01-31',
-      });
+      }, actor);
 
       expect(fuelRepo.getByVehicle).toHaveBeenCalledTimes(1);
       expect(result.vehicles).toHaveLength(2);
@@ -136,7 +141,7 @@ describe('fuel-analytics.service', () => {
       vi.mocked(fuelRepo.getByVehicle).mockClear();
       vi.mocked(fuelRepo.getByVehicle).mockResolvedValue([]);
 
-      await getFuelByVehicle({});
+      await getFuelByVehicle({}, actor);
 
       expect(fuelRepo.getByVehicle).toHaveBeenCalledTimes(1);
       const call = vi.mocked(fuelRepo.getByVehicle).mock.calls[0][0];
@@ -146,7 +151,7 @@ describe('fuel-analytics.service', () => {
 
     it('should throw a validation error for an invalid date', async () => {
       await expect(
-        getFuelByVehicle({ from: 'bad-date' }),
+        getFuelByVehicle({ from: 'bad-date' }, actor),
       ).rejects.toMatchObject({
         name: 'ApiError',
         status: 400,
@@ -165,11 +170,12 @@ describe('fuel-analytics.service', () => {
         from: '2026-01-01',
         to: '2026-01-31',
         interval: 'day',
-      });
+      }, actor);
 
       expect(fuelRepo.getTrends).toHaveBeenCalledWith(
         expect.objectContaining({ from: expect.any(Date), to: expect.any(Date) }),
         'day',
+        actor,
       );
       expect(result.trends).toHaveLength(2);
     });
@@ -177,30 +183,30 @@ describe('fuel-analytics.service', () => {
     it('should accept "week" interval', async () => {
       vi.mocked(fuelRepo.getTrends).mockResolvedValue([]);
 
-      await getFuelTrends({ from: '2026-01-01', to: '2026-01-31', interval: 'week' });
+      await getFuelTrends({ from: '2026-01-01', to: '2026-01-31', interval: 'week' }, actor);
 
-      expect(fuelRepo.getTrends).toHaveBeenCalledWith(expect.any(Object), 'week');
+      expect(fuelRepo.getTrends).toHaveBeenCalledWith(expect.any(Object), 'week', actor);
     });
 
     it('should accept "month" interval', async () => {
       vi.mocked(fuelRepo.getTrends).mockResolvedValue([]);
 
-      await getFuelTrends({ from: '2026-01-01', to: '2026-01-31', interval: 'month' });
+      await getFuelTrends({ from: '2026-01-01', to: '2026-01-31', interval: 'month' }, actor);
 
-      expect(fuelRepo.getTrends).toHaveBeenCalledWith(expect.any(Object), 'month');
+      expect(fuelRepo.getTrends).toHaveBeenCalledWith(expect.any(Object), 'month', actor);
     });
 
     it('should default to "day" interval when not provided', async () => {
       vi.mocked(fuelRepo.getTrends).mockResolvedValue([]);
 
-      await getFuelTrends({ from: '2026-01-01', to: '2026-01-31' });
+      await getFuelTrends({ from: '2026-01-01', to: '2026-01-31' }, actor);
 
-      expect(fuelRepo.getTrends).toHaveBeenCalledWith(expect.any(Object), 'day');
+      expect(fuelRepo.getTrends).toHaveBeenCalledWith(expect.any(Object), 'day', actor);
     });
 
     it('should throw a validation error for an invalid interval', async () => {
       await expect(
-        getFuelTrends({ from: '2026-01-01', to: '2026-01-31', interval: 'year' }),
+        getFuelTrends({ from: '2026-01-01', to: '2026-01-31', interval: 'year' }, actor),
       ).rejects.toMatchObject({
         name: 'ApiError',
         status: 400,
@@ -210,7 +216,7 @@ describe('fuel-analytics.service', () => {
 
     it('should throw a validation error when "from" is after "to"', async () => {
       await expect(
-        getFuelTrends({ from: '2026-12-01', to: '2026-01-01', interval: 'day' }),
+        getFuelTrends({ from: '2026-12-01', to: '2026-01-01', interval: 'day' }, actor),
       ).rejects.toMatchObject({
         name: 'ApiError',
         status: 400,

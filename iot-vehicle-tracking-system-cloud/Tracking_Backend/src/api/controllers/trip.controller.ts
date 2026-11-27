@@ -10,11 +10,8 @@ import {
 } from '@/api/validators/trip.validator';
 import * as tripCrudService from '@/domain/trip/services/trip-crud.service';
 import * as tripListService from '@/domain/trip/services/trip-list.service';
-import type { TripReadScope } from '@/domain/trip/repositories/trip.repository';
-const actorScope = (req: AuthenticatedRequest): TripReadScope => ({
-  userId: req.user!.id, role: req.user!.role,
-  deviceAccessMode: req.user!.deviceAccessMode,
-});
+import { toTripReadScope } from '@/domain/trip/repositories/trip-read-scope';
+const actorScope = (req: AuthenticatedRequest) => toTripReadScope(req.user!);
 
 import { getWaypoints, computeRouteSummary } from '@/domain/trip/services/trip-waypoints.service';
 

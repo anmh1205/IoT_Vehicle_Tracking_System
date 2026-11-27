@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient, unwrap } from '@/lib/api/client';
 import { toLocalDateInputValue } from '@/lib/utils';
+import { isDateInputRangeValid } from '@/lib/utils/date/range';
 import type {
   FuelSummary,
   VehicleFuelData,
@@ -26,6 +27,7 @@ export const useFuelAnalyticsParams = (): FuelAnalyticsParams => {
 export const useFuelSummary = (params: FuelAnalyticsParams) => {
   return useQuery<FuelSummary>({
     queryKey: ['fuel-analytics', 'summary', params],
+    enabled: isDateInputRangeValid(params),
     queryFn: async () => {
       const response = await apiClient.get('/fuel-analytics/summary', {
         params: { from: params.from, to: params.to },
@@ -45,6 +47,7 @@ export const useFuelSummary = (params: FuelAnalyticsParams) => {
 export const useFuelByVehicle = (params: FuelAnalyticsParams) => {
   return useQuery<VehicleFuelData[]>({
     queryKey: ['fuel-analytics', 'by-vehicle', params],
+    enabled: isDateInputRangeValid(params),
     queryFn: async () => {
       const response = await apiClient.get('/fuel-analytics/by-vehicle', {
         params: { from: params.from, to: params.to },
@@ -65,6 +68,7 @@ export const useFuelByVehicle = (params: FuelAnalyticsParams) => {
 export const useFuelTrends = (params: FuelAnalyticsParams) => {
   return useQuery<FuelTrend[]>({
     queryKey: ['fuel-analytics', 'trends', params],
+    enabled: isDateInputRangeValid(params),
     queryFn: async () => {
       const response = await apiClient.get('/fuel-analytics/trends', {
         params: { from: params.from, to: params.to, interval: params.interval },

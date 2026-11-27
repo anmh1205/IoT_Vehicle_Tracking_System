@@ -1,4 +1,4 @@
-import type { DashboardEvent } from '@/features/dashboard/hooks/use-dashboard-stats';
+import type { DashboardEvent } from '@/lib/api/dashboard';
 
 type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
 
@@ -100,7 +100,9 @@ export const getDashboardSeverityMeta = (severity?: string | null) =>
   SEVERITY_LABELS[String(severity ?? '').toLowerCase()] ?? SEVERITY_LABELS.info;
 
 export const getDashboardEventPresentation = (
-  event: DashboardEvent,
+  event: Pick<DashboardEvent, 'eventCode' | 'eventType' | 'message' | 'severity'> & {
+    deviceId: string | null;
+  },
 ): DashboardEventPresentation => {
   const eventCode = String(event.eventCode ?? '').toLowerCase();
   const eventType = String(event.eventType ?? '').toLowerCase();

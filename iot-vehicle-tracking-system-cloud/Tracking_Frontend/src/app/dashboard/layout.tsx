@@ -26,12 +26,12 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
         <SidebarInset className="min-h-[100dvh]">
           <ConnectionBanner />
           <header className="relative z-[var(--layer-header)] flex h-16 shrink-0 items-center justify-between gap-2 border-b/60 bg-background/95 backdrop-blur transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-            <div className="flex items-center gap-2 px-4">
+            <div className="flex min-w-0 items-center gap-2 pl-3 sm:pl-4">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
               <Breadcrumbs />
             </div>
-            <div className="flex items-center gap-1.5 px-3 sm:gap-2 sm:px-4">
+            <div className="flex shrink-0 items-center gap-1.5 px-3 sm:gap-2 sm:px-4">
               <NotificationBell />
               <div className="hidden lg:block">
                 <ThemeSelector />
@@ -39,7 +39,7 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
               <ModeToggle />
             </div>
           </header>
-          <div id="main-content" className="flex min-h-0 flex-1 flex-col">
+          <div id="main-content" tabIndex={-1} className="flex min-h-0 flex-1 flex-col">
             {children}
           </div>
         </SidebarInset>

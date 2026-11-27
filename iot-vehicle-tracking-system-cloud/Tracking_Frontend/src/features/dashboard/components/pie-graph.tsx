@@ -3,10 +3,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { PieStatusPoint } from '@/features/dashboard/hooks/use-dashboard-stats';
+import type { DeviceStatusPoint } from '@/lib/api/dashboard';
 import { Cell, Legend, Pie, PieChart, Tooltip } from 'recharts';
 
-export const PieGraph = ({ data, isLoading }: { data: PieStatusPoint[]; isLoading?: boolean }) => {
+export const PieGraph = ({
+  data,
+  isLoading,
+  isUnavailable,
+}: {
+  data: DeviceStatusPoint[];
+  isLoading?: boolean;
+  isUnavailable?: boolean;
+}) => {
   const hasMeaningfulData = data.some((item) => item.value > 0);
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
@@ -47,13 +55,13 @@ export const PieGraph = ({ data, isLoading }: { data: PieStatusPoint[]; isLoadin
             <Skeleton className="h-full w-full" />
           ) : data.length === 0 || !hasMeaningfulData ? (
             <div className="flex h-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-              Chưa có dữ liệu trạng thái kết nối thiết bị.
+              {isUnavailable ? 'Không thể tải trạng thái kết nối.' : 'Chưa có thiết bị để hiển thị.'}
             </div>
           ) : (
             <PieChart width={chartSize.width} height={chartSize.height}>
               <Pie data={data} dataKey="value" nameKey="name" innerRadius={68} outerRadius={92}>
                 {data.map((entry) => (
-                  <Cell key={entry.name} fill={entry.color} />
+                  <Cell key={entry.name} fill={entry.color ?? '#94a3b8'} />
                 ))}
               </Pie>
               <Tooltip />
