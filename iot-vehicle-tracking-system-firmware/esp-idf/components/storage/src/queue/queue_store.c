@@ -2,7 +2,9 @@
  * @file src/queue/queue_store.c
  * @brief Offline queue startup, segment discovery and tail recovery.
  *
- * Startup scans the SD directory, truncates a corrupt tail suffix and restores the cursor where usable.
+ * Startup scans the SD directory, truncates a corrupt tail suffix and restores the newest valid checkpoint
+ * or the legacy cursor. A missing cursor or one outside the segment range starts replay at the head.
+ * A cursor read I/O error aborts recovery.
  * The storage task owns later mutations and calls the frame and peek helpers. The app decides when to replay.
  * Recovery publishes its unread count through the shared slot interface.
  */
@@ -62,15 +64,19 @@ static bool repair_tail_segment(storage_queue_state_t *queue, uint32_t *total_in
 }
 
 /**
- * @brief Fall back to the head if the checkpoint fails validation or names an out-of-range segment.
+ * @brief Restore the cursor or start at the head when no checkpoint names a segment in range.
+ * An offset beyond the repaired tail starts at the beginning of that segment.
  */
-static void restore_read_cursor(storage_queue_state_t *queue)
+static esp_err_t restore_read_cursor(storage_queue_state_t *queue)
 {
-    if (!storage_queue_cursor_load(queue) || queue->read_segment < queue->head || queue->read_segment > queue->tail) {
+    esp_err_t result = storage_queue_cursor_load(queue);
+    if (result == ESP_FAIL) { return result; }
+    if (result == ESP_ERR_NOT_FOUND || queue->read_segment < queue->head || queue->read_segment > queue->tail) {
         queue->read_segment = queue->head;
         queue->read_offset = 0;
     }
     if (queue->read_segment == queue->tail && queue->read_offset > queue->tail_size) { queue->read_offset = 0; }
+    return ESP_OK;
 }
 
 /**
@@ -125,7 +131,7 @@ esp_err_t storage_queue_open_state(storage_queue_state_t *queue)
 
     uint32_t total_in_tail;
     if (!repair_tail_segment(queue, &total_in_tail)) { return ESP_FAIL; }
-    restore_read_cursor(queue);
+    if (restore_read_cursor(queue) != ESP_OK) { return ESP_FAIL; }
 
     uint32_t unread;
     if (!count_unread_records(queue, total_in_tail, &unread)) { return ESP_FAIL; }

@@ -5,8 +5,8 @@
  * App wiring initializes NVS and recovers SD state before creating the only SD request consumer.
  * Producers submit copied requests with zero wait. The worker reports failures and announces a newly filled
  * peek slot.
- * Stale pop tokens are ignored. Requests live in RAM, and startup recovers from segment files and the saved
- * cursor.
+ * Pop requests require a ready offline queue. The worker ignores stale tokens. Requests live in RAM, and
+ * startup recovers from segment files and cursor checkpoints.
  * NVS operations run synchronously on their callers.
  */
 #include "storage_internal.h"
@@ -85,6 +85,8 @@ ivts_err_t storage_queue_request_peek(void)
 
 ivts_err_t storage_queue_pop(uint32_t token)
 {
+    if (!storage_queue_slot_is_initialized()) { return IVTS_ERR_INVALID_ARG; }
+    if (!storage_sd_ok()) { return IVTS_ERR_INVALID_STATE; }
     storage_req_t r = { .op = REQ_Q_POP, .token = token };
     return post(&r);
 }

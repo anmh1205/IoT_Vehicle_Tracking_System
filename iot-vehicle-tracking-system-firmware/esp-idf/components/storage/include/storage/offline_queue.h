@@ -64,11 +64,12 @@ ivts_err_t storage_queue_peek_copy(uint8_t *out, size_t cap, size_t *len, uint32
  * @brief Queue token-checked removal of the cached record.
  *
  * The app chooses when a record can be removed. Storage checks the token before advancing the RAM cursor.
- * A reset can replay acknowledged records if their cursor has not been checkpointed.
+ * A reset can replay acknowledged records after the last durable cursor checkpoint.
  *
  * @param token Token obtained from storage_queue_peek_copy().
  * @retval IVTS_OK The request is queued for later token validation.
- * @retval IVTS_ERR_INVALID_STATE The work queue is absent.
+ * @retval IVTS_ERR_INVALID_ARG The slot mutex is absent.
+ * @retval IVTS_ERR_INVALID_STATE SD is unavailable or the work queue is absent.
  * @retval IVTS_ERR_FULL The work queue is full.
  * @note Context: App task after startup. Non-blocking.
  */

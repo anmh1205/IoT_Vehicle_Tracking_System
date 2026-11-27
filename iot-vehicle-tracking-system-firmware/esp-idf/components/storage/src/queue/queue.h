@@ -54,6 +54,8 @@ ivts_err_t storage_queue_do_peek(void);
  * @brief Apply a matching pop to the component-owned queue.
  * @param token Peek token from the app.
  * @retval IVTS_OK The slot is consumed and the cursor advances in RAM.
+ * @retval IVTS_ERR_INVALID_ARG The slot mutex is absent.
+ * @retval IVTS_ERR_INVALID_STATE The queue is closed.
  * @retval IVTS_ERR_NOT_FOUND The token is stale or the slot is empty.
  * @note Context: Storage task. May lock the slot and checkpoint on SD with no fixed timeout.
  */
@@ -95,7 +97,7 @@ size_t storage_queue_frame_encode(uint8_t *frame, const uint8_t *record, size_t 
  */
 int storage_queue_frame_decode(const uint8_t *frame, size_t size, uint8_t *payload, size_t *len);
 
-#define Q_DIR SD_MOUNT "/q"   /**< Directory for offline queue segments and the cursor checkpoint. */
+#define Q_DIR SD_MOUNT "/q"   /**< Directory for offline queue segments and cursor checkpoints. */
 #define MAX_SEGMENT_ID 9999999u   /**< Highest ID representable in the seven-digit segment filename. */
 
 /** @brief Segment and cursor state owned by startup during recovery and by the storage task afterward. */
@@ -105,7 +107,8 @@ typedef struct {
     uint32_t tail_size;   /**< Known complete frame bytes in the tail. */
     uint32_t read_segment;   /**< Segment ID at the read cursor. */
     uint32_t read_offset;   /**< Byte offset of the next unread frame. */
-    uint32_t pops_since_checkpoint;   /**< Accepted pops since the last successful cursor save. */
+    uint32_t checkpoint_sequence;   /**< Last loaded or synced slot sequence, zero for initial or legacy recovery. */
+    uint32_t pops_since_checkpoint;   /**< Accepted pops since a checkpoint was synced and closed successfully. */
     bool is_open;   /**< Recovery completes and file operations can proceed. */
     bool tail_needs_repair;   /**< An incomplete append needs truncation before another write. */
 } storage_queue_state_t;
@@ -145,8 +148,10 @@ ivts_err_t storage_queue_peek_record(storage_queue_state_t *queue);
  * @brief Consume the slot and advance the cursor on a matching token.
  * @param[in,out] queue Borrowed state. Cursor fields are unchanged on a token mismatch.
  * @param token Peek token to match.
- * @retval IVTS_OK A matching slot is consumed. A checkpoint is attempted every 16 pops or when the count
- *       reaches zero.
+ * @retval IVTS_OK A matching slot is consumed. A checkpoint is attempted after at least 16 pops
+ *       since the last save or when the unread count reaches zero.
+ * @retval IVTS_ERR_INVALID_ARG The slot mutex is absent.
+ * @retval IVTS_ERR_INVALID_STATE The queue is closed.
  * @retval IVTS_ERR_NOT_FOUND No matching slot.
  * @note Context: Storage task. May lock the slot and write a checkpoint with no fixed timeout.
  */
@@ -212,25 +217,26 @@ int storage_queue_read_frame(FILE *file, uint32_t offset, uint8_t *payload, size
 int storage_queue_scan_segment(uint32_t segment, uint32_t offset, uint32_t *valid_end, uint32_t *count);
 
 /**
- * @brief Attempt to checkpoint the current read position.
- * @param[in,out] queue Borrowed state. The pop counter clears only after a full write and successful close.
+ * @brief Write and sync the current position to the inactive checkpoint file.
+ * @param[in,out] queue Borrowed state. Sync advances the sequence. Successful sync and close clear the pop count.
  * @note Context: Storage task. Synchronous SD I/O with no fixed timeout. Failures are not returned.
  */
 void storage_queue_cursor_save(storage_queue_state_t *queue);
 /**
- * @brief Load a checksum-valid cursor into the queue state.
+ * @brief Load the newest checksum-valid slot, falling back to the legacy cursor if both slots are absent or invalid.
  * @param[in,out] queue Borrowed state. Read segment and offset change only on success.
- * @retval true The cursor bytes, magic and CRC validate. Recovery separately checks the segment range.
- * @retval false The file cannot be opened or a complete, valid cursor is unavailable.
+ * @retval ESP_OK A cursor was loaded. Recovery separately checks the segment range.
+ * @retval ESP_ERR_NOT_FOUND No complete, valid cursor is available.
+ * @retval ESP_FAIL A cursor file could not be read due to I/O failure.
  * @note Context: App startup. Synchronous SD I/O with no fixed timeout.
  */
-bool storage_queue_cursor_load(storage_queue_state_t *queue);
+esp_err_t storage_queue_cursor_load(storage_queue_state_t *queue);
 
 /**
  * @brief Check availability of the shared slot mutex.
  * @retval true The mutex exists.
  * @retval false The mutex is absent.
- * @note Context: App startup during queue recovery. Non-blocking.
+ * @note Context: App startup or runtime task. Non-blocking. The mutex handle is fixed after startup.
  */
 bool storage_queue_slot_is_initialized(void);
 /**
@@ -281,6 +287,7 @@ void storage_queue_slot_fill(const uint8_t *data, size_t len, uint32_t next_segm
  * @param[out] offset Non-null destination for the next cursor's byte offset.
  * @retval true The outputs are written, the slot is cleared and the pending count decreases if positive.
  * @retval false No match. Slot, count and outputs stay unchanged.
- * @note Context: Storage task. Waits on the slot mutex without a fixed timeout.
+ * @note Context: Storage task after the caller checks that the queue and slot mutex are ready.
+ *       Waits on the slot mutex without a fixed timeout.
  */
 bool storage_queue_slot_consume(uint32_t token, uint32_t *segment, uint32_t *offset);
