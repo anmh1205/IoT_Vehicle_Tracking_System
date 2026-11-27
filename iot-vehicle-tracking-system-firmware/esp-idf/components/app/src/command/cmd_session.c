@@ -3,8 +3,8 @@
  * @brief Tracking, session assignment and on-demand location command handlers.
  *
  * The app task updates tracking after a successful NVS write and delegates session identity
- * to the session tracker. A location request holds GNSS demand through its pre-submit deadline
- * or, after submission, until the modem result. The publisher owns the RAW transaction.
+ * to the session tracker. A location request holds GNSS demand until its modem result or deadline.
+ * The publisher owns the RAW transaction through its modem result, even after the command times out.
  */
 #include "command/command.h"
 #include "ivts_core/payload/meta.h"
@@ -40,7 +40,7 @@ const char *cmd_tracking_handle(const cmd_envelope_t *command)
     return NULL;
 }
 
-/* Startup clears location state. The app task owns it through submission and ACK delivery. */
+/* Startup clears location state. The app task owns it until command completion. */
 static uint64_t s_deadline_at_ms;
 static bool s_awaiting_publish_ack;
 
@@ -62,24 +62,32 @@ bool app_cmd_needs_gnss(void)
     return s_deadline_at_ms != 0u;
 }
 
+/** @brief Release GNSS demand and queue the final command result once. */
+static void complete_location(const char *reason)
+{
+    s_awaiting_publish_ack = false;
+    s_deadline_at_ms = 0;
+    cmd_inbox_complete(reason);
+}
+
 void app_cmd_on_location_ack(bool ok)
 {
     if (!s_awaiting_publish_ack) { return; }
-    s_awaiting_publish_ack = false;
-    s_deadline_at_ms = 0;
-    cmd_inbox_complete(ok ? NULL : "location_publish_failed");
+    /* The app can dispatch a modem result before running the deadline tick. */
+    if (app_now() >= s_deadline_at_ms) {
+        complete_location("location_publish_timeout");
+    } else {
+        complete_location(ok ? NULL : "location_publish_failed");
+    }
 }
 
-void cmd_location_tick(uint64_t now)
+void cmd_location_tick(uint64_t now_ms)
 {
-    /* After submission the modem result owns completion, even if the pre-submit deadline passes. */
-    if (s_deadline_at_ms != 0u && !s_awaiting_publish_ack) {
-        bool fixed = app_telemetry_view()->gnss.fix_valid;
-        if (now >= s_deadline_at_ms) {
-            s_deadline_at_ms = 0;
-            cmd_inbox_complete(fixed ? "location_publish_timeout" : "location_unavailable");
-        } else if (fixed) {
-            s_awaiting_publish_ack = app_messages_publish_location();
-        }
+    if (s_deadline_at_ms == 0u) { return; }
+    if (now_ms >= s_deadline_at_ms) {
+        bool fixed = s_awaiting_publish_ack || app_telemetry_view()->gnss.fix_valid;
+        complete_location(fixed ? "location_publish_timeout" : "location_unavailable");
+    } else if (!s_awaiting_publish_ack && app_telemetry_view()->gnss.fix_valid) {
+        s_awaiting_publish_ack = app_messages_publish_location();
     }
 }

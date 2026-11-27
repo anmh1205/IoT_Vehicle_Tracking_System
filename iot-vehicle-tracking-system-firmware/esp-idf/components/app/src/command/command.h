@@ -59,8 +59,8 @@ bool app_cmd_blocks_sleep(void);
 /**
  * @brief Check whether the location request still holds GNSS demand.
  *
- * @retval true while waiting for a publish opportunity or its modem ACK.
- * @retval false when no location request is active.
+ * @retval true while the location request is active, including while it awaits its modem ACK.
+ * @retval false after completion or timeout, or when no location request has started.
  *
  * @note Context: App task. Blocking: non-blocking.
  */
@@ -78,10 +78,10 @@ bool app_cmd_needs_gnss(void);
  */
 void app_cmd_on_ack(bool ok);
 /**
- * @brief Complete a location request after its RAW publish result.
+ * @brief Apply the RAW publish result to an active location request.
  *
- * Release the location GNSS demand and queue the command result. Ignore results when no location publish is
- * pending.
+ * Release GNSS demand and queue the result. A result processed at or after the deadline queues a timeout.
+ * Ignore results for a request that already completed.
  *
  * @param ok True for a successful modem publish result, false for failure.
  *
@@ -162,7 +162,8 @@ const char *cmd_session_handle(const cmd_envelope_t *command);
 /**
  * @brief Arm an asynchronous location request.
  *
- * Start a 90000 ms window for obtaining a fix and submitting a publish. Completion follows through the inbox.
+ * Start a 90000 ms window for obtaining a fix and receiving the location publish result.
+ * Completion follows through the inbox.
  *
  * @param command Unused by the handler. The caller owns the outstanding command ID.
  * @return NULL when the request is armed.
@@ -203,10 +204,10 @@ const char *cmd_rollback_handle(const cmd_envelope_t *command);
  */
 void cmd_location_init(void);
 /**
- * @brief Advance the location request until a fix publish is submitted or the deadline expires.
+ * @brief Advance the location request and enforce its completion deadline.
  *
- * Once a publish is accepted, its modem ACK completes the request. The deadline applies only before
- * submission.
+ * At the deadline, release GNSS demand and queue a failure even if the modem has accepted the publish.
+ * The publisher releases its transaction slot when the matching modem result arrives.
  *
  * @param now_ms Current monotonic uptime in milliseconds.
  *

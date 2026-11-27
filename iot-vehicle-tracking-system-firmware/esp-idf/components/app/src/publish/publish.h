@@ -255,10 +255,12 @@ void app_outbox_request_status(void);
  */
 void app_outbox_request_event(const char *event_code);
 /**
- * @brief Check whether the app counts control work as pending.
+ * @brief Check whether the outbox has control work to publish.
  *
- * @retval true when status, a boundary, firmware reporting or a motion alarm is pending.
- * @retval false when none of those are pending. Event and command ACK state are outside this check.
+ * The runtime combines this with command inbox state when evaluating sleep.
+ *
+ * @retval true when status, an event, a boundary, firmware reporting or a motion alarm is pending.
+ * @retval false when none of those are pending.
  *
  * @note Context: App task. Blocking: non-blocking.
  */

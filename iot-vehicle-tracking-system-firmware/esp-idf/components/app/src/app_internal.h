@@ -68,7 +68,7 @@ void app_msg_seq_restore(uint32_t seq);
 #define ACK_RETRY_MS              1000u  /**< Delay after command ACK or receipt checkpoint failure in milliseconds. */
 #define OTA_MARK_VALID_RETRY_MS   1000u  /**< Delay after a failed OTA mark-valid attempt in milliseconds. */
 #define OTA_ROLLBACK_RETRY_MS     5000u  /**< Delay after a failed automatic rollback in milliseconds. */
-#define LOCATION_TIMEOUT_MS      90000u  /**< GNSS fix and location submission window in milliseconds. */
+#define LOCATION_TIMEOUT_MS      90000u  /**< Location command deadline offset in milliseconds. */
 #define OBD_SAMPLE_MAX_AGE_MS    30000u  /**< Maximum OBD sample age for RAW capture in milliseconds. */
 #define MOTION_QUIET_MS          30000u  /**< Motion-free interval before reporting stationary, in milliseconds. */
 #define STATUS_PERIOD_MS         60000u  /**< FSM status interval while driving, in milliseconds. */

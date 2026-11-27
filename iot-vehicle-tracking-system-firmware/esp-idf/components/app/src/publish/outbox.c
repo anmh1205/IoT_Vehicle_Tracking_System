@@ -51,7 +51,7 @@ void app_outbox_request_event(const char *event_code)
 
 bool app_outbox_has_unsent_control(void)
 {
-    return s_status_needs_publish || app_session_has_unsent_boundary() ||
+    return s_status_needs_publish || s_event_needs_publish || app_session_has_unsent_boundary() ||
            app_fw_update_report_needs_publish() || app_alarm_has_unsent();
 }
 
