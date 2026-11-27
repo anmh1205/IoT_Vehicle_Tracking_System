@@ -116,25 +116,15 @@ static bool fill_deploy_defaults(ivts_config_t *c)
     return ok;
 }
 
-/**
- * @brief Khởi tạo mọi component theo thứ tự: queue, board, storage, modem, obd, ota.
- *
- * - Queue được tạo đầu tiên vì mọi bước sau đều có thể phát sự kiện ngay (config hỏng, SD
- *   mount lỗi).
- * - storage khởi tạo trước obd vì nimble_port_init() dùng NVS.
- * - Lỗi bắt buộc (trả false): queue, board (thiếu ADC thì không đo được ignition), NVS, modem.
- * - Lỗi suy giảm (chạy tiếp): SD, IMU, RTC, OBD.
- *
- * Thiết bị chưa provision (cấu hình không hợp lệ) vẫn chạy và ghi offline queue, nhưng
- * không kết nối MQTT.
- *
- * @return true nếu đã sẵn sàng tạo task "app".
- */
-bool app_init_all(void)
+static bool init_event_queue(void)
 {
-    if (!app_os_init()) { ESP_LOGE(APP_TAG, "queue"); return false; }
-    ivts_sink_t sink = app_sink();
+    if (app_os_init()) { return true; }
+    ESP_LOGE(APP_TAG, "queue");
+    return false;
+}
 
+static bool init_board(ivts_sink_t sink)
+{
     board_cfg_t board_cfg = {
         .sink = sink, .power_sample_ms = CONFIG_IVTS_POWER_SAMPLE_MS,
         .imu_threshold = CONFIG_IVTS_IMU_THRESHOLD, .imu_enabled = true,
@@ -142,7 +132,11 @@ bool app_init_all(void)
     };
     ivts_err_t e = board_init(&board_cfg);
     if (e != IVTS_OK) { ESP_LOGE(APP_TAG, "board: %s", ivts_err_name(e)); return false; }
+    return true;
+}
 
+static bool init_storage(ivts_sink_t sink)
+{
     storage_cfg_t storage_cfg = {
         .sink = sink,
 #if CONFIG_IVTS_SD_ENABLE
@@ -157,25 +151,33 @@ bool app_init_all(void)
         .pin_cd = BOARD_PIN_SD_CD,
         .task_prio = PRIO_STORAGE, .task_stack = 5120, .req_queue_len = 16,
     };
-    e = storage_init(&storage_cfg);
+    ivts_err_t e = storage_init(&storage_cfg);
     if (e != IVTS_OK) { ESP_LOGE(APP_TAG, "storage: %s", ivts_err_name(e)); return false; }
+    return true;
+}
 
+static void load_persisted_state(void)
+{
     app_cmd_init();
     (void)storage_config_load(&g_app.cfg);
     (void)storage_tracking_load(&g_app.tracking_enabled);
     app_session_restore();
     app_alarm_restore();
+}
+
+static bool resolve_provisioning(void)
+{
     bool defaults_ok = fill_deploy_defaults(&g_app.cfg);
     ivts_cfg_issue_t config_issues[IVTS_CFG_F_COUNT];
     size_t config_issue_count = ivts_config_validate(&g_app.cfg, config_issues, IVTS_CFG_F_COUNT);
     for (size_t i = 0; i < config_issue_count && i < IVTS_CFG_F_COUNT; i++) {
         ESP_LOGW(APP_TAG, "config field %u reason %u", config_issues[i].field, config_issues[i].reason);
     }
-    /* Chỉ app_sleep_enter() cho CPU ngủ sau khi modem và BLE đã dừng. */
-    e = board_set_auto_light_sleep(false);
-    if (e != IVTS_OK) { ESP_LOGW(APP_TAG, "power management: %s", ivts_err_name(e)); }
-    app_apply_config();
+    return defaults_ok && config_issue_count == 0u;
+}
 
+static void restore_boot_identity(void)
+{
     /* boot_id: thức từ deep sleep thì giữ nguyên (ngữ cảnh RTC còn hợp lệ); boot nguội thì
      * lấy số mới từ NVS. */
     uint32_t seq = 0;
@@ -183,8 +185,10 @@ bool app_init_all(void)
         if (storage_boot_id_next(&g_app.boot_id) != IVTS_OK) { g_app.boot_id = esp_random(); }
         app_rtc_ctx_save(g_app.boot_id, 0, 0);
     }
+}
 
-    bool provisioned = defaults_ok && config_issue_count == 0u;
+static bool init_modem(ivts_sink_t sink, bool provisioned)
+{
     modem_cfg_t modem_cfg = {
         .sink = sink, .time_get = modem_time_get, .uart_num = BOARD_MODEM_UART_NUM, .pin_tx = BOARD_PIN_MODEM_TX,
         .pin_rx = BOARD_PIN_MODEM_RX, .pin_pwrkey = BOARD_PIN_MODEM_PWRKEY,
@@ -208,11 +212,15 @@ bool app_init_all(void)
         g_app.cfg.device_id[sizeof g_app.cfg.device_id - 1u] = '\0';
         g_app.cfg.auth_token[sizeof g_app.cfg.auth_token - 1u] = '\0';
     }
-    e = modem_init(&modem_cfg);
+    ivts_err_t e = modem_init(&modem_cfg);
     if (e != IVTS_OK) { ESP_LOGE(APP_TAG, "modem: %s", ivts_err_name(e)); return false; }
     g_app.provisioned = provisioned;
     if (provisioned) { (void)modem_set_link(true); }
+    return true;
+}
 
+static void init_obd(ivts_sink_t sink)
+{
     obd_cfg_t obd_cfg = {
         .sink = sink, .poll_ms = CONFIG_IVTS_OBD_POLL_MS, .diag_period_s = 60,
         .task_prio = PRIO_OBD, .task_stack = 4096,
@@ -221,13 +229,49 @@ bool app_init_all(void)
         (void)ivts_str_copy(obd_cfg.target_addr, sizeof obd_cfg.target_addr, g_app.cfg.obd_ble_addr);
     }
     if (obd_init(&obd_cfg) != IVTS_OK) { ESP_LOGW(APP_TAG, "obd init lỗi: chạy không OBD"); }
+}
 
+static bool init_ota(ivts_sink_t sink)
+{
     ota_cfg_t ota_cfg = {
         .sink = sink, .src = { .open = src_open, .read = src_read, .close = src_close, .ctx = NULL },
         .prepare_boot = app_fw_update_prepare_boot,
         .task_prio = PRIO_OTA, .task_stack = 6144,
     };
     if (ota_init(&ota_cfg) != IVTS_OK) { return false; }
+    return true;
+}
+
+/**
+ * @brief Khởi tạo mọi component theo thứ tự: queue, board, storage, modem, obd, ota.
+ *
+ * - Queue được tạo đầu tiên vì mọi bước sau đều có thể phát sự kiện ngay (config hỏng, SD
+ *   mount lỗi).
+ * - storage khởi tạo trước obd vì nimble_port_init() dùng NVS.
+ * - Lỗi bắt buộc (trả false): queue, board (thiếu ADC thì không đo được ignition), NVS, modem.
+ * - Lỗi suy giảm (chạy tiếp): SD, IMU, RTC, OBD.
+ *
+ * Thiết bị chưa provision (cấu hình không hợp lệ) vẫn chạy và ghi offline queue, nhưng
+ * không kết nối MQTT.
+ *
+ * @return true nếu đã sẵn sàng tạo task "app".
+ */
+bool app_init_all(void)
+{
+    if (!init_event_queue()) { return false; }
+    ivts_sink_t sink = app_sink();
+    if (!init_board(sink) || !init_storage(sink)) { return false; }
+
+    load_persisted_state();
+    bool provisioned = resolve_provisioning();
+    /* Chỉ app_sleep_enter() cho CPU ngủ sau khi modem và BLE đã dừng. */
+    ivts_err_t e = board_set_auto_light_sleep(false);
+    if (e != IVTS_OK) { ESP_LOGW(APP_TAG, "power management: %s", ivts_err_name(e)); }
+    app_apply_config();
+    restore_boot_identity();
+    if (!init_modem(sink, provisioned)) { return false; }
+    init_obd(sink);
+    if (!init_ota(sink)) { return false; }
 
     app_fw_update_restore_at_boot();
     app_outbox_init();

@@ -68,6 +68,18 @@ static void update_link(ivts_link_t link)
     ESP_LOGI(APP_TAG, "link -> %u", (unsigned)link);
 }
 
+static void on_power_sample(const ivts_event_t *ev)
+{
+    if (ivts_axes_on_power(&g_app.axes, &g_app.axes_cfg, ev->u.power.vehicle_mv, app_now())) {
+        ESP_LOGI(APP_TAG, "ignition -> %d (%u mV)", (int)g_app.axes.ign, ev->u.power.vehicle_mv);
+    }
+}
+
+static void on_config_corrupt(void)
+{
+    app_outbox_request_event("config_corrupt");
+}
+
 /**
  * @brief Cập nhật snapshot telemetry và trạng thái app theo một sự kiện.
  *
@@ -78,11 +90,7 @@ void app_dispatch(const ivts_event_t *ev)
 {
     app_state_on_event(ev);
     switch (ev->type) {
-    case IVTS_EV_POWER_SAMPLE:
-        if (ivts_axes_on_power(&g_app.axes, &g_app.axes_cfg, ev->u.power.vehicle_mv, app_now())) {
-            ESP_LOGI(APP_TAG, "ignition -> %d (%u mV)", (int)g_app.axes.ign, ev->u.power.vehicle_mv);
-        }
-        break;
+    case IVTS_EV_POWER_SAMPLE: on_power_sample(ev); break;
     case IVTS_EV_MOTION_IRQ:
         (void)ivts_axes_on_motion(&g_app.axes, app_now());
         break;
@@ -91,9 +99,7 @@ void app_dispatch(const ivts_event_t *ev)
         break;
     case IVTS_EV_MQTT_ACK:     app_publisher_on_ack(ev); break;
     case IVTS_EV_QUEUE_READY:  app_replay_on_queue_ready(); break;
-    case IVTS_EV_CONFIG_CORRUPT:
-        app_outbox_request_event("config_corrupt");
-        break;
+    case IVTS_EV_CONFIG_CORRUPT: on_config_corrupt(); break;
     case IVTS_EV_STORE_RESULT:
         ESP_LOGW(APP_TAG, "storage op=%u err=%s", ev->u.store_result.op,
                  ivts_err_name((ivts_err_t)ev->u.store_result.err));
@@ -103,20 +109,21 @@ void app_dispatch(const ivts_event_t *ev)
     }
 }
 
+static bool s_fsm_requests_gnss;
+static bool s_modem_requests_gnss;
+
 static void update_gnss(uint32_t actions)
 {
-    static bool state_wants_gnss;
-    static bool modem_wants_gnss;
-    if (actions & IVTS_ACT_GNSS_ON) { state_wants_gnss = true; }
-    if (actions & IVTS_ACT_GNSS_OFF) { state_wants_gnss = false; }
-    bool wanted = state_wants_gnss || app_cmd_needs_gnss();
-    if (wanted != modem_wants_gnss && modem_set_gnss(wanted) == IVTS_OK) {
-        modem_wants_gnss = wanted;
+    if (actions & IVTS_ACT_GNSS_ON) { s_fsm_requests_gnss = true; }
+    if (actions & IVTS_ACT_GNSS_OFF) { s_fsm_requests_gnss = false; }
+    bool wanted = s_fsm_requests_gnss || app_cmd_needs_gnss();
+    if (wanted != s_modem_requests_gnss && modem_set_gnss(wanted) == IVTS_OK) {
+        s_modem_requests_gnss = wanted;
     }
 }
 
 /** Thực thi các hành động do FSM yêu cầu trong bước hiện tại. Các lệnh đều không chặn. */
-static void execute(const ivts_fsm_out_t *o)
+static void execute_fsm_actions(const ivts_fsm_out_t *o)
 {
     update_gnss(o->actions);
     if (o->actions & IVTS_ACT_OBD_START) { (void)obd_start(); }
@@ -134,6 +141,59 @@ static void execute(const ivts_fsm_out_t *o)
     if (o->actions & IVTS_ACT_REPLAY) { app_replay_tick(); }
 }
 
+static void drain_events(void)
+{
+    ivts_event_t ev;
+    if (app_os_receive(&ev, APP_TICK_MS)) {
+        app_dispatch(&ev);
+        while (app_os_receive(&ev, 0)) { app_dispatch(&ev); }    /* Rút cạn queue rồi mới chạy FSM. */
+    }
+}
+
+static void run_periodic_services(uint64_t now)
+{
+    update_link(modem_link_state());
+    app_publisher_poll();
+    app_fw_update_poll(now);
+    app_cmd_handle();
+    app_cmd_tick();
+
+    (void)ivts_axes_tick(&g_app.axes, &g_app.axes_cfg, now);
+    if (g_app.provisioned) { app_session_tick(g_app.axes.ign, g_app.tracking_enabled, g_app.boot_id); }
+}
+
+static ivts_fsm_in_t collect_fsm_input(uint64_t now)
+{
+    bool linked = app_link_is_broker_up();
+    return (ivts_fsm_in_t){
+        .now = now, .ignition = g_app.axes.ign, .motion = g_app.axes.motion, .wake = g_app.fsm.wake,
+        .link_up = linked,
+        .link_expected = g_app.provisioned,
+        .publish_idle = !app_publisher_is_busy() && !storage_queue_push_pending(),
+        .control_pending = app_outbox_has_unsent_control(),
+        .queue_pending = storage_queue_pending(),
+        .ota_active = app_fw_update_in_progress() ||
+                      app_cmd_blocks_sleep(),
+    };
+}
+
+static void apply_fsm_transition(const ivts_fsm_out_t *out, ivts_app_state_t before)
+{
+    if (out->changed) {
+        ESP_LOGI(APP_TAG, "state %s -> %s", ivts_app_state_name(before), ivts_app_state_name(g_app.fsm.state));
+        if (g_app.fsm.state == IVTS_ST_ALARM) { app_alarm_latch(g_app.provisioned, g_app.boot_id); }
+    }
+}
+
+static void refresh_device_state(bool changed)
+{
+    if (app_fw_update_in_progress()) {
+        app_state_set_device(IVTS_DEV_OTA, IVTS_SLEEP_NONE);
+    } else if (changed || g_app.fsm.state != IVTS_ST_SLEEP) {
+        app_state_set_device(ivts_fsm_device_state(g_app.fsm.state), IVTS_SLEEP_NONE);
+    }
+}
+
 /** Thân task "app": xem mô tả ở đầu file. */
 static void app_task(void *arg)
 {
@@ -147,49 +207,20 @@ static void app_task(void *arg)
 
     /* Vẫn chờ queue và xử lý sự kiện khi FSM đang fake sleep. */
     while (true) {
-        ivts_event_t ev;
-        if (app_os_receive(&ev, APP_TICK_MS)) {
-            app_dispatch(&ev);
-            while (app_os_receive(&ev, 0)) { app_dispatch(&ev); }    /* Rút cạn queue rồi mới chạy FSM. */
-        }
+        drain_events();
         uint64_t now = app_now();
         if (now < next_tick) { continue; }
         next_tick = now + APP_TICK_MS;
 
-        update_link(modem_link_state());
-        app_publisher_poll();
-        app_fw_update_poll(now);
-        app_cmd_handle();
-        app_cmd_tick();
-
-        (void)ivts_axes_tick(&g_app.axes, &g_app.axes_cfg, now);
-        if (g_app.provisioned) { app_session_tick(g_app.axes.ign, g_app.tracking_enabled, g_app.boot_id); }
-        bool linked = app_link_is_broker_up();
-        ivts_fsm_in_t in = {
-            .now = now, .ignition = g_app.axes.ign, .motion = g_app.axes.motion, .wake = g_app.fsm.wake,
-            .link_up = linked,
-            .link_expected = g_app.provisioned,
-            .publish_idle = !app_publisher_is_busy() && !storage_queue_push_pending(),
-            .control_pending = app_outbox_has_unsent_control(),
-            .queue_pending = storage_queue_pending(),
-            .ota_active = app_fw_update_in_progress() ||
-                          app_cmd_blocks_sleep(),
-        };
+        run_periodic_services(now);
+        ivts_fsm_in_t in = collect_fsm_input(now);
         ivts_fsm_out_t out;
         ivts_app_state_t before = g_app.fsm.state;
         ivts_fsm_step(&g_app.fsm, &g_app.fsm_cfg, &in, &out);
-        if (out.changed) {
-            ESP_LOGI(APP_TAG, "state %s -> %s", ivts_app_state_name(before), ivts_app_state_name(g_app.fsm.state));
-            app_state_set_device(ivts_fsm_device_state(g_app.fsm.state), IVTS_SLEEP_NONE);
-            if (g_app.fsm.state == IVTS_ST_ALARM) { app_alarm_latch(g_app.provisioned, g_app.boot_id); }
-        }
-        if (app_fw_update_in_progress()) {
-            app_state_set_device(IVTS_DEV_OTA, IVTS_SLEEP_NONE);
-        } else if (g_app.fsm.state != IVTS_ST_SLEEP) {
-            app_state_set_device(ivts_fsm_device_state(g_app.fsm.state), IVTS_SLEEP_NONE);
-        }
+        apply_fsm_transition(&out, before);
+        refresh_device_state(out.changed);
         update_led(now);
-        execute(&out);
+        execute_fsm_actions(&out);
         app_fw_update_confirm_tick();
         app_diag_tick(now);
     }
