@@ -6,6 +6,7 @@
 #include "alarm/motion_alarm.h"
 #include "app_clock.h"
 #include "app_priv.h"
+#include "command/command.h"
 #include "app_timing.h"
 #include "fw_update/fw_update.h"
 #include "ivts_core/base/str.h"

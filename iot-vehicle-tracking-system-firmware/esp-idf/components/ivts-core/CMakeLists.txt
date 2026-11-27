@@ -10,6 +10,7 @@ idf_component_register(
         "src/event/event.c"
         "src/payload/json_writer.c"
         "src/payload/json_reader.c"
+        "src/payload/json_fields.c"
         "src/payload/payload.c"
         "src/fsm/axes.c"
         "src/fsm/fsm.c"

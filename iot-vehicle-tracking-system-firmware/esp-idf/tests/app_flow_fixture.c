@@ -45,8 +45,8 @@ static size_t s_message_count;
 static ivts_session_state_t s_session;
 static ivts_motion_alarm_t s_alarm;
 static ivts_ota_pending_t s_ota_context;
-static storage_command_receipts_t s_receipts;
-static storage_restart_intent_t s_restart_intent;
+static ivts_cmd_receipts_t s_receipts;
+static ivts_restart_intent_t s_restart_intent;
 static bool s_image_pending_verify;
 static bool s_fail_receipts_save;
 static bool s_tracking_enabled = true;
@@ -244,8 +244,8 @@ ivts_err_t storage_ota_pending_save(const ivts_ota_pending_t *ctx)
     return IVTS_OK;
 }
 
-ivts_err_t storage_command_receipts_load(storage_command_receipts_t *out) { *out = s_receipts; return IVTS_OK; }
-ivts_err_t storage_command_receipts_save(const storage_command_receipts_t *receipts)
+ivts_err_t storage_command_receipts_load(ivts_cmd_receipts_t *out) { *out = s_receipts; return IVTS_OK; }
+ivts_err_t storage_command_receipts_save(const ivts_cmd_receipts_t *receipts)
 {
     if (s_fail_receipts_save) { return IVTS_ERR_IO; }
     s_receipts_saves++;
@@ -253,13 +253,13 @@ ivts_err_t storage_command_receipts_save(const storage_command_receipts_t *recei
     return IVTS_OK;
 }
 
-ivts_err_t storage_restart_intent_load(storage_restart_intent_t *out)
+ivts_err_t storage_restart_intent_load(ivts_restart_intent_t *out)
 {
     *out = s_restart_intent;
     return out->id[0] == '\0' ? IVTS_ERR_NOT_FOUND : IVTS_OK;
 }
 
-ivts_err_t storage_restart_intent_save(const storage_restart_intent_t *intent)
+ivts_err_t storage_restart_intent_save(const ivts_restart_intent_t *intent)
 {
     s_restart_intent = *intent;
     return IVTS_OK;

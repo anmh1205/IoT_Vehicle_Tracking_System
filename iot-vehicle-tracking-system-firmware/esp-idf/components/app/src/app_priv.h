@@ -66,16 +66,6 @@ void app_state_set_device(ivts_device_state_t d, ivts_sleep_mode_t m);
 void app_state_make_record(ivts_record_t *r);     /**< Chụp mẫu telemetry hiện tại và cấp seq mới. */
 void app_dispatch(const ivts_event_t *ev);
 
-/* ---- app_cmd.c ---- */
-void app_cmd_init(void);
-void app_cmd_handle(void);
-void app_cmd_tick(void);
-void app_cmd_on_ack(bool ok);
-void app_cmd_on_location_ack(bool ok);
-bool app_cmd_pending(void);
-bool app_cmd_blocks_sleep(void);
-bool app_cmd_needs_gnss(void);
-
 /* ---- app_sleep.c ---- */
 void app_sleep_enter(const ivts_fsm_out_t *out);
 

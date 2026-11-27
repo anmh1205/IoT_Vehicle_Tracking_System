@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <string.h>
 #include "app_priv.h"
+#include "command/command.h"
 #include "publish/messages.h"
 #include "publish/outbox.h"
 #include "session/session_tracker.h"
@@ -15,9 +16,9 @@ app_t g_app;
 static uint64_t s_now = 1u;
 QueueHandle_t g_modem_q = &s_now;
 
-static storage_command_receipts_t s_saved_receipts;
+static ivts_cmd_receipts_t s_saved_receipts;
 static bool s_read_fails, s_write_fails, s_cloud_available = true;
-static storage_restart_intent_t s_restart_intent;
+static ivts_restart_intent_t s_restart_intent;
 static unsigned s_ack_count, s_location_count, s_config_writes, s_restarts;
 static const char *s_running_slot = "factory";
 static bool s_rollback_available, s_rollback_write_fails;
@@ -87,27 +88,27 @@ ivts_err_t storage_tracking_save(bool enabled)
     return IVTS_OK;
 }
 
-ivts_err_t storage_command_receipts_load(storage_command_receipts_t *out)
+ivts_err_t storage_command_receipts_load(ivts_cmd_receipts_t *out)
 {
     if (s_read_fails) { return IVTS_ERR_IO; }
     *out = s_saved_receipts;
     return out->next != 0u || out->id[0][0] != '\0' ? IVTS_OK : IVTS_ERR_NOT_FOUND;
 }
 
-ivts_err_t storage_command_receipts_save(const storage_command_receipts_t *in)
+ivts_err_t storage_command_receipts_save(const ivts_cmd_receipts_t *in)
 {
     if (s_write_fails) { return IVTS_ERR_IO; }
     s_saved_receipts = *in;
     return IVTS_OK;
 }
 
-ivts_err_t storage_restart_intent_load(storage_restart_intent_t *out)
+ivts_err_t storage_restart_intent_load(ivts_restart_intent_t *out)
 {
     *out = s_restart_intent;
     return s_restart_intent.id[0] == '\0' ? IVTS_ERR_NOT_FOUND : IVTS_OK;
 }
 
-ivts_err_t storage_restart_intent_save(const storage_restart_intent_t *intent)
+ivts_err_t storage_restart_intent_save(const ivts_restart_intent_t *intent)
 {
     s_restart_intent = *intent;
     return IVTS_OK;

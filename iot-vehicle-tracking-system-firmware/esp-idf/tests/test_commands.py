@@ -18,7 +18,7 @@ class Commands(unittest.TestCase):
         includes += [components / name / "include" for name in ("storage", "modem", "ota")]
         build_fixture(
             cls.executable,
-            [FIRMWARE / "tests" / "command_fixture.c", components / "app/src/app_cmd.c",
+            [FIRMWARE / "tests" / "command_fixture.c", *sorted((components / "app/src/command").glob("*.c")),
              components / "app/src/fw_update/fw_update.c",
              components / "modem" / "src" / "modem.c", PLATFORM / "src/platform_clock.c", PLATFORM / "src/platform_reset.c", *sorted(CORE.glob("src/**/*.c"))],
             ["-D_POSIX_C_SOURCE=200809L", "-ffunction-sections", "-Wl,--gc-sections", *(flag for path in includes for flag in ("-I", path))],

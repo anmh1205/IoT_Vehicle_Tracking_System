@@ -1,4 +1,5 @@
 #pragma once
+#include "ivts_core/model/command.h"
 
 /**
  * @file storage.h
@@ -91,25 +92,11 @@ ivts_err_t storage_ota_pending_load(ivts_ota_pending_t *out);
 /** @brief Ghi ngữ cảnh chờ xác nhận OTA; ghi cấu trúc rỗng để xoá. */
 ivts_err_t storage_ota_pending_save(const ivts_ota_pending_t *p);
 
-#define STORAGE_COMMAND_ID_SIZE 48u
-#define STORAGE_COMMAND_RECEIPTS 32u
+ivts_err_t storage_command_receipts_load(ivts_cmd_receipts_t *out);
+ivts_err_t storage_command_receipts_save(const ivts_cmd_receipts_t *receipts);
 
-/** Các command đã thực thi thành công, theo cửa sổ vòng tròn. Một ID rỗng là ô chưa dùng. */
-typedef struct {
-    uint8_t next;
-    char id[STORAGE_COMMAND_RECEIPTS][STORAGE_COMMAND_ID_SIZE];
-} storage_command_receipts_t;
-
-ivts_err_t storage_command_receipts_load(storage_command_receipts_t *out);
-ivts_err_t storage_command_receipts_save(const storage_command_receipts_t *receipts);
-
-typedef struct {
-    char id[STORAGE_COMMAND_ID_SIZE];
-    char rollback_origin[IVTS_OTA_PART_LABEL_SIZE]; /**< Slot gốc của rollback; rỗng với reboot thường. */
-} storage_restart_intent_t;
-
-ivts_err_t storage_restart_intent_load(storage_restart_intent_t *out);
-ivts_err_t storage_restart_intent_save(const storage_restart_intent_t *intent);
+ivts_err_t storage_restart_intent_load(ivts_restart_intent_t *out);
+ivts_err_t storage_restart_intent_save(const ivts_restart_intent_t *intent);
 ivts_err_t storage_tracking_load(bool *enabled);
 ivts_err_t storage_tracking_save(bool enabled);
 ivts_err_t storage_session_load(ivts_session_state_t *state);

@@ -34,7 +34,9 @@
 #define BLOB_MAGIC  0x49565453u     /* ASCII "IVTS". */
 #define CFG_VERSION 1u              /* Tăng khi đổi layout của ivts_config_t. */
 #define OTA_VERSION 3u              /* Thêm nhãn partition đích. */
-#define BLOB_PAYLOAD_MAX sizeof(storage_command_receipts_t)
+#define BLOB_PAYLOAD_MAX 1537u
+_Static_assert(sizeof(ivts_cmd_receipts_t) == BLOB_PAYLOAD_MAX, "receipt layout must match the NVS blob limit");
+_Static_assert(sizeof(ivts_restart_intent_t) == 65u, "restart intent layout must match NVS");
 
 /** Header đứng trước payload trong mỗi blob. */
 typedef struct {
@@ -169,7 +171,7 @@ ivts_err_t storage_ota_pending_save(const ivts_ota_pending_t *p)
     return platform_err_from_esp(blob_save(KEY_OTA, OTA_VERSION, p, sizeof *p));
 }
 
-ivts_err_t storage_command_receipts_load(storage_command_receipts_t *out)
+ivts_err_t storage_command_receipts_load(ivts_cmd_receipts_t *out)
 {
     if (out == NULL) { return IVTS_ERR_INVALID_ARG; }
     ivts_err_t r = blob_load("cmd_receipts", 1, out, sizeof *out);
@@ -177,20 +179,20 @@ ivts_err_t storage_command_receipts_load(storage_command_receipts_t *out)
         memset(out, 0, sizeof *out);
         return r;
     }
-    if (out->next >= STORAGE_COMMAND_RECEIPTS) { return IVTS_ERR_CRC; }
-    for (size_t i = 0; i < STORAGE_COMMAND_RECEIPTS; i++) {
-        if (memchr(out->id[i], '\0', STORAGE_COMMAND_ID_SIZE) == NULL) { return IVTS_ERR_CRC; }
+    if (out->next >= IVTS_CMD_RECEIPTS_COUNT) { return IVTS_ERR_CRC; }
+    for (size_t i = 0; i < IVTS_CMD_RECEIPTS_COUNT; i++) {
+        if (memchr(out->id[i], '\0', IVTS_CMD_ID_SIZE) == NULL) { return IVTS_ERR_CRC; }
     }
     return IVTS_OK;
 }
 
-ivts_err_t storage_command_receipts_save(const storage_command_receipts_t *receipts)
+ivts_err_t storage_command_receipts_save(const ivts_cmd_receipts_t *receipts)
 {
-    if (receipts == NULL || receipts->next >= STORAGE_COMMAND_RECEIPTS) { return IVTS_ERR_INVALID_ARG; }
+    if (receipts == NULL || receipts->next >= IVTS_CMD_RECEIPTS_COUNT) { return IVTS_ERR_INVALID_ARG; }
     return platform_err_from_esp(blob_save("cmd_receipts", 1, receipts, sizeof *receipts));
 }
 
-ivts_err_t storage_restart_intent_load(storage_restart_intent_t *out)
+ivts_err_t storage_restart_intent_load(ivts_restart_intent_t *out)
 {
     if (out == NULL) { return IVTS_ERR_INVALID_ARG; }
     memset(out, 0, sizeof *out);
@@ -202,7 +204,7 @@ ivts_err_t storage_restart_intent_load(storage_restart_intent_t *out)
     return r;
 }
 
-ivts_err_t storage_restart_intent_save(const storage_restart_intent_t *intent)
+ivts_err_t storage_restart_intent_save(const ivts_restart_intent_t *intent)
 {
     if (intent == NULL) { return IVTS_ERR_INVALID_ARG; }
     return platform_err_from_esp(blob_save("reboot_id", 2, intent, sizeof *intent));

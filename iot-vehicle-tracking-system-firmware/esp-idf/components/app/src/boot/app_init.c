@@ -24,6 +24,7 @@
  */
 
 #include "app_priv.h"
+#include "command/command.h"
 #include "alarm/motion_alarm.h"
 #include "publish/outbox.h"
 #include "session/session_tracker.h"
