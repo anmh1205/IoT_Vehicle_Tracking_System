@@ -228,11 +228,14 @@ Grafana visualizes VictoriaMetrics and VictoriaLogs.
 
 | Topic | Direction | QoS | Purpose |
 |---|---|---|---|
-| `v1/{device_id}/rawdata` | Device -> Server | 0 | High-frequency telemetry (loss-tolerant) |
+| `v1/{device_id}/rawdata` | Device -> Server | 0 (Bridge subscription) | High-frequency telemetry |
 | `v1/{device_id}/status` | Device -> Server | 1 | Heartbeat / session state |
 | `v1/{device_id}/events` | Device -> Server | 1 | Alerts and critical events |
 | `v1/{device_id}/firmware` | Device -> Server | 1 | OTA progress and results |
+| `v1/{device_id}/commands/ack` | Device -> Server | 1 | Application-level command result |
 | `v1/{device_id}/commands` | Server -> Device | 1 | Remote commands/config updates |
+
+The primary ESP-IDF firmware publishes to EMQX at QoS 1, including `rawdata`. The QoS 0 subscription applies between EMQX and MQTT Bridge. See the [system architecture](docs/system-architecture.md#telemetry-and-session-lifecycle).
 
 Canonical `v1/{device_id}/rawdata.data` fields:
 - `imu_accel_delta_mps2`, `vehicle_battery`, `device_battery`
@@ -482,7 +485,7 @@ Operational note:
 
 See the [firmware projects](iot-vehicle-tracking-system-firmware/README.md) for the primary ESP-IDF, legacy ESP-IDF and reserved Zephyr directories.
 
-As documented in the thesis draft and aligned with current project assets:
+The current tracker design uses the following components.
 
 - **MCU**: ESP32-S3 as central controller.
 - **Cellular + GNSS**: SIM7600CE-T (integrated LTE + GNSS), driven via AT command flow.
@@ -490,7 +493,7 @@ As documented in the thesis draft and aligned with current project assets:
 - **OBD2 integration**: BLE adapter flow (vgate iCar Pro class).
 
 Relevant operational behaviors:
-- Layered MQTT QoS policy (QoS 0 for high-frequency telemetry, QoS 1 for critical events/commands).
+- MQTT publish acknowledgment from the broker and a separate bridge-side acknowledgment for QoS 1 subscriptions.
 - Remote config via `update_config` on command topic.
 - OTA command flow via `ota_update` payload contract.
 

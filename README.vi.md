@@ -221,11 +221,14 @@ Grafana hiển thị dữ liệu từ VictoriaMetrics và VictoriaLogs.
 
 | Topic | Hướng | QoS | Mục đích |
 |---|---|---|---|
-| `v1/{device_id}/rawdata` | Device -> Server | 0 | Telemetry tần suất cao (chấp nhận mất gói) |
+| `v1/{device_id}/rawdata` | Device -> Server | 0 (subscription của Bridge) | Telemetry tần suất cao |
 | `v1/{device_id}/status` | Device -> Server | 1 | Heartbeat / trạng thái phiên |
 | `v1/{device_id}/events` | Device -> Server | 1 | Cảnh báo và sự kiện quan trọng |
 | `v1/{device_id}/firmware` | Device -> Server | 1 | Tiến trình/kết quả OTA |
+| `v1/{device_id}/commands/ack` | Device -> Server | 1 | Kết quả thực thi lệnh |
 | `v1/{device_id}/commands` | Server -> Device | 1 | Lệnh từ xa/cập nhật cấu hình |
+
+Firmware ESP-IDF chính publish lên EMQX ở QoS 1, gồm cả `rawdata`. Subscription QoS 0 áp dụng trên chặng từ EMQX sang MQTT Bridge. Xem [kiến trúc hệ thống](docs/system-architecture.md#telemetry-and-session-lifecycle).
 
 Các trường canonical của `v1/{device_id}/rawdata.data`:
 - `imu_accel_delta_mps2`, `vehicle_battery`, `device_battery`
@@ -459,7 +462,7 @@ Ghi chú vận hành:
 
 Xem [các dự án firmware](iot-vehicle-tracking-system-firmware/README.md) để chọn bản ESP-IDF chính, bản cũ hoặc thư mục dành cho Zephyr.
 
-Theo tài liệu thesis draft và đồng bộ với tài sản dự án hiện tại:
+Tracker hiện tại sử dụng các thành phần sau.
 
 - **MCU**: ESP32-S3 làm bộ điều khiển trung tâm.
 - **Cellular + GNSS**: SIM7600CE-T (LTE + GNSS tích hợp), điều khiển qua luồng AT command.
@@ -467,7 +470,7 @@ Theo tài liệu thesis draft và đồng bộ với tài sản dự án hiện 
 - **Tích hợp OBD2**: luồng BLE adapter (nhóm thiết bị vgate iCar Pro).
 
 Hành vi vận hành liên quan:
-- Chính sách MQTT QoS theo lớp (QoS 0 cho telemetry tần suất cao, QoS 1 cho event/lệnh quan trọng).
+- Broker xác nhận bản tin publish. Bridge có xác nhận riêng cho subscription QoS 1.
 - Cấu hình từ xa qua `update_config` trên command topic.
 - Luồng OTA qua hợp đồng payload `ota_update`.
 
