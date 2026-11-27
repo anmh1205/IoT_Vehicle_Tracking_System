@@ -5,15 +5,20 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "at_engine.h"
-#include "at_parser.h"
+#include "at/at_engine.h"
 #include "app_msg_seq.h"
 #include "session/session_tracker.h"
 #include "board/board.h"
 #include "elm327.h"
 #include "ivts_core/model/record.h"
 #include "ivts_core/ota/confirm.h"
-#include "modem_priv.h"
+#include "at/at_dispatch.h"
+#include "at/at_parser.h"
+#include "link/modem_link.h"
+#include "modem_internal.h"
+#include "mqtt/mqtt_rx.h"
+#include "mqtt/mqtt_session.h"
+#include "slots/modem_slots.h"
 #include "obd_pid.h"
 #include "storage_priv.h"
 
@@ -26,7 +31,6 @@ void storage_emit(const ivts_event_t *ev) { assert(ev->type == IVTS_EV_QUEUE_REA
 static const char *s_fail_read;
 static bool s_fail_remove, s_fail_truncate, s_short_write;
 
-modem_t g_modem;
 static ivts_session_state_t s_persisted_session;
 static bool s_fail_session_save;
 static uint32_t s_seq;
@@ -51,7 +55,8 @@ ivts_err_t storage_session_save(const ivts_session_state_t *state)
 }
 
 void modem_expect_raw(size_t len) { s_expected_raw = len; }
-void modem_lte_conn_lost(void) {}
+void modem_link_on_connection_lost(void) {}
+const char *modem_command_topic(void) { return "cmd"; }
 
 void modem_cmd_store(const char *payload, size_t len)
 {
@@ -279,36 +284,52 @@ static void check_late_session_assignment(void)
     assert(!app_session_assign(key, "00000007", 99u, NULL));
 }
 
+static void check_mqtt_connect_command(void)
+{
+    const modem_cfg_t config = { .mqtt_port = 1883, .mqtt_host = "broker.test",
+                                 .mqtt_user = "test-user", .mqtt_pass = "test-password" };
+    char command[128];
+    const char expected[] = "AT+CMQTTCONNECT=0,\"tcp://broker.test:8883\",60,0,\"test-user\",\"test-password\"";
+    assert(modem_mqtt_format_connect_cmd(command, sizeof command, &config, true));
+    assert(strcmp(command, expected) == 0);
+    assert(!modem_mqtt_format_connect_cmd(command, strlen(expected), &config, true));
+    assert(modem_mqtt_format_connect_cmd(command, sizeof expected, &config, true));
+}
+
 static void check_mqtt_rx(void)
 {
-    memcpy(g_modem.topic_cmd, "cmd", 4);
-    modem_mqtt_on_urc("+CMQTTRXSTART:");
-    modem_mqtt_on_urc("0,3,4");
-    assert(g_modem.rx.active);
-    modem_mqtt_on_urc("+CMQTTRXTOPIC:");
-    modem_mqtt_on_urc("0,3");
-    assert(s_expected_raw == 3u && g_modem.rx.phase == 1u);
-    memcpy(g_modem.rx.topic, "cmd", 3);
-    g_modem.rx.tlen = 3u;
-    modem_mqtt_on_urc("+CMQTTRXPAYLOAD: 0,4");
-    assert(s_expected_raw == 4u && g_modem.rx.phase == 2u);
-    memcpy(g_modem.rx.payload, "true", 4);
-    g_modem.rx.plen = 4u;
-    modem_mqtt_on_urc("+CMQTTRXEND: 0");
-    assert(s_seen_commands == 1u && !g_modem.rx.active);
+    modem_mqtt_rx_init();
+    modem_mqtt_rx_on_urc("+CMQTTRXSTART:");
+    modem_mqtt_rx_on_urc("0,3,4");
+    modem_mqtt_rx_on_urc("+CMQTTRXTOPIC:");
+    modem_mqtt_rx_on_urc("0,3");
+    assert(s_expected_raw == 3u);
+    modem_mqtt_rx_on_data((const uint8_t *)"cm", 2);
+    modem_mqtt_rx_on_data((const uint8_t *)"d", 1);
+    modem_mqtt_rx_on_urc("+CMQTTRXPAYLOAD: 0,4");
+    assert(s_expected_raw == 4u);
+    modem_mqtt_rx_on_data((const uint8_t *)"tr", 2);
+    modem_mqtt_rx_on_data((const uint8_t *)"ue", 2);
+    modem_mqtt_rx_on_urc("+CMQTTRXEND: 0");
+    assert(s_seen_commands == 1u);
 
-    modem_mqtt_on_urc("+CMQTTRXSTART: 0,3,5");
-    modem_mqtt_on_urc("+CMQTTRXTOPIC: 0,3");
-    memcpy(g_modem.rx.topic, "cmd", 3);
-    g_modem.rx.tlen = 3u;
-    modem_mqtt_on_urc("+CMQTTRXPAYLOAD: 0,4");
-    memcpy(g_modem.rx.payload, "true", 4);
-    g_modem.rx.plen = 4u;
-    modem_mqtt_on_urc("+CMQTTRXEND: 0");
-    assert(s_seen_commands == 1u && !g_modem.rx.active);   /* Prefix JSON hợp lệ vẫn thiếu byte. */
+    modem_mqtt_rx_on_urc("+CMQTTRXSTART: 0,3,5");
+    modem_mqtt_rx_on_urc("+CMQTTRXTOPIC: 0,3");
+    modem_mqtt_rx_on_data((const uint8_t *)"cm", 2);
+    modem_mqtt_rx_on_data((const uint8_t *)"d", 1);
+    modem_mqtt_rx_on_urc("+CMQTTRXPAYLOAD: 0,4");
+    modem_mqtt_rx_on_data((const uint8_t *)"tr", 2);
+    modem_mqtt_rx_on_data((const uint8_t *)"ue", 2);
+    modem_mqtt_rx_on_urc("+CMQTTRXEND: 0");
+    assert(s_seen_commands == 1u);   /* Prefix JSON hợp lệ vẫn thiếu byte. */
 
-    modem_mqtt_on_urc("+CMQTTRXSTART: 1,3,4");
-    assert(!g_modem.rx.active);
+    modem_mqtt_rx_on_urc("+CMQTTRXSTART: 1,3,4");
+    modem_mqtt_rx_on_urc("+CMQTTRXTOPIC: 1,3");
+    modem_mqtt_rx_on_data((const uint8_t *)"cmd", 3);
+    modem_mqtt_rx_on_urc("+CMQTTRXPAYLOAD: 1,4");
+    modem_mqtt_rx_on_data((const uint8_t *)"true", 4);
+    modem_mqtt_rx_on_urc("+CMQTTRXEND: 1");
+    assert(s_seen_commands == 1u);
 }
 
 static void check_obd(void)
@@ -354,6 +375,7 @@ int main(int argc, char *argv[])
         {"partial_append", check_partial_append}, {"sparse", check_sparse_segments},
         {"uart", check_uart}, {"ota", check_ota_deadline},
         {"session", check_late_session_assignment}, {"mqtt_rx", check_mqtt_rx}, {"obd", check_obd},
+        {"mqtt_connect", check_mqtt_connect_command},
     };
     assert(argc == 2);
     for (size_t i = 0; i < sizeof cases / sizeof cases[0]; i++) {

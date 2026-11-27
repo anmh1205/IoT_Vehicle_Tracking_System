@@ -32,6 +32,7 @@ typedef struct {
     char     apn[64];                /**< APN của nhà mạng. */
     char     mqtt_host[64];          /**< Địa chỉ broker. */
     uint16_t mqtt_port;              /**< Cổng broker. */
+    bool     use_tls;                /**< Client TLS policy, supplied by app wiring. */
     bool     command_subscribe_enabled;
     char     client_id[MODEM_CLIENT_ID_MAX + 1u];  /**< MQTT client id, 1..MODEM_CLIENT_ID_MAX ký tự. */
     char     mqtt_user[32];          /**< Tên đăng nhập MQTT. */

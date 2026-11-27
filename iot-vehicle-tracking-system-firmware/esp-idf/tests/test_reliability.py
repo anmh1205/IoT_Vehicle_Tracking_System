@@ -19,7 +19,7 @@ class Reliability(unittest.TestCase):
         build_fixture(
             cls.executable,
             [FIRMWARE / "tests" / "reliability_fixture.c", storage / "src" / "storage_queue.c",
-             modem / "at_parser.c", modem / "at_engine.c", modem / "modem_mqtt.c",
+             modem / "at/at_parser.c", modem / "at/at_engine.c", modem / "mqtt/mqtt_rx.c", modem / "mqtt/mqtt_session.c",
              obd / "elm327.c", obd / "obd_pid.c",
              components / "app/src/session/session_tracker.c", components / "app/src/runtime/app_clock.c", PLATFORM / "src/platform_clock.c", *sorted(CORE.glob("src/**/*.c"))],
             ["-D_POSIX_C_SOURCE=200809L", '-DSD_MOUNT="sd"', "-I", PLATFORM / "include", "-I", FIRMWARE / "tests" / "stubs",
@@ -56,6 +56,9 @@ class Reliability(unittest.TestCase):
 
     def test_mqtt_split_header_and_truncated_payload(self):
         self.run_case("mqtt_rx")
+
+    def test_mqtt_connect_rejects_truncated_credentials(self):
+        self.run_case("mqtt_connect")
 
     def test_obd_notifications_pid_readiness_and_dtc(self):
         self.run_case("obd")

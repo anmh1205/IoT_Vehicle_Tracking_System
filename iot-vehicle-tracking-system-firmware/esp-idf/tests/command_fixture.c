@@ -10,12 +10,13 @@
 #include "session/session_tracker.h"
 #include "esp_system.h"
 #include "ivts_core/payload/json_reader.h"
-#include "modem_priv.h"
+#include "modem_task.h"
+#include "modem_internal.h"
+#include "slots/modem_slots.h"
 #include "ota/ota.h"
 #include "storage/storage.h"
 
 static uint64_t s_now = 1u;
-QueueHandle_t g_modem_q = &s_now;
 
 static ivts_cmd_receipts_t s_saved_receipts;
 static bool s_read_fails, s_write_fails, s_cloud_available = true;
@@ -32,13 +33,10 @@ uint64_t app_now(void) { return s_now; }
 const ivts_telemetry_t *app_telemetry_view(void) { return &s_telemetry; }
 void app_outbox_request_status(void) {}
 void esp_restart(void) { s_restarts++; }
-esp_err_t modem_os_start(void) { return ESP_OK; }
-
-int xQueueSend(QueueHandle_t queue, const void *item, unsigned ticks)
+esp_err_t modem_task_start(const modem_cfg_t *cfg)
 {
-    (void)ticks;
-    assert(queue == g_modem_q && item != NULL);
-    return pdTRUE;
+    assert(cfg != NULL);
+    return ESP_OK;
 }
 
 static ivts_err_t event_sink(void *ctx, const ivts_event_t *ev)
@@ -251,7 +249,9 @@ static void check_fifo(void)
         assert(modem_cmd_take(&value, 1u, &len) == IVTS_OK && len == 1u && value == next);
     }
     assert(modem_cmd_take(&value, 1u, &len) == IVTS_OK && len == 1u && value == 'f');
-    g_modem.cfg.command_subscribe_enabled = false;
+    modem_cfg_t config = *modem_config();
+    config.command_subscribe_enabled = false;
+    assert(modem_init(&config) == IVTS_OK);
     modem_cmd_store("g", 1u);
     assert(modem_cmd_take(&value, 1u, &len) == IVTS_ERR_NOT_FOUND);
 }

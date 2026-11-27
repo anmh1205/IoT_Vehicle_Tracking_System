@@ -74,7 +74,8 @@ bool app_wiring_init_modem(ivts_sink_t sink, ivts_config_t *config, bool provisi
         .sink = sink, .time_get = modem_time_get, .uart_num = BOARD_MODEM_UART_NUM, .pin_tx = BOARD_PIN_MODEM_TX,
         .pin_rx = BOARD_PIN_MODEM_RX, .pin_pwrkey = BOARD_PIN_MODEM_PWRKEY,
         .pin_reset = BOARD_PIN_MODEM_RESET, .pwrkey_inverted = BOARD_MODEM_PWRKEY_INVERTED, .baud = BOARD_MODEM_BAUD,
-        .mqtt_port = config->mqtt_port, .gnss_period_s = CONFIG_IVTS_GNSS_PERIOD_S,
+        .mqtt_port = config->mqtt_port,
+        .use_tls = config->mqtt_port == 8883u || (provisioned && strcmp(config->mqtt_host, "mqtt.thingdock.dev") == 0), .gnss_period_s = CONFIG_IVTS_GNSS_PERIOD_S,
         .command_subscribe_enabled = config->command_subscribe_enabled,
         .task_prio = PRIO_MODEM, .task_stack = 6144,
     };

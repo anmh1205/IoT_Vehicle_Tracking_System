@@ -1,0 +1,81 @@
+#include "mqtt_publish.h"
+#include "modem_internal.h"
+#include "at/at_dispatch.h"
+#include "at/at_parser.h"
+#include "link/modem_link.h"
+#include "slots/modem_slots.h"
+
+#include <stdio.h>
+#include <string.h>
+
+#define PUB_TIMEOUT_S 60   /* Thời gian module chờ PUBACK, giây (manual cho phép 60..180). */
+
+static bool input(const char *what, const char *data, size_t len)
+{
+    char cmd[40];
+    snprintf(cmd, sizeof cmd, "AT+CMQTT%s=0,%u", what, (unsigned)len);
+    at_cmd_t c = { .text = cmd, .data = (const uint8_t *)data, .data_len = len, .timeout_ms = 10000 };
+    return modem_at(&c) == AT_RES_OK;
+}
+
+static bool send_topic(const char *topic)
+{
+    return input("TOPIC", topic, strlen(topic));
+}
+
+static bool send_payload(const char *payload, size_t len)
+{
+    return input("PAYLOAD", payload, len);
+}
+
+static bool send_publish(int16_t *err)
+{
+    char cmd[40];
+    snprintf(cmd, sizeof cmd, "AT+CMQTTPUB=0,1,%d", PUB_TIMEOUT_S);
+    at_cmd_t c = { .text = cmd, .final_prefix = "+CMQTTPUB:", .final_err_field = 2,
+                   .timeout_ms = (PUB_TIMEOUT_S + 5) * 1000u };
+    at_result_t r = modem_at(&c);
+    int32_t e = 0;
+    bool ok = (r == AT_RES_OK);
+    if (ok) {
+        *err = 0;
+    } else if (r == AT_RES_TIMEOUT) {
+        *err = -1;                                   /* Không có kết quả trong PUB_TIMEOUT_S + 5 giây. */
+    } else if (at_field_int(modem_at_response(), 1, &e)) {
+        *err = (int16_t)e;                           /* Mã <err> theo bảng lỗi MQTT của module. */
+    }
+    return ok;
+}
+
+static void on_pub_result(int16_t err)
+{
+    /* Mã 11 là "no connection" trong bảng lỗi MQTT: broker đã mất. */
+    if (err == 11) { modem_link_on_connection_lost(); }
+    if (err == -1) {
+        /* Đóng phiên cũ để kết quả PUB đến trễ không khớp nhầm vào lần gửi kế tiếp. */
+        modem_emit_link(IVTS_LINK_NET_UP, (int32_t)IVTS_ERR_TIMEOUT);
+        modem_link_reset(MODEM_LINK_STEP_MQTT_START);
+    }
+}
+
+/**
+ * @brief Gửi bản tin trong ô publish (nếu có) và báo kết quả cho app.
+ *
+ * Mã lỗi báo qua IVTS_EV_MQTT_ACK: 0 = thành công; -2 = lỗi khi nhập topic hoặc payload;
+ * -1 = không có kết quả trong PUB_TIMEOUT_S + 5 giây; giá trị khác là mã <err> trong bảng lỗi
+ * MQTT của module. Mã 11 (không có kết nối) làm máy trạng thái quay lại bước kết nối.
+ */
+void modem_mqtt_publish_pending(void)
+{
+    modem_topic_t t;
+    const char *p;
+    size_t n;
+    uint32_t id;
+    if (!modem_tx_take(&t, &p, &n, &id)) { return; }
+    const char *topic = modem_topic_name(t);
+    bool ok = send_topic(topic) && send_payload(p, n);
+    int16_t err = -2;                                   /* Lỗi trước khi PUB (nhập topic hoặc payload). */
+    if (ok) { ok = send_publish(&err); }
+    modem_tx_done(ok, err);
+    if (!ok) { on_pub_result(err); }
+}

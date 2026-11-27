@@ -20,7 +20,8 @@ class Commands(unittest.TestCase):
             cls.executable,
             [FIRMWARE / "tests" / "command_fixture.c", *sorted((components / "app/src/command").glob("*.c")),
              components / "app/src/fw_update/fw_update.c", components / "app/src/device/app_device.c",
-             components / "modem" / "src" / "modem.c", PLATFORM / "src/platform_clock.c", PLATFORM / "src/platform_reset.c", *sorted(CORE.glob("src/**/*.c"))],
+             components / "modem/src/modem.c", components / "modem/src/slots/command_fifo.c",
+             components / "modem/src/slots/slot_mutex.c", PLATFORM / "src/platform_clock.c", PLATFORM / "src/platform_reset.c", *sorted(CORE.glob("src/**/*.c"))],
             ["-D_POSIX_C_SOURCE=200809L", "-ffunction-sections", "-Wl,--gc-sections", *(flag for path in includes for flag in ("-I", path))],
         )
 

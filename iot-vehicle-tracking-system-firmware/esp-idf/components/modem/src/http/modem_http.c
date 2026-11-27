@@ -1,52 +1,46 @@
-/**
- * @file modem_http.c
- * @brief Nguồn byte HTTP cho OTA, thực thi bằng lệnh AT HTTP của SIM7600.
- *
- * Lệnh theo AT manual (mục HTTP(S)):
- *
- *     AT+HTTPINIT / AT+HTTPTERM
- *     AT+HTTPPARA="URL","<url>"
- *     AT+HTTPACTION=0            -> OK, +HTTPACTION: <method>,<statuscode>,<datalen>
- *     AT+HTTPREAD=<off>,<size>   -> OK, +HTTPREAD: DATA,<n> <n byte> ... +HTTPREAD: 0
- *
- * Phần mô tả cú pháp AT+HTTPREAD trong manual V2.00 chỉ có một tham số, trong khi ví dụ của
- * manual dùng hai tham số (AT+HTTPREAD=0,10). Dạng hai tham số (offset, size) được dùng ở đây
- * theo ví dụ đó.
- *
- * ## Mô hình thực thi
- *
- * Các hàm modem_http_open/read/close chạy trong task "ota" và là RPC chặn: đóng gói yêu cầu vào
- * g_modem_q rồi chờ trên một semaphore nhị phân. modem_http_handle() chạy trong task "modem",
- * thực hiện lệnh AT, ghi kết quả vào biến của caller rồi give semaphore. Caller chặn đến khi đó
- * nên các con trỏ trong yêu cầu (url, buf, got...) còn sống trong suốt thời gian task "modem"
- * truy cập.
- *
- * Semaphore được tạo và xoá trong mỗi lần gọi; task "modem" luôn give, kể cả khi lỗi, nên
- * caller không bị treo vĩnh viễn.
- *
- * ## Khi reset hoặc mất nguồn
- *
- * Phiên HTTP nằm trên module. Nếu ESP reset giữa chừng, bước mở phiên kế tiếp gọi AT+HTTPTERM
- * trước để đóng phiên còn treo.
- */
+#include "modem_http.h"
+#include "modem_internal.h"
+#include "at/at_dispatch.h"
+#include "at/at_parser.h"
+#include "at/raw_buffer.h"
+#include "esp_log.h"
+#include "link/modem_link.h"
+#include "mqtt/tls.h"
 
-#include "modem_priv.h"
 #include <stdio.h>
 #include <string.h>
-#include "esp_log.h"
-#include "freertos/queue.h"
 
-/**
- * @brief Gửi một yêu cầu tới task "modem" và chặn đến khi nhận kết quả.
- * @return Kết quả của yêu cầu; IVTS_ERR_FULL nếu không tạo được semaphore hoặc queue đầy quá 1 s.
- */
+static struct {
+    uint8_t *destination;
+    size_t capacity;
+    size_t length;
+    bool reading_raw;
+    bool overflow;
+} s_http;
+
+bool modem_http_route_raw(const uint8_t *data, size_t len, bool is_last)
+{
+    if (!s_http.reading_raw) { return false; }
+    if (s_http.destination != NULL) {
+        (void)append_bounded(s_http.destination, s_http.capacity, &s_http.length, data, len);
+    }
+    if (is_last) { s_http.reading_raw = false; }
+    return true;
+}
+
+void modem_http_discard_raw(void)
+{
+    if (s_http.reading_raw) { s_http.overflow = true; }
+    s_http.reading_raw = false;
+}
+
 static ivts_err_t rpc(modem_req_t *r)
 {
     ivts_err_t res = IVTS_ERR_FAIL;
     r->result = &res;
     r->done = xSemaphoreCreateBinary();
     if (r->done == NULL) { return IVTS_ERR_FULL; }
-    if (xQueueSend(g_modem_q, r, pdMS_TO_TICKS(1000)) != pdTRUE) {
+    if (modem_task_post(r, 1000u) != IVTS_OK) {
         vSemaphoreDelete(r->done);
         return IVTS_ERR_FULL;
     }
@@ -84,14 +78,13 @@ void modem_http_close(void)
  */
 bool modem_http_on_line(const char *line)
 {
-    modem_t *m = &g_modem;
-    if (m->http_dst == NULL || !at_has_prefix(line, "+HTTPREAD:")) { return false; }
+    if (s_http.destination == NULL || !at_has_prefix(line, "+HTTPREAD:")) { return false; }
     const char *field = line + sizeof("+HTTPREAD:") - 1u;
     while (*field == ' ') { field++; }
     int32_t n;
     if (!at_field_int(line, at_has_prefix(field, "DATA,") ? 1u : 0u, &n) || n <= 0) { return false; }
-    m->http_raw = true;
-    m->http_overflow |= (size_t)n > m->http_cap - m->http_len;
+    s_http.reading_raw = true;
+    s_http.overflow |= (size_t)n > s_http.capacity - s_http.length;
     modem_expect_raw((size_t)n);
     return true;
 }
@@ -106,8 +99,7 @@ bool modem_http_on_line(const char *line)
  */
 static ivts_err_t do_open(const modem_req_t *r)
 {
-    modem_t *m = &g_modem;
-    if (m->lte.st < L_PDP) { return IVTS_ERR_INVALID_STATE; }
+    if (modem_link_current_step() < MODEM_LINK_STEP_PDP) { return IVTS_ERR_INVALID_STATE; }
     if (r->url == NULL || strncmp(r->url, "https://", 8u) != 0 || strpbrk(r->url, "\"\\\r\n\t ") != NULL) {
         return IVTS_ERR_INVALID_ARG;
     }
@@ -128,7 +120,7 @@ static ivts_err_t do_open(const modem_req_t *r)
     at_cmd_t c = { .text = "AT+HTTPACTION=0", .final_prefix = "+HTTPACTION:", .timeout_ms = 120000 };
     if (modem_at(&c) != AT_RES_OK) { return IVTS_ERR_TIMEOUT; }
     int32_t status = 0, len = 0;
-    if (!at_field_int(m->eng.resp, 1, &status) || !at_field_int(m->eng.resp, 2, &len) || len < 0) {
+    if (!at_field_int(modem_at_response(), 1, &status) || !at_field_int(modem_at_response(), 2, &len) || len < 0) {
         return IVTS_ERR_IO;
     }
     *r->status = (int)status;
@@ -148,18 +140,17 @@ static ivts_err_t do_open(const modem_req_t *r)
  */
 static ivts_err_t do_read(const modem_req_t *r)
 {
-    modem_t *m = &g_modem;
     char cmd[48];
     snprintf(cmd, sizeof cmd, "AT+HTTPREAD=%lu,%u", (unsigned long)r->offset, (unsigned)r->len);
-    m->http_dst = r->buf;
-    m->http_cap = r->len;
-    m->http_len = 0;
-    m->http_overflow = false;
+    s_http.destination = r->buf;
+    s_http.capacity = r->len;
+    s_http.length = 0;
+    s_http.overflow = false;
     at_cmd_t c = { .text = cmd, .final_prefix = "+HTTPREAD: 0", .final_exact = true, .timeout_ms = 15000 };
     at_result_t res = modem_at(&c);
-    m->http_dst = NULL;
-    if (res != AT_RES_OK || m->http_overflow || m->http_len == 0u) { return IVTS_ERR_IO; }
-    *r->got = m->http_len;
+    s_http.destination = NULL;
+    if (res != AT_RES_OK || s_http.overflow || s_http.length == 0u) { return IVTS_ERR_IO; }
+    *r->got = s_http.length;
     return IVTS_OK;
 }
 
