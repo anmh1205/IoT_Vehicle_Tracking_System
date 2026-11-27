@@ -151,33 +151,53 @@ uint32_t storage_queue_pending(void)
     return v;
 }
 
-/**
- * @brief Đọc và kiểm tra khung tại vị trí @p off.
- * @param[out] payload Nơi nhận payload; có thể NULL nếu chỉ cần kiểm tra.
- * @param[out] len     Độ dài payload.
- * @return Kích thước khung (> 0), FRAME_END, FRAME_CORRUPT hoặc FRAME_IO.
- */
-static int read_frame(FILE *f, uint32_t off, uint8_t *payload, size_t *len)
+static size_t queue_frame_payload_size(const uint8_t header[2])
 {
-    uint8_t h[2];
-    if (fseek(f, (long)off, SEEK_SET) != 0) { return FRAME_IO; }
-    size_t n = fread(h, 1, sizeof h, f);
-    if (ferror(f)) { return FRAME_IO; }
-    if (n == 0u) { return FRAME_END; }
-    if (n != sizeof h || h[0] != FRAME_MAGIC || h[1] == 0u || h[1] > IVTS_RECORD_MAX_SIZE) {
-        return FRAME_CORRUPT;
+    return header[0] == FRAME_MAGIC && header[1] != 0u && header[1] <= IVTS_RECORD_MAX_SIZE
+        ? header[1] : 0u;
+}
+
+static size_t queue_frame_encode(uint8_t *frame, const uint8_t *record, size_t len)
+{
+    frame[0] = FRAME_MAGIC;
+    frame[1] = (uint8_t)len;
+    memcpy(&frame[2], record, len);
+    uint32_t crc = ivts_crc32(0, &frame[1], len + 1u);
+    for (size_t i = 0; i < 4u; i++) { frame[2u + len + i] = (uint8_t)(crc >> (8u * i)); }
+    return len + FRAME_OVERHEAD;
+}
+
+static int queue_frame_decode(const uint8_t *frame, size_t size, uint8_t *payload, size_t *len)
+{
+    if (size < 2u) { return FRAME_CORRUPT; }
+    size_t payload_size = queue_frame_payload_size(frame);
+    if (payload_size == 0u || size != payload_size + FRAME_OVERHEAD) { return FRAME_CORRUPT; }
+    const uint8_t *crc_bytes = &frame[2u + payload_size];
+    uint32_t stored_crc = (uint32_t)crc_bytes[0] | ((uint32_t)crc_bytes[1] << 8) |
+                          ((uint32_t)crc_bytes[2] << 16) | ((uint32_t)crc_bytes[3] << 24);
+    if (ivts_crc32(0, &frame[1], payload_size + 1u) != stored_crc) { return FRAME_CORRUPT; }
+    if (payload != NULL) {
+        memcpy(payload, &frame[2], payload_size);
+        *len = payload_size;
     }
-    uint8_t tail[IVTS_RECORD_MAX_SIZE + 4];
-    if (fread(tail, 1, (size_t)h[1] + 4u, f) != (size_t)h[1] + 4u) {
-        return ferror(f) ? FRAME_IO : FRAME_CORRUPT;
+    return (int)size;
+}
+
+/* Read the header first so corrupt framing cannot drive an oversized read. */
+static int read_frame(FILE *file, uint32_t offset, uint8_t *payload, size_t *len)
+{
+    uint8_t frame[IVTS_RECORD_MAX_SIZE + FRAME_OVERHEAD];
+    if (fseek(file, (long)offset, SEEK_SET) != 0) { return FRAME_IO; }
+    size_t read = fread(frame, 1, 2, file);
+    if (ferror(file)) { return FRAME_IO; }
+    if (read == 0u) { return FRAME_END; }
+    size_t payload_size = read == 2u ? queue_frame_payload_size(frame) : 0u;
+    if (payload_size == 0u) { return FRAME_CORRUPT; }
+    size_t tail_size = payload_size + 4u;
+    if (fread(frame + 2, 1, tail_size, file) != tail_size) {
+        return ferror(file) ? FRAME_IO : FRAME_CORRUPT;
     }
-    uint32_t crc = ivts_crc32(0, &h[1], 1);
-    crc = ivts_crc32(crc, tail, h[1]);
-    uint32_t got = (uint32_t)tail[h[1]] | ((uint32_t)tail[h[1] + 1] << 8) |
-                   ((uint32_t)tail[h[1] + 2] << 16) | ((uint32_t)tail[h[1] + 3] << 24);
-    if (crc != got) { return FRAME_CORRUPT; }
-    if (payload != NULL) { memcpy(payload, tail, h[1]); *len = h[1]; }
-    return (int)(h[1] + FRAME_OVERHEAD);
+    return queue_frame_decode(frame, 2u + tail_size, payload, len);
 }
 
 /**
@@ -233,51 +253,68 @@ static bool cursor_load(void)
  * Xem storage_priv.h. Các bước: tìm dải đoạn hiện có; cắt khung dở ở đoạn cuối; nạp cursor (hoặc
  * bắt đầu từ đoạn cũ nhất nếu cursor không hợp lệ); đếm số bản ghi chưa gửi.
  */
-esp_err_t storage_queue_open(void)
+static esp_err_t validate_queue_cfg(void)
 {
-    s_open = false;
     if (s_mx == NULL || g_storage_cfg.queue_max_segments < 2u ||
         g_storage_cfg.queue_segment_bytes < IVTS_RECORD_MAX_SIZE + FRAME_OVERHEAD) {
         return ESP_ERR_INVALID_ARG;
     }
-    if (mkdir(Q_DIR, 0775) != 0 && errno != EEXIST) { return ESP_FAIL; }
+    return ESP_OK;
+}
+
+static bool find_segment_range(uint32_t *head, uint32_t *tail)
+{
     DIR *d = opendir(Q_DIR);
-    if (d == NULL) { return ESP_FAIL; }
-    s_head = UINT32_MAX;
-    s_tail = 0;
+    if (d == NULL) { return false; }
+    *head = UINT32_MAX;
+    *tail = 0;
     for (;;) {
         errno = 0;
         struct dirent *de = readdir(d);
         if (de == NULL) { break; }
         uint32_t v;
         if (segment_id(de->d_name, &v)) {
-            if (v < s_head) { s_head = v; }
-            if (v > s_tail) { s_tail = v; }
+            if (v < *head) { *head = v; }
+            if (v > *tail) { *tail = v; }
         }
     }
     bool listed = errno == 0;
     closedir(d);
-    if (!listed) { return ESP_FAIL; }
-    if (s_head == UINT32_MAX) { s_head = s_tail = 0; }
+    if (!listed) { return false; }
+    if (*head == UINT32_MAX) { *head = *tail = 0; }
 
+    return true;
+}
+
+static bool repair_tail_segment(uint32_t *total_in_tail)
+{
     /* Cắt khung dở ở cuối đoạn đang ghi (nguồn mất giữa lúc fwrite). */
-    uint32_t total_in_tail;
-    int result = scan_segment(s_tail, 0, &s_tail_size, &total_in_tail);
-    if (result == FRAME_IO) { return ESP_FAIL; }
+    int result = scan_segment(s_tail, 0, &s_tail_size, total_in_tail);
+    if (result == FRAME_IO) { return false; }
     if (result == FRAME_CORRUPT) {
         char path[48];
         seg_path(path, sizeof path, s_tail);
-        if (truncate(path, (off_t)s_tail_size) != 0) { return ESP_FAIL; }
+        if (truncate(path, (off_t)s_tail_size) != 0) { return false; }
         ESP_LOGW(STORAGE_TAG, "queue: bỏ phần khung dở ở %s", path);
     }
+    return true;
+}
+
+static void restore_read_cursor(void)
+{
     if (!cursor_load() || s_rd_seg < s_head || s_rd_seg > s_tail) {
         s_rd_seg = s_head;
         s_rd_off = 0;
     }
     if (s_rd_seg == s_tail && s_rd_off > s_tail_size) { s_rd_off = 0; }
+}
+
+static bool count_unread_records(uint32_t total_in_tail, uint32_t *unread)
+{
     uint32_t pending = 0;
-    d = opendir(Q_DIR);
-    if (d == NULL) { return ESP_FAIL; }
+    DIR *d = opendir(Q_DIR);
+    if (d == NULL) { return false; }
+    bool listed;
     for (;;) {
         errno = 0;
         struct dirent *de = readdir(d);
@@ -295,7 +332,13 @@ esp_err_t storage_queue_open(void)
         pending += count;
     }
     closedir(d);
-    if (!listed) { return ESP_FAIL; }
+    if (!listed) { return false; }
+    *unread = pending;
+    return true;
+}
+
+static void publish_initial_count(uint32_t pending)
+{
     xSemaphoreTake(s_mx, portMAX_DELAY);
     s_slot.full = false;
     s_pending = pending;
@@ -303,6 +346,23 @@ esp_err_t storage_queue_open(void)
     s_pops = 0;
     s_tail_needs_repair = false;
     s_open = true;
+}
+
+esp_err_t storage_queue_open(void)
+{
+    s_open = false;
+    esp_err_t error = validate_queue_cfg();
+    if (error != ESP_OK) { return error; }
+    if (mkdir(Q_DIR, 0775) != 0 && errno != EEXIST) { return ESP_FAIL; }
+    if (!find_segment_range(&s_head, &s_tail)) { return ESP_FAIL; }
+
+    uint32_t total_in_tail;
+    if (!repair_tail_segment(&total_in_tail)) { return ESP_FAIL; }
+    restore_read_cursor();
+
+    uint32_t unread;
+    if (!count_unread_records(total_in_tail, &unread)) { return ESP_FAIL; }
+    publish_initial_count(unread);
     return ESP_OK;
 }
 
@@ -343,14 +403,8 @@ static bool repair_tail(void)
 }
 
 /* Xem storage_priv.h. Sang đoạn mới khi đoạn hiện tại không còn đủ chỗ. */
-ivts_err_t storage_queue_do_push(const uint8_t *rec, size_t len)
+static ivts_err_t rotate_tail_if_full(size_t len)
 {
-    if (!s_open) { return IVTS_ERR_INVALID_STATE; }
-    if (len == 0u || len > IVTS_RECORD_MAX_SIZE) { return IVTS_ERR_INVALID_ARG; }
-    if (s_tail_needs_repair) {
-        if (!repair_tail()) { return IVTS_ERR_IO; }
-        s_tail_needs_repair = false;
-    }
     if (s_tail_size + len + FRAME_OVERHEAD > g_storage_cfg.queue_segment_bytes) {
         if (s_tail == MAX_SEGMENT_ID) { return IVTS_ERR_FULL; }
         /* Dọn đoạn cũ trước khi cập nhật tail; lỗi I/O giữ nguyên con trỏ ghi. */
@@ -361,13 +415,20 @@ ivts_err_t storage_queue_do_push(const uint8_t *rec, size_t len)
         s_tail++;
         s_tail_size = 0;
     }
-    uint8_t fr[IVTS_RECORD_MAX_SIZE + FRAME_OVERHEAD];
-    fr[0] = FRAME_MAGIC;
-    fr[1] = (uint8_t)len;
-    memcpy(&fr[2], rec, len);
-    uint32_t crc = ivts_crc32(0, &fr[1], len + 1u);
-    for (int i = 0; i < 4; i++) { fr[2 + len + (size_t)i] = (uint8_t)(crc >> (8 * i)); }
+    return IVTS_OK;
+}
 
+static ivts_err_t ensure_room(size_t len)
+{
+    if (s_tail_needs_repair) {
+        if (!repair_tail()) { return IVTS_ERR_IO; }
+        s_tail_needs_repair = false;
+    }
+    return rotate_tail_if_full(len);
+}
+
+static ivts_err_t append_frame(const uint8_t *frame, size_t frame_size)
+{
     char p[48];
     seg_path(p, sizeof p, s_tail);
     FILE *f = fopen(p, "ab");
@@ -376,23 +437,80 @@ ivts_err_t storage_queue_do_push(const uint8_t *rec, size_t len)
         fclose(f);
         return IVTS_ERR_IO;
     }
-    size_t w = fwrite(fr, 1, len + FRAME_OVERHEAD, f);
+    size_t w = fwrite(frame, 1, frame_size, f);
     int rc = fclose(f);
-    if (w != len + FRAME_OVERHEAD || rc != 0) {
+    if (w != frame_size || rc != 0) {
         s_tail_needs_repair = !repair_tail();
         return IVTS_ERR_IO;
     }
-    s_tail_size += (uint32_t)(len + FRAME_OVERHEAD);
+    s_tail_size += (uint32_t)(frame_size);
     xSemaphoreTake(s_mx, portMAX_DELAY);
     s_pending++;
     xSemaphoreGive(s_mx);
     return IVTS_OK;
 }
 
+
+ivts_err_t storage_queue_do_push(const uint8_t *rec, size_t len)
+{
+    if (!s_open) { return IVTS_ERR_INVALID_STATE; }
+    if (len == 0u || len > IVTS_RECORD_MAX_SIZE) { return IVTS_ERR_INVALID_ARG; }
+    ivts_err_t result = ensure_room(len);
+    if (result != IVTS_OK) { return result; }
+    uint8_t frame[IVTS_RECORD_MAX_SIZE + FRAME_OVERHEAD];
+    size_t frame_size = queue_frame_encode(frame, rec, len);
+    return append_frame(frame, frame_size);
+}
+
 /*
  * Xem storage_priv.h. Ô peek còn đầy hoặc queue trống thì không làm gì. Đoạn đã đọc hết được xoá
  * và cursor chuyển sang đoạn kế; khung hỏng thì bỏ phần còn lại của đoạn.
  */
+static int read_head_frame(const char *path, bool *exists, uint8_t *buffer, size_t *len)
+{
+    FILE *f = fopen(path, "rb");
+    if (f == NULL && (errno != ENOENT || s_rd_seg == s_tail)) { return FRAME_IO; }
+    *exists = f != NULL;
+    int k = (f != NULL) ? read_frame(f, s_rd_off, buffer, len) : FRAME_END;
+    if (f != NULL && fclose(f) != 0) { k = FRAME_IO; }
+    return k;
+}
+
+static void fill_peek_slot(const uint8_t *buf, size_t len, uint32_t frame_size)
+{
+    xSemaphoreTake(s_mx, portMAX_DELAY);
+    memcpy(s_slot.data, buf, len);
+    s_slot.len = len;
+    if (++s_token == 0u) { s_token++; }
+    s_slot.token = s_token;
+    s_slot.next_seg = s_rd_seg;
+    s_slot.next_off = s_rd_off + frame_size;
+    s_slot.full = true;
+    xSemaphoreGive(s_mx);
+}
+
+static void emit_queue_ready(uint32_t pending)
+{
+    ivts_event_t ev = { .type = IVTS_EV_QUEUE_READY, .ts_ms = platform_uptime_ms() };
+    ev.u.queue_ready.pending = pending;
+    storage_emit(&ev);
+}
+
+static ivts_err_t advance_past_segment(const char *path, bool exists)
+{
+    uint32_t next = s_rd_seg + 1u;
+    if (exists) {
+        if (remove(path) != 0 && errno != ENOENT) { return IVTS_ERR_IO; }
+    } else if (!next_segment(next, &next)) {
+        return IVTS_ERR_IO;
+    }
+    s_rd_seg = next;
+    s_rd_off = 0;
+    if (s_head < s_rd_seg) { s_head = s_rd_seg; }
+    cursor_save();
+    return IVTS_OK;
+}
+
 ivts_err_t storage_queue_do_peek(void)
 {
     if (!s_open) { return IVTS_ERR_INVALID_STATE; }
@@ -409,27 +527,14 @@ ivts_err_t storage_queue_do_peek(void)
             set_pending(0);
             return IVTS_OK;
         }
-        FILE *f = fopen(p, "rb");
-        if (f == NULL && (errno != ENOENT || s_rd_seg == s_tail)) { return IVTS_ERR_IO; }
-        bool exists = f != NULL;
+        bool exists;
         uint8_t buf[IVTS_RECORD_MAX_SIZE];
         size_t len = 0;
-        int k = (f != NULL) ? read_frame(f, s_rd_off, buf, &len) : FRAME_END;
-        if (f != NULL && fclose(f) != 0) { k = FRAME_IO; }
+        int k = read_head_frame(p, &exists, buf, &len);
         if (k == FRAME_IO) { return IVTS_ERR_IO; }
         if (k > 0) {
-            xSemaphoreTake(s_mx, portMAX_DELAY);
-            memcpy(s_slot.data, buf, len);
-            s_slot.len = len;
-            if (++s_token == 0u) { s_token++; }
-            s_slot.token = s_token;
-            s_slot.next_seg = s_rd_seg;
-            s_slot.next_off = s_rd_off + (uint32_t)k;
-            s_slot.full = true;
-            xSemaphoreGive(s_mx);
-            ivts_event_t ev = { .type = IVTS_EV_QUEUE_READY, .ts_ms = platform_uptime_ms() };
-            ev.u.queue_ready.pending = pend;
-            storage_emit(&ev);
+            fill_peek_slot(buf, len, (uint32_t)k);
+            emit_queue_ready(pend);
             return IVTS_OK;
         }
         if (k == FRAME_CORRUPT) {
@@ -439,16 +544,8 @@ ivts_err_t storage_queue_do_peek(void)
             set_pending(0);                            /* Bộ đếm lệch với nội dung file: lấy file làm chuẩn. */
             return IVTS_OK;
         }
-        uint32_t next = s_rd_seg + 1u;
-        if (exists) {
-            if (remove(p) != 0 && errno != ENOENT) { return IVTS_ERR_IO; }
-        } else if (!next_segment(next, &next)) {
-            return IVTS_ERR_IO;
-        }
-        s_rd_seg = next;
-        s_rd_off = 0;
-        if (s_head < s_rd_seg) { s_head = s_rd_seg; }
-        cursor_save();
+        ivts_err_t error = advance_past_segment(p, exists);
+        if (error != IVTS_OK) { return error; }
     }
     return IVTS_OK;
 }
