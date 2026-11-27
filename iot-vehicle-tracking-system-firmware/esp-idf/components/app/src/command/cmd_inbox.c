@@ -1,9 +1,10 @@
 /**
- * @file cmd_inbox.c
- * @brief Command envelope parsing, handler dispatch and reliable command ACK delivery.
+ * @file src/command/cmd_inbox.c
+ * @brief Command envelope parsing, handler dispatch and command ACK delivery.
  *
- * The app task owns parsing buffers, the in-flight ACK and retry state.
- * Checkpoint successful receipts before handing an ACK to the publisher.
+ * The app task owns the parse buffers, outstanding command slot and retry state. It polls the
+ * modem FIFO and waits for each normal command ACK before taking another command. Successful
+ * receipts reach NVS before ACK submission. The modem owns MQTT transport.
  */
 #include "command/command.h"
 #include <string.h>
@@ -12,14 +13,16 @@
 #include "modem/modem.h"
 #include "publish/publish.h"
 
-#define CMD_TOKEN_CAPACITY 64
+#define CMD_TOKEN_CAPACITY 64  /**< Maximum JSON tokens in one command. */
 
+/** @brief Single app-owned command slot retained until successful ACK delivery. */
 typedef struct {
-    char id[IVTS_CMD_ID_SIZE];
-    const char *status;
-    const char *response;
+    char id[IVTS_CMD_ID_SIZE]; /**< Copied command ID. Empty when the slot is free. */
+    const char *status; /**< Static ACK status. NULL until command processing completes. */
+    const char *response; /**< Borrowed failure reason, or NULL to omit it. */
 } command_ack_t;
 
+/* Startup initializes this state. The app task owns the parse buffers and command slot without a lock. */
 static char s_cmd_json[MODEM_CMD_MAX];
 static ivts_jtok_t s_cmd_tokens[CMD_TOKEN_CAPACITY];
 static command_ack_t s_ack;
@@ -46,6 +49,7 @@ void cmd_inbox_complete(const char *reason)
     if (reason == NULL) { cmd_receipts_append(s_ack.id); }
 }
 
+/** @brief Consume one FIFO entry and accept only a parsed root object. */
 static int take_and_parse_command(void)
 {
     size_t len = 0;
@@ -58,6 +62,7 @@ static int take_and_parse_command(void)
     return n;
 }
 
+/** @brief Borrow the params tokens and resolve the supported command ID spellings. */
 static void read_command_envelope(int token_count, cmd_envelope_t *envelope)
 {
     const ivts_json_obj_t root = { s_cmd_json, s_cmd_tokens, token_count, 0 };
@@ -70,6 +75,7 @@ static void read_command_envelope(int token_count, cmd_envelope_t *envelope)
     envelope->has_params = params >= 0 && s_cmd_tokens[params].type == IVTS_JT_OBJ;
 }
 
+/** @brief Route the ID-less bridge assignment without allocating an ACK slot. */
 static void handle_internal_assignment(const cmd_envelope_t *envelope)
 {
     if (!envelope->has_id && envelope->has_name && envelope->has_params &&
@@ -127,6 +133,7 @@ void app_cmd_on_ack(bool ok)
     cmd_restart_on_ack();
 }
 
+/** @brief Gate ACK submission on receipt persistence and arm any waiting restart. */
 static bool flush_receipts_checkpoint(uint64_t now_ms)
 {
     if (!cmd_receipts_needs_checkpoint()) { return true; }
@@ -152,13 +159,15 @@ void app_cmd_tick(void)
     send_pending_ack(now_ms);
 }
 
+/** @brief Immutable command routing policy used by the app task. */
 typedef struct {
-    const char *name;
-    const char *(*handle)(const cmd_envelope_t *command);
-    bool needs_params;
-    bool awaits_completion;
+    const char *name; /**< Static command string matched against the envelope. */
+    const char *(*handle)(const cmd_envelope_t *command); /**< App-task handler borrowing the envelope. */
+    bool needs_params; /**< Require a parsed params object before dispatch. */
+    bool awaits_completion; /**< Defer completion when the handler accepts the request. */
 } command_handler_t;
 
+/* Read-only dispatch table used by the app task. */
 static const command_handler_t k_handlers[] = {
     { "ota_update",      cmd_ota_handle,      true,  false },
     { "update_config",   cmd_config_handle,   true,  false },

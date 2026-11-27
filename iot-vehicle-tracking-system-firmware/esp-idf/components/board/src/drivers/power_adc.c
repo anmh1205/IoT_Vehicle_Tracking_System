@@ -1,9 +1,11 @@
 /**
- * @file power_adc.c
- * @brief Calibrated ADC1 sampling for vehicle and board supply voltages.
+ * @file src/drivers/power_adc.c
+ * @brief Calibrated ADC1 sampling of the vehicle and device supplies.
  *
- * Average pin readings, then apply the PCB divider and channel trim. Return
- * acquisition and calibration errors through the driver result.
+ * Board startup configures the channels. The board task averages pin readings and applies divider and gain
+ * correction.
+ * The ESP-IDF one-shot driver arbitrates raw conversions. Application policy interprets the measured
+ * voltages.
  */
 #include "board_internal.h"
 #include "drivers/drivers.h"
@@ -14,18 +16,23 @@
 #include "esp_check.h"
 #include "platform/log.h"
 
-#define SAMPLES            8   /* Average this many ADC samples to reduce measurement noise. */
+#define SAMPLES            8   /**< Samples per input averaged to reduce measurement noise. */
 
+/** @brief Driver-owned channel setup populated during board startup. */
 typedef struct {
-    adc_channel_t     ch;
-    adc_cali_handle_t cali;
-    uint32_t          gain_ppm;
+    adc_channel_t     ch;   /**< ADC1 channel selected from the GPIO. */
+    adc_cali_handle_t cali;   /**< Curve-fitting calibration handle retained by the driver. */
+    uint32_t          gain_ppm;   /**< Input gain multiplier in parts per million. */
 } chan_t;
 
+/* Startup initializes the unit and calibration handles. SDK arbitration covers individual raw ADC reads. */
 static adc_oneshot_unit_handle_t s_unit;
 static chan_t s_veh, s_dev;
 static uint32_t s_divider;
 
+/**
+ * @brief Configure a GPIO-backed ADC1 channel with eFuse curve fitting.
+ */
 static esp_err_t chan_init(int gpio, uint32_t gain_ppm, chan_t *c)
 {
     adc_unit_t unit;
@@ -46,7 +53,6 @@ static esp_err_t chan_init(int gpio, uint32_t gain_ppm, chan_t *c)
     return ESP_OK;
 }
 
-/* ADC1 one-shot channels for the vehicle and device supplies. */
 esp_err_t power_adc_init(const power_adc_cfg_t *cfg)
 {
     s_divider = cfg->divider;
@@ -60,6 +66,9 @@ esp_err_t power_adc_init(const power_adc_cfg_t *cfg)
     return ESP_OK;
 }
 
+/**
+ * @brief Average calibrated pin samples before applying the channel correction.
+ */
 static esp_err_t read_mv(const chan_t *c, uint16_t *out)
 {
     int sum = 0;
@@ -77,10 +86,6 @@ static esp_err_t read_mv(const chan_t *c, uint16_t *out)
 ivts_err_t board_power_read(uint16_t *vehicle_mv, uint16_t *device_mv)
 {
     if (vehicle_mv == NULL || device_mv == NULL) { return IVTS_ERR_INVALID_ARG; }
-    /*
-     * The board task and app can both call adc_oneshot_read(), which is
-     * thread-safe in the ESP-IDF one-shot driver.
-     */
     esp_err_t e = read_mv(&s_veh, vehicle_mv);
     if (e == ESP_OK) { e = read_mv(&s_dev, device_mv); }
     return board_err(e);

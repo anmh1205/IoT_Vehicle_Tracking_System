@@ -1,9 +1,11 @@
 /**
- * @file at_dispatch.c
+ * @file src/at/at_dispatch.c
  * @brief Routing between UART input, AT responses and raw protocol streams.
  *
- * The modem task pumps UART bytes. A line or prompt is offered to the active
- * command and asynchronous modem protocols as appropriate.
+ * The modem task pumps UART during its loop and during synchronous commands.
+ * The active command has first claim on text and prompts. Unclaimed lines and raw chunks go to
+ * the HTTP or MQTT handler. Each service interprets its own fields and payloads.
+ * Dispatch owns the parser and drops partial protocol frames when raw input stalls.
  */
 #include "at/at.h"
 #include "modem_internal.h"
@@ -12,8 +14,9 @@
 #include "services/services.h"
 #include "transport/transport.h"
 
-#define RAW_TIMEOUT_MS 3000u
+#define RAW_TIMEOUT_MS 3000u /**< Raw block deadline in milliseconds from its header. */
 
+/* Startup binds the parser and engine. The modem task owns both and the raw deadline thereafter. */
 static at_parser_t s_parser;
 static at_engine_t s_engine;
 static uint64_t s_raw_deadline_at_ms;
@@ -29,6 +32,7 @@ const char *modem_at_response(void)
     return s_engine.resp;
 }
 
+/** @brief Give HTTP headers first claim on text left by the AT engine, then route to MQTT. */
 static void on_unsolicited(const char *line)
 {
     IVTS_LOGD(AT_TAG, "< %s", line);
@@ -42,6 +46,7 @@ void modem_expect_raw(size_t len)
     s_raw_deadline_at_ms = modem_now() + RAW_TIMEOUT_MS;
 }
 
+/** @brief Drop protocol frame state and buffered UART bytes together after a raw framing timeout. */
 static void discard_partial_frame(void)
 {
     modem_http_discard_raw();

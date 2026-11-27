@@ -1,9 +1,10 @@
 /**
- * @file ota_job.c
- * @brief OTA download, verification, cleanup and boot partition selection.
+ * @file src/ota_job.c
+ * @brief OTA image download, verification, cleanup and boot selection.
  *
- * Check size/version/digest, finalize the image and persist confirmation
- * context before selecting the new boot partition.
+ * The OTA task owns the source, hash and candidate partition resources for the job.
+ * Source read errors get up to two retries at the same offset. The worker verifies SHA-256 and image version.
+ * Confirmation context is persisted before changing the boot target. The app handles reboot and confirmation.
  */
 #include "ota_internal.h"
 #include "esp_app_desc.h"
@@ -16,19 +17,20 @@
 /*
  * SHA-256 uses PSA Crypto in ESP-IDF 6.1. The SDK initializes PSA at boot.
  */
-#define CHUNK 1024u   /* Maximum bytes read and written per OTA chunk. */
+#define CHUNK 1024u   /**< Maximum image bytes requested and written per chunk. */
 
+/** @brief Job-local resources owned by the active OTA task until completion or cleanup. */
 typedef struct {
-    const ota_source_t *source;
-    const esp_partition_t *partition;
-    esp_ota_handle_t handle;
-    psa_hash_operation_t hash;
-    uint32_t size;
-    uint8_t expected_digest[32];
-    uint8_t last_pct;
-    bool has_open_partition;
-    bool has_hash_operation;
-    bool is_downloading;
+    const ota_source_t *source;   /**< Borrowed source configuration until close. NULL after close. */
+    const esp_partition_t *partition;   /**< Borrowed SDK descriptor for the candidate partition. */
+    esp_ota_handle_t handle;   /**< Candidate writer handle while the partition is open. */
+    psa_hash_operation_t hash;   /**< SHA-256 operation for bytes written to the candidate. */
+    uint32_t size;   /**< Content length in bytes reported by the source. */
+    uint8_t expected_digest[32];   /**< Expected SHA-256 digest bytes decoded from the command. */
+    uint8_t last_pct;   /**< Last reported phase progress, in percent. */
+    bool has_open_partition;   /**< The writer handle still needs finalize or abort. */
+    bool has_hash_operation;   /**< Hash verification or cleanup remains pending. */
+    bool is_downloading;   /**< A failure in this phase aborts the writer before the hash. */
 } ota_job_t;
 
 static void job_close_source(ota_job_t *job)
@@ -45,6 +47,9 @@ static void job_abort_partition(ota_job_t *job)
     job->has_open_partition = false;
 }
 
+/**
+ * @brief Unwind any resources still owned by the job before emitting failure.
+ */
 static void job_abort(ota_job_t *job, ivts_ota_err_t error, uint8_t pct)
 {
     /* During download, release the image writer before the hash operation. */
@@ -65,6 +70,9 @@ static ivts_ota_err_t job_check_preconditions(ota_job_t *job, const ivts_ota_cmd
         ? IVTS_OTA_E_NONE : IVTS_OTA_E_BAD_COMMAND;
 }
 
+/**
+ * @brief Keep the source binding even on open failure so cleanup can close it.
+ */
 static ivts_ota_err_t job_open_source(ota_job_t *job, const ivts_ota_cmd_t *cmd)
 {
     job->source = &ota_config()->src;
@@ -76,6 +84,9 @@ static ivts_ota_err_t job_open_source(ota_job_t *job, const ivts_ota_cmd_t *cmd)
         ? IVTS_OTA_E_SIZE_MISMATCH : IVTS_OTA_E_NONE;
 }
 
+/**
+ * @brief Check the candidate partition capacity before opening the writer and hash.
+ */
 static ivts_ota_err_t job_begin_partition(ota_job_t *job)
 {
     job->partition = esp_ota_get_next_update_partition(NULL);
@@ -88,6 +99,9 @@ static ivts_ota_err_t job_begin_partition(ota_job_t *job)
     return psa_hash_setup(&job->hash, PSA_ALG_SHA_256) == PSA_SUCCESS ? IVTS_OTA_E_NONE : IVTS_OTA_E_SHA256;
 }
 
+/**
+ * @brief Retry a source error at the same byte offset. Reject a successful zero-length or oversized read.
+ */
 static bool read_chunk_with_retry(const ota_source_t *source, uint32_t offset, uint8_t *buffer,
                                   size_t requested, size_t *received)
 {
@@ -98,6 +112,9 @@ static bool read_chunk_with_retry(const ota_source_t *source, uint32_t offset, u
     return result == IVTS_OK && *received != 0u && *received <= requested;
 }
 
+/**
+ * @brief Scale byte progress to the download phase and always report the final chunk.
+ */
 static void report_progress(ota_job_t *job, uint32_t offset)
 {
     uint8_t pct = (uint8_t)(IVTS_OTA_PCT_DL_START +
@@ -145,6 +162,9 @@ static ivts_ota_err_t job_verify_digest(ota_job_t *job)
     return IVTS_OTA_E_NONE;
 }
 
+/**
+ * @brief Finalize the writer, then require the candidate image description to match the requested version.
+ */
 static ivts_ota_err_t job_finalize_image(ota_job_t *job, const ivts_ota_cmd_t *cmd)
 {
     job->last_pct = IVTS_OTA_PCT_INSTALLING;
@@ -160,9 +180,13 @@ static ivts_ota_err_t job_finalize_image(ota_job_t *job, const ivts_ota_cmd_t *c
     return IVTS_OTA_E_NONE;
 }
 
+/**
+ * @brief Persist confirmation data before making the candidate the next boot target.
+ */
 static ivts_ota_err_t job_switch_boot(const ota_job_t *job, const ivts_ota_cmd_t *cmd)
 {
     if (ota_config()->prepare_boot(cmd, job->partition->label) != IVTS_OK) { return IVTS_OTA_E_PERSIST; }
+    /* A reboot into the candidate can now recover the confirmation context. */
     if (esp_ota_set_boot_partition(job->partition) != ESP_OK) { return IVTS_OTA_E_SET_BOOT; }
     IVTS_LOGI(OTA_TAG, "image verified=yes boot_partition=%s version=%s", job->partition->label, cmd->version);
     ota_emit(IVTS_OTA_ST_REBOOTING, IVTS_OTA_PCT_CONFIRMING, 0);

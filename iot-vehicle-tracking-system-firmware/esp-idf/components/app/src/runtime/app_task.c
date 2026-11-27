@@ -1,16 +1,11 @@
 /**
- * @file app_task.c
- * @brief Application event queue, FreeRTOS task and periodic firmware services.
+ * @file src/runtime/app_task.c
+ * @brief Application event queue, runtime task and periodic firmware services.
  *
- * Modem, board, storage, OBD and OTA post events by value from task context.
- * The IMU ISR signals the board task. Each producer attempts a zero-wait send.
- * A full queue drops the event, returns IVTS_ERR_FULL and increments the
- * atomic drop count. Large payloads stay in their owner's slot and are copied
- * separately when the consumer handles the notification.
- *
- * This queue is volatile. Durable offline records, configuration and OTA
- * context are written through storage and survive independently of event
- * delivery.
+ * Startup creates the queue. Modem, board, storage, OBD and OTA post by value from task context.
+ * The IMU ISR signals the board task. A full queue drops and atomically counts the event.
+ * The app task drains the queue and owns its axes and FSM. Adapters retain large payloads
+ * for separate copies. Durable records and OTA context survive independently of queue delivery.
  */
 #include "runtime/runtime.h"
 #include <stdatomic.h>
@@ -34,16 +29,17 @@
 #include "ivts_core/model/status.h"
 #include "modem/modem.h"
 
-#define APP_QUEUE_LEN   32     /* Maximum number of pending by-value events. */
+#define APP_QUEUE_LEN   32     /**< Capacity in by-value events. */
 
-static QueueHandle_t s_event_queue;                  /* Event queue created by app_events_init() before starting producers. */
-static _Atomic uint32_t s_drops;           /* Full-queue drops counted atomically across producers. */
+/* Startup creates the queue before producers run. The app task consumes it and producers count drops atomically. */
+static QueueHandle_t s_event_queue;
+static _Atomic uint32_t s_drops;
 
 /**
  * @brief Copy an event into the app queue without waiting.
- * @retval IVTS_OK The event was copied into the queue.
- * @retval IVTS_ERR_FULL The queue was full. The event was dropped and counted.
- * @note Call from task context. ISRs signal the task that owns the source.
+ * @retval IVTS_OK The event is copied into the queue.
+ * @retval IVTS_ERR_FULL The queue is full. The sink drops and counts the event.
+ * @note Context: Producer task. Blocking: non-blocking. An ISR signals its owning task.
  */
 static ivts_err_t sink_fn(void *ctx, const ivts_event_t *ev)
 {
@@ -80,13 +76,12 @@ bool app_task_start(uint32_t stack_bytes, uint8_t priority)
     return xTaskCreate(app_task_run, "app", stack_bytes, NULL, priority, NULL) == pdPASS;
 }
 
-/**
- * Stack high-water marks and heap diagnostics are optional. The app task owns
- * the static sample buffer and serializes access to it.
+/*
+ * The app task owns the diagnostic sample table and interval state.
  */
 
 #if CONFIG_IVTS_DIAG_STACK_LOG
-#define MAX_TASKS 24   /* Maximum task records per diagnostics sample. */
+#define MAX_TASKS 24   /**< Maximum task records per diagnostics sample. */
 
 /**
  * @brief Log per-task stack high-water marks and heap capacity every 60 seconds.
@@ -112,10 +107,11 @@ static void app_diag_tick(uint64_t now_ms)
               (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
 }
 #else
-/** Stub used when CONFIG_IVTS_DIAG_STACK_LOG is disabled. */
+/** @brief Skip stack diagnostics when the build disables them. */
 static void app_diag_tick(uint64_t now_ms) { (void)now_ms; }
 #endif
 
+/* Startup installs policy. The app task then owns the axes, FSM and policy without a lock. */
 static ivts_axes_t s_axes;
 static ivts_axes_cfg_t s_axes_cfg;
 static ivts_fsm_t s_fsm;
@@ -193,8 +189,10 @@ static void app_status_tick(uint64_t now_ms)
 #endif
 }
 
+/** @brief Wait for one event, then drain queued events without waiting between receives. */
 static void drain_events(void)
 {
+    /* Drain available samples before running timed policy on the latest app observations. */
     if (app_dispatch_next(APP_TICK_MS)) {
         while (app_dispatch_next(0)) {}
     }
@@ -214,6 +212,7 @@ static void run_periodic_services(uint64_t now)
     if (app_device_is_provisioned()) { app_session_tick(s_axes.ign, app_device_tracking_enabled(), app_device_boot_id()); }
 }
 
+/** @brief Gather the observations and pending work that inform FSM sleep and publish decisions. */
 static ivts_fsm_in_t collect_fsm_input(uint64_t now)
 {
     bool linked = app_link_is_broker_up();
@@ -243,6 +242,7 @@ static void apply_fsm_transition(const ivts_fsm_out_t *out, ivts_fsm_state_t bef
     }
 }
 
+/** @brief Report OTA activity or FSM state while retaining an unchanged sleep mode. */
 static void refresh_device_state(bool changed)
 {
     if (app_fw_update_in_progress()) {
@@ -269,6 +269,7 @@ static void app_task_run(void *arg)
         if (now < next_tick) { continue; }
         next_tick = now + APP_TICK_MS;
 
+        /* During modem shutdown keep ACK recovery active while ordinary FSM effects are paused. */
         if (app_sleep_poll(&s_fsm, &s_axes, &s_axes_cfg, now)) {
             app_publisher_poll();
             app_led_pattern_tick(s_fsm.state, app_device_tracking_enabled(), now);

@@ -1,15 +1,19 @@
 /**
- * @file crc32.c
+ * @file src/base/crc32.c
  * @brief Reflected CRC-32 used by storage and retained RTC records.
+ *
+ * Storage uses this checksum for NVS payloads and SD queue frames and cursors.
+ * The app uses it for retained RTC context. The routine reads bytes synchronously
+ * and leaves framing, verification and recovery to the callers.
  */
 #include "ivts_core/base/crc32.h"
 
-#define IVTS_CRC32_POLY_REFLECTED 0xEDB88320u
+#define IVTS_CRC32_POLY_REFLECTED 0xEDB88320u  /**< CRC-32 polynomial in low-bit-first form. */
 
 uint32_t ivts_crc32(uint32_t seed, const void *data, size_t len)
 {
     const uint8_t *p = (const uint8_t *)data;
-    uint32_t crc = ~seed;                  /* Swap inverted input bounds so the caller can supply them in either order. */
+    uint32_t crc = ~seed;                  /* Recover the CRC state before extending it. */
 
     while (len-- > 0u) {
         crc ^= *p++;
@@ -19,5 +23,5 @@ uint32_t ivts_crc32(uint32_t seed, const void *data, size_t len)
             crc = (crc >> 1) ^ (IVTS_CRC32_POLY_REFLECTED & mask);
         }
     }
-    return ~crc;                           /* Complement the input CRC before processing the next block. */
+    return ~crc;                           /* Apply the final complement. */
 }

@@ -1,6 +1,10 @@
 /**
- * @file obd_pid.c
- * @brief Pure OBD-II PID, readiness and diagnostic trouble code decoders.
+ * @file src/obd_pid.c
+ * @brief OBD-II PID, readiness and trouble-code decoding.
+ *
+ * The OBD task passes service bytes extracted from ELM replies. Decoders populate caller-owned data and
+ * validity fields.
+ * Transport, snapshot locking and diagnostic scheduling stay in the poller.
  */
 #include "obd_internal.h"
 #include <string.h>
@@ -37,8 +41,7 @@ ivts_err_t obd_pid_decode(const uint8_t *b, size_t n, ivts_obd_sample_t *s)
 }
 
 /**
- * A supported monitor has its bit set in avail. A set incomplete bit means
- * that the monitor has yet to complete.
+ * @brief Interpret the supported and incomplete bits for a single monitor.
  */
 static ivts_monitor_status_t mon(uint8_t avail, uint8_t incomplete, unsigned bit)
 {

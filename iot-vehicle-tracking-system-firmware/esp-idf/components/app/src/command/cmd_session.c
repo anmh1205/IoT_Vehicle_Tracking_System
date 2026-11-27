@@ -1,10 +1,10 @@
 /**
- * @file cmd_session.c
- * @brief Tracking, active-session assignment and on-demand location commands.
+ * @file src/command/cmd_session.c
+ * @brief Tracking, session assignment and on-demand location command handlers.
  *
- * Changes to tracking and assigned session identity follow their persistence
- * path. A location request holds GNSS until publish acknowledgement or its
- * deadline.
+ * The app task updates tracking after a successful NVS write and delegates session identity
+ * to the session tracker. A location request holds GNSS demand through its pre-submit deadline
+ * or, after submission, until the modem result. The publisher owns the RAW transaction.
  */
 #include "command/command.h"
 #include "ivts_core/payload/meta.h"
@@ -40,6 +40,7 @@ const char *cmd_tracking_handle(const cmd_envelope_t *command)
     return NULL;
 }
 
+/* Startup clears location state. The app task owns it through submission and ACK delivery. */
 static uint64_t s_deadline_at_ms;
 static bool s_awaiting_publish_ack;
 
@@ -71,6 +72,7 @@ void app_cmd_on_location_ack(bool ok)
 
 void cmd_location_tick(uint64_t now)
 {
+    /* After submission the modem result owns completion, even if the pre-submit deadline passes. */
     if (s_deadline_at_ms != 0u && !s_awaiting_publish_ack) {
         bool fixed = app_telemetry_view()->gnss.fix_valid;
         if (now >= s_deadline_at_ms) {

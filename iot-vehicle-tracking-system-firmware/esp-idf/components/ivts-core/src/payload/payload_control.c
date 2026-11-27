@@ -1,6 +1,10 @@
 /**
- * @file payload_control.c
+ * @file src/payload/payload_control.c
  * @brief MQTT serialization for device status, events and firmware reports.
+ *
+ * The app task builds live status, session boundaries, events and firmware
+ * reports in its own publish buffer. It supplies the message identity and
+ * owns acknowledgement and retry policy separately from serialization.
  */
 #include "payload/payload_internal.h"
 #include "ivts_core/ota/contract.h"

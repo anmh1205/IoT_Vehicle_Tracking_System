@@ -1,9 +1,11 @@
 /**
- * @file board.c
+ * @file src/board.c
  * @brief Board startup, peripheral wiring and capability status.
  *
- * Initialize the I2C bus and optional sensors before the board sampling task
- * starts. Keep availability flags for hardware that fails probing.
+ * App wiring calls this file before starting clock and sensor consumers. Startup owns the capability flags.
+ * The board task starts after shared I2C and ADC setup. RTC and IMU drivers own their registers and
+ * transfers.
+ * The app owns ignition and sleep policy.
  */
 #include "board_internal.h"
 #include "board/board_hw.h"
@@ -14,9 +16,10 @@
 #include "platform/log.h"
 #include "platform/platform.h"
 
+/* Startup sets the capability flags once and publishes them before consumers run. */
 static bool s_imu_ok;
 
-/** Return the upper-case log name of the last controller reset. */
+/** @brief Return the upper-case log name of the last controller reset. */
 static const char *reset_reason_name(void)
 {
     switch (esp_reset_reason()) {

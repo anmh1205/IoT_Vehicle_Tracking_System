@@ -1,9 +1,10 @@
 /**
- * @file messages.c
+ * @file src/publish/messages.c
  * @brief Encoding and submission of application messages to the modem.
  *
- * New messages take IDs from the current app context. Replayed records
- * preserve their original boot ID and sequence across retries.
+ * The app task owns the encoding buffer and live RAW fallback record. New messages take IDs
+ * from current app context. Durable boundaries, alarms and replay retain their original IDs.
+ * Core payload builders own encoding. The publisher correlates ACKs and storage owns SD writes.
  */
 #include "publish/publish.h"
 #include "app_internal.h"
@@ -18,10 +19,11 @@
 
 _Static_assert(IVTS_PAYLOAD_MAX - 1u <= MODEM_PAYLOAD_MAX, "payload phải vừa trong ô publish");
 
-/* The modem copies the payload before returning. Only the app task uses this buffer. */
+/* The app task owns the encode buffer and live fallback record. The modem copies accepted payloads. */
 static char s_buf[IVTS_PAYLOAD_MAX];
 static ivts_record_t s_live_record;
 
+/** @brief Build fresh metadata with app uptime and trusted UTC when available. */
 static ivts_msg_meta_t meta_now(uint32_t seq)
 {
     ivts_msg_meta_t m = {
@@ -35,6 +37,7 @@ static ivts_msg_meta_t meta_now(uint32_t seq)
     return m;
 }
 
+/** @brief Encode a RAW record and hand a copy to the asynchronous storage queue. */
 static void to_queue(const ivts_record_t *r)
 {
     uint8_t b[IVTS_RECORD_MAX_SIZE];
@@ -75,6 +78,7 @@ bool app_messages_publish_status(bool heartbeat)
     return error == IVTS_OK && app_publisher_send(APP_MSG_STATUS, MODEM_TOPIC_STATUS, s_buf, len);
 }
 
+/** @brief Build metadata with the persisted boundary identity and captured time. */
 static ivts_msg_meta_t meta_from_boundary(const ivts_session_boundary_t *boundary)
 {
     return (ivts_msg_meta_t){
@@ -109,6 +113,7 @@ bool app_messages_publish_event(const char *event_code)
     return error == IVTS_OK && app_publisher_send(APP_MSG_EVENT, MODEM_TOPIC_EVENTS, s_buf, len);
 }
 
+/** @brief Build metadata with the retained alarm identity and captured time. */
 static ivts_msg_meta_t meta_from_alarm(const ivts_motion_alarm_t *alarm)
 {
     return (ivts_msg_meta_t){

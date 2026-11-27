@@ -1,9 +1,10 @@
 /**
- * @file mqtt_rx.c
+ * @file src/mqtt/mqtt_rx.c
  * @brief Incremental reception of SIM7600 MQTT topic and payload blocks.
  *
- * Track declared lengths across UART fragments. Deliver eligible cloud
- * commands through the modem FIFO after a complete frame.
+ * AT dispatch feeds unsolicited lines and raw chunks on the modem task. This assembler owns one
+ * frame and validates its declared lengths and command topic before copying it to the shared FIFO.
+ * Dispatch owns raw-mode deadlines. The app owns cloud command interpretation and acknowledgement.
  */
 #include "mqtt/mqtt.h"
 #include "modem_internal.h"
@@ -13,23 +14,31 @@
 #include <stdio.h>
 #include <string.h>
 
+/** @brief MQTT receive header kind, including the kind whose fields arrive on a later line. */
 typedef enum {
-    RX_HEADER_NONE = 0, RX_HEADER_START, RX_HEADER_TOPIC, RX_HEADER_PAYLOAD, RX_HEADER_END,
+    RX_HEADER_NONE = 0, /**< No header.
+     */RX_HEADER_START, /**< Starts a frame and declares totals.
+     */RX_HEADER_TOPIC, /**< Declares a topic block.
+     */RX_HEADER_PAYLOAD, /**< Declares a payload block.
+     */RX_HEADER_END, /**< Closes a frame and triggers validation. */
 } rx_header_t;
 
-typedef enum { MQTT_RX_TOPIC = 1, MQTT_RX_PAYLOAD } mqtt_rx_phase_t;
+/** @brief Destination for raw bytes announced by the most recent data header. */
+typedef enum { MQTT_RX_TOPIC = 1, /**< Topic bytes.
+ */MQTT_RX_PAYLOAD /**< Payload bytes. */} mqtt_rx_phase_t;
 
+/** @brief One inbound frame initialized at startup and owned exclusively by the modem task. */
 static struct {
-    bool active;
-    mqtt_rx_phase_t phase;
-    rx_header_t pending_header;
-    size_t topic_len;
-    size_t payload_len;
-    size_t topic_total;
-    size_t payload_total;
-    bool overflow;
-    char topic[64];
-    char payload[MODEM_CMD_MAX];
+    bool active;                   /**< Frame remains eligible for assembly. */
+    mqtt_rx_phase_t phase;          /**< Destination selected by the latest data header. Zero before data. */
+    rx_header_t pending_header;     /**< Header kind awaiting its field line, or RX_HEADER_NONE. */
+    size_t topic_len;               /**< Number of topic bytes copied. */
+    size_t payload_len;             /**< Number of payload bytes copied. */
+    size_t topic_total;             /**< Topic bytes declared by the frame start. */
+    size_t payload_total;           /**< Payload bytes declared by the frame start. */
+    bool overflow;                  /**< Declared or received data exceeds the frame's storage. */
+    char topic[64];                 /**< Assembled topic with room for a trailing NUL. */
+    char payload[MODEM_CMD_MAX];    /**< Assembled payload bytes without a terminator. */
 } s_rx;
 
 void modem_mqtt_rx_init(void)
@@ -43,6 +52,7 @@ void modem_mqtt_rx_discard_raw(void)
     s_rx.pending_header = RX_HEADER_NONE;
 }
 
+/** @brief Replace any partial frame and admit declarations for client zero. */
 static void on_rx_start(const char *fields, bool right_client)
 {
     modem_mqtt_rx_init();
@@ -56,6 +66,7 @@ static void on_rx_start(const char *fields, bool right_client)
     }
 }
 
+/** @brief Deliver only a complete frame whose topic exactly matches the command topic. */
 static void on_rx_end(bool right_client)
 {
     const char *command_topic = modem_command_topic();
@@ -70,6 +81,7 @@ static void on_rx_end(bool right_client)
     s_rx.active = false;
 }
 
+/** @brief Enter raw mode for a declared block, including one from a rejected frame. */
 static void on_rx_data_header(const char *fields, bool valid_order, mqtt_rx_phase_t phase)
 {
     int32_t length;
@@ -87,11 +99,13 @@ static void on_rx_topic_header(const char *fields, bool right_client)
     on_rx_data_header(fields, right_client && s_rx.phase != MQTT_RX_PAYLOAD, MQTT_RX_TOPIC);
 }
 
+/** @brief Accept payload blocks only after the advertised topic length arrives. */
 static void on_rx_payload_header(const char *fields, bool right_client)
 {
     on_rx_data_header(fields, right_client && s_rx.topic_len == s_rx.topic_total, MQTT_RX_PAYLOAD);
 }
 
+/** @brief Route header fields with the result of the client-zero check. */
 static void rx_header(rx_header_t header, const char *fields)
 {
     int32_t client;
@@ -125,6 +139,7 @@ void modem_mqtt_rx_on_urc(const char *line)
         const char *first = fields + 1;
         while (*first == ' ') { first++; }
         s_rx.pending_header = RX_HEADER_NONE;
+        /* A receive header can carry its numeric fields on a separate line. */
         if (*first == '\0') {
             s_rx.pending_header = header;
         } else {

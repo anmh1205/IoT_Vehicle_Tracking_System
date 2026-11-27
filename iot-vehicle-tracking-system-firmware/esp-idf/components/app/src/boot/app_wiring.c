@@ -1,10 +1,10 @@
 /**
- * @file app_wiring.c
- * @brief Composition of board pins, component task settings and callback ports.
+ * @file src/boot/app_wiring.c
+ * @brief Composition of board pins, adapter parameters and callback ports.
  *
- * This is the only application source that reads the PCB pin map. It connects
- * the modem HTTPS implementation to the OTA byte source and registers publish
- * ACK callbacks.
+ * Startup binds adapter configuration to one event sink and registers app-task publish ACK handlers.
+ * The modem task uses the RTC callback for trusted time. The OTA worker uses the modem HTTPS
+ * adapter as its image byte source. Adapters own hardware protocols and worker lifecycles.
  */
 #include "boot/boot.h"
 #include "boot/task_table.h"
@@ -25,14 +25,14 @@
 #include "sdkconfig.h"
 #include "storage/storage.h"
 
-/*
- * Bind modem HTTPS to the OTA byte-source callbacks so the OTA worker can read
- * through its source interface.
- */
+/** @brief Open the modem HTTPS source on behalf of the OTA worker. */
 static ivts_err_t src_open(void *ctx, const char *url, uint32_t *size, int *st) { (void)ctx; return modem_http_open(url, size, st); }
+/** @brief Read a range through the modem while the OTA worker waits. */
 static ivts_err_t src_read(void *ctx, uint32_t off, uint8_t *b, size_t n, size_t *got) { (void)ctx; return modem_http_read(off, b, n, got); }
+/** @brief Release the worker's modem HTTPS session. */
 static void src_close(void *ctx) { (void)ctx; modem_http_close(); }
 
+/** @brief Supply the modem task with UTC only after a successful trusted RTC read. */
 static bool modem_time_get(uint64_t *unix_ms)
 {
     bool trusted = false;
@@ -93,8 +93,8 @@ bool app_wiring_init_modem(ivts_sink_t sink, ivts_config_t *config, bool provisi
         (void)ivts_str_copy(modem_cfg.client_id, sizeof modem_cfg.client_id, config->device_id);
     } else {
         /*
-         * An unprovisioned device skips modem_set_link() and continues
-         * recording to the offline queue.
+         * Leave the modem link down for an unprovisioned device.
+         * Local RAW capture can still use the offline queue.
          */
         (void)ivts_str_copy(modem_cfg.client_id, sizeof modem_cfg.client_id, "unprovisioned");
         config->device_id[sizeof config->device_id - 1u] = '\0';
@@ -132,6 +132,7 @@ bool app_wiring_init_ota(ivts_sink_t sink)
 
 void app_wiring_register_acks(void)
 {
+    /* The publisher borrows this table for the firmware lifetime. */
     static const app_msg_ack_fn handlers[APP_MSG_COUNT] = {
         [APP_MSG_RAW_LIVE] = app_messages_on_live_ack,
         [APP_MSG_RAW_REPLAY] = app_replay_on_ack,

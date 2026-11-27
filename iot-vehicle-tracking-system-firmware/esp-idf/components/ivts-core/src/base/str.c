@@ -1,6 +1,10 @@
 /**
- * @file str.c
- * @brief Bounded copying and stable string names for portable error codes.
+ * @file src/base/str.c
+ * @brief Bounded string copying, integer clamping and portable error names.
+ *
+ * App boot and command handling and the modem AT engine use the bounded copy.
+ * Operations use caller-owned data or return immutable names. Field validation
+ * and error handling remain with the caller.
  */
 #include "ivts_core/base/str.h"
 #include <string.h>
@@ -28,6 +32,7 @@ ivts_err_t ivts_str_copy(char *dst, size_t cap, const char *src)
 
 int ivts_clamp_int(int v, int lo, int hi)
 {
+    /* Normalize reversed bounds so both endpoint orders define the same interval. */
     if (lo > hi) {
         int t = lo;
         lo = hi;

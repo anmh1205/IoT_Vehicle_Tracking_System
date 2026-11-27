@@ -1,19 +1,23 @@
 /**
- * @file gnss.h
+ * @file include/ivts_core/model/gnss.h
  * @brief GNSS fix fields and integer units shared by the modem and application.
+ *
+ * The modem task fills a GNSS sample and emits it by value. The app task owns
+ * its snapshot and uses it in telemetry and status. GNSS query scheduling and
+ * fix aging are handled by the modem and app respectively.
  */
 #pragma once
 #include <stdbool.h>
 #include <stdint.h>
 
-/** Protocol source of a GNSS sample. */
+/** @brief Protocol source of a GNSS sample, including no source. */
 typedef enum {
-    IVTS_GNSS_SRC_NONE = 0,
-    IVTS_GNSS_SRC_FULL,     /**< Full fix with per-constellation satellite counts. */
-    IVTS_GNSS_SRC_APPROX    /**< Fallback fix without a satellite count. sats remains zero. */
+    IVTS_GNSS_SRC_NONE = 0,  /**< No GNSS query source is recorded. */
+    IVTS_GNSS_SRC_FULL,     /**< Full GNSS query format, which can include satellite counts. */
+    IVTS_GNSS_SRC_APPROX    /**< Fallback GNSS query format without a satellite count. sats remains zero. */
 } ivts_gnss_src_t;
 
-/** Position sample with integer coordinates. */
+/** @brief Position sample with integer coordinates, owned and copied by value by its callers. */
 
 typedef struct {
     uint64_t ts_unix_ms;       /**< UTC fix time in Unix milliseconds. Zero means unknown. */

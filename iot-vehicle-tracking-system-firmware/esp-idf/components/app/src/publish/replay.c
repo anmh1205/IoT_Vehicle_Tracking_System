@@ -1,10 +1,10 @@
 /**
- * @file replay.c
+ * @file src/publish/replay.c
  * @brief Offline RAW replay and acknowledgement-driven queue advancement.
  *
- * The app retains the peek token until successful PUBACK for a valid RAW
- * record. Entries that fail payload decoding are discarded. A session
- * boundary waits behind its earlier RAW records.
+ * The app task preserves the peek token for a submitted RAW record until a successful ACK
+ * permits a pop request. Undecodable entries also request a pop. Boundary scheduling uses
+ * the same peek path to preserve order. The storage worker owns SD reads and cursor updates.
  */
 #include "publish/publish.h"
 #include "app_internal.h"
@@ -12,11 +12,13 @@
 #include "session/session_tracker.h"
 #include "storage/storage.h"
 
+/* The app task owns replay tokens and peek timing. Storage owns the shared peek slot and cursor. */
 static uint32_t s_replay_token;
 static uint32_t s_popped_token;
 static bool s_awaiting_peek;
 static uint64_t s_peek_requested_at_ms;
 
+/** @brief Retry a missing peek notification without submitting a request on every tick. */
 static void request_peek_if_due(void)
 {
     if (s_awaiting_peek && app_now() - s_peek_requested_at_ms < PEEK_RETRY_MS) { return; }
@@ -26,6 +28,7 @@ static void request_peek_if_due(void)
     }
 }
 
+/** @brief Suppress another attempt on this token after storage accepts the pop request. */
 static void pop_token(uint32_t token)
 {
     if (storage_queue_pop(token) == IVTS_OK) { s_popped_token = token; }
@@ -49,6 +52,7 @@ app_replay_result_t app_replay_until(const ivts_session_boundary_t *boundary)
 
     ivts_record_t record;
     if (ivts_record_decode(frame, len, &record) != IVTS_OK) {
+        /* An undecodable record cannot be published and must leave the head for replay to advance. */
         pop_token(token);
         return REPLAY_BUSY;
     }

@@ -1,9 +1,14 @@
 /**
- * @file fsm_states.c
+ * @file src/fsm/fsm_states.c
  * @brief State-specific transitions, sleep predicates and requested effects.
+ *
+ * The app task runs these handlers through the FSM dispatcher. The handlers
+ * update only app-owned state and output flags. Timing is driven by supplied
+ * observations, and the app executes effects outside the FSM.
  */
 #include "fsm/fsm_internal.h"
 
+/** @brief Enter a state and reset its one-shot status and RAW scheduling markers. */
 static void go(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_fsm_state_t s, ivts_ms_t now)
 {
     f->state = s;
@@ -14,7 +19,7 @@ static void go(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_fsm_state_t s, ivts_ms_t
     out->changed = true;
 }
 
-/* Publish RAW at the configured interval, starting immediately on entry. */
+/** @brief Request RAW at the configured interval, starting on the first step in the state. */
 static void periodic_raw(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_ms_t now, uint32_t period)
 {
     if (f->last_raw_ms == 0u || ivts_elapsed(now, f->last_raw_ms) >= period) {
@@ -23,6 +28,7 @@ static void periodic_raw(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_ms_t now, uint
     }
 }
 
+/** @brief Request status once per state entry and record when the request occurs. */
 static void status_once(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_ms_t now)
 {
     if (!f->status_sent) {
@@ -32,13 +38,14 @@ static void status_once(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_ms_t now)
     }
 }
 
-/* Give a provisioned device the awake window to connect and send its heartbeat. */
+/** @brief Check whether pending work or an expected broker connection requires staying awake. */
 static bool drained(const ivts_fsm_in_t *in)
 {
     if (in->ota_active || !in->publish_idle) { return false; }
     return in->link_up ? in->offline_record_count == 0u && !in->control_pending : !in->link_expected;
 }
 
+/** @brief Select a sleep mode that supports the requested wake sources. */
 static void enter_sleep(ivts_fsm_t *f, const ivts_fsm_cfg_t *c, ivts_fsm_out_t *out, ivts_ms_t now)
 {
     go(f, out, IVTS_ST_SLEEP, now);
@@ -73,12 +80,14 @@ static void enter_alarm(ivts_fsm_t *fsm, ivts_fsm_out_t *out, ivts_ms_t now)
     out->actions |= IVTS_ACT_GNSS_ON;
 }
 
+/** @brief Allow sleep after settling when drained or when the awake budget expires while idle. */
 static bool parked_may_sleep(const ivts_fsm_cfg_t *cfg, const ivts_fsm_in_t *in, ivts_ms_t in_state)
 {
     return in_state >= cfg->parked_settle_ms &&
            (drained(in) || (in_state >= cfg->awake_max_ms && in->publish_idle)) && !in->ota_active;
 }
 
+/** @brief Give the heartbeat request a later step to drain during the normal awake window. */
 static bool heartbeat_may_sleep(const ivts_fsm_cfg_t *cfg, const ivts_fsm_in_t *in,
                                 const ivts_fsm_out_t *out, ivts_ms_t in_state)
 {
@@ -101,6 +110,7 @@ static void step_check_ign(ivts_fsm_t *fsm, const ivts_fsm_cfg_t *cfg,
     }
     ivts_ms_t in_state = ivts_elapsed(in->now, fsm->entered_ms);
     if (in->ignition != IVTS_IGN_OFF && in_state < cfg->check_ign_max_ms) { return; }
+    /* Give motion priority over a timer wake once ignition is off or its check expires. */
     if (fsm->wake == IVTS_WAKE_MOTION || in->motion == IVTS_MOTION_MOVING) {
         enter_alarm(fsm, out, in->now);
     } else if (fsm->wake == IVTS_WAKE_TIMER) {
@@ -151,6 +161,7 @@ static void step_alarm(ivts_fsm_t *fsm, const ivts_fsm_cfg_t *cfg,
     }
     periodic_raw(fsm, out, in->now, cfg->alarm_ms);
     status_once(fsm, out, in->now);
+    /* Measure the minimum alarm duration from entry and require motion to clear before exit. */
     if (in->motion != IVTS_MOTION_MOVING && ivts_elapsed(in->now, fsm->entered_ms) >= cfg->alarm_timeout_ms) {
         go(fsm, out, IVTS_ST_PARKED, in->now);
     }
@@ -176,6 +187,7 @@ static void step_heartbeat(ivts_fsm_t *fsm, const ivts_fsm_cfg_t *cfg,
 static void step_sleep(ivts_fsm_t *fsm, const ivts_fsm_cfg_t *cfg,
                        const ivts_fsm_in_t *in, ivts_fsm_out_t *out)
 {
+    /* The simulated path is polled. The app handles hardware wake or reboot. */
     if (fsm->sleep_mode != IVTS_SLEEP_FAKE) { return; }
     bool motion_wake = in->motion == IVTS_MOTION_MOVING && cfg->imu_wakeup_enabled;
     if (in->ignition == IVTS_IGN_ON || cfg->sleep_enabled || motion_wake) {

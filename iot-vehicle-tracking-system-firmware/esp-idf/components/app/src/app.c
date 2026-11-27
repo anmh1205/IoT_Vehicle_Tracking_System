@@ -1,9 +1,10 @@
 /**
- * @file app.c
+ * @file src/app.c
  * @brief Firmware composition entry point and recovery from startup failure.
  *
- * Starts the runtime using the central task specification. A failed startup
- * waits for the existing restart delay before resetting the controller.
+ * The ESP-IDF startup task calls the boot composer, then creates the app runtime using
+ * the task table. Failure of either step delays restart by 10000 ms on the caller. Runtime
+ * state and hardware I/O belong to the app task and the adapters it coordinates.
  */
 #include "app/app.h"
 #include "app_internal.h"

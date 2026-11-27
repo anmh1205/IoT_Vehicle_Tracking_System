@@ -1,18 +1,12 @@
 /**
- * @file board_task.c
+ * @file src/board_task.c
  * @brief ADC sampling and latched IMU interrupt handling on the board task.
  *
- * The task uses the priority and stack supplied by app wiring. It waits on
- * ulTaskNotifyTake() for up to power_sample_ms. A notification services the
- * latched IMU interrupt and emits a motion event. A timeout produces an ADC
- * sample if the sampling deadline is due.
- *
- * The GPIO ISR only sends a task notification. The sleep adapter can also
- * notify the board task in task context after an IMU wake. Notifications can
- * coalesce, so the worker reads OUTS1 to release the latched interrupt.
- *
- * The task keeps no durable state. Board initialization reapplies the IMU
- * configuration after reset.
+ * Board startup publishes the task settings. The ISR and app sleep adapter only notify the task.
+ * A notification with an available IMU services OUTS1 and emits a motion event. Otherwise the task samples
+ * power.
+ * The notification wait restarts each iteration and can coalesce interrupts. Events are borrowed by the sink.
+ * The app interprets motion and power. Initialization reapplies hardware settings after reset.
  */
 #include "board_internal.h"
 #include "drivers/drivers.h"
@@ -21,8 +15,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-static TaskHandle_t s_task;             /* Board task handle. NULL until creation. */
-static board_cfg_t s_cfg;   /* Configuration copied before starting the worker. */
+static TaskHandle_t s_task;             /* Startup publishes the handle for the ISR and app. */
+static board_cfg_t s_cfg;   /* Startup writes once. The board task reads the copy. */
 
 void IRAM_ATTR board_task_notify_imu_from_isr(void)
 {
@@ -45,6 +39,9 @@ static void emit(const ivts_event_t *ev)
     (void)ivts_sink_emit(&s_cfg.sink, ev);   /* A full app queue counts the dropped event. The board does not retry it. */
 }
 
+/**
+ * @brief Read the IMU latch and report pin level and acceleration from task context.
+ */
 static void handle_imu_irq(uint64_t now_ms)
 {
     uint8_t outs = 0;
@@ -94,7 +91,6 @@ void board_task_configure(const board_cfg_t *cfg)
     s_cfg = *cfg;
 }
 
-/* Start the worker after ADC and IMU initialization. */
 esp_err_t board_task_start(void)
 {
     BaseType_t ok = xTaskCreate(board_task, "board", s_cfg.task_stack, NULL, s_cfg.task_prio, &s_task);

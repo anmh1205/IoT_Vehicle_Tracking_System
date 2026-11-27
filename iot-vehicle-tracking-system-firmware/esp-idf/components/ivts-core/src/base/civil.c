@@ -1,14 +1,23 @@
 /**
- * @file civil.c
+ * @file src/base/civil.c
  * @brief Gregorian calendar conversion for UTC times and Unix milliseconds.
+ *
+ * Board RTC conversion and modem GNSS and modem clock handling use these helpers.
+ * The app status formatter also converts Unix time. The routines modify only
+ * the caller's output and do not consult a hardware clock or time zone.
  */
 #include "ivts_core/base/civil.h"
 #include <stdbool.h>
 #include <stddef.h>
 
-/* The algorithm days_from_civil / civil_from_days (Howard Hinnant, public domain). */
+/**
+ * @brief Compute Unix epoch days using March-based Gregorian years.
+ *
+ * The conversion uses Howard Hinnant's public-domain calendar algorithms.
+ */
 static int64_t days_from_civil(int64_t y, unsigned m, unsigned d)
 {
+    /* A March-based year places the variable-length February at the end of the year. */
     y -= (m <= 2u) ? 1 : 0;
     int64_t era = (y >= 0 ? y : y - 399) / 400;
     unsigned yoe = (unsigned)(y - era * 400);

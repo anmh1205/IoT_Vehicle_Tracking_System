@@ -1,9 +1,10 @@
 /**
- * @file fsm_actions.c
+ * @file src/runtime/fsm_actions.c
  * @brief Application effects requested by the platform-independent FSM.
  *
- * The app task applies actions to the board, modem, OBD and publishing
- * services in the established order.
+ * The app task reconciles GNSS, applies OBD requests and handles status intent before sleep.
+ * When it continues running, it services the control outbox before live RAW and ordinary replay.
+ * The FSM chooses the actions and adapters own hardware I/O.
  */
 #include "runtime/runtime.h"
 #include "command/command.h"

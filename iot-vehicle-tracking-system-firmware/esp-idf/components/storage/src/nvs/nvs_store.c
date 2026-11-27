@@ -1,9 +1,11 @@
 /**
  * @file src/nvs/nvs_store.c
- * @brief Versioned IVTS NVS envelope and typed configuration persistence.
+ * @brief Versioned IVTS NVS envelope, device configuration and boot counter.
  *
- * Keep existing namespace, keys, byte layout and checksum behavior. Handle
- * failure before committing a replacement value.
+ * App startup initializes NVS and reads device configuration. App and OTA tasks save typed records
+ * synchronously.
+ * Each operation owns its NVS handle and stack buffer. Blob writes commit before returning success.
+ * App and core code own layout migrations and configuration policy.
  */
 #include "storage_internal.h"
 #include "platform/log.h"
@@ -14,16 +16,16 @@
 
 #include <string.h>
 
-#define NS          "ivts"          /* NVS namespace for IVTS records. */
-#define KEY_CFG     "cfg"           /* NVS key for the configuration blob. */
-#define KEY_BOOT    "boot"          /* NVS key for the persistent boot counter. */
-#define BLOB_MAGIC  0x49565453u     /* ASCII "IVTS". */
-#define CFG_VERSION 1u              /* Increment when the deployed ivts_config_t layout changes. */
-#define BLOB_PAYLOAD_MAX STORAGE_RECORD_PAYLOAD_MAX
+#define NS          "ivts"          /**< NVS namespace for IVTS records. */
+#define KEY_CFG     "cfg"           /**< NVS key for the configuration blob. */
+#define KEY_BOOT    "boot"          /**< NVS key for the persistent boot counter. */
+#define BLOB_MAGIC  0x49565453u     /**< Numeric format identifier for an IVTS record envelope. */
+#define CFG_VERSION 1u              /**< Payload layout version for ivts_config_t. */
+#define BLOB_PAYLOAD_MAX STORAGE_RECORD_PAYLOAD_MAX   /**< Maximum payload bytes in the envelope buffer. */
 
-/** Header stored immediately before the NVS payload. */
+/** @brief Header stored before the payload and copied through a call-local NVS buffer. */
 typedef struct {
-    uint32_t magic;      /**< BLOB_MAGIC. */
+    uint32_t magic;      /**< Envelope format identifier, checked before version or CRC. */
     uint16_t version;    /**< Payload layout version. */
     uint16_t len;        /**< Payload byte length, checked separately from the version. */
     uint32_t crc;        /**< CRC32 of the payload bytes. */
@@ -61,18 +63,6 @@ ivts_err_t storage_record_save(const char *key, uint16_t version, const void *bu
     return platform_err_from_esp(blob_save(key, version, buffer, len));
 }
 
-/**
- * @brief Load and verify an NVS record.
- *
- * Distinguish a missing key on a new device from a record that failed
- * validation or could not be read.
- *
- * @retval IVTS_OK The validated payload was copied to @p payload.
- * @retval IVTS_ERR_NOT_FOUND The namespace or key is missing.
- * @retval IVTS_ERR_CRC Missing header, incorrect magic or CRC mismatch.
- * @retval IVTS_ERR_VERSION Version or byte length mismatch.
- * @retval IVTS_ERR_IO Another NVS operation failed.
- */
 ivts_err_t storage_record_load(const char *key, uint16_t ver, void *payload, size_t len)
 {
     uint8_t buf[sizeof(blob_hdr_t) + BLOB_PAYLOAD_MAX];

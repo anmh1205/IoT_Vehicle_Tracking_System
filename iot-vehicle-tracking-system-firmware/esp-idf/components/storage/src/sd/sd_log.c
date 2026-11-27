@@ -1,6 +1,11 @@
 /**
- * @file sd_log.c
- * @brief SD log append, rotation and quota enforcement on the storage task.
+ * @file src/sd/sd_log.c
+ * @brief SD log append, rotation and quota checks.
+ *
+ * SD mount calls the startup scan. The storage task owns file and counter mutation afterward.
+ * Append borrows a request buffer and counts bytes after a full write and close. Rotation can reclaim older
+ * files.
+ * Callers submit log requests through the storage task interface.
  */
 #include "sd/sd.h"
 #include "storage_internal.h"
@@ -9,15 +14,16 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
-#define LOG_DIR SD_MOUNT "/log"   /* Directory containing rotated log files. */
+#define LOG_DIR SD_MOUNT "/log"   /**< Directory holding active and rotated logs. */
 
+/* Startup reconstructs these counters. Only the storage task updates them afterward. */
 static uint32_t s_log_idx;     /* Index of the active log file. */
 static uint32_t s_log_size;    /* Current size of the active log file in bytes. */
 static uint32_t s_log_total;   /* Total size of all log files in bytes. */
 
 /**
- * @brief Parse a log index from LNNNNNNN.TXT.
- * @return true and write idx if the format matches.
+ * @brief Read a numeric index following the L prefix.
+ * Only the numeric conversion is checked.
  */
 static bool parse_log_name(const char *n, uint32_t *idx)
 {
@@ -27,7 +33,7 @@ static bool parse_log_name(const char *n, uint32_t *idx)
     return true;
 }
 
-/** Scan the log directory to rebuild file index and byte counters. */
+/** @brief Rebuild the active log index and byte counters at startup. */
 static void log_scan(void)
 {
     DIR *d = opendir(LOG_DIR);
@@ -81,12 +87,11 @@ static void log_enforce_quota(void)
     }
 }
 
-/* Append @p line with a newline, rotating at the configured size. */
 ivts_err_t storage_sd_log_write(const char *line, size_t len)
 {
     if (!storage_sd_ok()) { return IVTS_ERR_INVALID_STATE; }
     if (s_log_size + len + 1u > storage_config_view()->log_file_max_bytes) {
-        s_log_idx++;                                 /* Advance to a new log file. */
+        s_log_idx++;                                 /* The previous active log is now eligible for reclamation. */
         s_log_size = 0;
         log_enforce_quota();
     }

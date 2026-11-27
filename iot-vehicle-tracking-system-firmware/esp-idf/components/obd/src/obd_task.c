@@ -1,9 +1,10 @@
 /**
- * @file obd_task.c
- * @brief OBD task startup, connection lifecycle and polling orchestration.
+ * @file src/obd_task.c
+ * @brief OBD task startup, BLE lifecycle and poll scheduling.
  *
- * The worker drains BLE callback events and owns its session. The app can
- * request start or stop while this task performs transport work.
+ * App controls publish an atomic enable request. NimBLE callbacks send copied events to the worker queue.
+ * The OBD task owns the session and services queued events during reply waits and reconnect delays.
+ * Session setup and ECU decoding live in their respective modules. The app consumes their reports.
  */
 #include "obd_internal.h"
 #include "platform/log.h"
@@ -14,21 +15,32 @@
 #include "platform/platform.h"
 #include <stdatomic.h>
 
-#define OBD_BLE_QUEUE_LEN 24u
+#define OBD_BLE_QUEUE_LEN 24u   /**< Capacity in copied BLE and control events. */
 
+/* App startup publishes the queue. App and host producers post to the sole worker consumer. */
 static QueueHandle_t s_event_queue;
+/* The app writes the desired state and the OBD task reads it atomically. */
 static atomic_bool s_enabled;
+/* The OBD task publishes BLE activity atomically for app sleep checks. */
 static atomic_bool s_ble_active;
+/* Only the OBD task mutates session state. */
 static obd_session_t s_session;
+/* Reconnect timing in milliseconds. Jitter is added after the exponential cap. */
 static const ivts_backoff_t k_reconnect_backoff = { .base_ms = 2000, .max_ms = 120000, .jitter_ms = 1000 };
 
 bool obd_task_is_enabled(void) { return atomic_load(&s_enabled); }
 
+/**
+ * @brief Match a notification to the active connection and discovered RX value handle.
+ */
 static bool is_current_notification(obd_session_t *session, const obd_ble_event_t *event)
 {
     return session->is_connected && event->conn == session->connection && event->notification.handle == session->rx_handle;
 }
 
+/**
+ * @brief Recognize lifecycle changes and current-link errors that abort a wait.
+ */
 static bool is_interrupting_event(obd_session_t *session, const obd_ble_event_t *event)
 {
     if (event->type == OBD_BLE_EV_CTRL_CHANGED) {
@@ -38,6 +50,9 @@ static bool is_interrupting_event(obd_session_t *session, const obd_ble_event_t 
     return event->type == OBD_BLE_EV_NOTIFY && is_current_notification(session, event) && event->status != 0;
 }
 
+/**
+ * @brief Update sync or reply state and discard events that cannot reach the requested match.
+ */
 static bool track_link_events(obd_session_t *session, const obd_ble_event_t *event)
 {
     switch (event->type) {
@@ -96,6 +111,9 @@ ivts_err_t obd_task_set_enabled(bool enabled)
 
 bool obd_is_stopped(void) { return !atomic_load(&s_ble_active); }
 
+/**
+ * @brief Shut down the BLE host, then discard stale callback events before waiting for enable.
+ */
 static void handle_disabled(uint32_t *attempt)
 {
     if (atomic_load(&s_ble_active)) {
@@ -109,6 +127,9 @@ static void handle_disabled(uint32_t *attempt)
     if (!atomic_load(&s_enabled)) { (void)obd_task_wait_event(&s_session, OBD_BLE_WAIT_ANY, 1000, NULL); }
 }
 
+/**
+ * @brief Start NimBLE if needed and wait for the host synchronization event.
+ */
 static bool ensure_ble_up(void)
 {
     if (!atomic_load(&s_ble_active)) {
@@ -126,6 +147,9 @@ static bool ensure_ble_up(void)
     return true;
 }
 
+/**
+ * @brief Poll live data and diagnostics with the remaining period spent servicing link events.
+ */
 static void run_session_loop(uint32_t *attempt)
 {
     uint64_t next_diag_at_ms = platform_uptime_ms();
@@ -144,6 +168,9 @@ static void run_session_loop(uint32_t *attempt)
     }
 }
 
+/**
+ * @brief Delay consecutive failed sessions while continuing to service BLE and control events.
+ */
 static void reconnect_backoff(uint32_t *attempt)
 {
     if (atomic_load(&s_enabled)) {
@@ -177,9 +204,7 @@ int obd_task_start(void)
     return xTaskCreate(obd_task, "obd", obd_config()->task_stack, NULL, obd_config()->task_prio, NULL) == pdPASS ? 0 : -1;
 }
 
-/**
- * Public OBD entry points hand lifecycle requests to the worker.
- */
+/* App startup copies the configuration. The OBD task and host callbacks read it for this boot. */
 
 static obd_cfg_t s_obd_cfg;
 
@@ -190,7 +215,6 @@ void obd_emit(const ivts_event_t *event)
     (void)ivts_sink_emit(&s_obd_cfg.sink, event);
 }
 
-/* Start NimBLE on the OBD task after the app requests obd_start(). */
 ivts_err_t obd_init(const obd_cfg_t *cfg)
 {
     if (cfg == NULL || cfg->sink.fn == NULL) { return IVTS_ERR_INVALID_ARG; }

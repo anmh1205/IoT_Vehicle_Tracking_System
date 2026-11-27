@@ -1,6 +1,10 @@
 /**
  * @file src/event/event.c
- * @brief Common publication of typed, by-value cross-task events.
+ * @brief Stable names for typed cross-task events.
+ *
+ * These immutable names label the by-value event discriminators. Lookup is
+ * stateless and borrows no buffers. The configured sink owns event delivery and
+ * the app runtime owns queue consumption.
  */
 #include "ivts_core/event/event.h"
 

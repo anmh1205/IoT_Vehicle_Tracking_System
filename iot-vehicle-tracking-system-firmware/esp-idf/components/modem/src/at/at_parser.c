@@ -1,17 +1,15 @@
 /**
- * @file at_parser.c
+ * @file src/at/at_parser.c
  * @brief Incremental UART framing for response lines, prompts and raw bytes.
  *
- * Caller-owned parser state survives reads that split lines or data blocks. No
- * reads or writes are issued by the parser itself.
+ * AT dispatch feeds bytes on the modem task. Host callers may supply bytes directly.
+ * Caller-owned parser state survives reads that split lines or data blocks.
+ * Dispatch provides raw lengths and owns all I/O and timeout handling.
  */
 #include "at/at.h"
 #include <string.h>
 
-/*
- * Known URC prefixes. Late +CMQTTPUB and +CMQTTCONNECT responses remain
- * associated with the active command through final_prefix.
- */
+/* Immutable URC classification table. The engine matches command-specific final lines separately. */
 static const char *const k_urc[] = {
     "+CMQTTRXSTART:", "+CMQTTRXTOPIC:", "+CMQTTRXPAYLOAD:", "+CMQTTRXEND:",
     "+CMQTTCONNLOST:", "+CMQTTNONET", "+CGEV:", "+CPIN:", "RDY", "SMS DONE",

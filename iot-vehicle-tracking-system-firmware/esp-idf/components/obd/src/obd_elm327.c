@@ -1,6 +1,10 @@
 /**
- * @file obd_elm327.c
- * @brief ELM327 ASCII response framing and conversion to OBD bytes.
+ * @file src/obd_elm327.c
+ * @brief ELM327 initialization commands, reply framing and service extraction.
+ *
+ * The OBD task uses the command table during session setup and assembles replies from BLE fragments.
+ * Polling uses these helpers to extract service bytes for the PID and diagnostic decoders.
+ * The functions use caller-owned buffers and perform no BLE I/O.
  */
 #include "obd_internal.h"
 #include <ctype.h>
@@ -22,7 +26,6 @@ void elm_rx_reset(elm_rx_t *r)
     memset(r, 0, sizeof(*r));
 }
 
-/* Ignore bytes arriving after the terminating prompt. */
 bool elm_rx_feed(elm_rx_t *r, const uint8_t *data, size_t n)
 {
     for (size_t i = 0; i < n && !r->complete; i++) {
@@ -39,7 +42,7 @@ bool elm_rx_feed(elm_rx_t *r, const uint8_t *data, size_t n)
     return r->complete;
 }
 
-/** @return true when @p text contains @p word, ignoring case. */
+/** @brief Find a case-insensitive substring in an adapter reply. */
 static bool contains_ci(const char *text, const char *word)
 {
     size_t wl = strlen(word);
@@ -51,7 +54,7 @@ static bool contains_ci(const char *text, const char *word)
     return false;
 }
 
-/** @return true if the response includes a line equal to "OK". */
+/** @brief Match a standalone OK response line with surrounding whitespace allowed. */
 static bool has_ok_line(const char *r)
 {
     const char *line = r;
@@ -98,7 +101,7 @@ ivts_ecu_state_t elm_reply_ecu_state(const char *reply)
     return IVTS_ECU_UNKNOWN;
 }
 
-/** Return the value of a hexadecimal digit, or -1 for an invalid character. */
+/** @brief Convert a hex digit, returning -1 for a non-hex character. */
 static int hexv(char c)
 {
     if (c >= '0' && c <= '9') { return c - '0'; }
@@ -108,9 +111,8 @@ static int hexv(char c)
 }
 
 /**
- * Decode the hex bytes in [s, e), skipping whitespace and an optional frame
- * index such as "0:".
- * @return Number of bytes written, or -1 for an invalid character.
+ * @brief Decode a hex line after optional colon-prefixed framing.
+ * Return the number of decoded bytes even if output is capped, or -1 for malformed hex.
  */
 static int line_bytes(const char *s, const char *e, uint8_t *out, size_t cap)
 {
@@ -155,7 +157,8 @@ ivts_err_t elm_extract_bytes(const char *reply, uint8_t mode, uint8_t *out, size
                     }
                 }
             } else if (frame) {
-                for (int j = 0; j < k && got < cap; j++) { out[got++] = tmp[j]; }   /* Skip the ISO-TP byte-count line. */
+                /* Indexed lines can continue the selected response. */
+                for (int j = 0; j < k && got < cap; j++) { out[got++] = tmp[j]; }
             } else {
                 break;                                                             /* Ignore a second ECU reply in this field. */
             }

@@ -1,9 +1,11 @@
 /**
- * @file obd_poll.c
- * @brief Live OBD sampling and readiness or trouble-code snapshots.
+ * @file src/obd_poll.c
+ * @brief Live OBD sampling and diagnostic snapshot publication.
  *
- * The OBD task owns ELM requests. Copy diagnostics under the snapshot mutex
- * and keep BLE, transport and sink operations outside the lock.
+ * The OBD task probes the ECU and sends PID, readiness and DTC commands through the session interface.
+ * It replaces the diagnostic snapshot under a mutex shared with the app. I/O and event delivery occur outside
+ * the lock.
+ * The app decides how to use the readings and validity flags.
  */
 #include "obd_internal.h"
 #include "platform/log.h"
@@ -11,8 +13,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#define ECU_PROBE_MS 15000u
+#define ECU_PROBE_MS 15000u   /**< Reply timeout in milliseconds for the supported-PID probe. */
 
+/**
+ * @brief Require a complete supported-PID response before treating the ECU as ready.
+ */
 static bool probe_ecu(obd_session_t *session)
 {
     if (!obd_session_command(session, "0100", ECU_PROBE_MS)) { return false; }
@@ -25,6 +30,9 @@ static bool probe_ecu(obd_session_t *session)
     return true;
 }
 
+/**
+ * @brief Accept bytes for the requested PID and retain explicit ECU status when data are unavailable.
+ */
 static bool read_pid(obd_session_t *session, uint8_t pid, ivts_obd_sample_t *sample, ivts_ecu_state_t *ecu)
 {
     char command[5];
@@ -42,6 +50,9 @@ static bool read_pid(obd_session_t *session, uint8_t pid, ivts_obd_sample_t *sam
     return true;
 }
 
+/**
+ * @brief Publish available measurements or drop ECU readiness after an explicit no-data or stopped reply.
+ */
 static void report_sample_or_ecu_state(obd_session_t *session, const ivts_obd_sample_t *sample, ivts_ecu_state_t ecu)
 {
     if (sample->valid_mask != 0u) {
@@ -72,6 +83,7 @@ bool obd_poll_sample(obd_session_t *session)
     return true;
 }
 
+/* Startup creates the mutex. The OBD task writes and the app copies the snapshot under this lock. */
 static platform_mutex_t s_diag_mutex;
 static ivts_obd_readiness_t s_readiness;
 static ivts_dtc_list_t s_dtc[3];
@@ -106,6 +118,9 @@ static bool read_dtc_mode(obd_session_t *session, size_t index, ivts_dtc_list_t 
     return true;
 }
 
+/**
+ * @brief Publish readiness and all three lists as one snapshot, then notify the app outside the lock.
+ */
 static void store_diag_snapshot(const ivts_obd_readiness_t *readiness, const ivts_dtc_list_t dtc[3])
 {
     platform_mutex_lock(s_diag_mutex);

@@ -2,8 +2,9 @@
  * @file src/services/link.c
  * @brief LTE and MQTT link sequencing, retry backoff and power recovery.
  *
- * The modem task executes one state-machine step at a time, preserving retry
- * windows and emitting link changes by value.
+ * The modem task owns the step and retry deadlines. Its loop applies due steps and reports link changes.
+ * MQTT receive and publish handlers can request reconnect on the same task.
+ * The MQTT service owns broker commands and the transport owns PWRKEY and its restart guard.
  */
 #include "modem_internal.h"
 #include "services/services.h"
@@ -15,14 +16,15 @@
 #include <stdio.h>
 #include <string.h>
 
+/* Startup clears the link state. Only the modem task reads or mutates it once started. */
 static modem_link_t s_link;
 
-#define FAILS_POWER_CYCLE  8u        /* Accumulated failures that trigger a modem power cycle. */
+#define FAILS_POWER_CYCLE  8u        /**< Accumulated failures that trigger a modem power cycle. */
 
 /* Retry delays grow from 1 to 60 seconds plus up to 2 seconds of jitter. */
 static const ivts_backoff_t k_step_backoff = { .base_ms = 1000, .max_ms = 60000, .jitter_ms = 2000 };
 
-/** Stable name of a link step for logging. */
+/** @brief Map a link step to its stable log name. */
 static const char *st_name(modem_link_step_t s)
 {
     static const char *const n[] = { "OFF", "POWER", "SYNC", "SIM", "REG", "PDP",
@@ -30,10 +32,6 @@ static const char *st_name(modem_link_step_t s)
     return (s <= MODEM_LINK_STEP_UP) ? n[s] : "?";
 }
 
-/*
- * Reset the current step and retry counters. Clear accumulated failures only
- * when moving to OFF or POWER.
- */
 void modem_link_reset(modem_link_step_t to)
 {
     s_link.step = to;
@@ -43,11 +41,7 @@ void modem_link_reset(modem_link_step_t to)
     if (to <= MODEM_LINK_STEP_POWER) { s_link.fails_total = 0; }
 }
 
-/**
- * @brief Log the current signal quality reported by AT+CSQ.
- * @details Called on the modem task when registration completes and when the
- * broker link comes up. RSSI 99 means unknown; other values map to dBm.
- */
+/** @brief Sample signal quality at packet-data setup and broker readiness. RSSI 99 means unknown. */
 static void log_signal(void)
 {
     at_cmd_t q = { .text = "AT+CSQ", .capture = "+CSQ:", .timeout_ms = 1000 };
@@ -61,7 +55,7 @@ static void log_signal(void)
     }
 }
 
-/** Enter @p to, reset its retry counters and log the transition. */
+/** @brief Log and enter a step while preserving the accumulated failure count. */
 static void go(modem_link_step_t to)
 {
     uint64_t took_ms = modem_now() - s_link.entered_at_ms;
@@ -75,12 +69,7 @@ static void go(modem_link_step_t to)
     s_link.entered_at_ms = modem_now();
 }
 
-/**
- * @brief Record one failure and apply retry backoff.
- *
- * At FAILS_POWER_CYCLE accumulated failures, pulse PWRKEY, report link down
- * and restart from MODEM_LINK_STEP_POWER.
- */
+/** @brief Back off the current step or request guarded shutdown when failures reach the threshold. */
 static void fail(void)
 {
     modem_link_t *l = &s_link;
@@ -99,7 +88,6 @@ static void fail(void)
               (unsigned long)l->attempt, (unsigned long)l->fails_total, (unsigned long)d);
 }
 
-/* Reconnect to the broker while keeping the LTE data context. */
 void modem_link_on_connection_lost(void)
 {
     if (s_link.step >= MODEM_LINK_STEP_MQTT_CONN) {
@@ -107,6 +95,7 @@ void modem_link_on_connection_lost(void)
         go(MODEM_LINK_STEP_MQTT_CONN);
     }
 }
+/** @brief Apply the step outcome, including any deadline or readiness event. */
 static void apply_step_result(modem_link_t *link, step_result_t result)
 {
     switch (result.action) {
@@ -150,8 +139,9 @@ void modem_link_power_down(void)
     if (modem_power_down()) { modem_gnss_reset_power(); }
 }
 
-#define REG_TIMEOUT_MS 180000u
+#define REG_TIMEOUT_MS 180000u /**< Elapsed registration time in milliseconds before returning to power. */
 
+/** @brief Accept the registration status for a home or roaming network. */
 static bool reg_ok(const char *resp)
 {
     int32_t stat;
@@ -163,6 +153,7 @@ static step_result_t advance_to(modem_link_step_t target)
     return (step_result_t){ .action = MODEM_LINK_ADVANCE, .target = target };
 }
 
+/** @brief Probe for an already-responsive module before pulsing PWRKEY. */
 static step_result_t step_power(void)
 {
     if (modem_power_restart_is_blocked()) { return (step_result_t){ .action = MODEM_LINK_IDLE }; }
@@ -198,6 +189,7 @@ static step_result_t step_sim(void)
     return (step_result_t){ .action = MODEM_LINK_FAIL };
 }
 
+/** @brief Poll registration without counting normal registration waits as failures. */
 static step_result_t step_register(const modem_link_t *link)
 {
     at_cmd_t command = { .text = "AT+CEREG?", .capture = "+CEREG:", .timeout_ms = 3000 };
@@ -225,6 +217,7 @@ static step_result_t step_pdp(void)
     return (step_result_t){ .action = MODEM_LINK_FAIL };
 }
 
+/** @brief Escalate repeated broker connection errors to MQTT service setup. */
 static step_result_t step_mqtt(const modem_link_t *link)
 {
     if (modem_mqtt_step(link->step)) {

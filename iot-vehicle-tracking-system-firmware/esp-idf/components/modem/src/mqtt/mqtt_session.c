@@ -1,9 +1,10 @@
 /**
- * @file mqtt_session.c
- * @brief SIM7600 MQTT connection, subscription and TLS configuration.
+ * @file src/mqtt/mqtt_session.c
+ * @brief SIM7600 MQTT connection, subscription and shared TLS configuration.
  *
- * Use the deployment-selected transport and configure TLS with trusted time
- * and the requested certificate context.
+ * The link service calls MQTT setup and the task calls disconnect on shutdown.
+ * The modem task serializes all commands, including HTTPS use of the TLS configurator.
+ * The module holds session and certificate state. The link service owns retry scheduling.
  */
 #include "mqtt/mqtt.h"
 #include "modem_internal.h"
@@ -13,11 +14,12 @@
 #include "ivts_core/base/civil.h"
 #include "sdkconfig.h"
 
-#define KEEPALIVE_S   60   /* MQTT keepalive in seconds. The modem supports 60 through 64800 seconds. */
+#define KEEPALIVE_S   60   /**< MQTT keepalive in seconds. The modem supports 60 through 64800 seconds. */
 
+/** @brief Accept formatting only when a nonempty result fits with its terminator. */
 static bool fmt_ok(int n, size_t cap) { return n > 0 && (size_t)n < cap; }
 
-/** Subscribe to the command topic at QoS 1 and require modem confirmation. */
+/** @brief Subscribe to the command topic at QoS 1 and require modem confirmation. */
 static bool sub_commands(void)
 {
     char cmd[40];
@@ -28,10 +30,7 @@ static bool sub_commands(void)
     return modem_at(&c) == AT_RES_OK;
 }
 
-/**
- * @brief Execute the requested MQTT link step.
- * @return true when the link state machine may advance.
- */
+/** @brief Attempt disconnect, release and stop after a failed MQTT service start. */
 static void mqtt_cleanup_stale_service(void)
 {
     (void)modem_at_simple("AT+CMQTTDISC=0,60", 5000);
@@ -55,6 +54,7 @@ static bool mqtt_start_service(void)
     return r == AT_RES_OK;
 }
 
+/** @brief Release the acquired client if binding its TLS context fails. */
 static bool mqtt_acquire_client(bool tls)
 {
     const modem_cfg_t *cfg = modem_config();
@@ -89,8 +89,8 @@ static bool mqtt_connect(bool tls)
 {
     char cmd[256];
     /*
-     * A persistent session keeps subscriptions and queued QoS 1 commands while
-     * offline.
+     * Request a persistent session so the broker can retain subscriptions and
+     * queued QoS 1 commands while the device is offline.
      */
     if (!modem_mqtt_format_connect_cmd(cmd, sizeof cmd, modem_config(), tls)) { return false; }
     at_cmd_t c = { .text = cmd, .final_prefix = "+CMQTTCONNECT:", .final_err_field = 2,
@@ -122,6 +122,7 @@ void modem_mqtt_disconnect(void)
     }
 }
 
+/** @brief Apply trusted UTC before setting up certificate time validation. */
 static void sync_modem_clock(void)
 {
     char cmd[180];
@@ -138,7 +139,9 @@ static void sync_modem_clock(void)
 static bool apply_ssl_settings(unsigned index)
 {
     char cmd[180];
-    static const struct { const char *key; unsigned value; } settings[] = {
+    /** @brief Immutable SIM7600 TLS parameter table. */
+    static const struct { const char *key; /**< SSL parameter name.
+     */unsigned value; /**< Modem setting. */} settings[] = {
         { "sslversion", 3 }, { "authmode", 1 }, { "ignorelocaltime", 0 },
         { "enableSNI", 1 }, { "negotiatetime", 30 },
     };

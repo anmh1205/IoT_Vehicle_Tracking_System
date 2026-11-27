@@ -1,9 +1,10 @@
 /**
- * @file app_dispatch.c
- * @brief Dispatch table for by-value events received by the app task.
+ * @file src/runtime/app_dispatch.c
+ * @brief App-task routing for events received by value.
  *
- * Dispatch runs on the app task and routes events to their owning feature.
- * Link refresh reconciles the last snapshot if a notification was dropped.
+ * Update telemetry before routing an event to its feature handler. Runtime also polls the
+ * modem link snapshot to reconcile lost notifications. Queue ownership belongs to the runtime
+ * and adapters retain large payloads in their own slots.
  */
 #include "runtime/runtime.h"
 #include "app_internal.h"
@@ -15,6 +16,7 @@
 #include "ivts_core/model/status.h"
 #include "storage/storage.h"
 
+/** @brief App-task handler that borrows an event for one dispatch. */
 typedef void (*app_event_handler_t)(const ivts_event_t *);
 
 void app_dispatch_refresh_link(void)
@@ -42,6 +44,7 @@ static void on_store_result(const ivts_event_t *event)
               ivts_err_name((ivts_err_t)event->u.store_result.err));
 }
 
+/* The app task reads this immutable table after the telemetry update. */
 static const app_event_handler_t k_handlers[] = {
     [IVTS_EV_POWER_SAMPLE] = on_power_sample,
     [IVTS_EV_MOTION_IRQ] = on_motion,

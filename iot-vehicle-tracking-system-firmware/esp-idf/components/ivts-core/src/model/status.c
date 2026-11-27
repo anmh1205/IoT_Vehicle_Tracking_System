@@ -1,6 +1,10 @@
 /**
  * @file src/model/status.c
  * @brief Pure formatting of the periodic console status lines.
+ *
+ * The app task formats its periodic console view and uses the same names in
+ * transition logs. The OBD task also uses the ECU name. The formatter borrows
+ * its inputs, writes caller-owned storage and leaves UART output to its caller.
  */
 #include "ivts_core/model/status.h"
 #include <stdarg.h>
@@ -85,13 +89,14 @@ const char *ivts_sleep_mode_name(ivts_sleep_mode_t sleep)
     }
 }
 
-/** Bounded append writer. */
+/** @brief Stack-local append cursor over the caller-owned line buffer. */
 typedef struct {
-    char  *buf;
-    size_t cap;
-    size_t len;
+    char  *buf;  /**< Writable destination borrowed for one line. */
+    size_t cap;  /**< Capacity in bytes including NUL. */
+    size_t len;  /**< Bytes written, excluding NUL. */
 } line_t;
 
+/** @brief Append formatted bytes and track the actual length after truncation. */
 static void put(line_t *line, const char *fmt, ...)
 {
     if (line->len + 1u >= line->cap) { return; }
@@ -104,13 +109,13 @@ static void put(line_t *line, const char *fmt, ...)
     line->len += (size_t)n < room ? (size_t)n : room;
 }
 
-/** Append millivolts as volts with two decimals, e.g. 13520 -> 13.52V. */
+/** @brief Append millivolts as volts truncated to two fractional digits. */
 static void put_volts(line_t *line, const char *key, uint16_t mv)
 {
     put(line, " %s=%u.%02uV", key, (unsigned)(mv / 1000u), (unsigned)(mv % 1000u / 10u));
 }
 
-/** Append a coordinate stored as degrees times 10^7. */
+/** @brief Append a coordinate stored as degrees times 10^7. */
 static void put_coord(line_t *line, int32_t e7)
 {
     int64_t v = e7;
@@ -130,7 +135,7 @@ static void format_core(line_t *line, const ivts_status_view_t *v)
         (unsigned long)(s / 3600u), (unsigned long)(s / 60u % 60u), (unsigned long)(s % 60u));
 }
 
-#define YN(value) ((value) ? "yes" : "no")
+#define YN(value) ((value) ? "yes" : "no")  /**< Console spelling for a Boolean flag. */
 
 static void format_net(line_t *line, const ivts_status_view_t *v)
 {
@@ -170,7 +175,7 @@ static void format_gnss(line_t *line, const ivts_status_view_t *v)
     put_coord(line, g->lat_e7);
     put(line, ",");
     put_coord(line, g->lon_e7);
-    unsigned tenths_kmh = (unsigned)((uint32_t)g->speed_cm_s * 36u / 100u);   /* cm/s * 0.036 = km/h */
+    unsigned tenths_kmh = (unsigned)((uint32_t)g->speed_cm_s * 36u / 100u);   /* 0.36 tenths of a km/h per cm/s. */
     put(line, " speed=%u.%ukm/h course=%u.%u", tenths_kmh / 10u, tenths_kmh % 10u,
         (unsigned)(g->course_deg_x10 / 10u), (unsigned)(g->course_deg_x10 % 10u));
 }

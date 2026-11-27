@@ -1,15 +1,11 @@
 /**
- * @file ota_task.c
- * @brief OTA task lifecycle, progress and image management entry points.
+ * @file src/ota_task.c
+ * @brief OTA task lifecycle, atomic progress and running-image operations.
  *
- * The app atomically claims the worker slot and copies the command before
- * creating the OTA task. The worker reads that copy, runs the job and clears
- * the active flag before deleting itself. The flag also lets other tasks query
- * progress without sharing the job's mutable state.
- *
- * Byte-source calls can block on the modem task. Progress notifications are by
- * value. A reset during download abandons the candidate write and keeps the
- * running partition selected until boot selection succeeds.
+ * The app atomically claims the worker slot and copies the command before creating the task.
+ * The worker runs one job and releases its slot before exiting. Its progress is available as a copied event
+ * and an atomic latest-value snapshot. Modem and flash operations run on the worker or its source binding.
+ * The app owns the reboot and post-boot policy.
  */
 #include "ota_internal.h"
 #include <stdatomic.h>
@@ -21,14 +17,14 @@
 #include "esp_ota_ops.h"
 #include "platform/platform.h"
 
-/** Parameters of the currently claimed OTA job. */
+/** @brief Parameters written by the slot claimant and read only by its OTA worker. */
 static struct {
-    ivts_ota_cmd_t cmd;
-    uint16_t       battery_mv, min_mv;
+    ivts_ota_cmd_t cmd;   /**< Complete command copied by value. */
+    uint16_t       battery_mv, /**< Measured supply in millivolts. */ min_mv; /**< Minimum in millivolts. */
 } s_job;
-static atomic_bool s_running;   /* Worker slot ownership flag, from claim through job completion. */
+static atomic_bool s_running;   /* Atomic claim covers parameter publication through job completion. */
 
-/** Run one update job and release the worker slot before exiting. */
+/** @brief Release the slot only after the job no longer uses the shared parameters. */
 static void ota_task(void *arg)
 {
     (void)arg;
@@ -37,12 +33,10 @@ static void ota_task(void *arg)
     vTaskDelete(NULL);
 }
 
-/*
- * Claim the job atomically before publishing its parameters to the worker.
- */
 ivts_err_t ota_start(const ivts_ota_cmd_t *cmd, uint16_t battery_mv, uint16_t min_battery_mv)
 {
     if (cmd == NULL) { return IVTS_ERR_INVALID_ARG; }
+    /* The claim excludes other start calls before any shared job field is written. */
     if (atomic_exchange(&s_running, true)) { return IVTS_ERR_INVALID_STATE; }
     s_job.cmd = *cmd;
     s_job.battery_mv = battery_mv;
@@ -56,7 +50,9 @@ ivts_err_t ota_start(const ivts_ota_cmd_t *cmd, uint16_t battery_mv, uint16_t mi
 
 bool ota_running(void) { return atomic_load(&s_running); }
 
+/* App startup sets the callback bindings. Jobs borrow the unchanged configuration. */
 static ota_cfg_t s_ota_cfg;
+/* The OTA task publishes the latest value. The app atomically consumes it. */
 static _Atomic uint32_t s_progress;
 
 const ota_cfg_t *ota_config(void) { return &s_ota_cfg; }
@@ -73,6 +69,7 @@ ivts_err_t ota_init(const ota_cfg_t *cfg)
 
 void ota_emit(uint8_t phase, uint8_t pct, uint8_t err)
 {
+    /* The presence bit keeps a zero-valued phase, percentage and error distinguishable from empty. */
     uint32_t progress = (1u << 24) | ((uint32_t)phase << 16) | ((uint32_t)pct << 8) | err;
     atomic_store(&s_progress, progress);
     IVTS_LOGI(OTA_TAG, "progress phase=%s pct=%u err=%u", ivts_ota_status_name((ivts_ota_status_t)phase), pct, err);

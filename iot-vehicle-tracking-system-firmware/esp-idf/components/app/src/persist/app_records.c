@@ -1,17 +1,18 @@
 /**
- * @file app_records.c
+ * @file src/persist/app_records.c
  * @brief Typed wrappers for versioned application records stored in NVS.
  *
- * These functions preserve the key and layout used by deployed firmware. They
- * can block on flash and return persistence errors to the caller.
+ * Startup and the app task use synchronous NVS records. The OTA worker also saves confirmation
+ * context before partition selection. These wrappers own keys, supported layouts and validation
+ * of selected fields. The storage adapter owns the record envelope and flash I/O.
  */
 #include "persist/persist.h"
 #include "storage/nvs_store.h"
 
 #include <string.h>
 
-#define OTA_KEY "ota"
-#define OTA_VERSION 3u
+#define OTA_KEY "ota"      /**< NVS key for the confirmation context. */
+#define OTA_VERSION 3u     /**< Current context layout version, which includes the target partition. */
 
 _Static_assert(sizeof(ivts_cmd_receipts_t) == STORAGE_RECORD_PAYLOAD_MAX, "receipt layout must match the NVS blob limit");
 _Static_assert(sizeof(ivts_restart_intent_t) == 65u, "restart intent layout must match NVS");
@@ -21,6 +22,7 @@ ivts_err_t app_records_ota_confirm_ctx_load(ivts_ota_confirm_ctx_t *out)
     if (out == NULL) { return IVTS_ERR_INVALID_ARG; }
     memset(out, 0, sizeof *out);
     ivts_err_t r = storage_record_load(OTA_KEY, OTA_VERSION, out, sizeof *out);
+    /* The prior layout ends before the target-partition field, which stays zeroed. */
     if (r == IVTS_ERR_VERSION) {
         r = storage_record_load(OTA_KEY, 2u, out, offsetof(ivts_ota_confirm_ctx_t, target_partition));
     }

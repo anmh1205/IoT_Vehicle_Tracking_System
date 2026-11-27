@@ -1,6 +1,10 @@
 /**
- * @file fsm.c
+ * @file src/fsm/fsm.c
  * @brief FSM initialization and dispatch with caller-owned runtime state.
+ *
+ * The app task owns the FSM and supplies one observation snapshot at a time.
+ * The dispatcher adds common replay requests before invoking a state-specific
+ * handler. The app executes publication, replay and power effects.
  */
 #include "fsm/fsm_internal.h"
 #include <string.h>

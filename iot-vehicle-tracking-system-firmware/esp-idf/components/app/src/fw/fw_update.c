@@ -2,8 +2,9 @@
  * @file src/fw/fw_update.c
  * @brief Application-side firmware update, reboot and confirmation policy.
  *
- * Boot restores pending context. The app task persists status where required
- * and coordinates image confirmation, rollback and final report ACK.
+ * Boot restores pending context. The app task manages the job, confirmation and final report ACK.
+ * The OTA worker calls the boot preparation hook to write a local record before partition
+ * selection. The OTA adapter owns image download, flashing and boot metadata operations.
  */
 #include "persist/persist.h"
 #include "fw/fw_update.h"
@@ -18,15 +19,16 @@
 #include "platform/platform.h"
 #include "storage/storage.h"
 
+/** @brief Runtime update state restored at startup and then owned by the app task. */
 static struct {
-    bool has_health_ack;
-    bool awaiting_confirmation;
-    bool is_job_active;
-    bool awaiting_final_report_ack;
-    bool fw_report_needs_publish;
-    uint64_t reboot_at_ms;
-    ivts_ota_confirm_ctx_t confirm_ctx;
-    ivts_fw_status_t report;
+    bool has_health_ack; /**< A qualifying publish succeeds during this boot. */
+    bool awaiting_confirmation; /**< The running image still requires a confirmation decision. */
+    bool is_job_active; /**< The app awaits a terminal OTA worker phase. */
+    bool awaiting_final_report_ack; /**< The context remains durable until a final report is acknowledged. */
+    bool fw_report_needs_publish; /**< The current firmware report needs a submission attempt. */
+    uint64_t reboot_at_ms; /**< Monotonic reboot deadline in milliseconds, or zero when idle. */
+    ivts_ota_confirm_ctx_t confirm_ctx; /**< Context used to evaluate confirmation of the running image. */
+    ivts_fw_status_t report; /**< Current report borrowed by the publisher on the app task. */
 } s_update;
 
 static void restore_pending_verify(const ivts_ota_confirm_ctx_t *saved)
@@ -43,12 +45,14 @@ static void restore_pending_verify(const ivts_ota_confirm_ctx_t *saved)
               (unsigned long)s_update.confirm_ctx.timeout_s);
 }
 
+/** @brief Match the running image to the saved target, allowing records without a partition label. */
 static bool image_landed(const ivts_ota_confirm_ctx_t *saved, const char *version, const char *partition)
 {
     return saved->target_version[0] != '\0' && strcmp(saved->target_version, version) == 0 &&
                   (saved->target_partition[0] == '\0' || strcmp(saved->target_partition, partition) == 0);
 }
 
+/** @brief Classify the OTA outcome from the running image and retained target. */
 static void restore_after_reboot(const ivts_ota_confirm_ctx_t *saved)
 {
     bool landed = image_landed(saved, ota_running_version(), ota_running_partition());
@@ -102,6 +106,7 @@ static void app_fw_update_on_progress(const ivts_event_t *ev)
     }
 }
 
+/* The app task owns the confirmation retry deadline along with the update state. */
 static uint64_t s_confirm_retry_at_ms;
 
 static void accept_running_image(uint64_t uptime_ms)
@@ -129,12 +134,6 @@ static void rollback_running_image(uint64_t uptime_ms)
     s_confirm_retry_at_ms = uptime_ms + OTA_ROLLBACK_RETRY_MS;
 }
 
-/**
- * @brief Evaluate the pending OTA image against the boot confirmation policy.
- *
- * Confirm before the deadline when the broker is up and a qualifying publish
- * has received PUBACK during this boot.
- */
 void app_fw_update_confirm_tick(void)
 {
     if (!s_update.awaiting_confirmation) { return; }
@@ -179,6 +178,7 @@ static void clear_confirm_ctx_after_report(void)
 
 void app_fw_update_on_report_acked(bool ok)
 {
+    /* A newer pending report keeps an older ACK from releasing reboot or clearing retained context. */
     if (!ok) {
         on_report_failed();
     } else if (s_update.awaiting_confirmation) {
@@ -263,6 +263,7 @@ ivts_err_t app_fw_update_prepare_boot(const ivts_ota_cmd_t *cmd, const char *par
     ivts_ota_confirm_ctx_t pending = { .pending = true, .timeout_s = cmd->confirm_timeout_s };
     bool trusted;
     uint64_t now = app_clock_unix_ms_or_zero(&trusted);
+    /* Without trusted UTC at installation, the next boot can enforce the timeout using uptime. */
     if (trusted) { pending.deadline_unix_ms = now + (uint64_t)pending.timeout_s * 1000u; }
     (void)ivts_str_copy(pending.job_id, sizeof pending.job_id, cmd->job_id);
     (void)ivts_str_copy(pending.target_version, sizeof pending.target_version, cmd->version);

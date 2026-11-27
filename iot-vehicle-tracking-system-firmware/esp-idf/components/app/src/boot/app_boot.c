@@ -1,9 +1,10 @@
 /**
- * @file app_boot.c
- * @brief Ordered startup, recovery of persisted state and boot identity.
+ * @file src/boot/app_boot.c
+ * @brief Ordered startup, persistent state recovery and boot identity.
  *
- * Open the event queue before starting producers. Load NVS and resolve
- * provisioning before connecting the modem, then restore the OTA boot context.
+ * The startup task opens the event queue before starting producers and loads NVS before
+ * resolving provisioning. It restores identity and OTA boot context before launching the
+ * app task. Adapter initialization is delegated to wiring. The entry point handles restart.
  */
 #include "persist/persist.h"
 #include "boot/boot.h"
@@ -23,9 +24,11 @@
 #include "session/session_tracker.h"
 #include "storage/storage.h"
 
+/** @brief Fill empty deployment fields and report any default that does not fit. */
 static bool fill_deploy_defaults(ivts_config_t *c)
 {
-    const struct { char *dst; size_t size; const char *value; } fields[] = {
+    /** @brief Startup-local map from configuration buffers to deployment defaults. */
+    const struct { char *dst; /**< Writable destination. */ size_t size; /**< Capacity in bytes. */ const char *value; /**< Static default text. */ } fields[] = {
         { c->device_id, sizeof c->device_id, CONFIG_IVTS_DEFAULT_DEVICE_ID },
         { c->auth_token, sizeof c->auth_token, CONFIG_IVTS_DEFAULT_AUTH_TOKEN },
         { c->mqtt_host, sizeof c->mqtt_host, CONFIG_IVTS_MQTT_HOST },
@@ -78,7 +81,7 @@ static void restore_boot_identity(void)
 {
     /*
      * Keep the boot ID on a deep-sleep wake with valid RTC context. For a cold
-     * boot or invalid context, allocate a new boot ID from NVS.
+     * boot or invalid context, allocate a new boot ID from NVS or fall back to random.
      */
     uint32_t seq = 0;
     uint32_t boot_id = 0;
@@ -89,7 +92,7 @@ static void restore_boot_identity(void)
     app_device_set_boot_id(boot_id);
 }
 
-/** Raise every firmware tag to DEBUG when CONFIG_IVTS_LOG_DEBUG is enabled. */
+/** @brief Raise each firmware tag to DEBUG when enabled by the build. */
 static void apply_log_levels(void)
 {
 #if CONFIG_IVTS_LOG_DEBUG

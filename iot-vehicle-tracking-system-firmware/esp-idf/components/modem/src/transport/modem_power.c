@@ -1,10 +1,10 @@
 /**
- * @file modem_power.c
+ * @file src/transport/modem_power.c
  * @brief SIM7600 PWRKEY sequencing and modem light-sleep lock.
  *
- * Apply the configured active level and native task delay. Keep the restart
- * guard during shutdown and hold the PM lock while UART communication is
- * active.
+ * Startup prepares the configured GPIO and optional PM lock. The link service calls the modem-task
+ * operations to pulse PWRKEY and guard against restarting during module shutdown.
+ * The transport tracks timing and lock requests. The link service determines when to change power.
  */
 #include "transport/transport.h"
 #include "platform/platform.h"
@@ -14,6 +14,7 @@
 #include "esp_pm.h"
 #include "sdkconfig.h"
 
+/* Startup initializes the GPIO and lock. The modem task alone changes lock and restart state. */
 static int s_pwrkey_gpio;
 static bool s_pwrkey_inverted;
 static esp_pm_lock_handle_t s_pm;

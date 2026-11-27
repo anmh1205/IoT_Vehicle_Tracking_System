@@ -1,15 +1,18 @@
 /**
  * @file src/mqtt/mqtt_slots.c
- * @brief Modem cross-task publish slot and command FIFO.
+ * @brief Modem cross-task publish slot, result snapshot and command FIFO.
  *
- * One mutex protects bounded copies and state updates. The modem holds the
- * transmit slot through completion and emits events after releasing the mutex.
+ * The app submits publishes and drains commands. The modem task claims publishes and stores commands.
+ * One mutex protects bounded copies and state updates. The occupied transmit slot keeps borrowed bytes
+ * stable through AT completion. Event delivery happens outside the copy lock.
+ * Queued data and result snapshots live in RAM. The app owns durable delivery and retry policy.
  */
 #include "modem_internal.h"
 #include "platform/platform.h"
 #include <string.h>
 #include "platform/log.h"
 
+/* Startup creates this mutex for app and modem task access to both slots and the drop counter. */
 static platform_mutex_t s_slot_mutex;
 
 bool modem_slots_init(void)
@@ -21,17 +24,17 @@ bool modem_slots_init(void)
 static void modem_slots_lock(void) { platform_mutex_lock(s_slot_mutex); }
 static void modem_slots_unlock(void) { platform_mutex_unlock(s_slot_mutex); }
 
-/** Transmit slot holds a queued or in-flight payload. */
+/** @brief Mutex-protected publish slot, with access to borrowed bytes reserved for the modem while in flight. */
 static struct {
-    bool          busy;         /* The occupied slot cannot accept another publish. */
-    bool          in_flight;    /* The modem task borrowed the slot for transmission. */
-    bool          result_ready;
-    bool          ok;
-    int16_t       err;
-    modem_topic_t topic;
-    uint32_t      tx_id;
-    size_t        len;
-    char          data[MODEM_PAYLOAD_MAX];
+    bool          busy;         /**< The occupied slot cannot accept another publish. */
+    bool          in_flight;    /**< The modem task has claimed the slot for transmission. */
+    bool          result_ready; /**< A stored result is available for the current transaction ID. */
+    bool          ok;           /**< Outcome of the stored publish result. */
+    int16_t       err;          /**< Stored modem or local failure code. */
+    modem_topic_t topic;        /**< Topic ID of the queued or in-flight publish. */
+    uint32_t      tx_id;        /**< App transaction ID for the message or stored result. */
+    size_t        len;          /**< Payload size in bytes, from 1 through MODEM_PAYLOAD_MAX when occupied. */
+    char          data[MODEM_PAYLOAD_MAX]; /**< Slot-owned payload bytes. */
 } s_tx;
 
 ivts_err_t modem_publish(modem_topic_t topic, const char *payload, size_t len, uint32_t tx_id)
@@ -77,7 +80,6 @@ bool modem_publish_result(uint32_t tx_id, bool *ok, int16_t *err)
     return ready;
 }
 
-/* The payload pointer borrows slot storage until modem_tx_done() releases it. */
 bool modem_tx_take(modem_topic_t *topic, const char **payload, size_t *len, uint32_t *tx_id)
 {
     modem_slots_lock();
@@ -114,18 +116,19 @@ void modem_tx_done(bool ok, int16_t err)
     modem_emit(&ev);
 }
 
-#define CMD_QUEUE_DEPTH 4u
+#define CMD_QUEUE_DEPTH 4u /**< Maximum number of commands in the FIFO. */
 
-/** Circular command FIFO protected by the shared slot mutex. */
+/** @brief Modem-owned command FIFO. The modem appends and the app drains under the shared slot mutex. */
 static struct {
+    /** @brief One FIFO-owned command copy. */
     struct {
-        size_t len;
-        char data[MODEM_CMD_MAX];
-    } items[CMD_QUEUE_DEPTH];
-    size_t head;
-    size_t count;
+        size_t len;                 /**< Payload size in bytes, from 1 through MODEM_CMD_MAX when occupied. */
+        char data[MODEM_CMD_MAX];   /**< Payload bytes without a terminator. */
+    } items[CMD_QUEUE_DEPTH];      /**< Command storage indexed as a ring. */
+    size_t head; /**< Index of the oldest item when the FIFO contains a command. */
+    size_t count; /**< Occupied entries, from zero through CMD_QUEUE_DEPTH. */
 } s_cmd;
-static uint32_t s_cmd_dropped;  /* Commands dropped on FIFO overflow. */
+static uint32_t s_cmd_dropped;  /* FIFO overflow count under the shared slot mutex. */
 
 void modem_cmd_store(const char *payload, size_t len)
 {
@@ -149,9 +152,8 @@ void modem_cmd_store(const char *payload, size_t len)
         modem_emit(&ev);
     } else {
         /*
-         * SIM7600 has already sent broker PUBACK before delivering the URC. A
-         * full FIFO drops the command. The cloud can retry the same command ID
-         * when it receives no application acknowledgement on commands/ack.
+         * The module handles broker PUBACK independently of FIFO admission.
+         * Retrying a dropped command depends on the application acknowledgement on commands/ack.
          */
         IVTS_LOGE(MODEM_TAG, "mqtt command result=dropped reason=fifo_full size=%uB", (unsigned)len);
     }

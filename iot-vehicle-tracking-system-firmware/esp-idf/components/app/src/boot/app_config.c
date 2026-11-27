@@ -1,10 +1,10 @@
 /**
- * @file app_config.c
- * @brief Mapping from validated device configuration to runtime policy.
+ * @file src/boot/app_config.c
+ * @brief Mapping from device configuration and board capabilities to runtime policy.
  *
- * Used during startup and when the application task applies a configuration
- * command. This mapping derives the thresholds and timeouts consumed by the
- * FSM.
+ * Startup and the runtime configuration callback use this mapper. It derives the axes and FSM
+ * settings and hands the app runtime a copy. The caller owns device configuration validation
+ * and persistence. The FSM owns policy decisions based on the resulting thresholds.
  */
 #include "boot/boot.h"
 #include "app_internal.h"

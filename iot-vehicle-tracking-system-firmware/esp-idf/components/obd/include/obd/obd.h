@@ -1,9 +1,11 @@
 /**
- * @file components/obd/include/obd/obd.h
- * @brief Public ELM327-over-BLE OBD component and diagnostic snapshot APIs.
+ * @file include/obd/obd.h
+ * @brief ELM327-over-BLE lifecycle requests and diagnostic snapshots.
  *
- * The OBD task owns the BLE link and ELM327 exchanges. Control requests return
- * immediately. The sink receives link, sample and diagnostic events.
+ * App wiring creates the OBD worker. The app requests start and stop and receives link, sample and diagnostic
+ * events.
+ * The OBD task owns the link and command exchanges. Control requests do not wait for it.
+ * Diagnostic copies can wait on a mutex. Their outputs belong to the caller.
  */
 #pragma once
 
@@ -13,56 +15,71 @@
 #include "ivts_core/event/event.h"
 #include "ivts_core/model/obd.h"
 
-/** Configuration copied by obd_init(). */
+/** @brief Startup settings copied by value. The sink context must outlive the OBD task. */
 typedef struct {
     ivts_sink_t sink;              /**< Destination for OBD link, sample and diagnostic events. */
     char        target_addr[18];   /**<
-     * Target BLE address, or an empty string to discover an adapter by service
-     * or name.
+     * NUL-terminated target address in colon-separated hex, or empty for discovery by service or name.
      */
-    uint16_t    poll_ms;           /**< Interval between live PID poll rounds, in milliseconds. */
-    uint16_t    diag_period_s;     /**< Interval between readiness and DTC queries, in seconds. */
+    uint16_t    poll_ms;           /**< Target poll interval in ms. App range is 200–10000 ms. */
+    uint16_t    diag_period_s;     /**< Delay in seconds after a diagnostic round before the next is due. */
     uint8_t     task_prio;         /**< FreeRTOS priority for the OBD task. */
     uint32_t    task_stack;        /**< OBD task stack size in bytes. */
 } obd_cfg_t;
 
 /**
- * @brief Create the OBD event queue, diagnostic mutex and worker.
+ * @brief Create the OBD queue, diagnostic mutex and worker.
  *
- * Call after storage_init() so NVS is available when the worker starts NimBLE.
+ * Call once after storage initialization so NVS is available when the worker starts NimBLE.
+ * The worker begins disabled and starts BLE after a start request.
  *
+ * @param cfg Non-null settings with a sink callback. Copied by value.
  * @retval IVTS_OK The worker was created.
  * @retval IVTS_ERR_INVALID_ARG Missing configuration or sink.
  * @retval IVTS_ERR_FULL Queue, mutex or task allocation failed.
+ * @note Context: App startup. Allocation and creation do not wait for BLE startup.
  */
 ivts_err_t obd_init(const obd_cfg_t *cfg);
 
 /**
  * @brief Request BLE startup, discovery, connection and polling.
- * @retval IVTS_ERR_INVALID_STATE The OBD worker is not initialized.
+ * Repeated starts keep the enabled request set.
+ * @retval IVTS_OK The requested enabled state is recorded.
+ * @retval IVTS_ERR_INVALID_STATE The worker event queue is absent.
+ * @note Context: App task after successful initialization. Non-blocking.
  */
 ivts_err_t obd_start(void);
 
 /**
- * @brief Request polling to stop and the worker to shut down NimBLE.
- * @retval IVTS_ERR_INVALID_STATE The OBD worker is not initialized.
+ * @brief Request that the worker stop polling and shut down NimBLE.
+ * Repeated stops keep the disabled request set. Observe obd_is_stopped() for BLE inactivity.
+ * @retval IVTS_OK The requested disabled state is recorded.
+ * @retval IVTS_ERR_INVALID_STATE The worker event queue is absent.
+ * @note Context: App task after successful initialization. Non-blocking.
  */
 ivts_err_t obd_stop(void);
 
 /**
- * @return True once the OBD worker has stopped. Check after obd_stop() when
- * coordinating sleep.
+ * @brief Check the worker's BLE activity flag.
+ * @retval true The BLE activity flag is clear. The worker still exists after a normal stop.
+ * @retval false BLE startup, operation or shutdown is in progress, or shutdown failed.
+ * @note Context: App task coordinating sleep. Non-blocking.
  */
 bool obd_is_stopped(void);
 
 /**
  * @brief Copy the latest readiness and trouble-code snapshots.
  *
- * Call after IVTS_EV_OBD_DIAG_READY. Any output pointer can be NULL. A mutex
- * protects the snapshot during the copy, so callers may use task context.
+ * The app normally reads after IVTS_EV_OBD_DIAG_READY. The snapshots start with validity flags clear
+ * and stay available until replaced by a later diagnostic round.
  *
+ * @param[out] rd Optional readiness destination.
+ * @param[out] stored Optional service 03 trouble-code destination.
+ * @param[out] pending Optional service 07 trouble-code destination.
+ * @param[out] permanent Optional service 0A trouble-code destination.
  * @retval IVTS_OK Requested outputs were copied.
- * @retval IVTS_ERR_INVALID_STATE The snapshot mutex is unavailable.
+ * @retval IVTS_ERR_INVALID_STATE The mutex is unavailable. Outputs are unchanged.
+ * @note Context: App task. Waits on the snapshot mutex without a fixed timeout.
  */
 ivts_err_t obd_diag_copy(ivts_obd_readiness_t *rd, ivts_dtc_list_t *stored,
                          ivts_dtc_list_t *pending, ivts_dtc_list_t *permanent);

@@ -1,9 +1,15 @@
 /**
- * @file payload_raw.c
- * @brief RAW, retained RAW and session boundary MQTT serialization.
+ * @file src/payload/payload_raw.c
+ * @brief RAW telemetry MQTT serialization for live and replayed records.
+ *
+ * The app task calls this builder for a captured record in live, retained
+ * or replay publication. The record supplies its original identity and
+ * measurements. Only a supplied live snapshot adds current OBD diagnostics.
+ * The caller owns the payload buffer and all publish and queue operations.
  */
 #include "payload/payload_internal.h"
 
+/** @brief Distinguish a valid empty trouble-code list from an unavailable list. */
 static void dtc_arr(ivts_jw_t *w, const char *key, const ivts_dtc_list_t *d)
 {
     if (!d->valid) { return; }
@@ -26,11 +32,13 @@ static void signals_obj(ivts_jw_t *w, const ivts_obd_sample_t *o)
     ivts_jw_obj_end(w);
 }
 
+/** @brief Emit decoded monitor states and omit monitors whose state is unknown. */
 static void readiness_obj(ivts_jw_t *w, const ivts_obd_readiness_t *r)
 {
     ivts_jw_bool(w, "mil_on", r->mil_on);
     ivts_jw_uint(w, "reported_dtc_count", r->reported_dtc_count);
-    const struct { const char *key; ivts_monitor_status_t value; } monitors[] = {
+    const struct { const char *key; /**< Wire field name.
+                   */ ivts_monitor_status_t value; /**< Snapshot monitor status. */ } monitors[] = {
         { "misfire", r->misfire },
         { "fuel_system", r->fuel_system },
         { "comprehensive_components", r->comprehensive_components },
@@ -89,6 +97,7 @@ ivts_err_t ivts_payload_rawdata(const ivts_msg_meta_t *m, const ivts_record_t *r
                                 const ivts_telemetry_t *live, char *buf, size_t cap, size_t *len)
 {
     if (m == NULL || m->device_id == NULL || r == NULL) { return IVTS_ERR_INVALID_ARG; }
+    /* Reuse capture identity when the same record passes through live delivery or replay. */
     ivts_msg_meta_t capture = *m;
     capture.boot_id = r->boot_id;
     capture.seq = r->seq;
@@ -108,6 +117,7 @@ ivts_err_t ivts_payload_rawdata(const ivts_msg_meta_t *m, const ivts_record_t *r
     if (r->gnss.fix_valid) {
         ivts_jw_fixed(&w, "latitude", r->gnss.lat_e7, 7);
         ivts_jw_fixed(&w, "longitude", r->gnss.lon_e7, 7);
+        /* Convert centimetres per second to kilometres per hour and round to one decimal place. */
         ivts_jw_fixed(&w, "speed", ((int64_t)r->gnss.speed_cm_s * 36 + 50) / 100, 1);
         if (r->gnss.src == IVTS_GNSS_SRC_FULL && r->gnss.course_deg_x10 <= 3600u) {
             ivts_jw_fixed(&w, "course", r->gnss.course_deg_x10, 1);

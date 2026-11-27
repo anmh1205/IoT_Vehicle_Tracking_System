@@ -1,11 +1,11 @@
 /**
  * @file src/power/sleep.c
- * @brief ESP-IDF light and deep sleep configuration for the board.
+ * @brief ESP-IDF frequency scaling and explicit sleep entry.
  *
- * Capture the ESP-IDF wake-source bitmap at board startup. The app sleep
- * controller is the sole caller that enters sleep. Light sleep suspends
- * execution until wake and returns the mapped wake reason. Deep sleep resets
- * the CPU on wake and preserves only the configured retained memory.
+ * App startup configures idle light sleep. The app sleep controller enters explicit sleep after stopping
+ * radios.
+ * The wake adapter owns GPIO configuration and cause mapping. The board task acknowledges pending INT1.
+ * Light sleep returns to the caller. Successful deep sleep resumes at boot.
  */
 #include "board_internal.h"
 #include "board/board_hw.h"
@@ -35,12 +35,18 @@ ivts_err_t board_set_auto_light_sleep(bool enabled)
 #endif
 }
 
+/**
+ * @brief Discard previous wake sources before arming the timer from a seconds interval.
+ */
 static void arm_timer_wake(uint32_t seconds)
 {
     (void)esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
     (void)esp_sleep_enable_timer_wakeup((uint64_t)seconds * 1000000u);
 }
 
+/**
+ * @brief Hand off an already asserted wake interrupt without clearing the sensor latch.
+ */
 static bool imu_already_pending(bool is_imu_armed)
 {
     if (!is_imu_armed || lis3dsh_interrupt_level() != 1) { return false; }
@@ -73,7 +79,7 @@ static board_wake_t enter_light_sleep(bool arm_imu)
     }
     board_wake_t wake = board_power_read_wake_cause();
     if (wake == BOARD_WAKE_IMU) {
-        board_task_notify_imu();                     /* The board task reads OUTS1 and publishes the motion event. */
+        board_task_notify_imu();                     /* Level wake can occur while the edge ISR is disabled. */
     }
     return wake;
 }

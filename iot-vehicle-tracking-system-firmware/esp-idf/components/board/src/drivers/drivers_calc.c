@@ -2,9 +2,8 @@
  * @file src/drivers/drivers_calc.c
  * @brief Host-testable RTC, accelerometer and ADC calculations.
  *
- * Decode or encode DS3231 BCD time, select and compare LIS3DSH axes, and scale
- * calibrated pin voltage to the measured input. Host coverage is in
- * tests/test_board_calc.py.
+ * The RTC, IMU and ADC drivers call these functions with their own values and buffers.
+ * These helpers perform BCD and unit conversions. Bus locking and peripheral access stay in the drivers.
  */
 #include "drivers/drivers_calc.h"
 #include <string.h>
@@ -13,9 +12,11 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#define TRUSTED_MIN_MS UINT64_C(1704067200000) /* 2024-01-01 UTC */
+#define TRUSTED_MIN_MS UINT64_C(1704067200000) /**< Earliest trusted Unix time in milliseconds, 2024-01-01 UTC. */
 
+/** @brief Interpret the two nibbles as decimal tens and ones. */
 static uint8_t bcd2bin(uint8_t v) { return (uint8_t)((v >> 4) * 10u + (v & 0x0Fu)); }
+/** @brief Pack a two-digit decimal value into BCD. */
 static uint8_t bin2bcd(uint8_t v) { return (uint8_t)(((v / 10u) << 4) | (v % 10u)); }
 
 ivts_err_t ds3231_decode_time(const uint8_t r[7], uint64_t *unix_ms)

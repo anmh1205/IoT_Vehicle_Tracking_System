@@ -1,9 +1,10 @@
 /**
  * @file src/device/app_clock.c
- * @brief Clock access for application policy and cloud timestamps.
+ * @brief Clock access for app deadlines and cloud timestamps.
  *
- * Deadlines use monotonic uptime. Cloud timestamps require a trusted board RTC
- * reading and can block on I2C.
+ * The app task uses monotonic uptime for deadlines. The app task and OTA worker use the board
+ * RTC for trusted UTC. RTC reads can wait on the shared I2C adapter, which owns device access
+ * and clock trust evaluation.
  */
 #include "app_internal.h"
 #include <stddef.h>

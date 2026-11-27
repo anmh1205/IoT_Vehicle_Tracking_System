@@ -1,14 +1,16 @@
 /**
- * @file cmd_ota.c
- * @brief Command handlers for firmware update and rollback.
+ * @file src/command/cmd_ota.c
+ * @brief Cloud manifest parsing for the OTA update command.
  *
- * Parses cloud parameters and delegates execution to the application
- * firmware-update policy and the OTA adapter.
+ * The app task validates typed parameters and passes a caller-local manifest to firmware-update
+ * policy. The update module decides whether to start a worker and the OTA adapter owns download
+ * and flash. The restart command module handles rollback requests.
  */
 #include "command/command.h"
 #include <string.h>
 #include "fw/fw_update.h"
 
+/** @brief Require an HTTPS prefix and exclude characters that would affect the modem command argument. */
 static bool validate_ota_url(const char *url)
 {
     return !(strncmp(url, "https://", 8u) != 0 || url[8] == '\0' ||
@@ -22,6 +24,7 @@ static uint32_t clamp_confirm_timeout(uint64_t t)
     return (uint32_t)t;
 }
 
+/** @brief Validate manifest fields before handing them to firmware-update policy. */
 static const char *parse_ota_manifest(const ivts_json_obj_t *params, ivts_ota_cmd_t *cmd)
 {
     uint64_t size;

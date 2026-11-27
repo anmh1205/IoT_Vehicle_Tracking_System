@@ -1,9 +1,10 @@
 /**
- * @file queue_peek.c
- * @brief Storage-task peeking and cross-task access to the cached record.
+ * @file src/queue/queue_peek.c
+ * @brief Storage-task file peeking and cross-task cached record access.
  *
- * File reads occur on the storage task. The copy mutex protects the slot, its
- * token and the pending count separately from file I/O.
+ * Only the storage task reads records and advances through exhausted or corrupt segments.
+ * The mutex protects the shared slot, pending count and token separately from SD I/O.
+ * The app copies the slot, attempts delivery and later submits the token.
  */
 #include "queue/queue.h"
 #include "platform/platform.h"
@@ -11,13 +12,15 @@
 #include "platform/log.h"
 #include <errno.h>
 
+/* Startup creates the mutex. The storage task writes slot state and the app copies it under this lock. */
 static platform_mutex_t s_slot_mutex;
+/** @brief Shared peek cache guarded by the slot mutex. */
 static struct {
-    bool     full;                          /* Slot contains a peeked record that has not been popped. */
-    uint8_t  data[IVTS_RECORD_MAX_SIZE];    /* Serialized bytes of the peeked record. */
-    size_t   len;
-    uint32_t token;                         /* Token that authorizes removal of this specific record. */
-    uint32_t next_seg, next_off;            /* Cursor position to commit after a matching pop. */
+    bool     full;                          /**< A record is cached and has an active token. */
+    uint8_t  data[IVTS_RECORD_MAX_SIZE];    /**< Encoded record bytes copied from the segment. */
+    size_t   len;   /**< Number of valid bytes in data. */
+    uint32_t token;                         /**< Nonzero token for this cached record. */
+    uint32_t next_seg, /**< Next segment ID on pop. */ next_off; /**< Next byte offset on pop. */
 } s_slot;
 static uint32_t s_pending;     /* Pending record count including the cached peek. */
 static uint32_t s_token;       /* Sequence used to assign a new nonzero token. */
@@ -123,6 +126,9 @@ bool storage_queue_slot_consume(uint32_t token, uint32_t *segment, uint32_t *off
     return matches;
 }
 
+/**
+ * @brief Read the cursor frame, treating a missing older segment as exhausted.
+ */
 static int read_head_frame(const storage_queue_state_t *queue, const char *path, bool *exists, uint8_t *buffer, size_t *len)
 {
     FILE *f = fopen(path, "rb");
@@ -140,6 +146,9 @@ static void emit_queue_ready(uint32_t pending)
     storage_emit(&ev);
 }
 
+/**
+ * @brief Reclaim an exhausted or corrupt older segment and attempt to checkpoint the next position.
+ */
 static ivts_err_t advance_past_segment(storage_queue_state_t *queue, const char *path, bool exists)
 {
     uint32_t next = queue->read_segment + 1u;

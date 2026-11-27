@@ -2,9 +2,9 @@
  * @file src/power/sleep_controller.c
  * @brief Coordination of modem and BLE shutdown before board sleep.
  *
- * Keep event processing alive while waiting for the modem. On deadline or
- * renewed activity, cancel the pending sleep and restore the requested
- * services.
+ * The app task keeps draining events during asynchronous modem shutdown. At completion or
+ * timeout it rechecks radio, ignition and motion state, then enters or aborts sleep. It saves
+ * RTC context before calling the board, which owns hardware sleep and wake configuration.
  */
 #include "power/power.h"
 #include "app_internal.h"
@@ -18,15 +18,18 @@
 #include "modem/modem.h"
 #include "obd/obd.h"
 
+/** @brief Asynchronous part of sleep entry, owned by the app task. */
 typedef enum {
-    APP_SLEEP_IDLE,
-    SLEEP_STOPPING_RADIOS,
+    APP_SLEEP_IDLE, /**< No modem shutdown request is pending. */
+    SLEEP_STOPPING_RADIOS, /**< The app is checking for modem shutdown or its deadline. */
 } app_sleep_phase_t;
 
+/* The app task owns the pending phase, modem deadline and copied FSM request. */
 static app_sleep_phase_t s_phase;
 static uint64_t s_modem_stop_deadline_at_ms;
 static ivts_fsm_out_t s_sleep_request;
 
+/** @brief Recheck stopped radios and wake conditions using observations available at sleep entry. */
 static bool can_sleep_now(const ivts_fsm_out_t *out, bool modem_stopped,
                           ivts_axes_t *axes, const ivts_axes_cfg_t *axes_cfg, bool *motion)
 {
@@ -43,6 +46,7 @@ static void abort_sleep(ivts_fsm_t *fsm, ivts_wake_t reason)
     if (app_device_is_provisioned()) { (void)modem_set_link(true); }
 }
 
+/** @brief Save the current identity before handing sleep and wake sources to the board. */
 static board_wake_t enter_hw_sleep(const ivts_fsm_out_t *out, ivts_fsm_state_t state)
 {
     app_rtc_ctx_save(app_device_boot_id(), app_msg_seq_current(), (uint8_t)state);
@@ -55,7 +59,7 @@ static board_wake_t enter_hw_sleep(const ivts_fsm_out_t *out, ivts_fsm_state_t s
     IVTS_LOGI(APP_TAG, "sleep enter mode=%s duration=%lus imu_wake=%s state=%s seq=%lu",
               ivts_sleep_mode_name(out->sleep_mode), (unsigned long)req.seconds, IVTS_LOG_YES(req.arm_imu),
               ivts_fsm_state_name(state), (unsigned long)app_msg_seq_current());
-    return board_sleep(&req);           /* Entering deep sleep resets the processor. */
+    return board_sleep(&req);
 }
 
 static void resume_after_wake(ivts_fsm_t *fsm, board_wake_t cause)
@@ -68,6 +72,7 @@ static void resume_after_wake(ivts_fsm_t *fsm, board_wake_t cause)
     if (app_device_is_provisioned()) { (void)modem_set_link(true); }
 }
 
+/** @brief Resolve the request using the latest eligibility check before entering board sleep. */
 static void finish_sleep_request(const ivts_fsm_out_t *out, bool stopped, ivts_fsm_t *fsm,
                                  ivts_axes_t *axes, const ivts_axes_cfg_t *axes_cfg)
 {

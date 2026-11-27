@@ -1,10 +1,10 @@
 /**
  * @file src/services/http.c
- * @brief HTTPS open, raw stream reads and close for the OTA byte source.
+ * @brief HTTPS GET, raw reads and close for the OTA byte source.
  *
- * Callers block through the modem task's request interface. The modem task
- * owns the HTTP parser state until it has finished writing the supplied
- * buffers.
+ * The OTA worker calls synchronously through the modem queue and keeps its buffers until completion.
+ * The modem task owns the HTTP state. AT dispatch hands it recognized headers and raw chunks.
+ * Each read borrows the destination only for its command. OTA owns image validation and writes.
  */
 #include "modem_internal.h"
 #include "services/services.h"
@@ -15,12 +15,13 @@
 #include <stdio.h>
 #include <string.h>
 
+/** @brief HTTP read state owned solely by the modem task, including during inline AT dispatch. */
 static struct {
-    uint8_t *destination;
-    size_t capacity;
-    size_t length;
-    bool reading_raw;
-    bool overflow;
+    uint8_t *destination; /**< OTA-owned destination borrowed during the read command, or NULL. */
+    size_t capacity;      /**< Capacity of the current destination in bytes. */
+    size_t length;        /**< Bytes copied into the current destination. */
+    bool reading_raw;    /**< HTTP owns the parser's current raw block. */
+    bool overflow;       /**< The announced block exceeds capacity or raw input is lost. */
 } s_http;
 
 bool modem_http_route_raw(const uint8_t *data, size_t len, bool is_last)
@@ -62,10 +63,6 @@ void modem_http_close(void)
     (void)modem_task_call(&r);
 }
 
-/**
- * @brief Recognize an HTTPREAD data header and enter raw mode.
- * @return true when an active read consumed the header.
- */
 bool modem_http_on_line(const char *line)
 {
     if (s_http.destination == NULL || !at_has_prefix(line, "+HTTPREAD:")) { return false; }
@@ -79,15 +76,7 @@ bool modem_http_on_line(const char *line)
     return true;
 }
 
-/**
- * @brief Start an HTTPS GET and collect the status and size.
- * @retval IVTS_OK The server returned HTTP 200.
- * @retval IVTS_ERR_INVALID_STATE The modem has no active data context.
- * @retval IVTS_ERR_INVALID_ARG Invalid HTTPS URL or command length.
- * @retval IVTS_ERR_TIMEOUT AT+HTTPACTION did not complete successfully.
- * @retval IVTS_ERR_IO Modem setup failed or the server reported a non-200
- * status.
- */
+/** @brief Replace any stale HTTP session and open a GET. A parsed non-200 reply still supplies status and size. */
 static ivts_err_t do_open(const modem_req_t *r)
 {
     if (modem_link_current_step() < MODEM_LINK_STEP_PDP) { return IVTS_ERR_INVALID_STATE; }
@@ -97,13 +86,14 @@ static ivts_err_t do_open(const modem_req_t *r)
     (void)modem_at_simple("AT+HTTPTERM", 3000);           /* Close a stale HTTP session before opening a new one. */
     if (modem_at_simple("AT+HTTPINIT", 10000) != AT_RES_OK) { return IVTS_ERR_IO; }
     if (!modem_tls_configure(1)) { return IVTS_ERR_IO; }
+    /* Try the quoted context form if the modem rejects the numeric form. */
     if (modem_at_simple("AT+HTTPPARA=\"SSLCFG\",1", 5000) != AT_RES_OK &&
         modem_at_simple("AT+HTTPPARA=\"SSLCFG\",\"1\"", 5000) != AT_RES_OK) {
         return IVTS_ERR_IO;
     }
     (void)modem_at_simple("AT+HTTPPARA=\"UA\",\"IVTS-Firmware/1.0\"", 5000);
     (void)modem_at_simple("AT+HTTPPARA=\"USERDATA\",\"Accept-Encoding: identity\"", 5000);
-    char cmd[300];                                        /* The OTA contract limits URLs to 256 characters. */
+    char cmd[300];                      /* The OTA URL field holds 256 bytes including NUL. */
     int k = snprintf(cmd, sizeof cmd, "AT+HTTPPARA=\"URL\",\"%s\"", r->url);
     if (k < 0 || (size_t)k >= sizeof cmd) { return IVTS_ERR_INVALID_ARG; }
     at_cmd_t url = { .text = cmd, .timeout_ms = 5000, .redact = true };
@@ -120,15 +110,7 @@ static ivts_err_t do_open(const modem_req_t *r)
     return (status == 200) ? IVTS_OK : IVTS_ERR_IO;
 }
 
-/**
- * @brief Read up to @c r->len bytes at @c r->offset into @c r->buf.
- *
- * During the command, raw dispatch writes directly into the caller's buffer.
- * Clear the destination when the AT command returns.
- *
- * @retval IVTS_OK At least one byte was received within capacity.
- * @retval IVTS_ERR_IO The read failed, overflowed or returned no bytes.
- */
+/** @brief Borrow the OTA buffer for the AT read. Release it before returning any completion result. */
 static ivts_err_t do_read(const modem_req_t *r)
 {
     char cmd[48];
@@ -137,6 +119,7 @@ static ivts_err_t do_read(const modem_req_t *r)
     s_http.capacity = r->len;
     s_http.length = 0;
     s_http.overflow = false;
+    /* The exact zero-length terminal line must not match a nonzero data header. */
     at_cmd_t c = { .text = cmd, .final_prefix = "+HTTPREAD: 0", .final_exact = true, .timeout_ms = 15000 };
     at_result_t res = modem_at(&c);
     s_http.destination = NULL;

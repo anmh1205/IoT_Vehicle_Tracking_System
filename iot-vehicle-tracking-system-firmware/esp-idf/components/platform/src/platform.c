@@ -1,6 +1,10 @@
 /**
- * @file platform.c
+ * @file src/platform.c
  * @brief Monotonic time, restart and ESP-IDF result translation.
+ *
+ * Firmware tasks and adapters use boot-relative time for deadlines and events.
+ * App startup and runtime use the restart wrapper after making their own restart decision.
+ * Adapters translate SDK results here. The wrappers keep no mutable state.
  */
 #include "platform/platform.h"
 #include "platform/log.h"

@@ -1,14 +1,16 @@
 /**
- * @file gnss_arbiter.c
+ * @file src/device/gnss_arbiter.c
  * @brief Reconciliation of FSM and command demands for GNSS power.
  *
- * The app task combines persistent FSM demand with temporary command demand
- * and sends a modem request only when the requested state changes.
+ * The app task runs this arbiter when applying FSM effects. It combines retained FSM demand
+ * with current command demand. A rejected request can be retried on the next pass. The modem
+ * owns actual GNSS power and fix acquisition.
  */
 #include "device/device.h"
 #include "ivts_core/fsm/fsm.h"
 #include "modem/modem.h"
 
+/* The app task owns both demand flags. The modem flag records the last accepted request. */
 static bool s_fsm_requests_gnss;
 static bool s_modem_requests_gnss;
 

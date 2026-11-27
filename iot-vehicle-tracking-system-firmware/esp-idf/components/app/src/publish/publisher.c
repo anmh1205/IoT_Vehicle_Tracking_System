@@ -1,16 +1,17 @@
 /**
- * @file publisher.c
- * @brief Single in-flight publish and acknowledgement correlation.
+ * @file src/publish/publisher.c
+ * @brief Single in-flight publish and modem acknowledgement correlation.
  *
- * Attempt to submit a complete payload to the modem. Only a matching
- * transaction acknowledgement releases the publisher and invokes the
- * registered handler.
+ * The app task reserves one transaction, then processes its result through dispatch or polling.
+ * A matching result releases the app slot before invoking its callback. The modem owns a
+ * copied payload and the MQTT transaction. Callbacks own any message-specific durability.
  */
 #include "publish/publish.h"
 #include "platform/log.h"
 #include "device/device.h"
 #include "app_internal.h"
 
+/* Boot installs the immutable ACK table. The app task owns transaction state without a lock. */
 static bool s_publish_in_flight;
 static app_msg_kind_t s_in_flight_kind;
 static uint32_t s_in_flight_tx_id;
@@ -19,7 +20,7 @@ static const app_msg_ack_fn *s_ack_handlers;
 static uint64_t s_in_flight_since_ms;
 static size_t s_in_flight_size;
 
-/** Return the lower-case log name of a message kind. */
+/** @brief Look up the log name for a publish kind. */
 static const char *kind_name(app_msg_kind_t kind)
 {
     static const char *const names[APP_MSG_COUNT] = {
@@ -68,6 +69,7 @@ void app_publisher_on_ack(const ivts_event_t *event)
 
     bool ok = event->u.mqtt_ack.ok != 0u;
     app_msg_kind_t kind = s_in_flight_kind;
+    /* Event dispatch and polling converge here. Release the slot before applying the callback. */
     s_publish_in_flight = false;
     if (s_ack_handlers != NULL && s_ack_handlers[kind] != NULL) {
         s_ack_handlers[kind](ok);

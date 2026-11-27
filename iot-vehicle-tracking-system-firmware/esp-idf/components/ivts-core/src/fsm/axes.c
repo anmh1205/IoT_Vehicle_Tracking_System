@@ -1,6 +1,10 @@
 /**
- * @file axes.c
+ * @file src/fsm/axes.c
  * @brief Ignition debounce, motion timeout and derived vehicle state logic.
+ *
+ * The app task invokes these routines for power and motion events, periodic
+ * ticks and wake handling. The caller owns the axes and monotonic time. The
+ * board handles sensing and the application FSM uses the derived states.
  */
 #include "ivts_core/fsm/axes.h"
 
@@ -64,7 +68,7 @@ bool ivts_axes_tick(ivts_axes_t *a, const ivts_axes_cfg_t *c, ivts_ms_t now)
         return true;
     }
     if (a->motion == IVTS_MOTION_UNKNOWN && now >= c->motion_quiet_ms) {
-        a->motion = IVTS_MOTION_STATIONARY;     /* No recent interrupt within the configured quiet interval. */
+        a->motion = IVTS_MOTION_STATIONARY;     /* Use uptime before the first interrupt. */
         return true;
     }
     return false;

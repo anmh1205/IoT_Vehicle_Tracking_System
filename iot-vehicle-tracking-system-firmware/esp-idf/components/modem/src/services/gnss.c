@@ -2,8 +2,9 @@
  * @file src/services/gnss.c
  * @brief Periodic SIM7600 GNSS reads and parsing into integer fix fields.
  *
- * The modem task applies the requested GNSS state, reads fixes and publishes
- * snapshots. Convert time and coordinates before publishing across tasks.
+ * The modem task applies queued GNSS demand and polls when due. Link recovery can clear its cached
+ * power state. Parsed fixes and no-fix reports cross into the app as by-value events.
+ * The app selects the position source. The parser helpers use caller buffers and also run on the host.
  */
 #include "modem_internal.h"
 #include "services/services.h"
@@ -12,6 +13,7 @@
 #include <string.h>
 #include "ivts_core/base/civil.h"
 
+/* Startup clears these fields. The modem task alone records demand, power state and poll timing. */
 static bool s_gnss_requested;
 static bool s_gnss_on;
 static uint64_t s_next_fix_at_ms;
@@ -68,13 +70,9 @@ void modem_gnss_step(void)
     modem_emit(&ev);
 }
 
-#define MAX_FIELDS 20u   /* Maximum number of CSV fields. Ignore fields beyond the caller's capacity. */
+#define MAX_FIELDS 20u   /**< Maximum number of CSV field pointers stored by the parser. */
 
-/**
- * @brief Split CSV in place by replacing commas with NUL.
- * @param[out] f Field pointers. Adjacent delimiters produce an empty field.
- * @return Number of fields, at least one.
- */
+/** @brief Split writable CSV in place. Adjacent delimiters produce empty fields. */
 static unsigned split(char *s, char *f[], unsigned max)
 {
     unsigned n = 0;
@@ -88,16 +86,8 @@ static unsigned split(char *s, char *f[], unsigned max)
     return n;
 }
 
-/**
- * @brief Convert a decimal value to an unsigned integer scaled by 10^scale.
- *
- * Extra fractional digits are truncated. Limit the integer part to guard
- * against overflow when it is scaled.
- *
- * @retval IVTS_OK Conversion succeeded.
- * @retval IVTS_ERR_INVALID_ARG Missing leading digit, invalid character or
- * integer part outside the supported range.
- */
+/** @brief Convert an unsigned decimal to fixed point, truncating extra fractional digits.
+ * The integer-part bound keeps current callers' scaled results within uint64_t. */
 static ivts_err_t parse_fixed(const char *s, unsigned scale, uint64_t *out)
 {
     uint64_t ip = 0, fp = 0;
@@ -140,17 +130,16 @@ ivts_err_t gnss_nmea_to_e7(const char *ddmm, char hemi, int32_t *out)
     return IVTS_OK;
 }
 
-/** Decode two decimal digits validated by the caller. */
+/** @brief Decode two decimal digits validated by the caller. */
 static int two(const char *s) { return (s[0] - '0') * 10 + (s[1] - '0'); }
 
-/** @return true when the first @p n characters of @p s are all decimal digits. */
+/** @brief Check the first @p n characters for decimal digits after the caller checks the length. */
 static bool digits(const char *s, size_t n)
 {
     for (size_t i = 0; i < n; i++) { if (s[i] < '0' || s[i] > '9') { return false; } }
     return true;
 }
 
-/* Interpret the two-digit year in the range 2000 through 2099. */
 ivts_err_t gnss_datetime_to_unix_ms(const char *ddmmyy, const char *hhmmss, uint64_t *out)
 {
     if (ddmmyy == NULL || hhmmss == NULL || out == NULL || strlen(ddmmyy) != 6u ||
@@ -162,7 +151,7 @@ ivts_err_t gnss_datetime_to_unix_ms(const char *ddmmyy, const char *hhmmss, uint
         .day = (uint8_t)two(ddmmyy), .hour = (uint8_t)two(hhmmss), .min = (uint8_t)two(hhmmss + 2),
         .sec = (uint8_t)two(hhmmss + 4), .ms = 0,
     };
-    if (hhmmss[6] == '.') {                        /* Accept a fractional second with one to three digits. */
+    if (hhmmss[6] == '.') {                        /* Use up to three fractional digits. */
         unsigned mul = 100, ms = 0;
         for (const char *p = hhmmss + 7; *p >= '0' && *p <= '9' && mul > 0u; p++, mul /= 10u) {
             ms += (unsigned)(*p - '0') * mul;
@@ -172,13 +161,8 @@ ivts_err_t gnss_datetime_to_unix_ms(const char *ddmmyy, const char *hhmmss, uint
     return ivts_civil_to_unix_ms(&c, out);
 }
 
-/**
- * @brief Decode the fields shared by both fix reports.
- *
- * Starting at f[i], consume latitude, N/S, longitude, E/W, date, time,
- * altitude, speed and course. Coordinates are required. Missing or malformed
- * UTC time, speed and course leave the corresponding value zero.
- */
+/** @brief Decode the shared coordinate, UTC, speed and course fields.
+ * The record includes an altitude column that this parser skips. Optional values can stay zero. */
 static ivts_err_t fill_common(char *f[], unsigned i, unsigned n, ivts_gnss_t *g)
 {
     if (i + 9u > n) { return IVTS_ERR_INVALID_ARG; }
@@ -205,11 +189,7 @@ static ivts_err_t fill_common(char *f[], unsigned i, unsigned n, ivts_gnss_t *g)
     return IVTS_OK;
 }
 
-/**
- * @brief Check the prefix and split a writable copy of the remaining fields.
- *
- * split() edits the copy at each comma. Clear the output fix before decoding.
- */
+/** @brief Validate framing and split a writable copy so the AT response remains intact. */
 static ivts_err_t prepare(const char *line, const char *prefix, char *buf, size_t cap,
                           char *f[], unsigned *n, ivts_gnss_t *out)
 {
@@ -250,7 +230,8 @@ ivts_err_t gnss_parse_cgnssinfo(const char *line, ivts_gnss_t *out)
     }
     if (lat < 2u) { return IVTS_ERR_INVALID_ARG; }
     unsigned sats = 0;
-    for (unsigned i = 1; i < lat; i++) {               /* The first field holds the mode. Remaining leading fields are satellite counts. */
+    /* Satellite counts start after the mode and end before latitude. */
+    for (unsigned i = 1; i < lat; i++) {
         uint64_t v;
         if (f[i][0] != '\0' && parse_fixed(f[i], 0, &v) == IVTS_OK) { sats += (unsigned)v; }
     }

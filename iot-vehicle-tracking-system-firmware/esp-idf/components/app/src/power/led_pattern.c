@@ -1,21 +1,24 @@
 /**
  * @file src/power/led_pattern.c
- * @brief Status LED cadence derived from application state and tracking policy.
+ * @brief Status LED cadence derived from app state and tracking policy.
  *
- * The app task advances the pattern using monotonic time, then writes the
- * requested level through the board API.
+ * The app task selects an immutable pattern using the current FSM state and monotonic time.
+ * The board adapter drives the pin. The FSM and device policy own state transitions and the
+ * tracking flag.
  */
 #include "power/power.h"
 #include "board/board_sensors.h"
 
+/** @brief Immutable LED pattern selected by the app task. */
 typedef struct {
-    uint16_t period_ms;
-    uint16_t on_ms;
-    uint16_t second_pulse_at_ms;
-    uint16_t second_pulse_off_at_ms;
-    bool follows_tracking;
+    uint16_t period_ms; /**< Cycle length in milliseconds. Zero disables timed pulses. */
+    uint16_t on_ms; /**< First pulse length in milliseconds from the start of the cycle. */
+    uint16_t second_pulse_at_ms; /**< Inclusive second pulse start in milliseconds within the cycle. */
+    uint16_t second_pulse_off_at_ms; /**< Exclusive second pulse end in milliseconds within the cycle. */
+    bool follows_tracking; /**< Drive the LED directly from the tracking flag. */
 } led_pattern_t;
 
+/* The app task reads this immutable table. Unspecified states select LED off. */
 static const led_pattern_t k_patterns[IVTS_ST_COUNT] = {
     [IVTS_ST_INIT]      = { .period_ms = 800, .on_ms = 100 },
     [IVTS_ST_CHECK_IGN] = { .period_ms = 800, .on_ms = 100 },

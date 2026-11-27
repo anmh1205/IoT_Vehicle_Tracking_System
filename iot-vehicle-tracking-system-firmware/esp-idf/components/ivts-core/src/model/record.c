@@ -1,13 +1,22 @@
 /**
  * @file src/model/record.c
  * @brief Versioned binary record codec for offline and replayed telemetry.
+ *
+ * App capture and replay use these byte codecs on local buffers. Storage
+ * supplies frame CRC and queue persistence. Replay compares captured identity
+ * with the next session boundary before the app advances its durable queues.
  */
 #include "ivts_core/model/record.h"
 #include <string.h>
 
-typedef struct { uint8_t *p; size_t i; } wr_t;
-typedef struct { const uint8_t *p; size_t i; } rd_t;
+/** @brief Encode cursor over the caller-owned output, advanced by the little-endian writers. */
+typedef struct { uint8_t *p; /**< Validated writable record bytes.
+                   */ size_t i; /**< Next byte offset. */ } wr_t;
+/** @brief Decode cursor over borrowed input, advanced by the little-endian readers. */
+typedef struct { const uint8_t *p; /**< Validated readable record bytes.
+                   */ size_t i; /**< Next byte offset. */ } rd_t;
 
+/* The caller checks the version-specific capacity once before accessing fields. */
 static void put8(wr_t *w, uint8_t v)   { w->p[w->i++] = v; }
 static void put16(wr_t *w, uint16_t v) { put8(w, (uint8_t)v); put8(w, (uint8_t)(v >> 8)); }
 static void put32(wr_t *w, uint32_t v) { put16(w, (uint16_t)v); put16(w, (uint16_t)(v >> 16)); }
@@ -118,5 +127,6 @@ bool ivts_record_precedes_boundary(const ivts_record_t *r, const ivts_session_bo
         return true;
     }
     if (r->boot_id == b->boot_id) { return r->seq < b->seq; }
+    /* Compare boot IDs modulo 2^32 so wraparound preserves order within half the range. */
     return (b->boot_id - r->boot_id) < UINT32_C(0x80000000);
 }

@@ -1,15 +1,11 @@
 /**
- * @file lis3dsh.c
+ * @file src/drivers/lis3dsh.c
  * @brief LIS3DSH motion detection using the SM1 interrupt state machine.
  *
- * The LIS3DSH uses SM1 registers 0x40–0x5F for detection. The program waits
- * for a selected axis to cross THRS1, asserts INT1 and returns to its waiting
- * state. Register and instruction encodings follow the datasheet DocID022405
- * and AN3393.
- *
- * Board startup configures the sensor. Its ISR notifies the board task, which
- * acknowledges the interrupt. The sleep adapter also clears an old interrupt
- * before arming a wake source. Register access uses the board I2C mutex.
+ * SM1 waits for a masked axis to cross THRS1, asserts INT1 and returns to its waiting state.
+ * Register and instruction encodings follow DocID022405 and AN3393. Board startup programs the sensor.
+ * The ISR notifies the board task. That task acknowledges INT1 and owns the sample baseline.
+ * The sleep adapter reads the INT1 level. Register access uses the board I2C mutex.
  */
 #include "board_internal.h"
 #include "platform/platform.h"
@@ -20,33 +16,34 @@
 #include "esp_check.h"
 #include "platform/log.h"
 
-#define LIS_WHO_AM_I    0x0F
-#define LIS_ID          0x3F
-#define LIS_CTRL4       0x20   /* ODR[7:4] BDU[3] Z/Y/X EN[2:0] */
-#define LIS_CTRL1       0x21   /* SM1: HYST[7:5] SM1_PIN[3] SM1_EN[0] */
-#define LIS_CTRL3       0x23   /* DR_EN[7] IEA[6] IEL[5] INT2_EN[4] INT1_EN[3] VFILT[2] STRT[0] */
-#define LIS_CTRL5       0x24   /* FSCALE[5:3] = 000 -> ±2g */
-#define LIS_CTRL6       0x25   /* ADD_INC bit 4 enables sequential register reads. */
-#define LIS_OUT_X_L     0x28
-#define LIS_ST1_1       0x40
-#define LIS_ST1_2       0x41
-#define LIS_THRS1_1     0x57
-#define LIS_MASK1_B     0x59
-#define LIS_MASK1_A     0x5A
-#define LIS_SETT1       0x5B
-#define LIS_OUTS1       0x5F
+#define LIS_WHO_AM_I    0x0F   /**< Chip identification register. */
+#define LIS_ID          0x3F   /**< Expected LIS3DSH identification byte. */
+#define LIS_CTRL4       0x20   /**< Output data rate, block data update and axis enables. */
+#define LIS_CTRL1       0x21   /**< SM1 hysteresis, interrupt routing and enable. */
+#define LIS_CTRL3       0x23   /**< Interrupt polarity, latching and output enable. */
+#define LIS_CTRL5       0x24   /**< Full-scale selection. Zero selects ±2 g. */
+#define LIS_CTRL6       0x25   /**< Bit 4 enables sequential register reads. */
+#define LIS_OUT_X_L     0x28   /**< First byte of the six output registers for X, Y and Z. */
+#define LIS_ST1_1       0x40   /**< First SM1 instruction register. */
+#define LIS_ST1_2       0x41   /**< Second SM1 instruction register. */
+#define LIS_THRS1_1     0x57   /**< Threshold used by the SM1 comparison. */
+#define LIS_MASK1_B     0x59   /**< Direction mask B for SM1. */
+#define LIS_MASK1_A     0x5A   /**< Direction mask A for SM1. */
+#define LIS_SETT1       0x5B   /**< SM1 options register, including SITR. */
+#define LIS_OUTS1       0x5F   /**< SM1 output status. Reading it releases the latched interrupt. */
 
 /* SM1 opcode encoding from AN3393. The high nibble is RESET and the low nibble is NEXT. */
-#define SM_NOP_GNTH1    0x05   /* Wait for a masked axis to cross THRS1. */
-#define SM_CONT         0x11   /* Assert the interrupt and return to ST1_1. */
+#define SM_NOP_GNTH1    0x05   /**< Wait for a masked axis to cross the threshold. */
+#define SM_CONT         0x11   /**< Assert INT1 and return to the first instruction. */
 /* MASKx bits are P_X N_X P_Y N_Y P_Z N_Z P_V N_V, where P and N select direction. */
-#define MASK_X          0xC0
-#define MASK_Y          0x30
-#define MASK_Z          0x0C
+#define MASK_X          0xC0   /**< Select both directions of X. */
+#define MASK_Y          0x30   /**< Select both directions of Y. */
+#define MASK_Z          0x0C   /**< Select both directions of Z. */
 
+/* Startup copies wiring and settings. Board and app task accesses only read the copy after initialization. */
 static lis3dsh_cfg_t s_imu_cfg;
 
-/** Write one 8-bit IMU register. */
+/** @brief Write an 8-bit register to the configured IMU slot. */
 static esp_err_t wr(uint8_t reg, uint8_t v) { return board_i2c_write(s_imu_cfg.i2c_device, reg, &v, 1); }
 
 static void IRAM_ATTR imu_isr(void *arg)
@@ -56,6 +53,9 @@ static void IRAM_ATTR imu_isr(void *arg)
     board_task_notify_imu_from_isr();
 }
 
+/**
+ * @brief Read and assemble the three little-endian signed acceleration counts.
+ */
 static esp_err_t read_axes(int16_t a[3])
 {
     uint8_t b[6];
@@ -67,10 +67,10 @@ static esp_err_t read_axes(int16_t a[3])
     return ESP_OK;
 }
 
+/* Startup resets the timestamp. The board task owns the baseline and timestamp after startup. */
 static int16_t s_previous_axes[3];
 static uint64_t s_last_sample_ms;
 
-/* The board task compares successive vectors to remove static gravity. */
 uint32_t lis3dsh_sample_delta(uint64_t now_ms)
 {
     int16_t axes[3];
@@ -86,14 +86,8 @@ uint32_t lis3dsh_sample_delta(uint64_t now_ms)
 }
 
 /**
- * @brief Choose the motion axes by excluding the axis dominated by gravity.
- *
- * Read one OUT_X/Y/Z sample and omit its largest absolute component. A static
- * vertical component is close to 1 g and would otherwise cross a lower SM1
- * threshold. Recompute the mask at startup after changing the mounting angle.
- *
- * @return A mask for the remaining axes, or MASK_X | MASK_Y after a read
- * error.
+ * @brief Exclude the axis with the largest absolute reading from SM1.
+ * A static component near 1 g can cross a lower threshold. A failed read falls back to X and Y.
  */
 static uint8_t mask_without_gravity(void)
 {
@@ -105,6 +99,9 @@ static uint8_t mask_without_gravity(void)
     return keep[gravity_axis];
 }
 
+/**
+ * @brief Register the first responding I2C address and check its chip ID.
+ */
 static esp_err_t lis3dsh_probe(void)
 {
     uint16_t addr = board_i2c_probe(s_imu_cfg.primary_address) ? s_imu_cfg.primary_address
@@ -144,6 +141,9 @@ static esp_err_t lis3dsh_program_sm1(uint8_t threshold, uint8_t mask)
     return ESP_OK;
 }
 
+/**
+ * @brief Bind the active-high edge handler, reusing the GPIO ISR service if present.
+ */
 static esp_err_t install_int1_isr(void)
 {
     gpio_config_t io = {

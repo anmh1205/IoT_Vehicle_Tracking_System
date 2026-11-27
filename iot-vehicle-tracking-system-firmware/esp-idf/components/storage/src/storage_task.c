@@ -1,18 +1,13 @@
 /**
- * @file storage_task.c
+ * @file src/storage_task.c
  * @brief Storage startup and single-task serialization of SD requests.
  *
- * The worker is the sole consumer of its request queue and owns SD file I/O.
- * Producers submit copied requests with zero wait and can reuse their buffers
- * as soon as the call returns. Full queues return IVTS_ERR_FULL. Operations
- * from the same producer retain their submission order.
- *
- * A failed SD operation emits IVTS_EV_STORE_RESULT. A completed peek publishes
- * IVTS_EV_QUEUE_READY while the data stays in its mutex-protected slot.
- * Duplicate ACKs can produce stale pop tokens, which the worker ignores.
- *
- * Queued requests are volatile. After reset, the queue store reconstructs
- * state from segment files and the last durable cursor.
+ * App wiring initializes NVS and recovers SD state before creating the only SD request consumer.
+ * Producers submit copied requests with zero wait. The worker reports failures and announces a newly filled
+ * peek slot.
+ * Stale pop tokens are ignored. Requests live in RAM, and startup recovers from segment files and the saved
+ * cursor.
+ * NVS operations run synchronously on their callers.
  */
 #include "storage_internal.h"
 #include "queue/queue.h"
@@ -27,7 +22,7 @@
 #include "freertos/task.h"
 #include "ivts_core/model/record.h"
 
-/** Operation identifier carried by a storage request. */
+/** @brief Operation identifier carried by a storage request. */
 typedef enum {
     REQ_LOG = 0,   /**< Append one SD log line. */
     REQ_Q_PUSH,    /**< Append a record to the offline queue. */
@@ -35,9 +30,9 @@ typedef enum {
     REQ_Q_POP      /**< Remove the record associated with the supplied peek token. */
 } req_op_t;
 
-/** One work item copied by value into the storage queue. */
+/** @brief Work item copied into the queue and then owned by the storage task. */
 typedef struct {
-    uint8_t  op;                            /**< req_op_t. */
+    uint8_t  op;                            /**< Request operation encoded as a req_op_t value. */
     uint16_t len;                           /**< Number of valid bytes in data. */
     uint32_t token;                         /**< Token identifying the record requested by REQ_Q_POP. */
     uint8_t  data[STORAGE_LOG_LINE_MAX];    /**< Copied log line or encoded offline record. */
@@ -45,10 +40,11 @@ typedef struct {
 
 _Static_assert(IVTS_RECORD_MAX_SIZE <= STORAGE_LOG_LINE_MAX, "bản ghi phải vừa ô data của yêu cầu");
 
-static QueueHandle_t s_request_queue;   /* Work queue consumed only by the storage task. */
+static QueueHandle_t s_request_queue;   /* Startup publishes the handle for producers and the sole consumer. */
+/* Producers reserve a count before enqueue. The worker releases it after the append attempt. */
 static atomic_uint s_pending_pushes;
 
-/** Queue one request without waiting. Returns IVTS_ERR_FULL on overflow. */
+/** @brief Copy one request to the SD worker queue without waiting for capacity. */
 static ivts_err_t post(const storage_req_t *r)
 {
     if (s_request_queue == NULL) { return IVTS_ERR_INVALID_STATE; }
@@ -93,7 +89,7 @@ ivts_err_t storage_queue_pop(uint32_t token)
     return post(&r);
 }
 
-/** Emit a storage result event only when the operation fails. */
+/** @brief Report an SD work failure asynchronously through the configured sink. */
 static void report(uint8_t op, ivts_err_t e)
 {
     if (e == IVTS_OK) { return; }
@@ -103,7 +99,7 @@ static void report(uint8_t op, ivts_err_t e)
     storage_emit(&ev);
 }
 
-/** Drain requests one at a time on the storage worker. */
+/** @brief Serialize SD requests and keep append tracking active through result delivery. */
 static void storage_task(void *arg)
 {
     (void)arg;
@@ -137,9 +133,7 @@ esp_err_t storage_task_start(void)
     return ESP_OK;
 }
 
-/**
- * Storage initialization, copied configuration and SD availability.
- */
+/* Startup publishes the copied settings and SD readiness before the worker starts. */
 
 static storage_cfg_t s_storage_cfg;
 static bool s_sd_ok;   /* Set during storage_init() after the card and offline queue are ready. */
@@ -153,11 +147,6 @@ void storage_emit(const ivts_event_t *ev)
 
 bool storage_sd_ok(void) { return s_sd_ok; }
 
-/*
- * Initialize NVS, the peek slot, SD and the queue before starting the worker.
- * NVS failure aborts startup. SD mount or queue recovery failure sets the SD
- * availability flag false and emits a mount result.
- */
 ivts_err_t storage_init(const storage_cfg_t *cfg)
 {
     if (cfg == NULL || cfg->sink.fn == NULL) { return IVTS_ERR_INVALID_ARG; }

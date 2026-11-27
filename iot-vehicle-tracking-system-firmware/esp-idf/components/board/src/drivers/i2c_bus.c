@@ -1,9 +1,10 @@
 /**
  * @file src/drivers/i2c_bus.c
- * @brief Shared board I2C device registry and timed transaction serialization.
+ * @brief Shared board I2C master, device registry and timed transfer lock.
  *
- * RTC and IMU calls share one task mutex. Each transfer has its own timeout
- * inside the lock, with a separate timeout for acquiring the lock.
+ * Board startup creates bus and slot handles. RTC and IMU drivers borrow the handles through this adapter.
+ * App, modem, OTA and board task I/O shares a mutex per transaction. Register sequences are coordinated by
+ * each driver.
  */
 #include "board_internal.h"
 #include "board/board_hw.h"
@@ -15,9 +16,10 @@
  * I2C transfers and acquisition of the bus mutex have separate deadlines. A
  * normal 7-byte transfer at 100 kHz takes less than 2 ms.
  */
-#define I2C_XFER_TIMEOUT_MS 50
-#define I2C_LOCK_TIMEOUT_MS 100
+#define I2C_XFER_TIMEOUT_MS 50   /**< SDK transfer timeout in milliseconds, separate from the mutex timeout. */
+#define I2C_LOCK_TIMEOUT_MS 100   /**< Mutex acquisition timeout in milliseconds. */
 
+/* Startup creates the master and device handles. Tasks serialize transfers with the bus mutex below. */
 static i2c_master_bus_handle_t s_bus;
 static i2c_master_dev_handle_t s_dev[BOARD_DEV_COUNT];
 
@@ -33,7 +35,6 @@ static void board_i2c_unlock(void)
     platform_mutex_unlock(s_i2c_mutex);
 }
 
-/* Initialize I2C master port 0. Register devices separately with board_i2c_add(). */
 esp_err_t board_i2c_init(void)
 {
     s_i2c_mutex = platform_mutex_create();

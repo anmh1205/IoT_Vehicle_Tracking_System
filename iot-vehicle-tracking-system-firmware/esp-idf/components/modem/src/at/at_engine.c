@@ -1,9 +1,10 @@
 /**
- * @file at_engine.c
+ * @file src/at/at_engine.c
  * @brief Execution and completion tracking for one outstanding AT command.
  *
- * The caller provides a monotonic timestamp and write function. Results
- * distinguish prompts, final replies, modem errors and timeouts.
+ * Dispatch drives the engine on the modem task. Host tests supply their own writer and time.
+ * The engine borrows command data, keeps one captured response and consumes matching lines and prompts.
+ * The caller handles UART reads, deadlines between polls and routing of unclaimed lines.
  */
 #include "at/at.h"
 #include <string.h>
@@ -31,7 +32,7 @@ ivts_err_t at_engine_start(at_engine_t *e, const at_cmd_t *cmd, ivts_ms_t now)
     return IVTS_OK;
 }
 
-/** Complete the active command with result @p r. */
+/** @brief Publish the terminal result and release the active command slot. */
 static void finish(at_engine_t *e, at_result_t r)
 {
     e->result = r;
@@ -82,7 +83,6 @@ bool at_engine_on_line(at_engine_t *e, const char *line)
     return false;          /* Let the caller route unsolicited or unknown lines. */
 }
 
-/* Only an active data command reacts to a prompt. Transmit its body once. */
 void at_engine_on_prompt(at_engine_t *e)
 {
     if (!e->busy || e->cmd.data == NULL || e->data_sent) { return; }

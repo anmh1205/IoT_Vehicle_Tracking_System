@@ -1,9 +1,10 @@
 /**
  * @file src/session/telemetry.c
- * @brief App-owned sensor snapshots and offline RAW record capture.
+ * @brief App-owned sensor snapshots and RAW record capture.
  *
- * Apply source-specific validity and age checks before publishing. Capture
- * boot identity and sequence with each RAW record to support stable replay.
+ * The app task applies source-specific validity and age checks to adapter data. Publishers
+ * borrow snapshots or capture caller-owned records with boot identity and a sequence for replay.
+ * Adapters own acquisition. Payload encoding and offline storage happen after capture.
  */
 #include "session/telemetry.h"
 #include "app_internal.h"
@@ -15,7 +16,7 @@
 #include "device/device.h"
 #include "session/session_tracker.h"
 
-/** Current telemetry snapshot, owned by the app task. */
+/* The app task owns the snapshot and source timestamps. Publishers borrow the snapshot on that task. */
 static ivts_telemetry_t s_snapshot;
 static uint64_t s_obd_sample_ms;
 static uint64_t s_gnss_sample_ms;
@@ -40,20 +41,13 @@ const ivts_telemetry_t *app_telemetry_view(void) { return &s_snapshot; }
 
 void app_telemetry_consume_imu_peak(void) { s_snapshot.imu_accel_delta_mmps2 = 0; }
 
-/** Set the device state and sleep mode reported to the cloud. */
 void app_telemetry_set_device(ivts_device_state_t d, ivts_sleep_mode_t m)
 {
     s_snapshot.device_state = d;
     s_snapshot.sleep_mode = m;
 }
 
-/**
- * @brief Update the app snapshot from a component event.
- *
- * Keep the latest GNSS validity flag so a lost fix invalidates old positions.
- * Use GNSS UTC to set an untrusted RTC. Clear OBD measurements when BLE
- * disconnects so a later payload cannot report stale values as live.
- */
+/** @brief Seed a readable but untrusted RTC from a valid GNSS UTC fix. */
 static void sync_rtc_from_gnss(const ivts_event_t *ev)
 {
     if (ev->u.gnss.fix_valid && ev->u.gnss.ts_unix_ms != 0u) {
@@ -102,6 +96,7 @@ static void on_obd_sample(const ivts_event_t *ev)
     s_obd_sample_ms = ev->ts_ms;
 }
 
+/** @brief Invalidate stored OBD measurements and diagnostics on BLE disconnect. */
 static void clear_obd_data(void)
 {
     s_obd_sample_ms = 0u;
@@ -139,12 +134,6 @@ void app_telemetry_on_event(const ivts_event_t *ev)
     }
 }
 
-/**
- * @brief Capture the current snapshot and allocate its record sequence.
- *
- * Allocate the sequence at capture. Offline storage and replay retain that
- * sequence and boot ID so the cloud can deduplicate retries.
- */
 void app_record_capture(ivts_record_t *r)
 {
     const ivts_telemetry_t *t = app_telemetry_view();

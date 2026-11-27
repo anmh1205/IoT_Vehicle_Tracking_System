@@ -1,8 +1,10 @@
 /**
- * @file confirm.h
+ * @file include/ivts_core/ota/confirm.h
  * @brief Pure OTA image confirmation decision and retained boot context.
  *
- * The caller supplies clock observations and connection health.
+ * The app task supplies trusted time, uptime and connection health when it
+ * checks an image. The decision function borrows its inputs for the call.
+ * The app owns persistence and uses the OTA adapter to accept or roll back.
  */
 #pragma once
 
@@ -11,30 +13,39 @@
 #include "ivts_core/base/time.h"
 #include "ivts_core/ota/contract.h"
 
-/** Pending image confirmation context retained in NVS across reboot. */
+/** @brief App-owned image confirmation context retained in NVS across reboot. */
 typedef struct {
     bool     pending;           /**< True while the installed image awaits confirmation. */
     uint32_t timeout_s;         /**< Confirmation timeout, clamped to its allowed range when receiving the command. */
     uint64_t deadline_unix_ms;  /**< Trusted UTC deadline. Zero if trusted time was unavailable during installation. */
     char     job_id[IVTS_OTA_JOB_ID_SIZE];          /**< Firmware job whose final outcome must be reported after reboot. */
-    char     target_version[IVTS_OTA_VERSION_SIZE];
-    char     target_partition[IVTS_OTA_PART_LABEL_SIZE];
+    char     target_version[IVTS_OTA_VERSION_SIZE];  /**< NUL-terminated target firmware version. */
+    char     target_partition[IVTS_OTA_PART_LABEL_SIZE];  /**< NUL-terminated target partition label. */
 } ivts_ota_confirm_ctx_t;
 
-/** Result of ivts_ota_confirm_decide(). */
-typedef enum { IVTS_CONFIRM_WAIT = 0, IVTS_CONFIRM_ACCEPT, IVTS_CONFIRM_ROLLBACK } ivts_confirm_t;
+/** @brief Decision for the app after evaluating image confirmation. */
+typedef enum { IVTS_CONFIRM_WAIT = 0, /**< A pending image is within its window and health is false.
+       */ IVTS_CONFIRM_ACCEPT, /**< No image is pending, or the pending image is healthy within its window.
+       */ IVTS_CONFIRM_ROLLBACK /**< At least one confirmation deadline expires. */ } ivts_confirm_t;
 
 /**
- * @brief Decide whether to wait, accept or roll back a new image.
+ * @brief Choose whether to wait, accept or roll back an image.
  *
- * Accept when there is no pending context. Roll back when the trusted UTC
- * deadline or uptime window expires. Within the window, accept once the app
- * reports a healthy broker connection and qualifying PUBACK.
+ * Expiry takes precedence over health. Trusted UTC can enforce an installation deadline.
+ * The boot uptime limit applies even when UTC is unavailable.
  *
- * With bootloader rollback enabled, a reset while PENDING_VERIFY can cause the
- * bootloader to mark the image ABORTED and boot its predecessor.
+ * @param p Borrowed retained context. NULL is treated as no pending image.
+ * @param healthy True when the app has a broker connection and a qualifying PUBACK.
+ * @param now_unix_ms Current time in Unix milliseconds. Used only with trusted time and a stored deadline.
+ * @param time_trusted True to enable the deadline comparison when the context contains a UTC deadline.
+ * @param uptime_ms Monotonic milliseconds since the current boot.
+ * @retval IVTS_CONFIRM_WAIT A pending image is within its window and health is false.
+ * @retval IVTS_CONFIRM_ACCEPT No image is pending, or health is true within the window.
+ * @retval IVTS_CONFIRM_ROLLBACK A pending image reaches either applicable deadline.
  *
- * @return IVTS_CONFIRM_WAIT, IVTS_CONFIRM_ACCEPT or IVTS_CONFIRM_ROLLBACK.
+ * @warning With bootloader rollback enabled, resetting a PENDING_VERIFY image may abort it.
+ *
+ * @note Context: App task. Blocking: non-blocking.
  */
 ivts_confirm_t ivts_ota_confirm_decide(const ivts_ota_confirm_ctx_t *p, bool healthy,
                                        uint64_t now_unix_ms, bool time_trusted, ivts_ms_t uptime_ms);

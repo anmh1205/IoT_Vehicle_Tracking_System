@@ -1,9 +1,10 @@
 /**
- * @file obd_session.c
- * @brief ELM327 scanning, GATT discovery and adapter initialization.
+ * @file src/obd_session.c
+ * @brief ELM327 scanning, connection, GATT setup and command exchange.
  *
- * Match discovery results to the active BLE connection and use bounded waits.
- * Enable notifications before issuing ELM commands.
+ * The OBD task calls these routines with its session state. It filters GATT results by the current connection
+ * and enables RX notifications before sending ELM commands. Event waits carry a deadline.
+ * The worker handles teardown and reconnection. The poller interprets ECU measurements.
  */
 #include "obd_internal.h"
 #include "ivts_core/model/status.h"
@@ -14,6 +15,7 @@
 
 void obd_session_emit_link(bool conn, bool elm, ivts_ecu_state_t ecu)
 {
+    /* The OBD task alone updates the last reported tuple. */
     static bool last_conn, last_elm;
     static ivts_ecu_state_t last_ecu = IVTS_ECU_UNKNOWN;
     if (last_conn == conn && last_elm == elm && last_ecu == ecu) { return; }
@@ -48,6 +50,9 @@ bool obd_session_command(obd_session_t *session, const char *cmd, uint32_t timeo
     return ok;
 }
 
+/**
+ * @brief Use one scan deadline and cancel the scan if no candidate arrives.
+ */
 static bool scan_for_adapter(obd_session_t *session, uint8_t addr[7])
 {
     if (obd_ble_scan() != 0) { return false; }
@@ -79,6 +84,9 @@ static bool connect_adapter(obd_session_t *session, const uint8_t addr[7])
     return true;
 }
 
+/**
+ * @brief Require the reset banner or an OK line according to the command table.
+ */
 static bool run_elm_init_sequence(obd_session_t *session)
 {
     for (size_t i = 0; i < ELM_INIT_SEQ_LEN; i++) {
@@ -104,13 +112,20 @@ bool obd_session_setup(obd_session_t *session)
     return true;
 }
 
-#define UUID_RX 0x2AF0u
-#define UUID_TX 0x2AF1u
+#define UUID_RX 0x2AF0u   /**< 16-bit characteristic UUID used for adapter notifications. */
+#define UUID_TX 0x2AF1u   /**< 16-bit characteristic UUID used for adapter command writes. */
 
-typedef struct { uint16_t start, end; } obd_service_range_t;
-typedef struct { uint16_t rx, tx, rx_end; } obd_characteristic_handles_t;
+/** @brief Service handle bounds collected in OBD-task local storage. */
+typedef struct { uint16_t start, /**< First handle. */ end; /**< Last handle. */ } obd_service_range_t;
+/** @brief OBD-task scratch state for characteristic discovery. */
+typedef struct { uint16_t rx, /**< RX value. */ tx, /**< TX value. */ rx_end; /**< RX scan limit.
+ */ } obd_characteristic_handles_t;
+/** @brief Collect a discovery result using an event and scratch context borrowed for the call. */
 typedef void (*discovery_visitor_t)(const obd_ble_event_t *event, void *ctx);
 
+/**
+ * @brief Ignore unrelated events while waiting for a GATT result on the current connection.
+ */
 static bool wait_gatt(obd_session_t *session, uint64_t deadline, obd_ble_event_t *e)
 {
     for (uint64_t now = platform_uptime_ms(); now < deadline; now = platform_uptime_ms()) {
@@ -124,6 +139,9 @@ static bool wait_gatt(obd_session_t *session, uint64_t deadline, obd_ble_event_t
     return false;
 }
 
+/**
+ * @brief Visit result events until a successful discovery completion or a wait failure.
+ */
 static bool collect_discovery(obd_session_t *session, uint64_t deadline_at_ms, discovery_visitor_t visit, void *ctx)
 {
     obd_ble_event_t event;
@@ -157,6 +175,7 @@ static void take_characteristic(const obd_ble_event_t *event, void *ctx)
 {
     obd_characteristic_handles_t *handles = ctx;
     if (event->type != OBD_BLE_EV_CHR) { return; }
+    /* The next declaration ends the handle range covered by the RX characteristic. */
     if (handles->rx != 0u && event->characteristic.definition_handle > handles->rx && event->characteristic.definition_handle <= handles->rx_end) {
         handles->rx_end = (uint16_t)(event->characteristic.definition_handle - 1u);
     }

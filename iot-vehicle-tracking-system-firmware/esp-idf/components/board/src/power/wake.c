@@ -1,9 +1,10 @@
 /**
  * @file src/power/wake.c
- * @brief Board wake-source mapping and IMU GPIO wake handling.
+ * @brief Wake-source mapping and INT1 GPIO wake configuration.
  *
- * Arm the latched IMU interrupt as a level wake source for sleep, then restore
- * rising-edge delivery to the board task.
+ * Board startup caches the boot wake classification. The app sleep path reads the current SDK bitmap on wake.
+ * It switches INT1 to level wake for light sleep and restores rising-edge notification afterward.
+ * Handling the IMU latch belongs to the board task.
  */
 #include "board_internal.h"
 #include "board/board_hw.h"
@@ -38,15 +39,14 @@ void board_power_arm_imu_deep_wake(void)
     (void)esp_sleep_enable_ext1_wakeup_io(1ULL << BOARD_PIN_IMU_INT1, ESP_EXT1_WAKEUP_ANY_HIGH);
 }
 
-/** Boot wake reason latched by board_power_capture_wake(). */
+/* Startup writes the boot wake reason. Runtime readers use the unchanged value. */
 static board_wake_t s_boot_wake = BOARD_WAKE_POWER_ON;
 
+/**
+ * @brief Prefer a GPIO wake bit when GPIO and timer causes occur together.
+ */
 static board_wake_t map_causes(uint32_t causes)
 {
-    /*
-     * Use the wake-source bitmap because several sources may fire together.
-     * When the timer and IMU fire together, report the one-off IMU event.
-     */
     if (causes & (BIT(ESP_SLEEP_WAKEUP_GPIO) | BIT(ESP_SLEEP_WAKEUP_EXT0) | BIT(ESP_SLEEP_WAKEUP_EXT1))) {
         return BOARD_WAKE_IMU;
     }

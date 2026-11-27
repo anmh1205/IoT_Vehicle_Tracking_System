@@ -1,10 +1,11 @@
 /**
- * @file queue_rw.c
- * @brief Queue frame codec, record append, token-checked pop and cursor persistence.
+ * @file src/queue/queue_rw.c
+ * @brief Queue frame encoding, append, token-checked pop and cursor checkpoints.
  *
- * Write the existing disk frame with its CRC. Only pop the record matching the
- * active token and checkpoint the advanced read cursor at the established
- * intervals.
+ * Startup and the storage task share the on-disk codec. The storage task alone appends and pops records.
+ * An append updates the pending count after a full write and close. Pops advance the RAM cursor before
+ * checkpointing.
+ * Segment discovery and recovery live in the store module. Delivery decisions belong to the app.
  */
 #include "queue/queue.h"
 #include "ivts_core/base/crc32.h"
@@ -14,7 +15,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define FRAME_MAGIC 0xA5u
+#define FRAME_MAGIC 0xA5u   /**< First byte identifying a queue frame. */
 
 _Static_assert(IVTS_RECORD_MAX_SIZE <= UINT8_MAX, "frame payload length is one byte");
 
@@ -50,11 +51,12 @@ int storage_queue_frame_decode(const uint8_t *frame, size_t size, uint8_t *paylo
     return (int)size;
 }
 
-#define CURSOR_PATH Q_DIR "/CURSOR.BIN"
-#define CURSOR_MAGIC 0x51435552u /* QCUR */
+#define CURSOR_PATH Q_DIR "/CURSOR.BIN"   /**< Checkpoint filename under the offline queue directory. */
+#define CURSOR_MAGIC 0x51435552u /**< Numeric format identifier for the queue cursor. */
 
-/* Cursor bytes and CRC are shared with firmware already deployed. */
-typedef struct { uint32_t magic, seg, off, crc; } cursor_t;
+/** @brief On-disk cursor checkpoint assembled in a call-local buffer. CRC covers the preceding fields. */
+typedef struct { uint32_t magic, /**< Tag. */ seg, /**< Segment ID. */ off, /**< Byte offset.
+ */ crc; /**< CRC32. */ } cursor_t;
 _Static_assert(sizeof(cursor_t) == 16u, "offline queue cursor layout changed");
 
 void storage_queue_cursor_save(storage_queue_state_t *queue)
@@ -82,6 +84,9 @@ bool storage_queue_cursor_load(storage_queue_state_t *queue)
     return true;
 }
 
+/**
+ * @brief Reclaim the oldest segment for rotation and adjust the pending count and read cursor.
+ */
 static ivts_err_t drop_head_segment(storage_queue_state_t *queue)
 {
     uint32_t lost = 0;
@@ -102,6 +107,9 @@ static ivts_err_t drop_head_segment(storage_queue_state_t *queue)
     return IVTS_OK;
 }
 
+/**
+ * @brief Trim an incomplete append back to the last successfully closed byte position.
+ */
 static bool repair_tail(const storage_queue_state_t *queue)
 {
     char path[48];
@@ -130,6 +138,9 @@ static ivts_err_t rotate_tail_if_full(storage_queue_state_t *queue, size_t len)
     return IVTS_OK;
 }
 
+/**
+ * @brief Restore the tail before making room for another complete frame.
+ */
 static ivts_err_t ensure_room(storage_queue_state_t *queue, size_t len)
 {
     if (queue->tail_needs_repair) {
@@ -151,6 +162,7 @@ static ivts_err_t append_frame(storage_queue_state_t *queue, const uint8_t *fram
     }
     size_t w = fwrite(frame, 1, frame_size, f);
     int rc = fclose(f);
+    /* Keep the previous byte position until the entire frame writes and closes successfully. */
     if (w != frame_size || rc != 0) {
         queue->tail_needs_repair = !repair_tail(queue);
         return IVTS_ERR_IO;
@@ -171,13 +183,14 @@ ivts_err_t storage_queue_push_record(storage_queue_state_t *queue, const uint8_t
     return append_frame(queue, frame, frame_size);
 }
 
-#define CURSOR_EVERY 16u
+#define CURSOR_EVERY 16u   /**< Successful pops between checkpoint attempts, unless the queue empties first. */
 
 ivts_err_t storage_queue_pop_record(storage_queue_state_t *queue, uint32_t token)
 {
     if (!storage_queue_slot_consume(token, &queue->read_segment, &queue->read_offset)) {
         return IVTS_ERR_NOT_FOUND;
     }
+    /* Batch checkpoints. A reset can replay records after the last saved position. */
     if (++queue->pops_since_checkpoint >= CURSOR_EVERY || storage_queue_count() == 0u) {
         storage_queue_cursor_save(queue);
     }

@@ -1,9 +1,10 @@
 /**
- * @file obd_ble.c
- * @brief NimBLE lifecycle, GAP scanning and GATT callbacks for ELM327.
+ * @file src/obd_ble.c
+ * @brief NimBLE lifecycle, GAP discovery and GATT event translation.
  *
- * BLE host callbacks copy their results into task events. The OBD task
- * interprets the events and advances its own session state.
+ * The OBD task starts and stops the host and submits GAP and GATT operations. NimBLE callbacks copy results
+ * into the task queue without waiting. Host packet buffers remain owned by NimBLE.
+ * The OBD task owns session transitions, response assembly and retry policy.
  */
 #include "obd_internal.h"
 #include "platform/log.h"
@@ -15,7 +16,7 @@
 #include <string.h>
 #include <strings.h>
 
-static uint8_t s_own_addr_type; /* Written before the host posts its synced event. */
+static uint8_t s_own_addr_type; /* The host sets the type before posting sync. The OBD task reads it after sync. */
 
 uint8_t obd_ble_own_addr_type(void) { return s_own_addr_type; }
 
@@ -24,6 +25,9 @@ static void on_reset(int reason)
     IVTS_LOGW(OBD_TAG, "ble host_reset reason=%d", reason);
 }
 
+/**
+ * @brief Publish the host address type before reporting readiness.
+ */
 static void on_sync(void)
 {
     if (ble_hs_id_infer_auto(0, &s_own_addr_type) != 0) { return; }
@@ -68,6 +72,9 @@ int obd_ble_deinit(void)
     return 0;
 }
 
+/**
+ * @brief Accept advertisements with the OBD service UUID or a known adapter name substring.
+ */
 static bool adv_is_candidate(const struct ble_gap_disc_desc *d)
 {
     struct ble_hs_adv_fields f;
@@ -85,6 +92,9 @@ static bool adv_is_candidate(const struct ble_gap_disc_desc *d)
     return false;
 }
 
+/**
+ * @brief Apply configured target filtering before handing an advertisement to the OBD task.
+ */
 static void on_disc(const struct ble_gap_disc_desc *disc)
 {
     obd_ble_event_t event = { .type = OBD_BLE_EV_ADV };
@@ -109,6 +119,9 @@ static void on_disconnect(const struct ble_gap_event *gap)
     (void)obd_task_post(&event);
 }
 
+/**
+ * @brief Copy a NimBLE-owned fragment or post an error for an oversized or unreadable packet.
+ */
 static void on_notify_rx(const struct ble_gap_event *gap)
 {
     obd_ble_event_t event = { .type = OBD_BLE_EV_NOTIFY, .conn = gap->notify_rx.conn_handle, .notification.handle = gap->notify_rx.attr_handle };
@@ -154,7 +167,7 @@ int obd_ble_connect(const uint8_t addr[7])
 {
     ble_addr_t a = { .type = addr[0] };
     memcpy(a.val, &addr[1], 6);
-    obd_ble_scan_stop();                      /* Disable BLE controller activity before entering sleep. */
+    obd_ble_scan_stop();                      /* Cancel scanning before requesting a connection. */
     return ble_gap_connect(obd_ble_own_addr_type(), &a, 10000, NULL, gap_cb, NULL);
 }
 
@@ -182,6 +195,7 @@ static int svc_cb(uint16_t conn, const struct ble_gatt_error *err, const struct 
         e.service.end_handle = svc->end_handle;
     } else {
         e.type = OBD_BLE_EV_DISC_DONE;
+        /* NimBLE uses EDONE to end a successful discovery. */
         e.status = (int16_t)((err->status == BLE_HS_EDONE) ? 0 : err->status);
     }
     (void)obd_task_post(&e);

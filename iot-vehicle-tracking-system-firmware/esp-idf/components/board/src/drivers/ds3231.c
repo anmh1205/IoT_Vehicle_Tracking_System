@@ -1,9 +1,12 @@
 /**
- * @file ds3231.c
- * @brief DS3231M RTC register access and trusted time reporting.
+ * @file src/drivers/ds3231.c
+ * @brief DS3231M register access and time trust evaluation.
  *
- * Use the shared I2C adapter for register transactions and pure BCD conversion
- * helpers for the calendar representation.
+ * Board startup probes and registers the device. The app reads and sets UTC. The modem and OTA task also read
+ * it.
+ * The I2C mutex protects individual transfers. Calendar conversion is delegated to the driver calculation
+ * helpers.
+ * The calendar is written before oscillator status is cleared. The caller supplies time policy.
  */
 #include "board_internal.h"
 #include "drivers/drivers.h"
@@ -15,9 +18,10 @@
  * of status register 0x0F is the oscillator stop flag (OSF). An asserted OSF
  * means the clock may have stopped and its time is untrusted.
  */
-#define DS3231_REG_TIME    0x00
-#define DS3231_REG_STATUS  0x0F
+#define DS3231_REG_TIME    0x00   /**< First of seven BCD calendar registers. */
+#define DS3231_REG_STATUS  0x0F   /**< Status register containing the oscillator stop flag. */
 
+/* Startup assigns the I2C slot. Clock users read it after initialization. */
 static board_dev_t s_device;
 
 esp_err_t ds3231_init(board_dev_t device, uint16_t address, uint32_t speed_hz)

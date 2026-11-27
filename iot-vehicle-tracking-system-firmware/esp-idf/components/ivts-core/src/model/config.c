@@ -1,16 +1,22 @@
 /**
  * @file src/model/config.c
  * @brief Validation of device configuration before provisioning or updates.
+ *
+ * App boot and command handling use these rules on their local configuration.
+ * Storage also validates before saving. This file keeps no shared state and
+ * checks field values before the modem or storage consumes them.
  */
 #include "ivts_core/model/config.h"
 #include <string.h>
 
+/** @brief Validation cursor over caller-owned issue storage for one call. */
 typedef struct {
-    ivts_cfg_issue_t *out;
-    size_t cap;
-    size_t n;
+    ivts_cfg_issue_t *out;  /**< Optional issue array borrowed for the call. */
+    size_t cap;  /**< Maximum number of issue entries writable. */
+    size_t n;  /**< Total issues seen, including entries that do not fit. */
 } issue_sink_t;
 
+/** @brief Count every issue while storing only the entries that fit. */
 static void add_issue(issue_sink_t *s, ivts_cfg_field_t f, ivts_cfg_reason_t r)
 {
     if (s->n < s->cap) {
@@ -30,7 +36,7 @@ static void check_range(issue_sink_t *s, ivts_cfg_field_t f,
     }
 }
 
-/* A required field must be nonempty and NUL-terminated within its capacity. */
+/** @brief Check required text for a terminator within capacity and a nonempty value. */
 static void check_required_str(issue_sink_t *s, ivts_cfg_field_t f,
                                const char *buf, size_t size)
 {
@@ -41,7 +47,7 @@ static void check_required_str(issue_sink_t *s, ivts_cfg_field_t f,
     }
 }
 
-/* An optional field can be empty and must be NUL-terminated within its capacity. */
+/** @brief Check optional text for a terminator within capacity. */
 static void check_optional_str(issue_sink_t *s, ivts_cfg_field_t f,
                                const char *buf, size_t size)
 {
@@ -50,6 +56,7 @@ static void check_optional_str(issue_sink_t *s, ivts_cfg_field_t f,
     }
 }
 
+/** @brief Reject bytes that interfere with quoted modem arguments or device topic segments. */
 static void check_at_str(issue_sink_t *s, ivts_cfg_field_t f, const char *buf, size_t cap, bool topic)
 {
     for (size_t i = 0; i < cap && buf[i] != '\0'; i++) {
@@ -67,7 +74,7 @@ static bool is_hex(char ch)
     return (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F');
 }
 
-/* An address has the form "AA:BB:CC:DD:EE:FF", with colons at indices 2, 5, 8, 11 and 14. */
+/** @brief Check the six colon-separated hex pairs in a terminated BLE address. */
 static bool ble_addr_ok(const char *a)
 {
     if (strlen(a) != 17u) {

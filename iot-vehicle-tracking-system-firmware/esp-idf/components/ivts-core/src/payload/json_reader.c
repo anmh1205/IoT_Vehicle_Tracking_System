@@ -1,10 +1,15 @@
 /**
- * @file json_reader.c
+ * @file src/payload/json_reader.c
  * @brief Bounded JSON tokenization and extraction of typed token values.
+ *
+ * The app command inbox supplies input bytes and token storage. The parser
+ * uses token parents to track open containers without allocation or recursion.
+ * Typed access borrows the same input. Callers own command schemas and policy.
  */
 #include "ivts_core/payload/json_reader.h"
 #include <string.h>
 
+/** @brief Compare a raw key token without decoding escape sequences. */
 static bool tok_eq(const char *js, const ivts_jtok_t *k, const char *s)
 {
     size_t n = strlen(s);
@@ -55,6 +60,7 @@ ivts_err_t ivts_json_get_str(const char *js, const ivts_jtok_t *tok, char *out, 
                     char h = js[++i];
                     v = (v << 4) | (unsigned)(h <= '9' ? h - '0' : (h | 0x20) - 'a' + 10);
                 }
+                /* Keep decoded escape values representable as single non-NUL C string bytes. */
                 if (v == 0u || v > 0x7Fu) { out[0] = '\0'; return IVTS_ERR_INVALID_ARG; }
                 c = (char)v;
                 break;
@@ -94,26 +100,28 @@ ivts_err_t ivts_json_get_bool(const char *js, const ivts_jtok_t *tok, bool *out)
     return IVTS_ERR_INVALID_ARG;
 }
 
+/** @brief Syntax expectations for the next non-whitespace byte. */
 typedef enum {
-    JSON_EXPECT_VALUE,            /* At the root, after an object colon, or after an array comma. */
-    JSON_EXPECT_VALUE_OR_CLOSE,   /* ngay sau '[' */
-    JSON_EXPECT_KEY,              /* sau ',' trong object */
-    JSON_EXPECT_KEY_OR_CLOSE,     /* ngay sau '{' */
-    JSON_EXPECT_COMMA_OR_CLOSE,   /* After a value. */
-    JSON_EXPECT_NOTHING           /* Only whitespace may follow the completed root value. */
+    JSON_EXPECT_VALUE,            /**< At the root, after an object colon, or after an array comma. */
+    JSON_EXPECT_VALUE_OR_CLOSE,   /**< After an opening array bracket. */
+    JSON_EXPECT_KEY,              /**< After an object comma. */
+    JSON_EXPECT_KEY_OR_CLOSE,     /**< After an opening object brace. */
+    JSON_EXPECT_COMMA_OR_CLOSE,   /**< After a value in a container. */
+    JSON_EXPECT_NOTHING           /**< Only whitespace may follow the completed root value. */
 } json_expect_t;
 
+/** @brief Stack-local parse cursor over caller-owned input and tokens. */
 typedef struct {
-    const char  *js;
-    size_t       len;
-    size_t       pos;
-    ivts_jtok_t *t;
-    size_t       ntok;
-    int          n;
-    int          cur;       /* Index of the open container. A negative index denotes the root. */
-    uint8_t      depth;
-    uint8_t      max_depth;
-    json_expect_t       want;
+    const char  *js;  /**< Input bytes borrowed for the parse. */
+    size_t       len;  /**< Input length in bytes. */
+    size_t       pos;  /**< Current byte offset within js. */
+    ivts_jtok_t *t;  /**< Caller-owned token array. */
+    size_t       ntok;  /**< Token capacity in entries. */
+    int          n;  /**< Number of allocated tokens. */
+    int          cur;       /**< Index of the innermost open container, or -1 outside a container. */
+    uint8_t      depth;  /**< Number of currently open containers. */
+    uint8_t      max_depth;  /**< Maximum allowed number of open containers. */
+    json_expect_t       want;  /**< Syntax expectation for the next non-whitespace byte. */
 } json_parser_t;
 
 static int alloc_tok(json_parser_t *p, ivts_jtype_t type, size_t start, size_t end)
@@ -131,12 +139,13 @@ static int alloc_tok(json_parser_t *p, ivts_jtype_t type, size_t start, size_t e
 static bool is_ws(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
 static bool want_value(const json_parser_t *p) { return p->want == JSON_EXPECT_VALUE || p->want == JSON_EXPECT_VALUE_OR_CLOSE; }
 
-/* A value finished or a container closed. */
+/** @brief Update the next syntax expectation after completing a value. */
 static void value_done(json_parser_t *p)
 {
     p->want = (p->cur < 0) ? JSON_EXPECT_NOTHING : JSON_EXPECT_COMMA_OR_CLOSE;
 }
 
+/** @brief Validate string escape syntax and record offsets without decoding the string. */
 static ivts_err_t parse_string(json_parser_t *p)
 {
     size_t start = ++p->pos;                     /* Skip the opening quote. */
@@ -191,6 +200,7 @@ static bool valid_number(const char *p, const char *end)
     return p == end;
 }
 
+/** @brief Validate a complete number, boolean or null token up to its delimiter. */
 static ivts_err_t parse_prim(json_parser_t *p)
 {
     size_t start = p->pos;
@@ -231,6 +241,7 @@ static ivts_err_t on_open(json_parser_t *parser, char character)
     return IVTS_OK;
 }
 
+/** @brief Close a matching container and recover the enclosing container from its parent. */
 static ivts_err_t on_close(json_parser_t *parser, char character)
 {
     if (parser->cur < 0) { return IVTS_ERR_INVALID_ARG; }

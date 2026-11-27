@@ -1,10 +1,10 @@
 /**
- * @file cmd_receipts.c
+ * @file src/command/cmd_receipts.c
  * @brief Deduplication and durable command receipt checkpoints.
  *
- * The app task loads and updates recent successful IDs. The checkpoint reports
- * persistence failure so ACK delivery can retry without re-executing the
- * command.
+ * Startup loads the recent successful command IDs. The app task owns the ring and checkpoints it
+ * before ACK submission. The inbox retries a failed checkpoint without rerunning the handler in
+ * the current boot. The record layer owns NVS layout and I/O.
  */
 #include "persist/persist.h"
 #include "command/command.h"
@@ -13,10 +13,12 @@
 #include "platform/log.h"
 #include "storage/storage.h"
 
+/* Startup loads the ring. The app task owns it and its checkpoint flags after startup. */
 static ivts_cmd_receipts_t s_receipts;
 static bool s_receipts_ready;
 static bool s_needs_checkpoint;
 
+/** @brief Treat a missing receipt record as an empty window and report other errors. */
 static bool load_receipts(void)
 {
     ivts_err_t e = app_records_command_receipts_load(&s_receipts);

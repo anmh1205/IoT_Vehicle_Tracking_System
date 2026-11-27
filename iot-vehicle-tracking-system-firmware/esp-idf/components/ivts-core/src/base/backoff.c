@@ -1,11 +1,15 @@
 /**
- * @file backoff.c
+ * @file src/base/backoff.c
  * @brief Capped exponential backoff with deterministic caller-supplied jitter.
+ *
+ * The modem link and OBD reconnect loops call this calculation with their own
+ * attempt counts and seeds. It keeps no state. Each caller owns the retry
+ * schedule and performs any wait.
  */
 #include "ivts_core/base/backoff.h"
 #include <stddef.h>
 
-#define BACKOFF_MAX_SHIFT 31u
+#define BACKOFF_MAX_SHIFT 31u  /**< Shift cap in bits. A 32-bit base shifted this far fits in uint64_t. */
 
 uint32_t ivts_backoff_ms(const ivts_backoff_t *p, uint32_t attempt, uint32_t seed)
 {
@@ -16,9 +20,6 @@ uint32_t ivts_backoff_ms(const ivts_backoff_t *p, uint32_t attempt, uint32_t see
     uint64_t base = (p->base_ms != 0u) ? (uint64_t)p->base_ms : 1u;
     uint64_t max  = ((uint64_t)p->max_ms < base) ? base : (uint64_t)p->max_ms;
 
-    /*
-     * A 32-bit base shifted at most 31 bits fits in uint64_t.
-     */
     uint32_t shift = (attempt < BACKOFF_MAX_SHIFT) ? attempt : BACKOFF_MAX_SHIFT;
     uint64_t curve = base << shift;
     if (curve > max) {

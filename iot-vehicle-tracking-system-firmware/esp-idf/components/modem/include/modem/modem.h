@@ -1,10 +1,12 @@
 /**
- * @file modem.h
+ * @file include/modem/modem.h
  * @brief Public SIM7600 LTE, MQTT, GNSS and HTTPS APIs.
  *
- * The modem task owns all communication with the module. Control requests are
- * queued without waiting. The HTTPS byte-source calls wait for the modem task
- * to finish. Asynchronous results are delivered by value through the sink.
+ * The modem task owns all UART communication. The app posts control requests without waiting for
+ * queue space and exchanges MQTT payloads through mutex-protected copies. The OTA worker serializes
+ * HTTPS calls and retains its buffers until the modem task signals completion.
+ * The event sink copies event values during the callback. The app handles commands.
+ * The OTA component validates and writes firmware images.
  */
 #pragma once
 
@@ -18,26 +20,31 @@
 #define MODEM_CMD_MAX       1024u    /**< Maximum inbound cloud command payload in bytes. */
 #define MODEM_PAYLOAD_MAX   2048u    /**< Maximum outbound MQTT payload in bytes. */
 
-/** Configuration copied by modem_init(). The source object may be reused after the call. */
+/**
+ * @brief Caller-owned configuration copied by modem_init() and read by the modem task.
+ *
+ * The caller may reuse the source object after initialization. Callback targets and the sink context
+ * stay valid for the modem task lifetime.
+ */
 typedef struct {
-    ivts_sink_t sink;                /**< Sink for link, MQTT ACK, command and GNSS events. */
-    bool     (*time_get)(uint64_t *unix_ms);  /**< Optional trusted UTC source called on the modem task. */
+    ivts_sink_t sink;                /**< Required sink for link, MQTT ACK, command and GNSS events. */
+    bool     (*time_get)(uint64_t *unix_ms);  /**< Optional modem-task callback that writes Unix ms on success. */
     int      uart_num;               /**< ESP32-S3 UART number wired to the SIM7600. */
-    int      pin_tx, pin_rx;         /**< ESP32-S3 UART transmit and receive pins. */
+    int      pin_tx, pin_rx;         /**< ESP32-S3 UART transmit and receive GPIO numbers, respectively. */
     int      pin_pwrkey;             /**< GPIO wired to the module's PWRKEY control. */
-    int      pin_reset;              /**< GPIO wired to RESET, reserved for future use. */
+    int      pin_reset;              /**< GPIO wired to RESET. The driver leaves it unused. */
     bool     pwrkey_inverted;        /**< True if the PCB inverts PWRKEY, so a high GPIO level asserts the signal. */
-    uint32_t baud;                   /**< UART baud rate. */
-    char     apn[64];                /**< Cellular carrier APN. */
-    char     mqtt_host[64];          /**< MQTT broker host. */
-    uint16_t mqtt_port;              /**< MQTT broker port. */
+    uint32_t baud;                   /**< UART baud rate in bits per second. */
+    char     apn[64];                /**< NUL-terminated cellular carrier APN. */
+    char     mqtt_host[64];          /**< NUL-terminated MQTT broker host. */
+    uint16_t mqtt_port;              /**< Broker TCP port for plaintext MQTT. TLS uses port 8883. */
     bool     use_tls;                /**< Client TLS policy, supplied by app wiring. */
-    bool     command_subscribe_enabled;
-    char     client_id[MODEM_CLIENT_ID_MAX + 1u];  /**< MQTT client identifier, from 1 through MODEM_CLIENT_ID_MAX bytes. */
-    char     mqtt_user[32];          /**< MQTT username. */
-    char     mqtt_pass[64];          /**< MQTT password. */
-    char     device_id[32];          /**< Device identifier used to form v1/<device_id>/ topic names. */
-    uint16_t gnss_period_s;          /**< GNSS polling interval in seconds. */
+    bool     command_subscribe_enabled;  /**< Enable subscription and admission of commands to the FIFO. */
+    char     client_id[MODEM_CLIENT_ID_MAX + 1u];  /**< NUL-terminated MQTT client ID of 1 to 23 bytes. */
+    char     mqtt_user[32];          /**< NUL-terminated MQTT username. Empty omits credentials from the command. */
+    char     mqtt_pass[64];          /**< NUL-terminated MQTT password used with a nonempty username. */
+    char     device_id[32];          /**< NUL-terminated device identifier for v1/<device_id>/ topic names. */
+    uint16_t gnss_period_s;          /**< GNSS polling interval in seconds. Zero makes each eligible loop due. */
     uint8_t  task_prio;              /**< FreeRTOS priority for the modem task. */
     uint32_t task_stack;             /**< Modem task stack size in bytes. */
 } modem_cfg_t;
@@ -45,109 +52,190 @@ typedef struct {
 /**
  * @brief Initialize UART, PWRKEY, shared slots and the modem task.
  *
- * The task starts with the module powered off. Post modem_set_link(true) to
- * start the connection state machine.
+ * The worker starts in the logical off state and waits for modem_set_link(true) to begin the link sequence.
  *
- * @return IVTS_OK after startup, IVTS_ERR_INVALID_ARG for invalid
- * configuration, or the applicable topic, allocation or hardware error.
+ * @param cfg Required configuration copied into modem-owned storage.
+ * @retval IVTS_OK The modem task starts.
+ * @retval IVTS_ERR_INVALID_ARG The configuration or sink callback is missing, or the client ID length is invalid.
+ * @retval IVTS_ERR_FULL A topic exceeds its buffer, slot allocation fails or hardware or task startup fails.
+ * @note Context: App startup before other callers use the modem. Blocking: Performs SDK driver setup and
+ *       allocation synchronously without waiting for the link.
+ * @warning Use once per boot. Startup failure can leave resources allocated.
  */
 ivts_err_t modem_init(const modem_cfg_t *cfg);
 
-/**
- * @name Nonblocking control requests These functions post work on the modem
- * task. Returns include IVTS_ERR_FULL for a full request queue and
- * IVTS_ERR_INVALID_STATE before initialization.
+/** @name Nonblocking control requests
  * @{
  */
 
 /**
  * @brief Request a powered modem connection or orderly shutdown.
  *
- * A true request powers the modem, registers LTE, opens the PDP context,
- * connects MQTT and subscribes when enabled. A false request disconnects and
- * pulses PWRKEY to shut down. Progress is reported through IVTS_EV_LINK_STATE.
+ * A true request progresses through power, LTE and MQTT setup, including subscription when enabled.
+ * A false request runs the disconnect and shutdown path. Link transitions use IVTS_EV_LINK_STATE.
+ * A true request clears the stopped flag before attempting to enqueue the request.
+ *
+ * @param on True requests link startup. False requests shutdown.
+ * @retval IVTS_OK The queue accepts the request.
+ * @retval IVTS_ERR_FULL The queue has no free entry.
+ * @retval IVTS_ERR_INVALID_STATE The request queue is absent.
+ * @note Context: App startup or app task. Blocking: Non-blocking queue send.
  */
 ivts_err_t modem_set_link(bool on);
-/** @return True before starting the link or after the shutdown pulse completes. */
+/**
+ * @brief Read the modem task's logical stopped flag.
+ *
+ * @retval true The initial flag is set or the task has completed its link-down path.
+ * @retval false Link startup is requested or the task has started link processing.
+ * @note Context: App task. Blocking: Non-blocking atomic read.
+ */
 bool modem_is_stopped(void);
-/** Read the latest link state even if its queued notification was dropped. */
+/**
+ * @brief Read the latest reported link state even if its notification drops.
+ *
+ * @return The current link snapshot, initially IVTS_LINK_DOWN.
+ * @note Context: App task. Blocking: Non-blocking atomic read.
+ */
 ivts_link_t modem_link_state(void);
 
-/** @brief Request GNSS power and receive fixes through IVTS_EV_GNSS_FIX. */
+/**
+ * @brief Request GNSS power and receive samples through IVTS_EV_GNSS_FIX.
+ *
+ * The modem task records the demand and applies it when the link reaches the SIM step or later.
+ *
+ * @param on True requests GNSS on. False requests GNSS off.
+ * @retval IVTS_OK The queue accepts the request.
+ * @retval IVTS_ERR_FULL The queue has no free entry.
+ * @retval IVTS_ERR_INVALID_STATE The request queue is absent.
+ * @note Context: App task. Blocking: Non-blocking queue send.
+ */
 ivts_err_t modem_set_gnss(bool on);
 /** @} */
 
-/** Publish topic identifier for a name under v1/<device_id>/. */
+/** @brief Identify a publish topic under v1/<device_id>/. */
 typedef enum {
-    MODEM_TOPIC_RAWDATA = 0,
-    MODEM_TOPIC_STATUS,
-    MODEM_TOPIC_EVENTS,
-    MODEM_TOPIC_FIRMWARE,
-    MODEM_TOPIC_CMD_ACK,
-    MODEM_TOPIC_COUNT
+    MODEM_TOPIC_RAWDATA = 0,  /**< Raw telemetry on rawdata. */
+    MODEM_TOPIC_STATUS,       /**< Device status on status. */
+    MODEM_TOPIC_EVENTS,       /**< Device events on events. */
+    MODEM_TOPIC_FIRMWARE,     /**< Firmware update reports on firmware. */
+    MODEM_TOPIC_CMD_ACK,      /**< Application command acknowledgements on commands/ack. */
+    MODEM_TOPIC_COUNT        /**< Number of publish topics and exclusive upper bound for topic IDs. */
 } modem_topic_t;
 
 /**
  * @brief Copy one outbound message into the QoS 1 publish slot.
  *
- * The caller can reuse its payload after this function returns. Completion is
- * reported through IVTS_EV_MQTT_ACK with the supplied transaction ID. The
- * modem task reports a failed ACK immediately when the broker is unavailable.
+ * Acceptance invalidates the previous result. The modem task reports completion through IVTS_EV_MQTT_ACK.
+ * If it services the slot without a broker session, it completes the slot with a failed result.
  *
- * @param tx_id Caller-selected transaction ID echoed in the ACK event.
- * @retval IVTS_OK The slot accepted the message.
+ * @param topic Publish topic from MODEM_TOPIC_RAWDATA through MODEM_TOPIC_CMD_ACK.
+ * @param payload Required buffer of at least @p len bytes. The modem copies the bytes before returning.
+ * @param len Payload length in bytes, from 1 through MODEM_PAYLOAD_MAX.
+ * @param tx_id Caller-selected transaction ID echoed in the result and ACK event.
+ * @retval IVTS_OK The slot accepts the message.
  * @retval IVTS_ERR_FULL An earlier publish still owns the slot.
- * @retval IVTS_ERR_INVALID_ARG Invalid topic, length or payload pointer.
+ * @retval IVTS_ERR_INVALID_ARG The topic is out of range, the length is invalid or the payload is NULL.
+ * @note Context: App task after successful initialization. Blocking: Waits without a timeout for the slot mutex.
  */
 ivts_err_t modem_publish(modem_topic_t topic, const char *payload, size_t len, uint32_t tx_id);
 
-/** @return True while the publish slot is waiting for its result. */
+/**
+ * @brief Check whether the outbound slot holds a queued or in-flight publish.
+ *
+ * @retval true A message occupies the slot.
+ * @retval false The slot can accept a publish.
+ * @note Context: Task context after initialization. Blocking: Waits without a timeout for the slot mutex.
+ */
 bool modem_publish_busy(void);
-/** Look up the most recent result by transaction ID if the app queue dropped its ACK. */
+/**
+ * @brief Look up the most recent publish result by transaction ID.
+ *
+ * Reading leaves the result available until the next accepted publish. The app uses this if its ACK event drops.
+ * The error is zero on success, -1 for a missing broker session or a publish timeout,
+ * -2 for an input failure or unparsed publish error, or the parsed modem error.
+ *
+ * @param tx_id Transaction ID passed to modem_publish().
+ * @param[out] ok Required outcome flag, written only for a matching result.
+ * @param[out] err Required modem or local error code, written only for a matching result.
+ * @retval true A matching completed publish exists and both outputs are written.
+ * @retval false No matching result exists and both outputs are untouched.
+ * @note Context: App task after successful initialization. Blocking: Waits without a timeout for the slot mutex.
+ */
 bool modem_publish_result(uint32_t tx_id, bool *ok, int16_t *err);
 
 /**
  * @brief Copy and release the oldest cloud command from the modem FIFO.
  *
- * The app can drain commands after IVTS_EV_CMD_PENDING. The payload has no
- * trailing NUL. Use the byte length returned through @p len.
+ * The app can drain commands after IVTS_EV_CMD_PENDING. Use the returned byte length to read the payload.
  *
- * @param cap Capacity of @p out. Use MODEM_CMD_MAX to accept any queued
- * payload.
- * @retval IVTS_OK The oldest command was copied and removed.
+ * @param[out] out Required caller-owned buffer. A successful copy adds no trailing NUL.
+ * @param cap Capacity of @p out in bytes. MODEM_CMD_MAX accepts any queued payload.
+ * @param[out] len Required byte count output. Both outputs remain untouched on failure.
+ * @retval IVTS_OK The oldest command is copied and removed.
  * @retval IVTS_ERR_NOT_FOUND The FIFO is empty.
- * @retval IVTS_ERR_FULL The buffer is too small and the command remains
- * queued.
+ * @retval IVTS_ERR_FULL The buffer is too small and the command remains queued.
+ * @retval IVTS_ERR_INVALID_ARG A required output pointer is NULL.
+ * @note Context: App task after successful initialization. Blocking: Waits without a timeout for the slot mutex.
  */
 ivts_err_t modem_cmd_take(char *out, size_t cap, size_t *len);
 
 /**
- * @return Number of new commands dropped by a full FIFO since boot.
+ * @brief Read the count of new commands dropped by a full FIFO.
  *
- * The modem has already sent broker PUBACK for these. The cloud retries using
- * the command ID if the application-level acknowledgement is absent.
+ * @return The boot-lifetime overflow counter, modulo 2^32.
+ * @note Context: App task after successful initialization. Blocking: Waits without a timeout for the slot mutex.
  */
 uint32_t modem_cmd_dropped(void);
 
-/**
- * @name Blocking HTTPS byte source for OTA The OTA worker waits until the
- * modem task finishes accessing its buffers.
+/** @name Blocking HTTPS byte source for OTA
  * @{
  */
 
 /**
  * @brief Open an HTTPS GET and return its reported status and size.
- * @param[out] size Content length reported by the modem.
- * @param[out] http_status HTTP status code reported by the modem.
+ *
+ * The modem checks the link step, attempts to close a stale HTTP session and accepts HTTP 200 as success.
+ *
+ * @param url Required NUL-terminated HTTPS URL borrowed through completion. Spaces, quotes, backslashes,
+ *            tabs and line breaks are rejected. The URL command must fit the modem command buffer.
+ * @param[out] size Required content length in bytes. The modem writes the parsed length even for a non-200 status.
+ * @param[out] http_status Required parsed HTTP status. Both outputs start at zero after the pointer checks.
+ * @retval IVTS_OK The modem reports HTTP 200 and a nonnegative length.
+ * @retval IVTS_ERR_INVALID_ARG A required pointer is NULL, the URL is invalid or the URL command exceeds capacity.
+ * @retval IVTS_ERR_INVALID_STATE The modem link step is earlier than packet-data setup.
+ * @retval IVTS_ERR_FULL Reply allocation or queue submission fails.
+ * @retval IVTS_ERR_TIMEOUT The HTTP action ends without a successful AT result.
+ * @retval IVTS_ERR_IO Required setup fails, the reply is malformed or the status differs from 200.
+ * @note Context: OTA worker. Blocking: Queue space for up to 1000 ms after tick conversion, then waits without
+ *       a caller timeout for completion. Setup and GET use up to 178 s of nominal AT deadlines,
+ *       including 120 s for the GET action. The clock callback can add time.
  */
 ivts_err_t modem_http_open(const char *url, uint32_t *size, int *http_status);
 
 /**
- * @brief Read up to @p len bytes at @p offset into @p buf.
- * @param[out] got Number of bytes copied by the modem task.
+ * @brief Read up to @p len bytes at @p offset from the active HTTP source.
+ *
+ * @param offset Zero-based byte offset in the response body.
+ * @param[out] buf Required caller-owned buffer of at least @p len bytes, borrowed through completion.
+ *                 The modem can write a prefix before reporting an error.
+ * @param len Positive requested byte count and capacity of @p buf.
+ * @param[out] got Required byte count. It starts at zero after argument validation and is positive on success.
+ * @retval IVTS_OK The modem completes the read with one or more bytes within capacity.
+ * @retval IVTS_ERR_INVALID_ARG The buffer or count pointer is NULL, or @p len is zero.
+ * @retval IVTS_ERR_FULL Reply allocation or queue submission fails.
+ * @retval IVTS_ERR_IO AT completion fails, the raw frame times out, the reply exceeds capacity or no bytes arrive.
+ * @note Context: OTA worker after a successful open. Blocking: Queue space for up to 1000 ms after tick conversion,
+ *       then waits without a caller timeout. The modem uses a 15 s read-command deadline.
  */
 ivts_err_t modem_http_read(uint32_t offset, uint8_t *buf, size_t len, size_t *got);
 
-/** @brief Close the active HTTP session on the modem. */
+/**
+ * @brief Attempt to close the active HTTP session on the modem.
+ *
+ * The function discards queue and modem errors.
+ *
+ * @note Context: OTA worker. Blocking: Queue space for up to 1000 ms after tick conversion, then waits without
+ *       a caller timeout if queued. The modem uses a 5 s close-command deadline.
+ */
 void modem_http_close(void);
 /** @} */

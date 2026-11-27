@@ -1,9 +1,10 @@
 /**
- * @file queue_store.c
- * @brief Offline queue startup, segment discovery and recovery.
+ * @file src/queue/queue_store.c
+ * @brief Offline queue startup, segment discovery and tail recovery.
  *
- * Recovery validates the tail and saved read position before accepting new
- * work. The storage task owns subsequent mutations of the recovered state.
+ * Startup scans the SD directory, truncates a corrupt tail suffix and restores the cursor where usable.
+ * The storage task owns later mutations and calls the frame and peek helpers. The app decides when to replay.
+ * Recovery publishes its unread count through the shared slot interface.
  */
 #include "queue/queue.h"
 #include "platform/log.h"
@@ -13,6 +14,7 @@
 #include <unistd.h>
 #include <string.h>
 
+/* Startup owns recovery. The storage task exclusively mutates this state after startup. */
 static storage_queue_state_t s_queue;
 
 esp_err_t storage_queue_open(void)
@@ -59,6 +61,9 @@ static bool repair_tail_segment(storage_queue_state_t *queue, uint32_t *total_in
     return true;
 }
 
+/**
+ * @brief Fall back to the head if the checkpoint fails validation or names an out-of-range segment.
+ */
 static void restore_read_cursor(storage_queue_state_t *queue)
 {
     if (!storage_queue_cursor_load(queue) || queue->read_segment < queue->head || queue->read_segment > queue->tail) {
@@ -68,6 +73,9 @@ static void restore_read_cursor(storage_queue_state_t *queue)
     if (queue->read_segment == queue->tail && queue->read_offset > queue->tail_size) { queue->read_offset = 0; }
 }
 
+/**
+ * @brief Count frames from the restored cursor, reusing the tail scan when it covers the same range.
+ */
 static bool count_unread_records(const storage_queue_state_t *queue, uint32_t total_in_tail, uint32_t *unread)
 {
     uint32_t pending = 0;
@@ -96,6 +104,9 @@ static bool count_unread_records(const storage_queue_state_t *queue, uint32_t to
     return true;
 }
 
+/**
+ * @brief Publish the count and mark the queue open only after recovery succeeds.
+ */
 static void publish_initial_count(storage_queue_state_t *queue, uint32_t pending)
 {
     storage_queue_slot_reset(pending);

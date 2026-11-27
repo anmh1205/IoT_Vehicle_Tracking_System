@@ -2,17 +2,12 @@
  * @file src/session/session_tracker.c
  * @brief Ignition-session tracking and durable delivery of session boundaries.
  *
- * Persist open and closed session boundaries until PUBACK. Accept a late
- * backend assignment while the corresponding boundary is still pending.
+ * Boot loads the retained session. The app task commits the active session and its new boundary
+ * together. A reset between PUBACK and removal can replay the boundary with its original identity.
+ * The command handler can assign an ID to an active session or a pending close.
+ * The publisher gates boundary delivery and the record layer owns NVS access.
  */
 #include "persist/persist.h"
-/**
- * @brief Ignition-session tracking and durable delivery of session boundaries.
- *
- * The app task is the sole writer. It commits the active session and its new
- * boundary together. A reset between PUBACK and removal can replay the same
- * boundary using its original identity.
- */
 
 #include "session/session_tracker.h"
 #include "app_internal.h"
@@ -21,8 +16,10 @@
 #include "ivts_core/payload/meta.h"
 #include "storage/storage.h"
 
+/* Startup restores this record. The app task serializes commits, assignment and delivery. */
 static ivts_session_state_t s_session;
 
+/** @brief Change the active session and outbox in RAM only after their joint NVS commit succeeds. */
 static bool commit(const ivts_session_state_t *next)
 {
     if (app_records_session_save(next) != IVTS_OK) {
@@ -33,6 +30,7 @@ static bool commit(const ivts_session_state_t *next)
     return true;
 }
 
+/* The app task owns transition backoff after a failed session save. */
 static uint64_t s_session_retry_at_ms;
 
 static bool wants_active_session(ivts_ignition_t ignition, bool tracking_enabled)
@@ -47,6 +45,7 @@ static bool outbox_has_room(bool want_active)
     return s_session.count < limit;
 }
 
+/** @brief Allocate a message identity and capture the boundary time before committing the session. */
 static void make_boundary(ivts_session_boundary_t *boundary, ivts_boundary_kind_t kind, uint64_t now_ms, uint32_t boot_id)
 {
     memset(boundary, 0, sizeof *boundary);

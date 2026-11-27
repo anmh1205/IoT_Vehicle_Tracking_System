@@ -2,15 +2,16 @@
  * @file src/session/motion_alarm.c
  * @brief Durable motion alarm delivery and acknowledgement.
  *
- * Attempt an NVS write when latching an alarm and retry on later delivery
- * ticks. Keep its identity until a successful report ACK. If a persisted
- * alarm cannot be cleared in NVS, retain it for retry.
+ * Startup restores the pending alarm. The app task latches a new identity and retries its NVS
+ * write on delivery ticks. If a saved alarm cannot be cleared after a successful publish ACK,
+ * keep it for retry. The publisher owns encoding and delivery.
  */
 #include "persist/persist.h"
 #include "session/motion_alarm.h"
 #include "app_internal.h"
 #include "storage/storage.h"
 
+/* Startup restores the alarm. The app task owns the alarm, durability flag and retry deadline. */
 static ivts_motion_alarm_t s_alarm;
 static bool s_alarm_saved_to_nvs;
 static uint64_t s_alarm_retry_at_ms;
@@ -49,6 +50,7 @@ const ivts_motion_alarm_t *app_alarm_view(void) { return &s_alarm; }
 void app_alarm_on_ack(bool ok)
 {
     if (!ok) { return; }
+    /* Clear the durable copy first so a failed NVS write retains the same identity for retry. */
     ivts_motion_alarm_t empty = {0};
     if (!s_alarm_saved_to_nvs || app_records_alarm_save(&empty) == IVTS_OK) {
         s_alarm = empty;

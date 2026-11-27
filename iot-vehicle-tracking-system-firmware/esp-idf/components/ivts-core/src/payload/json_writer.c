@@ -1,6 +1,10 @@
 /**
- * @file json_writer.c
+ * @file src/payload/json_writer.c
  * @brief Bounded JSON output with escaping and explicit buffer exhaustion.
+ *
+ * MQTT payload builders and command acknowledgements write into caller-owned
+ * buffers. The writer tracks length and nesting without allocation. Callers
+ * own the output schema and ensure that container types and keys match.
  */
 #include "ivts_core/payload/json_writer.h"
 #include <string.h>
@@ -57,7 +61,7 @@ static void put_u64(ivts_jw_t *w, uint64_t v)
     while (n > 0u) { put_c(w, tmp[--n]); }
 }
 
-/* Emit a separator and, for an object member, a key before the value. */
+/** @brief Apply the current depth's separator state and optional key before a value. */
 static void lead(ivts_jw_t *w, const char *key)
 {
     uint8_t bit = (uint8_t)(1u << w->depth);
@@ -83,6 +87,7 @@ void ivts_jw_init(ivts_jw_t *w, char *buf, size_t cap)
     }
 }
 
+/** @brief Open a container only while a child separator bit remains available. */
 static void open_(ivts_jw_t *w, const char *key, char c)
 {
     if (w->depth + 1u >= IVTS_JW_MAX_DEPTH) { w->bad = true; return; }

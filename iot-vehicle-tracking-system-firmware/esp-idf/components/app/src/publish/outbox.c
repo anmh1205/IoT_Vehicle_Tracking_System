@@ -1,9 +1,10 @@
 /**
- * @file outbox.c
- * @brief Control-message scheduling and publish ACK state transitions.
+ * @file src/publish/outbox.c
+ * @brief Control-message scheduling and publish ACK transitions.
  *
- * Preserve OTA and alarm precedence, and let older RAW records drain ahead of
- * their closing or opening session boundary.
+ * The app task owns status and event intent and controls boundary retry timing. Runtime services
+ * urgent firmware and motion alarm work before ordinary control messages. A boundary waits
+ * behind earlier RAW records. Message producers own records and the publisher owns ACK correlation.
  */
 #include "publish/publish.h"
 #include "session/motion_alarm.h"
@@ -13,6 +14,7 @@
 #include "device/device.h"
 #include "session/session_tracker.h"
 
+/* The app task owns the coalesced status, event buffer and boundary retry timing. */
 static bool s_status_needs_publish;
 static bool s_event_needs_publish;
 static char s_event_code[32];
@@ -58,6 +60,7 @@ static bool can_publish(void)
     return !app_publisher_is_busy() && app_link_is_broker_up();
 }
 
+/** @brief Give a pending report exclusive service while confirming or awaiting OTA reboot. */
 static bool retry_fw_report_during_update(void)
 {
     if (!app_fw_update_prioritizes_report() || !app_fw_update_report_needs_publish() || !can_publish()) {
@@ -67,6 +70,7 @@ static bool retry_fw_report_during_update(void)
     return true;
 }
 
+/** @brief Protect boundary order by replaying older RAW records before attempting the boundary. */
 static void publish_boundary(const ivts_session_boundary_t *boundary)
 {
     if (app_replay_until(boundary) == REPLAY_BUSY || app_now() < s_boundary_retry_at_ms) { return; }

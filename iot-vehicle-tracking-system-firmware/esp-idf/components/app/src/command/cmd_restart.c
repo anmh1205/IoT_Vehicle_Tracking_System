@@ -1,9 +1,10 @@
 /**
- * @file cmd_restart.c
+ * @file src/command/cmd_restart.c
  * @brief Durable restart and rollback intent with ACK-driven completion.
  *
- * Track the original OTA slot and defer the requested restart until the ACK is
- * delivered or the established deadline expires.
+ * The app task records the command identity and any original OTA slot. After the receipt
+ * checkpoint, a successful ACK or the restart deadline triggers reboot. A retried command
+ * consults the durable intent. The OTA adapter selects the rollback image.
  */
 #include "persist/persist.h"
 #include "command/command.h"
@@ -16,6 +17,7 @@
 #include "platform/platform.h"
 #include "storage/storage.h"
 
+/* Startup clears these flags. The app task owns both phases without a lock. */
 static bool s_awaiting_checkpoint;
 static uint64_t s_restart_at_ms;
 
@@ -27,6 +29,7 @@ static const char *load_restart_intent(ivts_restart_intent_t *intent, const char
     return NULL;
 }
 
+/** @brief Treat the intent as complete when no rollback from the current slot remains. */
 static bool is_duplicate_restart(const ivts_restart_intent_t *intent, bool rollback, const char *running)
 {
     return !rollback || intent->rollback_origin[0] == '\0' ||
@@ -41,6 +44,7 @@ static const char *check_restart_preconditions(bool rollback)
     return NULL;
 }
 
+/** @brief Record the current partition for rollback retry before changing boot metadata. */
 static const char *persist_restart_intent(const char *id, bool rollback, const char *running)
 {
     ivts_restart_intent_t intent = {0};

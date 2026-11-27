@@ -1,6 +1,11 @@
 /**
  * @file src/ota/contract.c
- * @brief OTA manifest validation and post-boot image confirmation rules.
+ * @brief OTA wire labels, digest decoding and post-boot image confirmation decisions.
+ *
+ * The app evaluates confirmation from a retained context and current health
+ * and time. App command handling and OTA job setup decode the expected image
+ * digest before installation. State labels are immutable, and adapters own
+ * persistence, download, installation and rollback effects.
  */
 #include "ivts_core/ota/contract.h"
 #include "ivts_core/ota/confirm.h"

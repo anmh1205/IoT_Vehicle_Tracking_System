@@ -1,9 +1,10 @@
 /**
- * @file modem_uart.c
+ * @file src/transport/modem_uart.c
  * @brief Dedicated UART transport for SIM7600 AT bytes.
  *
- * Opening UART binds the app-supplied pins and baud rate. Receive timeout uses
- * the same tick conversion as the scheduler.
+ * Startup binds the app-supplied pins and baud rate, then the modem task owns all UART I/O.
+ * AT dispatch supplies read and write buffers. UART receive waits follow native tick conversion.
+ * The SDK owns the driver rings. AT framing and recovery policy live in dispatch.
  */
 #include "transport/transport.h"
 #include "platform/platform.h"
@@ -11,9 +12,10 @@
 #include "driver/uart.h"
 #include "esp_check.h"
 
-#define UART_RX_BUF 4096
-#define UART_TX_BUF 2048
+#define UART_RX_BUF 4096 /**< SDK UART receive ring capacity in bytes. */
+#define UART_TX_BUF 2048 /**< SDK UART transmit ring capacity in bytes. */
 
+/* Startup selects this UART once before the modem task takes ownership of I/O. */
 static uart_port_t s_uart_num;
 
 esp_err_t modem_uart_open(const modem_cfg_t *c)

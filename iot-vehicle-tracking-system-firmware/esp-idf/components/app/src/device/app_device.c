@@ -1,14 +1,15 @@
 /**
- * @file app_device.c
+ * @file src/device/app_device.c
  * @brief Application-owned device identity, provisioning and runtime configuration.
  *
- * Boot initializes the policy and identifiers. The application task owns
- * subsequent changes and applies validated configuration through the bound
- * callback.
+ * Startup initializes policy and identity. The app task owns subsequent reads and changes.
+ * Configuration replacement copies by value and invokes the bound runtime callback synchronously.
+ * Boot and command handlers own validation and NVS access.
  */
 #include "device/device.h"
 #include <stddef.h>
 
+/* Startup initializes this state before the app task becomes its sole reader and writer. */
 static ivts_config_t s_config;
 static uint32_t s_boot_id;
 static bool s_is_provisioned;

@@ -1,9 +1,10 @@
 /**
- * @file cmd_config.c
+ * @file src/command/cmd_config.c
  * @brief Validation and application of fields writable through cloud commands.
  *
- * The editable-field table controls which typed fields are accepted.
- * Persistence and normal receipt processing apply to successful commands.
+ * The app task calls this handler through the command table. The editable-field table controls
+ * which typed fields the draft accepts. Commit the complete candidate before applying runtime
+ * policy. The command inbox owns receipt checkpoints and ACK retry.
  */
 #include "command/command.h"
 #include <stddef.h>
@@ -11,12 +12,14 @@
 #include "device/device.h"
 #include "storage/storage.h"
 
-typedef enum { CMD_CONFIG_U16, CMD_CONFIG_BOOL } cmd_config_kind_t;
+/** @brief JSON value types accepted by the editable policy map. */
+typedef enum { CMD_CONFIG_U16, /**< Unsigned 16-bit number. */ CMD_CONFIG_BOOL /**< JSON boolean. */ } cmd_config_kind_t;
 
+/** @brief Immutable policy field map read by the app task. */
 static const struct {
-    const char *key;
-    cmd_config_kind_t kind;
-    size_t offset;
+    const char *key; /**< Static JSON field name. */
+    cmd_config_kind_t kind; /**< Type used to parse and copy the field. */
+    size_t offset; /**< Byte offset in the candidate configuration. */
 } k_policy_fields[] = {
     { "tracking_interval_s",       CMD_CONFIG_U16,  offsetof(ivts_config_t, tracking_interval_s) },
     { "heartbeat_interval_s",      CMD_CONFIG_U16,  offsetof(ivts_config_t, heartbeat_interval_s) },
@@ -29,6 +32,7 @@ static const struct {
     { "imu_wakeup_enabled",       CMD_CONFIG_BOOL, offsetof(ivts_config_t, imu_wakeup_enabled) },
 };
 
+/** @brief Parse one mapped field before writing its typed value into the candidate. */
 static bool apply_policy_field(const ivts_json_obj_t *params, const char *key,
                                cmd_config_kind_t kind, unsigned char *destination)
 {

@@ -1,9 +1,14 @@
 /**
- * @file payload_common.c
+ * @file src/payload/payload_common.c
  * @brief Common MQTT JSON fields, escaping and stable wire enum names.
+ *
+ * RAW and control builders share metadata, wire names and session fields.
+ * All writes use each caller's local writer, and returned names are immutable.
+ * The app supplies device identity and time and owns publication and retries.
  */
 #include "payload/payload_internal.h"
 
+/* Immutable digit table shared by all caller tasks. */
 static const char s_hex[] = "0123456789abcdef";
 
 void ivts_boot_id_format(char out[IVTS_BOOT_ID_SIZE], uint32_t boot_id)
@@ -69,6 +74,7 @@ void ivts_payload_write_session(ivts_jw_t *w, const ivts_session_id_t *session)
     ivts_boot_id_format(boot, session->boot_id);
     ivts_jw_str(w, "boot_id", boot);
     ivts_jw_uint(w, "local_session_key", session->local_key);
+    /* The wire format carries canonical IDs as decimal strings. */
     if (session->canonical_id != 0u) {
         char id[21];
         size_t pos = sizeof id - 1u;

@@ -1,9 +1,10 @@
 /**
- * @file sd_mount.c
- * @brief SDMMC pin binding, card detection and FAT mount.
+ * @file src/sd/sd_mount.c
+ * @brief SDMMC wiring, card registration and FAT mount.
  *
- * Use the app-supplied wiring and leave an existing card untouched if its
- * filesystem cannot be mounted.
+ * Storage startup calls this adapter with the app-supplied pin configuration. Mount failure does not trigger
+ * formatting.
+ * The mount descriptor stays with this adapter. File ownership passes to the storage task after recovery.
  */
 #include "sd/sd.h"
 #include "storage_internal.h"
@@ -12,6 +13,7 @@
 #include "esp_vfs_fat.h"
 #include "sdmmc_cmd.h"
 
+/* Startup receives the card descriptor from the mount call and uses it to report capacity. */
 static sdmmc_card_t *s_card;
 
 esp_err_t storage_sd_mount(void)
@@ -35,8 +37,8 @@ esp_err_t storage_sd_mount(void)
 
     esp_vfs_fat_sdmmc_mount_config_t mc = {
         .format_if_mount_failed = false,   /* Mount failure leaves the existing filesystem intact. */
-        .max_files = 4,
-        .allocation_unit_size = 16 * 1024,
+        .max_files = 4,   /* Limit on simultaneously open FAT files. */
+        .allocation_unit_size = 16 * 1024,   /* Allocation unit in bytes if formatting is enabled. */
     };
     esp_err_t e = esp_vfs_fat_sdmmc_mount(SD_MOUNT, &host, &slot, &mc, &s_card);
     if (e != ESP_OK) {

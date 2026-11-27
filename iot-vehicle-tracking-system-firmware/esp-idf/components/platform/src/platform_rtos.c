@@ -1,9 +1,10 @@
 /**
- * @file platform_rtos.c
- * @brief Task-context delays, tick conversion and mutex operations backed by FreeRTOS.
+ * @file src/platform_rtos.c
+ * @brief Task delays, tick conversion and mutex operations backed by FreeRTOS.
  *
- * The implementation keeps scheduler types out of device adapters. Calls honor
- * the native tick conversion and the existing unbounded mutex wait semantics.
+ * Adapters supply delay durations and own the mutex handles returned during setup.
+ * Runtime tasks use them to serialize shared copies or peripheral access.
+ * Waits use native tick conversion. The caller defines the protected critical section.
  */
 #include "platform/platform.h"
 #include "freertos/FreeRTOS.h"

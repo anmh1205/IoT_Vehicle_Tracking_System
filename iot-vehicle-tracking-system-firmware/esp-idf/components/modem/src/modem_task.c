@@ -1,9 +1,10 @@
 /**
- * @file modem_task.c
- * @brief FreeRTOS ownership of SIM7600 requests, UART work and HTTP completion.
+ * @file src/modem_task.c
+ * @brief FreeRTOS request handling, UART scheduling and HTTP completion.
  *
- * Only the modem task runs AT commands. A synchronous HTTP caller retains its
- * buffers until the final signal after all output has been written.
+ * The modem task drains copied app and OTA requests before stepping link, GNSS and MQTT services.
+ * Those services own protocol state. The task is the only consumer and runs their UART work serially.
+ * A synchronous OTA caller retains the URL and output buffers through the completion signal.
  */
 #include "modem_internal.h"
 #include "at/at.h"
@@ -16,9 +17,10 @@
 #include "services/services.h"
 #include "transport/transport.h"
 
-#define REQ_QUEUE_LEN 8u
-#define LOOP_WAIT_MS 50u
+#define REQ_QUEUE_LEN 8u /**< Maximum number of queued modem requests. */
+#define LOOP_WAIT_MS 50u /**< UART receive wait in milliseconds between active loop iterations. */
 
+/* Startup creates the queue. Producers post copies and the modem task alone removes them. */
 static QueueHandle_t s_request_queue;
 
 ivts_err_t modem_task_post(const modem_req_t *request, uint32_t timeout_ms)
@@ -27,9 +29,10 @@ ivts_err_t modem_task_post(const modem_req_t *request, uint32_t timeout_ms)
     return xQueueSend(s_request_queue, request, pdMS_TO_TICKS(timeout_ms)) == pdTRUE ? IVTS_OK : IVTS_ERR_FULL;
 }
 
+/** @brief OTA caller-owned reply. The modem task publishes the result before signalling completion. */
 struct modem_rpc {
-    SemaphoreHandle_t done;
-    ivts_err_t result;
+    SemaphoreHandle_t done; /**< Binary semaphore given by the modem task and deleted by the waiting caller. */
+    ivts_err_t result;       /**< Operation result read by the caller after taking the semaphore. */
 };
 
 ivts_err_t modem_task_call(modem_req_t *request)
@@ -50,6 +53,7 @@ ivts_err_t modem_task_call(modem_req_t *request)
     return reply.result;
 }
 
+/** @brief Tear down the logical link before marking the modem task stopped. */
 static void link_down(void)
 {
     modem_mqtt_disconnect();
@@ -60,6 +64,7 @@ static void link_down(void)
     modem_set_stopped(true);
 }
 
+/** @brief Arm startup only when the link is logically off. */
 static void link_up(void)
 {
     if (modem_link_current_step() != MODEM_LINK_STEP_OFF) { return; }
@@ -67,6 +72,7 @@ static void link_up(void)
     modem_link_reset(MODEM_LINK_STEP_POWER);
 }
 
+/** @brief Apply one copied request and signal HTTP completion after the last borrowed-buffer access. */
 static void handle_req(const modem_req_t *r)
 {
     switch (r->op) {
@@ -91,6 +97,7 @@ static void handle_req(const modem_req_t *r)
     }
 }
 
+/** @brief Serialize requests and protocol work in the sole modem task loop. */
 static void modem_task(void *arg)
 {
     (void)arg;
@@ -113,6 +120,7 @@ static void modem_task(void *arg)
     }
 }
 
+/** @brief Publish the request queue before creating its sole consumer. */
 static esp_err_t start_task(const modem_cfg_t *c)
 {
     s_request_queue = xQueueCreate(REQ_QUEUE_LEN, sizeof(modem_req_t));

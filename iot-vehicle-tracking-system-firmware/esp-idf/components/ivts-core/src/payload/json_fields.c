@@ -1,6 +1,10 @@
 /**
- * @file json_fields.c
+ * @file src/payload/json_fields.c
  * @brief Typed object-field validation on tokenized JSON input.
+ *
+ * App command handlers use these conversions on views of the borrowed token
+ * array and original input. Each accessor examines direct members. Command
+ * execution and field-specific policy remain with the app.
  */
 #include "ivts_core/payload/json_fields.h"
 #include <string.h>
@@ -34,6 +38,7 @@ bool ivts_json_obj_get_u64(const ivts_json_obj_t *object, const char *key, uint6
         if (digit > limit || value > (limit - digit) / 10u) { return false; }
         value = value * 10u + digit;
     }
+    /* Publish the numeric result only after every digit and the final bound are checked. */
     *out = value;
     return true;
 }
@@ -48,6 +53,7 @@ bool ivts_json_obj_read_id(const ivts_json_obj_t *object, const char *key, char 
 {
     int index = field_index(object, key);
     if (index < 0) { return false; }
+    /* Presence alone matters during alias selection. Invalid values stay distinguishable from absence. */
     if (cap == 0u) { return true; }
     out[0] = '\0';
 

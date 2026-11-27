@@ -1,9 +1,10 @@
 /**
- * @file modem.c
- * @brief Public modem initialization, configuration snapshots and requests.
+ * @file src/modem.c
+ * @brief Public modem initialization, configuration snapshots and control requests.
  *
- * The modem task owns link and UART work. Startup copies configuration and
- * prepares static topic strings before starting it.
+ * App startup copies configuration and prepares static topic strings before starting the modem task.
+ * The app posts link and GNSS demand. The modem task owns protocol work and publishes link changes.
+ * Link and stopped snapshots use atomic access across tasks so the app can read them independently of events.
  */
 #include "modem_internal.h"
 #include "platform/platform.h"
@@ -12,9 +13,11 @@
 #include <stdio.h>
 #include <string.h>
 
+/* Startup writes configuration and topics before the modem task starts reading them. */
 static modem_cfg_t s_modem_cfg;
 static char s_topic_names[MODEM_TOPIC_COUNT][48];
 static char s_command_topic[48];
+/* The app and modem task share these logical snapshots through atomic access. */
 static atomic_bool s_stopped = true;
 static atomic_uchar s_link = IVTS_LINK_DOWN;
 
@@ -26,7 +29,6 @@ uint64_t modem_now(void) { return platform_uptime_ms(); }
 
 void modem_emit(const ivts_event_t *ev) { (void)ivts_sink_emit(&s_modem_cfg.sink, ev); }
 
-/* Emit a link event only when its value changes. */
 void modem_emit_link(uint8_t link, int32_t err)
 {
     if (atomic_exchange(&s_link, link) == link) { return; }
