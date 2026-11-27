@@ -1,3 +1,4 @@
+#include "esp_timer.h"
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
@@ -33,6 +34,7 @@ static uint64_t s_now;
 static size_t s_expected_raw;
 static unsigned s_seen_commands;
 
+int64_t esp_timer_get_time(void) { return 0; }
 uint64_t app_now(void) { return s_now; }
 uint32_t app_rtc_next_seq(void) { return ++s_seq; }
 ivts_err_t board_time_get(uint64_t *unix_ms, bool *trusted)

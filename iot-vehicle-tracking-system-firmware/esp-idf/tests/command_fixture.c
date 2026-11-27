@@ -1,3 +1,4 @@
+#include "esp_timer.h"
 #include <assert.h>
 #include <string.h>
 #include "app_priv.h"
@@ -21,6 +22,7 @@ static unsigned s_rollback_attempts;
 static const char *s_ack_status, *s_ack_reason;
 static ivts_telemetry_t s_telemetry;
 
+int64_t esp_timer_get_time(void) { return 0; }
 uint64_t app_now(void) { return s_now; }
 const ivts_telemetry_t *app_state_get(void) { return &s_telemetry; }
 void app_apply_config(void) {}
