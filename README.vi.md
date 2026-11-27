@@ -457,6 +457,8 @@ Ghi chú vận hành:
 
 ## Firmware and Hardware Context
 
+Xem [các dự án firmware](iot-vehicle-tracking-system-firmware/README.md) để chọn bản ESP-IDF chính, bản cũ hoặc thư mục dành cho Zephyr.
+
 Theo tài liệu thesis draft và đồng bộ với tài sản dự án hiện tại:
 
 - **MCU**: ESP32-S3 làm bộ điều khiển trung tâm.
