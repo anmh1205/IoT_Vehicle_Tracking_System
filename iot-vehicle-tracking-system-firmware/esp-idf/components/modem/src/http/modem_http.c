@@ -132,8 +132,8 @@ static ivts_err_t do_open(const modem_req_t *r)
 /**
  * @brief Đọc @c r->len byte từ @c r->offset vào @c r->buf.
  *
- * Trong lúc lệnh chạy, http_dst trỏ tới bộ đệm của caller để on_data() trong modem_os.c ghi
- * trực tiếp byte thô vào đó. http_dst được đặt lại NULL ngay khi lệnh kết thúc.
+ * Trong lúc lệnh chạy, destination trỏ tới bộ đệm của caller để modem_http_route_raw()
+ * ghi trực tiếp byte thô. destination được đặt lại NULL ngay khi lệnh kết thúc.
  *
  * @retval IVTS_OK       Đọc được ít nhất một byte.
  * @retval IVTS_ERR_IO   Lệnh lỗi hoặc không đọc được byte nào.

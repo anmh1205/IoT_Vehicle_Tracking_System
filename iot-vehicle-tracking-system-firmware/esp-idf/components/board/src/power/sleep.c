@@ -13,7 +13,7 @@
  *
  * ## Khi reset hoặc mất nguồn
  *
- * Deep sleep reset CPU; RAM thường mất, chỉ RTC_DATA_ATTR còn (xem app_rtc_ctx.c).
+ * Deep sleep reset CPU; RAM thường mất, chỉ RTC_DATA_ATTR còn (xem rtc_context.c).
  * Nguyên nhân thức được đọc lại từ esp_sleep_get_wakeup_causes() ở lần boot kế tiếp.
  */
 

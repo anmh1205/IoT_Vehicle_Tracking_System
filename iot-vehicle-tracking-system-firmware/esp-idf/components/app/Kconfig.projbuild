@@ -94,5 +94,5 @@ menu "IVTS"
         help
             Ghi log stack còn trống của từng task và thống kê heap mỗi 60 giây bằng
             uxTaskGetSystemState(). Bật khi cần đo kích thước stack, sau đó điều chỉnh task_stack
-            trong app_init.c. Tắt ở bản phát hành.
+            trong app_wiring.c. Tắt ở bản phát hành.
 endmenu

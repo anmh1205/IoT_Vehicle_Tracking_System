@@ -5,7 +5,7 @@
  * @brief Tách luồng byte UART của SIM7600 thành dòng văn bản, prompt '>' và khối dữ liệu thô,
  *        và phân loại dòng.
  *
- * Module thuần C: không truy cập UART, không dùng đồng hồ; modem_os.c đưa từng byte vào.
+ * Module thuần C: không truy cập UART, không dùng đồng hồ; at_dispatch.c đưa từng byte vào.
  * Không có khoá bên trong; mọi lời gọi phải xuất phát từ task "modem".
  */
 

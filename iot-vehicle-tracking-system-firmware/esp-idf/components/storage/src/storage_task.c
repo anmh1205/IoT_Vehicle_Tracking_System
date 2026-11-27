@@ -4,7 +4,7 @@
  *
  * ## Mô hình thực thi
  *
- * Task "storage" (priority và stack từ storage_cfg_t; app_init.c đặt 3 và 5120 B):
+ * Task "storage" (priority và stack từ storage_cfg_t; app_wiring.c đặt 3 và 5120 B):
  * - Sở hữu thẻ SD và FATFS: không task nào khác mở file trên SD, nên không cần khoá FATFS.
  * - Là consumer duy nhất của s_request_queue. Chặn vô hạn trên xQueueReceive khi không có việc.
  *

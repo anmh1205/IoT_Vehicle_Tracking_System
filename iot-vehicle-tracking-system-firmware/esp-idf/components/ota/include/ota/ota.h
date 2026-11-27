@@ -17,7 +17,7 @@
 #include "ivts_core/ota/contract.h"
 
 /**
- * Nguồn byte của image. app_init.c nối các hàm modem_http_* vào cấu trúc này.
+ * Nguồn byte của image. app_wiring.c nối các hàm modem_http_* vào cấu trúc này.
  * Các hàm được gọi từ task "ota" và được phép chặn.
  */
 typedef struct {

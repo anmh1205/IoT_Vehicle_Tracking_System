@@ -45,7 +45,7 @@ typedef enum {
 } ivts_ecu_state_t;
 
 /**
- * Ảnh chụp trạng thái thiết bị. Chỉ app_state.c được ghi (writer duy nhất);
+ * Ảnh chụp trạng thái thiết bị. Chỉ telemetry_snapshot.c được ghi (writer duy nhất);
  * payload được dựng từ ảnh này trong task app.
  */
 typedef struct {

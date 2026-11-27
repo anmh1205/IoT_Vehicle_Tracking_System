@@ -96,7 +96,7 @@ void ivts_config_defaults(ivts_config_t *c)
     c->sleep_enabled             = true;
     c->imu_wakeup_enabled        = true;
     c->command_subscribe_enabled = true;
-    /* mqtt_port = 0 và các chuỗi để trống: app_init.c điền từ Kconfig. */
+    /* mqtt_port = 0 và các chuỗi để trống: app_boot.c điền từ Kconfig. */
 }
 
 size_t ivts_config_validate(const ivts_config_t *c, ivts_cfg_issue_t *out, size_t cap)

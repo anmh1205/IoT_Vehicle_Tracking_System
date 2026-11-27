@@ -5,7 +5,7 @@
  * ## Mô hình thực thi
  *
  * - ota_start() chạy trong task gọi (task "app"). Hàm sao chép lệnh vào s_job rồi tạo task "ota".
- * - Task "ota" (priority và stack từ ota_cfg_t; app_init.c đặt 3 và 6144 B) chạy ota_job_run() rồi
+ * - Task "ota" (priority và stack từ ota_cfg_t; app_wiring.c đặt 3 và 6144 B) chạy ota_job_run() rồi
  *   tự xoá. Task chỉ tồn tại khi đang tải nên stack được trả lại heap sau mỗi lần OTA.
  * - s_running là cờ duy nhất giữa hai task, kiểu atomic: ota_start() đặt, task "ota" xoá khi
  *   xong, ota_running() đọc từ task bất kỳ. Cờ cũng chặn hai lần OTA chạy chồng.

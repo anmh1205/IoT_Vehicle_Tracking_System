@@ -4,7 +4,7 @@
  *
  * ## Mô hình thực thi
  *
- * Task "board" (priority và stack lấy từ board_cfg_t; app_init.c đặt 2 và 3072 B):
+ * Task "board" (priority và stack lấy từ board_cfg_t; app_wiring.c đặt 2 và 3072 B):
  * - Sở hữu việc lấy mẫu ADC định kỳ và xử lý ngắt IMU. Không task nào khác đọc IMU.
  * - Chờ bằng ulTaskNotifyTake() với timeout = power_sample_ms:
  *   - có notify: đọc OUTS1 qua I2C (nhả ngắt đã chốt), phát IVTS_EV_MOTION_IRQ;
