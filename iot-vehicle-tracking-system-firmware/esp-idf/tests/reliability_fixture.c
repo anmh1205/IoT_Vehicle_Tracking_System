@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "app_internal.h"
-#include "session_tracker.h"
+#include "session/session_tracker.h"
 #include "board/board.h"
 #include "ivts_core/model/record.h"
 #include "ivts_core/ota/confirm.h"

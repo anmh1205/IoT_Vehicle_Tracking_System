@@ -1,16 +1,16 @@
 /**
- * @file sleep_controller.c
+ * @file src/power/sleep_controller.c
  * @brief Coordination of modem and BLE shutdown before board sleep.
  *
  * Keep event processing alive while waiting for the modem. On deadline or
  * renewed activity, cancel the pending sleep and restore the requested
  * services.
  */
-#include "power.h"
+#include "power/power.h"
 #include "app_internal.h"
 #include "device/device.h"
 #include "persist/persist.h"
-#include "telemetry.h"
+#include "session/telemetry.h"
 #include "board/board.h"
 #include "board/board_power.h"
 #include "ivts_core/model/status.h"

@@ -1,5 +1,10 @@
+/*
+ * session/ owns trip and session lifecycle, telemetry sampling and the parked motion alarm.
+ * FreeRTOS calls stay in the app task. Publishing and storage go through publish/ and persist/.
+ * Callers are in runtime/, command/, publish/ and boot/.
+ */
 /**
- * @file session_tracker.h
+ * @file src/session/session_tracker.h
  * @brief App-task session tracking and publish boundary interfaces.
  *
  * The caller ticks session policy and acknowledges published boundaries on the

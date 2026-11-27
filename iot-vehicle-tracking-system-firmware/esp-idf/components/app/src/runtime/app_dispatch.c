@@ -11,7 +11,7 @@
 #include "device/device.h"
 #include "modem/modem.h"
 #include "publish/publish.h"
-#include "telemetry.h"
+#include "session/telemetry.h"
 #include "ivts_core/model/status.h"
 #include "storage/storage.h"
 

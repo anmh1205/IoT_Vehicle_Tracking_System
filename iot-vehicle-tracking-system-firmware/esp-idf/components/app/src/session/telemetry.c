@@ -1,11 +1,11 @@
 /**
- * @file telemetry.c
+ * @file src/session/telemetry.c
  * @brief App-owned sensor snapshots and offline RAW record capture.
  *
  * Apply source-specific validity and age checks before publishing. Capture
  * boot identity and sequence with each RAW record to support stable replay.
  */
-#include "telemetry.h"
+#include "session/telemetry.h"
 #include "app_internal.h"
 #include <string.h>
 #include "board/board.h"
@@ -13,7 +13,7 @@
 #include "obd/obd.h"
 #include "sdkconfig.h"
 #include "device/device.h"
-#include "session_tracker.h"
+#include "session/session_tracker.h"
 
 /** Current telemetry snapshot, owned by the app task. */
 static ivts_telemetry_t s_snapshot;

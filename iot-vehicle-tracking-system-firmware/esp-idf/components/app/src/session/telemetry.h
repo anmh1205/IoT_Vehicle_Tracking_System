@@ -1,5 +1,5 @@
 /**
- * @file components/app/src/telemetry.h
+ * @file src/session/telemetry.h
  * @brief Application telemetry snapshot and record capture interfaces.
  *
  * The app task owns snapshots and builds RAW records from the current sample

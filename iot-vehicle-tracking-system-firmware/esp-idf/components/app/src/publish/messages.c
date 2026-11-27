@@ -8,12 +8,12 @@
 #include "publish/publish.h"
 #include "app_internal.h"
 #include "device/device.h"
-#include "telemetry.h"
+#include "session/telemetry.h"
 #include "platform/log.h"
-#include "fw_update.h"
+#include "fw/fw_update.h"
 #include "ivts_core/payload/json_writer.h"
 #include "ivts_core/payload/payload.h"
-#include "session_tracker.h"
+#include "session/session_tracker.h"
 #include "storage/storage.h"
 
 _Static_assert(IVTS_PAYLOAD_MAX - 1u <= MODEM_PAYLOAD_MAX, "payload phải vừa trong ô publish");

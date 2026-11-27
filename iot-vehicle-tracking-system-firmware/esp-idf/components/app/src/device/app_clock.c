@@ -1,5 +1,5 @@
 /**
- * @file app_clock.c
+ * @file src/device/app_clock.c
  * @brief Clock access for application policy and cloud timestamps.
  *
  * Deadlines use monotonic uptime. Cloud timestamps require a trusted board RTC

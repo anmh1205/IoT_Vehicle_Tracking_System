@@ -1,9 +1,10 @@
 /**
- * @file fw_update.h
- * @brief Application firmware-update policy and report lifecycle interfaces.
+ * @file src/fw/fw_update.h
+ * @brief App-side firmware-update orchestration and report lifecycle interfaces.
  *
- * The app task owns update state. The OTA worker invokes the preparation
- * callback before selecting a new boot partition.
+ * Boot, command, publish and the app task use these interfaces. The app task owns update state.
+ * The OTA worker invokes the preparation callback before selecting a new boot partition.
+ * Firmware download and flashing belong to components/ota.
  */
 #pragma once
 #include <stdbool.h>

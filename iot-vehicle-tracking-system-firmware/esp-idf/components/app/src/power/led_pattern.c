@@ -1,11 +1,11 @@
 /**
- * @file led_pattern.c
+ * @file src/power/led_pattern.c
  * @brief Status LED cadence derived from application state and tracking policy.
  *
  * The app task advances the pattern using monotonic time, then writes the
  * requested level through the board API.
  */
-#include "power.h"
+#include "power/power.h"
 #include "board/board_sensors.h"
 
 typedef struct {

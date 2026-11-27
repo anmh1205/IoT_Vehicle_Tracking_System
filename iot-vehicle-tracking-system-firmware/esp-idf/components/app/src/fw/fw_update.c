@@ -1,16 +1,16 @@
 /**
- * @file fw_update.c
+ * @file src/fw/fw_update.c
  * @brief Application-side firmware update, reboot and confirmation policy.
  *
  * Boot restores pending context. The app task persists status where required
  * and coordinates image confirmation, rollback and final report ACK.
  */
 #include "persist/persist.h"
-#include "fw_update.h"
+#include "fw/fw_update.h"
 #include <string.h>
 #include "app_internal.h"
 #include "device/device.h"
-#include "telemetry.h"
+#include "session/telemetry.h"
 #include "ivts_core/ota/confirm.h"
 #include "platform/log.h"
 #include "ivts_core/base/str.h"

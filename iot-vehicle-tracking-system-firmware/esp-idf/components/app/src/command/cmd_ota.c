@@ -7,7 +7,7 @@
  */
 #include "command/command.h"
 #include <string.h>
-#include "fw_update.h"
+#include "fw/fw_update.h"
 
 static bool validate_ota_url(const char *url)
 {

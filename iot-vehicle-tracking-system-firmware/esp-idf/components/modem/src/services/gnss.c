@@ -1,5 +1,5 @@
 /**
- * @file gnss.c
+ * @file src/services/gnss.c
  * @brief Periodic SIM7600 GNSS reads and parsing into integer fix fields.
  *
  * The modem task applies the requested GNSS state, reads fixes and publishes

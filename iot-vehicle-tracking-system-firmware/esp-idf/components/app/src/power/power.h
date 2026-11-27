@@ -1,9 +1,10 @@
 /**
- * @file power.h
- * @brief Runtime sleep coordination and status LED policy interfaces.
+ * @file src/power/power.h
+ * @brief App sleep decisions and status LED patterns.
  *
  * The app task drives both features. The sleep controller coordinates
  * background workers before invoking the board sleep adapter.
+ * ESP-IDF sleep calls stay in components/board.
  */
 #pragma once
 #include "ivts_core/fsm/axes.h"

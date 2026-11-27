@@ -9,7 +9,7 @@
 #include "command/command.h"
 #include "device/device.h"
 #include "obd/obd.h"
-#include "power.h"
+#include "power/power.h"
 #include "publish/publish.h"
 
 void app_fsm_actions_execute(const ivts_fsm_out_t *o, ivts_fsm_t *fsm, ivts_axes_t *axes,

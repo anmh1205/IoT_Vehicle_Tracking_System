@@ -7,7 +7,7 @@
  */
 #include "persist/persist.h"
 #include "boot/boot.h"
-#include "motion_alarm.h"
+#include "session/motion_alarm.h"
 #include "app_internal.h"
 #include "board/board_power.h"
 #include "command/command.h"
@@ -15,12 +15,12 @@
 #include "platform/log.h"
 #include "esp_random.h"
 #include "esp_system.h"
-#include "fw_update.h"
+#include "fw/fw_update.h"
 #include "ota/ota.h"
 #include "ivts_core/base/str.h"
 #include "runtime/runtime.h"
 #include "sdkconfig.h"
-#include "session_tracker.h"
+#include "session/session_tracker.h"
 #include "storage/storage.h"
 
 static bool fill_deploy_defaults(ivts_config_t *c)

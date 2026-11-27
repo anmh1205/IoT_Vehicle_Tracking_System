@@ -131,24 +131,12 @@ class Layers(unittest.TestCase):
         root = COMPONENTS / "app/src"
         levels = {
             "boot": 0, "runtime": 0,
-            "fw_update": 1, "command": 1, "publish": 1, "session": 1,
-            "alarm": 1, "telemetry": 1, "power": 1,
+            "fw": 1, "command": 1, "publish": 1, "session": 1, "power": 1,
             "device": 2, "persist": 2,
-        }
-        flat_modules = {
-            "fw_update": "fw_update",
-            "session_tracker": "session",
-            "motion_alarm": "alarm",
-            "telemetry": "telemetry",
-            "power": "power",
-            "sleep_controller": "power",
-            "led_pattern": "power",
         }
 
         def module(relative):
-            if len(relative.parts) == 1:
-                return flat_modules.get(relative.stem)
-            return relative.parts[0]
+            return relative.parts[0] if len(relative.parts) > 1 else None
 
         paths = dict(sources(root))
         headers = {path.relative_to(root).as_posix(): path for path in paths if path.suffix == ".h"}

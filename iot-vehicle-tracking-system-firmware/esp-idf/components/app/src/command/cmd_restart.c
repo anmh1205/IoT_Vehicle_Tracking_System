@@ -8,9 +8,9 @@
 #include "persist/persist.h"
 #include "command/command.h"
 #include <string.h>
-#include "telemetry.h"
+#include "session/telemetry.h"
 #include "app_internal.h"
-#include "fw_update.h"
+#include "fw/fw_update.h"
 #include "ivts_core/base/str.h"
 #include "ota/ota.h"
 #include "platform/platform.h"

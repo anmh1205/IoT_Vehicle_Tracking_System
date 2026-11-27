@@ -1,5 +1,5 @@
 /**
- * @file motion_alarm.h
+ * @file src/session/motion_alarm.h
  * @brief Application motion alarm persistence and publish hooks.
  *
  * Boot restores any durable alarm. The app task latches it, presents it to the

@@ -4,14 +4,16 @@ The app task drains by-value events, refreshes telemetry and runs the FSM. Boot 
 
 | Source | Responsibility |
 | --- | --- |
-| `boot/` | Startup order, policy mapping, adapter wiring and the shared six-task specification |
-| `runtime/` | Task creation, queue ownership, dispatch, diagnostics and FSM effects |
-| `device/` | Device identity and policy, broker availability and GNSS demand |
-| `persist/` | Typed NVS records, deep-sleep context and sequence allocation |
-| `publish/` | Payload construction, one in-flight publish, ACK routing and ordered replay |
-| `command/` | Cloud command dispatch, durable receipts and completion |
-| `telemetry.c`, `session_tracker.c`, `motion_alarm.c` | Sensor snapshots and RAW capture, session boundaries and durable alarms |
-| `fw_update.c`, `sleep_controller.c`, `led_pattern.c` | Firmware confirmation, radio shutdown and sleep, LED policy |
+| `src/app.c`, `src/app_internal.h` | App entry point and shared declarations |
+| `src/boot/` | Startup order, policy mapping, adapter wiring and the shared six-task specification |
+| `src/runtime/` | Task creation, queue ownership, dispatch, diagnostics and FSM effects |
+| `src/session/` | Sensor snapshots and RAW capture, session boundaries and durable alarms |
+| `src/fw/` | Firmware update orchestration and confirmation |
+| `src/power/` | Radio shutdown, sleep decisions and status LED patterns |
+| `src/command/` | Cloud command dispatch, durable receipts and completion |
+| `src/publish/` | Payload construction, one in-flight publish, ACK routing and ordered replay |
+| `src/persist/` | Typed NVS records, deep-sleep context and sequence allocation |
+| `src/device/` | Device identity and policy, broker availability, GNSS demand and clock access |
 
 For a new command, add a handler, register it in the table in `command/cmd_inbox.c` and exercise it in the command fixture. Add editable configuration fields in `command/cmd_config.c` and apply policy in `boot/app_config.c`. Route a new component event through `runtime/app_dispatch.c` to its owner.
 

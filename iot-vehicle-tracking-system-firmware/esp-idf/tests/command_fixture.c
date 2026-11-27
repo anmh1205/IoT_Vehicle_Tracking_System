@@ -3,10 +3,10 @@
 #include <string.h>
 #include "app_internal.h"
 #include "device/device.h"
-#include "telemetry.h"
+#include "session/telemetry.h"
 #include "command/command.h"
 #include "publish/publish.h"
-#include "session_tracker.h"
+#include "session/session_tracker.h"
 #include "esp_system.h"
 #include "ivts_core/payload/json_reader.h"
 #include "modem_internal.h"

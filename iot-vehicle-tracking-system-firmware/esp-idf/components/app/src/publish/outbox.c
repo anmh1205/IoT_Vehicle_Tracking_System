@@ -6,12 +6,12 @@
  * their closing or opening session boundary.
  */
 #include "publish/publish.h"
-#include "motion_alarm.h"
+#include "session/motion_alarm.h"
 #include "app_internal.h"
-#include "fw_update.h"
+#include "fw/fw_update.h"
 #include "ivts_core/base/str.h"
 #include "device/device.h"
-#include "session_tracker.h"
+#include "session/session_tracker.h"
 
 static bool s_status_needs_publish;
 static bool s_event_needs_publish;

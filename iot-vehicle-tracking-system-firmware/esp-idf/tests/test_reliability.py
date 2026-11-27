@@ -21,7 +21,7 @@ class Reliability(unittest.TestCase):
             [FIRMWARE / "tests" / "reliability_fixture.c", *sorted((storage / "src/queue").glob("*.c")),
              modem / "at/at_parser.c", modem / "at/at_engine.c", modem / "mqtt/mqtt_rx.c", modem / "mqtt/mqtt_session.c",
              obd / "obd_elm327.c", obd / "obd_pid.c",
-             components / "app/src/session_tracker.c", components / "app/src/app_clock.c", PLATFORM / "src/platform.c", PLATFORM / "src/platform_rtos.c", *sorted(CORE.joinpath("src").rglob("*.c"))],
+             components / "app/src/session/session_tracker.c", components / "app/src/device/app_clock.c", PLATFORM / "src/platform.c", PLATFORM / "src/platform_rtos.c", *sorted(CORE.joinpath("src").rglob("*.c"))],
             ["-D_POSIX_C_SOURCE=200809L", '-DSD_MOUNT="sd"', "-I", PLATFORM / "include", "-I", FIRMWARE / "tests" / "stubs",
              "-I", storage / "include", "-I", storage / "src", "-I", modem, "-I", obd, "-I", components / "obd" / "include",
              "-I", components / "modem" / "include", "-I", components / "app" / "src",

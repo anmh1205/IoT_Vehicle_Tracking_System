@@ -1,5 +1,5 @@
 /**
- * @file motion_alarm.c
+ * @file src/session/motion_alarm.c
  * @brief Durable motion alarm delivery and acknowledgement.
  *
  * Attempt an NVS write when latching an alarm and retry on later delivery
@@ -7,7 +7,7 @@
  * alarm cannot be cleared in NVS, retain it for retry.
  */
 #include "persist/persist.h"
-#include "motion_alarm.h"
+#include "session/motion_alarm.h"
 #include "app_internal.h"
 #include "storage/storage.h"
 

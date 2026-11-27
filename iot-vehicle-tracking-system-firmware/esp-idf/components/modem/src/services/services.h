@@ -1,5 +1,5 @@
 /**
- * @file services.h
+ * @file src/services/services.h
  * @brief GNSS, HTTP and LTE link services built on the AT engine.
  *
  * The modem task runs these services, and AT dispatch routes HTTP replies.

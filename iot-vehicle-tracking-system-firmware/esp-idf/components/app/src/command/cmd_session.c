@@ -9,12 +9,12 @@
 #include "command/command.h"
 #include "ivts_core/payload/meta.h"
 #include "publish/publish.h"
-#include "session_tracker.h"
+#include "session/session_tracker.h"
 #include "persist/persist.h"
 #include "device/device.h"
 #include "storage/storage.h"
 #include "app_internal.h"
-#include "telemetry.h"
+#include "session/telemetry.h"
 
 const char *cmd_session_handle(const cmd_envelope_t *command)
 {

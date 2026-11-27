@@ -1,5 +1,5 @@
 /**
- * @file link.c
+ * @file src/services/link.c
  * @brief LTE and MQTT link sequencing, retry backoff and power recovery.
  *
  * The modem task executes one state-machine step at a time, preserving retry

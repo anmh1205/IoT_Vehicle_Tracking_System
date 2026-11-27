@@ -1,5 +1,5 @@
 /**
- * @file session_tracker.c
+ * @file src/session/session_tracker.c
  * @brief Ignition-session tracking and durable delivery of session boundaries.
  *
  * Persist open and closed session boundaries until PUBACK. Accept a late
@@ -14,7 +14,7 @@
  * boundary using its original identity.
  */
 
-#include "session_tracker.h"
+#include "session/session_tracker.h"
 #include "app_internal.h"
 #include <string.h>
 #include "platform/log.h"
