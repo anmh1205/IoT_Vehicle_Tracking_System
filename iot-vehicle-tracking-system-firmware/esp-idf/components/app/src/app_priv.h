@@ -59,17 +59,7 @@ typedef struct {
     uint32_t       replay_token;    /**< Token của bản ghi replay đang bay. */
     uint32_t       popped_token;    /**< Token đã yêu cầu pop, chờ storage xử lý xong. */
     bool           replay_requested;/**< Đã gửi yêu cầu peek lên storage, chờ kết quả. */
-    bool           ota_health_acked; /**< Broker đã ACK bản tin trạng thái trong lần boot này. */
     bool           status_dirty;
-
-    /* OTA */
-    bool               ota_confirm_pending; /**< Image mới đang chờ xác nhận hợp lệ. */
-    bool               ota_job_active;
-    bool               ota_report_pending;  /**< Giữ ngữ cảnh NVS đến PUBACK của báo cáo cuối. */
-    uint64_t           ota_reboot_ms;
-    ivts_ota_pending_t ota_pending;         /**< Thông tin OTA đang chờ, lưu trong NVS. */
-    ivts_fw_status_t   fw;                  /**< Trạng thái firmware báo lên cloud. */
-    bool               fw_dirty;            /**< fw đã đổi, cần publish PUB_FW. */
 
     /* Sự kiện chờ publish (ví dụ config hỏng). */
     char           event_code[32];  /**< Mã sự kiện gửi lên cloud. */

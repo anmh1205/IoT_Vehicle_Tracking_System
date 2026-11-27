@@ -19,6 +19,7 @@
  */
 
 #include "app_priv.h"
+#include "fw_update/fw_update.h"
 #include "app_timing.h"
 #include <string.h>
 #include "board/board.h"
@@ -30,7 +31,6 @@
 #include "ivts_core/fsm/state.h"
 #include "modem/modem.h"
 #include "obd/obd.h"
-#include "ota/ota.h"
 #include "storage/storage.h"
 
 app_t g_app;
@@ -52,75 +52,6 @@ static void update_led(uint64_t now)
     default: break;
     }
     board_led_set(on);
-}
-
-/**
- * @brief Cập nhật trạng thái firmware và hẹn reboot khi đã sẵn sàng.
- */
-static void on_ota_progress(const ivts_event_t *ev)
-{
-    g_app.fw.status = ev->u.ota_progress.phase;
-    g_app.fw.progress = ev->u.ota_progress.pct;
-    g_app.fw.error = (uint8_t)ev->u.ota_progress.err;
-    g_app.fw_dirty = true;
-    if (ev->u.ota_progress.phase == IVTS_OTA_ST_REBOOTING) {
-        g_app.ota_job_active = false;
-        g_app.ota_reboot_ms = app_now() + OTA_REBOOT_DELAY_MS;
-    } else if (ev->u.ota_progress.phase == IVTS_OTA_ST_FAILED) {
-        g_app.ota_job_active = false;
-        g_app.ota_report_pending = ev->u.ota_progress.err == IVTS_OTA_E_SET_BOOT;
-    }
-}
-
-static uint64_t s_confirm_retry_at_ms;
-
-static void accept_running_image(uint64_t uptime_ms)
-{
-    if (ota_mark_valid() == IVTS_OK) {
-        g_app.ota_confirm_pending = false;
-        g_app.ota_report_pending = g_app.ota_pending.job_id[0] != '\0';
-        g_app.fw.status = IVTS_OTA_ST_SUCCESS;
-        g_app.fw.progress = IVTS_OTA_PCT_DONE;
-        (void)ivts_str_copy(g_app.fw.current_version, sizeof g_app.fw.current_version, ota_running_version());
-        (void)ivts_str_copy(g_app.fw.partition, sizeof g_app.fw.partition, ota_running_partition());
-        g_app.fw_dirty = true;
-        ESP_LOGI(APP_TAG, "image hợp lệ: đã mark valid");
-    } else {
-        s_confirm_retry_at_ms = uptime_ms + OTA_MARK_VALID_RETRY_MS;
-        ESP_LOGW(APP_TAG, "chưa đánh dấu được image OTA hợp lệ");
-    }
-}
-
-static void rollback_running_image(uint64_t uptime_ms)
-{
-    ESP_LOGE(APP_TAG, "quá hạn confirm: rollback");
-    (void)ota_rollback_and_reboot();
-    s_confirm_retry_at_ms = uptime_ms + OTA_ROLLBACK_RETRY_MS;
-}
-
-/**
- * @brief Quyết định chấp nhận hay rollback image OTA đang chờ xác nhận.
- *
- * Xác nhận trước hạn khi broker đang kết nối và đã PUBACK bản tin trạng thái trong lần boot này.
- */
-static void ota_confirm_tick(void)
-{
-    if (!g_app.ota_confirm_pending) { return; }
-    uint64_t uptime = app_now();
-    if (uptime < s_confirm_retry_at_ms) { return; }
-    bool trusted;
-    uint64_t now = app_clock_unix_ms_or_zero(&trusted);
-    bool healthy = (g_app.link == IVTS_LINK_BROKER_UP) && g_app.ota_health_acked;
-    switch (ivts_ota_confirm_decide(&g_app.ota_pending, healthy, now, trusted, uptime)) {
-    case IVTS_CONFIRM_ACCEPT:
-        accept_running_image(uptime);
-        break;
-    case IVTS_CONFIRM_ROLLBACK:
-        rollback_running_image(uptime);
-        break;
-    case IVTS_CONFIRM_WAIT:
-        break;
-    }
 }
 
 static void update_link(ivts_link_t link)
@@ -222,8 +153,7 @@ static void app_task(void *arg)
 
         update_link(modem_link_state());
         app_publish_poll();
-        if (ota_progress_take(&ev)) { on_ota_progress(&ev); }
-        if (g_app.ota_reboot_ms != 0u && now >= g_app.ota_reboot_ms) { platform_restart("ota_reboot"); }
+        app_fw_update_poll(now);
         app_cmd_handle();
         app_cmd_tick();
 
@@ -235,10 +165,10 @@ static void app_task(void *arg)
             .link_up = linked,
             .link_expected = g_app.provisioned,
             .publish_idle = !g_app.pub_inflight && !storage_queue_push_pending(),
-            .control_pending = g_app.status_dirty || g_app.session.count != 0u || g_app.fw_dirty ||
+            .control_pending = g_app.status_dirty || g_app.session.count != 0u || app_fw_update_report_needs_publish() ||
                                g_app.alarm.seq != 0u || app_cmd_pending(),
             .queue_pending = storage_queue_pending(),
-            .ota_active = g_app.ota_job_active || g_app.ota_confirm_pending || g_app.ota_reboot_ms != 0u ||
+            .ota_active = app_fw_update_in_progress() ||
                           app_cmd_blocks_sleep(),
         };
         ivts_fsm_out_t out;
@@ -249,14 +179,14 @@ static void app_task(void *arg)
             app_state_set_device(ivts_fsm_device_state(g_app.fsm.state), IVTS_SLEEP_NONE);
             if (g_app.fsm.state == IVTS_ST_ALARM) { app_publish_latch_alarm(); }
         }
-        if (g_app.ota_job_active || g_app.ota_confirm_pending || g_app.ota_reboot_ms != 0u) {
+        if (app_fw_update_in_progress()) {
             app_state_set_device(IVTS_DEV_OTA, IVTS_SLEEP_NONE);
         } else if (g_app.fsm.state != IVTS_ST_SLEEP) {
             app_state_set_device(ivts_fsm_device_state(g_app.fsm.state), IVTS_SLEEP_NONE);
         }
         update_led(now);
         execute(&out);
-        ota_confirm_tick();
+        app_fw_update_confirm_tick();
         app_diag_tick(now);
     }
 }

@@ -32,6 +32,7 @@
  */
 
 #include "app_priv.h"
+#include "fw_update/fw_update.h"
 #include "app_timing.h"
 #include <string.h>
 #include "esp_log.h"
@@ -159,8 +160,8 @@ void app_publish(pub_kind_t kind)
     }
     case PUB_FW: {
         ivts_msg_meta_t m = meta(app_rtc_next_seq());
-        e = ivts_payload_firmware(&m, &g_app.fw, s_buf, sizeof s_buf, &len);
-        if (e == IVTS_OK && send(kind, MODEM_TOPIC_FIRMWARE, len)) { g_app.fw_dirty = false; }
+        e = ivts_payload_firmware(&m, app_fw_update_report(), s_buf, sizeof s_buf, &len);
+        if (e == IVTS_OK && send(kind, MODEM_TOPIC_FIRMWARE, len)) { app_fw_update_report_sent(); }
         return;
     }
     default:
@@ -204,41 +205,6 @@ bool app_publish_location(void)
            send(PUB_LOCATION, MODEM_TOPIC_RAWDATA, len);
 }
 
-static void on_report_failed(void)
-{
-    g_app.fw_dirty = true;
-}
-
-static void confirm_health_from_report(void)
-{
-    g_app.ota_health_acked = true;
-}
-
-static void release_reboot_after_report(void)
-{
-    g_app.ota_reboot_ms = app_now();
-}
-
-static void clear_confirm_ctx_after_report(void)
-{
-    ivts_ota_pending_t empty = {0};
-    if (storage_ota_pending_save(&empty) == IVTS_OK) { g_app.ota_report_pending = false; }
-    else { on_report_failed(); }
-}
-
-static void on_firmware_report_acked(bool ok)
-{
-    if (!ok) {
-        on_report_failed();
-    } else if (g_app.ota_confirm_pending) {
-        confirm_health_from_report();
-    } else if (!g_app.fw_dirty && g_app.ota_reboot_ms != 0u) {
-        release_reboot_after_report();
-    } else if (!g_app.fw_dirty && g_app.ota_report_pending) {
-        clear_confirm_ctx_after_report();
-    }
-}
-
 /**
  * @brief Xử lý kết quả publish: giải phóng ô bay và áp dụng chính sách theo loại bản tin.
  *
@@ -264,12 +230,12 @@ void app_publish_on_ack(const ivts_event_t *ev)
         }
         break;
     case PUB_STATUS:
-        if (ok) { g_app.ota_health_acked = true; }
+        if (ok) { app_fw_update_note_health_ack(); }
         else { g_app.status_dirty = true; }
         break;
     case PUB_BOUNDARY:
         if (ok) {
-            g_app.ota_health_acked = true;
+            app_fw_update_note_health_ack();
             if (app_session_on_ack()) { s_boundary_retry_at = 0; }
         }
         break;
@@ -280,7 +246,7 @@ void app_publish_on_ack(const ivts_event_t *ev)
         app_cmd_on_location_ack(ok);
         break;
     case PUB_FW:
-        on_firmware_report_acked(ok);
+        app_fw_update_on_report_acked(ok);
         break;
     case PUB_EVENT:
         if (!ok) { g_app.event_dirty = true; }
@@ -317,7 +283,7 @@ void app_publish_poll(void)
 
 void app_publish_control_tick(void)
 {
-    if ((g_app.ota_reboot_ms != 0u || g_app.ota_confirm_pending) && g_app.fw_dirty &&
+    if (app_fw_update_prioritizes_report() && app_fw_update_report_needs_publish() &&
         !g_app.pub_inflight && g_app.link == IVTS_LINK_BROKER_UP) {
         app_publish(PUB_FW);
         return;
@@ -336,7 +302,7 @@ void app_publish_control_tick(void)
         }
     } else if (g_app.status_dirty) {
         app_publish(PUB_STATUS);
-    } else if (g_app.fw_dirty) {
+    } else if (app_fw_update_report_needs_publish()) {
         app_publish(PUB_FW);
     } else if (g_app.event_dirty) {
         app_publish(PUB_EVENT);
