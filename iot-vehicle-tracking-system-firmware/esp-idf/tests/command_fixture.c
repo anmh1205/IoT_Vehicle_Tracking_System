@@ -1,7 +1,9 @@
 #include "esp_timer.h"
 #include <assert.h>
 #include <string.h>
-#include "app_priv.h"
+#include "app_clock.h"
+#include "device/app_device.h"
+#include "telemetry/telemetry_snapshot.h"
 #include "command/command.h"
 #include "publish/messages.h"
 #include "publish/outbox.h"
@@ -12,7 +14,6 @@
 #include "ota/ota.h"
 #include "storage/storage.h"
 
-app_t g_app;
 static uint64_t s_now = 1u;
 QueueHandle_t g_modem_q = &s_now;
 
@@ -28,9 +29,8 @@ static ivts_telemetry_t s_telemetry;
 
 int64_t esp_timer_get_time(void) { return 0; }
 uint64_t app_now(void) { return s_now; }
-const ivts_telemetry_t *app_state_get(void) { return &s_telemetry; }
+const ivts_telemetry_t *app_telemetry_view(void) { return &s_telemetry; }
 void app_outbox_request_status(void) {}
-void app_apply_config(void) {}
 void esp_restart(void) { s_restarts++; }
 esp_err_t modem_os_start(void) { return ESP_OK; }
 
@@ -155,7 +155,7 @@ static void check_receipts(void)
     const char *first = "{\"command_id\":\"41\",\"command\":\"update_config\",\"params\":{\"tracking_interval_s\":\"5\"}}";
     s_write_fails = true;
     receive(first);
-    assert(g_app.cfg.tracking_interval_s == 5u && s_config_writes == 1u);
+    assert(app_device_config()->tracking_interval_s == 5u && s_config_writes == 1u);
     app_cmd_tick();
     assert(s_ack_count == 0u && app_cmd_pending());
     s_write_fails = false;
@@ -168,17 +168,17 @@ static void check_receipts(void)
     app_cmd_init();
     receive(first);
     ack("acknowledged", NULL);
-    assert(g_app.cfg.tracking_interval_s == 7u && s_config_writes == 2u);
+    assert(app_device_config()->tracking_interval_s == 7u && s_config_writes == 2u);
 
     s_read_fails = true;
     app_cmd_init();
     receive("{\"command_id\":43,\"command\":\"enable_tracking\",\"params\":{\"enabled\":false}}");
     ack("failed", "dedupe_unavailable");
-    assert(g_app.tracking_enabled);
+    assert(app_device_tracking_enabled());
     s_read_fails = false;
     receive("{\"command_id\":43,\"command\":\"enable_tracking\",\"params\":{\"enabled\":false}}");
     ack("acknowledged", NULL);
-    assert(!g_app.tracking_enabled);
+    assert(!app_device_tracking_enabled());
 }
 
 static void check_location(void)
@@ -259,7 +259,7 @@ static void check_fifo(void)
 static void check_rollback(void)
 {
     const char *command = "{\"command_id\":81,\"command\":\"manual_rollback\"}";
-    g_app.axes.ign = IVTS_IGN_OFF;
+    s_telemetry.ignition = IVTS_IGN_OFF;
     s_running_slot = "ota_1";
     s_rollback_available = true;
     s_rollback_write_fails = true;
@@ -305,13 +305,15 @@ int main(int argc, char **argv)
     modem_cfg_t modem = {.sink = {.fn = event_sink}, .client_id = "tracker", .device_id = "tracker",
                          .command_subscribe_enabled = true};
     assert(modem_init(&modem) == IVTS_OK);
-    ivts_config_defaults(&g_app.cfg);
-    strcpy(g_app.cfg.device_id, "tracker");
-    strcpy(g_app.cfg.auth_token, "test");
-    strcpy(g_app.cfg.mqtt_host, "broker.test");
-    strcpy(g_app.cfg.apn, "example");
-    g_app.cfg.mqtt_port = 8883u;
-    g_app.tracking_enabled = true;
+    ivts_config_t config;
+    ivts_config_defaults(&config);
+    strcpy(config.device_id, "tracker");
+    strcpy(config.auth_token, "test");
+    strcpy(config.mqtt_host, "broker.test");
+    strcpy(config.apn, "example");
+    config.mqtt_port = 8883u;
+    app_device_set_config(&config);
+    app_device_set_tracking_enabled(true);
     app_cmd_init();
     if (strcmp(argv[1], "receipts") == 0) { check_receipts(); }
     else if (strcmp(argv[1], "location") == 0) { check_location(); }

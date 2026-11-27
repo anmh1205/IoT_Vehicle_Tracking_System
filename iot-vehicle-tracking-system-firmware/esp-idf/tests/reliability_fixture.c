@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include "at_engine.h"
 #include "at_parser.h"
-#include "app_priv.h"
+#include "app_msg_seq.h"
 #include "session/session_tracker.h"
 #include "board/board.h"
 #include "elm327.h"
@@ -26,7 +26,6 @@ void storage_emit(const ivts_event_t *ev) { assert(ev->type == IVTS_EV_QUEUE_REA
 static const char *s_fail_read;
 static bool s_fail_remove, s_fail_truncate, s_short_write;
 
-app_t g_app;
 modem_t g_modem;
 static ivts_session_state_t s_persisted_session;
 static bool s_fail_session_save;
@@ -36,7 +35,7 @@ static size_t s_expected_raw;
 static unsigned s_seen_commands;
 
 int64_t esp_timer_get_time(void) { return (int64_t)(s_now * 1000u); }
-uint32_t app_rtc_next_seq(void) { return ++s_seq; }
+uint32_t app_msg_seq_next(void) { return ++s_seq; }
 ivts_err_t board_time_get(uint64_t *unix_ms, bool *trusted)
 {
     *unix_ms = UINT64_C(1795430400000) + s_now;

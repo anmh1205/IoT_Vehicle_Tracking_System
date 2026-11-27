@@ -1,6 +1,6 @@
 #include "motion_alarm.h"
 #include "app_clock.h"
-#include "app_priv.h"
+#include "app_msg_seq.h"
 #include "app_timing.h"
 #include "storage/storage.h"
 
@@ -17,7 +17,7 @@ void app_alarm_latch(bool provisioned, uint32_t boot_id)
 {
     if (!provisioned || s_alarm.seq != 0u) { return; }
 
-    uint32_t seq = app_rtc_next_seq();
+    uint32_t seq = app_msg_seq_next();
     uint32_t uptime_ms = (uint32_t)app_now();
     uint64_t unix_ms = app_clock_unix_ms_or_zero(NULL);
     s_alarm = (ivts_motion_alarm_t){ .boot_id = boot_id, .seq = seq, .unix_ms = unix_ms, .uptime_ms = uptime_ms };

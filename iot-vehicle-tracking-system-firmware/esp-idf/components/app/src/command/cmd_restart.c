@@ -1,6 +1,6 @@
 #include "cmd_handlers.h"
 #include <string.h>
-#include "app_priv.h"
+#include "telemetry/telemetry_snapshot.h"
 #include "app_timing.h"
 #include "fw_update/fw_update.h"
 #include "ivts_core/base/str.h"
@@ -28,7 +28,7 @@ static bool is_duplicate_restart(const ivts_restart_intent_t *intent, bool rollb
 static const char *check_restart_preconditions(bool rollback)
 {
     if (app_fw_update_blocks_restart(rollback)) { return "ota_busy"; }
-    if (rollback && g_app.axes.ign != IVTS_IGN_OFF) { return "unsafe_runtime_window"; }
+    if (rollback && app_telemetry_view()->ignition != IVTS_IGN_OFF) { return "unsafe_runtime_window"; }
     if (rollback && !ota_can_rollback()) { return "no_rollback_image"; }
     return NULL;
 }

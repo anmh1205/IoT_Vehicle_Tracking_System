@@ -1,5 +1,5 @@
 /**
- * @file app_rtc_ctx.c
+ * @file rtc_context.c
  * @brief Ngữ cảnh giữ qua deep sleep: boot_id và bộ đếm seq của bản ghi.
  *
  * Ngữ cảnh nằm trong RTC slow memory (RTC_DATA_ATTR): còn nguyên qua deep sleep, mất khi mất
@@ -9,7 +9,7 @@
  * ## Ngữ cảnh gọi
  *
  * Mọi hàm chỉ gọi từ task "app" (hoặc từ app_init_all() trước khi task đó tồn tại), nên
- * s_seq không cần khoá. s_seq tăng trong RAM theo từng bản ghi; giá trị chỉ được ghi xuống
+ * bộ đếm seq không cần khoá. bộ đếm seq tăng trong RAM theo từng bản ghi; giá trị chỉ được ghi xuống
  * RTC trong app_rtc_ctx_save(), gọi trước khi ngủ.
  *
  * ## Khi reset hoặc mất nguồn
@@ -19,7 +19,8 @@
  * ngữ cảnh, còn app_init_all() cấp boot_id mới từ NVS mỗi khi ngữ cảnh không hợp lệ.
  */
 
-#include "app_priv.h"
+#include "rtc_context.h"
+#include "app_msg_seq.h"
 #include <stddef.h>
 #include <string.h>
 #include "esp_attr.h"
@@ -41,7 +42,6 @@ typedef struct {
 } rtc_ctx_t;
 
 static RTC_DATA_ATTR rtc_ctx_t s_ctx;   /* Bản trong RTC memory, chỉ ghi ở app_rtc_ctx_save(). */
-static uint32_t s_seq;                  /* Bộ đếm seq đang chạy trong RAM. */
 
 /** CRC32 của ngữ cảnh, tính trên các byte đứng trước trường crc. */
 static uint32_t ctx_crc(const rtc_ctx_t *c) { return ivts_crc32(0, c, offsetof(rtc_ctx_t, crc)); }
@@ -62,7 +62,7 @@ bool app_rtc_ctx_load(uint32_t *boot_id, uint32_t *seq)
     }
     *boot_id = s_ctx.boot_id;
     *seq = s_ctx.seq;
-    s_seq = s_ctx.seq;
+    app_msg_seq_restore(s_ctx.seq);
     return true;
 }
 
@@ -80,17 +80,5 @@ void app_rtc_ctx_save(uint32_t boot_id, uint32_t seq, uint8_t last_state)
     s_ctx.seq = seq;
     s_ctx.last_state = last_state;
     s_ctx.crc = ctx_crc(&s_ctx);
-    s_seq = seq;
-}
-
-/** Tăng bộ đếm seq và trả về giá trị mới. */
-uint32_t app_rtc_next_seq(void)
-{
-    return ++s_seq;
-}
-
-/** Trả về seq đã cấp gần nhất mà không tăng bộ đếm. */
-uint32_t app_rtc_current_seq(void)
-{
-    return s_seq;
+    app_msg_seq_restore(seq);
 }

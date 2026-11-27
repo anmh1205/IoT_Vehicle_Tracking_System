@@ -1,14 +1,13 @@
 /**
- * @file app_os.c
+ * @file app_events.c
  * @brief Queue sự kiện của app và việc tạo task "app".
  *
  * ## Mô hình thực thi
  *
  * Task "app" (priority 5, stack 6144 B):
- * - Là consumer duy nhất của s_q và là writer duy nhất của g_app.
- * - Mọi thay đổi trạng thái xảy ra trong task này, nên g_app không cần mutex.
+ * - App consumes these events and owns application state.
  *
- * Queue s_q (APP_QUEUE_LEN phần tử, mỗi phần tử là một ivts_event_t sao chép theo giá trị):
+ * Queue s_event_queue (APP_QUEUE_LEN phần tử, mỗi phần tử là một ivts_event_t sao chép theo giá trị):
  * - Producer: task "modem", "board", "storage", "obd", "ota" gọi sink_fn() từ ngữ cảnh task.
  * - Không có producer nào chạy trong ISR: ISR của IMU chỉ notify task "board".
  * - sink_fn() dùng timeout 0 nên producer không bao giờ bị chặn bởi app chậm. Queue đầy thì
@@ -22,9 +21,8 @@
  * (offline queue, cấu hình, OTA pending) do storage ghi riêng, không đi qua queue này.
  */
 
-#include "app_priv.h"
+#include "app_events.h"
 #include <stdatomic.h>
-#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
@@ -33,7 +31,7 @@
 #define APP_TASK_PRIO   5      /* Thấp hơn "modem" (6) để UART được rút trước, cao hơn "obd" (4). */
 #define APP_TASK_STACK  6144   /* Byte. */
 
-static QueueHandle_t s_q;                  /* Queue sự kiện; tạo một lần trong app_os_init(). */
+static QueueHandle_t s_event_queue;                  /* Queue sự kiện; tạo một lần trong app_events_init(). */
 static _Atomic uint32_t s_drops;           /* Số sự kiện bỏ do đầy; nhiều task tăng đồng thời. */
 
 /**
@@ -44,32 +42,32 @@ static _Atomic uint32_t s_drops;           /* Số sự kiện bỏ do đầy; n
 static ivts_err_t sink_fn(void *ctx, const ivts_event_t *ev)
 {
     (void)ctx;
-    if (xQueueSend(s_q, ev, 0) == pdTRUE) {
+    if (xQueueSend(s_event_queue, ev, 0) == pdTRUE) {
         return IVTS_OK;
     }
     atomic_fetch_add_explicit(&s_drops, 1u, memory_order_relaxed);
     return IVTS_ERR_FULL;
 }
 
-bool app_os_init(void)
+bool app_events_init(void)
 {
-    s_q = xQueueCreate(APP_QUEUE_LEN, sizeof(ivts_event_t));
-    return s_q != NULL;
+    s_event_queue = xQueueCreate(APP_QUEUE_LEN, sizeof(ivts_event_t));
+    return s_event_queue != NULL;
 }
 
-ivts_sink_t app_sink(void)
+ivts_sink_t app_events_sink(void)
 {
     return (ivts_sink_t){ .fn = sink_fn, .ctx = NULL };
 }
 
-bool app_os_receive(ivts_event_t *ev, uint32_t timeout_ms)
+bool app_events_receive(ivts_event_t *ev, uint32_t timeout_ms)
 {
-    return xQueueReceive(s_q, ev, pdMS_TO_TICKS(timeout_ms)) == pdTRUE;
+    return xQueueReceive(s_event_queue, ev, pdMS_TO_TICKS(timeout_ms)) == pdTRUE;
 }
 
-uint32_t app_os_drops(void) { return atomic_load_explicit(&s_drops, memory_order_relaxed); }
+uint32_t app_events_drops(void) { return atomic_load_explicit(&s_drops, memory_order_relaxed); }
 
-bool app_os_start_task(void (*fn)(void *))
+bool app_events_start_task(void (*fn)(void *))
 {
     return xTaskCreate(fn, "app", APP_TASK_STACK, NULL, APP_TASK_PRIO, NULL) == pdPASS;
 }

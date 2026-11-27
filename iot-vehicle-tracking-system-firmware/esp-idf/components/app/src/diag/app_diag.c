@@ -6,7 +6,8 @@
  * Hàm chỉ gọi từ task "app" nên bộ đệm static không cần khoá.
  */
 
-#include "app_priv.h"
+#include "app_diag.h"
+#include "app_log.h"
 #include "app_timing.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"

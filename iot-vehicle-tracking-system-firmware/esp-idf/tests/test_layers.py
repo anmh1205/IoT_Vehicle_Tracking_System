@@ -61,7 +61,6 @@ class Layers(unittest.TestCase):
         self.assert_symbols_local(re.compile(r"\bBOARD_PIN_\w+\b"),
                                   COMPONENTS / "board", COMPONENTS / "app/src/boot")
 
-    @unittest.expectedFailure  # P6 gives each app module ownership of its data.
     def test_app_module_dependencies(self):
         root = COMPONENTS / "app/src"
         levels = {

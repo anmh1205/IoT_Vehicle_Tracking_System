@@ -1,6 +1,6 @@
 #include "cmd_receipts.h"
 #include <string.h>
-#include "app_priv.h"
+#include "app_log.h"
 #include "esp_log.h"
 #include "storage/storage.h"
 

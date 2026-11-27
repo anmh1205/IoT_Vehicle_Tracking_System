@@ -1,6 +1,11 @@
 #include "messages.h"
 #include "publisher.h"
-#include "app_priv.h"
+#include "app_clock.h"
+#include "app_log.h"
+#include "app_msg_seq.h"
+#include "device/app_device.h"
+#include "telemetry/record_capture.h"
+#include "telemetry/telemetry_snapshot.h"
 #include "esp_log.h"
 #include "fw_update/fw_update.h"
 #include "ivts_core/payload/json_writer.h"
@@ -18,9 +23,9 @@ static ivts_record_t s_live_record;
 static ivts_msg_meta_t meta_now(uint32_t seq)
 {
     ivts_msg_meta_t m = {
-        .device_id = g_app.cfg.device_id,
-        .auth_token = g_app.cfg.auth_token[0] != '\0' ? g_app.cfg.auth_token : NULL,
-        .boot_id = g_app.boot_id,
+        .device_id = app_device_config()->device_id,
+        .auth_token = app_device_config()->auth_token[0] != '\0' ? app_device_config()->auth_token : NULL,
+        .boot_id = app_device_boot_id(),
         .seq = seq,
         .uptime_ms = app_now(),
     };
@@ -43,9 +48,10 @@ void app_messages_publish_live_record(void)
 {
     size_t len = 0;
     ivts_record_t r;
-    app_state_make_record(&r);
-    ivts_msg_meta_t m = { .device_id = g_app.cfg.device_id, .auth_token = g_app.cfg.auth_token };
-    ivts_err_t error = ivts_payload_rawdata(&m, &r, app_state_get(), s_buf, sizeof s_buf, &len);
+    app_record_capture(&r);
+    app_telemetry_consume_imu_peak();
+    ivts_msg_meta_t m = { .device_id = app_device_config()->device_id, .auth_token = app_device_config()->auth_token };
+    ivts_err_t error = ivts_payload_rawdata(&m, &r, app_telemetry_view(), s_buf, sizeof s_buf, &len);
     if (!app_session_has_unsent_boundary() && storage_queue_pending() == 0u && !storage_queue_push_pending() &&
         error == IVTS_OK && app_publisher_send(APP_MSG_RAW_LIVE, MODEM_TOPIC_RAWDATA, s_buf, len)) {
         s_live_record = r;
@@ -57,8 +63,8 @@ void app_messages_publish_live_record(void)
 bool app_messages_publish_status(bool heartbeat)
 {
     size_t len = 0;
-    ivts_msg_meta_t m = meta_now(app_rtc_next_seq());
-    ivts_err_t error = ivts_payload_status(&m, app_state_get(), app_session_active_id(), IVTS_BOUNDARY_NONE,
+    ivts_msg_meta_t m = meta_now(app_msg_seq_next());
+    ivts_err_t error = ivts_payload_status(&m, app_telemetry_view(), app_session_active_id(), IVTS_BOUNDARY_NONE,
                             heartbeat, s_buf, sizeof s_buf, &len);
     return error == IVTS_OK && app_publisher_send(APP_MSG_STATUS, MODEM_TOPIC_STATUS, s_buf, len);
 }
@@ -66,7 +72,7 @@ bool app_messages_publish_status(bool heartbeat)
 static ivts_msg_meta_t meta_from_boundary(const ivts_session_boundary_t *boundary)
 {
     return (ivts_msg_meta_t){
-        .device_id = g_app.cfg.device_id, .auth_token = g_app.cfg.auth_token,
+        .device_id = app_device_config()->device_id, .auth_token = app_device_config()->auth_token,
         .boot_id = boundary->boot_id, .seq = boundary->seq, .sent_unix_ms = boundary->unix_ms,
         .time_trusted = boundary->unix_ms != 0u, .uptime_ms = boundary->uptime_ms,
     };
@@ -92,7 +98,7 @@ uint64_t app_messages_publish_session_boundary(const ivts_session_boundary_t *bo
 bool app_messages_publish_event(const char *event_code)
 {
     size_t len = 0;
-    ivts_msg_meta_t m = meta_now(app_rtc_next_seq());
+    ivts_msg_meta_t m = meta_now(app_msg_seq_next());
     ivts_err_t error = ivts_payload_event(&m, 0, "warning", event_code, s_buf, sizeof s_buf, &len);
     return error == IVTS_OK && app_publisher_send(APP_MSG_EVENT, MODEM_TOPIC_EVENTS, s_buf, len);
 }
@@ -100,7 +106,7 @@ bool app_messages_publish_event(const char *event_code)
 static ivts_msg_meta_t meta_from_alarm(const ivts_motion_alarm_t *alarm)
 {
     return (ivts_msg_meta_t){
-        .device_id = g_app.cfg.device_id, .auth_token = g_app.cfg.auth_token,
+        .device_id = app_device_config()->device_id, .auth_token = app_device_config()->auth_token,
         .boot_id = alarm->boot_id, .seq = alarm->seq, .sent_unix_ms = alarm->unix_ms,
         .time_trusted = alarm->unix_ms != 0u, .uptime_ms = alarm->uptime_ms,
     };
@@ -117,7 +123,7 @@ void app_messages_publish_motion_alarm(const ivts_motion_alarm_t *alarm)
 void app_messages_publish_fw_report(void)
 {
     size_t len = 0;
-    ivts_msg_meta_t m = meta_now(app_rtc_next_seq());
+    ivts_msg_meta_t m = meta_now(app_msg_seq_next());
     ivts_err_t error = ivts_payload_firmware(&m, app_fw_update_report(), s_buf, sizeof s_buf, &len);
     if (error == IVTS_OK && app_publisher_send(APP_MSG_FW, MODEM_TOPIC_FIRMWARE, s_buf, len)) { app_fw_update_report_sent(); }
 }
@@ -125,7 +131,7 @@ void app_messages_publish_fw_report(void)
 bool app_messages_publish_command_ack(const char *command_id, const char *status, const char *response)
 {
     char boot[IVTS_BOOT_ID_SIZE];
-    ivts_boot_id_format(boot, g_app.boot_id);
+    ivts_boot_id_format(boot, app_device_boot_id());
     ivts_jw_t w;
     ivts_jw_init(&w, s_buf, sizeof s_buf);
     ivts_jw_obj_begin(&w, NULL);
@@ -140,14 +146,15 @@ bool app_messages_publish_command_ack(const char *command_id, const char *status
 
 bool app_messages_publish_location(void)
 {
-    const ivts_telemetry_t *telemetry = app_state_get();
+    const ivts_telemetry_t *telemetry = app_telemetry_view();
     if (!telemetry->gnss.fix_valid || app_session_has_unsent_boundary() || app_publisher_is_busy() ||
         !app_link_is_broker_up()) { return false; }
 
     ivts_record_t record;
-    app_state_make_record(&record);
+    app_record_capture(&record);
+    app_telemetry_consume_imu_peak();
     if (!record.gnss.fix_valid) { return false; }
-    ivts_msg_meta_t m = { .device_id = g_app.cfg.device_id, .auth_token = g_app.cfg.auth_token };
+    ivts_msg_meta_t m = { .device_id = app_device_config()->device_id, .auth_token = app_device_config()->auth_token };
     size_t len;
     return ivts_payload_rawdata(&m, &record, telemetry, s_buf, sizeof s_buf, &len) == IVTS_OK &&
            app_publisher_send(APP_MSG_LOCATION, MODEM_TOPIC_RAWDATA, s_buf, len);
@@ -155,7 +162,7 @@ bool app_messages_publish_location(void)
 
 bool app_messages_publish_replay_record(const ivts_record_t *record)
 {
-    ivts_msg_meta_t meta = { .device_id = g_app.cfg.device_id, .auth_token = g_app.cfg.auth_token };
+    ivts_msg_meta_t meta = { .device_id = app_device_config()->device_id, .auth_token = app_device_config()->auth_token };
     size_t len = 0;
     return ivts_payload_rawdata(&meta, record, NULL, s_buf, sizeof s_buf, &len) == IVTS_OK &&
            app_publisher_send(APP_MSG_RAW_REPLAY, MODEM_TOPIC_RAWDATA, s_buf, len);

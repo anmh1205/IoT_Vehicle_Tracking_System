@@ -1,8 +1,10 @@
 #pragma once
 #include <stdbool.h>
 
-/* Register the app's ACK handlers before the task starts. */
-void app_outbox_init(void);
+/* App task ACK callbacks registered by boot wiring. */
+void app_outbox_on_status_ack(bool ok);
+void app_outbox_on_boundary_ack(bool ok);
+void app_outbox_on_event_ack(bool ok);
 /* App task. Record control messages that need publishing. */
 void app_outbox_request_status(void);
 void app_outbox_request_event(const char *event_code);

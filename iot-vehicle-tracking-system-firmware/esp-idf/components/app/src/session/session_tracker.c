@@ -7,7 +7,9 @@
  */
 
 #include "session_tracker.h"
-#include "app_priv.h"
+#include "app_clock.h"
+#include "app_log.h"
+#include "app_msg_seq.h"
 #include "app_timing.h"
 #include <string.h>
 #include "esp_log.h"
@@ -45,7 +47,7 @@ static void make_boundary(ivts_session_boundary_t *boundary, ivts_boundary_kind_
     memset(boundary, 0, sizeof *boundary);
     boundary->kind = kind;
     boundary->boot_id = boot_id;
-    boundary->seq = app_rtc_next_seq();
+    boundary->seq = app_msg_seq_next();
     boundary->uptime_ms = (uint32_t)now_ms;
     boundary->unix_ms = app_clock_unix_ms_or_zero(NULL);
 }

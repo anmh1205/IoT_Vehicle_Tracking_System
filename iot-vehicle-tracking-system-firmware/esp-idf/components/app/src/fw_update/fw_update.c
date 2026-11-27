@@ -1,6 +1,10 @@
 #include "fw_update.h"
 #include <string.h>
-#include "app_priv.h"
+#include "app_clock.h"
+#include "app_log.h"
+#include "device/app_device.h"
+#include "telemetry/telemetry_snapshot.h"
+#include "ivts_core/ota/confirm.h"
 #include "link/app_link.h"
 #include "app_timing.h"
 #include "esp_log.h"
@@ -180,11 +184,11 @@ void app_fw_update_on_report_acked(bool ok)
 const char *app_fw_update_try_start(const ivts_ota_cmd_t *cmd)
 {
     if (!cmd->force && strcmp(cmd->version, ota_running_version()) == 0) { return "already_running"; }
-    if (g_app.axes.ign != IVTS_IGN_OFF && !cmd->force) { return "unsafe_runtime_window"; }
+    if (app_telemetry_view()->ignition != IVTS_IGN_OFF && !cmd->force) { return "unsafe_runtime_window"; }
     if (app_fw_update_in_progress() || s_update.awaiting_final_report_ack) { return "ota_busy"; }
-    if (app_state_get()->device_mv < g_app.cfg.ota_min_battery_mv) { return "low_battery"; }
+    if (app_telemetry_view()->device_mv < app_device_config()->ota_min_battery_mv) { return "low_battery"; }
 
-    ivts_err_t e = ota_start(cmd, app_state_get()->device_mv, g_app.cfg.ota_min_battery_mv);
+    ivts_err_t e = ota_start(cmd, app_telemetry_view()->device_mv, app_device_config()->ota_min_battery_mv);
     if (e != IVTS_OK) { return "ota_busy"; }
     s_update.is_job_active = true;
     memset(&s_update.report, 0, sizeof s_update.report);

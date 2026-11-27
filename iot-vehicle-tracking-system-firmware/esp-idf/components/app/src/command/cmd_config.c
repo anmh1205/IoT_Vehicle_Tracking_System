@@ -1,7 +1,7 @@
 #include "cmd_handlers.h"
 #include <stddef.h>
 #include <string.h>
-#include "app_priv.h"
+#include "device/app_device.h"
 #include "storage/storage.h"
 
 typedef enum { CMD_CONFIG_U16, CMD_CONFIG_BOOL } cmd_config_kind_t;
@@ -40,7 +40,7 @@ static bool apply_policy_field(const ivts_json_obj_t *params, const char *key,
 
 const char *cmd_config_handle(const cmd_envelope_t *command)
 {
-    ivts_config_t config = g_app.cfg;
+    ivts_config_t config = *app_device_config();
     bool present = false;
     for (size_t i = 0; i < sizeof k_policy_fields / sizeof k_policy_fields[0]; i++) {
         const char *key = k_policy_fields[i].key;
@@ -53,7 +53,6 @@ const char *cmd_config_handle(const cmd_envelope_t *command)
     }
     if (!present || ivts_config_validate(&config, NULL, 0) != 0u) { return "invalid_config"; }
     if (storage_config_save(&config) != IVTS_OK) { return "persist_failed"; }
-    g_app.cfg = config;
-    app_apply_config();
+    app_device_set_config(&config);
     return NULL;
 }

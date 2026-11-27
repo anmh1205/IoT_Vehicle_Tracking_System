@@ -5,8 +5,6 @@
 #include "replay.h"
 #include "alarm/motion_alarm.h"
 #include "app_clock.h"
-#include "app_priv.h"
-#include "command/command.h"
 #include "app_timing.h"
 #include "fw_update/fw_update.h"
 #include "ivts_core/base/str.h"
@@ -18,38 +16,22 @@ static bool s_event_needs_publish;
 static char s_event_code[32];
 static uint64_t s_boundary_retry_at_ms;
 
-static void on_status_ack(bool ok)
+void app_outbox_on_status_ack(bool ok)
 {
     if (ok) { app_fw_update_note_health_ack(); }
     else { app_outbox_request_status(); }
 }
 
-static void on_boundary_ack(bool ok)
+void app_outbox_on_boundary_ack(bool ok)
 {
     if (!ok) { return; }
     app_fw_update_note_health_ack();
     if (app_session_on_ack()) { s_boundary_retry_at_ms = 0; }
 }
 
-static void on_event_ack(bool ok)
+void app_outbox_on_event_ack(bool ok)
 {
     if (!ok) { s_event_needs_publish = true; }
-}
-
-void app_outbox_init(void)
-{
-    static const app_msg_ack_fn handlers[APP_MSG_COUNT] = {
-        [APP_MSG_RAW_LIVE] = app_messages_on_live_ack,
-        [APP_MSG_RAW_REPLAY] = app_replay_on_ack,
-        [APP_MSG_LOCATION] = app_cmd_on_location_ack,
-        [APP_MSG_STATUS] = on_status_ack,
-        [APP_MSG_BOUNDARY] = on_boundary_ack,
-        [APP_MSG_EVENT] = on_event_ack,
-        [APP_MSG_ALARM] = app_alarm_on_ack,
-        [APP_MSG_FW] = app_fw_update_on_report_acked,
-        [APP_MSG_CMD_ACK] = app_cmd_on_ack,
-    };
-    app_publisher_set_ack_handlers(handlers);
 }
 
 void app_outbox_request_status(void)
@@ -66,7 +48,7 @@ void app_outbox_request_event(const char *event_code)
 bool app_outbox_has_unsent_control(void)
 {
     return s_status_needs_publish || app_session_has_unsent_boundary() ||
-           app_fw_update_report_needs_publish() || app_alarm_has_unsent() || app_cmd_pending();
+           app_fw_update_report_needs_publish() || app_alarm_has_unsent();
 }
 
 static bool can_publish(void)
