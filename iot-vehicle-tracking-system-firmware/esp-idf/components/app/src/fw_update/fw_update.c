@@ -21,11 +21,11 @@ static struct {
     bool awaiting_final_report_ack;
     bool fw_report_needs_publish;
     uint64_t reboot_at_ms;
-    ivts_ota_pending_t confirm_ctx;
+    ivts_ota_confirm_ctx_t confirm_ctx;
     ivts_fw_status_t report;
 } s_update;
 
-static void restore_pending_verify(const ivts_ota_pending_t *saved)
+static void restore_pending_verify(const ivts_ota_confirm_ctx_t *saved)
 {
     s_update.confirm_ctx = *saved;
     s_update.confirm_ctx.pending = true;
@@ -38,13 +38,13 @@ static void restore_pending_verify(const ivts_ota_pending_t *saved)
     ESP_LOGW(APP_TAG, "image PENDING_VERIFY, hạn %lus", (unsigned long)s_update.confirm_ctx.timeout_s);
 }
 
-static bool image_landed(const ivts_ota_pending_t *saved, const char *version, const char *partition)
+static bool image_landed(const ivts_ota_confirm_ctx_t *saved, const char *version, const char *partition)
 {
     return saved->target_version[0] != '\0' && strcmp(saved->target_version, version) == 0 &&
                   (saved->target_partition[0] == '\0' || strcmp(saved->target_partition, partition) == 0);
 }
 
-static void restore_after_reboot(const ivts_ota_pending_t *saved)
+static void restore_after_reboot(const ivts_ota_confirm_ctx_t *saved)
 {
     bool landed = image_landed(saved, ota_running_version(), ota_running_partition());
     s_update.report.status = landed ? IVTS_OTA_ST_SUCCESS : IVTS_OTA_ST_ROLLED_BACK;
@@ -64,8 +64,8 @@ static void restore_idle(void)
 
 void app_fw_update_restore_at_boot(void)
 {
-    ivts_ota_pending_t saved;
-    (void)app_records_ota_pending_load(&saved);
+    ivts_ota_confirm_ctx_t saved;
+    (void)app_records_ota_confirm_ctx_load(&saved);
     (void)ivts_str_copy(s_update.report.current_version, sizeof s_update.report.current_version, ota_running_version());
     (void)ivts_str_copy(s_update.report.partition, sizeof s_update.report.partition, ota_running_partition());
     s_update.fw_report_needs_publish = true;
@@ -164,8 +164,8 @@ static void release_reboot_after_report(void)
 
 static void clear_confirm_ctx_after_report(void)
 {
-    ivts_ota_pending_t empty = {0};
-    if (app_records_ota_pending_save(&empty) == IVTS_OK) { s_update.awaiting_final_report_ack = false; }
+    ivts_ota_confirm_ctx_t empty = {0};
+    if (app_records_ota_confirm_ctx_save(&empty) == IVTS_OK) { s_update.awaiting_final_report_ack = false; }
     else { on_report_failed(); }
 }
 

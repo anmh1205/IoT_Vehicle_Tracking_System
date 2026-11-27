@@ -1,6 +1,6 @@
 #include "fsm_states.h"
 
-static void go(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_app_state_t s, ivts_ms_t now)
+static void go(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_fsm_state_t s, ivts_ms_t now)
 {
     f->state = s;
     f->sleep_mode = IVTS_SLEEP_NONE;
@@ -32,7 +32,7 @@ static void status_once(ivts_fsm_t *f, ivts_fsm_out_t *out, ivts_ms_t now)
 static bool drained(const ivts_fsm_in_t *in)
 {
     if (in->ota_active || !in->publish_idle) { return false; }
-    return in->link_up ? in->queue_pending == 0u && !in->control_pending : !in->link_expected;
+    return in->link_up ? in->offline_record_count == 0u && !in->control_pending : !in->link_expected;
 }
 
 static void enter_sleep(ivts_fsm_t *f, const ivts_fsm_cfg_t *c, ivts_fsm_out_t *out, ivts_ms_t now)

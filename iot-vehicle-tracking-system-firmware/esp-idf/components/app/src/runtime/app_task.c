@@ -73,16 +73,16 @@ static ivts_fsm_in_t collect_fsm_input(uint64_t now)
         .link_expected = app_device_is_provisioned(),
         .publish_idle = !app_publisher_is_busy() && !storage_queue_has_unflushed_push(),
         .control_pending = app_outbox_has_unsent_control() || app_cmd_pending(),
-        .queue_pending = storage_queue_count(),
+        .offline_record_count = storage_queue_count(),
         .ota_active = app_fw_update_in_progress() ||
                       app_cmd_blocks_sleep(),
     };
 }
 
-static void apply_fsm_transition(const ivts_fsm_out_t *out, ivts_app_state_t before)
+static void apply_fsm_transition(const ivts_fsm_out_t *out, ivts_fsm_state_t before)
 {
     if (out->changed) {
-        ESP_LOGI(APP_TAG, "state %s -> %s", ivts_app_state_name(before), ivts_app_state_name(s_fsm.state));
+        ESP_LOGI(APP_TAG, "state %s -> %s", ivts_fsm_state_name(before), ivts_fsm_state_name(s_fsm.state));
         if (s_fsm.state == IVTS_ST_ALARM) { app_alarm_latch(app_device_is_provisioned(), app_device_boot_id()); }
     }
 }
@@ -122,7 +122,7 @@ void app_task_run(void *arg)
         run_periodic_services(now);
         ivts_fsm_in_t in = collect_fsm_input(now);
         ivts_fsm_out_t out;
-        ivts_app_state_t before = s_fsm.state;
+        ivts_fsm_state_t before = s_fsm.state;
         ivts_fsm_step(&s_fsm, &s_fsm_cfg, &in, &out);
         apply_fsm_transition(&out, before);
         refresh_device_state(out.changed);

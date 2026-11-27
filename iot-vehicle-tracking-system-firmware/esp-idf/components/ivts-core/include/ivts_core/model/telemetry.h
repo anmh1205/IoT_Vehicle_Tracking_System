@@ -20,7 +20,7 @@ typedef enum {
     IVTS_VEH_UNKNOWN_MOVING
 } ivts_vehicle_t;
 
-/** Trạng thái thiết bị gửi cloud. Khác ivts_app_state_t của FSM. */
+/** Trạng thái thiết bị gửi cloud. Khác ivts_fsm_state_t của FSM. */
 typedef enum {
     IVTS_DEV_BOOTING = 0,
     IVTS_DEV_ACTIVE,

@@ -18,7 +18,7 @@ static const led_pattern_t k_patterns[IVTS_ST_COUNT] = {
     [IVTS_ST_HEARTBEAT] = { .period_ms = 1500, .on_ms = 100, .second_pulse_at_ms = 300, .second_pulse_off_at_ms = 400 },
 };
 
-void app_led_pattern_tick(ivts_app_state_t state, bool tracking_enabled, uint64_t now_ms)
+void app_led_pattern_tick(ivts_fsm_state_t state, bool tracking_enabled, uint64_t now_ms)
 {
     bool on = false;
     if ((unsigned)state < IVTS_ST_COUNT) {

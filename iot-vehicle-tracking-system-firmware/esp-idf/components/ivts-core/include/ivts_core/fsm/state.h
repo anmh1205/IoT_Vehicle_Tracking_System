@@ -14,7 +14,7 @@ typedef enum {
     IVTS_ST_HEARTBEAT,   /**< Thức theo timer: gửi status rồi ngủ lại. */
     IVTS_ST_SLEEP,       /**< Đã phát lệnh ngủ; chờ wake (light/fake) hoặc không quay lại (deep). */
     IVTS_ST_COUNT
-} ivts_app_state_t;
+} ivts_fsm_state_t;
 
 /** @brief Tên chuỗi của state. Không bao giờ NULL. */
-const char *ivts_app_state_name(ivts_app_state_t s);
+const char *ivts_fsm_state_name(ivts_fsm_state_t s);

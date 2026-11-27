@@ -37,7 +37,7 @@ static void abort_sleep(ivts_fsm_t *fsm, ivts_wake_t reason)
     if (app_device_is_provisioned()) { (void)modem_set_link(true); }
 }
 
-static board_wake_t enter_hw_sleep(const ivts_fsm_out_t *out, ivts_app_state_t state)
+static board_wake_t enter_hw_sleep(const ivts_fsm_out_t *out, ivts_fsm_state_t state)
 {
     app_rtc_ctx_save(app_device_boot_id(), app_msg_seq_current(), (uint8_t)state);
 

@@ -1,7 +1,7 @@
 #include "ivts_core/ota/confirm.h"
 #include <stddef.h>
 
-ivts_confirm_t ivts_ota_confirm_decide(const ivts_ota_pending_t *p, bool healthy,
+ivts_confirm_t ivts_ota_confirm_decide(const ivts_ota_confirm_ctx_t *p, bool healthy,
                                        uint64_t now_unix_ms, bool time_trusted, ivts_ms_t uptime_ms)
 {
     if (p == NULL || !p->pending) {

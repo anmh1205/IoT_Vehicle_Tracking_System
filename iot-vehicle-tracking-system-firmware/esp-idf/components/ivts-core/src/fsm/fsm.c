@@ -1,7 +1,7 @@
 #include "fsm_states.h"
 #include <string.h>
 
-const char *ivts_app_state_name(ivts_app_state_t s)
+const char *ivts_fsm_state_name(ivts_fsm_state_t s)
 {
     switch (s) {
     case IVTS_ST_INIT:      return "INIT";
@@ -16,7 +16,7 @@ const char *ivts_app_state_name(ivts_app_state_t s)
     return "UNKNOWN";
 }
 
-ivts_device_state_t ivts_fsm_device_state(ivts_app_state_t s)
+ivts_device_state_t ivts_fsm_device_state(ivts_fsm_state_t s)
 {
     switch (s) {
     case IVTS_ST_INIT:      return IVTS_DEV_BOOTING;
@@ -51,7 +51,7 @@ void ivts_fsm_woke(ivts_fsm_t *f, ivts_ms_t now, ivts_wake_t wake)
 void ivts_fsm_step(ivts_fsm_t *fsm, const ivts_fsm_cfg_t *cfg, const ivts_fsm_in_t *in, ivts_fsm_out_t *out)
 {
     memset(out, 0, sizeof(*out));
-    if (in->link_up && in->queue_pending > 0u && fsm->state != IVTS_ST_SLEEP) {
+    if (in->link_up && in->offline_record_count > 0u && fsm->state != IVTS_ST_SLEEP) {
         out->actions |= IVTS_ACT_REPLAY;
     }
     ivts_fsm_run_state(fsm, cfg, in, out);

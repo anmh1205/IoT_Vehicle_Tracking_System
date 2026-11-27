@@ -41,7 +41,7 @@ typedef struct {
     bool            link_expected; /**< Đã provision; chờ broker tới hết cửa sổ thức. */
     bool            publish_idle;  /**< Không có bản tin nào đang chờ ACK. */
     bool            control_pending; /**< Còn bản tin điều khiển chưa gửi. */
-    uint32_t        queue_pending; /**< Số record offline chưa gửi. */
+    uint32_t        offline_record_count; /**< Số record offline chưa gửi. */
     bool            ota_active;    /**< OTA đang chạy hoặc đang chờ confirm: cấm ngủ. */
 } ivts_fsm_in_t;
 
@@ -64,7 +64,7 @@ typedef struct {
 } ivts_fsm_out_t;
 
 typedef struct {
-    ivts_app_state_t state;
+    ivts_fsm_state_t state;
     ivts_ms_t        entered_ms;      /**< Thời điểm vào state hiện tại. */
     ivts_ms_t        last_raw_ms;     /**< Lần gửi RAW gần nhất; 0 = chưa gửi trong state này. */
     ivts_ms_t        last_status_ms;
@@ -91,4 +91,4 @@ void ivts_fsm_step(ivts_fsm_t *f, const ivts_fsm_cfg_t *c, const ivts_fsm_in_t *
 void ivts_fsm_woke(ivts_fsm_t *f, ivts_ms_t now, ivts_wake_t wake);
 
 /** @brief Ánh xạ state của app sang trạng thái thiết bị gửi cloud. */
-ivts_device_state_t ivts_fsm_device_state(ivts_app_state_t s);
+ivts_device_state_t ivts_fsm_device_state(ivts_fsm_state_t s);

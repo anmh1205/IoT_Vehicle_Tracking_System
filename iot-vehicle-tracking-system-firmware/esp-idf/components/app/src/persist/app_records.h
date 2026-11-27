@@ -5,8 +5,8 @@
 #include "ivts_core/ota/confirm.h"
 
 /* Typed records with the established NVS keys and layouts. Calls may block on flash. */
-ivts_err_t app_records_ota_pending_load(ivts_ota_pending_t *out);
-ivts_err_t app_records_ota_pending_save(const ivts_ota_pending_t *p);
+ivts_err_t app_records_ota_confirm_ctx_load(ivts_ota_confirm_ctx_t *out);
+ivts_err_t app_records_ota_confirm_ctx_save(const ivts_ota_confirm_ctx_t *p);
 ivts_err_t app_records_command_receipts_load(ivts_cmd_receipts_t *out);
 ivts_err_t app_records_command_receipts_save(const ivts_cmd_receipts_t *receipts);
 ivts_err_t app_records_restart_intent_load(ivts_restart_intent_t *out);

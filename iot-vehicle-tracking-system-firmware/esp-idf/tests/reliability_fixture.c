@@ -255,7 +255,7 @@ static void check_uart(void)
 
 static void check_ota_deadline(void)
 {
-    ivts_ota_pending_t pending = { .pending = true, .timeout_s = 60u, .deadline_unix_ms = 120000u };
+    ivts_ota_confirm_ctx_t pending = { .pending = true, .timeout_s = 60u, .deadline_unix_ms = 120000u };
     assert(ivts_ota_confirm_decide(&pending, true, 119999, true, 5000) == IVTS_CONFIRM_ACCEPT);
     assert(ivts_ota_confirm_decide(&pending, true, 120000, true, 5000) == IVTS_CONFIRM_ROLLBACK);
     assert(ivts_ota_confirm_decide(&pending, true, 100000, true, 60000) == IVTS_CONFIRM_ROLLBACK);

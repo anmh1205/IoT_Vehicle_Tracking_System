@@ -20,7 +20,7 @@ typedef struct {
     char     job_id[IVTS_OTA_JOB_ID_SIZE];          /**< Job cần báo kết quả cho cloud sau reboot. */
     char     target_version[IVTS_OTA_VERSION_SIZE];
     char     target_partition[IVTS_OTA_PART_LABEL_SIZE];
-} ivts_ota_pending_t;
+} ivts_ota_confirm_ctx_t;
 
 /** Quyết định của ivts_ota_confirm_decide(). */
 typedef enum { IVTS_CONFIRM_WAIT = 0, IVTS_CONFIRM_ACCEPT, IVTS_CONFIRM_ROLLBACK } ivts_confirm_t;
@@ -39,5 +39,5 @@ typedef enum { IVTS_CONFIRM_WAIT = 0, IVTS_CONFIRM_ACCEPT, IVTS_CONFIRM_ROLLBACK
  *
  * @return IVTS_CONFIRM_WAIT, IVTS_CONFIRM_ACCEPT hoặc IVTS_CONFIRM_ROLLBACK.
  */
-ivts_confirm_t ivts_ota_confirm_decide(const ivts_ota_pending_t *p, bool healthy,
+ivts_confirm_t ivts_ota_confirm_decide(const ivts_ota_confirm_ctx_t *p, bool healthy,
                                        uint64_t now_unix_ms, bool time_trusted, ivts_ms_t uptime_ms);

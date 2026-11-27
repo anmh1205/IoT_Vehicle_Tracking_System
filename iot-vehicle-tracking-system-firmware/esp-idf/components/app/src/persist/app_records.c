@@ -9,18 +9,18 @@
 _Static_assert(sizeof(ivts_cmd_receipts_t) == STORAGE_RECORD_PAYLOAD_MAX, "receipt layout must match the NVS blob limit");
 _Static_assert(sizeof(ivts_restart_intent_t) == 65u, "restart intent layout must match NVS");
 
-ivts_err_t app_records_ota_pending_load(ivts_ota_pending_t *out)
+ivts_err_t app_records_ota_confirm_ctx_load(ivts_ota_confirm_ctx_t *out)
 {
     if (out == NULL) { return IVTS_ERR_INVALID_ARG; }
     memset(out, 0, sizeof *out);
     ivts_err_t r = storage_record_load(OTA_KEY, OTA_VERSION, out, sizeof *out);
     if (r == IVTS_ERR_VERSION) {
-        r = storage_record_load(OTA_KEY, 2u, out, offsetof(ivts_ota_pending_t, target_partition));
+        r = storage_record_load(OTA_KEY, 2u, out, offsetof(ivts_ota_confirm_ctx_t, target_partition));
     }
     return r;
 }
 
-ivts_err_t app_records_ota_pending_save(const ivts_ota_pending_t *p)
+ivts_err_t app_records_ota_confirm_ctx_save(const ivts_ota_confirm_ctx_t *p)
 {
     if (p == NULL) { return IVTS_ERR_INVALID_ARG; }
     return storage_record_save(OTA_KEY, OTA_VERSION, p, sizeof *p);

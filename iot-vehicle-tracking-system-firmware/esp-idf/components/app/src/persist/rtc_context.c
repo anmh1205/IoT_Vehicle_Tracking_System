@@ -68,7 +68,7 @@ bool app_rtc_ctx_load(uint32_t *boot_id, uint32_t *seq)
 
 /**
  * @brief Ghi ngữ cảnh xuống RTC memory kèm CRC và đặt bộ đếm seq về @p seq.
- * @param last_state Trạng thái FSM trước khi ngủ (ivts_app_state_t).
+ * @param last_state Trạng thái FSM trước khi ngủ (ivts_fsm_state_t).
  */
 void app_rtc_ctx_save(uint32_t boot_id, uint32_t seq, uint8_t last_state)
 {

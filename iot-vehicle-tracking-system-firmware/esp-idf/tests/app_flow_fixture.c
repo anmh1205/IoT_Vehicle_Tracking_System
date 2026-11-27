@@ -52,7 +52,7 @@ static fixture_message_t s_messages[CAPACITY];
 static size_t s_message_count;
 static ivts_session_state_t s_session;
 static ivts_motion_alarm_t s_alarm;
-static ivts_ota_pending_t s_ota_context;
+static ivts_ota_confirm_ctx_t s_ota_context;
 static ivts_cmd_receipts_t s_receipts;
 static ivts_restart_intent_t s_restart_intent;
 static bool s_image_pending_verify;
@@ -271,7 +271,7 @@ ivts_err_t storage_record_load(const char *key, uint16_t version, void *buffer, 
 {
     if (s_legacy_ota_context && strcmp(key, "ota") == 0) {
         if (version == 3u) { return IVTS_ERR_VERSION; }
-        assert(version == 2u && len == offsetof(ivts_ota_pending_t, target_partition));
+        assert(version == 2u && len == offsetof(ivts_ota_confirm_ctx_t, target_partition));
         memcpy(buffer, &s_ota_context, len);
         return IVTS_OK;
     }
@@ -627,7 +627,7 @@ static void seed_boundary(void)
 
 static void seed_ota_context(const char *target)
 {
-    s_ota_context = (ivts_ota_pending_t){ .pending = true, .timeout_s = 60u, .job_id = "job-1",
+    s_ota_context = (ivts_ota_confirm_ctx_t){ .pending = true, .timeout_s = 60u, .job_id = "job-1",
                                           .target_partition = "ota_1" };
     assert(strlen(target) < sizeof s_ota_context.target_version);
     strcpy(s_ota_context.target_version, target);
