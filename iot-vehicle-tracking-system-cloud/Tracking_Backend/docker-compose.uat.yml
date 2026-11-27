@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ${DOCKERHUB_USERNAME}/tracking-backend:uat
+    image: ${DOCKERHUB_USERNAME}/tracking-backend:${IVTS_IMAGE_TAG:-uat}
     container_name: tracking-backend
     ports:
       - '4000:4000'

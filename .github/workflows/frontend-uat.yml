@@ -1,17 +1,16 @@
 name: Frontend UAT Deploy
 
 on:
-  push:
-    branches: [uat]
-    paths:
-      - 'iot-vehicle-tracking-system-cloud/Tracking_Frontend/**'
-      - 'scripts/deploy/**'
-      - '.github/workflows/frontend-uat.yml'
   workflow_dispatch:
+    inputs:
+      deploy:
+        description: Deploy the verified image after publishing it
+        type: boolean
+        default: false
 
 concurrency:
   group: frontend-uat-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   quality-and-build:
@@ -45,8 +44,7 @@ jobs:
           context: iot-vehicle-tracking-system-cloud/Tracking_Frontend
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/tracking-frontend:uat
-            ${{ secrets.DOCKERHUB_USERNAME }}/tracking-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/tracking-frontend:uat-${{ github.sha }}
           build-args: |
             NEXT_PUBLIC_API_URL=https://api.thingdock.dev
             NEXT_PUBLIC_API_BASE_URL=https://api.thingdock.dev
@@ -63,6 +61,10 @@ jobs:
           path: iot-vehicle-tracking-system-cloud/Tracking_Frontend/docker-compose.uat.yml
 
   deploy-uat:
+    if: inputs.deploy && github.ref_name == 'uat'
+    concurrency:
+      group: ivts-uat-vps
+      cancel-in-progress: false
     needs: quality-and-build
     runs-on: ubuntu-latest
     steps:
@@ -134,8 +136,9 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DOCKERHUB_USERNAME,SERVICE_ENV_CONTENT,SERVICE_ENV_OVERRIDES,SERVICE_DIR,COMPOSE_FILE,SERVICE_NAME,HEALTHCHECK_URL
+          envs: DOCKERHUB_USERNAME,IVTS_IMAGE_TAG,SERVICE_ENV_CONTENT,SERVICE_ENV_OVERRIDES,SERVICE_DIR,COMPOSE_FILE,SERVICE_NAME,HEALTHCHECK_URL
           script: |
+            set -eu
             chmod +x /opt/tracking/scripts/deploy/bootstrap-vps.sh
             chmod +x /opt/tracking/scripts/deploy/deploy-service.sh
             export DOCKERHUB_USERNAME="$DOCKERHUB_USERNAME"
@@ -145,6 +148,7 @@ jobs:
             /opt/tracking/scripts/deploy/deploy-service.sh "$SERVICE_DIR" "$COMPOSE_FILE" "$SERVICE_NAME" "$HEALTHCHECK_URL"
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          IVTS_IMAGE_TAG: uat-${{ github.sha }}
           SERVICE_ENV_CONTENT: ${{ secrets.FRONTEND_UAT_ENV_FILE }}
           SERVICE_ENV_OVERRIDES: |
             NEXT_PUBLIC_API_URL=https://api.thingdock.dev

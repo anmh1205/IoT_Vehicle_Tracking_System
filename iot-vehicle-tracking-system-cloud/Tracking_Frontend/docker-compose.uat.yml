@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: ${DOCKERHUB_USERNAME}/tracking-frontend:uat
+    image: ${DOCKERHUB_USERNAME}/tracking-frontend:${IVTS_IMAGE_TAG:-uat}
     container_name: tracking-frontend
     ports:
       - '4001:4001'
