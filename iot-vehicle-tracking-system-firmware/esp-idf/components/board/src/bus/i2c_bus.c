@@ -1,7 +1,7 @@
 #include "board_internal.h"
+#include "board/board_hw.h"
+#include "platform/platform.h"
 #include "i2c_bus.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
 #include "driver/i2c_master.h"
 #include "esp_check.h"
 
@@ -13,22 +13,22 @@
 static i2c_master_bus_handle_t s_bus;
 static i2c_master_dev_handle_t s_dev[BOARD_DEV_COUNT];
 
-static SemaphoreHandle_t s_i2c_mutex;
+static platform_mutex_t s_i2c_mutex;
 
 static bool board_i2c_lock(uint32_t timeout_ms)
 {
-    return xSemaphoreTake(s_i2c_mutex, pdMS_TO_TICKS(timeout_ms)) == pdTRUE;
+    return platform_mutex_lock_for(s_i2c_mutex, timeout_ms);
 }
 
 static void board_i2c_unlock(void)
 {
-    xSemaphoreGive(s_i2c_mutex);
+    platform_mutex_unlock(s_i2c_mutex);
 }
 
 /* Bus I2C master port 0. Thiết bị trên bus được thêm sau bằng board_i2c_add(). */
 esp_err_t board_i2c_init(void)
 {
-    s_i2c_mutex = xSemaphoreCreateMutex();
+    s_i2c_mutex = platform_mutex_create();
     ESP_RETURN_ON_FALSE(s_i2c_mutex != NULL, ESP_ERR_NO_MEM, BOARD_TAG, "mutex");
 
     i2c_master_bus_config_t cfg = {

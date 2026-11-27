@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "esp_err.h"
 #include "board/board.h"
-#include "platform/platform_err.h"
+#include "platform/platform.h"
 
 #define BOARD_TAG "board"
 

@@ -1,4 +1,5 @@
 #include "board_internal.h"
+#include "board/board_hw.h"
 #include "board_task.h"
 #include "bus/i2c_bus.h"
 #include "drivers/ds3231.h"
@@ -7,7 +8,7 @@
 #include "power/wake_cause.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
-#include "platform/platform_clock.h"
+#include "platform/platform.h"
 
 static bool s_imu_ok;
 static bool s_rtc_ok;

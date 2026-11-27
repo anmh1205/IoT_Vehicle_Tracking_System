@@ -8,7 +8,7 @@
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "ivts_core/base/backoff.h"
-#include "platform/platform_clock.h"
+#include "platform/platform.h"
 
 #include <stdatomic.h>
 

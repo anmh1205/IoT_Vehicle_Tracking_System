@@ -1,7 +1,7 @@
 #include "modem_internal.h"
 #include "modem_task.h"
 #include "slots/modem_slots.h"
-#include "platform/platform_clock.h"
+#include "platform/platform.h"
 
 #include <stdatomic.h>
 #include <stdio.h>

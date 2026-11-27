@@ -28,8 +28,6 @@
 #include "freertos/task.h"
 
 #define APP_QUEUE_LEN   32     /* Số sự kiện tối đa chờ xử lý. */
-#define APP_TASK_PRIO   5      /* Thấp hơn "modem" (6) để UART được rút trước, cao hơn "obd" (4). */
-#define APP_TASK_STACK  6144   /* Byte. */
 
 static QueueHandle_t s_event_queue;                  /* Queue sự kiện; tạo một lần trong app_events_init(). */
 static _Atomic uint32_t s_drops;           /* Số sự kiện bỏ do đầy; nhiều task tăng đồng thời. */
@@ -67,7 +65,7 @@ bool app_events_receive(ivts_event_t *ev, uint32_t timeout_ms)
 
 uint32_t app_events_drops(void) { return atomic_load_explicit(&s_drops, memory_order_relaxed); }
 
-bool app_events_start_task(void (*fn)(void *))
+bool app_events_start_task(void (*fn)(void *), uint32_t stack_bytes, uint8_t priority)
 {
-    return xTaskCreate(fn, "app", APP_TASK_STACK, NULL, APP_TASK_PRIO, NULL) == pdPASS;
+    return xTaskCreate(fn, "app", stack_bytes, NULL, priority, NULL) == pdPASS;
 }

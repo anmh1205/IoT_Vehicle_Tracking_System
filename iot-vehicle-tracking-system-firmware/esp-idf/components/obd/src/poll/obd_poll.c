@@ -3,7 +3,7 @@
 #include "obd_task.h"
 #include "elm/obd_pid.h"
 #include "esp_log.h"
-#include "platform/platform_clock.h"
+#include "platform/platform.h"
 
 #include <stdio.h>
 

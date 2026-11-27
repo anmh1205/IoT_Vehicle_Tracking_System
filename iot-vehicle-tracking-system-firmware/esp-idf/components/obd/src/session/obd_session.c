@@ -4,7 +4,7 @@
 #include "obd_task.h"
 #include "ble/obd_ble.h"
 #include "esp_log.h"
-#include "platform/platform_clock.h"
+#include "platform/platform.h"
 
 #include <stdio.h>
 #include <string.h>

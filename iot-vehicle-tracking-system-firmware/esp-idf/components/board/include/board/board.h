@@ -1,7 +1,6 @@
 #pragma once
 
 #include "board/board_clock.h"
-#include "board/board_hw.h"
 #include "board/board_power.h"
 #include "board/board_sensors.h"
 #include "ivts_core/event/event.h"

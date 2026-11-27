@@ -6,7 +6,7 @@
 #include "fw_update/fw_update.h"
 #include "ivts_core/base/str.h"
 #include "ota/ota.h"
-#include "platform/platform_reset.h"
+#include "platform/platform.h"
 #include "storage/storage.h"
 
 static bool s_awaiting_checkpoint;

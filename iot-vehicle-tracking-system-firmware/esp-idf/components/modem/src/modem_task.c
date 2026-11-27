@@ -2,7 +2,9 @@
 #include "modem_internal.h"
 #include "at/at_dispatch.h"
 #include "esp_check.h"
+#include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+#include "freertos/semphr.h"
 #include "freertos/task.h"
 #include "gnss/modem_gnss.h"
 #include "http/modem_http.h"
@@ -23,6 +25,29 @@ ivts_err_t modem_task_post(const modem_req_t *request, uint32_t timeout_ms)
 {
     if (s_request_queue == NULL) { return IVTS_ERR_INVALID_STATE; }
     return xQueueSend(s_request_queue, request, pdMS_TO_TICKS(timeout_ms)) == pdTRUE ? IVTS_OK : IVTS_ERR_FULL;
+}
+
+struct modem_rpc {
+    SemaphoreHandle_t done;
+    ivts_err_t result;
+};
+
+ivts_err_t modem_task_call(modem_req_t *request)
+{
+    struct modem_rpc reply = {
+        .done = xSemaphoreCreateBinary(),
+        .result = IVTS_ERR_FAIL,
+    };
+    if (reply.done == NULL) { return IVTS_ERR_FULL; }
+    request->reply = &reply;
+    if (modem_task_post(request, 1000u) != IVTS_OK) {
+        vSemaphoreDelete(reply.done);
+        return IVTS_ERR_FULL;
+    }
+    /* Completion also releases the borrowed URL and output buffers. */
+    (void)xSemaphoreTake(reply.done, portMAX_DELAY);
+    vSemaphoreDelete(reply.done);
+    return reply.result;
 }
 
 static void link_down(void)
@@ -54,9 +79,15 @@ static void handle_req(const modem_req_t *r)
         break;
     case REQ_PUB_KICK:
         break;                                    /* Chỉ để đánh thức vòng lặp. */
-    default:
-        modem_http_handle(r);
+    default: {
+        ivts_err_t result = modem_http_handle(r);
+        if (r->reply != NULL) {
+            r->reply->result = result;
+            /* This signal is the last access to caller-owned request storage. */
+            xSemaphoreGive(r->reply->done);
+        }
         break;
+    }
     }
 }
 

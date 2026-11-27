@@ -1,7 +1,5 @@
 #pragma once
 #include "esp_err.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
 #include "modem/modem.h"
 
 typedef enum {
@@ -14,13 +12,15 @@ typedef enum {
 } modem_req_op_t;
 
 /**
- * Yêu cầu từ task khác tới task "modem", sao chép theo giá trị vào the request queue.
+ * @brief Request copied by value into the modem work queue.
  *
- * Các yêu cầu HTTP mang con trỏ tới buffer và biến kết quả của caller. Việc này an toàn vì
- * caller chặn trên @c done cho đến khi task "modem" ghi kết quả và give semaphore, nên các
- * vùng nhớ đó còn sống trong suốt thời gian task "modem" truy cập. Sự kiện gửi qua sink thì
- * không được mang con trỏ vì người nhận không chặn.
+ * HTTP requests borrow caller-owned input and output buffers. The submitting
+ * task waits for completion before returning and releasing that storage.
+ * Notifications sent through component sinks carry values with no borrowed
+ * buffers because their receivers run independently.
  */
+struct modem_rpc;
+
 typedef struct {
     uint8_t           op;       /**< modem_req_op_t. */
     bool              on;       /**< Tham số của REQ_LINK và REQ_GNSS. */
@@ -31,11 +31,13 @@ typedef struct {
     size_t           *got;      /**< REQ_HTTP_READ: số byte đọc được. */
     uint32_t         *size;     /**< REQ_HTTP_OPEN: kích thước nội dung. */
     int              *status;   /**< REQ_HTTP_OPEN: mã trạng thái HTTP. */
-    ivts_err_t       *result;   /**< Kết quả của yêu cầu HTTP. */
-    SemaphoreHandle_t done;     /**< Semaphore caller chờ; task "modem" give khi xong. */
+    struct modem_rpc *reply;    /**< Completion state owned by the waiting task. */
 } modem_req_t;
 
 /* Initialize I/O and create the only consumer of the request queue. */
 esp_err_t modem_task_start(const modem_cfg_t *cfg);
 /* Copy a request into the task queue. HTTP callers may wait for space. */
 ivts_err_t modem_task_post(const modem_req_t *request, uint32_t timeout_ms);
+
+/** @brief Submit an HTTP request and block until the modem releases its buffers. */
+ivts_err_t modem_task_call(modem_req_t *request);

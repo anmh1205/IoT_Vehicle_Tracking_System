@@ -1,4 +1,5 @@
 #include "app_wiring.h"
+#include "boot/task_table.h"
 #include <string.h>
 #include "device/app_device.h"
 #include "publish/outbox.h"
@@ -19,10 +20,6 @@
 #include "sdkconfig.h"
 #include "storage/storage.h"
 
-enum {
-    PRIO_MODEM = 6, PRIO_OBD = 4, PRIO_STORAGE = 3, PRIO_OTA = 3, PRIO_BOARD = 2,
-};
-
 /* Cổng nguồn byte cho OTA: chuyển modem_http_* thành ota_source_t, để component ota không
  * phụ thuộc trực tiếp vào modem. */
 static ivts_err_t src_open(void *ctx, const char *url, uint32_t *size, int *st) { (void)ctx; return modem_http_open(url, size, st); }
@@ -40,7 +37,7 @@ bool app_wiring_init_board(ivts_sink_t sink)
     board_cfg_t board_cfg = {
         .sink = sink, .power_sample_ms = CONFIG_IVTS_POWER_SAMPLE_MS,
         .imu_threshold = CONFIG_IVTS_IMU_THRESHOLD, .imu_enabled = true,
-        .task_prio = PRIO_BOARD, .task_stack = 3072,
+        .task_prio = APP_TASKS[APP_TASK_BOARD].priority, .task_stack = APP_TASKS[APP_TASK_BOARD].stack_bytes,
     };
     ivts_err_t e = board_init(&board_cfg);
     if (e != IVTS_OK) { ESP_LOGE(APP_TAG, "board: %s", ivts_err_name(e)); return false; }
@@ -61,7 +58,7 @@ bool app_wiring_init_storage(ivts_sink_t sink)
         .pin_clk = BOARD_PIN_SD_CLK, .pin_cmd = BOARD_PIN_SD_CMD, .pin_d0 = BOARD_PIN_SD_D0,
         .pin_d1 = BOARD_PIN_SD_D1, .pin_d2 = BOARD_PIN_SD_D2, .pin_d3 = BOARD_PIN_SD_D3,
         .pin_cd = BOARD_PIN_SD_CD,
-        .task_prio = PRIO_STORAGE, .task_stack = 5120, .req_queue_len = 16,
+        .task_prio = APP_TASKS[APP_TASK_STORAGE].priority, .task_stack = APP_TASKS[APP_TASK_STORAGE].stack_bytes, .req_queue_len = 16,
     };
     ivts_err_t e = storage_init(&storage_cfg);
     if (e != IVTS_OK) { ESP_LOGE(APP_TAG, "storage: %s", ivts_err_name(e)); return false; }
@@ -77,7 +74,7 @@ bool app_wiring_init_modem(ivts_sink_t sink, ivts_config_t *config, bool provisi
         .mqtt_port = config->mqtt_port,
         .use_tls = config->mqtt_port == 8883u || (provisioned && strcmp(config->mqtt_host, "mqtt.thingdock.dev") == 0), .gnss_period_s = CONFIG_IVTS_GNSS_PERIOD_S,
         .command_subscribe_enabled = config->command_subscribe_enabled,
-        .task_prio = PRIO_MODEM, .task_stack = 6144,
+        .task_prio = APP_TASKS[APP_TASK_MODEM].priority, .task_stack = APP_TASKS[APP_TASK_MODEM].stack_bytes,
     };
     _Static_assert(IVTS_CFG_DEVICE_ID_MAX == MODEM_CLIENT_ID_MAX, "giới hạn client id phải khớp");
     if (provisioned) {
@@ -105,7 +102,7 @@ void app_wiring_init_obd(ivts_sink_t sink, const ivts_config_t *config)
 {
     obd_cfg_t obd_cfg = {
         .sink = sink, .poll_ms = CONFIG_IVTS_OBD_POLL_MS, .diag_period_s = 60,
-        .task_prio = PRIO_OBD, .task_stack = 4096,
+        .task_prio = APP_TASKS[APP_TASK_OBD].priority, .task_stack = APP_TASKS[APP_TASK_OBD].stack_bytes,
     };
     if (memchr(config->obd_ble_addr, '\0', sizeof config->obd_ble_addr) != NULL) {
         (void)ivts_str_copy(obd_cfg.target_addr, sizeof obd_cfg.target_addr, config->obd_ble_addr);
@@ -118,7 +115,7 @@ bool app_wiring_init_ota(ivts_sink_t sink)
     ota_cfg_t ota_cfg = {
         .sink = sink, .src = { .open = src_open, .read = src_read, .close = src_close, .ctx = NULL },
         .prepare_boot = app_fw_update_prepare_boot,
-        .task_prio = PRIO_OTA, .task_stack = 6144,
+        .task_prio = APP_TASKS[APP_TASK_OTA].priority, .task_stack = APP_TASKS[APP_TASK_OTA].stack_bytes,
     };
     if (ota_init(&ota_cfg) != IVTS_OK) { return false; }
     return true;

@@ -3,7 +3,7 @@
 #include "obd_task.h"
 #include "ble/obd_ble.h"
 #include "esp_log.h"
-#include "platform/platform_clock.h"
+#include "platform/platform.h"
 
 #define UUID_RX 0x2AF0u
 #define UUID_TX 0x2AF1u

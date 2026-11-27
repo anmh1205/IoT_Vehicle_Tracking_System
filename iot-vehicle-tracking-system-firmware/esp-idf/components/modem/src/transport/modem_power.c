@@ -1,10 +1,9 @@
 #include "modem_power.h"
+#include "platform/platform.h"
 #include "modem_internal.h"
 #include "driver/gpio.h"
 #include "esp_check.h"
 #include "esp_pm.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "sdkconfig.h"
 
 static int s_pwrkey_gpio;
@@ -53,7 +52,7 @@ void modem_power_pulse(uint32_t ms)
 {
     int on = s_pwrkey_inverted ? 1 : 0;
     gpio_set_level(s_pwrkey_gpio, on);
-    vTaskDelay(pdMS_TO_TICKS(ms));
+    platform_delay_ms(ms);
     gpio_set_level(s_pwrkey_gpio, !on);
 }
 

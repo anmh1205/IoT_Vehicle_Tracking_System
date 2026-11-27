@@ -2,7 +2,7 @@
 #include "esp_app_desc.h"
 #include "esp_log.h"
 #include "esp_ota_ops.h"
-#include "platform/platform_clock.h"
+#include "platform/platform.h"
 
 #include <stdatomic.h>
 

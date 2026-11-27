@@ -2,19 +2,17 @@
 #include "obd_internal.h"
 #include "obd_task.h"
 #include "elm/obd_pid.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
-#include "platform/platform_clock.h"
+#include "platform/platform.h"
 
 #include <string.h>
 
-static SemaphoreHandle_t s_diag_mutex;
+static platform_mutex_t s_diag_mutex;
 static ivts_obd_readiness_t s_readiness;
 static ivts_dtc_list_t s_dtc[3];
 
 bool obd_diag_init(void)
 {
-    s_diag_mutex = xSemaphoreCreateMutex();
+    s_diag_mutex = platform_mutex_create();
     return s_diag_mutex != NULL;
 }
 
@@ -44,10 +42,10 @@ static bool read_dtc_mode(obd_session_t *session, size_t index, ivts_dtc_list_t 
 
 static void store_diag_snapshot(const ivts_obd_readiness_t *readiness, const ivts_dtc_list_t dtc[3])
 {
-    xSemaphoreTake(s_diag_mutex, portMAX_DELAY);
+    platform_mutex_lock(s_diag_mutex);
     s_readiness = *readiness;
     memcpy(s_dtc, dtc, sizeof s_dtc);
-    xSemaphoreGive(s_diag_mutex);
+    platform_mutex_unlock(s_diag_mutex);
     ivts_event_t event = { .type = IVTS_EV_OBD_DIAG_READY, .ts_ms = platform_uptime_ms() };
     obd_emit(&event);
 }
@@ -69,11 +67,11 @@ ivts_err_t obd_diag_copy(ivts_obd_readiness_t *rd, ivts_dtc_list_t *stored,
                          ivts_dtc_list_t *pending, ivts_dtc_list_t *permanent)
 {
     if (s_diag_mutex == NULL) { return IVTS_ERR_INVALID_STATE; }
-    xSemaphoreTake(s_diag_mutex, portMAX_DELAY);
+    platform_mutex_lock(s_diag_mutex);
     if (rd != NULL)        { *rd = s_readiness; }
     if (stored != NULL)    { *stored = s_dtc[0]; }
     if (pending != NULL)   { *pending = s_dtc[1]; }
     if (permanent != NULL) { *permanent = s_dtc[2]; }
-    xSemaphoreGive(s_diag_mutex);
+    platform_mutex_unlock(s_diag_mutex);
     return IVTS_OK;
 }

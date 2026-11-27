@@ -17,6 +17,7 @@
  */
 
 #include "board_internal.h"
+#include "platform/platform.h"
 #include "lis3dsh.h"
 #include "lis3dsh_calc.h"
 #include "bsp/board_task.h"
@@ -24,8 +25,6 @@
 #include "driver/gpio.h"
 #include "esp_check.h"
 #include "esp_log.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 
 #define LIS_WHO_AM_I    0x0F
 #define LIS_ID          0x3F
@@ -131,7 +130,7 @@ static esp_err_t lis3dsh_configure_sampling(void)
     ESP_RETURN_ON_ERROR(wr(LIS_CTRL4, 0x4F), BOARD_TAG, "ctrl4");          /* ODR 25 Hz, BDU, XYZ. */
     ESP_RETURN_ON_ERROR(wr(LIS_CTRL5, 0x00), BOARD_TAG, "ctrl5");          /* Thang đo ±2 g. */
     ESP_RETURN_ON_ERROR(wr(LIS_CTRL6, 0x10), BOARD_TAG, "ctrl6");          /* Burst I2C tự tăng địa chỉ. */
-    vTaskDelay(pdMS_TO_TICKS(100));                                         /* Chờ vài mẫu đầu ổn định trước khi đọc trọng lực. */
+    platform_delay_ms(100);                                         /* Chờ vài mẫu đầu ổn định trước khi đọc trọng lực. */
 
     return ESP_OK;
 }

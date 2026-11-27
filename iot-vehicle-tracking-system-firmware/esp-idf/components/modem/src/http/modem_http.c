@@ -34,20 +34,6 @@ void modem_http_discard_raw(void)
     s_http.reading_raw = false;
 }
 
-static ivts_err_t rpc(modem_req_t *r)
-{
-    ivts_err_t res = IVTS_ERR_FAIL;
-    r->result = &res;
-    r->done = xSemaphoreCreateBinary();
-    if (r->done == NULL) { return IVTS_ERR_FULL; }
-    if (modem_task_post(r, 1000u) != IVTS_OK) {
-        vSemaphoreDelete(r->done);
-        return IVTS_ERR_FULL;
-    }
-    (void)xSemaphoreTake(r->done, portMAX_DELAY);   /* Task "modem" luôn give, kể cả khi lỗi. */
-    vSemaphoreDelete(r->done);
-    return res;
-}
 
 ivts_err_t modem_http_open(const char *url, uint32_t *size, int *http_status)
 {
@@ -55,7 +41,7 @@ ivts_err_t modem_http_open(const char *url, uint32_t *size, int *http_status)
     *size = 0u;
     *http_status = 0;
     modem_req_t r = { .op = REQ_HTTP_OPEN, .url = url, .size = size, .status = http_status };
-    return rpc(&r);
+    return modem_task_call(&r);
 }
 
 ivts_err_t modem_http_read(uint32_t offset, uint8_t *buf, size_t len, size_t *got)
@@ -63,13 +49,13 @@ ivts_err_t modem_http_read(uint32_t offset, uint8_t *buf, size_t len, size_t *go
     if (buf == NULL || len == 0u || got == NULL) { return IVTS_ERR_INVALID_ARG; }
     *got = 0u;
     modem_req_t r = { .op = REQ_HTTP_READ, .offset = offset, .buf = buf, .len = len, .got = got };
-    return rpc(&r);
+    return modem_task_call(&r);
 }
 
 void modem_http_close(void)
 {
     modem_req_t r = { .op = REQ_HTTP_CLOSE };
-    (void)rpc(&r);
+    (void)modem_task_call(&r);
 }
 
 /**
@@ -154,16 +140,14 @@ static ivts_err_t do_read(const modem_req_t *r)
     return IVTS_OK;
 }
 
-/* Chạy trong task "modem": thực hiện yêu cầu HTTP và báo cho caller đang chặn. */
-void modem_http_handle(const modem_req_t *r)
+ivts_err_t modem_http_handle(const modem_req_t *r)
 {
-    ivts_err_t res = IVTS_ERR_INVALID_ARG;
     switch (r->op) {
-    case REQ_HTTP_OPEN:  res = do_open(r); break;
-    case REQ_HTTP_READ:  res = do_read(r); break;
-    case REQ_HTTP_CLOSE: (void)modem_at_simple("AT+HTTPTERM", 5000); res = IVTS_OK; break;
-    default: break;
+    case REQ_HTTP_OPEN:  return do_open(r);
+    case REQ_HTTP_READ:  return do_read(r);
+    case REQ_HTTP_CLOSE:
+        (void)modem_at_simple("AT+HTTPTERM", 5000);
+        return IVTS_OK;
+    default: return IVTS_ERR_INVALID_ARG;
     }
-    if (r->result != NULL) { *r->result = res; }
-    if (r->done != NULL) { xSemaphoreGive(r->done); }
 }

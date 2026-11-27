@@ -2,6 +2,8 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#define pdTRUE 1
+
 typedef bool *SemaphoreHandle_t;
 
 static inline SemaphoreHandle_t xSemaphoreCreateMutex(void)
@@ -10,11 +12,12 @@ static inline SemaphoreHandle_t xSemaphoreCreateMutex(void)
     return &held;
 }
 
-static inline void xSemaphoreTake(SemaphoreHandle_t mutex, unsigned ticks)
+static inline int xSemaphoreTake(SemaphoreHandle_t mutex, unsigned ticks)
 {
     (void)ticks;
     assert(!*mutex);
     *mutex = true;
+    return pdTRUE;
 }
 
 static inline void xSemaphoreGive(SemaphoreHandle_t mutex)

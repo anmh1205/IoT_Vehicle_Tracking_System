@@ -18,6 +18,7 @@
  */
 
 #include "board_internal.h"
+#include "board/board_hw.h"
 #include "imu_wake.h"
 #include "wake_cause.h"
 #include "bsp/board_task.h"

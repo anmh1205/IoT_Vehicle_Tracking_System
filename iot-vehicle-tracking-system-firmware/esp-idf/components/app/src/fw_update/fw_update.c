@@ -11,7 +11,7 @@
 #include "esp_log.h"
 #include "ivts_core/base/str.h"
 #include "ota/ota.h"
-#include "platform/platform_reset.h"
+#include "platform/platform.h"
 #include "storage/storage.h"
 
 static struct {

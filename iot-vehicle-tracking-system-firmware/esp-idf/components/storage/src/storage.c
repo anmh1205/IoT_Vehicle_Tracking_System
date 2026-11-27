@@ -8,9 +8,8 @@
 #include "nvs/nvs_store_internal.h"
 #include "queue/queue.h"
 #include "sd/sd_io.h"
-#include "platform/platform_err.h"
 #include "esp_log.h"
-#include "platform/platform_clock.h"
+#include "platform/platform.h"
 
 static storage_cfg_t s_storage_cfg;
 static bool s_sd_ok;   /* Thẻ SD đã gắn và queue đã mở; ghi trong storage_init(), trước khi task "storage" tồn tại. */

@@ -1,7 +1,7 @@
 #include "app_clock.h"
 #include <stddef.h>
 #include "board/board.h"
-#include "platform/platform_clock.h"
+#include "platform/platform.h"
 
 uint64_t app_now(void)
 {

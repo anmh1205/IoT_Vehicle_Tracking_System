@@ -4,8 +4,7 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "ivts_core/base/crc32.h"
-#include "platform/platform_clock.h"
-#include "platform/platform_err.h"
+#include "platform/platform.h"
 
 #include <string.h>
 

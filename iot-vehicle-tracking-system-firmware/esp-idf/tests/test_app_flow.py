@@ -18,7 +18,7 @@ def executable():
             [
                 FIRMWARE / "tests/app_flow_fixture.c",
                 *sorted((app / "src").rglob("*.c")),
-                PLATFORM / "src/platform_clock.c", PLATFORM / "src/platform_reset.c", *sorted(CORE.glob("src/**/*.c")),
+                PLATFORM / "src/platform.c", PLATFORM / "src/platform_rtos.c", *sorted(CORE.glob("src/**/*.c")),
             ],
             [
                 "-I", PLATFORM / "include", "-I", FIRMWARE / "tests/stubs",

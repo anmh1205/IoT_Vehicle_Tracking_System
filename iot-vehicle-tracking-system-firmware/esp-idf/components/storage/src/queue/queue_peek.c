@@ -1,6 +1,6 @@
 #include "queue_parts.h"
 #include "esp_log.h"
-#include "platform/platform_clock.h"
+#include "platform/platform.h"
 
 #include <errno.h>
 

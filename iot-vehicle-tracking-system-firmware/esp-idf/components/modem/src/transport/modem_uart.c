@@ -1,8 +1,8 @@
 #include "modem_uart.h"
+#include "platform/platform.h"
 #include "modem_internal.h"
 #include "driver/uart.h"
 #include "esp_check.h"
-#include "freertos/FreeRTOS.h"
 
 #define UART_RX_BUF 4096
 #define UART_TX_BUF 2048
@@ -35,7 +35,7 @@ void modem_uart_write(void *ctx, const void *buf, size_t n)
 
 int modem_uart_read(uint8_t *data, size_t cap, uint32_t wait_ms)
 {
-    return uart_read_bytes(s_uart_num, data, cap, pdMS_TO_TICKS(wait_ms));
+    return uart_read_bytes(s_uart_num, data, cap, platform_timeout_ticks(wait_ms));
 }
 
 void modem_uart_flush(void)
