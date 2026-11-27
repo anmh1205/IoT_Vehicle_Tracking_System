@@ -26,7 +26,7 @@ typedef struct {
     int      uart_num;               /**< Số UART nối SIM7600. */
     int      pin_tx, pin_rx;         /**< Chân UART của ESP32-S3. */
     int      pin_pwrkey;             /**< Chân điều khiển PWRKEY. */
-    int      pin_reset;              /**< Chân RESET của module. */
+    int      pin_reset;              /**< Chân RESET của module, hiện chưa dùng. */
     bool     pwrkey_inverted;        /**< true nếu mạch có transistor đảo: GPIO = 1 nghĩa là kéo PWRKEY xuống. */
     uint32_t baud;                   /**< Tốc độ UART. */
     char     apn[64];                /**< APN của nhà mạng. */

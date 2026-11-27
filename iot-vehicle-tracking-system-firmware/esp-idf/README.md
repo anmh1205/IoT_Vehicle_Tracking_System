@@ -17,4 +17,6 @@ Giữ `sdkconfig` và `sdkconfig.old` cục bộ vì chúng có thể chứa th�
 
 Đặt tên hàm theo `<component>_<module>_<động_từ>` và ghi đơn vị ở cuối tên biến (`_ms`, `_s`, `_mv`, `_mmps2`). Dùng `_at_ms` cho mốc thời gian và `_ms` cho khoảng thời gian. Dùng tên vị từ cho biến bool. Mỗi module sở hữu dữ liệu của mình, khai báo API nội bộ theo thư mục và liệt kê nguồn tường minh trong CMake. Tách phần tính toán thuần để kiểm thử trên host.
 
+Các component có hướng dẫn riêng cho [board](components/board/README.md) và [platform](components/platform/README.md).
+
 Xem [thiết kế và phần cứng](IVTS.md) để biết các hợp đồng lưu trữ, giao tiếp và nguồn điện.

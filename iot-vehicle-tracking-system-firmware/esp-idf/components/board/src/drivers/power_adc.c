@@ -1,15 +1,12 @@
-#include "board_priv.h"
+#include "board_internal.h"
+#include "power_adc.h"
+#include "power_adc_calc.h"
 #include "esp_adc/adc_cali.h"
 #include "esp_adc/adc_cali_scheme.h"
 #include "esp_adc/adc_oneshot.h"
 #include "esp_check.h"
 #include "esp_log.h"
 
-/* Mạch chia áp 11:1 và hệ số hiệu chuẩn theo từng kênh (1.02007 và 1.01995). Hệ số được
- * biểu diễn bằng ppm để tính toán hoàn toàn bằng số nguyên. */
-#define DIVIDER            11u
-#define GAIN_VEHICLE_PPM   1020070u
-#define GAIN_DEVICE_PPM    1019950u
 #define SAMPLES            8   /* Số mẫu trung bình cho mỗi lần đọc, giảm nhiễu. */
 
 typedef struct {
@@ -20,6 +17,7 @@ typedef struct {
 
 static adc_oneshot_unit_handle_t s_unit;
 static chan_t s_veh, s_dev;
+static uint32_t s_divider;
 
 static esp_err_t chan_init(int gpio, uint32_t gain_ppm, chan_t *c)
 {
@@ -40,19 +38,14 @@ static esp_err_t chan_init(int gpio, uint32_t gain_ppm, chan_t *c)
 }
 
 /* ADC1 oneshot, hai kênh: nguồn xe và nguồn thiết bị. */
-esp_err_t board_adc_init(void)
+esp_err_t power_adc_init(const power_adc_cfg_t *cfg)
 {
+    s_divider = cfg->divider;
     adc_oneshot_unit_init_cfg_t uc = { .unit_id = ADC_UNIT_1 };
     ESP_RETURN_ON_ERROR(adc_oneshot_new_unit(&uc, &s_unit), BOARD_TAG, "adc unit");
-    ESP_RETURN_ON_ERROR(chan_init(BOARD_PIN_ADC_VEHICLE, GAIN_VEHICLE_PPM, &s_veh), BOARD_TAG, "veh");
-    ESP_RETURN_ON_ERROR(chan_init(BOARD_PIN_ADC_DEVICE, GAIN_DEVICE_PPM, &s_dev), BOARD_TAG, "dev");
+    ESP_RETURN_ON_ERROR(chan_init(cfg->vehicle_gpio, cfg->vehicle_gain_ppm, &s_veh), BOARD_TAG, "veh");
+    ESP_RETURN_ON_ERROR(chan_init(cfg->device_gpio, cfg->device_gain_ppm, &s_dev), BOARD_TAG, "dev");
     return ESP_OK;
-}
-
-static uint16_t power_adc_scale_mv(uint64_t pin_mv, uint32_t divider, uint32_t gain_ppm)
-{
-    uint64_t voltage_mv = pin_mv * divider * gain_ppm / 1000000u;
-    return voltage_mv > UINT16_MAX ? UINT16_MAX : (uint16_t)voltage_mv;
 }
 
 static esp_err_t read_mv(const chan_t *c, uint16_t *out)
@@ -65,7 +58,7 @@ static esp_err_t read_mv(const chan_t *c, uint16_t *out)
         sum += mv;
     }
     uint64_t pin_mv = (uint64_t)(sum / SAMPLES);
-    *out = power_adc_scale_mv(pin_mv, DIVIDER, c->gain_ppm);
+    *out = power_adc_scale_mv(pin_mv, s_divider, c->gain_ppm);
     return ESP_OK;
 }
 

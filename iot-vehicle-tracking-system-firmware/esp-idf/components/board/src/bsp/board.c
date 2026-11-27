@@ -1,4 +1,10 @@
-#include "board_priv.h"
+#include "board_internal.h"
+#include "board_task.h"
+#include "bus/i2c_bus.h"
+#include "drivers/ds3231.h"
+#include "drivers/lis3dsh.h"
+#include "drivers/power_adc.h"
+#include "power/wake_cause.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "platform/platform_clock.h"
@@ -17,18 +23,32 @@ ivts_err_t board_init(const board_cfg_t *cfg)
     s_led_ok = gpio_config(&led) == ESP_OK;
     board_led_set(false);
 
-    esp_err_t e = board_os_init(cfg);           /* Mutex phải tồn tại trước mọi truy cập I2C. */
-    if (e != ESP_OK) { return board_err(e); }
-    e = board_i2c_init();
+    board_task_configure(cfg);
+    esp_err_t e = board_i2c_init();
     if (e != ESP_OK) { return board_err(e); }   /* Không có bus I2C thì không có RTC và IMU. */
 
-    s_rtc_ok = (board_rtc_init() == ESP_OK);
+    s_rtc_ok = (ds3231_init(BOARD_DEV_RTC, BOARD_RTC_I2C_ADDR, BOARD_RTC_I2C_HZ) == ESP_OK);
     if (cfg->imu_enabled) {
-        s_imu_ok = (board_imu_init(cfg->imu_threshold) == ESP_OK);
+        const lis3dsh_cfg_t imu_cfg = {
+            .i2c_device = BOARD_DEV_IMU,
+            .primary_address = BOARD_IMU_I2C_ADDR_PRIMARY,
+            .alternate_address = BOARD_IMU_I2C_ADDR_ALT,
+            .i2c_speed_hz = BOARD_IMU_I2C_HZ,
+            .int_gpio = BOARD_PIN_IMU_INT1,
+            .threshold = cfg->imu_threshold,
+        };
+        s_imu_ok = (lis3dsh_init(&imu_cfg) == ESP_OK);
     }
-    e = board_adc_init();
+    const power_adc_cfg_t adc_cfg = {
+        .vehicle_gpio = BOARD_PIN_ADC_VEHICLE,
+        .device_gpio = BOARD_PIN_ADC_DEVICE,
+        .divider = BOARD_ADC_DIVIDER,
+        .vehicle_gain_ppm = BOARD_ADC_GAIN_VEHICLE_PPM,
+        .device_gain_ppm = BOARD_ADC_GAIN_DEVICE_PPM,
+    };
+    e = power_adc_init(&adc_cfg);
     if (e != ESP_OK) { return board_err(e); }   /* Không có ADC thì không suy ra được ignition. */
-    e = board_os_start();
+    e = board_task_start();
     if (e != ESP_OK) { return board_err(e); }
     ESP_LOGI(BOARD_TAG, "init ok rtc=%d imu=%d wake=%d", s_rtc_ok, s_imu_ok, (int)board_wake_cause());
     return IVTS_OK;

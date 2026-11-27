@@ -57,7 +57,6 @@ class Layers(unittest.TestCase):
         self.assert_symbols_local(re.compile(r"\b(?:esp_timer_get_time|esp_restart)\b"),
                                   COMPONENTS / "platform")
 
-    @unittest.expectedFailure  # P2 puts the PCB pin map behind board and composition.
     def test_board_pins_stay_in_board_and_app_boot(self):
         self.assert_symbols_local(re.compile(r"\bBOARD_PIN_\w+\b"),
                                   COMPONENTS / "board", COMPONENTS / "app/src/boot")

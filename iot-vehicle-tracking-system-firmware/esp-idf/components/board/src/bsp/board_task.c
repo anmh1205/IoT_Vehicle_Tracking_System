@@ -1,6 +1,6 @@
 /**
- * @file board_os.c
- * @brief Task "board" và mutex bus I2C.
+ * @file board_task.c
+ * @brief Lấy mẫu ADC và xử lý ngắt IMU trong task board.
  *
  * ## Mô hình thực thi
  *
@@ -14,46 +14,30 @@
  *
  * ## Nguồn notify
  *
- * - imu_isr() gọi board_os_notify_imu_from_isr() (ngữ cảnh ISR).
- * - board_sleep() gọi board_os_notify_imu() (ngữ cảnh task) sau khi thức do IMU.
+ * - imu_isr() gọi board_task_notify_imu_from_isr() (ngữ cảnh ISR).
+ * - board_sleep() gọi board_task_notify_imu() (ngữ cảnh task) sau khi thức do IMU.
  *
  * ISR không gọi sink và không truy cập I2C; chỉ báo cho task. Task notification không đếm
  * theo từng lần: nhiều ngắt liên tiếp gộp thành một lần xử lý, và không có sự kiện nào bị mất
  * vì mỗi lần xử lý đều đọc OUTS1 để nhả ngắt.
- *
- * ## Mutex bus I2C
- *
- * s_i2c_mutex bảo vệ bus giữa task "board" (IMU) và caller của board_time_get()/board_time_set()
- * (task app). Mutex được lấy bên trong board_i2c_read/write/probe (timeout 100 ms), nên caller
- * không bao giờ giữ mutex khi gọi sink hoặc hàm khác của board.
  *
  * ## Khi reset hoặc mất nguồn
  *
  * Task không có state bền vững. Cấu hình IMU được ghi lại ở mỗi lần board_init().
  */
 
-#include "board_priv.h"
+#include "board_internal.h"
+#include "board_task.h"
+#include "drivers/lis3dsh.h"
 #include "esp_check.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
 #include "freertos/task.h"
 
-static SemaphoreHandle_t s_i2c_mutex;   /* Khoá bus I2C, xem mô tả ở đầu file. */
 static TaskHandle_t s_task;             /* Task "board"; NULL khi chưa tạo. */
-static board_cfg_t s_cfg;   /* Bản sao cfg; chỉ ghi trong board_os_init(), trước khi task tồn tại. */
+static board_cfg_t s_cfg;   /* Bản sao cfg; chỉ ghi trong board_task_configure(), trước khi task tồn tại. */
 
-bool board_i2c_lock(uint32_t timeout_ms)
-{
-    return xSemaphoreTake(s_i2c_mutex, pdMS_TO_TICKS(timeout_ms)) == pdTRUE;
-}
-
-void board_i2c_unlock(void)
-{
-    xSemaphoreGive(s_i2c_mutex);
-}
-
-void IRAM_ATTR board_os_notify_imu_from_isr(void)
+void IRAM_ATTR board_task_notify_imu_from_isr(void)
 {
     BaseType_t woken = pdFALSE;
     if (s_task != NULL) {
@@ -62,7 +46,7 @@ void IRAM_ATTR board_os_notify_imu_from_isr(void)
     portYIELD_FROM_ISR(woken);
 }
 
-void board_os_notify_imu(void)
+void board_task_notify_imu(void)
 {
     if (s_task != NULL) {
         xTaskNotifyGive(s_task);
@@ -77,10 +61,10 @@ static void emit(const ivts_event_t *ev)
 static void handle_imu_irq(uint64_t now_ms)
 {
     uint8_t outs = 0;
-    (void)board_imu_clear(&outs);
+    (void)lis3dsh_clear_interrupt(&outs);
     ivts_event_t event = { .type = IVTS_EV_MOTION_IRQ, .ts_ms = now_ms };
-    event.u.motion_irq.pin_level = (uint8_t)board_imu_int_level();
-    event.u.motion_irq.imu_delta_mmps2 = board_imu_sample_delta(now_ms);
+    event.u.motion_irq.pin_level = (uint8_t)lis3dsh_interrupt_level();
+    event.u.motion_irq.imu_delta_mmps2 = lis3dsh_sample_delta(now_ms);
     emit(&event);
 }
 
@@ -93,7 +77,7 @@ static void sample_power(uint64_t now_ms)
     ivts_event_t event = { .type = IVTS_EV_POWER_SAMPLE, .ts_ms = now_ms };
     event.u.power.vehicle_mv = vehicle_mv;
     event.u.power.device_mv = device_mv;
-    event.u.power.imu_delta_mmps2 = board_imu_sample_delta(now_ms);
+    event.u.power.imu_delta_mmps2 = lis3dsh_sample_delta(now_ms);
     emit(&event);
 }
 
@@ -111,16 +95,13 @@ static void board_task(void *arg)
     }
 }
 
-esp_err_t board_os_init(const board_cfg_t *cfg)
+void board_task_configure(const board_cfg_t *cfg)
 {
     s_cfg = *cfg;
-    s_i2c_mutex = xSemaphoreCreateMutex();
-    ESP_RETURN_ON_FALSE(s_i2c_mutex != NULL, ESP_ERR_NO_MEM, BOARD_TAG, "mutex");
-    return ESP_OK;
 }
 
 /* Tạo task sau khi ADC và IMU đã khởi tạo: task bắt đầu đọc ADC ngay ở lần timeout đầu tiên. */
-esp_err_t board_os_start(void)
+esp_err_t board_task_start(void)
 {
     BaseType_t ok = xTaskCreate(board_task, "board", s_cfg.task_stack, NULL, s_cfg.task_prio, &s_task);
     ESP_RETURN_ON_FALSE(ok == pdPASS, ESP_ERR_NO_MEM, BOARD_TAG, "task");

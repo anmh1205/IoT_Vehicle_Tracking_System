@@ -27,6 +27,7 @@
 #include "app_timing.h"
 #include <string.h>
 #include "board/board.h"
+#include "board/board_hw.h"
 #include "esp_log.h"
 #include "esp_random.h"
 #include "esp_system.h"
@@ -141,15 +142,15 @@ bool app_init_all(void)
     if (!app_os_init()) { ESP_LOGE(APP_TAG, "queue"); return false; }
     ivts_sink_t sink = app_sink();
 
-    board_cfg_t bc = {
+    board_cfg_t board_cfg = {
         .sink = sink, .power_sample_ms = CONFIG_IVTS_POWER_SAMPLE_MS,
         .imu_threshold = CONFIG_IVTS_IMU_THRESHOLD, .imu_enabled = true,
         .task_prio = PRIO_BOARD, .task_stack = 3072,
     };
-    ivts_err_t e = board_init(&bc);
+    ivts_err_t e = board_init(&board_cfg);
     if (e != IVTS_OK) { ESP_LOGE(APP_TAG, "board: %s", ivts_err_name(e)); return false; }
 
-    storage_cfg_t sc = {
+    storage_cfg_t storage_cfg = {
         .sink = sink,
 #if CONFIG_IVTS_SD_ENABLE
         .sd_enabled = true,
@@ -163,7 +164,7 @@ bool app_init_all(void)
         .pin_cd = BOARD_PIN_SD_CD,
         .task_prio = PRIO_STORAGE, .task_stack = 5120, .req_queue_len = 16,
     };
-    e = storage_init(&sc);
+    e = storage_init(&storage_cfg);
     if (e != IVTS_OK) { ESP_LOGE(APP_TAG, "storage: %s", ivts_err_name(e)); return false; }
 
     app_cmd_init();
@@ -175,10 +176,10 @@ bool app_init_all(void)
     }
     g_app.alarm_persisted = storage_alarm_load(&g_app.alarm) == IVTS_OK && g_app.alarm.seq != 0u;
     bool defaults_ok = fill_deploy_defaults(&g_app.cfg);
-    ivts_cfg_issue_t iss[IVTS_CFG_F_COUNT];
-    size_t bad = ivts_config_validate(&g_app.cfg, iss, IVTS_CFG_F_COUNT);
-    for (size_t i = 0; i < bad && i < IVTS_CFG_F_COUNT; i++) {
-        ESP_LOGW(APP_TAG, "config field %u reason %u", iss[i].field, iss[i].reason);
+    ivts_cfg_issue_t config_issues[IVTS_CFG_F_COUNT];
+    size_t config_issue_count = ivts_config_validate(&g_app.cfg, config_issues, IVTS_CFG_F_COUNT);
+    for (size_t i = 0; i < config_issue_count && i < IVTS_CFG_F_COUNT; i++) {
+        ESP_LOGW(APP_TAG, "config field %u reason %u", config_issues[i].field, config_issues[i].reason);
     }
     /* Chỉ app_sleep_enter() cho CPU ngủ sau khi modem và BLE đã dừng. */
     e = board_set_auto_light_sleep(false);
@@ -193,50 +194,50 @@ bool app_init_all(void)
         app_rtc_ctx_save(g_app.boot_id, 0, 0);
     }
 
-    bool provisioned = defaults_ok && bad == 0u;
-    modem_cfg_t mc = {
+    bool provisioned = defaults_ok && config_issue_count == 0u;
+    modem_cfg_t modem_cfg = {
         .sink = sink, .time_get = modem_time_get, .uart_num = BOARD_MODEM_UART_NUM, .pin_tx = BOARD_PIN_MODEM_TX,
         .pin_rx = BOARD_PIN_MODEM_RX, .pin_pwrkey = BOARD_PIN_MODEM_PWRKEY,
-        .pin_reset = BOARD_PIN_MODEM_RESET, .pwrkey_inverted = true, .baud = BOARD_MODEM_BAUD,
+        .pin_reset = BOARD_PIN_MODEM_RESET, .pwrkey_inverted = BOARD_MODEM_PWRKEY_INVERTED, .baud = BOARD_MODEM_BAUD,
         .mqtt_port = g_app.cfg.mqtt_port, .gnss_period_s = CONFIG_IVTS_GNSS_PERIOD_S,
         .command_subscribe_enabled = g_app.cfg.command_subscribe_enabled,
         .task_prio = PRIO_MODEM, .task_stack = 6144,
     };
     _Static_assert(IVTS_CFG_DEVICE_ID_MAX == MODEM_CLIENT_ID_MAX, "giới hạn client id phải khớp");
     if (provisioned) {
-        (void)ivts_str_copy(mc.apn, sizeof mc.apn, g_app.cfg.apn);
-        (void)ivts_str_copy(mc.mqtt_host, sizeof mc.mqtt_host, g_app.cfg.mqtt_host);
-        (void)ivts_str_copy(mc.mqtt_user, sizeof mc.mqtt_user, g_app.cfg.mqtt_username);
-        (void)ivts_str_copy(mc.mqtt_pass, sizeof mc.mqtt_pass, g_app.cfg.mqtt_password);
-        (void)ivts_str_copy(mc.device_id, sizeof mc.device_id, g_app.cfg.device_id);
-        (void)ivts_str_copy(mc.client_id, sizeof mc.client_id, g_app.cfg.device_id);
+        (void)ivts_str_copy(modem_cfg.apn, sizeof modem_cfg.apn, g_app.cfg.apn);
+        (void)ivts_str_copy(modem_cfg.mqtt_host, sizeof modem_cfg.mqtt_host, g_app.cfg.mqtt_host);
+        (void)ivts_str_copy(modem_cfg.mqtt_user, sizeof modem_cfg.mqtt_user, g_app.cfg.mqtt_username);
+        (void)ivts_str_copy(modem_cfg.mqtt_pass, sizeof modem_cfg.mqtt_pass, g_app.cfg.mqtt_password);
+        (void)ivts_str_copy(modem_cfg.device_id, sizeof modem_cfg.device_id, g_app.cfg.device_id);
+        (void)ivts_str_copy(modem_cfg.client_id, sizeof modem_cfg.client_id, g_app.cfg.device_id);
     } else {
         /* Chưa provision thì không kết nối cloud (modem_set_link không được gọi), nhưng dữ liệu
          * vẫn được ghi vào offline queue. */
-        (void)ivts_str_copy(mc.client_id, sizeof mc.client_id, "unprovisioned");
+        (void)ivts_str_copy(modem_cfg.client_id, sizeof modem_cfg.client_id, "unprovisioned");
         g_app.cfg.device_id[sizeof g_app.cfg.device_id - 1u] = '\0';
         g_app.cfg.auth_token[sizeof g_app.cfg.auth_token - 1u] = '\0';
     }
-    e = modem_init(&mc);
+    e = modem_init(&modem_cfg);
     if (e != IVTS_OK) { ESP_LOGE(APP_TAG, "modem: %s", ivts_err_name(e)); return false; }
     g_app.provisioned = provisioned;
     if (provisioned) { (void)modem_set_link(true); }
 
-    obd_cfg_t oc = {
+    obd_cfg_t obd_cfg = {
         .sink = sink, .poll_ms = CONFIG_IVTS_OBD_POLL_MS, .diag_period_s = 60,
         .task_prio = PRIO_OBD, .task_stack = 4096,
     };
     if (memchr(g_app.cfg.obd_ble_addr, '\0', sizeof g_app.cfg.obd_ble_addr) != NULL) {
-        (void)ivts_str_copy(oc.target_addr, sizeof oc.target_addr, g_app.cfg.obd_ble_addr);
+        (void)ivts_str_copy(obd_cfg.target_addr, sizeof obd_cfg.target_addr, g_app.cfg.obd_ble_addr);
     }
-    if (obd_init(&oc) != IVTS_OK) { ESP_LOGW(APP_TAG, "obd init lỗi: chạy không OBD"); }
+    if (obd_init(&obd_cfg) != IVTS_OK) { ESP_LOGW(APP_TAG, "obd init lỗi: chạy không OBD"); }
 
-    ota_cfg_t tc = {
+    ota_cfg_t ota_cfg = {
         .sink = sink, .src = { .open = src_open, .read = src_read, .close = src_close, .ctx = NULL },
         .prepare_boot = prepare_ota_boot,
         .task_prio = PRIO_OTA, .task_stack = 6144,
     };
-    if (ota_init(&tc) != IVTS_OK) { return false; }
+    if (ota_init(&ota_cfg) != IVTS_OK) { return false; }
 
     /* Ba trường hợp lúc boot:
      *  1. Image ở trạng thái PENDING_VERIFY: vừa cài xong. Nạp hạn chót xác nhận và không cho
