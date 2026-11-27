@@ -23,35 +23,50 @@ static bool commit(const ivts_session_state_t *next)
     return true;
 }
 
+static uint64_t s_session_retry_at_ms;
+
+static bool wants_active_session(void)
+{
+    return g_app.axes.ign == IVTS_IGN_ON && g_app.tracking_enabled;
+}
+
+static bool outbox_has_room(bool want_active)
+{
+    /* Giữ một chỗ cho mốc đóng khi mở phiên mới. */
+    uint8_t limit = want_active ? IVTS_SESSION_OUTBOX_SIZE - 1u : IVTS_SESSION_OUTBOX_SIZE;
+    return g_app.session.count < limit;
+}
+
+static void make_boundary(ivts_session_boundary_t *boundary, ivts_boundary_kind_t kind, uint64_t now_ms)
+{
+    memset(boundary, 0, sizeof *boundary);
+    boundary->kind = kind;
+    boundary->boot_id = g_app.boot_id;
+    boundary->seq = app_rtc_next_seq();
+    boundary->uptime_ms = (uint32_t)now_ms;
+    boundary->unix_ms = app_clock_unix_ms_or_zero(NULL);
+}
+
 void app_session_tick(void)
 {
     if (g_app.axes.ign == IVTS_IGN_UNKNOWN) { return; }
-    bool want_active = g_app.axes.ign == IVTS_IGN_ON && g_app.tracking_enabled;
+    bool want_active = wants_active_session();
     if (want_active == (g_app.session.active.local_key != 0u)) { return; }
 
-    /* Giữ một chỗ cho mốc đóng khi mở phiên mới. Nếu offline quá lâu, chờ phát lại
-     * các mốc cũ trước khi tạo phiên tiếp theo. */
-    uint8_t limit = want_active ? IVTS_SESSION_OUTBOX_SIZE - 1u : IVTS_SESSION_OUTBOX_SIZE;
-    if (g_app.session.count >= limit) { return; }
+    if (!outbox_has_room(want_active)) { return; }
 
-    static uint64_t next_attempt_ms;
     uint64_t now = app_now();
-    if (now < next_attempt_ms) { return; }
+    if (now < s_session_retry_at_ms) { return; }
 
     ivts_session_state_t next = g_app.session;
     ivts_session_boundary_t *b = &next.outbox[next.count++];
-    memset(b, 0, sizeof *b);
-    b->kind = want_active ? IVTS_BOUNDARY_STARTED : IVTS_BOUNDARY_ENDED;
-    b->boot_id = g_app.boot_id;
-    b->seq = app_rtc_next_seq();
-    b->uptime_ms = (uint32_t)now;
-    b->unix_ms = app_clock_unix_ms_or_zero(NULL);
+    make_boundary(b, want_active ? IVTS_BOUNDARY_STARTED : IVTS_BOUNDARY_ENDED, now);
     if (want_active) {
         next.active = (ivts_session_id_t){ .boot_id = b->boot_id, .local_key = b->seq };
     }
     b->session = next.active;
     if (!want_active) { next.active = (ivts_session_id_t){0}; }
-    if (!commit(&next)) { next_attempt_ms = now + NVS_RETRY_MS; }
+    if (!commit(&next)) { s_session_retry_at_ms = now + NVS_RETRY_MS; }
 }
 
 bool app_session_on_ack(void)

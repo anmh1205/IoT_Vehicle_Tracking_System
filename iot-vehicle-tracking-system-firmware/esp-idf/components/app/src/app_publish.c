@@ -93,79 +93,91 @@ static bool send(pub_kind_t kind, modem_topic_t topic, size_t len)
     return true;
 }
 
-/**
- * @brief Dựng và gửi một bản tin theo loại. Xem mô tả ở đầu file về xử lý khi gửi lỗi.
- */
-void app_publish(pub_kind_t kind)
+static void publish_live_record(void)
 {
     size_t len = 0;
-    ivts_err_t e = IVTS_ERR_INVALID_ARG;
+    ivts_record_t r;
+    app_state_make_record(&r);
+    ivts_msg_meta_t m = { .device_id = g_app.cfg.device_id, .auth_token = g_app.cfg.auth_token };
+    ivts_err_t error = ivts_payload_rawdata(&m, &r, app_state_get(), s_buf, sizeof s_buf, &len);
+    if (g_app.session.count == 0u && storage_queue_pending() == 0u && !storage_queue_push_pending() &&
+        error == IVTS_OK && send(PUB_RAW_LIVE, MODEM_TOPIC_RAWDATA, len)) {
+        g_app.pub_rec = r;
+    } else {
+        to_queue(&r);                     /* Bản ghi giữ boot_id và seq đã cấp khi replay. */
+    }
+}
+
+static void publish_status(void)
+{
+    size_t len = 0;
+    ivts_msg_meta_t m = meta(app_rtc_next_seq());
+    bool heartbeat = g_app.fsm.state == IVTS_ST_HEARTBEAT || !g_app.tracking_enabled;
+    ivts_err_t error = ivts_payload_status(&m, app_state_get(), &g_app.session.active, IVTS_BOUNDARY_NONE,
+                            heartbeat, s_buf, sizeof s_buf, &len);
+    if (error == IVTS_OK && send(PUB_STATUS, MODEM_TOPIC_STATUS, len)) { g_app.status_dirty = false; }
+}
+
+static void publish_session_boundary(void)
+{
+    size_t len = 0;
+    const ivts_session_boundary_t *b = &g_app.session.outbox[0];
+    ivts_msg_meta_t m = {
+        .device_id = g_app.cfg.device_id, .auth_token = g_app.cfg.auth_token,
+        .boot_id = b->boot_id, .seq = b->seq, .sent_unix_ms = b->unix_ms,
+        .time_trusted = b->unix_ms != 0u, .uptime_ms = b->uptime_ms,
+    };
+    bool started = b->kind == IVTS_BOUNDARY_STARTED;
+    ivts_telemetry_t t = {
+        .ignition = started ? IVTS_IGN_ON : IVTS_IGN_OFF,
+        .vehicle = started ? IVTS_VEH_UNKNOWN : IVTS_VEH_PARKED_OFF,
+        .device_state = IVTS_DEV_ACTIVE,
+    };
+    ivts_err_t error = ivts_payload_status(&m, &t, &b->session, (ivts_boundary_kind_t)b->kind,
+                            false, s_buf, sizeof s_buf, &len);
+    s_boundary_retry_at = app_now() + BOUNDARY_RETRY_MS;
+    if (error == IVTS_OK) { (void)send(PUB_BOUNDARY, MODEM_TOPIC_STATUS, len); }
+}
+
+static void publish_event(void)
+{
+    size_t len = 0;
+    ivts_msg_meta_t m = meta(app_rtc_next_seq());
+    ivts_err_t error = ivts_payload_event(&m, 0, "warning", g_app.event_code, s_buf, sizeof s_buf, &len);
+    if (error == IVTS_OK && send(PUB_EVENT, MODEM_TOPIC_EVENTS, len)) { g_app.event_dirty = false; }
+}
+
+static void publish_motion_alarm(void)
+{
+    size_t len = 0;
+    const ivts_motion_alarm_t *a = &g_app.alarm;
+    ivts_msg_meta_t m = {
+        .device_id = g_app.cfg.device_id, .auth_token = g_app.cfg.auth_token,
+        .boot_id = a->boot_id, .seq = a->seq, .sent_unix_ms = a->unix_ms,
+        .time_trusted = a->unix_ms != 0u, .uptime_ms = a->uptime_ms,
+    };
+    ivts_err_t error = ivts_payload_event(&m, 1001, "warning", "motion_detected", s_buf, sizeof s_buf, &len);
+    if (error == IVTS_OK) { (void)send(PUB_ALARM, MODEM_TOPIC_EVENTS, len); }
+}
+
+static void publish_fw_report(void)
+{
+    size_t len = 0;
+    ivts_msg_meta_t m = meta(app_rtc_next_seq());
+    ivts_err_t error = ivts_payload_firmware(&m, app_fw_update_report(), s_buf, sizeof s_buf, &len);
+    if (error == IVTS_OK && send(PUB_FW, MODEM_TOPIC_FIRMWARE, len)) { app_fw_update_report_sent(); }
+}
+
+void app_publish(pub_kind_t kind)
+{
     switch (kind) {
-    case PUB_RAW_LIVE: {
-        ivts_record_t r;
-        app_state_make_record(&r);
-        ivts_msg_meta_t m = { .device_id = g_app.cfg.device_id, .auth_token = g_app.cfg.auth_token };
-        e = ivts_payload_rawdata(&m, &r, app_state_get(), s_buf, sizeof s_buf, &len);
-        if (g_app.session.count == 0u && storage_queue_pending() == 0u && !storage_queue_push_pending() &&
-            e == IVTS_OK && send(kind, MODEM_TOPIC_RAWDATA, len)) {
-            g_app.pub_rec = r;
-        } else {
-            to_queue(&r);                     /* Bản ghi giữ boot_id và seq đã cấp khi replay. */
-        }
-        return;
-    }
-    case PUB_STATUS: {
-        ivts_msg_meta_t m = meta(app_rtc_next_seq());
-        bool heartbeat = g_app.fsm.state == IVTS_ST_HEARTBEAT || !g_app.tracking_enabled;
-        e = ivts_payload_status(&m, app_state_get(), &g_app.session.active, IVTS_BOUNDARY_NONE,
-                                heartbeat, s_buf, sizeof s_buf, &len);
-        if (e == IVTS_OK && send(kind, MODEM_TOPIC_STATUS, len)) { g_app.status_dirty = false; }
-        return;
-    }
-    case PUB_BOUNDARY: {
-        const ivts_session_boundary_t *b = &g_app.session.outbox[0];
-        ivts_msg_meta_t m = {
-            .device_id = g_app.cfg.device_id, .auth_token = g_app.cfg.auth_token,
-            .boot_id = b->boot_id, .seq = b->seq, .sent_unix_ms = b->unix_ms,
-            .time_trusted = b->unix_ms != 0u, .uptime_ms = b->uptime_ms,
-        };
-        bool started = b->kind == IVTS_BOUNDARY_STARTED;
-        ivts_telemetry_t t = {
-            .ignition = started ? IVTS_IGN_ON : IVTS_IGN_OFF,
-            .vehicle = started ? IVTS_VEH_UNKNOWN : IVTS_VEH_PARKED_OFF,
-            .device_state = IVTS_DEV_ACTIVE,
-        };
-        e = ivts_payload_status(&m, &t, &b->session, (ivts_boundary_kind_t)b->kind,
-                                false, s_buf, sizeof s_buf, &len);
-        s_boundary_retry_at = app_now() + BOUNDARY_RETRY_MS;
-        if (e == IVTS_OK) { (void)send(kind, MODEM_TOPIC_STATUS, len); }
-        return;
-    }
-    case PUB_EVENT: {
-        ivts_msg_meta_t m = meta(app_rtc_next_seq());
-        e = ivts_payload_event(&m, 0, "warning", g_app.event_code, s_buf, sizeof s_buf, &len);
-        if (e == IVTS_OK && send(kind, MODEM_TOPIC_EVENTS, len)) { g_app.event_dirty = false; }
-        return;
-    }
-    case PUB_ALARM: {
-        const ivts_motion_alarm_t *a = &g_app.alarm;
-        ivts_msg_meta_t m = {
-            .device_id = g_app.cfg.device_id, .auth_token = g_app.cfg.auth_token,
-            .boot_id = a->boot_id, .seq = a->seq, .sent_unix_ms = a->unix_ms,
-            .time_trusted = a->unix_ms != 0u, .uptime_ms = a->uptime_ms,
-        };
-        e = ivts_payload_event(&m, 1001, "warning", "motion_detected", s_buf, sizeof s_buf, &len);
-        if (e == IVTS_OK) { (void)send(kind, MODEM_TOPIC_EVENTS, len); }
-        return;
-    }
-    case PUB_FW: {
-        ivts_msg_meta_t m = meta(app_rtc_next_seq());
-        e = ivts_payload_firmware(&m, app_fw_update_report(), s_buf, sizeof s_buf, &len);
-        if (e == IVTS_OK && send(kind, MODEM_TOPIC_FIRMWARE, len)) { app_fw_update_report_sent(); }
-        return;
-    }
-    default:
-        return;
+    case PUB_RAW_LIVE: publish_live_record(); break;
+    case PUB_STATUS: publish_status(); break;
+    case PUB_BOUNDARY: publish_session_boundary(); break;
+    case PUB_EVENT: publish_event(); break;
+    case PUB_ALARM: publish_motion_alarm(); break;
+    case PUB_FW: publish_fw_report(); break;
+    default: break;
     }
 }
 
