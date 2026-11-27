@@ -123,6 +123,59 @@ static bool fill_deploy_defaults(ivts_config_t *c)
     return ok;
 }
 
+static void restore_pending_verify(const ivts_ota_pending_t *saved)
+{
+    g_app.ota_pending = *saved;
+    g_app.ota_pending.pending = true;
+    if (g_app.ota_pending.timeout_s == 0u) { g_app.ota_pending.timeout_s = IVTS_OTA_CONFIRM_DEFAULT_S; }
+    g_app.ota_confirm_pending = true;
+    g_app.fw.status = IVTS_OTA_ST_CONFIRMING;
+    g_app.fw.progress = IVTS_OTA_PCT_CONFIRMING;
+    (void)ivts_str_copy(g_app.fw.job_id, sizeof g_app.fw.job_id, saved->job_id);
+    (void)ivts_str_copy(g_app.fw.target_version, sizeof g_app.fw.target_version, saved->target_version);
+    ESP_LOGW(APP_TAG, "image PENDING_VERIFY, hạn %lus", (unsigned long)g_app.ota_pending.timeout_s);
+}
+
+static bool image_landed(const ivts_ota_pending_t *saved, const char *version, const char *partition)
+{
+    return saved->target_version[0] != '\0' && strcmp(saved->target_version, version) == 0 &&
+                  (saved->target_partition[0] == '\0' || strcmp(saved->target_partition, partition) == 0);
+}
+
+static void restore_after_reboot(const ivts_ota_pending_t *saved)
+{
+    bool landed = image_landed(saved, ota_running_version(), ota_running_partition());
+    g_app.fw.status = landed ? IVTS_OTA_ST_SUCCESS : IVTS_OTA_ST_ROLLED_BACK;
+    g_app.fw.progress = landed ? IVTS_OTA_PCT_DONE : 0u;
+    g_app.fw.error = landed ? IVTS_OTA_E_NONE : IVTS_OTA_E_CONFIRM_TIMEOUT;
+    (void)ivts_str_copy(g_app.fw.job_id, sizeof g_app.fw.job_id, saved->job_id);
+    (void)ivts_str_copy(g_app.fw.target_version, sizeof g_app.fw.target_version, saved->target_version);
+    g_app.ota_report_pending = true;
+    ESP_LOGW(APP_TAG, "OTA %s: %s", saved->target_version, landed ? "đã xác nhận" : "đã bị rollback");
+}
+
+static void restore_idle(void)
+{
+    g_app.fw.status = IVTS_OTA_ST_SUCCESS;
+    g_app.fw.progress = IVTS_OTA_PCT_DONE;
+}
+
+static void restore_at_boot(void)
+{
+    ivts_ota_pending_t saved;
+    (void)storage_ota_pending_load(&saved);
+    (void)ivts_str_copy(g_app.fw.current_version, sizeof g_app.fw.current_version, ota_running_version());
+    (void)ivts_str_copy(g_app.fw.partition, sizeof g_app.fw.partition, ota_running_partition());
+    g_app.fw_dirty = true;
+    if (ota_image_pending_verify()) {
+        restore_pending_verify(&saved);
+    } else if (saved.pending) {
+        restore_after_reboot(&saved);
+    } else {
+        restore_idle();
+    }
+}
+
 /**
  * @brief Khởi tạo mọi component theo thứ tự: queue, board, storage, modem, obd, ota.
  *
@@ -239,43 +292,7 @@ bool app_init_all(void)
     };
     if (ota_init(&ota_cfg) != IVTS_OK) { return false; }
 
-    /* Ba trường hợp lúc boot:
-     *  1. Image ở trạng thái PENDING_VERIFY: vừa cài xong. Nạp hạn chót xác nhận và không cho
-     *     ngủ cho đến khi có quyết định.
-     *  2. Không PENDING_VERIFY nhưng NVS còn pending: image mới đã bị rollback (bootloader thấy
-     *     reset khi image còn PENDING_VERIFY, hoặc app gọi rollback). Giữ báo cáo đến PUBACK.
-     *  3. Còn lại: báo phiên bản đang chạy để cập nhật inventory. */
-    ivts_ota_pending_t saved;
-    (void)storage_ota_pending_load(&saved);
-    (void)ivts_str_copy(g_app.fw.current_version, sizeof g_app.fw.current_version, ota_running_version());
-    (void)ivts_str_copy(g_app.fw.partition, sizeof g_app.fw.partition, ota_running_partition());
-    g_app.fw_dirty = true;
-    if (ota_image_pending_verify()) {
-        g_app.ota_pending = saved;
-        g_app.ota_pending.pending = true;
-        if (g_app.ota_pending.timeout_s == 0u) { g_app.ota_pending.timeout_s = IVTS_OTA_CONFIRM_DEFAULT_S; }
-        g_app.ota_confirm_pending = true;
-        g_app.fw.status = IVTS_OTA_ST_CONFIRMING;
-        g_app.fw.progress = IVTS_OTA_PCT_CONFIRMING;
-        (void)ivts_str_copy(g_app.fw.job_id, sizeof g_app.fw.job_id, saved.job_id);
-        (void)ivts_str_copy(g_app.fw.target_version, sizeof g_app.fw.target_version, saved.target_version);
-        ESP_LOGW(APP_TAG, "image PENDING_VERIFY, hạn %lus", (unsigned long)g_app.ota_pending.timeout_s);
-    } else if (saved.pending) {
-        /* Đang chạy đúng phiên bản đích nghĩa là image đã được mark valid nhưng nguồn mất trước
-         * khi xoá pending trong NVS: coi là thành công. */
-        bool landed = saved.target_version[0] != '\0' && strcmp(saved.target_version, ota_running_version()) == 0 &&
-                      (saved.target_partition[0] == '\0' || strcmp(saved.target_partition, ota_running_partition()) == 0);
-        g_app.fw.status = landed ? IVTS_OTA_ST_SUCCESS : IVTS_OTA_ST_ROLLED_BACK;
-        g_app.fw.progress = landed ? IVTS_OTA_PCT_DONE : 0u;
-        g_app.fw.error = landed ? IVTS_OTA_E_NONE : IVTS_OTA_E_CONFIRM_TIMEOUT;
-        (void)ivts_str_copy(g_app.fw.job_id, sizeof g_app.fw.job_id, saved.job_id);
-        (void)ivts_str_copy(g_app.fw.target_version, sizeof g_app.fw.target_version, saved.target_version);
-        g_app.ota_report_pending = true;
-        ESP_LOGW(APP_TAG, "OTA %s: %s", saved.target_version, landed ? "đã xác nhận" : "đã bị rollback");
-    } else {
-        g_app.fw.status = IVTS_OTA_ST_SUCCESS;
-        g_app.fw.progress = IVTS_OTA_PCT_DONE;
-    }
+    restore_at_boot();
     ESP_LOGI(APP_TAG, "init xong boot_id=%lu provisioned=%d sd=%d", (unsigned long)g_app.boot_id,
              provisioned, storage_sd_ok());
     return true;

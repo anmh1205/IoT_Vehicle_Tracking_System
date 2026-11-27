@@ -72,6 +72,32 @@ static void on_ota_progress(const ivts_event_t *ev)
     }
 }
 
+static uint64_t s_confirm_retry_at_ms;
+
+static void accept_running_image(uint64_t uptime_ms)
+{
+    if (ota_mark_valid() == IVTS_OK) {
+        g_app.ota_confirm_pending = false;
+        g_app.ota_report_pending = g_app.ota_pending.job_id[0] != '\0';
+        g_app.fw.status = IVTS_OTA_ST_SUCCESS;
+        g_app.fw.progress = IVTS_OTA_PCT_DONE;
+        (void)ivts_str_copy(g_app.fw.current_version, sizeof g_app.fw.current_version, ota_running_version());
+        (void)ivts_str_copy(g_app.fw.partition, sizeof g_app.fw.partition, ota_running_partition());
+        g_app.fw_dirty = true;
+        ESP_LOGI(APP_TAG, "image hợp lệ: đã mark valid");
+    } else {
+        s_confirm_retry_at_ms = uptime_ms + OTA_MARK_VALID_RETRY_MS;
+        ESP_LOGW(APP_TAG, "chưa đánh dấu được image OTA hợp lệ");
+    }
+}
+
+static void rollback_running_image(uint64_t uptime_ms)
+{
+    ESP_LOGE(APP_TAG, "quá hạn confirm: rollback");
+    (void)ota_rollback_and_reboot();
+    s_confirm_retry_at_ms = uptime_ms + OTA_ROLLBACK_RETRY_MS;
+}
+
 /**
  * @brief Quyết định chấp nhận hay rollback image OTA đang chờ xác nhận.
  *
@@ -80,32 +106,17 @@ static void on_ota_progress(const ivts_event_t *ev)
 static void ota_confirm_tick(void)
 {
     if (!g_app.ota_confirm_pending) { return; }
-    static uint64_t retry_at;
     uint64_t uptime = app_now();
-    if (uptime < retry_at) { return; }
+    if (uptime < s_confirm_retry_at_ms) { return; }
     bool trusted;
     uint64_t now = app_clock_unix_ms_or_zero(&trusted);
     bool healthy = (g_app.link == IVTS_LINK_BROKER_UP) && g_app.ota_health_acked;
     switch (ivts_ota_confirm_decide(&g_app.ota_pending, healthy, now, trusted, uptime)) {
     case IVTS_CONFIRM_ACCEPT:
-        if (ota_mark_valid() == IVTS_OK) {
-            g_app.ota_confirm_pending = false;
-            g_app.ota_report_pending = g_app.ota_pending.job_id[0] != '\0';
-            g_app.fw.status = IVTS_OTA_ST_SUCCESS;
-            g_app.fw.progress = IVTS_OTA_PCT_DONE;
-            (void)ivts_str_copy(g_app.fw.current_version, sizeof g_app.fw.current_version, ota_running_version());
-            (void)ivts_str_copy(g_app.fw.partition, sizeof g_app.fw.partition, ota_running_partition());
-            g_app.fw_dirty = true;
-            ESP_LOGI(APP_TAG, "image hợp lệ: đã mark valid");
-        } else {
-            retry_at = uptime + OTA_MARK_VALID_RETRY_MS;
-            ESP_LOGW(APP_TAG, "chưa đánh dấu được image OTA hợp lệ");
-        }
+        accept_running_image(uptime);
         break;
     case IVTS_CONFIRM_ROLLBACK:
-        ESP_LOGE(APP_TAG, "quá hạn confirm: rollback");
-        (void)ota_rollback_and_reboot();
-        retry_at = uptime + OTA_ROLLBACK_RETRY_MS;
+        rollback_running_image(uptime);
         break;
     case IVTS_CONFIRM_WAIT:
         break;

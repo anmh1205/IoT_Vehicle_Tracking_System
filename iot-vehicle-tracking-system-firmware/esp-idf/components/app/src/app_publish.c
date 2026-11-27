@@ -204,6 +204,41 @@ bool app_publish_location(void)
            send(PUB_LOCATION, MODEM_TOPIC_RAWDATA, len);
 }
 
+static void on_report_failed(void)
+{
+    g_app.fw_dirty = true;
+}
+
+static void confirm_health_from_report(void)
+{
+    g_app.ota_health_acked = true;
+}
+
+static void release_reboot_after_report(void)
+{
+    g_app.ota_reboot_ms = app_now();
+}
+
+static void clear_confirm_ctx_after_report(void)
+{
+    ivts_ota_pending_t empty = {0};
+    if (storage_ota_pending_save(&empty) == IVTS_OK) { g_app.ota_report_pending = false; }
+    else { on_report_failed(); }
+}
+
+static void on_firmware_report_acked(bool ok)
+{
+    if (!ok) {
+        on_report_failed();
+    } else if (g_app.ota_confirm_pending) {
+        confirm_health_from_report();
+    } else if (!g_app.fw_dirty && g_app.ota_reboot_ms != 0u) {
+        release_reboot_after_report();
+    } else if (!g_app.fw_dirty && g_app.ota_report_pending) {
+        clear_confirm_ctx_after_report();
+    }
+}
+
 /**
  * @brief Xử lý kết quả publish: giải phóng ô bay và áp dụng chính sách theo loại bản tin.
  *
@@ -245,17 +280,7 @@ void app_publish_on_ack(const ivts_event_t *ev)
         app_cmd_on_location_ack(ok);
         break;
     case PUB_FW:
-        if (!ok) {
-            g_app.fw_dirty = true;
-        } else if (g_app.ota_confirm_pending) {
-            g_app.ota_health_acked = true;
-        } else if (!g_app.fw_dirty && g_app.ota_reboot_ms != 0u) {
-            g_app.ota_reboot_ms = app_now();
-        } else if (!g_app.fw_dirty && g_app.ota_report_pending) {
-            ivts_ota_pending_t empty = {0};
-            if (storage_ota_pending_save(&empty) == IVTS_OK) { g_app.ota_report_pending = false; }
-            else { g_app.fw_dirty = true; }
-        }
+        on_firmware_report_acked(ok);
         break;
     case PUB_EVENT:
         if (!ok) { g_app.event_dirty = true; }

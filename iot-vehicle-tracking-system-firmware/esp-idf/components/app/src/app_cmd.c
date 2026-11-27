@@ -141,6 +141,25 @@ static bool config_bool(int n, int obj, const char *key, bool *out, bool *presen
     return true;
 }
 
+static const char *try_start_ota(const ivts_ota_cmd_t *cmd)
+{
+    if (!cmd->force && strcmp(cmd->version, ota_running_version()) == 0) { return "already_running"; }
+    if (g_app.axes.ign != IVTS_IGN_OFF && !cmd->force) { return "unsafe_runtime_window"; }
+    if (g_app.ota_confirm_pending || g_app.ota_job_active || g_app.ota_reboot_ms != 0u ||
+        g_app.ota_report_pending) { return "ota_busy"; }
+    if (app_state_get()->device_mv < g_app.cfg.ota_min_battery_mv) { return "low_battery"; }
+
+    ivts_err_t e = ota_start(cmd, app_state_get()->device_mv, g_app.cfg.ota_min_battery_mv);
+    if (e != IVTS_OK) { return "ota_busy"; }
+    g_app.ota_job_active = true;
+    memset(&g_app.fw, 0, sizeof g_app.fw);
+    (void)ivts_str_copy(g_app.fw.job_id, sizeof g_app.fw.job_id, cmd->job_id);
+    (void)ivts_str_copy(g_app.fw.target_version, sizeof g_app.fw.target_version, cmd->version);
+    (void)ivts_str_copy(g_app.fw.current_version, sizeof g_app.fw.current_version, ota_running_version());
+    (void)ivts_str_copy(g_app.fw.partition, sizeof g_app.fw.partition, ota_running_partition());
+    return NULL;
+}
+
 /**
  * @brief Xử lý command ota_update.
  * @return NULL nếu đã nhận; ngược lại là mã lý do từ chối gửi lại cloud.
@@ -177,21 +196,7 @@ static const char *do_ota(int n, int params)
     if (t < IVTS_OTA_CONFIRM_MIN_S) { t = IVTS_OTA_CONFIRM_MIN_S; }
     if (t > IVTS_OTA_CONFIRM_MAX_S) { t = IVTS_OTA_CONFIRM_MAX_S; }
     c.confirm_timeout_s = (uint32_t)t;
-    if (!c.force && strcmp(c.version, ota_running_version()) == 0) { return "already_running"; }
-    if (g_app.axes.ign != IVTS_IGN_OFF && !c.force) { return "unsafe_runtime_window"; }
-    if (g_app.ota_confirm_pending || g_app.ota_job_active || g_app.ota_reboot_ms != 0u ||
-        g_app.ota_report_pending) { return "ota_busy"; }
-    if (app_state_get()->device_mv < g_app.cfg.ota_min_battery_mv) { return "low_battery"; }
-
-    ivts_err_t e = ota_start(&c, app_state_get()->device_mv, g_app.cfg.ota_min_battery_mv);
-    if (e != IVTS_OK) { return "ota_busy"; }
-    g_app.ota_job_active = true;
-    memset(&g_app.fw, 0, sizeof g_app.fw);
-    (void)ivts_str_copy(g_app.fw.job_id, sizeof g_app.fw.job_id, c.job_id);
-    (void)ivts_str_copy(g_app.fw.target_version, sizeof g_app.fw.target_version, c.version);
-    (void)ivts_str_copy(g_app.fw.current_version, sizeof g_app.fw.current_version, ota_running_version());
-    (void)ivts_str_copy(g_app.fw.partition, sizeof g_app.fw.partition, ota_running_partition());
-    return NULL;
+    return try_start_ota(&c);
 }
 
 /**
