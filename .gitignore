@@ -109,3 +109,4 @@ repomix-output*/
 ~$*
 # Firmware IDE-local
 iot-vehicle-tracking-system-firmware/.vscode/
+/iot-vehicle-tracking-system-firmware/esp-idf/build
